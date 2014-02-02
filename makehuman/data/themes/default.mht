@@ -1,0 +1,12 @@
+# Default theme of alpha7
+version 1.0.0
+creator Manuel Bastioni
+color clear 0.5 0.5 0.5
+color grid 0.8 0.8 0.8
+color subgrid 0.6 0.6 0.6
+
+logwindow_color DEBUG grey
+logwindow_color NOTICE blue
+logwindow_color WARNING darkorange
+logwindow_color ERROR red
+logwindow_color CRITICAL red

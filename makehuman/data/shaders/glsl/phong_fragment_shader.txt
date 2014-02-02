@@ -1,0 +1,78 @@
+#version 120
+
+/**
+ * Phong shader.
+ *
+ **Project Name:**      MakeHuman
+ *
+ **Product Home Page:** http://www.makehuman.org/
+ *
+ **Code Home Page:**    http://code.google.com/p/makehuman/
+ *
+ **Authors:**           Marc Flerackers, Jonas Hauquier
+ *
+ **Copyright(c):**      MakeHuman Team 2001-2014
+ *
+ **Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
+ *
+ **Coding Standards:**  See http://www.makehuman.org/node/165
+ *
+ * Abstract
+ * --------
+ *
+ * Standard per-pixel lighting shader.
+ * Supports one light only.
+**/
+
+
+varying vec3 normal, lightDir, halfVector;
+varying vec4 ambient_color, diffuse_color, specular_color, emissive_color;
+
+#ifdef DIFFUSE
+    uniform sampler2D diffuseTexture;
+#endif
+
+#ifdef AOMAP
+    uniform sampler2D aomapTexture;
+#endif
+
+void main (void)
+{
+#ifdef DIFFUSE
+    // Get the texture color
+    vec4 tex_color = texture2D(diffuseTexture, gl_TexCoord[0].st);
+#else
+    vec4 tex_color = vec4(1.0, 1.0, 1.0, 1.0);
+#endif
+
+#ifdef AOMAP
+    tex_color.rgb = tex_color.rgb * texture2D(aomapTexture, gl_TexCoord[0].st).rgb;
+#endif
+
+    // Ambient * texture color
+    vec4 final_color = ambient_color * tex_color;
+
+    vec3 N = normalize(normal);
+    vec3 L = normalize(lightDir);
+
+    float NdotL = max(dot(N, L), 0.0);
+
+    if(NdotL > 0.0)
+    {
+        // Diffuse * texture color
+        final_color += diffuse_color * NdotL * tex_color;
+        
+        // Specular
+        vec3 H = normalize(halfVector);
+        float NdotH = max(dot(N, H), 0.0);
+        float shininess = specular_color.a * 255.0;
+        float specular = pow(NdotH, shininess);
+        final_color.rgb += specular_color.rgb * specular;
+    }
+
+    // Make sure we use the alpha from the texture
+    // otherwise the eyelashes and eyebrows are not tranparent
+    final_color.a = tex_color.a;
+    final_color.rgb += emissive_color.rgb;
+    gl_FragColor = final_color;
+}
