@@ -28,6 +28,8 @@ Prepares an export folder ready to build packages from.
 
 # Filter of files from source folder to exclude (glob syntax)
 EXCLUDES = ['.hgignore', '*.target', '*.obj', '*.pyc', 'maketarget/standalone', 'plugins/4_rendering_mitsuba', 'plugins/4_rendering_povray', 'plugins/4_rendering_aqsis.py', 'plugins/0_modeling_5_editing.py', 'plugins/0_modeling_8_random.py', 'plugins/3_libraries_animation.py', 'compile_*.py', 'download_assets.py', '*~', '*.bak']
+# Same as above, but applies to release mode only
+EXCLUDES-RELEASE = ['testsuite']
 
 # Include filter for additional asset files (not on hg) to copy (glob syntax)
 ASSET_INCLUDES = ['*.npz', '*.thumb', '*.png', '*.json', '*.mhmat', '*.mhclo', '*.proxy', 'glsl/*.txt', 'languages/*.ini', "*.mhp", "*.mhm", "*.qss", "*.mht", "*.svg"]
@@ -58,6 +60,10 @@ class MHAppExporter(object):
 
         sys.path = sys.path + [self.sourceFile('makehuman'), self.sourceFile('makehuman/lib')]
 
+    def isRelease(self):
+        import makehuman
+        return makehuman.isRelease()
+
     def export(self):
         # Run scripts to prepare assets
         if not self.skipScripts:
@@ -83,8 +89,7 @@ class MHAppExporter(object):
         except:
             print "Failed to set %s file" % VERSION_FILE_PATH
 
-        import makehuman
-        resultInfo = ExportInfo(VERSION, HGREV, self.targetFile(), makehuman.isRelease())
+        resultInfo = ExportInfo(VERSION, HGREV, self.targetFile(), self.isRelease())
         return resultInfo
 
     def sourceFile(self, path=""):
@@ -147,8 +152,12 @@ class MHAppExporter(object):
             # TODO what to do here? continue? stop?
             raise RuntimeError("An export older called %s already exists" % self.targetFile())
 
-        excludes = [item for pair in zip(len(EXCLUDES)*['--exclude'], EXCLUDES) for item in pair]
-        self.runProcess( ["hg", "archive"] + excludes + [self.targetFile()])
+        if self.isRelease():
+            excludes = EXCLUDES + EXCLUDES-RELEASE
+        else:
+            excludes = EXCLUDES
+        exclarg = [item for pair in zip(len(excludes)*['--exclude'], EXCLUDES) for item in pair]
+        self.runProcess( ["hg", "archive"] + exclarg + [self.targetFile()])
 
         # Because the --excludes option does not appear to be working all too well (at least not with wildcards):
         # Gather files
