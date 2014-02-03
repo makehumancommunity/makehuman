@@ -27,15 +27,18 @@ Prepares an export folder ready to build packages from.
 ### Configuration ##############################################################
 
 # Filter of files from source folder to exclude (glob syntax)
-EXCLUDES = ['.hgignore', '*.target', '*.obj', '*.pyc', 'maketarget/standalone', 'plugins/4_rendering_mitsuba', 'plugins/4_rendering_povray', 'plugins/4_rendering_aqsis.py', 'plugins/0_modeling_5_editing.py', 'plugins/0_modeling_8_random.py', 'plugins/3_libraries_animation.py', 'compile_*.py', 'download_assets.py', '*~', '*.bak']
+EXCLUDES = ['.hgignore', '*.target', '*.obj', '*.pyc', 'maketarget/standalone', 'plugins/4_rendering_mitsuba', 'plugins/4_rendering_povray', 'plugins/4_rendering_aqsis.py', 'plugins/0_modeling_5_editing.py', 'plugins/0_modeling_8_random.py', 'plugins/3_libraries_animation.py', 'compile_*.py', 'build_prepare.py', 'download_assets.py', '*~', '*.bak', 'setup.nsi', 'clean*.sh', 'clean*.bat', 'makehuman/docs', 'makehuman/icons', 'makehuman.rc', 'rpm', 'deb']
 # Same as above, but applies to release mode only
-EXCLUDES-RELEASE = ['testsuite']
+EXCLUDES_RELEASE = ['testsuite']
 
 # Include filter for additional asset files (not on hg) to copy (glob syntax)
 ASSET_INCLUDES = ['*.npz', '*.thumb', '*.png', '*.json', '*.mhmat', '*.mhclo', '*.proxy', 'glsl/*.txt', 'languages/*.ini', "*.mhp", "*.mhm", "*.qss", "*.mht", "*.svg"]
 
 # Even if empty, create these folders (relative to export path)
 CREATE_FOLDERS = ['makehuman/data/backgrounds']
+
+# Files and folders to exclude as a last step, to correct things that still fall through, but shouldn't (relative path to export path, no wildcards allowed)
+POST_REMOVE = ['makehuman/icons', 'makehuman/docs']
 
 ################################################################################
 
@@ -65,6 +68,18 @@ class MHAppExporter(object):
         return makehuman.isRelease()
 
     def export(self):
+        # Sanity checks
+        if os.path.exists(self.targetFile()):
+            raise RuntimeError("An export folder called %s already exists" % self.targetFile())
+        if not os.path.exists(self.sourceFile()):
+            raise RuntimeError("Specified source folder %s does not exist" % self.sourceFile())
+        if not os.path.isfile(self.sourceFile('makehuman/makehuman.py')):
+            raise RuntimeError("The specified source folder %s does not appear to be a valid MakeHuman HG root folder (cannot find file %s)" % (self.sourceFile(), self.sourceFile('makehuman/makehuman.py')))
+
+        print "Exporting"
+        print "  from: %s" % self.sourceFile()
+        print "  to:   %s\n" % self.targetFile()
+
         # Run scripts to prepare assets
         if not self.skipScripts:
             self.runScripts()
@@ -77,6 +92,16 @@ class MHAppExporter(object):
         # Create extra folders
         for f in CREATE_FOLDERS:
             os.makedirs(self.targetFile(f))
+
+        # Perform post-remove step
+        for f in POST_REMOVE:
+            if not os.path.exists(self.targetFile(f)):
+                continue
+            print "Post-removing excluded file from export folder %s" % f
+            if os.path.isdir(self.targetFile(f)):
+                shutil.rmtree(self.targetFile(f))
+            else:
+                os.remove(self.targetFile(f))
 
         # Obtain exact revision
         HGREV = self.processRevision()
@@ -93,10 +118,10 @@ class MHAppExporter(object):
         return resultInfo
 
     def sourceFile(self, path=""):
-        return os.path.normpath( os.path.join(self.sourceFolder, path) )
+        return os.path.abspath(os.path.normpath( os.path.join(self.sourceFolder, path) ))
 
     def targetFile(self, path=""):
-        return os.path.normpath( os.path.join(self.targetFolder, path) )
+        return os.path.abspath(os.path.normpath( os.path.join(self.targetFolder, path) ))
 
     def getRevision(self):
         import makehuman
@@ -113,6 +138,7 @@ class MHAppExporter(object):
 
     def getVersion(self):
         import makehuman
+        # TODO still causes svn warnings with current version of makehuman
         return makehuman.getVersionStr(verbose=False)
 
     def getCWD(self):
@@ -144,6 +170,12 @@ class MHAppExporter(object):
             print "check that compile_models.py is working correctly"
             sys.exit(1)
 
+    def getExcludes(self):
+        if self.isRelease():
+            return EXCLUDES + EXCLUDES_RELEASE
+        else:
+            return EXCLUDES
+
     def exportHGFiles(self):
         if not os.path.exists(self.targetFile()):
             print 'creating folder %s' % self.targetFile()
@@ -152,26 +184,31 @@ class MHAppExporter(object):
             # TODO what to do here? continue? stop?
             raise RuntimeError("An export older called %s already exists" % self.targetFile())
 
-        if self.isRelease():
-            excludes = EXCLUDES + EXCLUDES-RELEASE
-        else:
-            excludes = EXCLUDES
+        excludes = self.getExcludes()
         exclarg = [item for pair in zip(len(excludes)*['--exclude'], EXCLUDES) for item in pair]
         self.runProcess( ["hg", "archive"] + exclarg + [self.targetFile()])
 
         # Because the --excludes option does not appear to be working all too well (at least not with wildcards):
         # Gather files
         files = []
-        _recursive_glob(self.targetFile(), EXCLUDES, files)
+        _recursive_glob(self.targetFile(), self.getExcludes(), files)
         for f in files:
             print "Removing excluded file from export folder %s" % f
-            # TODO this probably does not work for folders, luckily until now, folder excludes did not have wildcards
-            os.remove(self.targetFile(f))
+            if os.path.isdir(self.targetFile(f)):
+                shutil.rmtree(self.targetFile(f))
+            else:
+                os.remove(self.targetFile(f))
 
     def exportCompiledAssets(self, path):
         # Gather files
         files = []
         _recursive_glob(path, ASSET_INCLUDES, files)
+        # Exclude files matching exclude patterns
+        excludes = []
+        _recursive_glob(path, self.getExcludes(), excludes)
+        print 'makehuman/icons/makehuman.png' in files
+        print 'makehuman/icons/makehuman.png' in excludes
+        files = set(files).difference(excludes)
 
         # Copy them
         for f in files:
@@ -208,8 +245,15 @@ class ExportInfo(object):
     def __init__(self, version, revision, path, isRelease):
         self.version = version
         self.revision = revision
-        self.path = path
+        self.path = os.path.abspath(path)
         self.isRelease = isRelease
+
+    def __str__(self):
+        return """MH source export
+  version:  %s
+  revision: %s
+  path:     %s
+  type:     %s""" % (self.version, self.revision, self.path, "RELEASE" if self.isRelease else "NIGHTLY")
 
 def _recursive_glob(p, matchPatterns, files, root = None):
     import os
@@ -243,3 +287,32 @@ def export(sourcePath = '.', exportFolder = 'export', skipHG = False, skipScript
     exporter = MHAppExporter(sourcePath, exportFolder, skipHG, skipScripts)
     return exporter.export()
 
+
+def _parse_args():
+    if len(sys.argv) < 2:
+        return dict()
+
+    import argparse    # requires python >= 2.7
+    parser = argparse.ArgumentParser()
+
+    # optional arguments
+    parser.add_argument("--skipscripts", action="store_true", help="Skip running scripts for compiling assets")
+    parser.add_argument("--skiphg", action="store_true", help="Skip retrieving HG revision")
+
+    # positional arguments
+    parser.add_argument("sourcePath", default=None, nargs='?', help="Root path of HG source repository")
+    parser.add_argument("targetPath", default=None, nargs='?', help="Path to export to")
+
+    argOptions = vars(parser.parse_args())
+    return argOptions
+
+
+if __name__ == '__main__':
+    args = _parse_args()
+
+    if args.get('sourcePath', None) is None:
+        raise RuntimeError("sourcePath argument not specified")
+    if args.get('targetPath', None) is None:
+        raise RuntimeError("targetPath argument not specified")
+
+    print export(args['sourcePath'], args['targetPath'], args.get('skiphg', False), args.get('skipscripts', False))
