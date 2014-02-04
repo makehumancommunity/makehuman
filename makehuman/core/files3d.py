@@ -186,13 +186,14 @@ def loadMesh(path, locX=0, locY=0, locZ=0, loadColors=1, maxFaces=None):
         try:
             if not os.path.isfile(npzpath):
                 log.message('compiled file missing: %s', npzpath)
-                raise RuntimeError()
+                raise RuntimeError('compiled file missing: %s', npzpath)
             if os.path.isfile(path) and os.path.getmtime(path) > os.path.getmtime(npzpath):
                 log.message('compiled file out of date: %s', npzpath)
-                raise RuntimeError()
+                raise RuntimeError('compiled file out of date: %s', npzpath)
             loadBinaryMesh(obj, npzpath)
         except Exception as e:
-            log.warning("Problem loading binary mesh: %s", e, exc_info=True)
+            showTrace = not isinstance(e, RuntimeException)
+            log.warning("Problem loading binary mesh: %s", e, exc_info=showTrace)
             loadTextMesh(obj, path)
             if isSubPath(npzpath, getPath('')):
                 # Only write compiled binary meshes to user data path
