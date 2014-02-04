@@ -192,7 +192,7 @@ def loadMesh(path, locX=0, locY=0, locZ=0, loadColors=1, maxFaces=None):
                 raise RuntimeError('compiled file out of date: %s', npzpath)
             loadBinaryMesh(obj, npzpath)
         except Exception as e:
-            showTrace = not isinstance(e, RuntimeException)
+            showTrace = not isinstance(e, RuntimeError)
             log.warning("Problem loading binary mesh: %s", e, exc_info=showTrace)
             loadTextMesh(obj, path)
             if isSubPath(npzpath, getPath('')):
