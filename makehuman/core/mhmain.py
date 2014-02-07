@@ -926,7 +926,7 @@ class MHApplication(gui3d.Application, mh.Application):
         if mh.isRelease():
             self.setCaption("MakeHuman %s - [%s][*]" % (mh.getVersionStr(), filename))
         else:
-            self.setCaption("MakeHuman r%s - [%s][*]" % (os.environ['SVNREVISION'], filename))
+            self.setCaption("MakeHuman r%s (%s) - [%s][*]" % (os.environ['HGREVISION'], os.environ['HGNODEID'], filename))
 
     def setFileModified(self, modified):
         self.modified = modified
