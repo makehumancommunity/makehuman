@@ -213,16 +213,6 @@ def get_hg_revision():
 
     return (os.environ['HGREVISION'], os.environ['HGNODEID'])
     
-def recursiveDirNames(root):
-    pathlist=[]
-    #root=os.path.dirname(root)
-    for filename in os.listdir(root):
-        path=os.path.join(root,filename)
-        if not (os.path.isfile(path) or filename=="." or filename==".." or filename==".svn"):
-            pathlist.append(path)
-            pathlist = pathlist + recursiveDirNames(path) 
-    return(pathlist)
-
 def set_sys_path():
     """
     Append local module folders to python search path.
@@ -321,7 +311,7 @@ def main():
         get_platform_paths()
         redirect_standard_streams()
         if not isRelease():
-            get_svn_revision()
+            get_hg_revision()
         os.environ['MH_VERSION'] = getVersionStr()
         args = parse_arguments()
         init_logging()
