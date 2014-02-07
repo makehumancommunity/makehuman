@@ -10,81 +10,65 @@ import sys
 import subprocess
 import zipfile
 import os
-import os.path
+import shutil
 
-sys.path = sys.path + ['.', './lib']
-import makehuman
+sys.path = sys.path + ['.']
+import build_prepare
 
-def SvnInfo():
-    import makehuman
-    return makehuman.get_svn_revision_1()
-
-def get_plugin_files():
+def get_plugin_files(rootpath):
     """
     Returns all python modules (.py) and python packages (subfolders containing 
     a file called __init__.py) in the plugins/ folder.
     """
     import glob
     # plugin modules
-    pluginModules = glob.glob(os.path.join("plugins/",'[!_]*.py'))
+    pluginModules = glob.glob(os.path.join(rootpath,'[!_]*.py'))
 
     # plugin packages
-    for fname in os.listdir("plugins/"):
+    for fname in os.listdir(rootpath):
         if fname[0] != "_":
-            folder = os.path.join("plugins", fname)
+            folder = os.path.join(rootpath, fname)
             if os.path.isdir(folder) and ("__init__.py" in os.listdir(folder)):
                 pluginModules.append(os.path.join(folder, "__init__.py"))
 
     return pluginModules
 
-VERSION_FILE_PATH = os.path.join('data', 'VERSION')
+def hgRootPath(subpath=""):
+    return os.path.join('../..', subpath)
 
-if skipSvn:
-    try:
-        vfile = open(VERSION_FILE_PATH,"r")
-        SVNREV = int(vfile.read())
-        vfile.close()
-    except:
-        print 'Warning: no VERSION file found, svn revision unknown'
-        SVNREV = 'UNKNOWN'
-else:
-    SVNREV = SvnInfo()
+def exportPath(subpath=""):
+    return os.path.join('export', subpath)
 
-    ### Write VERSION file
-    vfile = open(VERSION_FILE_PATH,"w")
-    vfile.write(SVNREV)
-    vfile.close()
+def distPath(subpath=""):
+    return os.path.join('dist', subpath)
 
-VERSION= makehuman.getVersionStr(verbose=False)
-if makehuman.isRelease():
+
+# Export source to new folder and run scripts
+if os.path.exists(exportPath()):
+    shutil.rmtree(exportPath())
+exportInfo = build_prepare.export(sourcePath = hgRootPath(), exportFolder = exportPath(), skipHG = skipSvn, skipScripts = skipScripts)
+
+# Copy extra windows-specific files to export folder
+shutil.copy(hgRootPath('makehuman/icons/makehuman.ico'), exportPath('makehuman/makehuman.ico'))
+
+# Change to the export dir for building
+os.chdir(exportPath())
+
+
+SVNREV = exportInfo.revision
+VERSION= exportInfo.version
+
+if exportInfo.isRelease:
     VERSION_FN = VERSION.replace('.', '_').replace(' ', '-').lower()
 else:
     VERSION_FN= str(SVNREV)
 
-if not skipScripts:
-    ###COMPILE TARGETS
-    try:
-        subprocess.check_call(["python","compile_targets.py"])
-    except subprocess.CalledProcessError:
-        print "check that compile_targets.py is working correctly"
-        sys.exit(1)
 
-    ###DOWNLOAD ASSETS
-    try:
-        subprocess.check_call(["python","download_assets.py"])
-    except subprocess.CalledProcessError:
-        print "check that download_assets.py is working correctly"
-        sys.exit(1)
+appExecutable = exportPath('makehuman/makehuman.py')
+pEx = ['lib','core','shared','apps','apps/gui', 'plugins']
 
-    ###COMPILE MODELS
-    try:
-        subprocess.check_call(["python","compile_models.py"])
-    except subprocess.CalledProcessError:
-        print "check that compile_models.py is working correctly"
-        sys.exit(1)
-
-a = Analysis(['makehuman.py'] + get_plugin_files(),
-             pathex=['lib','core','shared','apps','apps/gui', 'plugins'],
+a = Analysis([appExecutable] + get_plugin_files(exportPath("makehuman/plugins")),
+             pathex=[ exportPath('makehuman/%s' % p) for p in pEx ],
              hiddenimports=[],
              hookspath=None,
              runtime_hooks=None
@@ -115,7 +99,7 @@ def extra_datas(mydir):
 EXTRA_DATA_PATHS = ['data', 'plugins', 'tools', 'icons']
 #EXTRA_DATA_PATHS += ['lib', 'core', 'shared', 'apps', 'qt_menu.nib']
 for p in EXTRA_DATA_PATHS:
-    a.datas += extra_datas(p)
+    a.datas += extra_datas(exportPath("makehuman"), p)
 
 
 ### Build
@@ -150,7 +134,7 @@ elif sys.platform == 'win32':
         a.scripts,
         exclude_binaries=True,
         name='makehuman.exe',
-        icon='icons/makehuman.ico',
+        icon=exportPath('makehuman/icons/makehuman.ico'),
         debug=False,
         strip=None,
         upx=True,
@@ -162,8 +146,8 @@ elif sys.platform == 'win32':
         strip=None,
         upx=True,
         name='makehuman')
-    target_dir = os.path.join('dist','makehuman')
-    zipfilename = 'dist/makehuman-%s-win32.zip' % VERSION_FN
+    target_dir = distPath('makehuman')
+    zipfilename = distPath('makehuman-%s-win32.zip' % VERSION_FN)
     zip = zipfile.ZipFile(zipfilename, 'w', zipfile.ZIP_DEFLATED)
     rootlen = len(target_dir) + 1
     for base, dirs, files in os.walk(target_dir):
