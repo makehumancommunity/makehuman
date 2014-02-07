@@ -85,6 +85,8 @@ class MHAppExporter(object):
         if not os.path.isfile(self.sourceFile('makehuman/makehuman.py')):
             raise RuntimeError("The specified source folder %s does not appear to be a valid MakeHuman HG root folder (cannot find file %s)" % (self.sourceFile(), self.sourceFile('makehuman/makehuman.py')))
 
+        # TODO perform hg pull?
+
         print 'Creating folder %s' % self.targetFile()
         os.makedirs(self.targetFile())
 
