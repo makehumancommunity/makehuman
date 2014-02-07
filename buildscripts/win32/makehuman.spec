@@ -15,60 +15,54 @@ import shutil
 sys.path = sys.path + ['.']
 import build_prepare
 
-def get_plugin_files(rootpath):
-    """
-    Returns all python modules (.py) and python packages (subfolders containing 
-    a file called __init__.py) in the plugins/ folder.
-    """
-    import glob
-    # plugin modules
-    pluginModules = glob.glob(os.path.join(rootpath,'[!_]*.py'))
-
-    # plugin packages
-    for fname in os.listdir(rootpath):
-        if fname[0] != "_":
-            folder = os.path.join(rootpath, fname)
-            if os.path.isdir(folder) and ("__init__.py" in os.listdir(folder)):
-                pluginModules.append(os.path.join(folder, "__init__.py"))
-
-    return pluginModules
-
 def hgRootPath(subpath=""):
+    """
+    The source location, root folder of the hg repository.
+    """
     return os.path.join('../..', subpath)
 
 def exportPath(subpath=""):
+    """
+    The export path, where the source files to be packaged are exported.
+    """
     return os.path.join('export', subpath)
 
 def distPath(subpath=""):
+    """
+    The distribution path, where the compiled files are stored and additional
+    data from export path is copied. This folder will eventually be packaged
+    for distribution.
+    """
     return os.path.join('dist', subpath)
 
 
-# Export source to new folder and run scripts
+# Export source to export folder and run scripts
 if os.path.exists(exportPath()):
     shutil.rmtree(exportPath())
-exportInfo = build_prepare.export(sourcePath = hgRootPath(), exportFolder = exportPath(), skipHG = skipSvn, skipScripts = skipScripts)
+i = exportInfo = build_prepare.export(sourcePath = hgRootPath(), exportFolder = exportPath(), skipHG = skipSvn, skipScripts = skipScripts)
 
 # Copy extra windows-specific files to export folder
 shutil.copy(hgRootPath('makehuman/icons/makehuman.ico'), exportPath('makehuman/makehuman.ico'))
+exportInfo.datas.append('makehuman/makehuman.ico')
 
 # Change to the export dir for building
 os.chdir(exportPath())
 
 
-SVNREV = exportInfo.revision
-VERSION= exportInfo.version
+VERSION = exportInfo.version
+HGREV = exportInfo.revision
+NODEID = exportInfo.nodeid
 
 if exportInfo.isRelease:
     VERSION_FN = VERSION.replace('.', '_').replace(' ', '-').lower()
 else:
-    VERSION_FN= str(SVNREV)
+    VERSION_FN= str(HGREV) + '-' + NODEID
 
 
-appExecutable = exportPath('makehuman/makehuman.py')
-pEx = ['lib','core','shared','apps','apps/gui', 'plugins']
+appExecutable = exportPath( i.mainExecutable )
 
-a = Analysis([appExecutable] + get_plugin_files(exportPath("makehuman/plugins")),
-             pathex=[ exportPath('makehuman/%s' % p) for p in pEx ],
+a = Analysis([appExecutable] + i.getPluginFiles(),
+             pathex= [ exportPath(p) for p in i.pathEx ],
              hiddenimports=[],
              hookspath=None,
              runtime_hooks=None
@@ -87,18 +81,13 @@ def extra_datas(mydir):
     rec_glob("%s/*" % mydir, files)
     extra_datas = []
     for f in files:
-        if mydir == 'data' and f.endswith(".target"):
-            print "skipping %s" % f
-        else:
-            extra_datas.append((f, f, 'DATA'))
+        extra_datas.append((f, f, 'DATA'))
 
     return extra_datas
 ###########################################
 
 # append all of our necessary subdirectories
-EXTRA_DATA_PATHS = ['data', 'plugins', 'tools', 'icons']
-#EXTRA_DATA_PATHS += ['lib', 'core', 'shared', 'apps', 'qt_menu.nib']
-for p in EXTRA_DATA_PATHS:
+for p in exportInfo.datas:
     a.datas += extra_datas(exportPath("makehuman"), p)
 
 
@@ -134,7 +123,7 @@ elif sys.platform == 'win32':
         a.scripts,
         exclude_binaries=True,
         name='makehuman.exe',
-        icon=exportPath('makehuman/icons/makehuman.ico'),
+        icon=exportPath('makehuman/makehuman.ico'),
         debug=False,
         strip=None,
         upx=True,
@@ -153,6 +142,5 @@ elif sys.platform == 'win32':
     for base, dirs, files in os.walk(target_dir):
         for file in files:
             fn = os.path.join(base, file)
-            zip.write(fn, fn[rootlen:])                           
-        
-os.remove(VERSION_FILE_PATH)
+            zip.write(fn, fn[rootlen:])
+
