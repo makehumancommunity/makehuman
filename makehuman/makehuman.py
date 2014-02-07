@@ -33,7 +33,7 @@ import subprocess
 ## Version information #########################################################
 version = [1, 0]                        # Major and minor version number
 release = False                         # False for nightly
-versionSub = "Alpha 8 RC"               # Short version description
+versionSub = "Alpha 8 RC2"              # Short version description
 meshVersion = "hm08"                    # Version identifier of the basemesh
 
 _versionStr = ".".join( [str(v) for v in version] ) + " " + versionSub
@@ -66,11 +66,11 @@ def getVersionStr(verbose=True):
     if isRelease():
         return _versionStr
     else:
-        if 'SVNREVISION' not in os.environ:
-            get_svn_revision()
-        result = _versionStr + " (r" + os.environ['SVNREVISION'] + ")"
+        if 'HGREVISION' not in os.environ:
+            get_hg_revision()
+        result = _versionStr + " (r%s %s)" % (os.environ['HGREVISION'], os.environ['HGNODEID'])
         if verbose:
-            result += (" [%s]" % os.environ['SVNREVISION_SOURCE'])
+            result += (" [%s]" % os.environ['HGREVISION_SOURCE'])
         return result
 
 def getShortVersion():
@@ -85,96 +85,133 @@ def getBasemeshVersion():
     """
     return meshVersion
 
-def get_revision_svn_info():
-    # Try getting svn revision by calling svn info (will only work in linux
-    #  and windows where sliksvn is installed)
-    output = subprocess.Popen(["svn","info","."], stdout=subprocess.PIPE, stderr=sys.stderr).communicate()[0]
-    for line in output.splitlines():
-        key, value = line.split(':', 1)
-        if key.strip().lower() == 'revision':
-            return value.strip()
-    raise RuntimeError("revision not found in 'svn info .' output")
+def getCwd():
+    """
+    Retrieve the folder where makehuman.py or makehuman.exe is located.
+    This is not necessarily the CWD (current working directory), but it is what
+    the CWD should be.
+    """
+    if isBuild():
+        return os.path.dirname(sys.executable)
+    else:
+        return os.path.dirname(os.path.realpath(__file__))
+
+def getHgRoot(subpath=''):
+    cwd = getCwd()
+    return os.path.realpath(os.path.join(cwd, '..', subpath))
+
+def get_revision_hg_info():
+    # Return local revision number of hg tip
+    hgRoot = getHgRoot()
+    output = subprocess.Popen(["hg","-q","tip","--template","{rev}:{node|short}"], stdout=subprocess.PIPE, stderr=sys.stderr, cwd=hgRoot).communicate()[0]
+    output = output.strip().split(':')
+    rev = output[0].strip().replace('+', '')
+    revid = output[1].strip().replace('+', '')
+    return (rev, revid)
 
 def get_revision_entries(folder=None):
-    # First fallback: try to parse the entries file manually
-    if folder:
-        scriptdir = os.path.abspath(folder)
-    else:
-        scriptdir = os.path.dirname(os.path.abspath(__file__))
-    svndir = os.path.join(scriptdir,'.svn')
-    entriesfile = os.path.join(svndir,'entries')
-    entries = open(entriesfile, 'r').read()
-    result = re.search(r'dir\n(\d+)\n',entries)
-    output = result.group(1)
-    if not output:
-        if not folder:
-            # Try going up one folder
-            return get_revision_entries(os.path.join(scriptdir, '..'))
-        raise RuntimeError("revision not found in 'entries' file")
-    return output
+    # First fallback: try to parse the files in .hg manually
+    cachefile = open(getHgRoot('.hg/cache/tags'), 'r')
+    for line in iter(cachefile):
+        if line == "\n":
+            break
+        line = line.split()
+        rev = int(line[0].strip())
+        nodeid = line[1].strip()
+        nodeid_short = nodeid[:12]
+        # Tip is at the top of the file
+        return (str(rev), nodeid_short)
+    raise RuntimeError("No tip revision found in tags cache file")
 
-def get_revision_pysvn():
-    # The following only works if pysvn is installed. We'd prefer not to use this since it's very slow.
-    # It was taken from this stackoverflow post:
-    # http://stackoverflow.com/questions/242295/how-does-one-add-a-svn-repository-build-number-to-python-code
-    import pysvn
-    repo = "."
-    rev = pysvn.Revision( pysvn.opt_revision_kind.working )
-    client = pysvn.Client()
-    info = client.info2(repo,revision=rev,recurse=False)
-    output = format(str(info[0][1].rev.number))
-    return output
+def get_revision_hglib():
+    # The following only works if python-hglib is installed.
+    import hglib
+    hgclient = hglib.open(getHgRoot())
+    tip = hgclient.tip()
+    return (tip.rev.replace('+',''), tip.node[:12])
 
 def get_revision_file():
-    # Default fallback to use if we can't figure out SVN revision in any other
-    # way: Use this file's svn revision.
+    # Default fallback to use if we can't figure out HG revision in any other
+    # way: Use this file's hg revision.
     pattern = re.compile(r'[^0-9]')
     return pattern.sub("", "$Revision: 6893 $")
 
-def get_svn_revision_1():
-    svnrev = None
+def get_hg_revision_1():
+    """
+    Retrieve (local) revision number and short nodeId for current tip.
+    """
+    hgrev = None
 
     try:
-        svnrev = get_revision_svn_info()
-        os.environ['SVNREVISION_SOURCE'] = "svn info command"
-        return svnrev
+        hgrev = get_revision_hg_info()
+        os.environ['HGREVISION_SOURCE'] = "hg tip command"
+        os.environ['HGREVISION'] = hgrev[0]
+        os.environ['HGNODEID'] = hgrev[1]
+        return hgrev
     except Exception as e:
-        print >> sys.stderr,  "NOTICE: Failed to get svn version number from command line: " + format(str(e)) + " (This is just a head's up, not a critical error)"
+        print >> sys.stderr,  "NOTICE: Failed to get hg version number from command line: " + format(str(e)) + " (This is just a head's up, not a critical error)"
 
     try:
-        svnrev = get_revision_entries()
-        os.environ['SVNREVISION_SOURCE'] = "entries file"
-        return svnrev
+        hgrev = get_revision_hglib()
+        os.environ['HGREVISION_SOURCE'] = "python-hglib"
+        os.environ['HGREVISION'] = hgrev[0]
+        os.environ['HGNODEID'] = hgrev[1]
+        return hgrev
     except Exception as e:
-        print >> sys.stderr,  "NOTICE: Failed to get svn version from file: " + format(str(e)) + " (This is just a head's up, not a critical error)"
+        print >> sys.stderr,  "NOTICE: Failed to get hg version number using hglib: " + format(str(e)) + " (This is just a head's up, not a critical error)"
 
     try:
-        svnrev = get_revision_pysvn()
-        os.environ['SVNREVISION_SOURCE'] = "pysvn"
-        return svnrev
+        hgrev = get_revision_entries()
+        os.environ['HGREVISION_SOURCE'] = ".hg cache file"
+        os.environ['HGREVISION'] = hgrev[0]
+        os.environ['HGNODEID'] = hgrev[1]
+        return hgrev
     except Exception as e:
-        print >> sys.stderr,  "NOTICE: Failed to get svn version number using pysvn: " + format(str(e)) + " (This is just a head's up, not a critical error)"
+        print >> sys.stderr,  "NOTICE: Failed to get hg version from file: " + format(str(e)) + " (This is just a head's up, not a critical error)"
 
-    print >> sys.stderr,  "NOTICE: Using SVN rev from file stamp. This is likely outdated, so the number in the title bar might be off by a few commits."
-    svnrev = get_revision_file()
-    os.environ['SVNREVISION_SOURCE'] = "approximated from file stamp"
-    return svnrev
+    #TODO Disabled this fallback for now, it's possible to do this using the hg keyword extension, but not recommended and this metric was never really reliable (it only caused more confusion)
+    '''
+    print >> sys.stderr,  "NOTICE: Using HG rev from file stamp. This is likely outdated, so the number in the title bar might be off by a few commits."
+    hgrev = get_revision_file()
+    os.environ['HGREVISION_SOURCE'] = "approximated from file stamp"
+    os.environ['HGREVISION'] = hgrev[0]
+    os.environ['HGNODEID'] = hgrev[1]
+    return hgrev
+    '''
 
-def get_svn_revision():
-    #[BAL 07/13/2013] use the VERSION file if it exists. This is created and managed using pyinstaller.
+    if hgrev is None:
+        rev = "?"
+        revid = "UNKNOWN"
+    else:
+        rev, revid = hgrev
+    os.environ['HGREVISION_SOURCE'] = "none found"
+    os.environ['HGREVISION'] = rev
+    os.environ['HGNODEID'] = revid
+
+    return hgrev
+
+def get_hg_revision():
+    # Use the data/VERSION file if it exists. This is created and managed by build scripts
     import getpath
     versionFile = getpath.getSysDataPath("VERSION")
     if os.path.exists(versionFile):
         version_ = open(versionFile).read().strip()
         print >> sys.stderr,  "data/VERSION file detected using value from version file: %s" % version_
-        os.environ['SVNREVISION'] = version_
-        os.environ['SVNREVISION_SOURCE'] = "data/VERSION static revision data"
+        os.environ['HGREVISION'] = version_.split(':')[0]
+        os.environ['HGNODEID'] = version_.split(':')[1]
+        os.environ['HGREVISION_SOURCE'] = "data/VERSION static revision data"
+    elif not isBuild():
+        print >> sys.stderr,  "NO VERSION file detected retrieving revision info from HG"
+        # Set HG rev in environment so it can be used elsewhere
+        hgrev = get_hg_revision_1()
+        print >> sys.stderr,  "Detected HG revision: r%s (%s)" % (hgrev[0], hgrev[1])
     else:
-        print >> sys.stderr,  "NO VERSION file detected retrieving revision info from SVN"
-        # Set SVN rev in environment so it can be used elsewhere
-        svnrev = get_svn_revision_1()
-        print >> sys.stderr,  "Detected SVN revision: " + svnrev
-        os.environ['SVNREVISION'] = svnrev
+        # Don't bother trying to retrieve HG info for a build release, there should be a data/VERSION file
+        os.environ['HGREVISION'] = None
+        os.environ['HGNODEID'] = None
+        os.environ['HGREVISION_SOURCE'] = "skipped for build"
+
+    return (os.environ['HGREVISION'], os.environ['HGNODEID'])
     
 def recursiveDirNames(root):
     pathlist=[]
