@@ -27,7 +27,7 @@ Prepares an export folder ready to build packages from.
 ### Configuration ##############################################################
 
 # Filter of files from source folder to exclude (glob syntax)
-EXCLUDES = ['.hgignore', '*.target', '*.obj', '*.pyc', 'maketarget-standalone', 'plugins/4_rendering_mitsuba', 'plugins/4_rendering_povray', 'plugins/4_rendering_aqsis.py', 'plugins/0_modeling_5_editing.py', 'plugins/0_modeling_8_random.py', 'plugins/3_libraries_animation.py', 'compile_*.py', 'build_prepare.py', 'download_assets.py', '*~', '*.bak', 'setup.nsi', 'clean*.sh', 'clean*.bat', 'makehuman/docs', 'makehuman/icons', 'makehuman.rc', 'rpm', 'deb']
+EXCLUDES = ['.hgignore', '*.target', '*.obj', '*.pyc', 'maketarget-standalone', 'plugins/4_rendering_mitsuba', 'plugins/4_rendering_povray', 'plugins/4_rendering_aqsis.py', 'plugins/0_modeling_5_editing.py', 'plugins/0_modeling_8_random.py', 'plugins/3_libraries_animation.py', 'compile_*.py', 'build_prepare.py', 'download_assets.py', '*~', '*.bak', 'setup.nsi', 'clean*.sh', 'makehuman.sh', 'clean*.bat', 'makehuman/docs', 'makehuman/icons', 'makehuman.rc', '*_contents.txt', 'buildscripts']
 # Same as above, but applies to release mode only
 EXCLUDES_RELEASE = ['testsuite']
 
@@ -48,6 +48,12 @@ PY_AS_DATA = ['blendertools']
 
 # Files and paths that have to be declared as data (when freezing)
 DATAS = ['blendertools', 'makehuman/data', 'makehuman/plugins', 'makehuman/license.txt', 'makehuman/licenses']
+
+# Entry point for the MakeHuman application
+MAIN_EXECUTABLE = 'makehuman/makehuman.py'
+
+# Extension to python path, folders containing MH modules
+PYTHON_PATH_EX = ['makehuman/lib','makehuman/core','makehuman/shared','makehuman/apps','makehuman/apps/gui', 'makehuman/plugins']
 
 ################################################################################
 
@@ -153,6 +159,8 @@ class MHAppExporter(object):
 
         resultInfo = ExportInfo(VERSION, HGREV, REVID, self.targetFile(), self.isRelease())
         resultInfo.datas = DATAS
+        resultInfo.pathEx = PYTHON_PATH_EX
+        resultInfo.mainExecutable = MAIN_EXECUTABLE
         return resultInfo
 
     def sourceFile(self, path=""):
@@ -300,7 +308,38 @@ class ExportInfo(object):
         self.isRelease = isRelease
         self.datas = []
 
-        # TODO add targetFolder() sourceFolder() member methods?
+    def exportFolder(self, subpath = ""):
+        """
+        Get absolute path to folder that contains the export.
+        """
+        return os.path.abspath(os.path.normpath( os.path.join(self.path, subpath) ))
+
+    def relPath(self, path):
+        """
+        Get subpath relative to export folder
+        """
+        return os.path.relpath(path, self.exportFolder())
+
+    def getPluginFiles(self):
+        """
+        Returns all python modules (.py) and python packages (subfolders containing 
+        a file called __init__.py) in the plugins/ folder.
+        Useful for including as extra modules to compile when freezing.
+        """
+        import glob
+        rootpath = self.exportFolder('makehuman/plugins')
+
+        # plugin modules
+        pluginModules = glob.glob(os.path.join(rootpath,'[!_]*.py'))
+
+        # plugin packages
+        for fname in os.listdir(rootpath):
+            if fname[0] != "_":
+                folder = os.path.join(rootpath, fname)
+                if os.path.isdir(folder) and ("__init__.py" in os.listdir(folder)):
+                    pluginModules.append(os.path.join(folder, "__init__.py"))
+
+        return pluginModules
 
     def __str__(self):
         return """MH source export
