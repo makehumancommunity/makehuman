@@ -12,7 +12,7 @@ import zipfile
 import os
 import shutil
 
-sys.path = sys.path + ['.']
+sys.path = sys.path + ['..']
 import build_prepare
 
 def hgRootPath(subpath=""):
@@ -25,7 +25,8 @@ def exportPath(subpath=""):
     """
     The export path, where the source files to be packaged are exported.
     """
-    return os.path.join('export', subpath)
+    global hgRootPath
+    return os.path.join(hgRootPath(), '..', 'mh_export', subpath)
 
 def distPath(subpath=""):
     """
@@ -34,7 +35,6 @@ def distPath(subpath=""):
     for distribution.
     """
     return os.path.join('dist', subpath)
-
 
 # Export source to export folder and run scripts
 if os.path.exists(exportPath()):
@@ -143,4 +143,5 @@ elif sys.platform == 'win32':
         for file in files:
             fn = os.path.join(base, file)
             zip.write(fn, fn[rootlen:])
+
 
