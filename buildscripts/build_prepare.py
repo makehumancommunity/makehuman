@@ -37,8 +37,8 @@ ASSET_INCLUDES = ['*.npz', '*.thumb', '*.png', '*.json', '*.mhmat', '*.mhclo', '
 # Even if empty, create these folders (relative to export path)
 CREATE_FOLDERS = ['makehuman/data/backgrounds', 'makehuman/data/clothes']
 
-# Files and folders to exclude as a last step, to correct things that still fall through, but shouldn't (relative path to export path, no wildcards allowed)
-POST_REMOVE = ['makehuman/icons', 'makehuman/docs']
+# Files and folders to exclude as a last step, to correct things that still fall through, but shouldn't (relative path to export path, no wildcards allowed) For example folders affected during build
+POST_REMOVE = ['makehuman/icons', 'makehuman/docs', 'buildscripts']
 
 # Finally copy all files from these source folders, effectively ignoring all exclude filters
 COPY_ALL = ['blendertools']
