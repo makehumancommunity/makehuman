@@ -227,7 +227,12 @@ class MHAppExporter(object):
         print "Exporting files from hg repo (hg archive)"
         excludes = self.getExcludes()
         exclarg = [item for pair in zip(len(excludes)*['--exclude'], EXCLUDES) for item in pair]
-        self.runProcess( ["hg", "archive"] + exclarg + [self.targetFile()])
+
+        try:
+            self.runProcess( ["hg", "archive"] + exclarg + [self.targetFile()])
+        except Exception as e:
+            print "An error happened attempting to run 'hg archive'. Is Mercurial (commandline-tools) installed?"
+            raise e
 
         # Because the --excludes option does not appear to be working all too well (at least not with wildcards):
         # Gather files

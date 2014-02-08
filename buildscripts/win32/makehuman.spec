@@ -1,8 +1,8 @@
 # -*- mode: python -*-
 
 ### Config #########
-skipSvn = True
-skipScripts = True
+skipHg = False
+skipScripts = False
 ####################
 
 
@@ -39,7 +39,7 @@ def distPath(subpath=""):
 # Export source to export folder and run scripts
 if os.path.exists(exportPath()):
     shutil.rmtree(exportPath())
-i = exportInfo = build_prepare.export(sourcePath = hgRootPath(), exportFolder = exportPath(), skipHG = skipSvn, skipScripts = skipScripts)
+i = exportInfo = build_prepare.export(sourcePath = hgRootPath(), exportFolder = exportPath(), skipHG = skipHg, skipScripts = skipScripts)
 
 # Copy extra windows-specific files to export folder
 shutil.copy(hgRootPath('makehuman/icons/makehuman.ico'), exportPath('makehuman/makehuman.ico'))
@@ -88,7 +88,7 @@ def extra_datas(mydir):
 
 # append all of our necessary subdirectories
 for p in exportInfo.datas:
-    a.datas += extra_datas(exportPath("makehuman"), p)
+    a.datas += extra_datas(exportPath(p))
 
 
 ### Build
