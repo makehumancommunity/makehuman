@@ -46,14 +46,21 @@ COPY_ALL = ['blendertools']
 # Files or folders in target folder to pack as data (when freezing)
 PY_AS_DATA = ['blendertools']
 
+# Root folder after rearranging all. All folders in root except this one will be copied inside this folder, as new root.
+REARRANGE_ROOT_FOLDER = 'makehuman'
+
+
+# == Following settings relate to freezing a py package, paths are referenced in rearranged folder state, relative to REARRANGE_ROOT_FOLDER ==
+
 # Files and paths that have to be declared as data (when freezing)
-DATAS = ['blendertools', 'makehuman/data', 'makehuman/plugins', 'makehuman/license.txt', 'makehuman/licenses']
+DATAS = ['blendertools', 'data', 'plugins', 'license.txt', 'licenses']
 
 # Entry point for the MakeHuman application
-MAIN_EXECUTABLE = 'makehuman/makehuman.py'
+MAIN_EXECUTABLE = 'makehuman.py'
 
 # Extension to python path, folders containing MH modules
-PYTHON_PATH_EX = ['makehuman/lib','makehuman/core','makehuman/shared','makehuman/apps','makehuman/apps/gui', 'makehuman/plugins']
+PYTHON_PATH_EX = ['lib','core','shared','apps','apps/gui', 'plugins']
+
 
 ################################################################################
 
@@ -121,6 +128,7 @@ class MHAppExporter(object):
         print "Creating extra folders"
         for f in CREATE_FOLDERS:
             try:
+                print self.targetFile(f)
                 os.makedirs(self.targetFile(f))
             except:
                 pass
@@ -157,10 +165,39 @@ class MHAppExporter(object):
                 print "Failed to copy %s file to export (%s)" % (VERSION_FILE_PATH, e)
             print "\n"
 
+        # Re-arrange folders
+        for f in os.listdir( self.targetFile() ):
+            if f == REARRANGE_ROOT_FOLDER:
+                continue
+            path = self.targetFile(f)
+            if os.path.isdir(path):
+                # Move folder in new root folder
+                print "Moving folder %s into new root %s" % (f, REARRANGE_ROOT_FOLDER)
+                shutil.move(path, self.targetFile(os.path.join(REARRANGE_ROOT_FOLDER, f)))
+        '''
+        # Move all contents of new root folder into dist root (overwrite if needed)
+        _fixOnFinish = []
+        for f in os.listdir( self.targetFile(REARRANGE_ROOT_FOLDER) ):
+            path = self.targetFile(os.path.join(REARRANGE_ROOT_FOLDER, f))
+            print "Moving %s to root" % os.path.join(REARRANGE_ROOT_FOLDER, f)
+            if os.path.exists(self.targetFile(f)):
+                #print "WARNING: overwriting folder of file %s with %s" % (f, os.path.join(REARRANGE_ROOT_FOLDER, f))
+                _fixOnFinish.append(f)
+                shutil.move(path, self.targetFile(f+'--fixOnFinish'))
+            else:
+                shutil.move(path, self.targetFile(f))
+        # Remove the now empty root subfolder
+        os.rmdir(self.targetFile(REARRANGE_ROOT_FOLDER))
+        for f in _fixOnFinish:
+            shutil.move(self.targetFile(f+'--fixOnFinish'), self.targetFile(f))
+        '''
+        print "\n"
+
         resultInfo = ExportInfo(VERSION, HGREV, REVID, self.targetFile(), self.isRelease())
-        resultInfo.datas = DATAS
-        resultInfo.pathEx = PYTHON_PATH_EX
-        resultInfo.mainExecutable = MAIN_EXECUTABLE
+        resultInfo.rootSubpath = REARRANGE_ROOT_FOLDER
+        resultInfo.datas = [os.path.join(REARRANGE_ROOT_FOLDER, d) for d in DATAS]
+        resultInfo.pathEx = [os.path.join(REARRANGE_ROOT_FOLDER, p) for p in PYTHON_PATH_EX]
+        resultInfo.mainExecutable = os.path.join(REARRANGE_ROOT_FOLDER, MAIN_EXECUTABLE)
         return resultInfo
 
     def sourceFile(self, path=""):
@@ -312,12 +349,20 @@ class ExportInfo(object):
         self.path = os.path.abspath(path)
         self.isRelease = isRelease
         self.datas = []
+        self.rootSubpath = None
 
     def exportFolder(self, subpath = ""):
         """
         Get absolute path to folder that contains the export.
         """
         return os.path.abspath(os.path.normpath( os.path.join(self.path, subpath) ))
+
+    def applicationPath(self, subpath = ""):
+        """
+        Get the absolute path to export path containing the app main executable.
+        This is the direct subfolder specified in rootSubpath of the export folder.
+        """
+        return self.exportFolder( os.path.join(self.rootSubpath, subpath) )
 
     def relPath(self, path):
         """
