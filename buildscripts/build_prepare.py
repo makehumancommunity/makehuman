@@ -27,7 +27,7 @@ Prepares an export folder ready to build packages from.
 ### Configuration ##############################################################
 
 # Filter of files from source folder to exclude (glob syntax)
-EXCLUDES = ['.hgignore', '*.target', '*.obj', '*.pyc', 'maketarget-standalone', 'plugins/4_rendering_mitsuba', 'plugins/4_rendering_povray', 'plugins/4_rendering_aqsis.py', 'plugins/0_modeling_5_editing.py', 'plugins/0_modeling_8_random.py', 'plugins/3_libraries_animation.py', 'compile_*.py', 'build_prepare.py', 'download_assets.py', '*~', '*.bak', 'setup.nsi', 'clean*.sh', 'makehuman.sh', 'clean*.bat', 'makehuman/docs', 'makehuman/icons', 'makehuman.rc', '*_contents.txt', 'buildscripts']
+EXCLUDES = ['.hgignore', '.hgeol', '*.target', '*.obj', '*.pyc', 'maketarget-standalone', 'plugins/4_rendering_mitsuba', 'plugins/4_rendering_povray', 'plugins/4_rendering_aqsis.py', 'plugins/0_modeling_5_editing.py', 'plugins/0_modeling_8_random.py', 'plugins/3_libraries_animation.py', 'compile_*.py', 'build_prepare.py', 'download_assets.py', '*~', '*.bak', 'setup.nsi', 'clean*.sh', 'makehuman.sh', 'clean*.bat', 'makehuman/docs', 'makehuman/icons', 'makehuman.rc', '*_contents.txt', 'buildscripts']
 # Same as above, but applies to release mode only
 EXCLUDES_RELEASE = ['testsuite']
 
