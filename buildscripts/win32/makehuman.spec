@@ -18,6 +18,7 @@ import build_prepare
 def hgRootPath(subpath=""):
     """
     The source location, root folder of the hg repository.
+    (we assume cwd is in buildscripts/win32 relative to hg root)
     """
     return os.path.join('../..', subpath)
 
@@ -26,7 +27,7 @@ def exportPath(subpath=""):
     The export path, where the source files to be packaged are exported.
     """
     global hgRootPath
-    return os.path.join(hgRootPath(), '..', 'mh_export', subpath)
+    return os.path.join(hgRootPath(), '..', 'mh_export_win32', subpath)
 
 def distPath(subpath=""):
     """
@@ -42,8 +43,8 @@ if os.path.exists(exportPath()):
 i = exportInfo = build_prepare.export(sourcePath = hgRootPath(), exportFolder = exportPath(), skipHG = skipHg, skipScripts = skipScripts)
 
 # Copy extra windows-specific files to export folder
-shutil.copy(hgRootPath('makehuman/icons/makehuman.ico'), exportPath('makehuman/makehuman.ico'))
-exportInfo.datas.append('makehuman/makehuman.ico')
+shutil.copy(hgRootPath('icons/makehuman.ico'), exportPath('makehuman.ico'))
+exportInfo.datas.append('makehuman.ico')
 
 # Change to the export dir for building
 os.chdir(exportPath())
@@ -123,7 +124,7 @@ elif sys.platform == 'win32':
         a.scripts,
         exclude_binaries=True,
         name='makehuman.exe',
-        icon=exportPath('makehuman/makehuman.ico'),
+        icon=exportPath('makehuman.ico'),
         debug=False,
         strip=None,
         upx=True,
