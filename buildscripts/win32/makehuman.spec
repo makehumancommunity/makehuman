@@ -20,7 +20,7 @@ def hgRootPath(subpath=""):
     The source location, root folder of the hg repository.
     (we assume cwd is in buildscripts/win32 relative to hg root)
     """
-    return os.path.join('../..', subpath)
+    return os.path.join('..', '..', subpath)
 
 def exportPath(subpath=""):
     """
@@ -43,7 +43,7 @@ if os.path.exists(exportPath()):
 i = exportInfo = build_prepare.export(sourcePath = hgRootPath(), exportFolder = exportPath(), skipHG = skipHg, skipScripts = skipScripts)
 
 # Copy extra windows-specific files to export folder
-shutil.copy(hgRootPath('icons/makehuman.ico'), exportPath('makehuman.ico'))
+shutil.copy(hgRootPath('makehuman/icons/makehuman.ico'), exportPath('makehuman.ico'))
 exportInfo.datas.append('makehuman.ico')
 
 # Change to the export dir for building
