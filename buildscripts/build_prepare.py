@@ -349,7 +349,8 @@ class ExportInfo(object):
         self.path = os.path.abspath(path)
         self.isRelease = isRelease
         self.datas = []
-        self.rootSubpath = None
+        self.pathEx = []
+        self.rootSubpath = ""
 
     def exportFolder(self, subpath = ""):
         """

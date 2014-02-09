@@ -43,11 +43,11 @@ if os.path.exists(exportPath()):
 i = exportInfo = build_prepare.export(sourcePath = hgRootPath(), exportFolder = exportPath(), skipHG = skipHg, skipScripts = skipScripts)
 
 # Copy extra windows-specific files to export folder
-shutil.copy(hgRootPath('makehuman/icons/makehuman.ico'), exportPath('makehuman.ico'))
-exportInfo.datas.append('makehuman.ico')
+shutil.copy(hgRootPath('makehuman/icons/makehuman.ico'), i.applicationPath('makehuman.ico'))
+exportInfo.datas.append(os.path.join(i.rootSubpath, 'makehuman.ico'))
 
 # Change to the export dir for building
-os.chdir(exportPath())
+#os.chdir(exportPath())
 
 
 VERSION = exportInfo.version
@@ -71,6 +71,8 @@ a = Analysis([appExecutable] + i.getPluginFiles(),
 
 ##### include mydir in distribution #######
 def extra_datas(mydir):
+    global exportInfo
+    global exportPath
     def rec_glob(p, files):
         import os
         import glob
@@ -82,7 +84,9 @@ def extra_datas(mydir):
     rec_glob("%s/*" % mydir, files)
     extra_datas = []
     for f in files:
-        extra_datas.append((f, f, 'DATA'))
+        ft = os.path.relpath(f, exportInfo.applicationPath())
+        fs = os.path.normpath(os.path.realpath(f))
+        extra_datas.append((ft, fs, 'DATA'))
 
     return extra_datas
 ###########################################
@@ -124,7 +128,7 @@ elif sys.platform == 'win32':
         a.scripts,
         exclude_binaries=True,
         name='makehuman.exe',
-        icon=exportPath('makehuman.ico'),
+        icon=i.applicationPath('makehuman.ico'),
         debug=False,
         strip=None,
         upx=True,
