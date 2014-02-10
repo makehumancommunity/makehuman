@@ -32,7 +32,7 @@ import mh2proxy
 import filechooser as fc
 import log
 import getpath
-import pickle
+import cPickle as pickle
 
 
 class ProxyAction(gui3d.Action):
@@ -499,7 +499,9 @@ class ProxyChooserTaskView(gui3d.TaskView):
         saveDir = getpath.getPath('cache')
         if not os.path.isdir(saveDir):
             os.makedirs(saveDir)
-        pickle.dump(self._proxyFileCache, open( os.path.join(saveDir, self.proxyName + '_filecache.mhc'), "wb"))
+        f = open( os.path.join(saveDir, self.proxyName + '_filecache.mhc'), "wb")
+        pickle.dump(self._proxyFileCache, f, protocol=2)
+        f.close()
 
     def loadProxyFileCache(self, restoreFromFile = True):
         """
@@ -511,7 +513,9 @@ class ProxyChooserTaskView(gui3d.TaskView):
             try:
                 cacheFile = getpath.getPath(os.path.join('cache', self.proxyName + '_filecache.mhc'))
                 if os.path.isfile(cacheFile):
-                    self._proxyFileCache = pickle.load( open(cacheFile, "rb") )
+                    f = open(cacheFile, "rb")
+                    self._proxyFileCache = pickle.load(f)
+                    f.close()
             except:
                 log.debug("Failed to restore proxy list cache from file %s", cacheFile)
         self._proxyFileCache = mh2proxy.updateProxyFileCache(self.paths, self.getFileExtension(), self._proxyFileCache)

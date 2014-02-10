@@ -23,7 +23,7 @@ Definitions of scene objects and the scene class.
 .mhscene file structure.
 """
 
-import pickle
+import cPickle as pickle
 
 import log
 import events3d
@@ -127,7 +127,7 @@ class SceneObject(object):
 
     def save(self, hfile):
         for attr in self._attributes:
-            pickle.dump(getattr(self, "_" + attr), hfile)
+            pickle.dump(getattr(self, "_" + attr), hfile, protocol=2)
 
     def load(self, hfile):
         for attr in self._attributes:
@@ -244,9 +244,9 @@ class Scene(events3d.EventHandler):
             return False
         else:
             try:
-                pickle.dump(mhscene_version, hfile)
+                pickle.dump(mhscene_version, hfile, protocol=2)
                 self.environment.save(hfile)
-                pickle.dump(len(self.lights), hfile)
+                pickle.dump(len(self.lights), hfile, protocol=2)
                 for light in self.lights:
                     light.save(hfile)
             except:
