@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-""" 
+"""
 **Project Name:**      MakeHuman
 
 **Product Home Page:** http://www.makehuman.org/
@@ -29,17 +29,15 @@ like lights and ambience, that are defined in the scene class.
 
 import mh
 import gui
-import gui3d
+from core import G
 import guirender
 
 import os
 import scene
 
-import glmodule
-
 
 class SceneItem(object):
-    def __init__(self, sceneview, label = ""):
+    def __init__(self, sceneview, label=""):
         # Call this last
         self.sceneview = sceneview
         self.label = label
@@ -59,7 +57,7 @@ class SceneItem(object):
     def __del__(self):
         self.widget.destroy()
 
-            
+
 class SceneItemAdder(SceneItem):
     # Virtual scene item for adding scene items.
     def __init__(self, sceneview):
@@ -82,40 +80,51 @@ class EnvironmentSceneItem(SceneItem):
     def makeProps(self):
         SceneItem.makeProps(self)
 
-        self.colbox = self.widget.addWidget(VectorInput("Ambience", self.sceneview.scene.environment.ambience, True))
+        self.colbox = self.widget.addWidget(
+            VectorInput("Ambience",
+                self.sceneview.scene.environment.ambience, True))
 
         @self.colbox.mhEvent
         def onChange(value):
             self.sceneview.scene.environment.ambience = value
-            self.sceneview.updateScene()
-            
-     
+
+
 class LightSceneItem(SceneItem):
     def __init__(self, sceneview, light, lid):
         self.lightid = lid
         self.light = light
-        SceneItem.__init__(self, sceneview, "Light %s properties" % self.lightid)
+        SceneItem.__init__(
+            self, sceneview, "Light %s properties" % self.lightid)
 
     def makeProps(self):
         SceneItem.makeProps(self)
-        
-        self.posbox = self.widget.addWidget(VectorInput("Position", self.light.position))
 
-        self.focbox = self.widget.addWidget(VectorInput("Focus", self.light.focus))
-        
-        self.colbox = self.widget.addWidget(VectorInput("Color", self.light.color, True))
+        self.posbox = self.widget.addWidget(
+            VectorInput("Position", self.light.position))
 
-        self.specbox = self.widget.addWidget(VectorInput("Specular", self.light.specular, True))
+        self.focbox = self.widget.addWidget(
+            VectorInput("Focus", self.light.focus))
 
-        self.fov = self.widget.addWidget(VectorInput("Spot angle", [self.light.fov]))
+        self.colbox = self.widget.addWidget(
+            VectorInput("Color", self.light.color, True))
 
-        self.att = self.widget.addWidget(VectorInput("Attenuation", [self.light.attenuation]))
+        self.specbox = self.widget.addWidget(
+            VectorInput("Specular", self.light.specular, True))
 
-        self.soft = self.widget.addWidget(BooleanInput("Soft light", self.light.areaLights > 1))
+        self.fov = self.widget.addWidget(
+            VectorInput("Spot angle", [self.light.fov]))
 
-        self.size = self.widget.addWidget(VectorInput("Softness", [self.light.areaLightSize]))
+        self.att = self.widget.addWidget(
+            VectorInput("Attenuation", [self.light.attenuation]))
 
-        self.samples = self.widget.addWidget(VectorInput("Samples", [self.light.areaLights]))
+        self.soft = self.widget.addWidget(
+            BooleanInput("Soft light", self.light.areaLights > 1))
+
+        self.size = self.widget.addWidget(
+            VectorInput("Softness", [self.light.areaLightSize]))
+
+        self.samples = self.widget.addWidget(
+            VectorInput("Samples", [self.light.areaLights]))
 
         self.removebtn = self.widget.addWidget(
             gui.Button('Remove light ' + str(self.lightid)))
@@ -123,7 +132,6 @@ class LightSceneItem(SceneItem):
         @self.posbox.mhEvent
         def onChange(value):
             self.light.position = tuple(value)
-            self.sceneview.updateScene()
 
         @self.focbox.mhEvent
         def onChange(value):
@@ -132,12 +140,10 @@ class LightSceneItem(SceneItem):
         @self.colbox.mhEvent
         def onChange(value):
             self.light.color = tuple(value)
-            self.sceneview.updateScene()
 
         @self.specbox.mhEvent
         def onChange(value):
             self.light.specular = tuple(value)
-            self.sceneview.updateScene()
 
         @self.fov.mhEvent
         def onChange(value):
@@ -164,7 +170,7 @@ class LightSceneItem(SceneItem):
         def onChange(value):
             self.light.areaLights = int(value[0])
             self.soft.setValue(self.light.areaLights > 1)
-            
+
         @self.removebtn.mhEvent
         def onClicked(event):
             self.sceneview.scene.removeLight(self.light)
@@ -184,7 +190,8 @@ class SceneEditorTaskView(guirender.RenderTaskView):
 
         itemBox = self.addLeftWidget(gui.GroupBox('Items'))
         self.itemList = itemBox.addWidget(gui.ListView())
-        self.itemList.setSizePolicy(gui.SizePolicy.Ignored, gui.SizePolicy.Preferred)
+        self.itemList.setSizePolicy(
+            gui.SizePolicy.Ignored, gui.SizePolicy.Preferred)
 
         self.propsBox = gui.StackedBox()
         self.addRightWidget(self.propsBox)
@@ -199,27 +206,33 @@ class SceneEditorTaskView(guirender.RenderTaskView):
         self.readScene()
 
         def doLoad():
-            filename = mh.getOpenFileName(mh.getPath("scenes"), 'MakeHuman scene (*.mhscene);;All files (*.*)')
+            filename = mh.getOpenFileName(
+                G.app.settings.get('Scene_Editor_FileDlgPath',
+                    mh.getPath('data/scenes')),
+                'MakeHuman scene (*.mhscene);;All files (*.*)')
             if filename:
+                G.app.settings['Scene_Editor_FileDlgPath'] = filename
                 self.scene.load(filename)
                 self.readScene()
 
-        def doSave(filename = None):
-            self.scene.save(filename)
-            mhscene = gui3d.app.getCategory('Rendering').getTaskByName('Scene').scene
-            if os.path.normpath(mhscene.path) == os.path.normpath(self.scene.path):
-                mhscene.load(mhscene.path) # Refresh MH's current scene.
+        def doSave(filename=None):
+            ok = self.scene.save(filename)
+            if ok and not G.app.currentScene.path is None \
+                and os.path.normpath(G.app.currentScene.path) \
+                == os.path.normpath(self.scene.path):
+                # Refresh MH's current scene if it was modified.
+                G.app.currentScene.reload()
 
         @self.scene.mhEvent
-        def onChanged(scene):
-            self.updateFileTitle()
+        def onChanged(scn):
+            self.updateScene()
 
         @self.loadButton.mhEvent
         def onClicked(event):
             if self.scene.unsaved:
-                gui3d.app.prompt('Confirmation',
-                                 'Your scene is unsaved. Are you sure you want to close it?',
-                                 'Close','Cancel',doLoad())
+                G.app.prompt('Confirmation',
+                    'Your scene is unsaved. Are you sure you want to close it?',
+                    'Close', 'Cancel', doLoad())
             else:
                 doLoad()
 
@@ -234,20 +247,24 @@ class SceneEditorTaskView(guirender.RenderTaskView):
         @self.closeButton.mhEvent
         def onClicked(event):
             if self.scene.unsaved:
-                gui3d.app.prompt('Confirmation',
-                                 'Your scene is unsaved. Are you sure you want to close it?',
-                                 'Close','Cancel',self.scene.close())
+                G.app.prompt('Confirmation',
+                    'Your scene is unsaved. Are you sure you want to close it?',
+                    'Close', 'Cancel', self.scene.close())
             else:
                 self.scene.close()
             self.readScene()
 
         @self.saveAsButton.mhEvent
         def onClicked(event):
-            filename = mh.getSaveFileName(mh.getPath("scenes"), 'MakeHuman scene (*.mhscene);;All files (*.*)')
+            filename = mh.getSaveFileName(
+                G.app.settings.get('Scene_Editor_FileDlgPath',
+                    mh.getPath('data/scenes')),
+                'MakeHuman scene (*.mhscene);;All files (*.*)')
             if filename:
+                G.app.settings['Scene_Editor_FileDlgPath'] = filename
                 doSave(filename)
             self.updateFileTitle()
-                
+
         @self.itemList.mhEvent
         def onClicked(event):
             self.items[self.itemList.getSelectedItem()].showProps()
@@ -255,7 +272,7 @@ class SceneEditorTaskView(guirender.RenderTaskView):
         @self.addButton.mhEvent
         def onClicked(event):
             self.adder.showProps()
-            
+
     def readScene(self):
         self.adder.showProps()
         self.items.clear()
@@ -267,12 +284,12 @@ class SceneEditorTaskView(guirender.RenderTaskView):
         for item in self.items.values():
             self.propsBox.addWidget(item.widget)
         self.itemList.setData(self.items.keys()[::-1])
-        self.updateFileTitle()
 
         self.updateScene()
 
     def updateScene(self):
-        glmodule.setSceneLighting(self.scene)
+        G.app.applyScene(self.scene)
+        self.updateFileTitle()
 
     def updateFileTitle(self):
         if self.scene.path is None:
@@ -285,17 +302,16 @@ class SceneEditorTaskView(guirender.RenderTaskView):
 
     def onShow(self, event):
         guirender.RenderTaskView.onShow(self, event)
-        
+
         # Set currently edited scene
         self.updateScene()
 
     def onHide(self, event):
         # Restore selected scene
-        sceneTask = gui3d.app.getTask('Rendering', 'Scene')
-        scene = sceneTask.scene
-        glmodule.setSceneLighting(scene)
+        G.app.applyScene()
 
         guirender.RenderTaskView.onHide(self, event)
+
 
 class BooleanInput(gui.GroupBox):
     def __init__(self, name, value):
@@ -316,13 +332,14 @@ class BooleanInput(gui.GroupBox):
     def setValue(self, value):
         self.widget.setChecked(value)
 
+
 class VectorInput(gui.GroupBox):
-    def __init__(self, name, value = [0.0, 0.0, 0.0], isColor = False):
+    def __init__(self, name, value=[0.0, 0.0, 0.0], isColor=False):
         super(VectorInput, self).__init__(name)
         self.name = name
 
         self.widgets = []
-        for idx,v in enumerate(value):
+        for idx, v in enumerate(value):
             w = FloatValue(self, v)
             self.widgets.append(w)
             self.addWidget(w, 0, idx)
@@ -330,15 +347,17 @@ class VectorInput(gui.GroupBox):
 
         if isColor:
             self.colorPicker = gui.ColorPickButton(value)
+
             @self.colorPicker.mhEvent
             def onClicked(color):
                 self.setValue(list(color.asTuple()))
+
             self.addWidget(self.colorPicker, 1, 0)
         else:
             self.colorPicker = None
 
     def setValue(self, value):
-        for idx,w in enumerate(self.widgets):
+        for idx, w in enumerate(self.widgets):
             w.setValue(value[idx])
         self._value = value
         if self.colorPicker:
@@ -356,6 +375,7 @@ class VectorInput(gui.GroupBox):
             self.callEvent('onChange', self.getValue())
         except:
             pass
+
 
 class NumberValue(gui.TextEdit):
     def __init__(self, parent, value):
@@ -382,12 +402,14 @@ class NumberValue(gui.TextEdit):
     def setValue(self, value):
         self.setText(str(value))
 
+
 class FloatValue(NumberValue):
     _validator = gui.floatValidator
 
     @property
     def value(self):
         return float(self.text)
+
 
 class IntValue(NumberValue):
     _validator = gui.intValidator
@@ -399,7 +421,8 @@ class IntValue(NumberValue):
 
 def load(app):
     category = app.getCategory('Utilities')
-    taskview = category.addTask(SceneEditorTaskView(category))
+    category.addTask(SceneEditorTaskView(category))
+
 
 def unload(app):
     pass
