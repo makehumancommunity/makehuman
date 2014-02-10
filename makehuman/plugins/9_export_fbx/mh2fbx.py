@@ -87,7 +87,7 @@ def exportFbx(human, filepath, config):
     fbx_mesh.writeObjectProps(fp, rmeshes, amt, config)
     fbx_deformer.writeObjectProps(fp, rmeshes, amt, config)
     if config.useMaterials:
-        fbx_material.writeObjectProps(fp, rmeshes, amt)
+        fbx_material.writeObjectProps(fp, rmeshes, amt, config)
     #fbx_anim.writeObjectProps(fp, rmeshes, amt)
     fp.write('}\n\n')
 
