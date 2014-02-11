@@ -283,16 +283,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         from scene import Scene
         from getpath import findFile
-        self.currentScene = Scene()
-        try:
-            ok = self.currentScene.load(findFile("data/scenes/default.mhscene"))
-        except Exception as e:
-            ok = False
-            showTrace = not isinstance(e, IOError)
-            log.warning('Failed to load scene file %s (error: %s)' % ("data/scenes/default.mhscene", e), exc_info=showTrace)
-        if not ok:
-            log.warning(
-                "Unable to load default scene file. Using hardcoded scene.")
+        self.currentScene = Scene(findFile("data/scenes/default.mhscene"))
 
         @self._currentScene.mhEvent
         def onChanged(scene):
