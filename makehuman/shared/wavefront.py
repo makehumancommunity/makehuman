@@ -238,7 +238,8 @@ def writeMaterial(fp, mat, texPathConf = None):
     writeTexture(fp, "map_Ks", mat.specularMapTexture, texPathConf)
     #writeTexture(fp, "map_Tr", mat.translucencyMapTexture, texPathConf)
     # Disabled because Blender interprets map_Disp as map_D
-    #writeTexture(fp, "map_Disp", mat.normalMapTexture, texPathConf)
+    if mat.normalMapTexture:
+        texPathConf.copyTextureToNewLocation(mat.normalMapTexture)
     #writeTexture(fp, "map_Disp", mat.specularMapTexture, texPathConf)
     #writeTexture(fp, "map_Disp", mat.displacementMapTexture, texPathConf)
 
