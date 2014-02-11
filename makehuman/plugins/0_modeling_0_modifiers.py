@@ -393,6 +393,8 @@ class TorsoTaskView(ModifierTaskView):
             ]),
         ('Pelvis', 'pelvis', [
             ('pelvis-tone', 'decr', 'incr', {'cam' : 'setGlobalCamera'}),
+            ('pelvis-tone', 'decr', 'incr', {'cam' : 'setGlobalCamera'}),
+            ('bulge', 'decr', 'incr', {'cam' : 'setGlobalCamera'}),
             ])
         ]
 
@@ -475,8 +477,7 @@ class GenderTaskView(ModifierTaskView):
         ('Genitals', 'genitals', [
             ('penis-length', 'min', 'max', {}),
             ('penis-circ', 'min', 'max', {}),
-            ('penis-testicles', 'min', 'max', {}),
-            ('penis-bulgeeffect', 'one', 'two', {}),
+            ('penis-testicles', 'min', 'max', {}),            
             ]),
         ]
 
