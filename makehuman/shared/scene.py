@@ -175,14 +175,19 @@ class Environment(SceneObject):
 
 class Scene(events3d.EventHandler):
     def __init__(self, path=None):
-        if path is None:
-            self.lights = [Light(self)]
-            self.environment = Environment(self)
+        events3d.EventHandler.__init__(self)
 
-            self.unsaved = False
-            self.path = None
-        else:
-            self.load(path)
+        self.path = None
+        self.unsaved = False
+
+        self.lights = []
+        self.environment = Environment(self)
+
+        ok = self.load(path)
+        if not ok:
+            log.warning(
+                'Unable to load %s. Using hardcoded default scene.', path)
+            self.load(None)
 
     def changed(self):
         self.unsaved = True
@@ -190,36 +195,58 @@ class Scene(events3d.EventHandler):
 
     # Load scene from a .mhscene file.
     def load(self, path):
-        log.debug('Loading scene file: %s', path)
+        if path is None:
+            log.debug('Loading hardcoded default scene')
 
-        try:
-            hfile = open(path, 'rb')
-        except IOError as e:
-            log.warning('Could not load %s: %s', path, e[1])
-            return False
+            self.lights = [Light(self)]
+            self.environment = Environment(self)
+            # TODO: Hardcoded defaults should be set here, not in classes.
+
         else:
-            try:
-                # Ensure the file version is supported
-                filever = pickle.load(hfile)
-                checkVersions((mhscene_minversion, filever, mhscene_version),
-                    FileVersionException)
-                self.filever = filever
+            log.debug('Loading scene file: %s', path)
 
-                self.environment.load(hfile)
-                nlig = pickle.load(hfile)
-                self.lights = []
-                for i in xrange(nlig):
-                    light = Light(self)
-                    light.load(hfile)
-                    self.lights.append(light)
-            except FileVersionException as e:
-                log.error('%s: %s', path, e)
-                hfile.close()
+            try:
+                hfile = open(path, 'rb')
+            except IOError as e:
+                log.warning('Could not load %s: %s', path, e[1])
                 return False
-            except:
+            except Exception as e:
+                log.error('Failed to load scene file %s\nError: %s',
+                    path, repr(e), exc_info=True)
+                return False
+            else:
+                try:
+                    # Ensure the file version is supported
+                    filever = pickle.load(hfile)
+                    checkVersions(
+                        (mhscene_minversion, filever, mhscene_version),
+                        FileVersionException)
+
+                    # TODO: Save current state in temporary buffer
+                    # before loading, for reverting in case of error
+                    self.filever = filever
+                    self.environment.load(hfile)
+                    nlig = pickle.load(hfile)
+                    self.lights = []
+                    for i in xrange(nlig):
+                        light = Light(self)
+                        light.load(hfile)
+                        self.lights.append(light)
+                except FileVersionException as e:
+                    log.warning('%s: %s', path, e)
+                    hfile.close()
+                    return False
+                except Exception as e:
+                    log.error('Failed to load scene file %s\nError: %s\n',
+                        path, repr(e), exc_info=True)
+                    # TODO: Revert to buffered saved state here instead
+                    if path != self.path:
+                        self.load(self.path)
+                    else:
+                        self.load(None)
+                    hfile.close()
+                    return False
                 hfile.close()
-                raise
-            hfile.close()
 
         self.path = path
         self.unsaved = False
@@ -234,13 +261,22 @@ class Scene(events3d.EventHandler):
     # Save scene to a .mhscene file.
     def save(self, path=None):
         if path is None:
-            path = self.path
+            if self.path is None:
+                log.notice(
+'Cannot save scene as it is not associated with any file. Please supply a path')
+                return False
+            else:
+                path = self.path
         log.debug('Saving scene file: %s', path)
 
         try:
             hfile = open(path, 'wb')
         except IOError as e:
             log.warning('Could not save %s: %s', path, e[1])
+            return False
+        except Exception as e:
+            log.error('Failed to save scene file %s\nError: %s\n',
+                path, repr(e), exc_info=True)
             return False
         else:
             try:
@@ -249,9 +285,11 @@ class Scene(events3d.EventHandler):
                 pickle.dump(len(self.lights), hfile, protocol=2)
                 for light in self.lights:
                     light.save(hfile)
-            except:
+            except Exception as e:
+                log.error('Failed to save scene file %s\nError: %s\n',
+                    path, repr(e), exc_info=True)
                 hfile.close()
-                raise
+                return False
             hfile.close()
 
         self.path = path
@@ -259,7 +297,7 @@ class Scene(events3d.EventHandler):
         return True
 
     def close(self):
-        self.__init__()
+        self.load(None)
 
     def addLight(self):
         self.changed()
