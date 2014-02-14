@@ -135,7 +135,7 @@ def matchPoleTarget(pb, above, below):
         n.normalize()
         z -= z.dot(n)*n
         z.normalize()
-        p = p0 + 3.0*z
+        p = p0 + 6*pb.length*z
     else:
         p = p0
     gmat = Matrix.Translation(p)
