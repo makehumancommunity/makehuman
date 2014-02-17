@@ -26,6 +26,9 @@ Prepares an export folder ready to build packages from.
 
 ### Configuration ##############################################################
 
+# Path to hg executable
+HG_PATH = "hg"
+
 # Filter of files from source folder to exclude (glob syntax)
 EXCLUDES = ['.hgignore', '.hgeol', '*.target', '*.obj', '*.pyc', 'maketarget-standalone', 'plugins/4_rendering_mitsuba', 'plugins/4_rendering_povray', 'plugins/4_rendering_aqsis.py', 'plugins/0_modeling_5_editing.py', 'plugins/0_modeling_8_random.py', 'plugins/3_libraries_animation.py', 'compile_*.py', 'build_prepare.py', 'download_assets.py', '*~', '*.bak', 'setup.nsi', 'clean*.sh', 'makehuman.sh', 'clean*.bat', 'makehuman/docs', 'makehuman/icons', 'makehuman.rc', '*_contents.txt', 'buildscripts']
 # Same as above, but applies to release mode only
@@ -35,7 +38,7 @@ EXCLUDES_RELEASE = ['testsuite']
 ASSET_INCLUDES = ['*.npz', '*.thumb', '*.png', '*.json', '*.mhmat', '*.mhclo', '*.proxy', 'glsl/*.txt', 'languages/*.ini', "*.mhp", "*.mhm", "*.qss", "*.mht", "*.svg"]
 
 # Even if empty, create these folders (relative to export path)
-CREATE_FOLDERS = ['makehuman/data/backgrounds', 'makehuman/data/clothes']
+CREATE_FOLDERS = ['makehuman/data/backgrounds', 'makehuman/data/clothes', 'makehuman/data/teeth', 'makehuman/data/eyelashes', 'makehuman/data/tongue']
 
 # Files and folders to exclude as a last step, to correct things that still fall through, but shouldn't (relative path to export path, no wildcards allowed) For example folders affected during build
 POST_REMOVE = ['makehuman/icons', 'makehuman/docs', 'buildscripts']
@@ -266,7 +269,7 @@ class MHAppExporter(object):
         exclarg = [item for pair in zip(len(excludes)*['--exclude'], EXCLUDES) for item in pair]
 
         try:
-            self.runProcess( ["hg", "archive"] + exclarg + [self.targetFile()])
+            self.runProcess( [HG_PATH, "archive"] + exclarg + [self.targetFile()])
         except Exception as e:
             print "An error happened attempting to run 'hg archive'. Is Mercurial (commandline-tools) installed?"
             raise e
