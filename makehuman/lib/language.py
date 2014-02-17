@@ -53,7 +53,7 @@ class Language(object):
             self.rtl = self.languageStrings['__options__'].get('rtl', False)
             
     def getLanguageString(self, string):
-        if not self.languageStrings:
+        if self.languageStrings is None:
             return string
         result = self.languageStrings.get(string)
         if result is not None:
@@ -68,7 +68,7 @@ class Language(object):
         pathdir = os.path.dirname(path)
         if not os.path.isdir(pathdir):
             os.makedirs(pathdir)
-        with open(path, 'w') as f:
+        with open(path, 'wb') as f:
             for string in self.missingStrings:
                 f.write('"%s": "",\n' % string.encode('utf8'))
 
