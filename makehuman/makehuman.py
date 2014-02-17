@@ -145,8 +145,8 @@ def get_hg_revision_1():
     try:
         hgrev = get_revision_hg_info()
         os.environ['HGREVISION_SOURCE'] = "hg tip command"
-        os.environ['HGREVISION'] = hgrev[0]
-        os.environ['HGNODEID'] = hgrev[1]
+        os.environ['HGREVISION'] = str(hgrev[0])
+        os.environ['HGNODEID'] = str(hgrev[1])
         return hgrev
     except Exception as e:
         print >> sys.stderr,  "NOTICE: Failed to get hg version number from command line: " + format(str(e)) + " (This is just a head's up, not a critical error)"
@@ -154,8 +154,8 @@ def get_hg_revision_1():
     try:
         hgrev = get_revision_hglib()
         os.environ['HGREVISION_SOURCE'] = "python-hglib"
-        os.environ['HGREVISION'] = hgrev[0]
-        os.environ['HGNODEID'] = hgrev[1]
+        os.environ['HGREVISION'] = str(hgrev[0])
+        os.environ['HGNODEID'] = str(hgrev[1])
         return hgrev
     except Exception as e:
         print >> sys.stderr,  "NOTICE: Failed to get hg version number using hglib: " + format(str(e)) + " (This is just a head's up, not a critical error)"
@@ -163,8 +163,8 @@ def get_hg_revision_1():
     try:
         hgrev = get_revision_entries()
         os.environ['HGREVISION_SOURCE'] = ".hg cache file"
-        os.environ['HGREVISION'] = hgrev[0]
-        os.environ['HGNODEID'] = hgrev[1]
+        os.environ['HGREVISION'] = str(hgrev[0])
+        os.environ['HGNODEID'] = str(hgrev[1])
         return hgrev
     except Exception as e:
         print >> sys.stderr,  "NOTICE: Failed to get hg version from file: " + format(str(e)) + " (This is just a head's up, not a critical error)"
@@ -185,8 +185,8 @@ def get_hg_revision_1():
     else:
         rev, revid = hgrev
     os.environ['HGREVISION_SOURCE'] = "none found"
-    os.environ['HGREVISION'] = rev
-    os.environ['HGNODEID'] = revid
+    os.environ['HGREVISION'] = str(rev)
+    os.environ['HGNODEID'] = str(revid)
 
     return hgrev
 
@@ -197,8 +197,8 @@ def get_hg_revision():
     if os.path.exists(versionFile):
         version_ = open(versionFile).read().strip()
         print >> sys.stderr,  "data/VERSION file detected using value from version file: %s" % version_
-        os.environ['HGREVISION'] = version_.split(':')[0]
-        os.environ['HGNODEID'] = version_.split(':')[1]
+        os.environ['HGREVISION'] = str(version_.split(':')[0])
+        os.environ['HGNODEID'] = str(version_.split(':')[1])
         os.environ['HGREVISION_SOURCE'] = "data/VERSION static revision data"
     elif not isBuild():
         print >> sys.stderr,  "NO VERSION file detected retrieving revision info from HG"
@@ -207,8 +207,8 @@ def get_hg_revision():
         print >> sys.stderr,  "Detected HG revision: r%s (%s)" % (hgrev[0], hgrev[1])
     else:
         # Don't bother trying to retrieve HG info for a build release, there should be a data/VERSION file
-        os.environ['HGREVISION'] = None
-        os.environ['HGNODEID'] = None
+        os.environ['HGREVISION'] = ""
+        os.environ['HGNODEID'] = ""
         os.environ['HGREVISION_SOURCE'] = "skipped for build"
 
     return (os.environ['HGREVISION'], os.environ['HGNODEID'])
