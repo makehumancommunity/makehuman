@@ -232,7 +232,7 @@ class SceneEditorTaskView(guirender.RenderTaskView):
             if self.scene.unsaved:
                 G.app.prompt('Confirmation',
                     'Your scene is unsaved. Are you sure you want to close it?',
-                    'Close', 'Cancel', doLoad())
+                    'Close', 'Cancel', doLoad)
             else:
                 doLoad()
 
@@ -249,7 +249,7 @@ class SceneEditorTaskView(guirender.RenderTaskView):
             if self.scene.unsaved:
                 G.app.prompt('Confirmation',
                     'Your scene is unsaved. Are you sure you want to close it?',
-                    'Close', 'Cancel', self.scene.close())
+                    'Close', 'Cancel', self.scene.close)
             else:
                 self.scene.close()
             self.readScene()
