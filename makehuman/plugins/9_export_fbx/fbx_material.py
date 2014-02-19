@@ -155,17 +155,17 @@ def writeObjectDefs(fp, rmeshes, amt):
 #   Object properties
 #--------------------------------------------------------------------
 
-def writeObjectProps(fp, rmeshes, amt):
+def writeObjectProps(fp, rmeshes, amt, config):
 
     for rmesh in rmeshes:
         mat = rmesh.material
         writeMaterial(fp, rmesh, amt)
-        writeTexture(fp, mat.diffuseTexture, "DiffuseColor")
-        writeTexture(fp, mat.specularMapTexture, "SpecularFactor")
-        writeTexture(fp, mat.normalMapTexture, "Bump")
-        writeTexture(fp, mat.transparencyMapTexture, "TransparencyFactor")
-        writeTexture(fp, mat.bumpMapTexture, "BumpFactor")
-        writeTexture(fp, mat.displacementMapTexture, "DisplacementFactor")
+        writeTexture(fp, mat.diffuseTexture, "DiffuseColor", config)
+        writeTexture(fp, mat.specularMapTexture, "SpecularFactor", config)
+        writeTexture(fp, mat.normalMapTexture, "Bump", config)
+        writeTexture(fp, mat.transparencyMapTexture, "TransparencyFactor", config)
+        writeTexture(fp, mat.bumpMapTexture, "BumpFactor", config)
+        writeTexture(fp, mat.displacementMapTexture, "DisplacementFactor", config)
 
 
 def writeMaterial(fp, rmesh, amt):
@@ -195,13 +195,14 @@ def writeMaterial(fp, rmesh, amt):
 '    }\n')
 
 
-def writeTexture(fp, filepath, channel):
+def writeTexture(fp, filepath, channel, config):
     if not filepath:
         return
-    filepath,tex = getTexturePath(filepath)
+    filepath = config.copyTextureToNewLocation(filepath)
+    texname = getTextureName(filepath)
     relpath = getRelativePath(filepath)
 
-    vid,vkey = getId("Video::%s" % tex)
+    vid,vkey = getId("Video::%s" % texname)
 
     fp.write(
 '    Video: %d, "%s", "Clip" {\n' % (vid, vkey) +
@@ -214,7 +215,7 @@ def writeTexture(fp, filepath, channel):
 '        RelativeFilename: "%s"\n' % relpath +
 '    }\n')
 
-    tid,tkey = getId("Texture::%s" % tex)
+    tid,tkey = getId("Texture::%s" % texname)
 
     fp.write(
 '    Texture: %d, "%s", "" {\n' % (tid, tkey) +
@@ -254,7 +255,7 @@ def writeLinks(fp, rmeshes, amt):
             (mat.bumpMapTexture, "BumpFactor"),
             (mat.displacementMapTexture, "Displacement")]:
             if filepath:
-                _,tex = getTexturePath(filepath)
-                opLink(fp, 'Texture::%s' % tex, 'Material::%s' % name, channel)
-                ooLink(fp, 'Video::%s' % tex, 'Texture::%s' % tex)
+                texname = getTextureName(filepath)
+                opLink(fp, 'Texture::%s' % texname, 'Material::%s' % name, channel)
+                ooLink(fp, 'Video::%s' % texname, 'Texture::%s' % texname)
 
