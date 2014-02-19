@@ -1,0 +1,76 @@
+#version 120
+
+/**
+ * Toon shader.
+ *
+ **Project Name:**      MakeHuman
+ *
+ **Product Home Page:** http://www.makehuman.org/
+ *
+ **Code Home Page:**    http://code.google.com/p/makehuman/
+ *
+ **Authors:**           Marc Flerackers
+ *
+ **Copyright(c):**      MakeHuman Team 2001-2014
+ *
+ **Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
+ *
+ **Coding Standards:**  See http://www.makehuman.org/node/165
+ *
+ * Abstract
+ * --------
+ *
+ * Cell shading.
+ * Based on an example from www.ozone3d.net
+**/
+
+varying vec3 vNormal;
+varying vec3 vVertex;
+uniform sampler2D diffuseTexture;
+
+uniform float silhouetteThreshold = 0.2;
+uniform float shininess = 20.0;
+uniform float ambientIntensity = 0.4;
+uniform float specularIntensity = 0.2;
+uniform float diffuseIntensity = 0.4;
+uniform float specular_th = 0.3;
+uniform float diffuse_th = 0.5;
+
+void main (void)
+{
+  // Texture color
+	vec4 tex_color = texture2D(diffuseTexture, gl_TexCoord[0].st);
+
+  // Silhouette Color:
+  vec4 silhouetteColor = vec4(0.0, 0.0, 0.0, 1.0);
+
+  // Lighting
+  //vec3 eyePos = normalize(-vVertex); 
+  vec3 lightPos = gl_LightSource[0].position.xyz;
+
+  vec3 Normal = normalize(vNormal);
+  vec3 EyeVert = normalize(-vVertex);
+  vec3 LightVert = normalize(lightPos - vVertex);
+  vec3 EyeLight = normalize(LightVert + EyeVert);
+
+  // Simple Silhouette
+  float sil = max(dot(Normal, EyeVert), 0.0);
+  if (sil < silhouetteThreshold) 
+    gl_FragColor = silhouetteColor;
+  else 
+  {
+    float multiplier = ambientIntensity;
+    
+    // Specular part
+    float spec = pow(max(dot(Normal, EyeLight), 0.0), shininess);
+    multiplier += specularIntensity * smoothstep(specular_th-0.01, specular_th, spec);
+
+    // Diffuse part
+    float diff = max(dot(Normal, LightVert), 0.0);
+    multiplier += diffuseIntensity * smoothstep(diffuse_th-0.01, diffuse_th, diff);
+      
+    gl_FragColor = multiplier * tex_color;
+  }
+  
+  gl_FragColor.a = tex_color.a;
+}
