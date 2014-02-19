@@ -14,13 +14,9 @@ varying vec2 texCoord;  // UV coordinate
 // TODO allow disabling diffuse texture
 uniform sampler2D diffuseTexture;
 uniform sampler2D normalmapTexture;
-uniform float invRadius = 0.00000001;
 
 void main (void)
 {
-    //float distSqr = dot(lightVec, lightVec);
-    //float att = clamp(1.0 - invRadius * sqrt(distSqr), 0.0, 1.0);
-    //vec3 lVec = lightVec * inversesqrt(distSqr);
     vec3 lVec = normalize(lightVec);
 
     vec3 vVec = normalize(eyeVec);

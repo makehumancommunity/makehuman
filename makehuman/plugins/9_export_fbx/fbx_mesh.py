@@ -148,17 +148,10 @@ def writeGeometryProp(fp, name, obj, config):
                 Type: "LayerElementTexture"
                 TypedIndex: 0
             }
-""")
-    if config.useNormals:
-        fp.write(
-"""
             LayerElement:  {
                 Type: "LayerElementNormal"
                 TypedIndex: 0
             }
-""")
-    fp.write(
-"""
             LayerElement:  {
                 Type: "LayerElementUV"
                 TypedIndex: 0

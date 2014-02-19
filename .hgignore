@@ -1,0 +1,8 @@
+syntax: glob
+
+*.npz
+*.pyc
+*~
+*.exe
+*.dll
+*.so

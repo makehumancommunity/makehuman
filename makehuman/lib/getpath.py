@@ -47,7 +47,7 @@ def localPath(path):
     If all buffers use the same keys, this becomes obsolete.
     """
     path = os.path.realpath(path)
-    root = os.path.realpath(".")
+    root = os.path.realpath( getSysPath() )
     return formatPath(os.path.relpath(path, root))
 
 def getHomePath():

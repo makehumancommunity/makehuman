@@ -31,7 +31,7 @@ class RenderTaskView(PoseModeTaskView):
         PoseModeTaskView.__init__(self, category, name, label)
 
         self.oldShader = None
-        self.taskViewShader = 'shaders/glsl/phong'
+        self.taskViewShader = None
 
     # Render task views enable pose mode when shown, so that the selected pose
     # is seen and rendered, and a light-based shader (default phong) is
@@ -53,7 +53,7 @@ class RenderTaskView(PoseModeTaskView):
 
     # renderingWidth, renderingHeight: properties for getting/setting
     # the rendering width and height stored in the settings.
-    
+
     def getRenderingWidth(self):
         return G.app.settings.get('rendering_width', 800)
 

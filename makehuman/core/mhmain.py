@@ -230,6 +230,7 @@ class MHApplication(gui3d.Application, mh.Application):
         self.modules = {}
 
         self.selectedHuman = None
+        self._currentScene = None
         self.backplaneGrid = None
         self.groundplaneGrid = None
 
@@ -271,6 +272,24 @@ class MHApplication(gui3d.Application, mh.Application):
         # Set a lower than default MAX_FACES value because we know the human has a good topology (will make it a little faster)
         # (we do not lower the global limit because that would limit the selection of meshes that MH would accept too much)
         self.selectedHuman = self.addObject(human.Human(files3d.loadMesh(mh.getSysDataPath("3dobjs/base.obj"), maxFaces = 5)))
+
+    def loadScene(self):
+
+        self.progress(0.18)
+
+        userSceneDir = mh.getPath("data/scenes")
+        if not os.path.exists(userSceneDir):
+            os.makedirs(userSceneDir)
+
+        from scene import Scene
+        from getpath import findFile
+        self.currentScene = Scene(findFile("data/scenes/default.mhscene"))
+
+        @self._currentScene.mhEvent
+        def onChanged(scene):
+            self._currentSceneChanged()
+
+        self._currentSceneChanged()
 
     def loadMainGui(self):
 
@@ -576,6 +595,9 @@ class MHApplication(gui3d.Application, mh.Application):
 
         log.message('Loading human')
         self.loadHuman()
+
+        log.message('Loading scene')
+        self.loadScene()
 
         log.message('Loading main GUI')
         self.loadMainGui()
@@ -926,7 +948,7 @@ class MHApplication(gui3d.Application, mh.Application):
         if mh.isRelease():
             self.setCaption("MakeHuman %s - [%s][*]" % (mh.getVersionStr(), filename))
         else:
-            self.setCaption("MakeHuman r%s - [%s][*]" % (os.environ['SVNREVISION'], filename))
+            self.setCaption("MakeHuman r%s (%s) - [%s][*]" % (os.environ['HGREVISION'], os.environ['HGNODEID'], filename))
 
     def setFileModified(self, modified):
         self.modified = modified
@@ -1039,6 +1061,29 @@ class MHApplication(gui3d.Application, mh.Application):
     def setRightLegRightCamera(self):
         self.setTargetCamera(4744, 2.3)
 
+    # Global scene
+    def getCurrentScene(self):
+        return self._currentScene
+
+    def setCurrentScene(self, scene):
+        self._currentScene = scene
+        self._currentSceneChanged()
+
+    currentScene = property(getCurrentScene, setCurrentScene)
+
+    def _currentSceneChanged(self):
+        # TODO: Possibly emit an onSceneChanged event
+        self.applyScene()
+
+    def applyScene(self, scene=None):
+        if scene is None:
+            scene = self.currentScene
+
+        from glmodule import setSceneLighting
+        setSceneLighting(scene)
+
+        # TODO: Possibly emit an onSceneApplied event
+
     # Shortcuts
     def setShortcut(self, modifier, key, action):
 
@@ -1149,10 +1194,18 @@ class MHApplication(gui3d.Application, mh.Application):
         human = self.selectedHuman
         human.symmetryModeEnabled = self.actions.symmetry.isChecked()
 
-    def saveTarget(self):
+    def saveTarget(self, path=None):
+        """
+        Export the current modifications to the human as one single target, 
+        relative to the basemesh.
+        """
+        if path is None:
+            path = mh.getPath("full_target.target")
+        if os.path.splitext(path)[1] != '.target':
+            raise RuntimeError("Cannot save target to file %s, expected a path to a .target file." % path)
         human = self.selectedHuman
-        algos3d.saveTranslationTarget(human.meshData, "full_target.target")
-        log.message("Full target exported")
+        algos3d.saveTranslationTarget(human.meshData, path)
+        log.message("Full target exported to %s", path)
 
     def grabScreen(self):
         import datetime
@@ -1348,7 +1401,7 @@ class MHApplication(gui3d.Application, mh.Application):
         self.actions.load      = action('load',      'Load',          self.goToLoad)
         self.actions.save      = action('save',      'Save',          self.goToSave)
         self.actions.export    = action('export',    'Export',        self.goToExport)
-        
+
 
         # 2 - Edit toolbar
         toolbar = self.edit_toolbar = mh.addToolBar("Edit")
