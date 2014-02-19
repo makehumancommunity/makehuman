@@ -38,7 +38,7 @@ Alternatively, run the script in the script editor (Alt-P), and access from the 
 bl_info = {
     'name': 'Import: MakeHuman Exchange (.mhx)',
     'author': 'Thomas Larsson',
-    'version': (1,16,19),
+    'version': (1,16,20),
     "blender": (2, 69, 0),
     'location': "File > Import > MakeHuman (.mhx)",
     'description': 'Import files in the MakeHuman eXchange format (.mhx)',
@@ -3444,7 +3444,7 @@ def matchPoleTarget(pb, above, below, auto):
         n = n/n.length
         z -= z.dot(n)*n
         z = z/z.length
-        p = p0 + 3.0*z
+        p = p0 + 6*pb.bone.length*z
     else:
         p = p0
     gmat = Matrix.Translation(p)

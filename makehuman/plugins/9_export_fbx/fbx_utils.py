@@ -84,8 +84,12 @@ def getTexturePath(filepath):
     global _AbsPath
     filepath = os.path.abspath(os.path.expanduser(filepath))
     filepath = os.path.join(_AbsPath, "textures", os.path.basename(filepath))
-    tex = os.path.basename(filepath).replace(" ","_")
-    return filepath, tex
+    return filepath
+
+
+def getTextureName(filepath):
+    texfile = os.path.basename(filepath)
+    return texfile.replace(".","_")
 
 
 def getRmeshName(rmesh, amt):
