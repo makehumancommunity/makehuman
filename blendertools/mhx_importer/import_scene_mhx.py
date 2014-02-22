@@ -38,7 +38,7 @@ Alternatively, run the script in the script editor (Alt-P), and access from the 
 bl_info = {
     'name': 'Import: MakeHuman Exchange (.mhx)',
     'author': 'Thomas Larsson',
-    'version': (1,16,20),
+    'version': (1,16,21),
     "blender": (2, 69, 0),
     'location': "File > Import > MakeHuman (.mhx)",
     'description': 'Import files in the MakeHuman eXchange format (.mhx)',
@@ -2538,12 +2538,21 @@ class RigifyBone:
         self.head = eb.head.copy()
         self.tail = eb.tail.copy()
         self.roll = eb.roll
+        self.customShape = None
+        self.lockLocation = None
         self.deform = eb.use_deform
         self.parent = None
         self.child = None
         self.connect = False
         self.original = False
         self.extra = (eb.name in ["spine-1"])
+
+        if eb.layers[10]:   # Face
+            self.layer = 0
+        elif eb.layers[9]:  # Tweak
+            self.layer = 2
+        else:
+            self.layer = 1  # Muscle
 
     def __repr__(self):
         return ("<RigifyBone %s %s %s>" % (self.name, self.realname, self.realname1))
@@ -2583,6 +2592,16 @@ def rigifyMhx(context):
             bone.parent = eb.parent.name
             bones[bone.parent].child = eb.name
     bpy.ops.object.mode_set(mode='OBJECT')
+
+    for pb in rig.pose.bones:
+        bone = bones[pb.name]
+        bone.lockLocation = pb.lock_location
+        if pb.custom_shape:
+            bone.customShape = pb.custom_shape
+            if pb.custom_shape.parent:
+                pb.custom_shape.parent.parent = None
+                pb.custom_shape.parent = None
+            pb.custom_shape = None
 
     # Create metarig
     try:
@@ -2644,8 +2663,6 @@ def rigifyMhx(context):
 
     # Add extra bone to generated rig
     bpy.ops.object.mode_set(mode='EDIT')
-    layers = 32*[False]
-    layers[1] = True
     for bone in bones.values():
         if not bone.original:
             if bone.deform:
@@ -2666,6 +2683,8 @@ def rigifyMhx(context):
                 else:
                     print(bone)
             eb.use_connect = (eb.parent != None and eb.parent.tail == eb.head)
+            layers = 32*[False]
+            layers[bone.layer] = True
             eb.layers = layers
 
     bpy.ops.object.mode_set(mode='OBJECT')
@@ -2674,6 +2693,9 @@ def rigifyMhx(context):
             pb = gen.pose.bones[bone.realname]
             db = rig.pose.bones[bone.name]
             pb.rotation_mode = db.rotation_mode
+            pb.lock_location = bone.lockLocation
+            if bone.customShape:
+                pb.custom_shape = bone.customShape
             for cns1 in db.constraints:
                 cns2 = pb.constraints.new(cns1.type)
                 fixConstraint(cns1, cns2, gen, bones)
@@ -2719,7 +2741,9 @@ def rigifyMhx(context):
     empty.layers[19] = True
     empty.parent = gen
     for ob in scn.objects:
-        if ob.type == 'MESH' and ob.name[0:4] == "WGT-" and not ob.parent:
+        if (ob.type == 'MESH' and
+            ob.name[0:4] in ["WGT-", "GZM_"] and
+            not ob.parent):
             ob.parent = empty
             grp.objects.link(ob)
 
