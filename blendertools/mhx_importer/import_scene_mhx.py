@@ -38,7 +38,7 @@ Alternatively, run the script in the script editor (Alt-P), and access from the 
 bl_info = {
     'name': 'Import: MakeHuman Exchange (.mhx)',
     'author': 'Thomas Larsson',
-    'version': (1,16,22),
+    'version': (1,16,23),
     "blender": (2, 69, 0),
     'location': "File > Import > MakeHuman (.mhx)",
     'description': 'Import files in the MakeHuman eXchange format (.mhx)',
@@ -96,6 +96,7 @@ theMhxFile = ""
 T_EnforceVersion = 0x01
 T_Clothes = 0x02
 T_HardParents = 0x0
+T_CrashSafe = 0x04
 
 T_Diamond = 0x10
 T_Shapekeys = 0x40
@@ -772,6 +773,9 @@ def parseDriverTarget(var, nTarget, rna, args, tokens):
     return targ
 
 
+# ---------------------------------------------------------------------
+#
+# ---------------------------------------------------------------------
 #
 #    parseMaterial(args, ext, tokens):
 #    parseMTex(mat, args, tokens):
@@ -784,6 +788,168 @@ def parseMaterial(args, tokens):
     if mat is None:
         return None
     loadedData['Material'][name] = mat
+
+    scn = bpy.context.scene
+    if scn.render.engine == 'BLENDER_RENDER':
+        parseMaterialBlenderRender(mat, tokens)
+    elif scn.render.engine == 'CYCLES':
+        parseMaterialCycles(mat, tokens)
+    elif scn.render.engine == 'BLENDER_GAME':
+        parseMaterialBlenderRender(mat, tokens)
+        #parseMaterialBlenderGame(mat, tokens)
+    return mat
+
+
+class CMTex:
+    def __init__(self, args):
+        self.index = int(args[0])
+        self.texname = args[1]
+        self.texco = args[2]
+        self.mapto = args[3]
+        self.texture = loadedData['Texture'][self.texname]
+
+
+class CMaterial:
+    def __init__(self):
+        self.diffuse_color = [1,1,1,1]
+        self.specular_color =[1,1,1,1]
+        self.specular_hardness = 50
+        self.alpha = 1
+        self.textures = {
+            'COLOR' : None,
+            'SPECULAR' : None,
+            'NORMAL' : None,
+            'BUMP' : None,
+            'DISPLACEMENT' : None,
+            }
+
+    def parse(self, tokens):
+        for (key, val, sub) in tokens:
+            if key == 'MTex':
+                cmtex = CMTex(val)
+                self.textures[cmtex.mapto] = cmtex
+            elif hasattr(self, key):
+                defaultKey(key, val, sub, self)
+
+        self.diffuse_color[3] = self.alpha
+        self.specular_color[3] = self.alpha
+
+    def hasTexture(self):
+        for tex in self.textures.values():
+            if tex is not None:
+                return True
+        return False
+
+# ---------------------------------------------------------------------
+#   Cycles materials
+# ---------------------------------------------------------------------
+
+def parseMaterialCycles(mat, tokens):
+    print("Creating CYCLES material", mat.name)
+
+    mat.use_nodes= True
+    mat.node_tree.nodes.clear()
+    cmat = CMaterial()
+    cmat.parse(tokens)
+
+    ycoord1 = 1
+    ycoord2 = 1
+    ycoord3 = 1
+    ycoord4 = 1
+    dy1 = 300
+    dy2 = 300
+    dy3 = 200
+    dy4 = 200
+
+    if cmat.hasTexture():
+        texco = mat.node_tree.nodes.new(type = 'ShaderNodeTexCoord')
+        texco.location = (1, ycoord1)
+        ycoord1 += dy1
+
+    if cmat.textures['NORMAL']:
+        normalTex = mat.node_tree.nodes.new(type = 'ShaderNodeTexImage')
+        normalTex.image = cmat.textures['NORMAL'].texture.image
+        normalTex.location = (251, ycoord2)
+        ycoord2 += dy2
+        mat.node_tree.links.new(texco.outputs['UV'], normalTex.inputs['Vector'])
+        normalMap = mat.node_tree.nodes.new(type = 'ShaderNodeNormalMap')
+        normalMap.space = 'TANGENT'
+        mat.node_tree.links.new(normalTex.outputs['Color'], normalMap.inputs['Color'])
+        normalMap.location = (501, ycoord3)
+        ycoord3 += dy3
+    else:
+        normalMap = None
+
+    diffuse = mat.node_tree.nodes.new(type = 'ShaderNodeBsdfDiffuse')
+    diffuse.inputs["Color"].default_value = cmat.diffuse_color
+    diffuse.inputs["Roughness"].default_value = 0
+    diffuse.location = (501, ycoord3)
+    ycoord3 += dy3
+    transparent = None
+    if cmat.textures['COLOR']:
+        diffuseTex = mat.node_tree.nodes.new(type = 'ShaderNodeTexImage')
+        diffuseTex.image = cmat.textures['COLOR'].texture.image
+        mat.node_tree.links.new(texco.outputs['UV'], diffuseTex.inputs['Vector'])
+        mat.node_tree.links.new(diffuseTex.outputs['Color'], diffuse.inputs['Color'])
+        diffuseTex.location = (251, ycoord2)
+        ycoord2 += dy2
+        transparent = mat.node_tree.nodes.new(type = 'ShaderNodeBsdfTransparent')
+        transparent.location = (501, ycoord3)
+        ycoord3 += dy3
+    if normalMap is not None:
+        mat.node_tree.links.new(normalMap.outputs['Normal'], diffuse.inputs['Normal'])
+
+    glossy = mat.node_tree.nodes.new(type = 'ShaderNodeBsdfGlossy')
+    glossy.inputs["Color"].default_value = cmat.specular_color
+    glossy.inputs["Roughness"].default_value = 0
+    glossy.location = (501, ycoord3)
+    ycoord3 += dy3
+    if cmat.textures['SPECULAR']:
+        glossyTex = mat.node_tree.nodes.new(type = 'ShaderNodeTexImage')
+        glossyTex.image = cmat.textures['SPECULAR'].texture.image
+        mat.node_tree.links.new(texco.outputs['UV'], glossyTex.inputs['Vector'])
+        mat.node_tree.links.new(glossyTex.outputs['Color'], glossy.inputs['Color'])
+        glossyTex.location = (251, ycoord2)
+        ycoord2 += dy2
+    if normalMap is not None:
+        mat.node_tree.links.new(normalMap.outputs['Normal'], glossy.inputs['Normal'])
+
+    mixGloss = mat.node_tree.nodes.new(type = 'ShaderNodeMixShader')
+    mixGloss.inputs['Fac'].default_value = 0.02
+    mat.node_tree.links.new(diffuse.outputs['BSDF'], mixGloss.inputs[1])
+    mat.node_tree.links.new(glossy.outputs['BSDF'], mixGloss.inputs[2])
+    mixGloss.location = (751, ycoord4)
+    ycoord4 += dy4
+
+    if transparent is not None:
+        mixTrans = mat.node_tree.nodes.new(type = 'ShaderNodeMixShader')
+        mat.node_tree.links.new(diffuseTex.outputs['Alpha'], mixTrans.inputs['Fac'])
+        mat.node_tree.links.new(transparent.outputs['BSDF'], mixTrans.inputs[1])
+        mat.node_tree.links.new(mixGloss.outputs['Shader'], mixTrans.inputs[2])
+        mixTrans.location = (751, ycoord4)
+        ycoord4 += dy4
+    else:
+        mixTrans = mixGloss
+
+    output = mat.node_tree.nodes.new(type = 'ShaderNodeOutputMaterial')
+    mat.node_tree.links.new(mixTrans.outputs['Shader'], output.inputs['Surface'])
+    output.location = (1001, 1)
+
+    return mat
+
+# ---------------------------------------------------------------------
+#   Blender Game engine materials
+# ---------------------------------------------------------------------
+
+def parseMaterialBlenderGame(mat, tokens):
+    print("Creating BLENDER GAME material", mat.name)
+
+# ---------------------------------------------------------------------
+#   Blender Internal materials
+# ---------------------------------------------------------------------
+
+def parseMaterialBlenderRender(mat, tokens):
+    print("Creating BLENDER RENDER material", mat.name)
     for (key, val, sub) in tokens:
         if key == 'MTex':
             parseMTex(mat, val, sub)
@@ -797,31 +963,22 @@ def parseMaterial(args, tokens):
             parseDefault(mat.subsurface_scattering, sub, {}, [])
         elif key == 'Strand':
             parseDefault(mat.strand, sub, {}, [])
-        elif key == 'NodeTree':
-            mat.use_nodes = True
-            parseNodeTree(mat.node_tree, val, sub)
         elif key == 'AnimationData':
             parseAnimationData(mat, val, sub)
         else:
             exclude = ['specular_intensity', 'tangent_shading']
             defaultKey(key, val, sub, mat)
 
-    return mat
 
 def parseMTex(mat, args, tokens):
-    index = int(args[0])
-    texname = args[1]
-    texco = args[2]
-    mapto = args[3]
-    tex = loadedData['Texture'][texname]
+    cmtex = CMTex(args)
     mtex = mat.texture_slots.add()
-    mtex.texture_coords = texco
-    mtex.texture = tex
-
+    mtex.texture_coords = cmtex.texco
+    mtex.texture = cmtex.texture
     for (key, val, sub) in tokens:
         defaultKey(key, val, sub, mtex)
-
     return mtex
+
 
 def parseTexture(args, tokens):
     if verbosity > 2:
