@@ -34,7 +34,7 @@ class SceneLibraryTaskView(guirender.RenderTaskView):
 
         self.filechooser = self.addRightWidget(
             fc.IconListFileChooser(
-                [mh.getPath('data/scenes'), mh.getSysPath('data/scenes')],
+                [mh.getDataPath('scenes'), mh.getSysDataPath('scenes')],
                 'mhscene', ['thumb', 'png'], 'notfound.thumb', 'Scene'))
         #self.addLeftWidget(self.filechooser.createSortBox())
         self.filechooser.enableAutoRefresh(False)
