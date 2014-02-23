@@ -140,7 +140,7 @@ class Writer(mhx_writer.Writer):
                 fp.write(
                     "  Modifier Mask%s MASK\n" % proxy.name +
                     "    mode 'VERTEX_GROUP' ;\n" +
-                    "    vertex_group 'Delete:%s' ;\n" % proxy.name +
+                    "    vertex_group 'Delete_%s' ;\n" % proxy.name +
                     "    invert_vertex_group True ;\n" +
                     "    show_viewport %s ;\n" % enable +
                     "    show_render %s ;\n" % enable +
