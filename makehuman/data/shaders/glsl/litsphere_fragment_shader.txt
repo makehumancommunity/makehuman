@@ -1,0 +1,111 @@
+#version 120
+
+/**
+ * Lit Sphere (spherically mapped captured light) shader.
+ *
+ **Project Name:**      MakeHuman
+ *
+ **Product Home Page:** http://www.makehuman.org/
+ *
+ **Code Home Page:**    http://code.google.com/p/makehuman/
+ *
+ **Authors:**           Jonas Hauquier
+ *
+ **Copyright(c):**      MakeHuman Team 2001-2014
+ *
+ **Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
+ *
+ **Coding Standards:**  See http://www.makehuman.org/node/165
+ *
+ * Abstract
+ * --------
+ *
+ * Has the effect of a specular material, shaded relative to the camera without
+ * lights.
+ * The normal is used as UV coordinates of the litsphere texture, which is a
+ * spherically shaped mapping of colors for all angles that normals can face in
+ * the half sphere facing the camera.
+ * Litsphere textures express lighting for normal angles in view space.
+**/
+
+#ifdef DIFFUSE
+    uniform sampler2D diffuseTexture;
+#else
+    #ifdef ALPHA_MAP
+        uniform sampler2D alphaTexture;
+    #endif
+#endif
+
+#ifdef AOMAP
+    uniform sampler2D aomapTexture;
+#endif
+
+
+#ifdef NORMALMAP
+    uniform sampler2D normalmapTexture;
+    uniform float normalmapIntensity = 1.0;
+    //define CALC_NORMAL_Z
+
+    // Inputs
+    varying mat3 tbnMat;    // Conversion matrix from tangent to view space
+#else
+    // Inputs
+    varying vec3 vNormal;   // Vertex normal in view space
+#endif
+
+// Lit Sphere texture
+uniform sampler2D litsphereTexture;
+
+// Additive litsphere shading. Useful for specularity litspheres
+// Specifies the amount of litsphere shading that will be added instead of multiplied.
+uniform float AdditiveShading = 0.0;
+
+
+void main() {
+
+    #ifdef NORMALMAP
+        #ifdef CALC_NORMAL_Z
+            vec2 normalH = 0.5 * texture2D(normalmapTexture, gl_TexCoord[0].xy).rg;
+            vec3 normal;
+            normal.xy = (2.0 * normalH -1.0) * normalmapIntensity;
+            normal.z = sqrt(1.0 - dot(normal.xy, normal.xy));
+        #else
+            vec3 normalH = texture2D(normalmapTexture, gl_TexCoord[0].xy).rgb;
+            vec3 normal = (2.0 * normalH -1.0) * normalmapIntensity;
+        #endif
+
+        // Convert sampled normal from tangent to view space
+        normal = normalize(tbnMat * normal);
+    #else
+        vec3 normal = vNormal;
+    #endif
+
+    vec3 shading = texture2D(litsphereTexture, vec2(normal.xyz * vec3(0.495) + vec3(0.5))).rgb;
+
+    #ifdef VERTEX_COLOR
+        shading = shading * gl_Color.rgb;
+    #endif
+
+    vec4 outColor;
+    #ifdef DIFFUSE
+        vec4 diffuse = texture2D(diffuseTexture, gl_TexCoord[0].xy).rgba;
+        outColor.rgb = (1.0 - AdditiveShading)*shading * diffuse.rgb * vec3(2.0 - (shading.r + shading.g + shading.b)/3.0);
+        outColor.rgb += AdditiveShading*(shading + diffuse.rgb);
+        outColor.a = diffuse.a;
+    #else
+        outColor.rgb = shading.rgb;
+        #ifdef ALPHA_MAP
+            outColor.a = texture2D(alphaTexture, gl_TexCoord[0].xy).a;
+        #else
+            outColor.a = 1.0;
+        #endif
+    #endif
+
+    #ifdef AOMAP
+        outColor.rgb = outColor.rgb * texture2D(aomapTexture, gl_TexCoord[0].xy).rgb;
+    #endif
+
+    gl_FragColor.rgba = outColor.rgba;
+
+}
+
