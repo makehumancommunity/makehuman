@@ -31,7 +31,7 @@ For more info on the usage of this tool, see usage()
 
 ## CONFIG ##
 
-BASE_OBJ_SVN_PATH = "../../../data/3dobjs/base.obj"
+BASE_OBJ_HG_PATH = "../makehuman/data/3dobjs/base.obj"
 
 DEBUG = False    # Debug mode (no masking of exceptions)
 
@@ -129,10 +129,10 @@ def getBaseObj():
     if not BASE_OBJ:
         # Only read base.obj once, then return a deep copy of the obj in memory
         try:
-            # First try to get obj from path in svn, otherwise fall back on local base.obj in resources/
-            if os.path.isfile(BASE_OBJ_SVN_PATH):
-                verbosePrint("Using base.obj in svn at location %s"% BASE_OBJ_SVN_PATH)
-                BASE_OBJ = Obj(BASE_OBJ_SVN_PATH)
+            # First try to get obj from path in hg, otherwise fall back on local base.obj in resources/
+            if os.path.isfile(BASE_OBJ_HG_PATH):
+                verbosePrint("Using base.obj in svn at location %s"% BASE_OBJ_HG_PATH)
+                BASE_OBJ = Obj(BASE_OBJ_HG_PATH)
             else:
                 verbosePrint("Using local base.obj at location %s"% os.path.join("resources", "base.obj"))
                 BASE_OBJ = Obj(os.path.join("resources", "base.obj"))
