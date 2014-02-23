@@ -1738,7 +1738,7 @@ def init():
 
     bpy.types.Scene.MCLicense = StringProperty(
         name="License",
-        default="AGPL3 (see also http://www.makehuman.org/node/320)",
+        default="AGPL3 (see also http://www.makehuman.org/doc/node/external_tools_license.html)",
         maxlen=256)
 
     bpy.types.Scene.MCHomePage = StringProperty(
