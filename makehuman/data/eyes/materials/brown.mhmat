@@ -1,0 +1,37 @@
+# Material definition for Eye_brown
+
+name Eye_brown
+ambientColor 0.11 0.11 0.11
+diffuseColor 1.0 1.0 1.0
+specularColor 1.0 1.0 1.0
+shininess 1.0
+emissiveColor 0.0 0.0 0.0
+opacity 1.0
+translucency 0.0
+
+shadeless False
+wireframe False
+transparent True
+alphaToCoverage True
+backfaceCull True
+depthless False
+
+castShadows True
+
+receiveShadows True
+
+diffuseTexture brown_eye.png
+
+shader data/shaders/glsl/litsphere
+
+shaderParam AdditiveShading 0.5
+shaderParam litsphereTexture data/litspheres/skinmat_eye.png
+
+shaderConfig ambientOcclusion True
+shaderConfig normal False
+shaderConfig bump False
+shaderConfig displacement False
+shaderConfig vertexColors False
+shaderConfig spec False
+shaderConfig transparency True
+shaderConfig diffuse True
