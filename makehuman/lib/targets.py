@@ -83,6 +83,12 @@ class Component(object):
     def isRoot(self):
         return self.parent == None
 
+    def getVariables(self):
+        """
+        The variables that apply to this target component.
+        """
+        return [value for key,value in self.data.items() if value != None]
+
     def set_data(self, category, value):
         orig = self.data.get(category)
         if orig is not None and orig != value:

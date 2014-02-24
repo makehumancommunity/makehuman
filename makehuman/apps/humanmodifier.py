@@ -85,26 +85,6 @@ import targets
 # dependencies will be updated (this is a performance feature)
 realtimeDependencyUpdates = ['macrodetails', 'macrodetails-universal']
 
-class DetailAction(guicommon.Action):
-    def __init__(self, human, before, after, update=True):
-        super(DetailAction, self).__init__('Change detail')
-        self.human = human
-        self.before = before
-        self.after = after
-        self.update = update
-
-    def do(self):
-        for (target, value) in self.after.iteritems():
-            self.human.setDetail(target, value)
-        self.human.applyAllTargets(G.app.progress, update=self.update)
-        return True
-
-    def undo(self):
-        for (target, value) in self.before.iteritems():
-            self.human.setDetail(target, value)
-        self.human.applyAllTargets()
-        return True
-
 class ModifierAction(guicommon.Action):
     def __init__(self, modifier, before, after, postAction):
         super(ModifierAction, self).__init__('Change modifier')
@@ -116,12 +96,20 @@ class ModifierAction(guicommon.Action):
 
     def do(self):
         self.modifier.setValue(self.after)
+        if self.human.symmetryModeEnabled and self.modifier.getSymmetricOpposite():
+            opposite = self.human.getModifier( self.modifier.getSymmetricOpposite() )
+            opposite.setValue( self.modifier.getValue() )
+
         self.human.applyAllTargets(G.app.progress)
         self.postAction()
         return True
 
     def undo(self):
         self.modifier.setValue(self.before)
+        if self.human.symmetryModeEnabled and self.modifier.getSymmetricOpposite():
+            opposite = self.human.getModifier( self.modifier.getSymmetricOpposite() )
+            opposite.setValue( self.modifier.getValue() )
+
         self.human.applyAllTargets(G.app.progress)
         self.postAction()
         return True
@@ -132,6 +120,8 @@ class BaseModifier(object):
         self.groupName = groupName.replace('/', '-')
         self.name = name.replace('/', '-')
 
+        self._symmSide = 0
+        self._symmModifier = None
         self.verts = None
         self.faces = None
         self.eventType = 'modifier'
@@ -241,6 +231,41 @@ class BaseModifier(object):
         event = events3d.HumanEvent(self.human, self.eventType)
         event.modifier = self.fullName
         self.human.callEvent('onChanging', event)
+
+    def getSymmetrySide(self):
+        """
+        The side this modifier takes in a symmetric pair of two modifiers.
+        Returns 'l' for left, 'r' for right.
+        Returns None if symmetry does not apply to this modifier.
+        """
+        if self._symmSide != 0:
+            # Cache this const value for performance
+            return self._symmSide
+
+        path = self.name.split('-')
+        if 'l' in path:
+            self._symmSide = 'l'
+        elif 'r' in path:
+            self._symmSide = 'r'
+        else:
+            self._symmSide = None
+            return self._symmSide
+
+        self._symmModifier = '-'.join(['l' if p == 'r' else 'r' if p == 'l' else p for p in path])
+        return self._symmSide
+
+    def getSymmetricOpposite(self):
+        """
+        The name of the modifier symmetric to this one. None if there is no
+        symmetric opposite of this modifier.
+        """
+        if self._symmSide == 0:
+            # Cache const value for performance
+            self.getSymmetrySide()
+        if self._symmModifier:
+            return self.groupName+"/"+self._symmModifier
+        else:
+            return None
 
     def __str__(self):
         return "%s %s" % (type(self).__name__, self.fullName)
@@ -388,16 +413,19 @@ class GenericModifier(BaseModifier):
         """
         if path is None:
             return []
-        path = tuple(path.split('-'))
-        result = []
-        if path not in targets.getTargets().groups:
+
+        try:
+            targetsList = targets.getTargets().getTargetsByGroup(path)
+        except KeyError:
             log.debug('missing target %s', path)
-        for target in targets.getTargets().groups.get(path, []):
-            keys = [var
-                    for var in target.data.itervalues()
-                    if var is not None]
-            keys.append('-'.join(target.key))
-            result.append((target.path, keys))
+            targetsList = []
+
+        result = []
+        for component in targetsList:
+            targetgroup = '-'.join(component.key)
+            factordependencies = component.getVariables() + [targetgroup]
+            result.append( (component.path, factordependencies) )
+
         return result
 
     @staticmethod
@@ -449,7 +477,6 @@ class GenericModifier(BaseModifier):
     _variables = targets._value_cat.keys()
 
     def getFactors(self, value):
-        #print 'genericModifier: getFactors'
         return dict((name, getattr(self.human, name + 'Val'))
                     for name in self._variables)
 
@@ -492,7 +519,6 @@ class UniversalModifier(GenericModifier):
         self.targets = self.l_targets + self.r_targets + self.c_targets
 
     def getFactors(self, value):
-        #print "UniversalModifier factors:"
         factors = super(UniversalModifier, self).getFactors(value)
 
         if self.left is not None:
@@ -500,9 +526,6 @@ class UniversalModifier(GenericModifier):
         if self.center is not None:
             factors[self.center] = 1.0 - abs(value)
         factors[self.right] = max(0.0, value)
-
-        #print 'factors:'
-        #print factors
 
         return factors
 

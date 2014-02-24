@@ -848,22 +848,6 @@ class Human(guicommon.Object):
             log.debug('Failed to remove modifier % from human.', modifier.fullName)
             pass
 
-    def getSymmetryGroup(self, group):
-        if group.name.find('l-', 0, 2) != -1:
-            return self.mesh.getFaceGroup(group.name.replace('l-', 'r-', 1))
-        elif group.name.find('r-', 0, 2) != -1:
-            return self.mesh.getFaceGroup(group.name.replace('r-', 'l-', 1))
-        else:
-            return None
-
-    def getSymmetryPart(self, name):
-        if name.find('l-', 0, 2) != -1:
-            return name.replace('l-', 'r-', 1)
-        elif name.find('r-', 0, 2) != -1:
-            return name.replace('r-', 'l-', 1)
-        else:
-            return None
-
     def applyAllTargets(self, progressCallback=None, update=True):
         """
         This method applies all targets, in function of age and sex
@@ -937,7 +921,6 @@ class Human(guicommon.Object):
         **Parameters:** None.
 
         """
-
         self.symmetrize('l')
 
     def applySymmetryRight(self):
@@ -948,7 +931,6 @@ class Human(guicommon.Object):
         **Parameters:** None.
 
         """
-
         self.symmetrize('r')
 
     def symmetrize(self, direction='r'):
@@ -965,43 +947,23 @@ class Human(guicommon.Object):
             symmetry (\"r\") or right to left symmetry (\"l\").
 
         """
-
         if direction == 'l':
-            prefix1 = 'l-'
-            prefix2 = 'r-'
+            # Apply r to l
+            src = 'r'
+            #trg = 'l'
         else:
-            prefix1 = 'r-'
-            prefix2 = 'l-'
+            # Apply l to r
+            src = 'l'
+            #trg = 'r'
 
-        # Remove current values
+        for modifier in self.modifiers:
+            if modifier.getSymmetrySide() == src:
+                opposite = self.getModifier(modifier.getSymmetricOpposite())
+                opposite.setValue(modifier.getValue())
 
-        for target in self.targetsDetailStack.keys():
-            targetName = os.path.basename(target)
+        self.applyAllTargets()
 
-            # Reset previous targets on symm side
-
-            if targetName[:2] == prefix2:
-                targetVal = self.targetsDetailStack[target]
-                algos3d.loadTranslationTarget(self.meshData, target, -targetVal, None, 1, 0)
-                del self.targetsDetailStack[target]
-
-        # Apply symm target. For horiz movement the value must be inverted
-
-        for target in self.targetsDetailStack.keys():
-            targetName = os.path.basename(target)
-            if targetName[:2] == prefix1:
-                targetSym = os.path.join(os.path.dirname(target), prefix2 + targetName[2:])
-                targetSymVal = self.targetsDetailStack[target]
-                if 'trans-in' in targetSym:
-                    targetSym = targetSym.replace('trans-in', 'trans-out')
-                elif 'trans-out' in targetSym:
-                    targetSym = targetSym.replace('trans-out', 'trans-in')
-                algos3d.loadTranslationTarget(self.meshData, targetSym, targetSymVal, None, 1, 1)
-                self.targetsDetailStack[targetSym] = targetSymVal
-
-        self.updateProxyMesh()
-        if self.isSubdivided():
-            self.getSubdivisionMesh()
+        # TODO emit event?
 
     def setDefaultValues(self):
         self.age = 0.5
