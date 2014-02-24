@@ -89,6 +89,8 @@ class MHAppExporter(object):
 
     def export(self):
         # Sanity checks
+        if not os.path.isdir(self.sourceFile('.hg')):
+            raise RuntimeError("The export folder %s is not found, the source folder argument should be the root of the hg repository." % self.sourceFile('.hg'))
         if self.isSubPath(self.targetFile(), self.sourceFile()):
             raise RuntimeError("The export folder is a subfolder of the source folder, this is not allowed.")
         if os.path.exists(self.targetFile()):
