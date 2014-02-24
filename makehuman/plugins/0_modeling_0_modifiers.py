@@ -393,7 +393,6 @@ class TorsoTaskView(ModifierTaskView):
             ]),
         ('Pelvis', 'pelvis', [
             ('pelvis-tone', 'decr', 'incr', {'cam' : 'setGlobalCamera'}),
-            ('pelvis-tone', 'decr', 'incr', {'cam' : 'setGlobalCamera'}),
             ('bulge', 'decr', 'incr', {'cam' : 'setGlobalCamera'}),
             ])
         ]
