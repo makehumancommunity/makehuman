@@ -85,26 +85,6 @@ import targets
 # dependencies will be updated (this is a performance feature)
 realtimeDependencyUpdates = ['macrodetails', 'macrodetails-universal']
 
-class DetailAction(guicommon.Action):
-    def __init__(self, human, before, after, update=True):
-        super(DetailAction, self).__init__('Change detail')
-        self.human = human
-        self.before = before
-        self.after = after
-        self.update = update
-
-    def do(self):
-        for (target, value) in self.after.iteritems():
-            self.human.setDetail(target, value)
-        self.human.applyAllTargets(G.app.progress, update=self.update)
-        return True
-
-    def undo(self):
-        for (target, value) in self.before.iteritems():
-            self.human.setDetail(target, value)
-        self.human.applyAllTargets()
-        return True
-
 class ModifierAction(guicommon.Action):
     def __init__(self, modifier, before, after, postAction):
         super(ModifierAction, self).__init__('Change modifier')
