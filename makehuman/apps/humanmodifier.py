@@ -140,6 +140,8 @@ class BaseModifier(object):
         self.groupName = groupName.replace('/', '-')
         self.name = name.replace('/', '-')
 
+        self._symmSide = 0
+        self._symmModifier = None
         self.verts = None
         self.faces = None
         self.eventType = 'modifier'
@@ -249,6 +251,41 @@ class BaseModifier(object):
         event = events3d.HumanEvent(self.human, self.eventType)
         event.modifier = self.fullName
         self.human.callEvent('onChanging', event)
+
+    def getSymmetrySide(self):
+        """
+        The side this modifier takes in a symmetric pair of two modifiers.
+        Returns 'l' for left, 'r' for right.
+        Returns None if symmetry does not apply to this modifier.
+        """
+        if self._symmSide != 0:
+            # Cache this const value for performance
+            return self._symmSide
+
+        path = self.name.split('-')
+        if 'l' in path:
+            self._symmSide = 'l'
+        elif 'r' in path:
+            self._symmSide = 'r'
+        else:
+            self._symmSide = None
+            return self._symmSide
+
+        self._symmModifier = '-'.join(['l' if p == 'r' else 'r' if p == 'l' else p for p in path])
+        return self._symmSide
+
+    def getSymmetricOpposite(self):
+        """
+        The name of the modifier symmetric to this one. None if there is no
+        symmetric opposite of this modifier.
+        """
+        if self._symmSide == 0:
+            # Cache const value for performance
+            self.getSymmetrySide()
+        if self._symmModifier:
+            return self.groupName+"/"+self._symmModifier
+        else:
+            return None
 
     def __str__(self):
         return "%s %s" % (type(self).__name__, self.fullName)
