@@ -30,12 +30,12 @@ Prepares an export folder ready to build packages from.
 HG_PATH = "hg"
 
 # Filter of files from source folder to exclude (glob syntax)
-EXCLUDES = ['.hgignore', '.hgeol', '*.target', '*.obj', '*.pyc', 'maketarget-standalone', 'plugins/4_rendering_mitsuba', 'plugins/4_rendering_povray', 'plugins/4_rendering_aqsis.py', 'plugins/0_modeling_5_editing.py', 'plugins/0_modeling_8_random.py', 'plugins/3_libraries_animation.py', 'compile_*.py', 'build_prepare.py', 'download_assets.py', '*~', '*.bak', 'setup.nsi', 'clean*.sh', 'makehuman.sh', 'clean*.bat', 'makehuman/docs', 'makehuman/icons', 'makehuman.rc', '*_contents.txt', 'buildscripts']
+EXCLUDES = ['.hgignore', '.hgeol', '*.target', '*.obj', '*.pyc', '*.pyd', 'maketarget-standalone', 'plugins/4_rendering_mitsuba', 'plugins/4_rendering_povray', 'plugins/4_rendering_aqsis.py', 'plugins/0_modeling_5_editing.py', 'plugins/0_modeling_8_random.py', 'plugins/3_libraries_animation.py', 'compile_*.py', 'build_prepare.py', 'download_assets.py', '*~', '*.bak', 'setup.nsi', 'clean*.sh', 'makehuman.sh', 'clean*.bat', 'makehuman/docs', 'makehuman/icons', 'makehuman.rc', '*_contents.txt', 'buildscripts']
 # Same as above, but applies to release mode only
 EXCLUDES_RELEASE = ['testsuite']
 
 # Include filter for additional asset files (not on hg) to copy (glob syntax)
-ASSET_INCLUDES = ['*.npz', '*.thumb', '*.png', '*.json', '*.mhmat', '*.mhclo', '*.proxy', 'glsl/*.txt', 'languages/*.ini', "*.mhp", "*.mhm", "*.qss", "*.mht", "*.svg"]
+ASSET_INCLUDES = ['*.npz', '*.list', '*.thumb', '*.png', '*.json', '*.mhmat', '*.mhclo', '*.proxy', 'glsl/*.txt', 'languages/*.ini', "*.mhp", "*.mhm", "*.qss", "*.mht", "*.svg"]
 
 # Even if empty, create these folders (relative to export path)
 CREATE_FOLDERS = ['makehuman/data/backgrounds', 'makehuman/data/clothes', 'makehuman/data/teeth', 'makehuman/data/eyelashes', 'makehuman/data/tongue']
@@ -45,9 +45,6 @@ POST_REMOVE = ['makehuman/icons', 'makehuman/docs', 'buildscripts']
 
 # Finally copy all files from these source folders, effectively ignoring all exclude filters
 COPY_ALL = ['blendertools']
-
-# Files or folders in target folder to pack as data (when freezing)
-PY_AS_DATA = ['blendertools']
 
 # Root folder after rearranging all. All folders in root except this one will be copied inside this folder, as new root.
 REARRANGE_ROOT_FOLDER = 'makehuman'
