@@ -50,8 +50,6 @@ class MouseActionsTaskView(gui3d.TaskView):
         speedBox = self.addLeftWidget(gui.SliderBox('3D Viewport Speed'))
         self.normal = speedBox.addWidget(gui.Slider(gui3d.app.settings.get('lowspeed', 1), 1, 10,
             "Normal speed: %d"))
-        self.shift = speedBox.addWidget(gui.Slider(gui3d.app.settings.get('highspeed', 5), 1, 10,
-            "Shift + Mouse: %d"))
 
         self.mouseBox = self.addLeftWidget(gui.GroupBox('Camera'))
 
@@ -68,10 +66,6 @@ class MouseActionsTaskView(gui3d.TaskView):
         @self.normal.mhEvent
         def onChange(value):
             gui3d.app.settings['lowspeed'] = value
-            
-        @self.shift.mhEvent
-        def onChange(value):
-            gui3d.app.settings['highspeed'] = value
             
     def onShow(self, event):
         
