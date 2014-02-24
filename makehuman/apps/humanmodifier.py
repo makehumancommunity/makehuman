@@ -116,12 +116,20 @@ class ModifierAction(guicommon.Action):
 
     def do(self):
         self.modifier.setValue(self.after)
+        if self.human.symmetryModeEnabled and self.modifier.getSymmetricOpposite():
+            opposite = self.human.getModifier( self.modifier.getSymmetricOpposite() )
+            opposite.setValue( self.modifier.getValue() )
+
         self.human.applyAllTargets(G.app.progress)
         self.postAction()
         return True
 
     def undo(self):
         self.modifier.setValue(self.before)
+        if self.human.symmetryModeEnabled and self.modifier.getSymmetricOpposite():
+            opposite = self.human.getModifier( self.modifier.getSymmetricOpposite() )
+            opposite.setValue( self.modifier.getValue() )
+
         self.human.applyAllTargets(G.app.progress)
         self.postAction()
         return True
