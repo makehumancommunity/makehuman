@@ -100,6 +100,29 @@ class PluginsTaskView(gui3d.TaskView):
         for module in sorted(gui3d.app.modules):
             self.pluginsBox.addWidget(PluginCheckBox(module))
 
+class SymmetryAction(gui3d.Action):
+    def __init__(self, human, direction):
+        super(SymmetryAction, self).__init__('Apply symmetry %s' % ("left" if direction == 'l' else "right"))
+        self.human = human
+        self.direction = direction
+        self.before = [(m.fullName, m.getValue()) for m in human.modifiers]
+
+    def do(self):
+        if self.direction == 'r':
+            self.human.applySymmetryRight()
+        else:
+            self.human.applySymmetryLeft()
+        self.human.applyAllTargets(G.app.progress)
+        mh.redraw()
+        return True
+
+    def undo(self):
+        for (modifierName, value) in self.before:
+            self.human.getModifier(modifierName).setValue(value)
+        self.human.applyAllTargets(G.app.progress)
+        mh.redraw()
+        return True
+
 class MHApplication(gui3d.Application, mh.Application):
     def __init__(self):
         if G.app is not None:
@@ -1182,13 +1205,11 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def symmetryRight(self):
         human = self.selectedHuman
-        human.applySymmetryRight()
-        mh.redraw()
+        self.do( SymmetryAction(human, 'r') )
 
     def symmetryLeft(self):
         human = self.selectedHuman
-        human.applySymmetryLeft()
-        mh.redraw()
+        self.do( SymmetryAction(human, 'l') )
 
     def symmetry(self):
         human = self.selectedHuman
@@ -1421,8 +1442,8 @@ class MHApplication(gui3d.Application, mh.Application):
         # 4 - Symmetry toolbar
         toolbar = self.sym_toolbar = mh.addToolBar("Symmetry")
 
-        self.actions.symmetryR = action('symm1', 'Symmmetry R>L',     self.symmetryRight)
-        self.actions.symmetryL = action('symm2', 'Symmmetry L>R',     self.symmetryLeft)
+        self.actions.symmetryR = action('symm1', 'Symmmetry R>L',     self.symmetryLeft)
+        self.actions.symmetryL = action('symm2', 'Symmmetry L>R',     self.symmetryRight)
         self.actions.symmetry  = action('symm',  'Symmmetry',         self.symmetry, toggle=True)
 
 
