@@ -24,14 +24,8 @@ Clothes library.
 
 import proxychooser
 
-import os
 import gui3d
-import mh
-import files3d
-import mh2proxy
-import exportutils
 import gui
-import filechooser as fc
 import log
 import numpy as np
 
@@ -63,16 +57,16 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
     def getObjectLayer(self):
         return 10
 
-    def proxySelected(self, proxy, obj):
-        uuid = proxy.getUuid()
+    def proxySelected(self, pxy, obj):
+        uuid = pxy.getUuid()
 
         self.human.clothesObjs[uuid] = obj
-        self.human.clothesProxies[uuid] = proxy
+        self.human.clothesProxies[uuid] = pxy
 
         self.updateFaceMasks(self.faceHidingTggl.selected)
 
-    def proxyDeselected(self, proxy, obj, suppressSignal = False):
-        uuid = proxy.uuid
+    def proxyDeselected(self, pxy, obj, suppressSignal = False):
+        uuid = pxy.uuid
         del self.human.clothesObjs[uuid]
         del self.human.clothesProxies[uuid]
 
@@ -88,7 +82,7 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
         Return UUIDs of clothes proxys sorted on proxy.z_depth render queue 
         parameter (the order in which they will be rendered).
         """
-        decoratedClothesList = [(proxy.z_depth, proxy.uuid) for proxy in self.getSelection()]
+        decoratedClothesList = [(pxy.z_depth, pxy.uuid) for pxy in self.getSelection()]
         decoratedClothesList.sort()
         return [uuid for (_, uuid) in decoratedClothesList]
 
@@ -106,7 +100,7 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
         if not enableFaceHiding:
             human.meshData.changeFaceMask(self.originalHumanMask)
             human.meshData.updateIndexBufferFaces()
-            for uuid in [proxy.uuid for proxy in self.getSelection()]:
+            for uuid in [pxy.uuid for pxy in self.getSelection()]:
                 obj = human.clothesObjs[uuid]
                 faceMask = np.ones(obj.mesh.getFaceCount(), dtype=bool)
                 obj.mesh.changeFaceMask(faceMask)
@@ -116,12 +110,12 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
         vertsMask = np.ones(human.meshData.getVertexCount(), dtype=bool)
         log.debug("masked verts %s", np.count_nonzero(~vertsMask))
         for uuid in reversed(self.getClothesRenderOrder()):
-            proxy = human.clothesProxies[uuid]
+            pxy = human.clothesProxies[uuid]
             obj = human.clothesObjs[uuid]
 
             # Convert basemesh vertex mask to local mask for proxy vertices
-            proxyVertMask = np.ones(len(proxy.refVerts), dtype=bool)
-            for idx,vs in enumerate(proxy.refVerts):
+            proxyVertMask = np.ones(len(pxy.refVerts), dtype=bool)
+            for idx,vs in enumerate(pxy.refVerts):
                 # Body verts to which proxy vertex with idx is mapped
                 (v1,v2,v3) = vs.getHumanVerts()
                 # Hide proxy vert if any of its referenced body verts are hidden (most agressive)
@@ -137,13 +131,13 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
             # Apply accumulated mask from previous clothes layers on this clothing piece
             obj.mesh.changeFaceMask(proxyFaceMask)
             obj.mesh.updateIndexBufferFaces()
-            log.debug("%s faces masked for %s", np.count_nonzero(~proxyFaceMask), proxy.name)
+            log.debug("%s faces masked for %s", np.count_nonzero(~proxyFaceMask), pxy.name)
 
-            if proxy.deleteVerts != None and len(proxy.deleteVerts > 0):
-                log.debug("Loaded %s deleted verts (%s faces) from %s", np.count_nonzero(proxy.deleteVerts), len(human.meshData.getFacesForVertices(np.argwhere(proxy.deleteVerts)[...,0])),proxy.name)
+            if pxy.deleteVerts != None and len(pxy.deleteVerts > 0):
+                log.debug("Loaded %s deleted verts (%s faces) from %s", np.count_nonzero(pxy.deleteVerts), len(human.meshData.getFacesForVertices(np.argwhere(pxy.deleteVerts)[...,0])),pxy.name)
 
                 # Modify accumulated (basemesh) verts mask
-                verts = np.argwhere(proxy.deleteVerts)[...,0]
+                verts = np.argwhere(pxy.deleteVerts)[...,0]
                 vertsMask[verts] = False
             log.debug("masked verts %s", np.count_nonzero(~vertsMask))
 
