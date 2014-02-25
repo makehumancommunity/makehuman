@@ -38,7 +38,7 @@ Alternatively, run the script in the script editor (Alt-P), and access from the 
 bl_info = {
     'name': 'Import: MakeHuman Exchange (.mhx)',
     'author': 'Thomas Larsson',
-    'version': (1,16,22),
+    'version': (1,16,23),
     "blender": (2, 69, 0),
     'location': "File > Import > MakeHuman (.mhx)",
     'description': 'Import files in the MakeHuman eXchange format (.mhx)',
@@ -96,6 +96,7 @@ theMhxFile = ""
 T_EnforceVersion = 0x01
 T_Clothes = 0x02
 T_HardParents = 0x0
+T_CrashSafe = 0x0
 
 T_Diamond = 0x10
 T_Shapekeys = 0x40
@@ -3525,8 +3526,8 @@ class MhxVisibilityPanel(bpy.types.Panel):
         for prop in props:
             if prop[0:3] == "Mhh":
                 layout.prop(ob, '["%s"]' % prop, text="Hide %s" % prop[3:])
-        layout.separator()
-        layout.operator("mhx.update_textures")
+        #layout.separator()
+        #layout.operator("mhx.update_textures")
         layout.separator()
         layout.operator("mhx.add_hiders")
         layout.operator("mhx.remove_hiders")
@@ -3631,6 +3632,26 @@ def getMhxRigMesh(ob):
             return (None, None)
     return (None, None)
 
+
+#
+#   updatePose(context):
+#   class VIEW3D_OT_MhxUpdateButton(bpy.types.Operator):
+#
+
+def updatePose(context):
+    scn = context.scene
+    scn.frame_current = scn.frame_current
+    bpy.ops.object.posemode_toggle()
+    bpy.ops.object.posemode_toggle()
+    return
+
+class VIEW3D_OT_MhxUpdateButton(bpy.types.Operator):
+    bl_idname = "mhx.update"
+    bl_label = "Update"
+
+    def execute(self, context):
+        updatePose(context)
+        return{'FINISHED'}
 
 #
 #    setInterpolation(rig):
