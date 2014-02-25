@@ -36,7 +36,7 @@ import log
 
 #import cProfile
 
-import mh2proxy
+import proxy
 import exportutils
 import posemode
 
@@ -138,7 +138,7 @@ class Writer(mhx_writer.Writer):
 
         self.proxyWriter.writeProxyType('Proxymeshes', 'T_Proxy', 3, fp, 0.35, 0.4)
         self.proxyWriter.writeProxyType('Clothes', 'T_Clothes', 2, fp, 0.4, 0.55)
-        for ptype in mh2proxy.SimpleProxyTypes:
+        for ptype in proxy.SimpleProxyTypes:
             self.proxyWriter.writeProxyType(ptype, 'T_Clothes', 0, fp, 0.55, 0.6)
 
         self.poseWriter.writePose(fp)
@@ -180,9 +180,9 @@ class Writer(mhx_writer.Writer):
     def groupProxy(self, type, test, fp):
         amt = self.armature
         fp.write("#if toggle&%s\n" % test)
-        for proxy in self.proxies.values():
-            if proxy.type == type:
-                name = amt.name + proxy.name
+        for pxy in self.proxies.values():
+            if pxy.type == type:
+                name = amt.name + pxy.name
                 fp.write("    ob %s ;\n" % name)
         fp.write("#endif\n")
         return

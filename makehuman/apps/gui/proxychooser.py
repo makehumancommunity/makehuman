@@ -28,7 +28,7 @@ import gui
 import events3d
 import mh
 import files3d
-import mh2proxy
+import proxy
 import filechooser as fc
 import log
 import getpath
@@ -226,13 +226,13 @@ class ProxyChooserTaskView(gui3d.TaskView):
         # TODO remove, this is bogus
         raise NotImplementedError("Implement ProxyChooserTaskView.getObjectLayer()!")
 
-    def proxySelected(self, proxy, obj):
+    def proxySelected(self, pxy, obj):
         """
         Do custom work specific to this library when a proxy object was loaded.
         """
         raise NotImplementedError("Implement ProxyChooserTaskView.proxySelected()!")
 
-    def proxyDeselected(self, proxy, obj, suppressSignal = False):
+    def proxyDeselected(self, pxy, obj, suppressSignal = False):
         """
         Do custom work specific to this library when a proxy object was unloaded.
         """
@@ -257,36 +257,36 @@ class ProxyChooserTaskView(gui3d.TaskView):
         log.message('Selecting proxy file "%s" from %s library.', mhclofile, self.proxyName)
         human = self.human
 
-        proxy = None
+        pxy = None
         mhcloId = getpath.canonicalPath(mhclofile)
         if mhcloId in self._proxyCache:
-            proxy = self._proxyCache[mhcloId]
-            if proxy.mtime < os.path.getmtime(mhclofile):
-                proxy = None
+            pxy = self._proxyCache[mhcloId]
+            if pxy.mtime < os.path.getmtime(mhclofile):
+                pxy = None
 
-        if not proxy:
-            proxy = mh2proxy.readProxyFile(human.meshData,
+        if not pxy:
+            pxy = proxy.readProxyFile(human.meshData,
                                            mhclofile,
                                            type=self.proxyName.capitalize())
-            self._proxyCache[mhcloId] = proxy
+            self._proxyCache[mhcloId] = pxy
 
-        if proxy.uuid in [p.uuid for p in self.getSelection()]:
-            log.debug("Proxy with UUID %s (%s) already loaded in %s library. Skipping.", proxy.uuid, proxy.file, self.proxyName)
+        if pxy.uuid in [p.uuid for p in self.getSelection()]:
+            log.debug("Proxy with UUID %s (%s) already loaded in %s library. Skipping.", pxy.uuid, pxy.file, self.proxyName)
             return
 
         if not self.multiProxy and self.isProxySelected():
             # Deselect previously selected proxy
             self.deselectProxy(None, suppressSignal = True)
 
-        mesh = files3d.loadMesh(proxy.obj_file, maxFaces = proxy.max_pole)
+        mesh = files3d.loadMesh(pxy.obj_file, maxFaces = pxy.max_pole)
         if not mesh:
-            log.error("Failed to load %s", proxy.obj_file)
+            log.error("Failed to load %s", pxy.obj_file)
             return
 
         self.filechooser.selectItem(mhclofile)
 
-        mesh.material = proxy.material
-        mesh.priority = proxy.z_depth           # Set render order
+        mesh.material = pxy.material
+        mesh.priority = pxy.z_depth           # Set render order
         mesh.setCameraProjection(0)             # Set to model camera
         mesh.setSolid(human.mesh.solid)    # Set to wireframe if human is in wireframe
 
@@ -294,16 +294,16 @@ class ProxyChooserTaskView(gui3d.TaskView):
         obj.setRotation(human.getRotation())
         gui3d.app.addObject(obj)
 
-        self.adaptProxyToHuman(proxy, obj)
+        self.adaptProxyToHuman(pxy, obj)
         obj.setSubdivided(human.isSubdivided()) # Copy subdivided state of human
 
         # Add to selection
-        self.selectedProxies.append(proxy)
+        self.selectedProxies.append(pxy)
         self.proxyObjects.append(obj)
 
         self.filechooser.selectItem(mhclofile)
 
-        self.proxySelected(proxy, obj)
+        self.proxySelected(pxy, obj)
 
         self.signalChange()
 
@@ -324,13 +324,13 @@ class ProxyChooserTaskView(gui3d.TaskView):
                 return
 
         obj = self.proxyObjects[idx]
-        proxy = self.selectedProxies[idx]
+        pxy = self.selectedProxies[idx]
         gui3d.app.removeObject(obj)
         del self.proxyObjects[idx]
         del self.selectedProxies[idx]
         self.filechooser.deselectItem(mhclofile)
 
-        self.proxyDeselected(proxy, obj, suppressSignal)
+        self.proxyDeselected(pxy, obj, suppressSignal)
 
         if not self.multiProxy:
             # Select None item in file list
@@ -400,9 +400,9 @@ class ProxyChooserTaskView(gui3d.TaskView):
         #self.filechooser.deselectAll()
         self.deselectAllProxies()
 
-    def adaptProxyToHuman(self, proxy, obj):
+    def adaptProxyToHuman(self, pxy, obj):
         mesh = obj.getSeedMesh()
-        proxy.update(mesh)
+        pxy.update(mesh)
         mesh.update()
         # Update subdivided mesh if smoothing is enabled
         if obj.isSubdivided():
@@ -411,7 +411,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
     def signalChange(self):
         human = self.human
         event = events3d.HumanEvent(human, 'proxy')
-        event.proxy = self.proxyName
+        event.pxy = self.proxyName
         human.callEvent('onChanged', event)
 
     def onShow(self, event):
@@ -454,9 +454,9 @@ class ProxyChooserTaskView(gui3d.TaskView):
         proxyCount = len(self.getSelection())
         if proxyCount > 0:
             log.message("Adapting all %s proxies (%s).", self.proxyName, proxyCount)
-        for pIdx, proxy in enumerate(self.getSelection()):
+        for pIdx, pxy in enumerate(self.getSelection()):
             obj = self.getObjects()[pIdx]
-            self.adaptProxyToHuman(proxy, obj)
+            self.adaptProxyToHuman(pxy, obj)
 
     def loadHandler(self, human, values):
         if values[0] == 'status':
@@ -479,8 +479,8 @@ class ProxyChooserTaskView(gui3d.TaskView):
                 log.error("Not loading %s %s. Loading proxies from filename is no longer supported, they need to be referenced by UUID.", self.proxyName, filename)
 
     def saveHandler(self, human, file):
-        for proxy in self.getSelection():
-            file.write('%s %s %s\n' % (self.getSaveName(), proxy.name, proxy.getUuid()))
+        for pxy in self.getSelection():
+            file.write('%s %s %s\n' % (self.getSaveName(), pxy.name, pxy.getUuid()))
 
     def onUnload(self):
         """
@@ -518,7 +518,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
                     f.close()
             except:
                 log.debug("Failed to restore proxy list cache from file %s", cacheFile)
-        self._proxyFileCache = mh2proxy.updateProxyFileCache(self.paths, self.getFileExtension(), self._proxyFileCache)
+        self._proxyFileCache = proxy.updateProxyFileCache(self.paths, self.getFileExtension(), self._proxyFileCache)
 
     def updateProxyFileCache(self):
         """
