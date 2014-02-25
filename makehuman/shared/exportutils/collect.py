@@ -28,7 +28,7 @@ import os
 import numpy
 import shutil
 
-import mh2proxy
+import proxy
 from richmesh import FakeTarget, getRichMesh
 import log
 
@@ -91,7 +91,7 @@ def setupMeshes(name, human, config=None, amt=None, rawTargets=[], hidden=False,
     deleteGroups = []
     deleteVerts = None  # Don't load deleteVerts from proxies directly, we use the facemask set in the gui module3d
     _,deleteVerts = setupProxies('Clothes', None, human, rmeshes, richMesh, config, useCurrentMeshes, deleteGroups, deleteVerts)
-    for ptype in mh2proxy.SimpleProxyTypes:
+    for ptype in proxy.SimpleProxyTypes:
         _,deleteVerts = setupProxies(ptype, None, human, rmeshes, richMesh, config, useCurrentMeshes, deleteGroups, deleteVerts)
     foundProxy,deleteVerts = setupProxies('Proxymeshes', name, human, rmeshes, richMesh, config, useCurrentMeshes, deleteGroups, deleteVerts)
     progress(0.06*(3-2*subdivide))
@@ -136,14 +136,14 @@ def setupProxies(typename, name, human, rmeshes, richMesh, config, useCurrentMes
     import re
 
     foundProxy = False
-    for proxy in config.getProxies().values():
-        if proxy.type == typename:
+    for pxy in config.getProxies().values():
+        if pxy.type == typename:
             foundProxy = True
             if not useCurrentMeshes:
-                deleteGroups += proxy.deleteGroups
+                deleteGroups += pxy.deleteGroups
                 if deleteVerts != None:
-                    deleteVerts = deleteVerts | proxy.deleteVerts
-            rmesh = getRichMesh(None, proxy, useCurrentMeshes, richMesh.weights, richMesh.shapes, richMesh.armature)
+                    deleteVerts = deleteVerts | pxy.deleteVerts
+            rmesh = getRichMesh(None, pxy, useCurrentMeshes, richMesh.weights, richMesh.shapes, richMesh.armature)
             if name is not None:    # Make exportable names.
                 rmesh.name = name
             rmesh.name = re.sub('[^0-9a-zA-Z]+', '_', rmesh.name)
