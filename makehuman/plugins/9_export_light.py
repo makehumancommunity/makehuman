@@ -33,7 +33,7 @@ class ExporterLight(Exporter):
         self.filter = "PNG (*.png)"
 
     def build(self, options, taskview):
-        self.lightmapDisplay = options.addWidget(gui.CheckBox("Display on human", False))
+        pass
 
     def export(self, human, filename):
         import projection
@@ -41,12 +41,6 @@ class ExporterLight(Exporter):
         dstImg = projection.mapLighting()
         filepath = filename("png")
         dstImg.save(filepath)
-
-        if self.lightmapDisplay:
-            import log
-            human.setTexture(filepath)
-            log.message("Enabling shadeless rendering on body")
-            human.mesh.setShadeless(True)
 
 def load(app):
     app.addExporter(ExporterLight())
