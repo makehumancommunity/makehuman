@@ -20,7 +20,7 @@
 # Product Home Page:   http://www.makehuman.org/
 # Code Home Page:      http://code.google.com/p/makehuman/
 # Authors:             Thomas Larsson
-# Script copyright (C) MakeHuman Team 2001-2014
+# Script copyright (C) MakeHuman Team 2001-2013
 # Coding Standards:    See http://www.makehuman.org/node/165
 
 """
@@ -37,7 +37,7 @@ Alternatively, run the script in the script editor (Alt-P), and access from UI p
 bl_info = {
     "name": "MakeWalk",
     "author": "Thomas Larsson",
-    "version": (0, 943),
+    "version": (0, 942),
     "blender": (2, 6, 9),
     "location": "View3D > Tools > MakeWalk",
     "description": "Mocap tool for MakeHuman character",
@@ -47,7 +47,7 @@ bl_info = {
 
 # To support reload properly, try to access a package var, if it's there, reload everything
 if "bpy" in locals():
-    print("Reloading MakeWalk v %d.%d" % bl_info["version"])
+    print("Reloading MakeWalk")
     import imp
     imp.reload(utils)
     imp.reload(io_json)
@@ -65,7 +65,7 @@ if "bpy" in locals():
     imp.reload(edit)
     imp.reload(floor)
 else:
-    print("Loading MakeWalk v %d.%d" % bl_info["version"])
+    print("Loading MakeWalk")
     import bpy, os
     from bpy_extras.io_utils import ImportHelper
     from bpy.props import *
@@ -98,6 +98,7 @@ def inset(layout):
 #
 
 class MainPanel(bpy.types.Panel):
+    bl_category = "MakeWalk"
     bl_label = "MakeWalk v %d.%d: Main" % bl_info["version"]
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
@@ -138,6 +139,7 @@ class MainPanel(bpy.types.Panel):
 #
 
 class OptionsPanel(bpy.types.Panel):
+    bl_category = "MakeWalk"
     bl_label = "MakeWalk: Options"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
@@ -190,6 +192,7 @@ class OptionsPanel(bpy.types.Panel):
 #
 
 class EditPanel(bpy.types.Panel):
+    bl_category = "MakeWalk"
     bl_label = "MakeWalk: Edit Actions"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
@@ -330,6 +333,7 @@ class EditPanel(bpy.types.Panel):
 #
 
 class MhxSourceBonesPanel(bpy.types.Panel):
+    bl_category = "MakeWalk"
     bl_label = "MakeWalk: Source armature"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
@@ -375,6 +379,7 @@ class MhxSourceBonesPanel(bpy.types.Panel):
 #
 
 class MhxTargetBonesPanel(bpy.types.Panel):
+    bl_category = "MakeWalk"
     bl_label = "MakeWalk: Target armature"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
@@ -447,6 +452,7 @@ class MhxTargetBonesPanel(bpy.types.Panel):
 #
 
 class UtilityPanel(bpy.types.Panel):
+    bl_category = "MakeWalk"
     bl_label = "MakeWalk: Utilities"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
@@ -517,5 +523,4 @@ def unregister():
 if __name__ == "__main__":
     register()
 
-print("MakeWalk loaded")
 
