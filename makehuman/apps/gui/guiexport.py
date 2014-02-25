@@ -100,8 +100,6 @@ class ExportTaskView(guipose.PoseModeTaskView):
 
             gui3d.app.prompt('Info', u'The mesh has been exported to %s.' % dir, 'OK', helpId='exportHelp')
 
-            mh.changeCategory('Modelling')
-
 
     _scales = {
         "decimeter": 1.0,
