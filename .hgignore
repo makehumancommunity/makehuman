@@ -6,3 +6,17 @@ syntax: glob
 *.exe
 *.dll
 *.so
+*.bak
+*.orig
+images.list
+makehuman/*_contents.txt
+makehuman/data/clothes
+makehuman/data/eyebrows
+makehuman/data/eyelashes
+makehuman/data/genitals
+makehuman/data/hair
+makehuman/data/eyes
+makehuman/data/litspheres
+makehuman/data/skins
+makehuman/data/teeth
+makehuman/data/tongue
