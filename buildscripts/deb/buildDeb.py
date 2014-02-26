@@ -3,259 +3,329 @@
 
 # HINT: You need to run 
 #
-#   apt-get install devscripts equivs rsync subversion
+#   apt-get install devscripts equivs mercurial
 #
 # ... in order for this script to function at all
+#
+# script has to be run as root (sudo)
 
 
 # --- CONFIGURATION SETTINGS --- 
+package_name = "makehuman"  # Note: 'hg' will be appended if this is a nightly build
+package_replaces = "makehuman-nightly,makehuman-alpha,makehumansvn"   # TODO for release, do we need to add 'makehumanhg' to the replaces as well?
 
-
-# These scripts are run before building deb contents, in the array order
-pre_deb_scripts = ["cleanpyc.sh","cleannpz.sh","compile_targets.py", "download_assets.py", "compile_models.py"]
-
-rsync = "/usr/bin/rsync"
-rsync_common_args = "-av --delete --exclude=.svn"
-rsync_main_excludes = ["deb","SConstruct","*.pyc","*.nsi","*.pyd","*.c","*.h","*.target","utils","compressTargetsASCII.py", "download_assets.py"]
-
-# Set to true to skip compiling targets and models etc
-do_not_execute_scripts = False
+hgpath = "/usr/bin/hg"
 
 files_to_chmod_executable = [
     "usr/bin/makehuman",
-    "usr/share/makehuman/docs/drupal-export/parse.pl",
-    "usr/share/makehuman/docs/drupal-export/syncimages.bash",
     "usr/share/makehuman/makehuman",
-    "usr/share/makehuman/cleannpz.sh",
-    "usr/share/makehuman/cleanpyc.sh",
-    "usr/share/makehuman/compile_models.py",
-    "usr/share/makehuman/compile_targets.py",
-    "usr/share/makehuman/compressTargetsASCII.py",
     "usr/share/makehuman/makehuman.py",
     ]
-
-package_name = "makehuman"  # Note: 'svn' will be appended if this is a nightly build
-package_replaces = "makehuman-nightly,makehuman-alpha"  # TODO for release, do we need to add 'makehumansvn' to the replaces list too?
-
 
 # --- EVERYTHING BELOW THIS POINT IS LOGIC, HANDS OFF ---
 
 
 import sys
 import os
-import string
 import re
 import subprocess
 import shutil
 
-dest = os.getenv('makehuman_dest',0)
+def _cp_files(folder, dest):
+  """
+  Copy files in folder to dest folder
+  """
+  for f in os.listdir(folder):
+    fpath = os.path.join(folder, f)
+    if os.path.isfile(fpath):
+      print "Copy %s to %s" % (fpath, os.path.join(dest, f))
+      shutil.copy(fpath, os.path.join(dest, f))
 
-if dest == 0:
-  print "You must explicitly set the makehuman_dest environment variable to point at a work directory. I will violently destroy and mutilate the contents of this directory."
-  exit(1)
+def _sed_replace(filepath, templateToken, replaceStr):
+  subprocess.check_call(['sed', '-i', '-e', 's/%s/%s/' % (templateToken, replaceStr), filepath])
 
-destdir = os.path.abspath(dest)
-if not os.path.exists(destdir):
-  print destdir + " does not exist"
-  exit(1)
+def parseConfig(configPath):
+    if os.path.isfile(configPath):
+        import ConfigParser
+        config = ConfigParser.ConfigParser()
+        config.read(configPath)
+        return config
+    else:
+        return None
 
-if not os.path.exists(rsync):
-  print "Rsync is not installed."
-  exit(1)
+def configure(confpath):
+  global package_name
+  global package_replaces
+  global hgpath
 
-debdir = os.path.dirname(os.path.abspath(__file__))
-scriptdir = os.path.abspath( os.path.join(debdir,'..') )
+  def _conf_get(config, section, option, defaultVal):
+    try:
+        return config.get(section, option)
+    except:
+        return defaultVal
 
-print "Makehuman directory: " + scriptdir
-print "Destination directory: " + destdir
+  conf = parseConfig(confpath)
+  if conf is None:
+    print "No config file at %s, using defaults or options passed on commandline." % confpath
+  else:
+    print "Using config file at %s. NOTE: properties in config file will override any other settings!" % confpath
 
-sys.path = sys.path + [scriptdir, os.path.join(scriptdir, 'lib')]
-import makehuman
+    hgpath = _conf_get(conf, 'General', 'hgPath', hgpath)
+    package_name = _conf_get(conf, 'Deb', 'packageName', package_name)
+    package_replaces = _conf_get(conf, 'Deb', 'packageReplaces', package_replaces)
 
-if not makehuman.isRelease():
-    package_name = package_name + 'svn'
 
-target = os.path.join(destdir,"debroot")
-if not os.path.exists(target):
-  os.mkdir(target)
+def buildDeb(dest = None):
+  global package_name
+  global package_replaces
+  global hgpath
+  global files_to_chmod_executable
 
-controldir = os.path.join(target,"DEBIAN")
-if not os.path.exists(controldir):
-  os.mkdir(controldir)
+  if dest is None:
+    dest = os.getenv('makehuman_dest',0)
 
-print "Control directory: " + controldir
+    if dest == 0:
+      print "You must explicitly set the makehuman_dest environment variable to point at a work directory, or specify it as argument. I will violently destroy and mutilate the contents of this directory."
+      exit(1)
 
-srccontrol = os.path.join(debdir,"debian");
+  destdir = os.path.normpath(os.path.realpath(dest))          # Folder to build deb package to
+  if os.path.exists(destdir):
+    # Ensure dest dir is empty
+    shutil.rmtree(destdir)
+  os.mkdir(destdir)
 
-if not os.path.exists(srccontrol):
-  print "The debian directory does not exist in the source deb folder. Something is likely horribly wrong. Eeeeek! Giving up and hiding..."
-  exit(1)
+  debdir = os.path.dirname(os.path.abspath(__file__))         # / deb build script root path
 
-tmp = os.path.join(target,"usr")
-if not os.path.exists(tmp):
-  os.mkdir(tmp)
+  print "Destination directory: " + destdir
 
-bindir = os.path.join(tmp,"bin")
-if not os.path.exists(bindir):
-  os.mkdir(bindir)
+  hgrootdir = os.path.normpath(os.path.realpath( os.path.join(debdir, '..', '..') ))
 
-print "Bin directory: " + bindir
+  print "HG root directory: " + hgrootdir
+  if not os.path.isdir( os.path.join(hgrootdir, '.hg') ):
+    print "Error, the hg root folder %s does not contain .hg folder!" % hgrootdir
+    exit(1)
 
-srcbin = os.path.join(scriptdir,"deb");
-srcbin = os.path.join(srcbin,"bin");
 
-if not os.path.exists(srcbin):
-  print "The bin directory does not exist in the source deb folder. Something is likely horribly wrong. Eeeeek! Giving up and hiding..."
-  exit(1)
+  # Parse build.conf (in buildscripts folder)
+  configure(os.path.join(hgrootdir, 'buildscripts', 'build.conf'))
 
-tmp = os.path.join(tmp,"share")
-if not os.path.exists(tmp):
-  os.mkdir(tmp)
 
-docdir = os.path.join(tmp,"doc")
-if not os.path.exists(docdir):
-  os.mkdir(docdir)
+  # Folder where hg contents are exported and prepared for packaging (scripts are run)
+  exportdir = os.path.normpath(os.path.realpath( os.path.join(hgrootdir, '..', 'mh-export-deb') ))
+  print "Source export directory: " + exportdir
 
-docdir = os.path.join(docdir,package_name)
-if not os.path.exists(docdir):
-  os.mkdir(docdir)
 
-print "Doc dir: " + docdir
+  print "\nABOUT TO PERFORM BUILD EXPORT\n"
+  print "to: %s" % os.path.normpath(os.path.realpath(exportdir))
 
-applications = os.path.join(tmp,"applications")
-if not os.path.exists(applications):
-  os.mkdir(applications)
+  # Export source to export folder and run scripts
+  sys.path = [os.path.join(debdir, '..')] + sys.path
+  try:
+    import build_prepare
+  except:
+    print "Failed to import build_prepare, expected to find it at %s. Make sure to run this script from hgroot/buildscripts/deb/" % os.path.normpath(os.path.realpath(os.path.join(debdir, '..')))
+    exit(1)
+  if os.path.exists(exportdir):
+    shutil.rmtree(exportdir)
+  build_prepare.EXCLUDES.append('blendertools/copy2blender.bat')
+  exportInfo = build_prepare.export(sourcePath = hgrootdir, exportFolder = exportdir)
 
-print "Desktop shortcut dir: " + applications
 
-programdir = os.path.join(tmp,"makehuman")
-if not os.path.exists(programdir):
-  os.mkdir(programdir)
+  scriptdir = os.path.abspath( os.path.join(exportdir, 'makehuman') )    # .. Folder containing makehuman.py (source to package)
+  print "Makehuman directory: " + scriptdir
 
-print "Program directory: " + programdir
+  if not exportInfo.isRelease:
+    package_name = package_name + 'hg'
 
-print "\nABOUT TO EXECUTE SCRIPTS\n"
+  target = os.path.join(destdir,"debroot")                    # /dest/debroot    contents of deb archive (= target)
+  if not os.path.exists(target):
+    os.mkdir(target)
 
-if not do_not_execute_scripts:
-  os.chdir(scriptdir)
-  for s in pre_deb_scripts:
-    exe = "./" + s
-    os.system(exe)
+  controldir = os.path.join(target,"DEBIAN")                  # /dest/debroot/DEBIAN   deb control files
+  if not os.path.exists(controldir):
+    os.mkdir(controldir)
 
-print "\nABOUT TO RSYNC CONTENTS TO DEB DEST\n"
+  print "Control directory: " + controldir
 
-rsyncmain = rsync + " " + rsync_common_args
+  srccontrol = os.path.join(debdir,"debian");                 # /debian   source of DEBIAN control templates
 
-for e in rsync_main_excludes:
-  rsyncmain = rsyncmain + " --exclude=" + e
+  if not os.path.exists(srccontrol):
+    print "The debian directory does not exist in the source deb folder. Something is likely horribly wrong. Eeeeek! Giving up and hiding..."
+    exit(1)
 
-rsyncmain = rsyncmain + " " + scriptdir + "/ " + programdir + "/"
+  bindir = os.path.join(target, "usr", "bin")
+  if not os.path.exists(bindir):
+    os.makedirs(bindir)
 
-print rsyncmain
-os.system(rsyncmain)
+  print "Bin directory: " + bindir
 
-rsyncbin = rsync + " " + rsync_common_args
-rsyncbin = rsyncbin + " " + srcbin + "/ " + bindir + "/"
+  srcbin = os.path.join(debdir,"bin");                        # /bin    src executable file
 
-print rsyncbin
-os.system(rsyncbin)
+  if not os.path.exists(srcbin):
+    print "The bin directory does not exist in the source deb folder. Something is likely horribly wrong. Eeeeek! Giving up and hiding..."
+    exit(1)
 
-svnrevfile = os.path.join(docdir,"SVNREV.txt")
+  docdir = os.path.join(target, "usr", "share", "doc", package_name)
+  if not os.path.exists(docdir):
+    os.makedirs(docdir)
 
-svnrev = makehuman.get_svn_revision_1()
-f = open(svnrevfile, 'w')
-f.write(str(svnrev))
-f.close()
-shutil.copy(svnrevfile, os.path.join(programdir, 'data', 'VERSION'))
+  print "Doc dir: " + docdir                                # /dest/share/doc/makehuman   docs export folder
 
-rsynccontrol = rsync + " " + rsync_common_args
-rsynccontrol = rsynccontrol + " " + srccontrol + "/ " + controldir + "/"
+  applications = os.path.join(target, "usr", "share", "applications")  # /dest/share/applications   app shortcut export folder
+  if not os.path.exists(applications):
+    os.mkdir(applications)
 
-print rsynccontrol
-os.system(rsynccontrol)
+  print "Desktop shortcut dir: " + applications
 
-os.chdir(controldir)
+  programdir = os.path.join(target, "usr", "share", "makehuman")    # /dest/share/makehuman   export folder of mh app and data
+  if os.path.exists(programdir):
+    shutil.rmtree(programdir) # Cannot exist because copytree requires it
 
-os.system('find ' + controldir + ' -name "*.target" -exec "rm" "-f" {} ";"')
+  print "Program directory: " + programdir
 
-f = open(svnrevfile,"r")
-svnrev = f.readline().rstrip()
-f.close()
+  print "\nABOUT TO COPY CONTENTS TO DEB DEST\n"
 
-os.system("du -cks " + target + " | cut -f 1 | uniq > /tmp/makehumansize")
-f = open("/tmp/makehumansize","r")
-size = f.readline().rstrip()
-f.close()
+  shutil.copytree(scriptdir, programdir)  # Copy exported makehuman/ folder to programdir
 
-if makehuman.isRelease():
-    # Conform to: http://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-Version
-    ver = "1:"+makehuman.getVersionStr().replace(' ', '.').lower()
-else:
-    ver = svnrev
-os.system("sed -i -e 's/VERSION/" + ver + "/' control")
-os.system("sed -i -e 's/PKGNAME/" + package_name + "/' control")
-os.system("sed -i -e 's/REPLACES/" + package_replaces + "/' control")
-os.system("sed -i -e 's/SIZE/" + size + "/' control")
+  # Copy icon file from hg to export folder
+  svgIcon = os.path.join(hgrootdir, 'makehuman/icons/makehuman.svg')
+  shutil.copy(svgIcon, os.path.join(programdir,"makehuman.svg"))
 
-if makehuman.isRelease():
-    ver = makehuman.getVersionStr()
-else:
-    ver = svnrev
-os.system("sed -i -e 's/VERSION/" + ver + "/' MakeHuman.desktop")
+  # Copy files in src bin dir to dest bin dir
+  _cp_files(srcbin, bindir)
 
-shortcut = os.path.join(applications,"MakeMuman.desktop")
-os.system("mv MakeHuman.desktop " + shortcut)
+  # Make a copy of hg revision in docs folder
+  shutil.copy(os.path.join(programdir, 'data', 'VERSION'), os.path.join(docdir,"HGREV.txt"))
 
-os.chdir(scriptdir)
-changelog = os.path.join(docdir,"changelog")
-os.system('rm -f ' + changelog + '*')
-os.system('svn log >' + changelog)
-os.system('gzip -9v ' + changelog)
+  # Copy files in src bin dir to dest bin dir
+  _cp_files(srccontrol, controldir)
 
-os.chdir(target)
+  hgrev = exportInfo.revision
 
-copysrc = os.path.join(controldir,"copyright")
-copydest = os.path.join(docdir,"copyright")
+  # Calculate package size
+  # du -cks $target | cut -f 1 | uniq
+  du_p = subprocess.Popen(['du', '-cks', target], stdout=subprocess.PIPE)
+  cut_p = subprocess.Popen(['cut', '-f', '1'], stdin=du_p.stdout, stdout=subprocess.PIPE)
+  uniq_p = subprocess.Popen(['uniq'], stdin=cut_p.stdout, stdout=subprocess.PIPE)
+  # Allow producer processes to receive SIGPIPE if consumer process exits
+  du_p.stdout.close()
+  cut_p.stdout.close()
+  # Retrieve output
+  size = uniq_p.communicate()[0].strip().strip('\n')
+  print "\nPackage size: %s\n" % size
 
-os.system("mv " + copysrc + " " + copydest)
 
-tmp = os.path.join(programdir,"license.txt")
-tmp2 = os.path.join(docdir,"LICENSE.txt")
-os.system("mv " + tmp + " " + tmp2)
+  if exportInfo.isRelease:
+      # Conform to: http://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-Version
+      ver = "1:"+exportInfo.version.replace(' ', '.').lower()
+  else:
+      ver = hgrev
+  # Replace fields in control file template
+  controlFile = os.path.join(controldir, 'control')
+  _sed_replace(controlFile, 'VERSION', ver)
+  _sed_replace(controlFile, 'PKGNAME', package_name)
+  _sed_replace(controlFile, 'REPLACES', package_replaces)
+  _sed_replace(controlFile, 'SIZE', size)
 
-os.system("chown -R 0:0 " + target)
-os.system("chmod -R 644 " + target)
-os.system('find ' + target + ' -type d -exec "chmod" "755" {} ";"')
-os.system("chmod 755 " + target)
 
-for x in files_to_chmod_executable:
-  if os.path.exists(x):
-    os.system("chmod 755 " + x)
+  if exportInfo.isRelease:
+      ver = exportInfo.version
+  else:
+      ver = hgrev
+  # Create desktop shortcut
+  shortcut = os.path.join(applications, "MakeHuman.desktop")
+  shutil.move(os.path.join(controldir, "MakeHuman.desktop"), shortcut)
+  _sed_replace(shortcut, 'VERSION', ver)
 
-# make reeeeally sure we don't bring along any .svn junk since it seems it has a
-# tendency to bork ubuntu's graphical package manager
-os.system('find ' + destdir + ' -type d -name ".svn" -exec "rm" "-rf" {} ";"')
 
-outputdir = os.path.join(destdir,"output")
+  # Generate changelog
+  os.chdir(hgrootdir)
+  changelog = os.path.join(docdir,"changelog")
+  import glob
+  for logfile in glob.glob(changelog+'*'):
+    if os.path.isfile(logfile):
+      os.remove(logfile)
+  branch_p = subprocess.Popen([hgpath,'branch'], stdout=subprocess.PIPE)
+  branch = branch_p.communicate()[0].strip().strip('\n')
+  print "\nUsing HG branch: %s\n" % branch
 
-if not os.path.exists(outputdir):
-  os.mkdir(outputdir)
+  changelog_f = open(changelog, 'wb')
+  subprocess.check_call([hgpath,'log','-b',branch], stdout=changelog_f)
+  changelog_f.close()
+  subprocess.check_call(['gzip', '-9v', changelog])
 
-os.chdir(outputdir)
 
-if makehuman.isRelease():
-    ver = makehuman.getVersionStr().replace(' ', '.').lower()
-else:
-    ver = svnrev
-debfile = os.path.join(outputdir,package_name + "_" + ver + "_all.deb")
+  os.chdir(target)
 
-debcmd = "dpkg-deb -Z bzip2 -z 9 -b ../debroot " + debfile + "\n"
+  # Move copyright file in place
+  copysrc = os.path.join(controldir,"copyright")
+  copydest = os.path.join(docdir,"copyright")
+  shutil.move(copysrc, copydest)
 
-print debcmd
-os.system(debcmd)
+  # Move license file in place
+  lsrc = os.path.join(programdir,"license.txt")
+  ldst = os.path.join(docdir,"LICENSE.txt")
+  shutil.move(lsrc, ldst)
 
-print "\n\n\nPackage is now available in " + debfile + "\n"
-print "If you are building for release, you should now run:\n"
-print "  lintian " + debfile + "\n"
-print "... in order to check the deb file.\n"
+  try:
+    subprocess.check_call(["chown", "-R", "0:0", target])
+  except:
+    print "Failed to chown to root. Operation not permitted?"
+  try:
+    subprocess.check_call(["chmod", "-R", "644", target])
+    for path, dirs, files in os.walk(target):
+      for d in dirs:
+        dpath = os.path.join(target, path, d)
+        try:
+          subprocess.check_call(["chmod", "755", dpath])
+        except:
+          print "Failed to chmod 755 folder %s" % dpath
+    subprocess.check_call(["chmod", "755", target])
+  except:
+    print "Failed to chmod."
 
+  for x in files_to_chmod_executable:
+    if os.path.exists(x):
+      subprocess.check_call(["chmod", "755", x])
+
+  outputdir = os.path.join(destdir,"output")
+
+  if not os.path.exists(outputdir):
+    os.mkdir(outputdir)
+
+  os.chdir(outputdir)
+
+  if exportInfo.isRelease:
+      ver = exportInfo.version.replace(' ', '.').lower()
+  else:
+      ver = hgrev
+  debfile = os.path.join(outputdir,package_name + "_" + ver + "_all.deb")
+
+  debcmd = ["dpkg-deb", "-Z", "bzip2", "-z", "9", "-b", "../debroot", debfile]
+
+  print debcmd
+  subprocess.check_call(debcmd)
+
+  print "\n\n\nPackage is now available in " + debfile + "\n"
+  print "If you are building for release, you should now run:\n"
+  print "  lintian " + debfile + "\n"
+  print "... in order to check the deb file.\n"
+
+
+def _parse_args():
+    if len(sys.argv) < 2:
+        return dict()
+
+    import argparse    # requires python >= 2.7
+    parser = argparse.ArgumentParser()
+
+    # positional arguments
+    parser.add_argument("destination", default=None, nargs='?', help="Destination path for deb build, can also be set using makehuman_dest environment variable if this argument is left empty.")
+
+    argOptions = vars(parser.parse_args())
+    return argOptions
+
+
+if __name__ == '__main__':
+  args = _parse_args()
+  buildDeb(args.get('destination', None))
