@@ -53,8 +53,6 @@ qtConf.write('[Paths]\nPrefix = .\nPlugins = qt4_plugins')
 qtConf.close()
 exportInfo.datas.append(os.path.join(i.rootSubpath, 'qt.conf'))
 
-print exportInfo.datas
-
 # Change to the export dir for building
 #os.chdir(exportPath())
 
