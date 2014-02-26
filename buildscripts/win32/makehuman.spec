@@ -46,6 +46,15 @@ i = exportInfo = build_prepare.export(sourcePath = hgRootPath(), exportFolder = 
 shutil.copy(hgRootPath('makehuman/icons/makehuman.ico'), i.applicationPath('makehuman.ico'))
 exportInfo.datas.append(os.path.join(i.rootSubpath, 'makehuman.ico'))
 
+# Create config file for the Qt libraries to be able to load plugins
+# (such as for loading jpg and svg images)
+qtConf = open(i.applicationPath('qt.conf'), 'wb')
+qtConf.write('[Paths]\nPrefix = .\nPlugins = qt4_plugins')
+qtConf.close()
+exportInfo.datas.append(os.path.join(i.rootSubpath, 'qt.conf'))
+
+print exportInfo.datas
+
 # Change to the export dir for building
 #os.chdir(exportPath())
 
@@ -80,8 +89,11 @@ def extra_datas(mydir):
             if os.path.isfile(d):
                 files.append(d)
             rec_glob("%s/*" % d, files)
-    files = []
-    rec_glob("%s/*" % mydir, files)
+    if os.path.isfile(mydir):
+        files = [mydir]
+    else:
+        files = []
+        rec_glob("%s/*" % mydir, files)
     extra_datas = []
     for f in files:
         ft = os.path.relpath(f, exportInfo.applicationPath())
