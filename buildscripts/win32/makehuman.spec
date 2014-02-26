@@ -53,6 +53,8 @@ qtConf.write('[Paths]\nPrefix = .\nPlugins = qt4_plugins')
 qtConf.close()
 exportInfo.datas.append(os.path.join(i.rootSubpath, 'qt.conf'))
 
+print exportInfo.datas
+
 # Change to the export dir for building
 #os.chdir(exportPath())
 
@@ -87,8 +89,11 @@ def extra_datas(mydir):
             if os.path.isfile(d):
                 files.append(d)
             rec_glob("%s/*" % d, files)
-    files = []
-    rec_glob("%s/*" % mydir, files)
+    if os.path.isfile(mydir):
+        files = [mydir]
+    else:
+        files = []
+        rec_glob("%s/*" % mydir, files)
     extra_datas = []
     for f in files:
         ft = os.path.relpath(f, exportInfo.applicationPath())
