@@ -26,3 +26,8 @@ skipHg = False
 # Skip download and compile assets scripts (default: obtained from commandline
 # argument, False if not specified)
 skipScripts = False
+
+# Skip only downloading assets scripts (default: obtained from commandline
+# argument, False if not specified) Has no effect if skipScripts is already
+# enabled
+noDownload = False

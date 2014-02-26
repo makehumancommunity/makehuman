@@ -77,11 +77,12 @@ BUILD_CONF_FILE_PATH = 'buildscripts/build_prepare.conf'
 
 
 class MHAppExporter(object):
-    def __init__(self, sourceFolder, exportFolder='export', skipHG=False, skipScripts=False):
+    def __init__(self, sourceFolder, exportFolder='export', skipHG=False, skipScripts=False, noDownload=False):
         self.sourceFolder = sourceFolder
         self.targetFolder = exportFolder
         self.skipHG = skipHG
         self.skipScripts = skipScripts
+        self.noDownload = noDownload
 
         sys.path = sys.path + [self.sourceFile('makehuman'), self.sourceFile('makehuman/lib')]
 
@@ -132,6 +133,10 @@ class MHAppExporter(object):
             skipScripts = _conf_get(self.config, 'Config', 'skipScripts', None)
             if skipScripts is not None:
                 self.skipScripts = skipScripts
+
+            noDownload = _conf_get(self.config, 'Config', 'noDownload', None)
+            if noDownload is not None:
+                self.noDownload = noDownload
 
     def isRelease(self):
         if self.IS_RELEASE is not None:
@@ -314,13 +319,14 @@ class MHAppExporter(object):
         return subprocess.check_call(args, cwd=self.getCWD())
 
     def runScripts(self):
-        ###DOWNLOAD ASSETS
-        try:
-            self.runProcess( ["python","download_assets.py"] )
-        except subprocess.CalledProcessError:
-            print "check that download_assets.py is working correctly"
-            sys.exit(1)
-        print "\n"
+        if not self.noDownload:
+            ###DOWNLOAD ASSETS
+            try:
+                self.runProcess( ["python","download_assets.py"] )
+            except subprocess.CalledProcessError:
+                print "check that download_assets.py is working correctly"
+                sys.exit(1)
+            print "\n"
 
         ###COMPILE TARGETS
         try:
@@ -529,19 +535,20 @@ def parseConfig(configPath):
     else:
         return None
 
-def export(sourcePath = '.', exportFolder = 'export', skipHG = False, skipScripts = False):
+def export(sourcePath = '.', exportFolder = 'export', skipHG = False, skipScripts = False, noDownload = False):
     """
     Perform export
 
     sourcePath      The root of the hg repository (it contains folders makehuman, blendertools, ...)
     exportFolder    The folder to export to. Should not exist before running.
     skipScripts     Set to true to skip executing asset compile scripts
+    noDownload      Skip downloading files (has no effect when skipScripts is already enabled)
     skipHG          Set to true to skip verifying HG revision status (tries to read from data/VERSION)
 
     Returns a summary object with members: version, revision, path (exported path), isRelease
     containing information on the exported release.
     """
-    exporter = MHAppExporter(sourcePath, exportFolder, skipHG, skipScripts)
+    exporter = MHAppExporter(sourcePath, exportFolder, skipHG, skipScripts, noDownload)
     return exporter.export()
 
 
@@ -554,6 +561,7 @@ def _parse_args():
 
     # optional arguments
     parser.add_argument("--skipscripts", action="store_true", help="Skip running scripts for compiling assets")
+    parser.add_argument("--nodownload", action="store_true", help="Do not run download assets script")
     parser.add_argument("--skiphg", action="store_true", help="Skip retrieving HG revision")
 
     # positional arguments
@@ -572,4 +580,4 @@ if __name__ == '__main__':
     if args.get('targetPath', None) is None:
         raise RuntimeError("targetPath argument not specified")
 
-    print export(args['sourcePath'], args['targetPath'], args.get('skiphg', False), args.get('skipscripts', False))
+    print export(args['sourcePath'], args['targetPath'], args.get('skiphg', False), args.get('skipscripts', False), args.get('nodownload', False))
