@@ -46,6 +46,13 @@ i = exportInfo = build_prepare.export(sourcePath = hgRootPath(), exportFolder = 
 shutil.copy(hgRootPath('makehuman/icons/makehuman.ico'), i.applicationPath('makehuman.ico'))
 exportInfo.datas.append(os.path.join(i.rootSubpath, 'makehuman.ico'))
 
+# Create config file for the Qt libraries to be able to load plugins
+# (such as for loading jpg and svg images)
+qtConf = open(i.applicationPath('qt.conf'), 'wb')
+qtConf.write('[Paths]\nPrefix = .\nPlugins = qt4_plugins')
+qtConf.close()
+exportInfo.datas.append(os.path.join(i.rootSubpath, 'qt.conf'))
+
 # Change to the export dir for building
 #os.chdir(exportPath())
 
