@@ -71,9 +71,9 @@ class DebugDump(object):
     def reset(self):
         self.open()
 
-        if 'SVNREVISION' in os.environ and 'SVNREVISION_SOURCE' in os.environ:
-            self.write("SVN REVISION: %s [%s]", os.environ['SVNREVISION'], os.environ['SVNREVISION_SOURCE'])
         self.write("VERSION: %s", os.environ['MH_VERSION'])
+        if 'HGREVISION' in os.environ and 'HGREVISION_SOURCE' in os.environ:
+            self.write("HG REVISION: r%s (%s) [%s]", os.environ['HGREVISION'], os.environ['HGNODEID'], os.environ['HGREVISION_SOURCE'])
         self.write("IS BUILT (FROZEN): %s", os.environ['MH_FROZEN'])
         self.write("IS RELEASE VERSION: %s", os.environ['MH_RELEASE'])
         self.write("HOME LOCATION: %s", self.home)
