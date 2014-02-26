@@ -1,11 +1,5 @@
 # -*- mode: python -*-
 
-### Config #########
-skipHg = False
-skipScripts = False
-####################
-
-
 import sys
 import subprocess
 import zipfile
@@ -40,7 +34,7 @@ def distPath(subpath=""):
 # Export source to export folder and run scripts
 if os.path.exists(exportPath()):
     shutil.rmtree(exportPath())
-i = exportInfo = build_prepare.export(sourcePath = hgRootPath(), exportFolder = exportPath(), skipHG = skipHg, skipScripts = skipScripts)
+i = exportInfo = build_prepare.export(sourcePath = hgRootPath(), exportFolder = exportPath())
 
 # Copy extra windows-specific files to export folder
 shutil.copy(hgRootPath('makehuman/icons/makehuman.ico'), i.applicationPath('makehuman.ico'))
