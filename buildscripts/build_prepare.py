@@ -64,6 +64,7 @@ PYTHON_PATH_EX = ['lib','core','shared','apps','apps/gui', 'plugins']
 
 ################################################################################
 
+# TODO copies could be made more efficient with rsync
 
 import sys
 import os
@@ -72,7 +73,7 @@ import shutil
 
 
 VERSION_FILE_PATH = 'makehuman/data/VERSION'
-BUILD_CONF_FILE_PATH = 'buildscripts/build_prepare.conf'
+BUILD_CONF_FILE_PATH = 'buildscripts/build.conf'
 
 
 
@@ -107,9 +108,9 @@ class MHAppExporter(object):
             print "Using config file at %s. NOTE: properties in config file will override any other settings!" % self.sourceFile(BUILD_CONF_FILE_PATH)
 
             global HG_PATH
-            HG_PATH = _conf_get(self.config, 'Config', 'hgPath', HG_PATH)
+            HG_PATH = _conf_get(self.config, 'General', 'hgPath', HG_PATH)
 
-            hgrev = _conf_get(self.config, 'Config', 'hgRev', None)
+            hgrev = _conf_get(self.config, 'BuildPrepare', 'hgRev', None)
             if hgrev is not None:
                 self.HGREV, self.REVID = hgrev.split(':')
             if self.HGREV and self.REVID:
@@ -120,23 +121,23 @@ class MHAppExporter(object):
                 self.HGREV = None
                 self.REVID = None
 
-            self.VERSION_SUB = _conf_get(self.config, 'Config', 'versionSub', None)
+            self.VERSION_SUB = _conf_get(self.config, 'BuildPrepare', 'versionSub', None)
 
-            isRelease = _conf_get(self.config, 'Config', 'isRelease', None)
+            isRelease = _conf_get(self.config, 'BuildPrepare', 'isRelease', None)
             if isRelease is not None:
                 self.IS_RELEASE = ( isRelease.lower() in ['yes', 'true'] )
 
-            skipHg = _conf_get(self.config, 'Config', 'skipHg', None)
+            skipHg = _conf_get(self.config, 'BuildPrepare', 'skipHg', None)
             if skipHg is not None:
-                self.skipHG = skipHg
+                self.skipHG = skipHg.lower() in ['yes', 'true']
 
-            skipScripts = _conf_get(self.config, 'Config', 'skipScripts', None)
+            skipScripts = _conf_get(self.config, 'BuildPrepare', 'skipScripts', None)
             if skipScripts is not None:
-                self.skipScripts = skipScripts
+                self.skipScripts = skipScripts.lower() in ['yes', 'true']
 
-            noDownload = _conf_get(self.config, 'Config', 'noDownload', None)
+            noDownload = _conf_get(self.config, 'BuildPrepare', 'noDownload', None)
             if noDownload is not None:
-                self.noDownload = noDownload
+                self.noDownload = noDownload.lower() in ['yes', 'true']
 
     def isRelease(self):
         if self.IS_RELEASE is not None:
@@ -248,6 +249,7 @@ class MHAppExporter(object):
             f = open(self.targetFile('makehuman/makehuman.py'), 'wb')
             f.write(''.join(lines))
             f.close()
+            print ''
 
         # Re-arrange folders
         for f in os.listdir( self.targetFile() ):
