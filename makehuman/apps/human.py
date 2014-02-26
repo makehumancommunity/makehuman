@@ -848,22 +848,6 @@ class Human(guicommon.Object):
             log.debug('Failed to remove modifier % from human.', modifier.fullName)
             pass
 
-    def getSymmetryGroup(self, group):
-        if group.name.find('l-', 0, 2) != -1:
-            return self.mesh.getFaceGroup(group.name.replace('l-', 'r-', 1))
-        elif group.name.find('r-', 0, 2) != -1:
-            return self.mesh.getFaceGroup(group.name.replace('r-', 'l-', 1))
-        else:
-            return None
-
-    def getSymmetryPart(self, name):
-        if name.find('l-', 0, 2) != -1:
-            return name.replace('l-', 'r-', 1)
-        elif name.find('r-', 0, 2) != -1:
-            return name.replace('r-', 'l-', 1)
-        else:
-            return None
-
     def applyAllTargets(self, progressCallback=None, update=True):
         """
         This method applies all targets, in function of age and sex
@@ -937,7 +921,6 @@ class Human(guicommon.Object):
         **Parameters:** None.
 
         """
-
         self.symmetrize('l')
 
     def applySymmetryRight(self):
@@ -948,7 +931,6 @@ class Human(guicommon.Object):
         **Parameters:** None.
 
         """
-
         self.symmetrize('r')
 
     def symmetrize(self, direction='r'):

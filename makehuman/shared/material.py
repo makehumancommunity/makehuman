@@ -85,6 +85,9 @@ class Color(object):
 
         return self
 
+    def clone(self):
+        return type(self)().copyFrom(self)
+
     def asTuple(self):
         return (self.r, self.g, self.b)
 
@@ -295,6 +298,9 @@ class Material(object):
 
         return self
 
+    def clone(self):
+        return type(self)().copyFrom(self)
+
     def fromFile(self, filename):
         """
         Parse .mhmat file and set as the properties of this material.
@@ -407,6 +413,7 @@ class Material(object):
                 if self._uvMap and \
                    canonicalPath(self._uvMap) == canonicalPath(getSysDataPath('uvs/default.mhuv')):
                     # uvs/default.mhuv is a meta-file that refers to the default uv set
+                    # TODO remove this, use None for setting default UV map
                     self._uvMap = None
             elif words[0] == "shaderParam":
                 if len(words) > 3:

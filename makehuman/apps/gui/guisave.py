@@ -80,8 +80,6 @@ class SaveTaskView(gui3d.TaskView):
         self.parent.tasksByName['Load'].fileentry.edit.setText(dir)
         self.parent.tasksByName['Load'].fileentry.setDirectory(dir)
 
-        mh.changeCategory('Modelling')
-
     def onShow(self, event):
         # When the task gets shown, set the focus to the file entry
         gui3d.TaskView.onShow(self, event)

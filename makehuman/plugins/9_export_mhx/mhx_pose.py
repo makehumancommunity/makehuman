@@ -25,7 +25,7 @@ Pose
 import log
 import os
 import mh
-import mh2proxy
+import proxy
 import algos3d
 import exportutils
 
@@ -63,7 +63,7 @@ class Writer(mhx_writer.Writer):
         self.proxyShapes('Cage', 'T_Cage', fp, [])
         self.proxyShapes('Proxymeshes', 'T_Proxy', fp, targets)
         self.proxyShapes('Clothes', 'T_Clothes', fp, [])
-        for ptype in mh2proxy.SimpleProxyTypes:
+        for ptype in proxy.SimpleProxyTypes:
             self.proxyShapes(ptype, 'T_Clothes', fp, [])
 
         fp.write("#if toggle&T_Mesh\n")
@@ -100,13 +100,13 @@ class Writer(mhx_writer.Writer):
 
     def proxyShapes(self, type, test, fp, targets):
         fp.write("#if toggle&%s\n" % test)
-        for proxy in self.proxies.values():
-            if proxy.name and proxy.type == type:
-                self.writeShapeKeysAndDrivers(fp, self.name+proxy.name, proxy, targets)
+        for pxy in self.proxies.values():
+            if pxy.name and pxy.type == type:
+                self.writeShapeKeysAndDrivers(fp, self.name+pxy.name, pxy, targets)
         fp.write("#endif\n")
 
 
-    def writeShape1(self, fp, sname, lr, trg, min, max, proxy, scale):
+    def writeShape1(self, fp, sname, lr, trg, min, max, pxy, scale):
         if len(trg.verts) == 0:
             return
         fp.write(
@@ -118,25 +118,25 @@ class Writer(mhx_writer.Writer):
         fp.write("end ShapeKey\n")
 
 
-    def writeShape(self, fp, sname, lr, trg, min, max, proxy, scale):
-        if proxy:
-            ptargets = proxy.getShapes([("shape",trg)], 1.0)
+    def writeShape(self, fp, sname, lr, trg, min, max, pxy, scale):
+        if pxy:
+            ptargets = pxy.getShapes([("shape",trg)], 1.0)
             if len(ptargets) > 0:
                 name,trg = ptargets[0]
-                self.writeShape1(fp, sname, lr, trg, min, max, proxy, scale)
+                self.writeShape1(fp, sname, lr, trg, min, max, pxy, scale)
         else:
-            self.writeShape1(fp, sname, lr, trg, min, max, proxy, scale)
+            self.writeShape1(fp, sname, lr, trg, min, max, pxy, scale)
 
 
-    def writeShapeKeysAndDrivers(self, fp, name, proxy, targets):
+    def writeShapeKeysAndDrivers(self, fp, name, pxy, targets):
         config = self.config
         ptargets = []
-        if proxy:
-            obj = proxy.getSeedMesh()
-            for filepath in proxy.shapekeys:
+        if pxy:
+            obj = pxy.getSeedMesh()
+            for filepath in pxy.shapekeys:
                 shape = exportutils.shapekeys.getShape(filepath, obj)
                 fname = os.path.splitext(os.path.basename(filepath))[0]
-                ptargets.append((proxy.name+fname, shape))
+                ptargets.append((pxy.name+fname, shape))
 
         if not targets and not ptargets:
             return
@@ -148,7 +148,7 @@ class Writer(mhx_writer.Writer):
             "  end ShapeKey\n")
 
         for (sname, shape) in targets:
-            self.writeShape(fp, sname, "Sym", shape, 0, 1, proxy, config.scale)
+            self.writeShape(fp, sname, "Sym", shape, 0, 1, pxy, config.scale)
 
         for (sname, shape) in ptargets:
             self.writeShape(fp, sname, "Sym", shape, 0, 1, None, config.scale)
@@ -175,21 +175,21 @@ class Writer(mhx_writer.Writer):
             "#endif\n")
 
 
-    def writeShapeKeyDrivers(self, fp, name, proxy):
-        isHuman = ((not proxy) or proxy.type == 'Proxymeshes')
+    def writeShapeKeyDrivers(self, fp, name, pxy):
+        isHuman = ((not pxy) or pxy.type == 'Proxymeshes')
         amt = self.armature
 
         if isHuman:
             for path,name in self.customTargetFiles:
-                mhx_drivers.writeShapePropDrivers(fp, amt, [name], proxy, "Mhc", callback)
+                mhx_drivers.writeShapePropDrivers(fp, amt, [name], pxy, "Mhc", callback)
 
             if self.config.expressions:
-                mhx_drivers.writeShapePropDrivers(fp, amt, exportutils.shapekeys.getExpressionUnits(), proxy, "Mhs", callback)
+                mhx_drivers.writeShapePropDrivers(fp, amt, exportutils.shapekeys.getExpressionUnits(), pxy, "Mhs", callback)
 
             skeys = []
             for (skey, val, string, min, max) in  self.customProps:
                 skeys.append(skey)
-            mhx_drivers.writeShapePropDrivers(fp, amt, skeys, proxy, "Mha", callback)
+            mhx_drivers.writeShapePropDrivers(fp, amt, skeys, pxy, "Mha", callback)
 
 
     def writeExpressions(self, fp, exprList, label):
