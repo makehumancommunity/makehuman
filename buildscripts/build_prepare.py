@@ -168,6 +168,8 @@ class MHAppExporter(object):
         print "  from: %s" % self.sourceFile()
         print "  to:   %s\n" % self.targetFile()
 
+        print "\n\n%s build\n\n" % ("RELEASE" if self.isRelease() else "NIGHTLY")
+
         # Obtain exact revision
         # TODO perhaps try to obtain hg tags instead of node id for releases
         if not self.HGREV or not self.REVID:
@@ -249,7 +251,7 @@ class MHAppExporter(object):
             f = open(self.targetFile('makehuman/makehuman.py'), 'wb')
             f.write(''.join(lines))
             f.close()
-            print ''
+            print '\n'
 
         # Re-arrange folders
         for f in os.listdir( self.targetFile() ):
@@ -355,7 +357,7 @@ class MHAppExporter(object):
     def exportHGFiles(self):
         print "Exporting files from hg repo (hg archive)"
         excludes = self.getExcludes()
-        exclarg = [item for pair in zip(len(excludes)*['--exclude'], EXCLUDES) for item in pair]
+        exclarg = [item for pair in zip(len(excludes)*['--exclude'], excludes) for item in pair]
 
         try:
             self.runProcess( [HG_PATH, "archive"] + exclarg + [self.targetFile()])
