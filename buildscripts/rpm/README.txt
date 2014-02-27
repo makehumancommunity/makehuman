@@ -77,3 +77,19 @@ You can do this daily if you want to. It will only download the changes,
 so it is normally a fast operation. You do not need to re-do the other
 steps in order to get an updated version.
 
+
+BUILDING AN RPM PACKAGE
+-----------------------
+Make sure to have mercurial and rpmbuild installed on your system (updated to
+stable branch if required).
+With an intact hg copy, change working directory to the buildscripts/rpm folder.
+Then execute 
+
+  ./buildRpm.py
+
+The file buildscripts/build.conf.example can be copied to 
+buildscripts/build.conf to customize the build process (the sections General, 
+BuildPrepare and Rpm apply to the RPM build).
+
+After finishing, the RPM file will be in 
+~/rpms/RPMS/noarch/makehuman*.rpm
