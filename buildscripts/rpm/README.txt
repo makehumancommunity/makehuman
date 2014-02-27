@@ -9,14 +9,14 @@ STEP 1 INSTALL SUBVERSION
 -------------------------
 Install subversion:
 
-  yum install subversion
+  yum install mercurial
 
 
-STEP 2 CHECK OUT CURRENT SVN
-----------------------------
+STEP 2 CLONE THE CURRENT HG REPOSITORY
+--------------------------------------
 Check out the latest revision of the source code:
 
-  svn checkout http://makehuman.googlecode.com/svn/trunk/makehuman/
+  hg clone https://bitbucket.org/MakeHuman/makehuman
 
 (this will take a while)
 
@@ -37,7 +37,7 @@ STEP 4 RUN MAKEHUMAN
 --------------------
 Change working directory to the root of the makehuman tree:
 
-  cd makehuman
+  cd makehuman/makehuman
 
 Then run:
 
@@ -56,22 +56,22 @@ If makehuman doesn't start, write a forum post under
 In this report you should include exactly what linux distribution you
 are using and at least the contents of the file
 
-  ~/makehuman/makehuman-debug.txt
+  ~/makehuman/A8/makehuman-debug.txt
 
 ..which contains essential debugging information. You should probably 
 also include the file
 
-  ~/makehuman/makehuman.log
+  ~/makehuman/A8/makehuman.log
 
 ..at least if something crashed or the program did not start at all.
 
 
-STEP x UPDATE TO LATEST SVN
----------------------------
+STEP x UPDATE TO LATEST HG
+--------------------------
 If some time has passed since you did the above and you want the latest
 version, cd into the makehuman root and run
 
-  svn update
+  hg pull -u
 
 You can do this daily if you want to. It will only download the changes,
 so it is normally a fast operation. You do not need to re-do the other

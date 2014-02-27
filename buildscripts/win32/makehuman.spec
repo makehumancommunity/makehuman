@@ -1,5 +1,29 @@
 # -*- mode: python -*-
 
+"""
+MakeHuman pyinstaller spec file for Windows build
+
+**Project Name:**      MakeHuman
+
+**Product Home Page:** http://www.makehuman.org/
+
+**Code Home Page:**    http://code.google.com/p/makehuman/
+
+**Authors:**           Jonas Hauquier, Benjamin A Lau, Joel Palmius
+
+**Copyright(c):**      MakeHuman Team 2001-2014
+
+**Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
+
+**Coding Standards:**  See http://www.makehuman.org/node/165
+
+Abstract
+--------
+
+Create a windows executable package for the MakeHuman application.
+"""
+
+
 import sys
 import subprocess
 import zipfile
