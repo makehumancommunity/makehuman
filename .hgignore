@@ -20,6 +20,6 @@ makehuman/data/litspheres
 makehuman/data/skins
 makehuman/data/teeth
 makehuman/data/tongue
-buildscripts/build_prepare.conf
+buildscripts/build.conf
 buildscripts/win32/build
 buildscripts/win32/dist
