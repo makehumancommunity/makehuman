@@ -304,9 +304,10 @@ class SkeletonLibrary(gui3d.TaskView):
         skel = self.human.getSkeleton()
         self.drawSkeleton(skel)
 
+        self.boneCountLbl.setText("Bones: %s" % self.human.getSkeleton().getBoneCount())
+
         if self.debugLib:
             self.debugLib.reloadBoneExplorer()
-            self.boneCountLbl.setText("Bones: %s" % self.human.getSkeleton().getBoneCount())
 
 
     def drawSkeleton(self, skel):
