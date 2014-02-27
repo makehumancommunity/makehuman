@@ -155,9 +155,9 @@ def buildDeb(dest = None):
     exit(1)
   if os.path.exists(exportdir):
     shutil.rmtree(exportdir)
-  build_prepare.EXCLUDES.append('blendertools/copy2blender.bat')
   exportInfo = build_prepare.export(sourcePath = hgrootdir, exportFolder = exportdir)
 
+  os.remove(os.path.join(exportdir, 'makehuman', 'blendertools', 'copy2blender.bat'))
 
   scriptdir = os.path.abspath( os.path.join(exportdir, 'makehuman') )    # .. Folder containing makehuman.py (source to package)
   print "Makehuman directory: " + scriptdir
