@@ -36,7 +36,7 @@ class FbxConfig(Config):
         self.selectedOptions(exporter)
 
         self.useRelPaths     = False
-        self.expressions = False    #exporter.expressions.selected
+        self.useExpressions = False    #exporter.useExpressions.selected
         self.useCustomTargets = False   #exporter.useCustomTargets.selected
         self.useMaterials    = True # for debugging
 
@@ -56,7 +56,7 @@ class FbxConfig(Config):
         if not self.rigOptions:
             return
         self.rigOptions.setExportOptions(
-            useExpressions = self.expressions,
+            useExpressions = self.useExpressions,
             useTPose = self.useTPose,
             useLeftRight = False,
         )
@@ -65,7 +65,7 @@ class FbxConfig(Config):
 
     def __repr__(self):
         return("<FbxConfig %s e %s>" % (
-            self.rigOptions.rigtype, self.expressions))
+            self.rigOptions.rigtype, self.useExpressions))
 
 
 class ExporterFBX(Exporter):
@@ -78,7 +78,7 @@ class ExporterFBX(Exporter):
 
     def build(self, options, taskview):
         Exporter.build(self, options, taskview)
-        #self.expressions     = options.addWidget(gui.CheckBox("Expressions", False))
+        #self.useExpressions     = options.addWidget(gui.CheckBox("Expressions", False))
         #self.useCustomTargets = options.addWidget(gui.CheckBox("Custom targets", False))
 
     def export(self, human, filename):

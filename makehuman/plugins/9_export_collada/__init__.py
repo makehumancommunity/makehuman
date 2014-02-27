@@ -37,8 +37,8 @@ class DaeConfig(Config):
         self.useRelPaths = True
         self.useNormals = True
 
-        self.expressions = False
-        #self.expressions = exporter.expressions.selected
+        self.useExpressions = False
+        #self.useExpressions = exporter.useExpressions.selected
         self.useCustomTargets = False
         #self.useCustomTargets = exporter.useCustomTargets.selected
         self.useTPose = False
@@ -58,7 +58,7 @@ class DaeConfig(Config):
             return
             self.rigOptions = ArmatureOptions()
         self.rigOptions.setExportOptions(
-            useExpressions = self.expressions,
+            useExpressions = self.useExpressions,
             useTPose = self.useTPose,
         )
 
@@ -74,7 +74,7 @@ class ExporterCollada(Exporter):
 
     def build(self, options, taskview):
         Exporter.build(self, options, taskview)
-        #self.expressions     = options.addWidget(gui.CheckBox("Expressions", False))
+        #self.useExpressions     = options.addWidget(gui.CheckBox("Expressions", False))
         #self.useCustomTargets = options.addWidget(gui.CheckBox("Custom targets", False))
         #self.useTPose = options.addWidget(gui.CheckBox("T-pose", False))
 

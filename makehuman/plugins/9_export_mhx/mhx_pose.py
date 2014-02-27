@@ -156,7 +156,7 @@ class Writer(mhx_writer.Writer):
         '''
         fp.write("#if toggle&T_ShapeDrivers\n")
 
-        if config.expressions and not proxy:
+        if config.useExpressions and not proxy:
             exprList = exportutils.shapekeys.readExpressionMhm(mh.getSysDataPath("expressions"))
             self.writeExpressions(fp, exprList, "Expression")
             visemeList = exportutils.shapekeys.readExpressionMhm(mh.getSysDataPath("visemes"))
@@ -183,7 +183,7 @@ class Writer(mhx_writer.Writer):
             for path,name in self.customTargetFiles:
                 mhx_drivers.writeShapePropDrivers(fp, amt, [name], pxy, "Mhc", callback)
 
-            if self.config.expressions:
+            if self.config.useExpressions:
                 mhx_drivers.writeShapePropDrivers(fp, amt, exportutils.shapekeys.getExpressionUnits(), pxy, "Mhs", callback)
 
             skeys = []

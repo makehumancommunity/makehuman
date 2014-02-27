@@ -66,7 +66,7 @@ Only works with MHX export.
         self.useBoneGroups = False
         self.useCorrectives = False
         self.useFaceRig = config.useFaceRig
-        self.useExpressions = config.expressions
+        self.useExpressions = config.useExpressions
 
         renameBones = {
             "clavicle.L" : "shoulder.L",

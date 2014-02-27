@@ -37,7 +37,7 @@ from .custom import listCustomFiles
 
 def readTargets(human, config):
     targets = []
-    if config.expressions:
+    if config.useExpressions:
         shapeList = readExpressionUnits(human, 0, 1)
         targets += shapeList
 
