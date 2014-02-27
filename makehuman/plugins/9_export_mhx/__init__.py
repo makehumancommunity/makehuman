@@ -55,7 +55,7 @@ class MhxConfig(Config):
 
         self.feetOnGround =         exporter.feetOnGround.selected
         self.useFaceRig =           False   # exporter.useFaceRig.selected
-        self.useExpressions =          False   #exporter.useExpressions.selected
+        self.expressions =          False   #exporter.expressions.selected
         self.useCustomTargets =     False   #exporter.useCustomTargets.selected
 
         if exporter.useRigify.selected:
@@ -76,7 +76,7 @@ class MhxConfig(Config):
             useRotationLimits = exporter.useRotationLimits.selected,
             useCorrectives = False,
             useFaceRig = self.useFaceRig,
-            useExpressions = self.useExpressions,
+            useExpressions = self.expressions,
             useLeftRight = False,
         )
 
@@ -94,7 +94,7 @@ class ExporterMHX(Exporter):
         self.feetOnGround   = options.addWidget(gui.CheckBox("Feet on ground", True))
         self.useRotationLimits   = options.addWidget(gui.CheckBox("Rotation limits", False))
         #self.useFaceRig     = options.addWidget(gui.CheckBox("Face rig", True))
-        #self.useExpressions    = options.addWidget(gui.CheckBox("Expressions", False))
+        #self.expressions    = options.addWidget(gui.CheckBox("Expressions", False))
         #self.useCustomTargets = options.addWidget(gui.CheckBox("Custom targets", False))
         self.useRigify      = options.addWidget(gui.CheckBox("Export for Rigify", False))
 
