@@ -1,0 +1,36 @@
+#version 120
+
+/**
+ * Toon shader.
+ *
+ **Project Name:**      MakeHuman
+ *
+ **Product Home Page:** http://www.makehuman.org/
+ *
+ **Code Home Page:**    http://code.google.com/p/makehuman/
+ *
+ **Authors:**           Marc Flerackers
+ *
+ **Copyright(c):**      MakeHuman Team 2001-2014
+ *
+ **Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
+ *
+ **Coding Standards:**  See http://www.makehuman.org/node/165
+ *
+ * Abstract
+ * --------
+ *
+ * Cell shading.
+ * Based on an example from www.ozone3d.net
+**/
+
+varying vec3 vNormal;
+varying vec3 vVertex;
+		
+void main(void)
+{
+  gl_TexCoord[0] = gl_MultiTexCoord0;
+  gl_Position = ftransform();
+  vVertex = vec3(gl_ModelViewMatrix * gl_Vertex);
+  vNormal = normalize(gl_NormalMatrix * gl_Normal);
+}
