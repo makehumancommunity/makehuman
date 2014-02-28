@@ -6,7 +6,7 @@
 
 **Product Home Page:** http://www.makeinfo.human.org/
 
-**Code Home Page:**    http://code.google.com/p/makehuman/
+**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Thomas Larsson
 
