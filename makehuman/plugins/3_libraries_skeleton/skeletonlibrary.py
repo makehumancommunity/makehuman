@@ -191,7 +191,7 @@ class SkeletonLibrary(gui3d.TaskView):
             return
 
         descr = self.amtOptions.loadPreset(filename, self.optionsSelector)   # TODO clean up this design
-        self.descrLbl.setText("Description: %s" % descr)
+        self.descrLbl.setTextFormat("Description: %s", gui.getLanguageString(descr))
         self.updateSkeleton(suppressAction = suppressAction)
 
     def updateSkeleton(self, useOptions=True, suppressAction = False):
@@ -278,7 +278,7 @@ class SkeletonLibrary(gui3d.TaskView):
                 gui3d.app.removeObject(self.skelObj)
                 self.skelObj = None
                 self.skelMesh = None
-            self.boneCountLbl.setText("Bones: ")
+            self.boneCountLbl.setTextFormat("Bones: %s", "")
             #self.selectedBone = None
 
             if self.debugLib:
@@ -305,7 +305,7 @@ class SkeletonLibrary(gui3d.TaskView):
         skel = self.human.getSkeleton()
         self.drawSkeleton(skel)
 
-        self.boneCountLbl.setText("Bones: %s" % self.human.getSkeleton().getBoneCount())
+        self.boneCountLbl.setTextFormat("Bones: %s", self.human.getSkeleton().getBoneCount())
 
         if self.debugLib:
             self.debugLib.reloadBoneExplorer()
