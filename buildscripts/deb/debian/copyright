@@ -1,0 +1,10 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Source: http://www.makehuman.org
+Upstream-Name: MakeHuman
+Upstream-Contact: Manuel Bastioni <mbastiono@gmail.com>
+
+Files: *
+Copyright: Copyright 1998-2013 Manuel Bastioni <mbastiono@gmail.com>
+License: AGPL-3+
+
+
