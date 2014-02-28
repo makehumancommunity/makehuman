@@ -1,6 +1,29 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+MakeHuman debian package build script
+
+**Project Name:**      MakeHuman
+
+**Product Home Page:** http://www.makehuman.org/
+
+**Code Home Page:**    http://code.google.com/p/makehuman/
+
+**Authors:**           Joel Palmius, Jonas Hauquier
+
+**Copyright(c):**      MakeHuman Team 2001-2014
+
+**Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
+
+**Coding Standards:**  See http://www.makehuman.org/node/165
+
+Abstract
+--------
+
+Create a debian DEB package for the MakeHuman application.
+"""
+
 # HINT: You need to run 
 #
 #   apt-get install devscripts equivs mercurial
@@ -8,6 +31,8 @@
 # ... in order for this script to function at all
 #
 # script has to be run as root (sudo)
+#
+# Settings can be changed in ../build.conf
 
 
 # --- CONFIGURATION SETTINGS --- 
@@ -81,6 +106,9 @@ def buildDeb(dest = None):
   global hgpath
   global files_to_chmod_executable
 
+  if os.geteuid() != 0:
+    print "WARNING: You are not root. You should be running this script with root permissions!"
+
   if dest is None:
     dest = os.getenv('makehuman_dest',0)
 
@@ -127,9 +155,9 @@ def buildDeb(dest = None):
     exit(1)
   if os.path.exists(exportdir):
     shutil.rmtree(exportdir)
-  build_prepare.EXCLUDES.append('blendertools/copy2blender.bat')
   exportInfo = build_prepare.export(sourcePath = hgrootdir, exportFolder = exportdir)
 
+  os.remove(os.path.join(exportdir, 'makehuman', 'blendertools', 'copy2blender.bat'))
 
   scriptdir = os.path.abspath( os.path.join(exportdir, 'makehuman') )    # .. Folder containing makehuman.py (source to package)
   print "Makehuman directory: " + scriptdir
