@@ -72,7 +72,7 @@ class Language(object):
             os.makedirs(pathdir)
         with open(path, 'wb') as f:
             for string in self.missingStrings:
-                f.write('"%s": "",\n' % string.encode('utf8'))
+                f.write('"%s": "",\n' % string.replace('\n', '\\n').encode('utf8'))
 
 
 class OrderedSet(collections.MutableSet):
