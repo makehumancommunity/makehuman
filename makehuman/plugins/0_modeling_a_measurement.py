@@ -213,11 +213,13 @@ class MeasureTaskView(gui3d.TaskView):
         self.waist = self.statsBox.addWidget(gui.TextView('Waist: '))
         self.hips = self.statsBox.addWidget(gui.TextView('Hips: '))
 
+        '''
         self.braBox = self.addRightWidget(gui.GroupBox('Brassiere size'))
         self.eu = self.braBox.addWidget(gui.TextView('EU: '))
         self.jp = self.braBox.addWidget(gui.TextView('JP: '))
         self.us = self.braBox.addWidget(gui.TextView('US: '))
         self.uk = self.braBox.addWidget(gui.TextView('UK: '))
+        '''
 
         self.groupBox.showWidget(self.groupBoxes['neck'])
 
@@ -301,12 +303,12 @@ class MeasureTaskView(gui3d.TaskView):
             slider.update()
 
         self.syncStatistics()
-        self.syncBraSizes()
+        #self.syncBraSizes()
 
     def syncSliderLabels(self):
 
         self.syncStatistics()
-        self.syncBraSizes()
+        #self.syncBraSizes()
 
     def syncStatistics(self):
 
@@ -426,11 +428,11 @@ class Ruler:
         self.Measures['upperarm']=[8383,8393,8392,8391,8390,8394,8395,8399,10455,10516,8396,8397,8398,8388,8387,8386,10431,8385,8384,8389]
         self.Measures['wrist']=[10208,10211,10212,10216,10471,10533,10213,10214,10215,10205,10204,10203,10437,10202,10201,10206,10200,10210,10209,10208]
         self.Measures['frontchest']=[1437,8125]
-        self.Measures['bust']=[8471,8439,8455,8462,8446,8478,8494,8557,8510,8526,8542,10720,10601,10603,10602,10612,10611,10610,10613,10604,10605,10606,3942,3941,3940,3950,3947,3948,3949,3938,3939,3937,4065,1870,1854,1838,1885,1822,1806,1774,1790,1783,1767,1799,]
+        self.Measures['bust']=[8439,8455,8462,8446,8478,8494,8557,8510,8526,8542,10720,10601,10603,10602,10612,10611,10610,10613,10604,10605,10606,3942,3941,3940,3950,3947,3948,3949,3938,3939,3937,4065,1870,1854,1838,1885,1822,1806,1774,1790,1783,1767,1799,8471]
         self.Measures['napetowaist']=[1491,4181]
         self.Measures['waisttohip']=[4121,4341]
         self.Measures['shoulder'] = [7478,8274]
-        self.Measures['underbust'] = [4088,10750,10744,10724,10725,10748,10722,10640,10642,10641,10651,10650,10649,10652,10643,10644,10645,10646,10647,10648,3988,3987,3986,3985,3984,3983,3982,3992,3989,3990,3991,3980,3981,3979,4067,4098,4073,4072,4094,4100,4082,4088]
+        self.Measures['underbust'] = [10750,10744,10724,10725,10748,10722,10640,10642,10641,10651,10650,10649,10652,10643,10644,10645,10646,10647,10648,3988,3987,3986,3985,3984,3983,3982,3992,3989,3990,3991,3980,3981,3979,4067,4098,4073,4072,4094,4100,4082,4088, 4088]
         self.Measures['waist'] = [4121,10760,10757,10777,10776,10779,10780,10778,10781,10771,10773,10772,10775,10774,10814,10834,10816,10817,10818,10819,10820,10821,4181,4180,4179,4178,4177,4176,4175,4196,4173,4131,4132,4129,4130,4128,4138,4135,4137,4136,4133,4134,4108,4113,4118,4121]
         self.Measures['upperlegheight'] = [10970,11230]
         self.Measures['lowerlegheight'] = [11225,12820]
