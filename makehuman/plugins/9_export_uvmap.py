@@ -33,7 +33,7 @@ class ExporterUV(Exporter):
         self.filter = "PNG (*.png)"
 
     def build(self, options, taskview):
-        self.uvmapDisplay = options.addWidget(gui.CheckBox("Display on human", False))
+        pass
 
     def export(self, human, filename):
         import projection
@@ -41,12 +41,6 @@ class ExporterUV(Exporter):
         dstImg = projection.mapUV()
         filepath = filename("png")
         dstImg.save(filepath)
-
-        if self.uvmapDisplay:
-            import log
-            human.setTexture(filepath)
-            log.message("Enabling shadeless rendering on body")
-            human.mesh.setShadeless(True)
 
 def load(app):
     app.addExporter(ExporterUV())
