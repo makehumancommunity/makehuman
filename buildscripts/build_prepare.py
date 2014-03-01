@@ -219,15 +219,9 @@ class MHAppExporter(object):
             _recursive_cp(self.sourceFile(f), self.targetFile(f))
         print "\n"
 
-        # Try to copy old VERSION file to export folder
-        if self.skipHG:
-            print "Skipped getting HG revision, attempting to copy already existing VERSION file to export"
-            try:
-                shutil.copy(self.sourceFile(VERSION_FILE_PATH), 
-                            self.targetFile(VERSION_FILE_PATH))
-            except Exception as e:
-                print "Failed to copy %s file to export (%s)" % (VERSION_FILE_PATH, e)
-            print "\n"
+        # Write VERSION file to export folder
+        print "Writing data/VERSION file to export folder with contents: %s:%s\n" % (self.HGREV, self.REVID)
+        self.writeVersionFile(self.HGREV, self.REVID)
 
         # If RELEASE status or version-sub was set in config, update it in exported mh source file
         if (self.IS_RELEASE is not None) or (self.VERSION_SUB is not None) :
@@ -425,15 +419,17 @@ class MHAppExporter(object):
                 HGREV = rev[0]
                 REVID = rev[1]
 
-            ### Write VERSION file
-            versionFile = self.targetFile(VERSION_FILE_PATH)
-            if not os.path.isdir(os.path.dirname( versionFile )):
-                os.makedirs(os.path.dirname( versionFile ))
-            vfile = open(versionFile, "w")
-            vfile.write("%s:%s" % (HGREV, REVID))
-            vfile.close()
-
         return HGREV, REVID
+
+    def writeVersionFile(self, hgrev, revid):
+        ### Write VERSION file
+        versionFile = self.targetFile(VERSION_FILE_PATH)
+        if not os.path.isdir(os.path.dirname( versionFile )):
+            os.makedirs(os.path.dirname( versionFile ))
+        vfile = open(versionFile, "w")
+        vfile.write("%s:%s" % (hgrev, revid))
+        vfile.close()
+
 
 class ExportInfo(object):
     def __init__(self, version, revision, nodeid, path, isRelease):

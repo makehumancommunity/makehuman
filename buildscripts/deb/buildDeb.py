@@ -37,6 +37,7 @@ Create a debian DEB package for the MakeHuman application.
 
 # --- CONFIGURATION SETTINGS --- 
 package_name = "makehuman"  # Note: 'hg' will be appended if this is a nightly build
+package_version = None
 package_replaces = "makehuman-nightly,makehuman-alpha,makehumansvn"   # TODO for release, do we need to add 'makehumanhg' to the replaces as well?
 
 hgpath = "/usr/bin/hg"
@@ -80,6 +81,7 @@ def parseConfig(configPath):
 
 def configure(confpath):
   global package_name
+  global package_version
   global package_replaces
   global hgpath
 
@@ -98,10 +100,12 @@ def configure(confpath):
     hgpath = _conf_get(conf, 'General', 'hgPath', hgpath)
     package_name = _conf_get(conf, 'Deb', 'packageName', package_name)
     package_replaces = _conf_get(conf, 'Deb', 'packageReplaces', package_replaces)
+    package_version = _conf_get(conf, 'Deb', 'packageVersion', package_version)
 
 
 def buildDeb(dest = None):
   global package_name
+  global package_version
   global package_replaces
   global hgpath
   global files_to_chmod_executable
@@ -223,7 +227,11 @@ def buildDeb(dest = None):
   _cp_files(srcbin, bindir)
 
   # Make a copy of hg revision in docs folder
-  shutil.copy(os.path.join(programdir, 'data', 'VERSION'), os.path.join(docdir,"HGREV.txt"))
+  try:
+    shutil.copy(os.path.join(programdir, 'data', 'VERSION'), os.path.join(docdir,"HGREV.txt"))
+  except:
+    print "ERROR did not find data/VERSION file (%s)! Your build is incomplete!! Verify your build_prepare settings." % os.path.join(programdir, 'data', 'VERSION')
+    exit(1)
 
   # Copy files in src bin dir to dest bin dir
   _cp_files(srccontrol, controldir)
@@ -242,19 +250,23 @@ def buildDeb(dest = None):
   size = uniq_p.communicate()[0].strip().strip('\n')
   print "\nPackage size: %s\n" % size
 
-
-  if exportInfo.isRelease:
-      # Conform to: http://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-Version
-      ver = "1:"+exportInfo.version.replace(' ', '.').lower()
+  if package_version is None:
+    if exportInfo.isRelease:
+        # Conform to: http://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-Version
+        ver = "1:"+exportInfo.version.replace(' ', '.').lower()
+    else:
+        ver = hgrev
   else:
-      ver = hgrev
+    ver = package_version
+
+  print "DEB PACKAGE VERSION: %s\n" % ver
+
   # Replace fields in control file template
   controlFile = os.path.join(controldir, 'control')
   _sed_replace(controlFile, 'VERSION', ver)
   _sed_replace(controlFile, 'PKGNAME', package_name)
   _sed_replace(controlFile, 'REPLACES', package_replaces)
   _sed_replace(controlFile, 'SIZE', size)
-
 
   if exportInfo.isRelease:
       ver = exportInfo.version
@@ -323,10 +335,13 @@ def buildDeb(dest = None):
 
   os.chdir(outputdir)
 
-  if exportInfo.isRelease:
-      ver = exportInfo.version.replace(' ', '.').lower()
+  if package_version is None:
+    if exportInfo.isRelease:
+        ver = exportInfo.version.replace(' ', '.').lower()
+    else:
+        ver = hgrev
   else:
-      ver = hgrev
+    ver = package_version
   debfile = os.path.join(outputdir,package_name + "_" + ver + "_all.deb")
 
   debcmd = ["dpkg-deb", "-Z", "bzip2", "-z", "9", "-b", "../debroot", debfile]
