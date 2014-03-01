@@ -1,20 +1,18 @@
 %global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
 
-Name:           makehumansvn
+Name:           PACKAGE_NAME
 Summary:        MakeHuman
-Version:        REV
+Version:        VER
 Release:        1
 URL:            http://www.makehuman.org
 License:        AGPLv3
 Group:          Applications/Graphics
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-BuildRequires:  subversion
-BuildRequires:  python
 Vendor:         MakeHuman.org
 Packager:       Joel Palmius <joepal1976@hotmail.com>
 Provides:       makehuman
-Requires:       python >= 2.7, numpy, PyOpenGL, PyQt4, pysvn
-Source:         makehumansvn-REV-1.tar.gz
+Requires:       python >= 2.7, numpy, PyOpenGL, PyQt4
+Source:         PACKAGE_NAME-VER-1.tar.gz
 BuildArch:      noarch
 Summary:        Free, open source tool for creating realistic 3D human characters.
 
@@ -42,7 +40,7 @@ Affero General Public License 3.0 (AGPL).
 cd $RPM_BUILD_DIR
 rm -rf makehuman
 rm -rf usr
-gzip -dc $RPM_SOURCE_DIR/makehumansvn-REV-1.tar.gz | tar -xvvf -
+gzip -dc $RPM_SOURCE_DIR/PACKAGE_NAME-VER-1.tar.gz | tar -xvvf -
 if [ $? -ne 0 ]; then
   exit $?
 fi
@@ -51,20 +49,14 @@ fi
 mkdir -p usr/share
 mkdir -p usr/share/applications
 mkdir -p usr/bin
-cd makehuman
-./cleannpz.sh
-./cleanpyc.sh
-python compile_targets.py
-python compile_models.py
-grep -v Name deb/debian/MakeHuman.desktop > ../usr/share/applications/MakeHuman.desktop
-echo "Name=MakeHuman REV" >> ../usr/share/applications/MakeHuman.desktop
-find . -name "*.target" -exec "rm" "-f" {} ";"
-rm -rf deb utils tools docs SConstruct setup.nsi makehuman.rc makehuman.spec main.c *.bat
-cd ..
-mv makehuman/rpm/makehuman usr/bin/makehuman
-mv makehuman usr/share
+
+mv makehuman/MakeHuman.desktop usr/share/applications/MakeHuman.desktop
+mv makehuman/makehuman usr/bin/makehuman
+mv makehuman usr/share/
 
 %install
+rm -rf $RPM_BUILD_ROOT
+rm -rf doesnotexist
 mkdir -p $RPM_BUILD_ROOT
 mv $RPM_BUILD_DIR/usr $RPM_BUILD_ROOT/usr
 
