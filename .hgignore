@@ -20,3 +20,4 @@ makehuman/data/litspheres
 makehuman/data/skins
 makehuman/data/teeth
 makehuman/data/tongue
+buildscripts/build_prepare.conf
