@@ -34,6 +34,8 @@ Create a redhat RPM package for the MakeHuman application.
 # --- CONFIGURATION SETTINGS --- 
 package_name = "makehuman"  # Note: 'hg' will be appended if this is a nightly build
 
+package_version = None
+
 hgpath = "/usr/bin/hg"
 
 # ------------------------------
@@ -46,6 +48,7 @@ import shutil
 
 def buildRpm():
   global package_name
+  global package_version
   global hgpath
 
   if os.geteuid() == 0:
@@ -124,7 +127,11 @@ def buildRpm():
     os.environ["MH_PKG_NAME"] = package_name
   else:
     os.environ["MH_PKG_NAME"] = package_name + 'hg'
-  version = exportInfo.version.replace(" ", ".")
+  if package_version is None:
+    version = exportInfo.version.replace(" ", ".")
+  else:
+    version = package_version
+  print "RPM PACKAGE VERSION: %s\n" % version
   os.environ["MH_VERSION"] = version
   os.environ["MH_EXPORT_PATH"] = exportdir
   print '\n\nBuilding RPM package "%s" of version "%s"\n\n' % (os.environ["MH_PKG_NAME"], version)
@@ -142,6 +149,7 @@ def parseConfig(configPath):
 
 def configure(confpath):
   global package_name
+  global package_version
   global hgpath
 
   def _conf_get(config, section, option, defaultVal):
@@ -158,6 +166,7 @@ def configure(confpath):
 
     hgpath = _conf_get(conf, 'General', 'hgPath', hgpath)
     package_name = _conf_get(conf, 'Rpm', 'packageName', package_name)
+    package_version = _conf_get(conf, 'Rpm', 'packageVersion', package_version)
 
 
 if __name__ == '__main__':
