@@ -24,6 +24,11 @@ else
 fi
 
 
+if [ ! -e EXPORT_PATH ]; then
+  echo "$EXPORT_PATH folder does not exist. Make sure you run the build with ./buildRpm.py Do not run this script directly!!"
+  return 1 
+fi
+
 
 if [ ! -e /bin/rpmbuild ]; then
   echo "/bin/rpmbuild does not exist. Maybe you need to install, for example, fedora-packager?"
