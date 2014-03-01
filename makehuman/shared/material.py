@@ -85,6 +85,9 @@ class Color(object):
 
         return self
 
+    def clone(self):
+        return type(self)().copyFrom(self)
+
     def asTuple(self):
         return (self.r, self.g, self.b)
 
@@ -294,6 +297,9 @@ class Material(object):
         self._uvMap = material.uvMap
 
         return self
+
+    def clone(self):
+        return type(self)().copyFrom(self)
 
     def fromFile(self, filename):
         """
