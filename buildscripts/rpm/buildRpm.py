@@ -86,9 +86,6 @@ def buildRpm():
   if os.path.exists(exportdir):
     shutil.rmtree(exportdir)
 
-  # Extra stuff to exclude
-  build_prepare.EXCLUDES.append('blendertools/copy2blender.bat')
-
   exportInfo = build_prepare.export(sourcePath = hgrootdir, exportFolder = exportdir)
 
 
@@ -106,6 +103,8 @@ def buildRpm():
   if os.path.isfile(execDest):
     os.remove(execDest)
   shutil.copy(execFile, execDest)
+
+  os.remove(os.path.join(exportdir, 'makehuman', 'blendertools', 'copy2blender.bat'))
 
 
   # Setup RPM environment
