@@ -236,6 +236,7 @@ class TaskView(View):
     def __init__(self, category, name, label=None):
         super(TaskView, self).__init__()
         self.name = name
+        self.category = category
         self.label = label
         self.focusWidget = None
         self.tab = None
