@@ -906,7 +906,7 @@ class ProgressBar(QtGui.QProgressBar, Widget):
         Widget.__init__(self)
         self.setVisible(visible)
 
-    def setProgress(self, progress, redraw=True):
+    def setProgress(self, progress):
         min_ = self.minimum()
         max_ = self.maximum()
         self.setValue(min_ + progress * (max_ - min_))
@@ -1074,7 +1074,7 @@ class Dialog(QtGui.QDialog):
         self.icon.setPixmap(icon.pixmap(64))
         self.layout.addWidget(self.icon, 0, 0, 2, 1)
 
-        self.text = QtGui.QLabel()
+        self.text = TextView()
         self.layout.addWidget(self.text, 0, 1, 1, -1)
 
         self.check = QtGui.QCheckBox(getLanguageString("Don't show this again"))
@@ -1089,17 +1089,21 @@ class Dialog(QtGui.QDialog):
         self.connect(self.button1, QtCore.SIGNAL('clicked(bool)'), self.accept)
         self.connect(self.button2, QtCore.SIGNAL('clicked(bool)'), self.reject)
 
-    def prompt(self, title, text, button1Label, button2Label=None, button1Action=None, button2Action=None, helpId=None):
+    def prompt(self, title, text, button1Label, button2Label=None, button1Action=None, button2Action=None, helpId=None, fmtArgs = None):
         if helpId in self.helpIds:
             return
 
+        if fmtArgs is None:
+            fmtArgs = []
+        elif isinstance(fmtArgs, basestring):
+            fmtArgs = [fmtArgs]
+
         button1Label = getLanguageString(button1Label)
         button2Label = getLanguageString(button2Label)
-        text = getLanguageString(text)
         title = getLanguageString(title)
 
         self.setWindowTitle(title)
-        self.text.setText(text)
+        self.text.setTextFormat(text, *fmtArgs)
         self.button1.setText(button1Label)
 
         if button2Label is not None:

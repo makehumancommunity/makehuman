@@ -76,7 +76,7 @@ def exportCollada(human, filepath, config):
     #        rmesh.pose = amt.getTPose()
 
     try:
-        progress(0.5, 0.55, "Exporting %s" % filepath)
+        progress(0.5, 0.55, "Exporting %s", filepath)
 
         try:
             fp = codecs.open(filepath, 'w', encoding="utf-8")
@@ -128,7 +128,7 @@ def exportCollada(human, filepath, config):
 
         progress(1, None, "Export finished.")
         time2 = time.clock()
-        log.message("Wrote Collada file in %g s: %s" % (time2-time1, filepath))
+        log.message("Wrote Collada file in %g s: %s", time2-time1, filepath)
 
     finally:
         if fp:

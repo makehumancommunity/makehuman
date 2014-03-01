@@ -108,6 +108,7 @@ class Progress(object):
         self.steps = steps
         self.stepsdone = 0
         self.description = None
+        self.args = []
 
         self.time = None
         self.totalTime = 0.0
@@ -135,7 +136,7 @@ class Progress(object):
 
     # Internal method that is responsible for the
     # actual progress bar updating.
-    def update(self, prog = None, desc = None):
+    def update(self, prog = None, desc = None, *args):
 
         if self.steps:
             prog = float(self.stepsdone) / float(self.steps)
@@ -144,8 +145,10 @@ class Progress(object):
 
         if self.description:
             desc = self.description
+            args = self.args
         elif desc is None:
             desc = ""
+            args = []
 
         if self.parent is None:
             if self.timing:
@@ -164,18 +167,18 @@ class Progress(object):
                 log.debug("Progress %s%%: %s", prog, desc)
                 
             if not self.progressCallback is None:
-                self.progressCallback(prog, desc)
+                self.progressCallback(prog, desc, *args)
 
         if prog >= 0.999999: # Not using 1.0 for precision safety.
             self.finish()
             
         if self.parent:
-            self.parent.childupdate(prog, desc)
+            self.parent.childupdate(prog, desc, *args)
 
 
     # Internal method that a child Progress calls for doing a
     # progress update by communicating with its parent.
-    def childupdate(self, prog, desc):
+    def childupdate(self, prog, desc, *args):
         if self.steps:
             prog = (self.stepsdone + prog) / float(self.steps)
         elif not self.nextprog is None:
@@ -183,7 +186,7 @@ class Progress(object):
         else:
             prog = self.progress
 
-        self.update(prog, desc)
+        self.update(prog, desc, *args)
 
 
     # Method to be called when a subroutine has finished,
@@ -202,12 +205,13 @@ class Progress(object):
     # Basic method for progress updating.
     # It overloads the () operator of the constructed object.
     # Pass None to the description to allow the child update status.
-    def __call__(self, progress, end = None, desc = False):
+    def __call__(self, progress, end = None, desc = False, *args):
         global current_Progress_
         current_Progress_ = self
         
         if not (desc is False):
             self.description = desc
+            self.args = args
 
         self.progress = progress
         self.nextprog = end
@@ -220,12 +224,13 @@ class Progress(object):
     # of roughly equivalent steps to complete.
     # You can use this in a non-stepped Progress to just
     # update the description on the status bar.
-    def step(self, desc = False):
+    def step(self, desc = False, *args):
         global current_Progress_
         current_Progress_ = self
 
         if not (desc is False):
             self.description = desc
+            self.args = args
         
         if self.steps:
             self.stepsdone += 1
