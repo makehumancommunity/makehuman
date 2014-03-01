@@ -6,7 +6,7 @@
 
 **Product Home Page:** http://www.makehuman.org/
 
-**Code Home Page:**    http://code.google.com/p/makehuman/
+**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Marc Flerackers, Jonas Hauquier
 
@@ -98,9 +98,7 @@ class ExportTaskView(guipose.PoseModeTaskView):
                 log.error("Unknown export format selected!")
                 return
 
-            gui3d.app.prompt('Info', u'The mesh has been exported to %s.' % dir, 'OK', helpId='exportHelp')
-
-            mh.changeCategory('Modelling')
+            gui3d.app.prompt('Info', u'The mesh has been exported to %s.', 'OK', helpId='exportHelp', fmtArgs = dir)
 
 
     _scales = {

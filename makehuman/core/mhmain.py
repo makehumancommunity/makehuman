@@ -6,7 +6,7 @@
 
 **Product Home Page:** http://www.makehuman.org/
 
-**Code Home Page:**    http://code.google.com/p/makehuman/
+**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Glynn Clements, Jonas Hauquier
 
@@ -306,7 +306,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         from scene import Scene
         from getpath import findFile
-        self.currentScene = Scene(findFile("data/scenes/default.mhscene"))
+        self.currentScene = Scene(findFile("scenes/default.mhscene"))
 
         @self._currentScene.mhEvent
         def onChanged(scene):
@@ -678,7 +678,10 @@ class MHApplication(gui3d.Application, mh.Application):
             if self.args.get('mhmFile', None):
                 mhmFile = self.args.get('mhmFile')
                 log.message("Loading MHM file %s (as specified by commandline argument)", mhmFile)
-                self.files.load.loadMHM(mhmFile)
+                if os.path.isfile(mhmFile):
+                    self.files.load.loadMHM(mhmFile)
+                else:
+                    log.error("Failed to load MHM file. The MHM file specified as argument (%s) does not exist!", mhmFile)
             if self.args.get('runtests', False):
                 log.message("Running test suite")
                 import testsuite
@@ -957,6 +960,13 @@ class MHApplication(gui3d.Application, mh.Application):
         language.language.setLanguage(lang)
         self.settings['rtl'] = language.language.rtl
 
+    def getLanguages(self):
+        """
+        The languages available on this MH installation, by listing all .json
+        files in the languages folder in user and system data path.
+        """
+        return language.getLanguages()
+
     def getLanguageString(self, string):
         return language.language.getLanguageString(string)
 
@@ -989,9 +999,9 @@ class MHApplication(gui3d.Application, mh.Application):
         self.statusBar.setMessage(text, *args)
 
     # Global progress bar
-    def progress(self, value, text=None):
+    def progress(self, value, text=None, *args):
         if text is not None:
-            self.status(text)
+            self.status(text, *args)
 
         if self.progressBar is None:
             return
@@ -1007,11 +1017,15 @@ class MHApplication(gui3d.Application, mh.Application):
         self.processEvents()
 
     # Global dialog
-    def prompt(self, title, text, button1Label, button2Label=None, button1Action=None, button2Action=None, helpId=None):
+    def prompt(self, title, text, button1Label, button2Label=None, button1Action=None, button2Action=None, helpId=None, fmtArgs = None):
+        if fmtArgs is None:
+            fmtArgs = []
+        elif isinstance(fmtArgs, basestring):
+            fmtArgs = [fmtArgs]
         if self.dialog is None:
             self.dialog = gui.Dialog(self.mainwin)
             self.dialog.helpIds.update(self.helpIds)
-        self.dialog.prompt(title, text, button1Label, button2Label, button1Action, button2Action, helpId)
+        self.dialog.prompt(title, text, button1Label, button2Label, button1Action, button2Action, helpId, fmtArgs)
 
     def setGlobalCamera(self):
         human = self.selectedHuman

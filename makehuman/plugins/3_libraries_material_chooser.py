@@ -6,7 +6,7 @@
 
 **Product Home Page:** http://www.makehuman.org/
 
-**Code Home Page:**    http://code.google.com/p/makehuman/
+**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Jonas Hauquier, Marc Flerackers
 
@@ -30,7 +30,7 @@ import os
 import gui3d
 import mh
 import gui
-import mh2proxy
+from proxy import SimpleProxyTypes
 import filechooser as fc
 from humanobjchooser import HumanObjectSelector
 import log
@@ -114,7 +114,7 @@ class MaterialTaskView(gui3d.TaskView):
     def getMaterialPaths(self, objType, proxy = None):
         if objType == 'skin':
             objType = 'skins'
-        elif objType not in [t.lower() for t in mh2proxy.SimpleProxyTypes]:
+        elif objType not in [t.lower() for t in SimpleProxyTypes]:
             objType = 'clothes'
         objType = objType.lower()
 

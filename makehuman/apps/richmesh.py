@@ -6,7 +6,7 @@
 
 **Product Home Page:** http://www.makehuman.org/
 
-**Code Home Page:**    http://code.google.com/p/makehuman/
+**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Thomas Larsson
 
@@ -226,8 +226,6 @@ class RichMesh(object):
 
 
     def rescale(self, scale):
-        import mh2proxy
-
         obj = self.object
         newobj = module3d.Object3D(self.name)
         newobj.setCoords(scale*obj.coord)

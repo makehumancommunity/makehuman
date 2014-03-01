@@ -6,7 +6,7 @@
 
 **Product Home Page:** http://www.makeinfo.human.org/
 
-**Code Home Page:**    http://code.google.com/p/makehuman/
+**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Thomas Larsson
 
@@ -55,7 +55,7 @@ class Writer(mhx_writer.Writer):
         t = t0
         for proxy in self.proxies.values():
             if proxy.type == type:
-                gui3d.app.progress(t, text="Exporting %s" % proxy.name)
+                gui3d.app.progress(t, "Exporting %s", proxy.name)
                 fp.write("#if toggle&%s\n" % test)
                 self.writeProxy(fp, proxy, layer)
                 fp.write("#endif\n")

@@ -8,7 +8,7 @@ Internal OpenGL Renderer Functions.
 
 **Product Home Page:** http://www.makehuman.org/
 
-**Code Home Page:**    http://code.google.com/p/makehuman/
+**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Jonas Hauquier
 
@@ -110,4 +110,4 @@ def Render(settings):
 
     gui3d.app.getCategory('Rendering').getTaskByName('Viewer').setImage(img)
     mh.changeTask('Rendering', 'Viewer')
-    gui3d.app.statusPersist('Rendering complete.')
+    gui3d.app.statusPersist('Rendering complete')

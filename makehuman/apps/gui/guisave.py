@@ -6,7 +6,7 @@
 
 **Product Home Page:** http://www.makehuman.org/
 
-**Code Home Page:**    http://code.google.com/p/makehuman/
+**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Marc Flerackers
 
@@ -79,8 +79,6 @@ class SaveTaskView(gui3d.TaskView):
         self.parent.tasksByName['Load'].fileentry.text = dir
         self.parent.tasksByName['Load'].fileentry.edit.setText(dir)
         self.parent.tasksByName['Load'].fileentry.setDirectory(dir)
-
-        mh.changeCategory('Modelling')
 
     def onShow(self, event):
         # When the task gets shown, set the focus to the file entry
