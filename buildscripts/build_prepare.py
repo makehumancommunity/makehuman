@@ -72,6 +72,8 @@ import shutil
 
 
 VERSION_FILE_PATH = 'makehuman/data/VERSION'
+BUILD_CONF_FILE_PATH = 'buildscripts/build_prepare.conf'
+
 
 
 class MHAppExporter(object):
@@ -83,7 +85,58 @@ class MHAppExporter(object):
 
         sys.path = sys.path + [self.sourceFile('makehuman'), self.sourceFile('makehuman/lib')]
 
+        self.configure()
+
+    def configure(self):
+        self.HGREV = self.REVID = None
+        self.VERSION = None
+        self.IS_RELEASE = None
+        self.VERSION_SUB = None
+
+        def _conf_get(config, section, option, defaultVal):
+            try:
+                return config.get(section, option)
+            except:
+                return defaultVal
+
+        self.config = parseConfig(self.sourceFile(BUILD_CONF_FILE_PATH))
+        if self.config is None:
+            print "No config file at %s, using defaults or options passed on commandline." % self.sourceFile(BUILD_CONF_FILE_PATH)
+        else:
+            print "Using config file at %s. NOTE: properties in config file will override any other settings!" % self.sourceFile(BUILD_CONF_FILE_PATH)
+
+            global HG_PATH
+            HG_PATH = _conf_get(self.config, 'Config', 'hgPath', HG_PATH)
+
+            hgrev = _conf_get(self.config, 'Config', 'hgRev', None)
+            if hgrev is not None:
+                self.HGREV, self.REVID = hgrev.split(':')
+            if self.HGREV and self.REVID:
+                os.environ['HGREVISION_SOURCE'] = "build config file"
+                os.environ['HGREVISION'] = self.HGREV
+                os.environ['HGNODEID'] = self.REVID
+            else:
+                self.HGREV = None
+                self.REVID = None
+
+            self.VERSION_SUB = _conf_get(self.config, 'Config', 'versionSub', None)
+
+            isRelease = _conf_get(self.config, 'Config', 'isRelease', None)
+            if isRelease is not None:
+                self.IS_RELEASE = ( isRelease.lower() in ['yes', 'true'] )
+
+            skipHg = _conf_get(self.config, 'Config', 'skipHg', None)
+            if skipHg is not None:
+                self.skipHG = skipHg
+
+            skipScripts = _conf_get(self.config, 'Config', 'skipScripts', None)
+            if skipScripts is not None:
+                self.skipScripts = skipScripts
+
     def isRelease(self):
+        if self.IS_RELEASE is not None:
+            return self.IS_RELEASE
+
         import makehuman
         return makehuman.isRelease()
 
@@ -111,9 +164,10 @@ class MHAppExporter(object):
 
         # Obtain exact revision
         # TODO perhaps try to obtain hg tags instead of node id for releases
-        HGREV, REVID = self.processRevision()
-        VERSION = self.getVersion() # TODO 'A8 RC1'
-        print "Retrieved version information: %s (revision info: r%s %s [%s])\n" % (VERSION, HGREV, REVID, os.environ['HGREVISION_SOURCE'])
+        if not self.HGREV or not self.REVID:
+            self.HGREV, self.REVID = self.processRevision()
+        self.VERSION = self.getVersion()
+        print "Retrieved version information: %s (revision info: r%s %s [%s])\n" % (self.VERSION, self.HGREV, self.REVID, os.environ['HGREVISION_SOURCE'])
 
         # Run scripts to prepare assets
         if not self.skipScripts:
@@ -167,6 +221,29 @@ class MHAppExporter(object):
                 print "Failed to copy %s file to export (%s)" % (VERSION_FILE_PATH, e)
             print "\n"
 
+        # If RELEASE status or version-sub was set in config, update it in exported mh source file
+        if (self.IS_RELEASE is not None) or (self.VERSION_SUB is not None) :
+            f = open(self.targetFile('makehuman/makehuman.py'), 'rb')
+            release_replaced = False
+            versionsub_replaced = False
+            lines = []
+            for lIdx, line in enumerate(f):
+                if self.IS_RELEASE is not None and not release_replaced and line.strip().startswith('release ='):
+                    line = line.replace('release = True', 'release = %s' % self.IS_RELEASE)
+                    line = line.replace('release = False', 'release = %s' % self.IS_RELEASE)
+                    print "Replaced release declaration in makehuman/makehuman.py at line %s." % (lIdx+1)
+                    release_replaced = True
+                if self.VERSION_SUB is not None and not versionsub_replaced and line.strip().startswith('versionSub ='):
+                    import re
+                    line = re.sub(r'versionSub = ".*"','versionSub = "%s"' % self.VERSION_SUB, line)
+                    print "Replaced version-sub declaration in makehuman/makehuman.py at line %s." % (lIdx+1)
+                    versionsub_replaced = True
+                lines.append(line)
+            f.close()
+            f = open(self.targetFile('makehuman/makehuman.py'), 'wb')
+            f.write(''.join(lines))
+            f.close()
+
         # Re-arrange folders
         for f in os.listdir( self.targetFile() ):
             if f == REARRANGE_ROOT_FOLDER:
@@ -195,7 +272,7 @@ class MHAppExporter(object):
         '''
         print "\n"
 
-        resultInfo = ExportInfo(VERSION, HGREV, REVID, self.targetFile(), self.isRelease())
+        resultInfo = ExportInfo(self.VERSION, self.HGREV, self.REVID, self.targetFile(), self.isRelease())
         resultInfo.rootSubpath = REARRANGE_ROOT_FOLDER
         resultInfo.datas = [os.path.join(REARRANGE_ROOT_FOLDER, d) for d in DATAS]
         resultInfo.pathEx = [os.path.join(REARRANGE_ROOT_FOLDER, p) for p in PYTHON_PATH_EX]
@@ -215,6 +292,11 @@ class MHAppExporter(object):
     def getVersion(self):
         import makehuman
         # TODO still causes svn warnings with current version of makehuman
+        if self.VERSION_SUB is not None:
+            makehuman.versionSub = self.VERSION_SUB
+        if self.IS_RELEASE is not None:
+            makehuman.release = self.IS_RELEASE
+
         return makehuman.getVersionStr(verbose=False)
 
     def getCWD(self):
@@ -437,6 +519,15 @@ def _recursive_cp(src, dest):
     except OSError, e:
         # Copying file access times may fail on Windows (WindowsError)
         pass
+
+def parseConfig(configPath):
+    if os.path.isfile(configPath):
+        import ConfigParser
+        config = ConfigParser.ConfigParser()
+        config.read(configPath)
+        return config
+    else:
+        return None
 
 def export(sourcePath = '.', exportFolder = 'export', skipHG = False, skipScripts = False):
     """
