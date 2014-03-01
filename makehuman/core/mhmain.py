@@ -992,9 +992,9 @@ class MHApplication(gui3d.Application, mh.Application):
         self.statusBar.setMessage(text, *args)
 
     # Global progress bar
-    def progress(self, value, text=None):
+    def progress(self, value, text=None, *args):
         if text is not None:
-            self.status(text)
+            self.status(text, *args)
 
         if self.progressBar is None:
             return
@@ -1010,11 +1010,15 @@ class MHApplication(gui3d.Application, mh.Application):
         self.processEvents()
 
     # Global dialog
-    def prompt(self, title, text, button1Label, button2Label=None, button1Action=None, button2Action=None, helpId=None):
+    def prompt(self, title, text, button1Label, button2Label=None, button1Action=None, button2Action=None, helpId=None, fmtArgs = None):
+        if fmtArgs is None:
+            fmtArgs = []
+        elif isinstance(fmtArgs, basestring):
+            fmtArgs = [fmtArgs]
         if self.dialog is None:
             self.dialog = gui.Dialog(self.mainwin)
             self.dialog.helpIds.update(self.helpIds)
-        self.dialog.prompt(title, text, button1Label, button2Label, button1Action, button2Action, helpId)
+        self.dialog.prompt(title, text, button1Label, button2Label, button1Action, button2Action, helpId, fmtArgs)
 
     def setGlobalCamera(self):
         human = self.selectedHuman
