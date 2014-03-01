@@ -33,11 +33,12 @@ import subprocess
 ## Version information #########################################################
 version = [1, 0]                        # Major and minor version number
 release = False                         # False for nightly
-versionSub = "Alpha 8 RC2"              # Short version description
+versionSub = "Alpha 8"                  # Short version description
 meshVersion = "hm08"                    # Version identifier of the basemesh
-
-_versionStr = ".".join( [str(v) for v in version] ) + " " + versionSub
 ################################################################################
+
+def _versionStr():
+    return ".".join( [str(v) for v in version] ) + " " + versionSub
 
 def isRelease():
     """
@@ -64,11 +65,11 @@ def getVersionStr(verbose=True):
     Verbose version as string, for displaying and information
     """
     if isRelease():
-        return _versionStr
+        return _versionStr()
     else:
         if 'HGREVISION' not in os.environ:
             get_hg_revision()
-        result = _versionStr + " (r%s %s)" % (os.environ['HGREVISION'], os.environ['HGNODEID'])
+        result = _versionStr() + " (r%s %s)" % (os.environ['HGREVISION'], os.environ['HGNODEID'])
         if verbose:
             result += (" [%s]" % os.environ['HGREVISION_SOURCE'])
         return result
