@@ -48,8 +48,18 @@ noDownload = False
 # Debian package config
 #
 [Deb]
-# name of the debian package
+# Name of the debian package. In nightly mode (isRelease == False) "hg" is 
+# appended to this string
 packageName = makehuman
 
-# installed packages to replace by this package
+# Installed packages to replace by this package
 packageReplaces = makehuman-nightly, makehuman-alpha, makehumansvn
+
+
+#
+# Redhat RPM package config
+#
+[Rpm]
+# Name of the redhat package. In nightly mode (isRelease == False) "hg" is 
+# appended to this string
+packageName = makehuman
