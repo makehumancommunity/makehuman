@@ -59,7 +59,7 @@
 #packageReplaces = makehuman-nightly, makehuman-alpha, makehumansvn
 
 # Override the string used as version for the package (default: is derived from
-versionSub either specified in this file or in makehuman.py)
+# versionSub either specified in this file or in makehuman.py)
 #packageVersion = 1.0.0~alpha8~rc3
 
 
@@ -72,6 +72,6 @@ versionSub either specified in this file or in makehuman.py)
 #packageName = makehuman
 
 # Override the string used as version for the package (default: is derived from
-versionSub either specified in this file or in makehuman.py)
+# versionSub either specified in this file or in makehuman.py)
 #packageVersion = 1.0.0.alpha8.rc3
 
