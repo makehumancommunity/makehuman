@@ -960,6 +960,13 @@ class MHApplication(gui3d.Application, mh.Application):
         language.language.setLanguage(lang)
         self.settings['rtl'] = language.language.rtl
 
+    def getLanguages(self):
+        """
+        The languages available on this MH installation, by listing all .json
+        files in the languages folder in user and system data path.
+        """
+        return language.getLanguages()
+
     def getLanguageString(self, string):
         return language.language.getLanguageString(string)
 
