@@ -1,19 +1,30 @@
-# Example configuration for build_prepare.py
-# Rename to build_prepare.conf to use (must be in buildscripts/ folder in hg root)
+################################################################################
+# Example build configuration
+# Rename to build.conf to use (must be in buildscripts/ folder in hg root)
+# Don't wrap any "around your strings" (property = some string)!
+################################################################################
 
-[Config]
+#
+# General declarations
+#
+[General]
 # Path to hg executable on system (default: hg)
 # If HG is not installed, build_prepare will attempt to use python hglib (must 
 # be installed)
 hgPath = /usr/bin/hg
 
+
+#
+# Config section for build_prepare.py
+#
+[BuildPrepare]
 # HG revision in format rev_nb:node_id (default: not specified, obtain rev 
 # from hg, or data/VERSION file if skipHG is enabled)
 hgRev = 103:298d59a0c920
 
 # Version sub title string (default: not specified, obtained from declaration
 # in makehuman/makehuman.py) If set replaces contents of that file in export. 
-versionSub = "Alpha 8 final"
+versionSub = Alpha 8 final
 
 # Release status (default: not specified, obtained from declaration
 # in makehuman/makehuman.py) If set replaces contents of that file in export. 
@@ -31,3 +42,14 @@ skipScripts = False
 # argument, False if not specified) Has no effect if skipScripts is already
 # enabled
 noDownload = False
+
+
+#
+# Debian package config
+#
+[Deb]
+# name of the debian package
+packageName = makehuman
+
+# installed packages to replace by this package
+packageReplaces = makehuman-nightly, makehuman-alpha, makehumansvn
