@@ -275,7 +275,7 @@ def exportMd5(human, filepath, config):
             writeAnimation(filepath, human, humanBBox, config, anim.getAnimationTrack())
             animprog.step()
 
-    progress(1, None, "MD5 export finished. Exported file: %s" % filepath)
+    progress(1, None, "MD5 export finished. Exported file: %s", filepath)
 
 def writeBone(f, bone, human, config):
     """
