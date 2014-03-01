@@ -35,6 +35,7 @@ import animation
 import armature
 from armature.options import ArmatureOptions
 import getpath
+import material
 
 import numpy as np
 import os
@@ -127,8 +128,8 @@ class SkeletonLibrary(gui3d.TaskView):
 
         self.selectedJoint = None
 
-        self.oldHumanTransp = self.human.material.transparent
-        self.oldHumanShader = self.human.material.shader
+        self.oldHumanMat = self.human.material
+        self.oldPxyMats = dict()
 
         #
         #   Display box
@@ -221,11 +222,13 @@ class SkeletonLibrary(gui3d.TaskView):
         self.oldSmoothValue = self.human.isSubdivided()
         self.human.setSubdivided(False)
 
-        self.oldHumanTransp = self.human.material.transparent
-        self.oldHumanShader = self.human.material.shader
-        self.human.material.shader = mh.getSysDataPath('shaders/glsl/xray')
-        self.setHumanTransparency(True)
-        self.human.meshData.setPickable(False)
+        self.oldHumanMat = self.human.material.clone()
+        self.oldPxyMats = dict()
+        xray_mat = material.fromFile(mh.getSysDataPath('materials/xray.mhmat'))
+        self.human.material = xray_mat
+        for pxy, obj in self.human.getProxiesAndObjects():
+            self.oldPxyMats[pxy.uuid] = obj.material.clone()
+            obj.material = xray_mat
 
         if self.skelObj:
             self.skelObj.show()
@@ -250,10 +253,10 @@ class SkeletonLibrary(gui3d.TaskView):
 
         if self.skelObj:
             self.skelObj.hide()
-        self.setHumanTransparency(False)
-        self.human.material.shader = self.oldHumanShader
-        self.human.meshData.setPickable(True)
-        self.removeBoneHighlights()
+        self.human.material = self.oldHumanMat
+        for pxy, obj in self.human.getProxiesAndObjects():
+            if pxy.uuid in self.oldPxyMats:
+                obj.material = self.oldPxyMats[pxy.uuid]
 
         # Reset smooth setting
         self.human.setSubdivided(self.oldSmoothValue)
@@ -265,8 +268,6 @@ class SkeletonLibrary(gui3d.TaskView):
         Load skeleton from an options set.
         """
         log.debug("Loading skeleton with options %s", options)
-
-        self.removeBoneHighlights()
 
         if not options:
             # Unload current skeleton
@@ -449,16 +450,12 @@ class SkeletonLibrary(gui3d.TaskView):
         mesh.markCoords(colr = True)
         mesh.sync_all()
 
-
-    def setHumanTransparency(self, enabled):
-        if enabled:
-            self.human.material.transparent = enabled
-        else:
-            self.human.material.transparent = self.oldHumanTransp
-
-
     def onHumanChanged(self, event):
         human = event.human
+        if event.change == 'reset':
+            if gui3d.app.currentTask == self:
+                # Refresh onShow status
+                self.onShow(event)
         if event.change == 'targets':
             # Set flag to do a deferred skeleton update in the future
             if human._skeleton:
@@ -469,7 +466,7 @@ class SkeletonLibrary(gui3d.TaskView):
     def onHumanChanging(self, event):
         if event.change == 'reset':
             self.chooseSkeleton(None)
-            self.selectedRig = None # TODO because there is no proper chooseSkeleton(filename) method
+            self.presetChooser.selectItem(None)
 
 
     def onHumanRotated(self, event):
