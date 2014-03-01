@@ -149,12 +149,12 @@ def getLanguages():
     The languages available on this MH installation, by listing all .json
     files in the languages folder in user and system data path.
     """
-    langDirFiles = ['english'] + os.listdir(getSysDataPath('languages'))
+    langDirFiles = os.listdir(getSysDataPath('languages'))
     try:
         langDirFiles = langDirFiles + os.listdir(getDataPath('languages'))
     except:
         pass
-    return [os.path.basename(filename).replace('.json', '') for filename in langDirFiles if filename.split(os.extsep)[-1] == "json"]
+    return ['english'] + [os.path.basename(filename).replace('.json', '') for filename in langDirFiles if filename.split(os.extsep)[-1] == "json"]
 
 
 language = Language()
