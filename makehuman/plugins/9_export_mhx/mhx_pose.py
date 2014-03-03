@@ -66,16 +66,7 @@ class Writer(mhx_writer.Writer):
         for ptype in proxy.SimpleProxyTypes:
             self.proxyShapes(ptype, 'T_Clothes', fp, [])
 
-        fp.write("#if toggle&T_Mesh\n")
         self.writeShapeKeysAndDrivers(fp, "%sBody" % self.name, None, targets)
-
-        fp.write("""
-    #endif
-
-    # --------------- Actions ----------------------------- #
-
-    #if toggle&T_Armature
-    """)
 
         fp.write(
             "Pose %s\n" % self.name +
@@ -86,11 +77,7 @@ class Writer(mhx_writer.Writer):
         amt.writeControlPoses(fp, config)
         fp.write("  ik_solver 'LEGACY' ;\nend Pose\n")
         amt.writeDrivers(fp)
-        fp.write("CorrectRig %s ;\n" % self.name)
-        fp.write("""
-    #endif
-    """)
-
+        fp.write("CorrectRig %s ;\n\n" % self.name)
 
     # *** material-drivers
 
@@ -99,11 +86,9 @@ class Writer(mhx_writer.Writer):
     #-------------------------------------------------------------------------------
 
     def proxyShapes(self, type, test, fp, targets):
-        fp.write("#if toggle&%s\n" % test)
         for pxy in self.proxies.values():
             if pxy.name and pxy.type == type:
                 self.writeShapeKeysAndDrivers(fp, self.name+pxy.name, pxy, targets)
-        fp.write("#endif\n")
 
 
     def writeShape1(self, fp, sname, lr, trg, min, max, pxy, scale):
@@ -142,7 +127,6 @@ class Writer(mhx_writer.Writer):
             return
 
         fp.write(
-            "#if toggle&T_Shapekeys\n" +
             "ShapeKeys %s\n" % name +
             "  ShapeKey Basis Sym True\n" +
             "  end ShapeKey\n")
@@ -154,8 +138,6 @@ class Writer(mhx_writer.Writer):
             self.writeShape(fp, sname, "Sym", shape, 0, 1, None, config.scale)
 
         '''
-        fp.write("#if toggle&T_ShapeDrivers\n")
-
         if config.expressions and not proxy:
             exprList = exportutils.shapekeys.readExpressionMhm(mh.getSysDataPath("expressions"))
             self.writeExpressions(fp, exprList, "Expression")
@@ -166,13 +148,9 @@ class Writer(mhx_writer.Writer):
             fp.write("  AnimationData None (toggle&T_Symm==0)\n")
             self.writeShapeKeyDrivers(fp, name, proxy)
             fp.write("  end AnimationData\n\n")
-
-        fp.write("#endif\n")
         '''
 
-        fp.write(
-            "  end ShapeKeys\n" +
-            "#endif\n")
+        fp.write("  end ShapeKeys\n")
 
 
     def writeShapeKeyDrivers(self, fp, name, pxy):

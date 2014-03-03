@@ -84,13 +84,11 @@ class Writer(mhx_writer.Writer):
         self.writeBaseMaterials(fp)
         self.writeVertexGroups(fp, None)
 
-        fp.write("#if toggle&T_Clothes\n")
         weights = {}
         for proxy in self.proxies.values():
             if proxy.deleteVerts.any():
                 weights["Delete_" + proxy.name] = proxy.deleteVerts
         self.writeBoolWeights(fp, weights)
-        fp.write("#endif\n")
 
         ox,oy,oz = config.scale*config.offset
         fp.write(
@@ -99,10 +97,7 @@ class Writer(mhx_writer.Writer):
     "  Property MhxOffsetX %.4f ;\n" % ox +
     "  Property MhxOffsetY %.4f ;\n" % oy +
     "  Property MhxOffsetZ %.4f ;\n" % oz +
-"""
-  layers Array 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0  ;
-#if toggle&T_Armature
-""")
+    "  layers Array 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0  ;\n")
 
         self.writeArmatureModifier(fp, None)
 
@@ -122,7 +117,6 @@ class Writer(mhx_writer.Writer):
             "  parent Refer Object %s ;" % self.name +
 """
   parent_type 'OBJECT' ;
-#endif
   color Array 1.0 1.0 1.0 1.0  ;
   select True ;
   lock_location Array 1 1 1 ;
@@ -280,9 +274,7 @@ end Object
 
     def writeHideAnimationData(self, fp, amt, prefix, name, suffix):
         return
-        fp.write(
-            "#if toggle&T_ShapeDrivers\n" +
-            "AnimationData %s%s%s True\n" % (prefix, name, suffix))
+        fp.write("AnimationData %s%s%s True\n" % (prefix, name, suffix))
         mhx_drivers.writePropDriver(fp, amt, ["Mhh%s" % name], "x1", "hide", -1)
         mhx_drivers.writePropDriver(fp, amt, ["Mhh%s" % name], "x1", "hide_render", -1)
         if suffix == "Body":
@@ -292,9 +284,7 @@ end Object
                     mask = 'modifiers["Mask%s"]' % proxy.name
                     mhx_drivers.writePropDriver(fp, amt, path, "not(x1)", mask + ".show_viewport", -1)
                     mhx_drivers.writePropDriver(fp, amt, path, "not(x1)", mask + ".show_render", -1)
-        fp.write(
-            "end AnimationData\n" +
-            "#endif\n")
+        fp.write("end AnimationData\n")
 
 #-------------------------------------------------------------------------------
 #   Vertex groups
