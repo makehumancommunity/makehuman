@@ -31,14 +31,20 @@ import re
 import subprocess
 
 ## Version information #########################################################
-version = [1, 0]                        # Major and minor version number
+version = [1, 0, 0]                     # Major, minor and patch version number
 release = False                         # False for nightly
-versionSub = "Alpha 8"                  # Short version description
+versionSub = ""                         # Short version description
 meshVersion = "hm08"                    # Version identifier of the basemesh
 ################################################################################
 
+def _versionDigitsStr():
+    return ".".join( [str(v) for v in version] )
+
 def _versionStr():
-    return ".".join( [str(v) for v in version] ) + " " + versionSub
+    if versionSub:
+        return _versionDigitsStr() + " " + versionSub
+    else:
+        return _versionDigitsStr()
 
 def isRelease():
     """
@@ -78,7 +84,10 @@ def getShortVersion():
     """
     Useful for tagging assets
     """
-    return versionSub.replace(' ', '_').lower()
+    if versionSub:
+        return versionSub.replace(' ', '_').lower()
+    else:
+        return "v" + _versionDigitsStr()
 
 def getBasemeshVersion():
     """
@@ -314,6 +323,8 @@ def main():
         if not isRelease():
             get_hg_revision()
         os.environ['MH_VERSION'] = getVersionStr()
+        os.environ['MH_SHORT_VERSION'] = getShortVersion()
+        os.environ['MH_MESH_VERSION'] = getBasemeshVersion()
         args = parse_arguments()
         init_logging()
     except Exception as e:
