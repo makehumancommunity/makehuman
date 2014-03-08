@@ -74,6 +74,8 @@ class DebugDump(object):
         self.write("VERSION: %s", os.environ['MH_VERSION'])
         if 'HGREVISION' in os.environ and 'HGREVISION_SOURCE' in os.environ:
             self.write("HG REVISION: r%s (%s) [%s]", os.environ['HGREVISION'], os.environ['HGNODEID'], os.environ['HGREVISION_SOURCE'])
+        if 'HGBRANCH' in os.environ:
+            self.write("HG BRANCH: %s", os.environ['HGBRANCH'])
         self.write("SHORT VERSION: %s", os.environ['MH_SHORT_VERSION'])
         self.write("BASEMESH VERSION: %s", os.environ['MH_MESH_VERSION'])
         self.write("IS BUILT (FROZEN): %s", os.environ['MH_FROZEN'])
