@@ -6,7 +6,7 @@
 
 **Product Home Page:** http://www.makehuman.org/
 
-**Code Home Page:**    http://code.google.com/p/makehuman/
+**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Manuel Bastioni, Marc Flerackers
 
@@ -47,7 +47,7 @@ class ExampleTaskView(gui3d.TaskView):
         @self.aButton.mhEvent
         def onClicked(event):
             self.pushed += 1
-            self.aButtonLabel.setText('Pushed %d times' % self.pushed)
+            self.aButtonLabel.setTextFormat('Pushed %d times', self.pushed)
 
         # We add a toggle button to the current task
         # A toggle button fires an event when it is clicked but retains its selected state after the mouse is up,
@@ -94,13 +94,13 @@ class ExampleTaskView(gui3d.TaskView):
 
         @self.aSlider.mhEvent
         def onChange(value):
-            self.aSliderLabel.setText('Value is %f' % value)
-            self.aProgressBar.setProgress(value, 1)
+            self.aSliderLabel.setTextFormat('Value is %f', value)
+            self.aProgressBar.setProgress(value)
 
         # we also create a progressbar, which is updated as the slider moves
 
         self.aProgressBar = box.addWidget(gui.ProgressBar())
-        self.aProgressBar.setProgress(0.5, 0)
+        self.aProgressBar.setProgress(0.5)
         
         # A text edit
 

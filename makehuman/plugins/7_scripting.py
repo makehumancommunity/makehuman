@@ -6,7 +6,7 @@
 
 **Product Home Page:** http://www.makehuman.org/
 
-**Code Home Page:**    http://code.google.com/p/makehuman/
+**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Joel Palmius
 
@@ -68,7 +68,7 @@ class ScriptingView(gui3d.TaskView):
                 self.directory = os.path.split(filename)[0]
             else:
                 dlg = gui.Dialog()
-                dlg.prompt("Load script","File " + filename + " does not seem to exist","OK")
+                dlg.prompt("Load script","File %s does not exist","OK", fmtArgs=filename)
 
         @self.saveButton.mhEvent
         def onClicked(filename):

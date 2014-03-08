@@ -6,7 +6,7 @@
 
 **Product Home Page:** http://www.makehuman.org/
 
-**Code Home Page:**    http://code.google.com/p/makehuman/
+**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Marc Flerackers, Glynn Clements, Jonas Hauquier
 
@@ -84,26 +84,6 @@ import targets
 # when a value they depend on changes. After dragged slider is released, all
 # dependencies will be updated (this is a performance feature)
 realtimeDependencyUpdates = ['macrodetails', 'macrodetails-universal']
-
-class DetailAction(guicommon.Action):
-    def __init__(self, human, before, after, update=True):
-        super(DetailAction, self).__init__('Change detail')
-        self.human = human
-        self.before = before
-        self.after = after
-        self.update = update
-
-    def do(self):
-        for (target, value) in self.after.iteritems():
-            self.human.setDetail(target, value)
-        self.human.applyAllTargets(G.app.progress, update=self.update)
-        return True
-
-    def undo(self):
-        for (target, value) in self.before.iteritems():
-            self.human.setDetail(target, value)
-        self.human.applyAllTargets()
-        return True
 
 class ModifierAction(guicommon.Action):
     def __init__(self, modifier, before, after, postAction):
@@ -433,16 +413,19 @@ class GenericModifier(BaseModifier):
         """
         if path is None:
             return []
-        path = tuple(path.split('-'))
-        result = []
-        if path not in targets.getTargets().groups:
+
+        try:
+            targetsList = targets.getTargets().getTargetsByGroup(path)
+        except KeyError:
             log.debug('missing target %s', path)
-        for target in targets.getTargets().groups.get(path, []):
-            keys = [var
-                    for var in target.data.itervalues()
-                    if var is not None]
-            keys.append('-'.join(target.key))
-            result.append((target.path, keys))
+            targetsList = []
+
+        result = []
+        for component in targetsList:
+            targetgroup = '-'.join(component.key)
+            factordependencies = component.getVariables() + [targetgroup]
+            result.append( (component.path, factordependencies) )
+
         return result
 
     @staticmethod
@@ -494,7 +477,6 @@ class GenericModifier(BaseModifier):
     _variables = targets._value_cat.keys()
 
     def getFactors(self, value):
-        #print 'genericModifier: getFactors'
         return dict((name, getattr(self.human, name + 'Val'))
                     for name in self._variables)
 
@@ -537,7 +519,6 @@ class UniversalModifier(GenericModifier):
         self.targets = self.l_targets + self.r_targets + self.c_targets
 
     def getFactors(self, value):
-        #print "UniversalModifier factors:"
         factors = super(UniversalModifier, self).getFactors(value)
 
         if self.left is not None:
@@ -545,9 +526,6 @@ class UniversalModifier(GenericModifier):
         if self.center is not None:
             factors[self.center] = 1.0 - abs(value)
         factors[self.right] = max(0.0, value)
-
-        #print 'factors:'
-        #print factors
 
         return factors
 
@@ -630,6 +608,4 @@ def debugModifiers():
         log.debug("    controls: %s", m.macroVariable)
         log.debug("    dependencies (variables): %s", str(m.macroDependencies))
         log.debug("    dependencies (modifier groups): %s", str(list(human.getModifierDependencies(m))))
-        log.debug("    influences (modifier groups): %s", str(list(human.getModifiersAffectedBy(m))))
-        log.debug("\n")
-
+        log.debug("    influences (modifier groups): %s\n", str(list(human.getModifiersAffectedBy(m))))

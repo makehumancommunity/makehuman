@@ -6,7 +6,7 @@
 
 **Product Home Page:** http://www.makehuman.org/
 
-**Code Home Page:**    http://code.google.com/p/makehuman/
+**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Thomas Larsson
 
@@ -59,7 +59,7 @@ Only works with MHX export.
         self.mergeShoulders = True
 
         # Options set by MHX exporter
-        self.useCustomShapes = False
+        self.useCustomShapes = "face"
         self.useConstraints = True
         self.useLocks = False
         self.useRotationLimits = False

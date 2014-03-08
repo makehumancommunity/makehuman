@@ -6,7 +6,7 @@
 
 **Product Home Page:** http://www.makeinfo.human.org/
 
-**Code Home Page:**    http://code.google.com/p/makehuman/
+**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Thomas Larsson
 
@@ -55,10 +55,8 @@ class Writer(mhx_writer.Writer):
         t = t0
         for proxy in self.proxies.values():
             if proxy.type == type:
-                gui3d.app.progress(t, text="Exporting %s" % proxy.name)
-                fp.write("#if toggle&%s\n" % test)
+                gui3d.app.progress(t, "Exporting %s", proxy.name)
                 self.writeProxy(fp, proxy, layer)
-                fp.write("#endif\n")
                 t += dt
 
 
@@ -142,18 +140,13 @@ class Writer(mhx_writer.Writer):
                 fp.write("1 ")
             else:
                 fp.write("0 ")
-        fp.write(";\n")
-
-        fp.write("""
-    #if toggle&T_Armature
-    """)
+        fp.write(";\n\n")
 
         self.meshWriter.writeArmatureModifier(fp, proxy)
         self.writeProxyModifiers(fp, proxy)
 
         fp.write("""
       parent_type 'OBJECT' ;
-    #endif
       color Array 1.0 1.0 1.0 1.0  ;
       show_name True ;
       select True ;

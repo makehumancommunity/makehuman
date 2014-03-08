@@ -6,7 +6,7 @@
 
 **Product Home Page:** http://www.makehuman.org/
 
-**Code Home Page:**    http://code.google.com/p/makehuman/
+**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Jonas Hauquier
 
@@ -413,6 +413,7 @@ class Material(object):
                 if self._uvMap and \
                    canonicalPath(self._uvMap) == canonicalPath(getSysDataPath('uvs/default.mhuv')):
                     # uvs/default.mhuv is a meta-file that refers to the default uv set
+                    # TODO remove this, use None for setting default UV map
                     self._uvMap = None
             elif words[0] == "shaderParam":
                 if len(words) > 3:

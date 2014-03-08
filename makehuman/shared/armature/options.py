@@ -6,7 +6,7 @@
 
 **Product Home Page:** http://www.makehuman.org/
 
-**Code Home Page:**    http://code.google.com/p/makehuman/
+**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Thomas Larsson
 
@@ -69,7 +69,7 @@ class ArmatureOptions(object):
         self.useStretchyBones = False
 
         # Options set by exporters
-        self.useCustomShapes = False
+        self.useCustomShapes = None
         self.useConstraints = False
         self.useBoneGroups = False
         self.useCorrectives = False
@@ -84,7 +84,7 @@ class ArmatureOptions(object):
         self.clothesRig = False
 
     def setExportOptions(self,
-            useCustomShapes = False,
+            useCustomShapes = None,
             useConstraints = False,
             useBoneGroups = False,
             useCorrectives = False,

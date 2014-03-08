@@ -6,7 +6,7 @@
 
 **Product Home Page:** http://www.makehuman.org/
 
-**Code Home Page:**    http://code.google.com/p/makehuman/
+**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Glynn Clements, Jonas Hauquier
 
@@ -82,6 +82,12 @@ class Component(object):
 
     def isRoot(self):
         return self.parent == None
+
+    def getVariables(self):
+        """
+        The variables that apply to this target component.
+        """
+        return [value for key,value in self.data.items() if value != None]
 
     def set_data(self, category, value):
         orig = self.data.get(category)

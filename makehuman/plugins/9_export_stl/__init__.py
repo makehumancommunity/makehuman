@@ -6,7 +6,7 @@
 
 **Product Home Page:** http://www.makehuman.org/
 
-**Code Home Page:**    http://code.google.com/p/makehuman/
+**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Marc Flerackers, Thomas Larsson
 
@@ -44,7 +44,7 @@ class ExporterSTL(Exporter):
     def build(self, options, taskview):
         Exporter.build(self, options, taskview)
         stlOptions = []
-        self.stlAscii = options.addWidget(gui.RadioButton(stlOptions,  "Ascii", selected=True))
+        self.stlAscii = options.addWidget(gui.RadioButton(stlOptions,  "ASCII", selected=True))
         self.stlBinary = options.addWidget(gui.RadioButton(stlOptions, "Binary"))
 
     def export(self, human, filename):

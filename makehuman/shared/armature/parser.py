@@ -6,7 +6,7 @@
 
 **Product Home Page:** http://www.makehuman.org/
 
-**Code Home Page:**    http://code.google.com/p/makehuman/
+**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Thomas Larsson
 
@@ -149,11 +149,12 @@ class Parser:
                 addDict(rig_face.FaceRigRotationLimits, self.rotationLimits)
 
         if options.useCustomShapes:
-            addDict(rig_bones.CustomShapes, self.customShapes)
             addDict(rig_face.CustomShapes, self.customShapes)
-            addDict(rig_control.CustomShapes, self.customShapes)
-            if options.useMuscles:
-                addDict(rig_muscle.CustomShapes, self.customShapes)
+            if options.useCustomShapes == "all":
+                addDict(rig_bones.CustomShapes, self.customShapes)
+                addDict(rig_control.CustomShapes, self.customShapes)
+                if options.useMuscles:
+                    addDict(rig_muscle.CustomShapes, self.customShapes)
             if options.useFaceRig:
                 addDict(rig_face.FaceRigCustomShapes, self.customShapes)
 
@@ -290,8 +291,9 @@ class Parser:
                 boneInfo[bone.name] = bone
 
         if options.useCustomShapes:
-            struct = io_json.loadJson("data/mhx/gizmos.json")
-            addDict(struct, self.gizmos)
+            addDict(io_json.loadJson("data/mhx/gizmos-face.json"), self.gizmos)
+            if options.useCustomShapes == "all":
+                addDict(io_json.loadJson("data/mhx/gizmos.json"), self.gizmos)
 
         vgroups = self.readVertexGroupFiles(self.vertexGroupFiles)
         addDict(vgroups, amt.vertexWeights)
@@ -322,7 +324,9 @@ class Parser:
                     self.renameConstraints(rig_muscle.Constraints, boneInfo)
             custom = {}
             if options.useCustomShapes:
-                addDict(rig_muscle.CustomShapes, custom)
+                if options.useCustomShapes == "all":
+                    if options.useMuscles:
+                        addDict(rig_muscle.CustomShapes, custom)
                 if options.useFaceRig:
                     addDict(rig_face.FaceRigCustomShapes, custom)
             self.addDeformVertexGroups(vgroups, custom)

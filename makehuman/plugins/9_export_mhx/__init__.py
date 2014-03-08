@@ -6,7 +6,7 @@
 
 **Product Home Page:** http://www.makehuman.org/
 
-**Code Home Page:**    http://code.google.com/p/makehuman/
+**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Thomas Larsson
 
@@ -69,7 +69,7 @@ class MhxConfig(Config):
                 self.rigOptions.loadPreset("data/mhx/advanced.json", None)
 
         self.rigOptions.setExportOptions(
-            useCustomShapes = True,
+            useCustomShapes = "all",
             useConstraints = True,
             useBoneGroups = True,
             useLocks = True,
