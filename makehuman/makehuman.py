@@ -117,7 +117,11 @@ def get_revision_hg_info():
     output = output.strip().split(':')
     rev = output[0].strip().replace('+', '')
     revid = output[1].strip().replace('+', '')
-    return (rev, revid)
+    try:
+        branch = subprocess.Popen(["hg","-q","branch"], stdout=subprocess.PIPE, stderr=sys.stderr, cwd=hgRoot).communicate()[0].replace('\n','').strip()
+    except:
+        branch = None
+    return (rev, revid, branch)
 
 def get_revision_entries(folder=None):
     # First fallback: try to parse the files in .hg manually
@@ -138,7 +142,8 @@ def get_revision_hglib():
     import hglib
     hgclient = hglib.open(getHgRoot())
     tip = hgclient.tip()
-    return (tip.rev.replace('+',''), tip.node[:12])
+    branch = hgclient.branch()
+    return (tip.rev.replace('+',''), tip.node[:12], branch)
 
 def get_revision_file():
     # Default fallback to use if we can't figure out HG revision in any other
@@ -157,6 +162,8 @@ def get_hg_revision_1():
         os.environ['HGREVISION_SOURCE'] = "hg tip command"
         os.environ['HGREVISION'] = str(hgrev[0])
         os.environ['HGNODEID'] = str(hgrev[1])
+        if hgrev[2]:
+            os.environ['HGBRANCH'] = hgrev[2]
         return hgrev
     except Exception as e:
         print >> sys.stderr,  "NOTICE: Failed to get hg version number from command line: " + format(str(e)) + " (This is just a head's up, not a critical error)"
@@ -166,6 +173,8 @@ def get_hg_revision_1():
         os.environ['HGREVISION_SOURCE'] = "python-hglib"
         os.environ['HGREVISION'] = str(hgrev[0])
         os.environ['HGNODEID'] = str(hgrev[1])
+        if hgrev[2]:
+            os.environ['HGBRANCH'] = hgrev[2]
         return hgrev
     except Exception as e:
         print >> sys.stderr,  "NOTICE: Failed to get hg version number using hglib: " + format(str(e)) + " (This is just a head's up, not a critical error)"
