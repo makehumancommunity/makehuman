@@ -33,10 +33,18 @@ import language
 #import log
 from getpath import getSysDataPath, getPath, isSubPath
 
+
 def getLanguageString(text):
+    """Function to get the translation of a text according to the selected
+    language.
+
+    The function will look up the given text in the current language's
+    dictionary and it will return the translated string.
+    """
     if not text:
         return text
     return language.language.getLanguageString(text)
+
 
 class Widget(events3d.EventHandler):
     def __init__(self):
@@ -474,12 +482,12 @@ class Slider(QtGui.QWidget, Widget):
 
     def getValue(self):
         return self._i2f(self.slider.value())
-        
+
     def setMin(self, min):
         value = self.getValue()
         self.min = min
         self.setValue(value)
-        
+
     def setMax(self, max):
         value = self.getValue()
         self.max = max
@@ -783,7 +791,7 @@ class TextView(QtGui.QLabel, Widget):
     def setText(self, text):
         text = getLanguageString(text) if text else ''
         super(TextView,self).setText(text)
-        
+
     def setTextFormat(self, text, *values):
         text = getLanguageString(text) if text else ''
         super(TextView,self).setText(text % values)
@@ -793,7 +801,7 @@ class SliderBox(GroupBox):
 
 def intValidator(text):
     return not text or text.isdigit() or (text[0] == '-' and (len(text) == 1 or text[1:].isdigit()))
-    
+
 def floatValidator(text):
     return not text or (text.replace('.', '').isdigit() and text.count('.') <= 1) or (text[0] == '-' and (len(text) == 1 or text[1:].replace('.', '').isdigit()) and text.count('.') <= 1) # Negative sign and optionally digits with optionally 1 decimal point
 
@@ -979,7 +987,7 @@ class MouseActionEdit(QtGui.QLabel, Widget):
 
     def shortcutToLabel(self, modifiers, button):
         labels = []
-        
+
         if modifiers & QtCore.Qt.ControlModifier:
             labels.append('Ctrl')
         if modifiers & QtCore.Qt.AltModifier:
@@ -988,7 +996,7 @@ class MouseActionEdit(QtGui.QLabel, Widget):
             labels.append('Meta')
         if modifiers & QtCore.Qt.ShiftModifier:
             labels.append('Shift')
-            
+
         if button & QtCore.Qt.LeftButton:
             labels.append('Left')
         elif button & QtCore.Qt.MidButton:
@@ -997,9 +1005,9 @@ class MouseActionEdit(QtGui.QLabel, Widget):
             labels.append('Right')
         else:
             labels.append('[Unknown]')
-            
+
         return '+'.join(labels)
-        
+
     def onChanged(self, shortcut):
         pass
 
@@ -1128,8 +1136,32 @@ class Dialog(QtGui.QDialog):
         if helpId and self.check.isChecked():
             self.helpIds.add(helpId)
 
+
 class FileEntryView(QtGui.QWidget, Widget):
+    """Widget for entering paths and filenames.
+
+    It can be used in file save / load task views, for browsing directories and
+    opening or saving files.
+    """
+
     def __init__(self, buttonLabel, mode='open'):
+        """FileEntryView constructor.
+
+        The File Entry has a browse button on the left, which will open
+        a standard save dialog. The center is occupied by an empty line edit,
+        in which the user can simply enter a filename to save the file
+        in the current directory. Finally, a button at the right can be used
+        for accepting the filename and doing some action. You can control
+        the button's caption with the buttonLabel parameter.
+
+        By using the mode parameter, the widget will adapt to the needs,
+        depending if it is used for opening a file, saving a file, or browsing
+        a directory. Accordingly, its values can be: 'open', 'save', and 'dir'.
+
+        If the mode is 'dir', there is no button. The final directory will be
+        the path specified by the browse button.
+        """
+
         super(FileEntryView, self).__init__()
         Widget.__init__(self)
 
@@ -1145,7 +1177,8 @@ class FileEntryView(QtGui.QWidget, Widget):
         self.layout.setColumnStretch(0, 0)
 
         self.edit = QtGui.QLineEdit()
-        self.edit.setValidator(QtGui.QRegExpValidator(QtCore.QRegExp(r'[^\/:*?"<>|]*'), None))
+        self.edit.setValidator(
+            QtGui.QRegExpValidator(QtCore.QRegExp(r'[^\/:*?"<>|]*'), None))
         self.layout.addWidget(self.edit, 0, 1)
         self.layout.setColumnStretch(1, 1)
 
@@ -1154,45 +1187,69 @@ class FileEntryView(QtGui.QWidget, Widget):
             self.layout.addWidget(self.confirm, 0, 2)
             self.layout.setColumnStretch(2, 0)
 
-            self.connect(self.confirm, QtCore.SIGNAL('clicked(bool)'), self._confirm)
-            self.connect(self.edit, QtCore.SIGNAL(' returnPressed()'), self._confirm)
+            self.connect(
+                self.confirm, QtCore.SIGNAL('clicked(bool)'), self._confirm)
+            self.connect(
+                self.edit, QtCore.SIGNAL(' returnPressed()'), self._confirm)
 
         self.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Fixed)
 
-
         @self.browse.mhEvent
         def onClicked(path):
+            """When the browse button is used, update the path in
+            the line edit. If the mode is 'dir', confirm the entry
+            and emit an onFileSelected event."""
             if path:
                 self.edit.setText(path)
                 if self.browse._mode == 'dir':
                     self._confirm()
 
     def setDirectory(self, directory):
+        """Set the directory that the widget will use for saving or
+        opening the filename, and as an initial path for browsing in
+        the dialog. If the mode is 'dir', the given path is written
+        in the line edit."""
         self.directory = directory
         self.browse._path = directory
         if self.browse._mode == 'dir':
             self.edit.setText(directory)
 
     def setFilter(self, filter):
+        """Set the extension filter the browse dialog will use for browsing.
+        [notice: see note for _browse.]"""
         self.filter = getLanguageString(filter)
         if '(*.*)' not in self.filter:
-            self.filter = ';;'.join([self.filter, getLanguageString('All Files')+' (*.*)'])
+            self.filter = ';;'.join(
+                [self.filter, getLanguageString('All Files') + ' (*.*)'])
 
-    def _browse(self, state = None):
-        path = QtGui.QFileDialog.getSaveFileName(G.app.mainwin, getLanguageString("Save File"), self.directory, self.filter)
+    def _browse(self, state=None):
+        """Method to be called when the browse button is clicked.
+        [notice: Is this actually used? I don't see it called anywhere.]
+        """
+        path = QtGui.QFileDialog.getSaveFileName(
+            G.app.mainwin, getLanguageString("Save File"),
+            self.directory, self.filter)
         self.edit.setText(path)
         if self.browse._mode == 'dir':
             self._confirm()
 
-    def _confirm(self, state = None):
+    def _confirm(self, state=None):
+        """Method to be called once the user has confirmed their choice,
+        either by pressing the confirmation button, by pressing the return
+        button in the line edit, or by using the browser while in 'dir' mode.
+        It emits an onFileSelected event if the line edit is not empty."""
         if len(self.edit.text()):
             self.callEvent('onFileSelected', unicode(self.edit.text()))
-                
+
     def onFocus(self, event):
+        """Handler for the event of the widget being given focus. It passes
+        the focus directly to the line edit."""
         self.edit.setFocus()
 
     def onFileSelected(self, shortcut):
+        """Self-capture handler for the onFileSelected event."""
         pass
+
 
 class SplashScreen(QtGui.QSplashScreen):
     def __init__(self, image):
@@ -1551,7 +1608,7 @@ class ColorPickButton(Button):
 
     def getColor(self):
         return self._color
-        
+
     def setColor(self, color):
         import material
         if isinstance(color, material.Color):
@@ -1600,7 +1657,7 @@ class Action(QtGui.QAction, Widget):
 
         # Allows setting custom icons for active, selected and disabled states
         ext = os.path.splitext(path)[1]
-        for (name, mode) in [ ("disabled", QtGui.QIcon.Disabled), 
+        for (name, mode) in [ ("disabled", QtGui.QIcon.Disabled),
                               ("active", QtGui.QIcon.Active),
                               ("selected", QtGui.QIcon.Selected) ]:
             customIconPath = "%s_%s%s" % (os.path.splitext(path)[0], name, ext)
@@ -1722,7 +1779,7 @@ class ImageView(QtGui.QLabel, QtGui.QScrollArea, Widget):
     def resizeEvent(self, event):
         self.workingSize = event.size()
         self.refreshImage(event.size())
-       
+
     def refreshImage(self, size = None):
         if not self._pixmap:
             return
@@ -1790,7 +1847,7 @@ class ZoomableImageView(QtGui.QScrollArea, Widget):
         else:
             size = pixmap.size()
             return int((float(width)/size.width())*size.height())
-        
+
     def refreshImage(self, zoomAct = False, displ = (0, 0)):
         pixmap = self.imageLabel.pixmap()
         if not pixmap:
@@ -1807,17 +1864,17 @@ class ZoomableImageView(QtGui.QScrollArea, Widget):
             for (index, scrollBar) in enumerate((self.horizontalScrollBar(), self.verticalScrollBar())):
                 if scrollBar.maximum() > 0:
                     scrollBar.setValue(int(scrat[index] * scrollBar.maximum() + displ[index]))
-        
+
     def save(self, fname):
         if not os.path.splitext(fname)[1]:
             fname = fname + '.png'
 
         if self.imageLabel.pixmap():
             self.imageLabel.pixmap().save (fname)
-            
+
     def mousePressEvent(self, event):
         self.mdown = event.pos()
-        
+
     def mouseMoveEvent(self, event):
         if event.buttons() & QtCore.Qt.RightButton:
             self.wheelEvent(QtGui.QWheelEvent(event.pos(),
@@ -1831,7 +1888,7 @@ class ZoomableImageView(QtGui.QScrollArea, Widget):
                 self.verticalScrollBar().value() + 2*(self.mdown.y() - event.pos().y()))
             self.mdown = event.pos()
             self.refreshImage()
-                               
+
     def wheelEvent(self, event, displace = True):
         ratbef = self.ratio
         if G.app.settings.get('invertMouseWheel', False):
@@ -1853,8 +1910,8 @@ class ZoomableImageView(QtGui.QScrollArea, Widget):
 def colorFromQColor(qColor):
     import material
     if qColor.isValid():
-        values = (float(qColor.red())/255, 
-                  float(qColor.green())/255, 
+        values = (float(qColor.red())/255,
+                  float(qColor.green())/255,
                   float(qColor.blue())/255)
         return material.Color().copyFrom(values)
     else:
@@ -1864,8 +1921,8 @@ def qColorFromColor(color):
     import material
     if isinstance(color, material.Color):
         color = color.asTuple()
-    return QtGui.QColor(int(color[0]*255), 
-                            int(color[1]*255), 
+    return QtGui.QColor(int(color[0]*255),
+                            int(color[1]*255),
                             int(color[2]*255))
 
 def getPixmap(img):
