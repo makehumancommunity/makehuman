@@ -149,9 +149,6 @@ class Writer(mhx_writer.Writer):
 end Object
 """)
 
-        self.writeHideAnimationData(fp, amt, "", self.name, "Body")
-        return
-
 
     #-------------------------------------------------------------------------------
     #   Armature modifier.
@@ -270,21 +267,6 @@ end Object
             "  Material %sBlue ;\n" % self.name +
             "  Material %sYellow ;\n" % self.name
         )
-
-
-    def writeHideAnimationData(self, fp, amt, prefix, name, suffix):
-        return
-        fp.write("AnimationData %s%s%s True\n" % (prefix, name, suffix))
-        mhx_drivers.writePropDriver(fp, amt, ["Mhh%s" % name], "x1", "hide", -1)
-        mhx_drivers.writePropDriver(fp, amt, ["Mhh%s" % name], "x1", "hide_render", -1)
-        if suffix == "Body":
-            for proxy in self.proxies.values():
-                if proxy.deleteVerts.any():
-                    path = ["Mhh%s" % proxy.name]
-                    mask = 'modifiers["Mask%s"]' % proxy.name
-                    mhx_drivers.writePropDriver(fp, amt, path, "not(x1)", mask + ".show_viewport", -1)
-                    mhx_drivers.writePropDriver(fp, amt, path, "not(x1)", mask + ".show_render", -1)
-        fp.write("end AnimationData\n")
 
 #-------------------------------------------------------------------------------
 #   Vertex groups
