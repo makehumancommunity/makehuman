@@ -207,7 +207,7 @@ def getMyDocuments():
 
 
 def getMHDirectory():
-    return os.path.join(getMyDocuments(), "makehuman", "A8")
+    return os.path.join(getMyDocuments(), "makehuman", "v1")
 
 
 def getMHBlenderDirectory():
