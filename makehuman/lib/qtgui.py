@@ -1633,7 +1633,7 @@ class Action(QtGui.QAction, Widget):
     @classmethod
     def getIcon(cls, name):
         from qtui import supportsSVG
-        # TODO SVG icons disabled until py2app/pyinstaller can pack Qt's SVG libs, and until the SVG icons are updated
+        # TODO SVG icons disabled until the SVG icons are updated
 
         # icon = G.app.mainwin.style().standardIcon(QtGui.QStyle.SP_MessageBoxWarning)
         svgPath = os.path.join(getSysDataPath('icons'), name + '.svg')
