@@ -28,6 +28,7 @@ is being edited inside MakeHuman.
 """
 
 import os
+import log
 
 
 class File(object):
@@ -52,9 +53,13 @@ class File(object):
         a change occured since the last save or load action.
         """
 
-        self._path = path
-
+        self._path = None
         self.modified = False
+
+        ok = self.load(path)
+        if not ok:
+            log.warning('Unable to load %s', path)
+            self.load(None)
 
     @property
     def path(self):
@@ -100,8 +105,10 @@ class File(object):
         The method is intented to be overwritten by the implementation,
         and shall set the _path member and clear the modified flag accordingly.
 
-        Implementations may treat save(None) as overwrite
-        of the current file.
+        Implementations shall be able to process save(None). Such case may be
+        treated as overwrite of the current file.
+
+        Implementations shall return True upon success, and False upon failure.
         """
         pass
 
@@ -111,11 +118,26 @@ class File(object):
         The method is intented to be overwritten by the implementation,
         and shall set the _path member and clear the modified flag accordingly.
 
-        Implementations may treat load(None) as loading
-        of a default (built-in) file.
+        Implementations shall be able to process load(None). Such case may be
+        treated as loading of a default (built-in) file.
+
+        Implementations shall return True upon success, and False upon failure.
         """
         pass
 
     def reload(self):
-        """Reload the currently associated file."""
-        self.load(self.path)
+        """Reload the currently associated file.
+
+        Useful when the associated file is modified externally.
+        """
+
+        return self.load(self.path)
+
+    def close(self):
+        """Unassociate the File object from its file on the disk.
+
+        This restores the File object to its initial state,
+        potentially releasing any resources.
+        """
+
+        return self.load(None)
