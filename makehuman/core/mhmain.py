@@ -306,7 +306,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         from scene import Scene
         from getpath import findFile
-        self.currentScene = Scene(findFile("scenes/default.mhscene"))
+        self._currentScene = Scene(findFile("scenes/default.mhscene"))
 
         @self._currentScene.mhEvent
         def onChanged(scene):
