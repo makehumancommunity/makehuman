@@ -26,6 +26,7 @@ Definitions of scene objects and the scene class.
 import cPickle as pickle
 
 import log
+import managed_file
 import events3d
 from material import Color
 
@@ -173,28 +174,23 @@ class Environment(SceneObject):
              'skybox': None})
 
 
-class Scene(events3d.EventHandler):
+class Scene(events3d.EventHandler, managed_file.File):
     def __init__(self, path=None):
         events3d.EventHandler.__init__(self)
-
-        self.path = None
-        self.unsaved = False
 
         self.lights = []
         self.environment = Environment(self)
 
-        ok = self.load(path)
-        if not ok:
-            log.warning(
-                'Unable to load %s. Using hardcoded default scene.', path)
-            self.load(None)
+        managed_file.File.__init__(self, path)
 
     def changed(self):
-        self.unsaved = True
+        """Method to be called whenever the Scene's contents are modified."""
+        self.modified = True
         self.callEvent('onChanged', self)
 
-    # Load scene from a .mhscene file.
     def load(self, path):
+        """Load scene from a .mhscene file."""
+
         if path is None:
             log.debug('Loading hardcoded default scene')
 
@@ -248,15 +244,10 @@ class Scene(events3d.EventHandler):
                     return False
                 hfile.close()
 
-        self.path = path
-        self.unsaved = False
+        self._path = path
+        self.modified = False
         self.callEvent('onChanged', self)
         return True
-
-    # Reloads the loaded scene.
-    # Useful when the scene file is changed from another Scene object.
-    def reload(self):
-        return self.load(self.path)
 
     # Save scene to a .mhscene file.
     def save(self, path=None):
@@ -292,12 +283,9 @@ class Scene(events3d.EventHandler):
                 return False
             hfile.close()
 
-        self.path = path
-        self.unsaved = False
+        self._path = path
+        self.modified = False
         return True
-
-    def close(self):
-        self.load(None)
 
     def addLight(self):
         self.changed()
