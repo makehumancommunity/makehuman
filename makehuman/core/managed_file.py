@@ -67,7 +67,7 @@ class File(object):
         return self._path
 
     @property
-    def name(self):
+    def filename(self):
         """Get the filename of the associated file."""
         if self.path is not None:
             return os.path.basename(self.path)
@@ -75,7 +75,7 @@ class File(object):
             return None
 
     @property
-    def extension(self):
+    def fileextension(self):
         """Get the extension of the associated file."""
         if self.path is not None:
             return os.path.splitext(self.path)[1]
@@ -83,11 +83,11 @@ class File(object):
             return None
 
     @property
-    def title(self):
+    def filetitle(self):
         """Get the title of the associated file,
         which is the filename without the extension."""
         if self.path is not None:
-            return os.path.splitext(self.name)[0]
+            return os.path.splitext(self.filename)[0]
         else:
             return None
 
