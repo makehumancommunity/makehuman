@@ -144,6 +144,12 @@ class BaseModifier(object):
     def fullName(self):
         return self.groupName+"/"+self.name
 
+    def getMin(self):
+        return 0.0
+
+    def getMax(self):
+        return 1.0
+
     def setValue(self, value, skipDependencies = False):
         value = self.clampValue(value)
         factors = self.getFactors(value)
@@ -291,6 +297,12 @@ class Modifier(BaseModifier):
         self.left = left
         self.right = right
         self.targets = [[self.left], [self.right]]
+
+    def getMin(self):
+        if self.left is None:
+            return 0.0
+        else:
+            return -1.0
 
     @staticmethod
     def split_path(pathStr):
