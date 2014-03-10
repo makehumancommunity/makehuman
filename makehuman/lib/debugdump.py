@@ -115,6 +115,7 @@ class DebugDump(object):
         import qtui
         self.open()
         self.write("PYQT.VERSION: %s", qtui.getQtVersionString())
+        self.write("PYQT.SVG_SUPPORT: %s", "supported" if qtui.supportsSVG() else "not supported")
         self.close()
 
     def appendMessage(self,message):
