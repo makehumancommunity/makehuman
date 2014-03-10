@@ -30,18 +30,18 @@ Prepares an export folder ready to build packages from.
 HG_PATH = "hg"
 
 # Filter of files from source folder to exclude (glob syntax)
-EXCLUDES = ['.hgignore', '.hgeol', '*.target', '*.obj', '*.pyc', '*.pyd', 'maketarget-standalone', 'plugins/4_rendering_mitsuba', 'plugins/4_rendering_povray', 'plugins/4_rendering_aqsis.py', 'plugins/0_modeling_5_editing.py', 'plugins/0_modeling_8_random.py', 'plugins/3_libraries_animation.py', 'compile_*.py', 'build_prepare.py', 'download_assets.py', '*~', '*.bak', 'setup.nsi', 'clean*.sh', 'makehuman.sh', 'clean*.bat', 'makehuman/docs', 'makehuman/icons', 'makehuman.rc', '*_contents.txt', 'buildscripts']
+EXCLUDES = ['.hgignore', '.hgeol', '*.target', '*.obj', '*.pyc', '*.pyd', 'maketarget-standalone', 'plugins/4_rendering_mitsuba', 'plugins/4_rendering_povray', 'plugins/4_rendering_aqsis.py', 'plugins/0_modeling_5_editing.py', 'plugins/0_modeling_8_random.py', 'plugins/3_libraries_animation.py', 'compile_*.py', 'build_prepare.py', 'download_assets.py', '*~', '*.bak', 'setup.nsi', 'clean*.sh', 'makehuman.sh', 'clean*.bat', 'makehuman/docs', 'makehuman/icons/*psd', 'makehuman/icons/*bmp', 'makehuman/icons/*ico', 'makehuman/icons/*icns', 'makehuman/icons/*xcf', 'makehuman/icons/makehuman.svg', 'makehuman.rc', '*_contents.txt', 'buildscripts']
 # Same as above, but applies to release mode only
 EXCLUDES_RELEASE = ['testsuite']
 
 # Include filter for additional asset files (not on hg) to copy (glob syntax)
-ASSET_INCLUDES = ['*.npz', '*.list', '*.thumb', '*.png', '*.json', '*.mhmat', '*.mhclo', '*.proxy', 'glsl/*.txt', 'languages/*.ini', "*.mhp", "*.mhm", "*.qss", "*.mht", "*.svg"]
+ASSET_INCLUDES = ['*.npz', '*.list', '*.thumb', '*.png', '*.json', '*.mhmat', '*.mhclo', '*.proxy', 'glsl/*.txt', 'languages/*.ini', "*.mhp", "*.mhm", "*.qss", "*.mht", "*.svg", "icons/makehuman_bg.svg", "icons/makehuman.png"]
 
 # Even if empty, create these folders (relative to export path)
 CREATE_FOLDERS = ['makehuman/data/backgrounds', 'makehuman/data/clothes', 'makehuman/data/teeth', 'makehuman/data/eyelashes', 'makehuman/data/tongue']
 
 # Files and folders to exclude as a last step, to correct things that still fall through, but shouldn't (relative path to export path, no wildcards allowed) For example folders affected during build
-POST_REMOVE = ['makehuman/icons', 'makehuman/docs', 'buildscripts', 'maketarget-standalone']
+POST_REMOVE = ['makehuman/docs', 'buildscripts', 'maketarget-standalone']
 
 # Finally copy all files from these source folders, effectively ignoring all exclude filters
 COPY_ALL = ['blendertools']
@@ -53,7 +53,7 @@ REARRANGE_ROOT_FOLDER = 'makehuman'
 # == Following settings relate to freezing a py package, paths are referenced in rearranged folder state, relative to REARRANGE_ROOT_FOLDER ==
 
 # Files and paths that have to be declared as data (when freezing)
-DATAS = ['blendertools', 'data', 'plugins', 'license.txt', 'licenses']
+DATAS = ['blendertools', 'data', 'plugins', 'license.txt', 'licenses', 'icons']
 
 # Entry point for the MakeHuman application
 MAIN_EXECUTABLE = 'makehuman.py'
