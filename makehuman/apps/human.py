@@ -1063,6 +1063,7 @@ class Human(guicommon.Object, managed_file.File):
         self._path = path
         self.modified = False
         self.callEvent('onChanged', events3d.HumanEvent(self, 'load'))
+        self.callEvent('onModifiedState', False)
         return True
 
     def save(self, path, tags):
@@ -1086,4 +1087,5 @@ class Human(guicommon.Object, managed_file.File):
 
         self._path = path
         self.modified = False
+        self.callEvent('onModifiedState', False)
         return True
