@@ -49,12 +49,8 @@ class RandomTaskView(gui3d.TaskView):
             #human = gui3d.app.selectedHuman
             # human.resetMeshValues()
             self.lastRandoms = {}
-            self.modifierGroups = []
-            self.excludedModifiers = []
             
             if self.macro.selected:
-                self.modifierGroups.append('macrodetails', 'macrodetails-proportions', )
-
                 self.storeLastRandom('gender', 0.5, random.random()-0.5)
                 self.storeLastRandom('age', 0.5, random.random()-0.5)
                 self.storeLastRandom('muscle', 0.5, random.random()-0.5)
