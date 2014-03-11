@@ -26,15 +26,16 @@ import numpy as np
 import algos3d
 import guicommon
 from core import G
-import os
 import events3d
+import files3d
 from getpath import getSysDataPath, canonicalPath
+import managed_file
 import log
 import material
 
 from makehuman import getBasemeshVersion, getShortVersion, getVersionStr, getVersion
 
-class Human(guicommon.Object):
+class Human(guicommon.Object, managed_file.File):
 
     def __init__(self, mesh, hairObj=None, eyesObj=None, genitalsObj=None):
 
@@ -76,19 +77,17 @@ class Human(guicommon.Object):
         self.targetsDetailStack = {}  # All details targets applied, with their values
         self.symmetryModeEnabled = False
 
-        self.setDefaultValues()
-
         self.bodyZones = ['l-eye','r-eye', 'jaw', 'nose', 'mouth', 'head', 'neck', 'torso', 'hip', 'pelvis', 'r-upperarm', 'l-upperarm', 'r-lowerarm', 'l-lowerarm', 'l-hand',
                           'r-hand', 'r-upperleg', 'l-upperleg', 'r-lowerleg', 'l-lowerleg', 'l-foot', 'r-foot', 'ear']
 
-        self.material = material.fromFile(getSysDataPath('skins/default.mhmat'))
-        self._defaultMaterial = material.Material().copyFrom(self.material)
+        self._defaultMaterial = material.fromFile(getSysDataPath('skins/default.mhmat'))
 
         self._modifiers = dict()
         self._modifier_varMapping = dict()              # Maps macro variable to the modifier group that modifies it
         self._modifier_dependencyMapping = dict()       # Maps a macro variable to all the modifiers that depend on it
         self._modifier_groups = dict()
 
+        managed_file.File.__init__(self)
 
     # TODO introduce better system for managing proxies, nothing done for clothes yet
     def setHairProxy(self, proxy):
@@ -993,7 +992,7 @@ class Human(guicommon.Object):
 
         self.targetsDetailStack = {}
 
-        self.setMaterial(self._defaultMaterial)
+        self.material = self._defaultMaterial
 
         self.callEvent('onChanging', events3d.HumanEvent(self, 'reset'))
         self.callEvent('onChanged', events3d.HumanEvent(self, 'reset'))
@@ -1020,49 +1019,61 @@ class Human(guicommon.Object):
         verts = self.meshData.getCoords(self.meshData.getVerticesForGroups([fg.name]))
         return verts.mean(axis=0)
 
-    def load(self, filename, update=True, progressCallback=None):
-
-        log.message("Loading human from MHM file %s.", filename)
+    def load(self, path, update=True, progressCallback=None):
 
         self.resetMeshValues()
 
-        # TODO perhaps create progress indicator that depends on line count of mhm file?
-        f = open(filename, 'r')
+        if path is None:
+            log.message("Loading default human")
+        else:
+            log.message("Loading human from MHM file %s.", path)
 
-        for lh in G.app.loadHandlers.values():
-            lh(self, ['status', 'started'])
+            # TODO perhaps create progress indicator that depends on line count of mhm file?
+            f = open(path, 'r')
 
-        for data in f.readlines():
-            lineData = data.split()
+            for lh in G.app.loadHandlers.values():
+                lh(self, ['status', 'started'])
 
-            if len(lineData) > 0 and not lineData[0] == '#':
-                if lineData[0] == 'version':
-                    log.message('Version %s', lineData[1])
-                elif lineData[0] == 'tags':
-                    for tag in lineData:
-                        log.debug('Tag %s', tag)
-                elif lineData[0] in G.app.loadHandlers:
-                    G.app.loadHandlers[lineData[0]](self, lineData)
-                else:
-                    log.debug('Could not load %s', lineData)
+            for data in f.readlines():
+                lineData = data.split()
 
-        log.debug("Finalizing MHM loading.")
-        for lh in set(G.app.loadHandlers.values()):
-            lh(self, ['status', 'finished'])
-        f.close()
+                if len(lineData) > 0 and not lineData[0] == '#':
+                    if lineData[0] == 'version':
+                        log.message('Version %s', lineData[1])
+                    elif lineData[0] == 'tags':
+                        for tag in lineData:
+                            log.debug('Tag %s', tag)
+                    elif lineData[0] in G.app.loadHandlers:
+                        G.app.loadHandlers[lineData[0]](self, lineData)
+                    else:
+                        log.debug('Could not load %s', lineData)
 
-        self.syncRace()
+            log.debug("Finalizing MHM loading.")
+            for lh in set(G.app.loadHandlers.values()):
+                lh(self, ['status', 'finished'])
+            f.close()
 
+            self.syncRace()
+
+            if update:
+                self.applyAllTargets(progressCallback)
+
+            log.message("Done loading MHM file.")
+
+        self._path = path
+        self.modified = False
         self.callEvent('onChanged', events3d.HumanEvent(self, 'load'))
+        return True
 
-        if update:
-            self.applyAllTargets(progressCallback)
+    def save(self, path, tags):
+        if path is None:
+            path = self.path
+            if path is None:
+                log.notice('Cannot save human as it is not associated with any file. Please supply a path')
+                return False
 
-        log.message("Done loading MHM file.")
-
-    def save(self, filename, tags):
-
-        f = open(filename, 'w')
+        log.message('Saving human in MHM file: %s', path)
+        f = open(path, 'w')
         f.write('# Written by MakeHuman %s\n' % getVersionStr())
         f.write('version %s\n' % getShortVersion())
         f.write('tags %s\n' % tags)
@@ -1071,4 +1082,8 @@ class Human(guicommon.Object):
             handler(self, f)
 
         f.close()
+        log.message("Done saving MHM file.")
 
+        self._path = path
+        self.modified = False
+        return True
