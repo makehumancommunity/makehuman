@@ -80,7 +80,7 @@ HGREV = exportInfo.revision
 NODEID = exportInfo.nodeid
 
 if exportInfo.isRelease:
-    VERSION_FN = VERSION.replace('.', '_').replace(' ', '-').lower()
+    VERSION_FN = VERSION.replace(' ', '-').lower()
 else:
     VERSION_FN= str(HGREV) + '-' + NODEID
 
