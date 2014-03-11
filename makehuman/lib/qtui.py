@@ -375,8 +375,7 @@ def supportsSVG():
     # pyinstaller windows builds appear to cause issues with this
     # py2app on OSX appears not to include qt svg libs either...
     return qtVersion[0] >= 4 and qtVersion[1] >= 2 and \
-           not sys.platform.startswith("win") and \
-           not sys.platform == "darwin"
+        'svg' in [ str(s).lower() for s in QtGui.QImageReader.supportedImageFormats() ]
 
 class Frame(QtGui.QMainWindow):
     title = "MakeHuman"
@@ -387,8 +386,7 @@ class Frame(QtGui.QMainWindow):
 
         self.setWindowTitle(self.title)
         if supportsSVG():
-            # Explicitly include Qt SVG lib to force pyinstaller to pack it
-            #from PyQt4 import QtSvg
+            # SVG icons allow better resolution when resized
             self.setWindowIcon(QtGui.QIcon(getpath.getSysPath("icons/makehuman_bg.svg")))
         else:
             # Older Qt libraries do not support svg icons
