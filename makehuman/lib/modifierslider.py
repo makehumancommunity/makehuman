@@ -29,7 +29,7 @@ from core import G
 
 class ModifierSlider(gui.Slider):
 
-    def __init__(self, label=None, modifier=None, valueConverter=None, image=None, cameraView=None):
+    def __init__(self, modifier, label=None, valueConverter=None, image=None, cameraView=None):
         if image is not None:
             if not os.path.isfile(image):
                 image = self.findImage(image)
