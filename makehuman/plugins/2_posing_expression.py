@@ -119,7 +119,7 @@ class ExpressionTaskView(gui3d.TaskView):
                     modifier = ExpressionSimpleModifier(template)
 
                 modifier.setHuman(gui3d.app.selectedHuman)
-                slider = box.addWidget(modifierslider.ModifierSlider(label=subname.capitalize(), modifier=modifier))
+                slider = box.addWidget(modifierslider.ModifierSlider(modifier=modifier, label=subname.capitalize()))
                 @slider.mhEvent
                 def onChange(event):
                     slider = event
