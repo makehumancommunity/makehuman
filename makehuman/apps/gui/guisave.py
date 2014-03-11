@@ -47,9 +47,7 @@ class SaveTaskView(gui3d.TaskView):
 
         gui3d.TaskView.__init__(self, category, 'Save')
 
-        self.fileentry = self.addTopWidget(
-            gui.FileEntryView('Save', mode='save'))
-        self.fileentry.setDirectory(mh.getPath('models'))
+        self.fileentry = self.addTopWidget(gui.FileEntryView('Save', mode='save'))
         self.fileentry.setFilter('MakeHuman Models (*.mhm)')
 
         @self.fileentry.mhEvent
@@ -62,14 +60,12 @@ class SaveTaskView(gui3d.TaskView):
         if not filename.lower().endswith('.mhm'):
             filename += '.mhm'
 
-        modelPath = mh.getPath('models')
+        modelPath = self.fileentry.directory
+        if not os.path.exists(modelPath):
+            os.makedirs(modelPath)
+
         path = os.path.normpath(os.path.join(modelPath, filename))
-
-        dir, name = os.path.split(path)
-        name, ext = os.path.splitext(name)
-
-        if not os.path.exists(dir):
-            os.makedirs(dir)
+        name = os.path.splitext(filename)[0]
 
         # Save square sized thumbnail
         size = min(G.windowWidth, G.windowHeight)
@@ -79,24 +75,28 @@ class SaveTaskView(gui3d.TaskView):
         # Resize thumbnail to max 128x128
         if size > 128:
             img.resize(128, 128)
-        img.save(os.path.join(dir, name + '.thumb'))
+        img.save(os.path.join(modelPath, name + '.thumb'))
 
         # Save the model
         G.app.selectedHuman.save(path, name)
         #G.app.clearUndoRedo()
 
-        self.parent.tasksByName['Load'].fileentry.text = dir
-        self.parent.tasksByName['Load'].fileentry.edit.setText(dir)
-        self.parent.tasksByName['Load'].fileentry.setDirectory(dir)
-
-        gui3d.app.prompt('Info', u'Your model has been saved to %s.' % dir, 'OK')
+        gui3d.app.prompt('Info', u'Your model has been saved to %s.' % modelPath, 'OK')
 
     def onShow(self, event):
         """Handler for the TaskView onShow event.
-        Once the task view is shown, give focus to the file entry."""
+        Once the task view is shown, preset the save directory
+        and give focus to the file entry."""
         gui3d.TaskView.onShow(self, event)
-        self.fileentry.setFocus()
 
-    def onHide(self, event):
-        """Handler for the TaskView onHide event."""
-        gui3d.TaskView.onHide(self, event)
+        modelPath = G.app.selectedHuman.dir
+        if modelPath is None:
+            modelPath = mh.getPath("models")
+
+        name = G.app.selectedHuman.filetitle
+        if name is None:
+            name = ""
+
+        self.fileentry.setDirectory(modelPath)
+        self.fileentry.edit.setText(name)
+        self.fileentry.setFocus()
