@@ -94,6 +94,8 @@ class SaveTaskView(gui3d.TaskView):
         self.parent.tasksByName['Load'].fileentry.edit.setText(dir)
         self.parent.tasksByName['Load'].fileentry.setDirectory(dir)
 
+        gui3d.app.prompt('Info', u'Your model has been saved to %s.' % dir, 'OK')
+
     def onShow(self, event):
         """Handler for the TaskView onShow event.
         Once the task view is shown, give focus to the file entry."""
