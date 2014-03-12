@@ -56,9 +56,7 @@ class Writer(mhx_writer.Writer):
         config = self.config
         targets = exportutils.collect.readTargets(self.human, config)
 
-        fp.write("""
-    # --------------- Shapekeys ----------------------------- #
-    """)
+        fp.write("\n# --------------- Shapekeys ----------------------------- #\n\n")
 
         self.proxyShapes('Cage', 'T_Cage', fp, [])
         self.proxyShapes('Proxymeshes', 'T_Proxy', fp, targets)
@@ -66,12 +64,7 @@ class Writer(mhx_writer.Writer):
         for ptype in proxy.SimpleProxyTypes:
             self.proxyShapes(ptype, 'T_Clothes', fp, [])
 
-        self.writeShapeKeysAndDrivers(fp, "%sBody" % self.name, None, targets)
-
-        fp.write(
-            "Pose %s\n" % self.name +
-            "end Pose\n")
-        #amt.writeAllActions(fp)
+        self.writeShapeKeysAndDrivers(fp, "%s" % self.meshName(), None, targets)
 
         fp.write("Pose %s\n" % self.name)
         amt.writeControlPoses(fp, config)
@@ -86,11 +79,9 @@ class Writer(mhx_writer.Writer):
     #-------------------------------------------------------------------------------
 
     def proxyShapes(self, type, test, fp, targets):
-        from .mhx_proxy import getProxyName
-
         for pxy in self.proxies.values():
             if pxy.name and pxy.type == type:
-                self.writeShapeKeysAndDrivers(fp, getProxyName(self, pxy), pxy, targets)
+                self.writeShapeKeysAndDrivers(fp, self.meshName(pxy), pxy, targets)
 
 
     def writeShape1(self, fp, sname, lr, trg, min, max, pxy, scale):
