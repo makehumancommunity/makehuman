@@ -600,6 +600,7 @@ class MacroModifier(GenericModifier):
     def buildLists(self):
         pass
 
+
 def getTargetWeights(targets, factors, value = 1.0, ignoreNotfound = False):
     result = dict()
     if ignoreNotfound:
@@ -609,7 +610,6 @@ def getTargetWeights(targets, factors, value = 1.0, ignoreNotfound = False):
         for (tpath, tfactors) in targets:
             result[tpath] = value * reduce(operator.mul, [factors[factor] for factor in tfactors])
     return result
-
 
 def debugModifiers():
     human = G.app.selectedHuman
@@ -621,3 +621,25 @@ def debugModifiers():
         log.debug("    dependencies (variables): %s", str(m.macroDependencies))
         log.debug("    dependencies (modifier groups): %s", str(list(human.getModifierDependencies(m))))
         log.debug("    influences (modifier groups): %s\n", str(list(human.getModifiersAffectedBy(m))))
+
+def loadModifiers(filename, human):
+    """
+    Load modifiers from a modifier definition file.
+    """
+    log.debug("Loading modifiers from %s", filename)
+    import json
+    modifiers = []
+    data = json.loads(open(filename, 'rb').read())
+    for modifierGroup in data:
+        groupName = modifierGroup['group']
+        for mDef in modifierGroup['modifiers']:
+            if 'macrovar' in mDef:
+                modifier = MacroModifier(groupName, mDef['macrovar'])
+            else:
+                modifier = UniversalModifier(groupName, mDef['target'], mDef.get('min',None), mDef.get('max',None), mDef.get('mid',None))
+            modifiers.append(modifier)
+    if human is not None:
+        for modifier in modifiers:
+            modifier.setHuman(human)
+    log.message('Loaded %s modifiers from file %s', len(modifiers), filename)
+    return modifiers
