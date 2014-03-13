@@ -748,7 +748,7 @@ class Human(guicommon.Object):
     def addModifier(self, modifier):
         #log.debug("Adding modifier of type %s: %s", type(modifier), modifier.fullName)
 
-        if modifier.fullName in self.modifiers:
+        if modifier.fullName in self._modifiers:
             log.error("Modifier with name %s is already attached to human.", modifier.fullName)
             raise RuntimeError("Modifier with name %s is already attached to human." % modifier.fullName)
 
