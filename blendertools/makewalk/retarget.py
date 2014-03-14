@@ -49,8 +49,8 @@ from bpy_extras.io_utils import ImportHelper
 from bpy.props import *
 
 from .simplify import simplifyFCurves, rescaleFCurves
-from .t_pose import setTPose, getStoredBonePose
 from .utils import *
+from . import t_pose
 
 
 class CAnimation:
@@ -80,13 +80,9 @@ class CAnimation:
 
     def setTPose(self, scn):
         selectAndSetRestPose(self.srcRig, scn)
-        setTPose(self.srcRig, scn)
+        t_pose.setTPose(self.srcRig, scn)
         selectAndSetRestPose(self.trgRig, scn)
-        if isMakeHumanRig(self.trgRig) and scn.McpMakeHumanTPose:
-            tpose = "target_rigs/makehuman_tpose.json"
-        else:
-            tpose = None
-        setTPose(self.trgRig, scn, filename=tpose)
+        t_pose.setTPose(self.trgRig, scn)
         for banim in self.boneAnims.values():
             banim.insertTPoseFrame()
         scn.frame_set(0)
@@ -181,7 +177,7 @@ class CBoneAnim:
 
 
     def insertTPoseFrame(self):
-        mat = getStoredBonePose(self.trgBone)
+        mat = t_pose.getStoredBonePose(self.trgBone)
         self.insertKeyFrame(mat, 0)
 
 
@@ -471,7 +467,7 @@ def loadRetargetSimplify(context, filepath):
     trgRig = context.object
     data = changeTargetData(trgRig, scn)
     try:
-        clearMcpProps(trgRig)
+        #clearMcpProps(trgRig)
         srcRig = load.readBvhFile(context, filepath, scn, False)
         try:
             load.renameAndRescaleBvh(context, srcRig, trgRig)
