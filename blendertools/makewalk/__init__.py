@@ -37,7 +37,7 @@ Alternatively, run the script in the script editor (Alt-P), and access from UI p
 bl_info = {
     "name": "MakeWalk",
     "author": "Thomas Larsson",
-    "version": (0, 942),
+    "version": (0, 943),
     "blender": (2, 6, 9),
     "location": "View3D > Tools > MakeWalk",
     "description": "Mocap tool for MakeHuman character",
@@ -159,7 +159,6 @@ class OptionsPanel(bpy.types.Panel):
         layout.prop(scn, "McpBvhScale")
         layout.prop(scn, "McpUseLimits")
         layout.prop(scn, "McpClearLocks")
-        layout.prop(scn, "McpMakeHumanTPose")
         layout.prop(scn, 'McpAutoSourceRig')
         layout.prop(scn, 'McpAutoTargetRig')
         layout.prop(scn, "McpIgnoreHiddenLayers")
@@ -406,13 +405,20 @@ class MhxTargetBonesPanel(bpy.types.Panel):
         layout.prop(scn, "McpIgnoreHiddenLayers")
         layout.prop(rig, "MhReverseHip")
         layout.operator("mcp.get_target_rig")
-
-        layout.separator()
-        layout.operator("mcp.set_t_pose")
-
         layout.separator()
         layout.prop(scn, "McpSaveTargetTPose")
         layout.operator("mcp.save_target_file")
+
+        layout.separator()
+        layout.label("T-pose")
+        if not rig.McpTPoseDefined:
+            layout.prop(scn, "McpMakeHumanTPose")
+        layout.operator("mcp.set_t_pose")
+        layout.operator("mcp.define_t_pose")
+        layout.operator("mcp.undefine_t_pose")
+        layout.operator("mcp.load_t_pose")
+        layout.operator("mcp.save_t_pose")
+
         layout.separator()
 
         if scn.McpTargetRig:
@@ -487,17 +493,7 @@ class UtilityPanel(bpy.types.Panel):
         layout.operator("mcp.clear_temp_props")
 
         layout.separator()
-        layout.label("T-pose")
-        layout.operator("mcp.set_t_pose")
-        layout.operator("mcp.clear_t_pose")
-        layout.operator("mcp.load_t_pose")
-        layout.operator("mcp.save_t_pose")
-
-        layout.separator()
-        layout.label("Rest Pose")
         layout.operator("mcp.rest_current_pose")
-        #layout.operator("mcp.rest_t_pose")
-        #layout.operator("mcp.rest_default_pose")
 
         return
         layout.operator("mcp.copy_angles_fk_ik")
