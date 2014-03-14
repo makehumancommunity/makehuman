@@ -129,6 +129,7 @@ def findSrcArmature(context, rig):
         selectAndSetRestPose(rig, scn)
         amt.findArmature(rig)
         t_pose.autoTPose(rig, scn)
+        t_pose.defineTPose(rig)
         _sourceArmatures["Automatic"] = amt
         amt.display("Source")
 
