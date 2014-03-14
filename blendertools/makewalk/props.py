@@ -307,10 +307,7 @@ def initInterface(context):
         description = "Automatically F-curves to fit T-pose at frame 0",
         default = True)
 
-    bpy.types.Object.McpTPoseLoaded = BoolProperty(
-        default = False)
-
-    bpy.types.Object.McpRestTPose = BoolProperty(
+    bpy.types.Object.McpTPoseDefined = BoolProperty(
         default = False)
 
     bpy.types.Object.McpTPoseFile = StringProperty(
