@@ -295,7 +295,7 @@
 
   { "group": "genitals",
     "modifiers": [
-        {"target": "penis-length", "min": "min", "max": "max"}
+        {"target": "penis-length", "min": "min", "max": "max"},
         {"target": "penis-circ", "min": "min", "max": "max"},
         {"target": "penis-testicles", "min": "min", "max": "max"}
     ]
