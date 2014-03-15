@@ -86,7 +86,7 @@ def writeGeometry(fp, rmesh, config):
     # Normals
 
     if config.useNormals:
-        normals = rotateCoord(rmesh.getVnorm(), config)
+        normals = rmesh.getVnorm()
         nNormals = len(normals)
         fp.write(
             '        <source id="%s-Normals">\n' % rmesh.name +
