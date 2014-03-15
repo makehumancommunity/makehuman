@@ -170,7 +170,7 @@ def setTPose(rig, scn, filename=None, reload=False):
             filename = "target_rigs/makehuman_tpose.json"
         elif filename is None:
             filename = rig.McpTPoseFile
-        hasFile = loadTPose(rig, filename)
+        hasFile = loadPose(rig, filename)
         if not hasFile:
             autoTPose(rig, scn)
         defineTPose(rig)
@@ -299,7 +299,7 @@ class VIEW3D_OT_McpUndefineTPoseButton(bpy.types.Operator):
 #   Load T-pose from file
 #------------------------------------------------------------------
 
-def loadTPose(rig, filename):
+def loadPose(rig, filename):
     if filename:
         filepath = os.path.join(os.path.dirname(__file__), filename)
         filepath = os.path.normpath(filepath)
@@ -334,10 +334,10 @@ def getBoneName(rig, name):
             return ""
 
 
-class VIEW3D_OT_McpLoadTPoseButton(bpy.types.Operator, ImportHelper):
-    bl_idname = "mcp.load_t_pose"
-    bl_label = "Load T-pose"
-    bl_description = "Load T-pose from file"
+class VIEW3D_OT_McpLoadPoseButton(bpy.types.Operator, ImportHelper):
+    bl_idname = "mcp.load_pose"
+    bl_label = "Load Pose"
+    bl_description = "Load pose from file"
     bl_options = {'UNDO'}
 
     filename_ext = ".json"
@@ -348,11 +348,10 @@ class VIEW3D_OT_McpLoadTPoseButton(bpy.types.Operator, ImportHelper):
         rig = initRig(context)
         filename = os.path.relpath(self.filepath, os.path.dirname(__file__))
         try:
-            loadTPose(rig, filename)
-            defineTPose(rig)
+            loadPose(rig, filename)
         except MocapError:
             bpy.ops.mcp.error('INVOKE_DEFAULT')
-        print("Loaded T-pose")
+        print("Loaded pose")
         return{'FINISHED'}
 
     def invoke(self, context, event):
@@ -363,7 +362,7 @@ class VIEW3D_OT_McpLoadTPoseButton(bpy.types.Operator, ImportHelper):
 #   Save current pose to file
 #------------------------------------------------------------------
 
-def saveTPose(context, filepath):
+def savePose(context, filepath):
     rig = context.object
     struct = []
     for pb in rig.pose.bones:
@@ -386,10 +385,10 @@ def saveTPose(context, filepath):
     saveJson(struct, filepath)
 
 
-class VIEW3D_OT_McpSaveTPoseButton(bpy.types.Operator, ImportHelper):
-    bl_idname = "mcp.save_t_pose"
-    bl_label = "Save T-pose"
-    bl_description = "Save current pose as T-pose .json file"
+class VIEW3D_OT_McpSavePoseButton(bpy.types.Operator, ImportHelper):
+    bl_idname = "mcp.save_pose"
+    bl_label = "Save Pose"
+    bl_description = "Save current pose as .json file"
     bl_options = {'UNDO'}
 
     filename_ext = ".json"
@@ -398,10 +397,10 @@ class VIEW3D_OT_McpSaveTPoseButton(bpy.types.Operator, ImportHelper):
 
     def execute(self, context):
         try:
-            saveTPose(context, self.filepath)
+            savePose(context, self.filepath)
         except MocapError:
             bpy.ops.mcp.error('INVOKE_DEFAULT')
-        print("Saved T-pose")
+        print("Saved current pose")
         return{'FINISHED'}
 
     def invoke(self, context, event):

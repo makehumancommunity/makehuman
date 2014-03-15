@@ -68,6 +68,21 @@ def initInterface(context):
         description="Show stitching",
         default=False)
 
+    bpy.types.Scene.McpShowDefaultSettings = BoolProperty(
+        name="Default Settings",
+        description="Show default settings",
+        default=False)
+
+    bpy.types.Scene.McpShowActions = BoolProperty(
+        name="Manage Actions",
+        description="Show manage actions",
+        default=False)
+
+    bpy.types.Scene.McpShowPosing = BoolProperty(
+        name="Posing",
+        description="Show posing",
+        default=False)
+
 
     # Load and retarget
 
