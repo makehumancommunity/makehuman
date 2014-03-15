@@ -36,8 +36,6 @@ package_name = "makehuman"  # Note: 'hg' will be appended if this is a nightly b
 
 package_version = None
 
-hgpath = "/usr/bin/hg"
-
 # ------------------------------
 
 import sys
@@ -49,7 +47,6 @@ import shutil
 def buildRpm():
   global package_name
   global package_version
-  global hgpath
 
   if os.geteuid() == 0:
     print "You are not allowed to run this script as root. You must run it as a normal user."
@@ -150,7 +147,6 @@ def parseConfig(configPath):
 def configure(confpath):
   global package_name
   global package_version
-  global hgpath
 
   def _conf_get(config, section, option, defaultVal):
     try:
@@ -164,7 +160,6 @@ def configure(confpath):
   else:
     print "Using config file at %s. NOTE: properties in config file will override any other settings!" % confpath
 
-    hgpath = _conf_get(conf, 'General', 'hgPath', hgpath)
     package_name = _conf_get(conf, 'Rpm', 'packageName', package_name)
     package_version = _conf_get(conf, 'Rpm', 'packageVersion', package_version)
 
