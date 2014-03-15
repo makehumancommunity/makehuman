@@ -30,11 +30,26 @@ from core import G
 class ModifierSlider(gui.Slider):
 
     def __init__(self, modifier, label=None, valueConverter=None, image=None, cameraView=None):
-        if image is not None:
-            if not os.path.isfile(image):
-                image = self.findImage(image)
-            if not os.path.isfile(image):
-                image = None
+        if label is None:
+            # Guess a suitable slider label from target name
+            tlabel = modifier.name.split('-')
+            if "|" in tlabel[len(tlabel)-1]:
+                tlabel = tlabel[:-1]
+            if len(tlabel) > 1 and tlabel[0] == modifier.groupName:
+                label = tlabel[1:]
+            else:
+                label = tlabel
+            label = ' '.join([word.capitalize() for word in label])
+
+        if image is None:
+            tlabel = modifier.name.replace('|', '-').split('-')
+            # Guess a suitable image path from target name
+            image = ('%s.png' % '-'.join(tlabel)).lower()
+        if not os.path.isfile(image):
+            image = self.findImage(image)
+        if not os.path.isfile(image):
+            image = None
+
         super(ModifierSlider, self).__init__(modifier.getValue(), modifier.getMin(), modifier.getMax(), label, valueConverter=valueConverter, image=image)
         self.modifier = modifier
         self.value = None
@@ -61,20 +76,26 @@ class ModifierSlider(gui.Slider):
 
     def _handleMousePress(self, event):
         if event.button() == gui.QtCore.Qt.RightButton:
-            # Right clicking reset the slider to default position
-            if self.modifier.getValue() == self.modifier.getDefaultValue():
-                return False
-
-            # Reset slider to default action
-            import humanmodifier
-            G.app.do(humanmodifier.ModifierAction(self.modifier, 
-                                                  self.modifier.getValue(), 
-                                                  self.modifier.getDefaultValue(), 
-                                                  self.update))
+            self.resetValue()
             return False
         else:
             # Default behaviour
             return True
+
+    def resetValue(self):
+        """
+        Reset value of slider to default.
+        """
+        # Right clicking reset the slider to default position
+        if self.modifier.getValue() == self.modifier.getDefaultValue():
+            return False
+
+        # Reset slider to default action
+        import humanmodifier
+        G.app.do(humanmodifier.ModifierAction(self.modifier, 
+                                              self.modifier.getValue(), 
+                                              None,  # Reset 
+                                              self.update))
 
     def onChanging(self, value):
         if self.changing is not None:
