@@ -14,6 +14,21 @@
 
 **Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
 
+    This file is part of MakeHuman.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 **Coding Standards:**  See http://www.makehuman.org/node/165
 
 Abstract
@@ -95,24 +110,45 @@ class ModifierAction(guicommon.Action):
         self.postAction = postAction
 
     def do(self):
-        self.modifier.setValue(self.after)
+        if self.after is None:
+            # Reset modifier to default value, store old values of other modifiers
+            # possibly involved
+            self.before = self.modifier.resetValue()
+        else:
+            self.modifier.setValue(self.after)
+
+        # Handle symmetry
         if self.human.symmetryModeEnabled and self.modifier.getSymmetricOpposite():
             opposite = self.human.getModifier( self.modifier.getSymmetricOpposite() )
-            opposite.setValue( self.modifier.getValue() )
+            if self.after is None:
+                # Reset modifier to default value
+                opposite.setValue( self.modifier.getValue() )
+            else:
+                oldV = opposite.resetValue()
+                if isinstance(oldv, dict):
+                    self.before.update(oldv)
 
         self.human.applyAllTargets(G.app.progress)
         self.postAction()
         return True
 
     def undo(self):
-        self.modifier.setValue(self.before)
-        if self.human.symmetryModeEnabled and self.modifier.getSymmetricOpposite():
-            opposite = self.human.getModifier( self.modifier.getSymmetricOpposite() )
-            opposite.setValue( self.modifier.getValue() )
+        if isinstance(self.before, dict):
+            # Undo reset of multiple modifiers
+            for mName, mVal in self.before.items():
+                self.human.getModifier(mName).setValue(mVal)
+        else:
+            self.modifier.setValue(self.before)
+
+            # Handle symmetry
+            if self.human.symmetryModeEnabled and self.modifier.getSymmetricOpposite():
+                opposite = self.human.getModifier( self.modifier.getSymmetricOpposite() )
+                opposite.setValue( self.modifier.getValue() )
 
         self.human.applyAllTargets(G.app.progress)
         self.postAction()
         return True
+
 
 class BaseModifier(object):
 
@@ -163,6 +199,11 @@ class BaseModifier(object):
 
         # Update dependent modifiers
         self.propagateUpdate(realtime = False)
+
+    def resetValue(self):
+        oldVal = self.getValue()
+        self.setValue(self.getDefaultValue())
+        return oldVal
 
     def propagateUpdate(self, realtime = False):
         """
@@ -600,6 +641,36 @@ class MacroModifier(GenericModifier):
     def buildLists(self):
         pass
 
+class EthnicModifier(MacroModifier):
+    def __init__(self, groupName, variable):
+        super(EthnicModifier, self).__init__(groupName, variable)
+
+        # We assume there to be only 3 ethnic modifiers
+        self._defaultValue = 1.0/3
+
+    def resetValue(self):
+        """
+        Resetting one ethnic modifier restores all ethnic modifiers to their
+        default position.
+        """
+        _tmp = self.human.blockEthnicUpdates
+        self.human.blockEthnicUpdates = True
+
+        oldVals = {}
+        oldVals[self.fullName] = self.getValue()
+        self.setValue(self.getDefaultValue())
+        for modifier in self.getSimilar():
+            oldVals[modifier.fullName] = modifier.getValue()
+            modifier.setValue(modifier.getDefaultValue())
+
+        self.human.blockEthnicUpdates = _tmp
+        return oldVals
+
+    def getSimilar(self):
+        """
+        Retrieve the other modifiers of the same type on the human.
+        """
+        return [m for m in self.human.getModiersByType(type(self)) if m != self]
 
 def getTargetWeights(targets, factors, value = 1.0, ignoreNotfound = False):
     result = dict()
@@ -628,15 +699,28 @@ def loadModifiers(filename, human):
     """
     log.debug("Loading modifiers from %s", filename)
     import json
+    from collections import OrderedDict
     modifiers = []
-    data = json.loads(open(filename, 'rb').read())
+    data = json.load(open(filename, 'rb'), object_pairs_hook=OrderedDict)
     for modifierGroup in data:
         groupName = modifierGroup['group']
         for mDef in modifierGroup['modifiers']:
-            if 'macrovar' in mDef:
-                modifier = MacroModifier(groupName, mDef['macrovar'])
+            # Construct modifier
+            if "modifierType" in mDef:
+                modifierClass = globals()[ mDef["modifierType"] ]
+            elif 'macrovar' in mDef:
+                modifierClass = MacroModifier
             else:
-                modifier = UniversalModifier(groupName, mDef['target'], mDef.get('min',None), mDef.get('max',None), mDef.get('mid',None))
+                modifierClass = UniversalModifier
+
+            if 'macrovar' in mDef:
+                modifier = modifierClass(groupName, mDef['macrovar'])
+            else:
+                modifier = modifierClass(groupName, mDef['target'], mDef.get('min',None), mDef.get('max',None), mDef.get('mid',None))
+
+            if "defaultValue" in mDef:
+                modifier._defaultValue = mDef["defaultValue"]
+
             modifiers.append(modifier)
     if human is not None:
         for modifier in modifiers:
