@@ -1,7 +1,7 @@
 [
   { "group": "head",
     "modifiers": [
-      {"target": "head-age", "min": "less", "max": "more", "desc": "Age of the facial features."},
+      {"target": "head-age", "min": "less", "max": "more"},
       {"target": "head-angle", "min": "in", "max": "out"},
       {"target": "head-oval"},
       {"target": "head-round"},
@@ -92,13 +92,13 @@
       {"target": "nose-height", "min": "min", "max": "max"},
       {"target": "nose-width1", "min": "min", "max": "max"},
       {"target": "nose-width2", "min": "min", "max": "max"},
-      {"target": "nose-width3", "min": "min", "max": "max"},            
+      {"target": "nose-width3", "min": "min", "max": "max"},
 
       {"target": "nose-compression", "min": "compress", "max": "uncompress"},
       {"target": "nose-curve", "min": "convex", "max": "concave"},
       {"target": "nose-greek", "min": "moregreek", "max": "lessgreek"},
       {"target": "nose-hump", "min": "morehump", "max": "lesshump"},
-      {"target": "nose-volume", "min": "potato", "max": "point"},            
+      {"target": "nose-volume", "min": "potato", "max": "point"},
       {"target": "nose-nostrils-angle", "min": "up", "max": "down"},
       {"target": "nose-point", "min": "up", "max": "down"},
       {"target": "nose-septumangle", "min": "decr", "max": "incr"},
@@ -115,7 +115,7 @@
       {"target": "mouth-trans", "min": "up", "max": "down"},
       {"target": "mouth-trans", "min": "forward", "max": "backward"},
 
-      {"target": "mouth-lowerlip-height", "min": "min", "max": "max"},            
+      {"target": "mouth-lowerlip-height", "min": "min", "max": "max"},
       {"target": "mouth-lowerlip-width", "min": "min", "max": "max"},
       {"target": "mouth-upperlip-height", "min": "min", "max": "max"},
       {"target": "mouth-upperlip-width", "min": "min", "max": "max"},
@@ -173,10 +173,10 @@
 
   { "group": "cheek",
     "modifiers": [
-      {"target": "l-cheek-volume", "min": "deflate", "max": "inflate"},                      
+      {"target": "l-cheek-volume", "min": "deflate", "max": "inflate"},
       {"target": "l-cheek-bones", "min": "in", "max": "out"},
       {"target": "l-cheek-inner", "min": "deflate", "max": "inflate"},
-      {"target": "l-cheek-trans-vert", "min": "down", "max": "up"},   
+      {"target": "l-cheek-trans-vert", "min": "down", "max": "up"},
       {"target": "r-cheek-volume", "min": "deflate", "max": "inflate"},
       {"target": "r-cheek-bones", "min": "in", "max": "out"},
       {"target": "r-cheek-inner", "min": "deflate", "max": "inflate"},
@@ -230,21 +230,21 @@
   { "group": "armslegs",
     "modifiers": [
         {"target": "r-hand-fingers-diameter", "min": "decr", "max": "incr"},
-        {"target": "r-hand-fingers-length", "min": "decr", "max": "incr"}, 
-        {"target": "r-hand-scale", "min": "decr", "max": "incr"},       
-        {"target": "r-hand-trans", "min": "in", "max": "out"},            
+        {"target": "r-hand-fingers-length", "min": "decr", "max": "incr"},
+        {"target": "r-hand-scale", "min": "decr", "max": "incr"},
+        {"target": "r-hand-trans", "min": "in", "max": "out"},
 
         {"target": "l-hand-fingers-diameter", "min": "decr", "max": "incr"},
-        {"target": "l-hand-fingers-length", "min": "decr", "max": "incr"}, 
-        {"target": "l-hand-scale", "min": "decr", "max": "incr"},              
-        {"target": "l-hand-trans", "min": "in", "max": "out"},            
+        {"target": "l-hand-fingers-length", "min": "decr", "max": "incr"},
+        {"target": "l-hand-scale", "min": "decr", "max": "incr"},
+        {"target": "l-hand-trans", "min": "in", "max": "out"},
 
-        {"target": "r-foot-scale", "min": "decr", "max": "incr"},            
+        {"target": "r-foot-scale", "min": "decr", "max": "incr"},
         {"target": "r-foot-trans", "min": "in", "max": "out"},
         {"target": "r-foot-trans", "min": "down", "max": "up"},
         {"target": "r-foot-trans", "min": "forward", "max": "backward"},
 
-        {"target": "l-foot-scale", "min": "decr", "max": "incr"},             
+        {"target": "l-foot-scale", "min": "decr", "max": "incr"},
         {"target": "l-foot-trans", "min": "in", "max": "out"},
         {"target": "l-foot-trans", "min": "down", "max": "up"},
         {"target": "l-foot-trans", "min": "forward", "max": "backward"},
@@ -266,15 +266,15 @@
         {"target": "r-leg-genu", "min": "varun", "max": "valgus"},
         {"target": "r-lowerleg-scale-depth", "min": "decr", "max": "incr"},
         {"target": "r-lowerleg-scale-horiz", "min": "decr", "max": "incr"},
-        {"target": "r-lowerleg-scale-vert", "min": "decr", "max": "incr"},            
+        {"target": "r-lowerleg-scale-vert", "min": "decr", "max": "incr"},
         {"target": "r-upperleg-scale-depth", "min": "decr", "max": "incr"},
         {"target": "r-upperleg-scale-horiz", "min": "decr", "max": "incr"},
-        {"target": "r-upperleg-scale-vert", "min": "decr", "max": "incr"},            
+        {"target": "r-upperleg-scale-vert", "min": "decr", "max": "incr"},
 
         {"target": "l-leg-genu", "min": "varun", "max": "valgus"},
         {"target": "l-lowerleg-scale-depth", "min": "decr", "max": "incr"},
         {"target": "l-lowerleg-scale-horiz", "min": "decr", "max": "incr"},
-        {"target": "l-lowerleg-scale-vert", "min": "decr", "max": "incr"},            
+        {"target": "l-lowerleg-scale-vert", "min": "decr", "max": "incr"},
         {"target": "l-upperleg-scale-depth", "min": "decr", "max": "incr"},
         {"target": "l-upperleg-scale-horiz", "min": "decr", "max": "incr"},
         {"target": "l-upperleg-scale-vert", "min": "decr", "max": "incr"}
@@ -295,50 +295,38 @@
 
   { "group": "genitals",
     "modifiers": [
-        {"target": "penis-length", "min": "min", "max": "max", 
-            "desc": "Length of the male genital (if proxy applied)."},
-        {"target": "penis-circ", "min": "min", "max": "max", 
-            "desc": "Circumference or thickness of the male genital (if proxy applied)."},
-        {"target": "penis-testicles", "min": "min", "max": "max", 
-            "desc": "Size of the testicles of the male genital (if proxy applied)."}
+        {"target": "penis-length", "min": "min", "max": "max"}
+        {"target": "penis-circ", "min": "min", "max": "max"},
+        {"target": "penis-testicles", "min": "min", "max": "max"}
     ]
   },
 
   { "group": "macrodetails",
     "modifiers": [
-        {"macrovar": "Gender",
-            "desc": "Gender of the human (min is female, max is male)."},
-        {"macrovar": "Age", 
-            "desc": "Age of the human (range from 1 year to 90 years old, with center position 25 years)."},
-        {"macrovar": "African", "modifierType": "EthnicModifier",
-            "desc": "African ethnicity of the human (the three ethnicity values are normalized so they sum to 100%)."},
-        {"macrovar": "Asian", "modifierType": "EthnicModifier",
-            "desc": "Asian ethnicity of the human (the three ethnicity values are normalized so they sum to 100%)."},
-        {"macrovar": "Caucasian", "modifierType": "EthnicModifier",
-            "desc": "Caucasian ethnicity of the human (the three ethnicity values are normalized so they sum to 100%)."}
+        {"macrovar": "Gender"},
+        {"macrovar": "Age"},
+        {"macrovar": "African", "modifierType": "EthnicModifier"},
+        {"macrovar": "Asian", "modifierType": "EthnicModifier"},
+        {"macrovar": "Caucasian", "modifierType": "EthnicModifier"}
     ]
   },
 
   { "group": "macrodetails-universal",
     "modifiers": [
-        {"target": "universal", "macrovar": "Muscle", 
-            "desc": "Amount of muscle mass."},
-        {"target": "universal", "macrovar": "Weight", 
-            "desc": "The weight of the human."}
+        {"macrovar": "Muscle"},
+        {"macrovar": "Weight"}
     ]
   },
 
   { "group": "macrodetails-height",
     "modifiers": [
-        {"macrovar": "Height", 
-            "desc": "The height of the human."}
+        {"macrovar": "Height"}
     ]
   },
 
   { "group": "macrodetails-proportions",
     "modifiers": [
-        {"macrovar": "BodyProportions", 
-            "desc": "Proportions of the human features, often subjectively referred to as qualities of beauty (min is unusual, center position is average and max is idealistic proportions)."}
+        {"macrovar": "BodyProportions"}
     ]
   }
 
