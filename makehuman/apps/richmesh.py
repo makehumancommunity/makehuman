@@ -103,7 +103,7 @@ class RichMesh(object):
                 wvec = vw.weights * vec
                 self._coord[vw.verts] += wvec.transpose()
 
-                obj.calcVertexNormals()
+                obj.calcNormals()
                 vec = np.dot(rmat, obj.vnorm[vw.verts].transpose())
                 wvec = vw.weights * vec
                 self._vnorm[vw.verts] += wvec.transpose()
@@ -126,13 +126,13 @@ class RichMesh(object):
 
 
     def getVnorm(self):
-        self.object.calcVertexNormals()
+        self.object.calcNormals()
         return self.object.vnorm
 
         if self._vnorm is not None:
             return self._vnorm
         else:
-            self.object.calcVertexNormals()
+            self.object.calcNormals()
             return self.object.vnorm
 
 

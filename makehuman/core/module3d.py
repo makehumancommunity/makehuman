@@ -230,6 +230,7 @@ class Object3D(object):
         """
         Calculate the face normals. A right-handed coordinate system is assumed,
         which requires mesh faces to be defined with counter clock-wise vertex order.
+        Face normals are not normalized.
 
         Faces are treated as if they were triangles (using only the 3 first verts), 
         so for quads with non co-planar points, inaccuracies may occur (even though 
