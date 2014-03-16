@@ -653,6 +653,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.splash.hide()
         # self.splash.finish(self.mainwin)
+        self.splash.close()
         self.splash = None
 
         # Restore main window size and position
