@@ -147,6 +147,10 @@ HeadsTails = {
     'shin.R' :             ('r-knee', 'r-ankle'),
     'foot.R' :             ('r-ankle', 'r-foot-1'),
     'toe.R' :              ('r-foot-1', 'r-toe-2'),
+
+    'skull' :              ('head-2', ('head-2', (0,0.2,0))),
+    'toe_end.L' :          ('l-toe-2', ('l-toe-2', (0,0,0.2))),
+    'toe_end.R' :          ('r-toe-2', ('r-toe-2', (0,0,0.2))),
 }
 
 Planes = {
@@ -251,6 +255,14 @@ Armature = {
     'shin.R' :             ("PlaneLeg.R", 'thigh.R', F_DEF|F_CON, L_RLEGFK, P_YZX),
     'foot.R' :             ("PlaneFoot.R", 'shin.R', F_DEF|F_CON, L_RLEGFK, P_YZX),
     'toe.R' :              ("PlaneFoot.R", 'foot.R', F_DEF|F_CON, L_RLEGFK, P_YZX),
+}
+
+# Terminators needed by OpenSim
+
+TerminatorArmature = {
+    'skull' :               (0, 'head', F_CON, L_HELP),
+    'toe_end.L' :           (0, 'toe.L', F_CON, L_HELP),
+    'toe_end.R' :           (0, 'toe.R', F_CON, L_HELP),
 }
 
 RotationLimits = {

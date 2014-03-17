@@ -31,8 +31,14 @@
         "thigh.R":      "mHipRight",
         "shin.R":       "mKneeRight",
         "foot.R":       "mAnkleRight",
-        "toe.R":        "mFootRight"
+        "toe.R":        "mFootRight",
+        
+        "skull" :	"mSkull",
+        "toe_end.L" : 	"mToeLeft",
+        "toe_end.R" :	"mToeRight"
     },
+    
+    "use_terminators" :	true,
     
     "merge" : {
             "spine":        ["spine", "spine-1"],
