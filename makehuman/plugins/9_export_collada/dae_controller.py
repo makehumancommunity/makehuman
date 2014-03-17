@@ -54,7 +54,8 @@ def writeSkinController(fp, rmesh, amt, config):
     progress = Progress()
     progress(0, 0.1)
 
-    nVerts = len(rmesh.getCoord())
+    obj = rmesh.object
+    nVerts = len(obj.coord)
     nBones = len(amt.bones)
 
     skinWeights = []
