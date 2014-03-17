@@ -57,7 +57,9 @@ def writeGeometry(fp, rmesh, config):
     progress = Progress()
     progress(0)
 
-    coord = rmesh.getCoord() - config.scale*config.offset
+    obj = rmesh.object
+
+    coord = obj.coord - config.scale*config.offset
     coord = rotateCoord(coord, config)
     nVerts = len(coord)
 
@@ -85,14 +87,14 @@ def writeGeometry(fp, rmesh, config):
     # Normals
 
     if config.useNormals:
-        normals = rotateCoord(rmesh.getVnorm(), config)
-        nNormals = len(normals)
+        obj.calcFaceNormals()
+        nNormals = len(obj.fnorm)
         fp.write(
             '        <source id="%s-Normals">\n' % rmesh.name +
             '          <float_array count="%d" id="%s-Normals-array">\n' % (3*nNormals,rmesh.name) +
             '          ')
 
-        fp.write( ''.join([("%.4f %.4f %.4f " % tuple(normalize(no))) for no in normals]) )
+        fp.write( ''.join([("%.4f %.4f %.4f " % tuple(normalize(no))) for no in obj.fnorm]) )
 
         fp.write('\n' +
             '          </float_array>\n' +
@@ -108,15 +110,14 @@ def writeGeometry(fp, rmesh, config):
 
     # UV coordinates
 
-    texco = rmesh.getTexco()
-    nUvVerts = len(texco)
+    nUvVerts = len(obj.texco)
 
     fp.write(
         '        <source id="%s-UV">\n' % rmesh.name +
         '          <float_array count="%d" id="%s-UV-array">\n' % (2*nUvVerts,rmesh.name) +
         '           ')
 
-    fp.write( ''.join([("%.4f %.4f " % tuple(uv)) for uv in texco]) )
+    fp.write( ''.join([("%.4f %.4f " % tuple(uv)) for uv in obj.texco]) )
 
     fp.write('\n' +
         '          </float_array>\n' +
@@ -136,9 +137,8 @@ def writeGeometry(fp, rmesh, config):
         '          <input semantic="POSITION" source="#%s-Position"/>\n' % rmesh.name +
         '        </vertices>\n')
 
-    checkFaces(rmesh, nVerts, nUvVerts)
+    checkFaces(obj, nVerts, nUvVerts)
     progress(0.7, 0.9)
-    #writePolygons(fp, rmesh, config)
     writePolylist(fp, rmesh, config)
     progress(0.9, 0.99)
 
@@ -166,11 +166,12 @@ def writeShapeKey(fp, name, shape, rmesh, config):
         return
 
     progress = Progress()
+    obj = rmesh.object
 
     # Verts
 
     progress(0)
-    target = np.array(rmesh.getCoord() - config.scale * config.offset)
+    target = np.array(obj.coord - config.scale * config.offset)
     target[shape.verts] += shape.data[np.s_[...]]
     target = rotateCoord(target, config)
     nVerts = len(target)
@@ -196,29 +197,9 @@ def writeShapeKey(fp, name, shape, rmesh, config):
         '        </source>\n')
     progress(0.3)
 
-    # Normals
-    """
-    fp.write(
-'        <source id="%sMeshMorph_%s-normals">\n' % (rmesh.name, name) +
-'          <float_array id="%sMeshMorph_%s-normals-array" count="18">\n' % (rmesh.name, name))
--0.9438583 0 0.3303504 0 0.9438583 0.3303504 0.9438583 0 0.3303504 0 -0.9438583 0.3303504 0 0 -1 0 0 1
-    fp.write(
-        '          </float_array>\n' +
-        '          <technique_common>\n' +
-        '            <accessor source="#%sMeshMorph_%s-normals-array" count="6" stride="3">\n' % (rmesh.name, name) +
-        '              <param name="X" type="float"/>\n' +
-        '              <param name="Y" type="float"/>\n' +
-        '              <param name="Z" type="float"/>\n' +
-        '            </accessor>\n' +
-        '          </technique_common>\n' +
-        '        </source>\n')
-    """
-    progress(0.6)
-
     # Polylist
 
-    fvert = rmesh.getFvert()
-    nFaces = len(fvert)
+    nFaces = len(obj.fvert)
 
     fp.write(
         '        <vertices id="%sMeshMorph_%s-vertices">\n' % (rmesh.name, name) +
@@ -229,13 +210,13 @@ def writeShapeKey(fp, name, shape, rmesh, config):
         #'          <input semantic="NORMAL" source="#%sMeshMorph_%s-normals" offset="1"/>\n' % (rmesh.name, name) +
         '          <vcount>')
 
-    fp.write( ''.join(["4 " for fv in fvert]) )
+    fp.write( ''.join(["4 " for fv in obj.fvert]) )
 
     fp.write('\n' +
         '          </vcount>\n' +
         '          <p>')
 
-    fp.write( ''.join([("%d %d %d %d " % (fv[0], fv[1], fv[2], fv[3])) for fv in fvert]) )
+    fp.write( ''.join([("%d %d %d %d " % (fv[0], fv[1], fv[2], fv[3])) for fv in obj.fvert]) )
 
     fp.write('\n' +
         '          </p>\n' +
@@ -246,37 +227,14 @@ def writeShapeKey(fp, name, shape, rmesh, config):
 
 
 #
-#   writePolygons(fp, rmesh, config):
 #   writePolylist(fp, rmesh, config):
 #
-'''
-def writePolygons(fp, rmesh, config):
-    fvert = rmesh.getFvert()
-    fuvs = rmesh.getFuvs()
-
-    fp.write(
-        '        <polygons count="%d">\n' % len(fvert) +
-        '          <input offset="0" semantic="VERTEX" source="#%s-Vertex"/>\n' % rmesh.name +
-        '          <input offset="1" semantic="NORMAL" source="#%s-Normals"/>\n' % rmesh.name +
-        '          <input offset="2" semantic="TEXCOORD" source="#%s-UV"/>\n' % rmesh.name)
-
-    for fn,fvs in enumerate(fvert):
-        fuv = fuvs[fn]
-        fp.write('          <p>')
-        for n,vn in enumerate(fvs):
-            fp.write("%d %d %d " % (vn, vn, fuv[n]))
-        fp.write('</p>\n')
-
-    fp.write('\n' +
-        '        </polygons>\n')
-    return
-'''
 
 def writePolylist(fp, rmesh, config):
     progress = Progress(2)
 
-    fvert = rmesh.getFvert()
-    nFaces = len(fvert)
+    obj = rmesh.object
+    nFaces = len(obj.fvert)
 
     fp.write(
         '        <polylist count="%d">\n' % nFaces +
@@ -292,17 +250,15 @@ def writePolylist(fp, rmesh, config):
         '          <input offset="1" semantic="TEXCOORD" source="#%s-UV"/>\n' % rmesh.name +
         '          <vcount>')
 
-    fp.write( ''.join(["4 " for fv in fvert]) )
+    fp.write( ''.join(["4 " for fv in obj.fvert]) )
 
     fp.write('\n' +
         '          </vcount>\n'
         '          <p>')
     progress.step()
 
-    fuvs = rmesh.getFuvs()
-
-    for fn,fv in enumerate(fvert):
-        fuv = fuvs[fn]
+    for fn,fv in enumerate(obj.fvert):
+        fuv = obj.fuvs[fn]
         if config.useNormals:
             fp.write( ''.join([("%d %d %d " % (fv[n], fn, fuv[n])) for n in range(4)]) )
         else:
@@ -314,15 +270,13 @@ def writePolylist(fp, rmesh, config):
     progress.step()
 
 #
-#   checkFaces(rmesh, nVerts, nUvVerts):
+#   checkFaces(obj, nVerts, nUvVerts):
 #
 
-def checkFaces(rmesh, nVerts, nUvVerts):
-    fvert = rmesh.getFvert()
-    fuvs = rmesh.getFuvs()
-    for fn,fvs in enumerate(fvert):
+def checkFaces(obj, nVerts, nUvVerts):
+    for fn,fvs in enumerate(obj.fvert):
         for n,vn in enumerate(fvs):
-            uv = fuvs[fn][n]
+            uv = obj.fuvs[fn][n]
             if vn > nVerts:
                 raise NameError("v %d > %d" % (vn, nVerts))
             if uv > nUvVerts:

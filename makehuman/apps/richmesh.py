@@ -82,23 +82,6 @@ class RichMesh(object):
             #log.debug(self.vertexGroups[name])
 
 
-    def getCoord(self):
-        return self.object.coord
-
-    def getVnorm(self):
-        self.object.calcNormals()
-        return self.object.vnorm
-
-    def getTexco(self):
-        return self.object.texco
-
-    def getFvert(self):
-        return self.object.fvert
-
-    def getFuvs(self):
-        return self.object.fuvs
-
-
     def getProxy(self):
         log.debug((self, self._proxy))
         return self._proxy
