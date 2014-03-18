@@ -284,7 +284,6 @@ end AnimationData
             return
 
         '''
-        fp.write("#if toggle&T_ShapeDrivers\n")
         self.writeHideProp(fp, self.name)
         for proxy in env.proxies.values():
             self.writeHideProp(fp, proxy.name)
@@ -296,12 +295,9 @@ end AnimationData
             self.defProp(fp, "FLOAT", key, val, string, min, max)
 
         if self.options.useExpressions:
-            fp.write("#if toggle&T_Shapekeys\n")
             for skey in exportutils.shapekeys.getExpressionUnits():
                 self.defProp(fp, "FLOAT", "Mhs%s"%skey, 0.0, skey, -1.0, 2.0)
                 #fp.write("  DefProp Float Mhs%s 0.0 %s min=-1.0,max=2.0 ;\n" % (skey, skey))
-            fp.write("#endif\n")
-        fp.write("#endif\n")
         '''
 
         if self.options.useIkArms:
