@@ -94,7 +94,7 @@ def writeGeometry(fp, rmesh, config):
             '          <float_array count="%d" id="%s-Normals-array">\n' % (3*nNormals,rmesh.name) +
             '          ')
 
-        fp.write( ''.join([("%.4f %.4f %.4f " % tuple(no/math.sqrt(np.dot(no,no)))) for no in obj.vnorm]) )
+        fp.write( ''.join([("%.4f %.4f %.4f " % tuple(no)) for no in obj.vnorm]) )
 
         fp.write('\n' +
             '          </float_array>\n' +
