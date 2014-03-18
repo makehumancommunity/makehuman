@@ -1,8 +1,8 @@
 # author Manuel Bastioni, Thomas Larsson
-# license AGPL3 (see also http://www.makehuman.org/node/320)
 # homepage http://www.makehuman.org/
 uuid 2c12f43b-1303-432c-b7ce-d78346baf2e6
 basemesh hm08
+# license AGPL3 (http://www.makehuman.org/doc/node/makehuman_mesh_license.html)
 
 name HighPolyEyes
 obj_file high-poly.obj
