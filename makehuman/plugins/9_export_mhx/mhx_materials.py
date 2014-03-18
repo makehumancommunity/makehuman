@@ -39,8 +39,8 @@ class Writer(mhx_writer.Writer):
         self.type == "mhx_materials"
 
 
-    def writeTexture(self, fp, filepath, prefix, channel):
-        texname = prefix+"_"+channel
+    def writeTexture(self, fp, filepath, channel, pxy):
+        texname = self.textureName(channel, pxy)
         imgname = os.path.basename(filepath)
         newpath = self.config.copyTextureToNewLocation(filepath)
         newpath = newpath.replace("\\","/")
@@ -58,19 +58,18 @@ class Writer(mhx_writer.Writer):
         return texname
 
 
-    def writeTextures(self, fp, mat, prefix):
-        prefix = prefix.replace(" ", "_")
+    def writeTextures(self, fp, mat, pxy=None):
         diffuse,spec,bump,normal,disp = None,None,None,None,None
         if mat.diffuseTexture:
-            diffuse = self.writeTexture(fp, mat.diffuseTexture, prefix, "diffuse")
+            diffuse = self.writeTexture(fp, mat.diffuseTexture, "diffuse", pxy)
         if mat.specularMapTexture:
-            spec = self.writeTexture(fp, mat.specularMapTexture, prefix, "spec")
+            spec = self.writeTexture(fp, mat.specularMapTexture, "spec", pxy)
         if mat.bumpMapTexture:
-            bump = self.writeTexture(fp, mat.bumpMapTexture, prefix, "bump")
+            bump = self.writeTexture(fp, mat.bumpMapTexture, "bump", pxy)
         if mat.normalMapTexture:
-            normal = self.writeTexture(fp, mat.normalMapTexture, prefix, "normal")
+            normal = self.writeTexture(fp, mat.normalMapTexture, "normal", pxy)
         if mat.displacementMapTexture:
-            disp = self.writeTexture(fp, mat.displacementMapTexture, prefix, "disp")
+            disp = self.writeTexture(fp, mat.displacementMapTexture, "disp", pxy)
         return diffuse,spec,bump,normal,disp
 
 
@@ -182,7 +181,7 @@ class Writer(mhx_writer.Writer):
         human = self.human
         mat = human.material
 
-        texnames = self.writeTextures(fp, mat, self.name)
+        texnames = self.writeTextures(fp, mat)
 
         fp.write(
 """
@@ -193,7 +192,7 @@ end Texture
 
         fp.write(
             "# --------------- Materials ----------------------------- #\n\n" +
-            "Material %sSkin\n" % self.name)
+            "Material %s\n" % self.materialName("Skin"))
 
         if mat.diffuseTexture:
             alpha = 0
@@ -230,15 +229,14 @@ end Texture
         self.writeSimpleMaterial(fp, "Green", (0,1,0))
         self.writeSimpleMaterial(fp, "Blue", (0,0,1))
         self.writeSimpleMaterial(fp, "Yellow", (1,1,0))
-        return
 
     #-------------------------------------------------------------------------------
     #   Simple materials: red, green, blue
     #-------------------------------------------------------------------------------
 
-    def writeSimpleMaterial(self, fp, name, color):
+    def writeSimpleMaterial(self, fp, matname, color):
         fp.write(
-            "Material %s%s\n" % (self.name, name) +
+            "Material %s\n" % self.materialName(matname) +
             "  diffuse_color Array %s %s %s  ;" % (color[0], color[1], color[2]))
 
         fp.write(
@@ -263,7 +261,7 @@ end Material
         for n in range(nTextures):
             fp.write(" 1")
         fp.write(" ;\n")
-        fp.write("  AnimationData %sBody True\n" % self.name)
+        #fp.write("  AnimationData %s True\n" % self.meshName())
         #mhx_drivers.writeTextureDrivers(fp, rig_panel.BodyLanguageTextureDrivers)
-        fp.write("  end AnimationData\n")
+        #fp.write("  end AnimationData\n")
 

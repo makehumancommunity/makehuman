@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#:/usr/bin/python
 # -*- coding: utf-8 -*-
 
 """
@@ -47,5 +47,26 @@ class Writer:
         self.loadedShapes = writer.loadedShapes
         self.customProps = writer.customProps
         return self
+
+    # Names exported to Blender
+
+    def meshName(self, proxy=None):
+        if proxy:
+            return "%s:%s" % (self.name, proxy.name)
+        else:
+            return "%s:Body" % self.name
+
+    def materialName(self, matname, proxy=None):
+        if proxy:
+            return "%s:%s:%s" % (self.name, proxy.name, matname)
+        else:
+            return "%s:%s" % (self.name, matname)
+
+    def textureName(self, channel, proxy=None):
+        if proxy:
+            return "%s:%s:%s" % (self.name, proxy.name, channel)
+        else:
+            return "%s:%s" % (self.name, channel)
+
 
 

@@ -43,35 +43,29 @@ class Writer(mhx_writer.Writer):
         config = self.config
         scale = config.scale
 
-        meshname = self.name + "Body"
-        fp.write("\nMesh %s %s\n  Verts\n" % (meshname, meshname))
+        meshname = self.meshName()
         amt = self.armature
         coords = config.scale * (mesh.coord - config.offset)
-        fp.write( "".join(["  v %.4f %.4f %.4f ;\n" % (x,-z,y) for (x,y,z) in coords] ))
 
         fp.write(
-"""
-  end Verts
+            "\nMesh %s %s\n" % (meshname, meshname) +
+            "  Verts\n" +
+            "".join(["    v %.4f %.4f %.4f ;\n" % (x,-z,y) for (x,y,z) in coords] ) +
+            "  end Verts\n")
 
-  Faces
-""")
-        fp.write( "".join(["    f %d %d %d %d ;\n" % tuple(fv) for fv in mesh.fvert] ))
-
+        fp.write(
+            "  Faces\n" +
+            "".join(["    f %d %d %d %d ;\n" % tuple(fv) for fv in mesh.fvert] ))
         self.writeFaceNumbers(fp)
+        fp.write("  end Faces\n")
 
         fp.write(
-"""
-  end Faces
-
-  MeshTextureFaceLayer UVTex
-    Data
-""")
-
+            "  MeshTextureFaceLayer UVTex\n" +
+            "    Data\n")
         uvs = mesh.texco
         fuvs = mesh.fuvs
         for fuv in fuvs:
-            fp.write( "    vt" + "".join([" %.4g %.4g" %(tuple(uvs[vt])) for vt in fuv]) + " ;\n")
-
+            fp.write( "      vt" + "".join([" %.4g %.4g" %(tuple(uvs[vt])) for vt in fuv]) + " ;\n")
         fp.write(
 """
     end Data
@@ -92,12 +86,12 @@ class Writer(mhx_writer.Writer):
 
         ox,oy,oz = config.scale*config.offset
         fp.write(
-    "end Mesh\n\n"+
-    "Object %s MESH %s\n"  % (meshname, meshname) +
-    "  Property MhxOffsetX %.4f ;\n" % ox +
-    "  Property MhxOffsetY %.4f ;\n" % oy +
-    "  Property MhxOffsetZ %.4f ;\n" % oz +
-    "  layers Array 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0  ;\n")
+            "end Mesh\n\n"+
+            "Object %s MESH %s\n"  % (meshname, meshname) +
+            "  Property MhxOffsetX %.4f ;\n" % ox +
+            "  Property MhxOffsetY %.4f ;\n" % oy +
+            "  Property MhxOffsetZ %.4f ;\n" % oz +
+            "  layers Array 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0  ;\n")
 
         self.writeArmatureModifier(fp, None)
 
@@ -162,49 +156,49 @@ end Object
             not (proxy and proxy.cage)):
 
             fp.write(
-    """
-      #if toggle&T_Cage
-        Modifier MeshDeform MESH_DEFORM
-          invert_vertex_group False ;
-    """ +
-    "  object Refer Object %sCageMesh ;" % self.name +
-    """
-          precision 6 ;
-          use_dynamic_bind True ;
-        end Modifier
-        Modifier Armature ARMATURE
-          invert_vertex_group False ;
-    """ +
-    "  object Refer Object %s ;" % self.name +
-    """
-          use_bone_envelopes False ;
-          use_multi_modifier True ;
-          use_vertex_groups True ;
-          vertex_group 'Cage' ;
-        end Modifier
-      #else
-        Modifier Armature ARMATURE
-    """ +
-    "  object Refer Object %s ;" % self.name +
-    """
-          use_bone_envelopes False ;
-          use_vertex_groups True ;
-        end Modifier
-      #endif
-    """)
+"""
+  #if toggle&T_Cage
+    Modifier MeshDeform MESH_DEFORM
+      invert_vertex_group False ;
+""" +
+"  object Refer Object %sCageMesh ;" % self.name +
+"""
+      precision 6 ;
+      use_dynamic_bind True ;
+    end Modifier
+    Modifier Armature ARMATURE
+      invert_vertex_group False ;
+""" +
+"  object Refer Object %s ;" % self.name +
+"""
+      use_bone_envelopes False ;
+      use_multi_modifier True ;
+      use_vertex_groups True ;
+      vertex_group 'Cage' ;
+    end Modifier
+  #else
+    Modifier Armature ARMATURE
+""" +
+"  object Refer Object %s ;" % self.name +
+"""
+      use_bone_envelopes False ;
+      use_vertex_groups True ;
+    end Modifier
+  #endif
+""")
 
         else:
 
             fp.write(
-    """
-        Modifier Armature ARMATURE
-    """ +
-    "  object Refer Object %s ;" % self.name +
-    """
-          use_bone_envelopes False ;
-          use_vertex_groups True ;
-        end Modifier
-    """)
+"""
+    Modifier Armature ARMATURE
+""" +
+"  object Refer Object %s ;" % self.name +
+"""
+      use_bone_envelopes False ;
+      use_vertex_groups True ;
+    end Modifier
+""")
 
     #-------------------------------------------------------------------------------
     #   Face numbers
@@ -258,15 +252,8 @@ end Object
     #-------------------------------------------------------------------------------
 
     def writeBaseMaterials(self, fp):
-        fp.write(
-            "  Material %sSkin ;\n" % self.name +
-            "  Material %sShiny ;\n" % self.name +
-            "  Material %sInvisio ;\n" % self.name +
-            "  Material %sRed ;\n" % self.name +
-            "  Material %sGreen ;\n" % self.name +
-            "  Material %sBlue ;\n" % self.name +
-            "  Material %sYellow ;\n" % self.name
-        )
+        for matname in ["Skin", "Invisio", "Red", "Green", "Blue", "Yellow"]:
+            fp.write("  Material %s ;\n" % self.materialName(matname))
 
 #-------------------------------------------------------------------------------
 #   Vertex groups
