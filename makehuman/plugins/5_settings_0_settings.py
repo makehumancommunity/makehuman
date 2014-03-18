@@ -104,9 +104,8 @@ class SettingsTaskView(gui3d.TaskView):
 
         languages = []
         languageBox = self.languageBox = self.addRightWidget(gui.GroupBox('Language'))
-        languageBox.addWidget(LanguageRadioButton(languages, 'english'))
         
-        languageFiles = [os.path.basename(filename).replace('.ini', '') for filename in os.listdir(mh.getSysDataPath('languages')) if filename.split(os.extsep)[-1] == "ini"]
+        languageFiles = gui3d.app.getLanguages()
         for language in languageFiles:
             languageBox.addWidget(LanguageRadioButton(languages, language))
         
