@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
+Save Tab GUI
+============
+
 **Project Name:**      MakeHuman
 
 **Product Home Page:** http://www.makehuman.org/
@@ -19,7 +22,7 @@
 Abstract
 --------
 
-This module implements the 'Files > Save' tab 
+This module implements the 'Files > Save' tab.
 """
 
 import os
@@ -27,17 +30,25 @@ import os
 import mh
 import gui
 import gui3d
-import geometry3d
-import log
 from core import G
 
+
 class SaveTaskView(gui3d.TaskView):
+    """Task view for saving MakeHuman model files."""
 
     def __init__(self, category):
-        
+        """SaveTaskView constructor.
+
+        The Save Task view contains a filename entry box at the top,
+        and lets the model be displayed in the center,
+        accompanied by a square border which the user can utilize
+        to create a thumbnail for the saved model.
+        """
+
         gui3d.TaskView.__init__(self, category, 'Save')
 
-        self.fileentry = self.addTopWidget(gui.FileEntryView('Save', mode='save'))
+        self.fileentry = self.addTopWidget(
+            gui.FileEntryView('Save', mode='save'))
         self.fileentry.setDirectory(mh.getPath('models'))
         self.fileentry.setFilter('MakeHuman Models (*.mhm)')
 
@@ -46,6 +57,8 @@ class SaveTaskView(gui3d.TaskView):
             self.saveMHM(filename)
 
     def saveMHM(self, filename):
+        """Method that does the saving of the .mhm and the thumbnail once
+        the save path is selected."""
         if not filename.lower().endswith('.mhm'):
             filename += '.mhm'
 
@@ -60,21 +73,22 @@ class SaveTaskView(gui3d.TaskView):
 
         # Save square sized thumbnail
         size = min(G.windowWidth, G.windowHeight)
-        img = mh.grabScreen((G.windowWidth-size)/2, (G.windowHeight-size)/2, size, size)
+        img = mh.grabScreen(
+            (G.windowWidth - size) / 2, (G.windowHeight - size) / 2, size, size)
 
         # Resize thumbnail to max 128x128
         if size > 128:
-            img.resize(128,128)
+            img.resize(128, 128)
         img.save(os.path.join(dir, name + '.thumb'))
 
         # Save the model
-        human = gui3d.app.selectedHuman
+        human = G.app.selectedHuman
         human.save(path, name)
-        gui3d.app.modified = False
-        #gui3d.app.clearUndoRedo()
+        G.app.modified = False
+        #G.app.clearUndoRedo()
 
-        gui3d.app.setFilenameCaption(filename)
-        gui3d.app.setFileModified(False)
+        G.app.setFilenameCaption(filename)
+        G.app.setFileModified(False)
 
         self.parent.tasksByName['Load'].fileentry.text = dir
         self.parent.tasksByName['Load'].fileentry.edit.setText(dir)
@@ -83,9 +97,11 @@ class SaveTaskView(gui3d.TaskView):
         mh.changeCategory('Modelling')
 
     def onShow(self, event):
-        # When the task gets shown, set the focus to the file entry
+        """Handler for the TaskView onShow event.
+        Once the task view is shown, give focus to the file entry."""
         gui3d.TaskView.onShow(self, event)
         self.fileentry.setFocus()
 
     def onHide(self, event):
+        """Handler for the TaskView onHide event."""
         gui3d.TaskView.onHide(self, event)
