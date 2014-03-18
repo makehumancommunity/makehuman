@@ -42,8 +42,6 @@ def writeLibraryGeometry(fp, rmeshes, config):
 
 
 def rotateCoord(coord, config):
-    offs = config.scale * config.offset
-    coord = [co-offs for co in coord]
     if config.yUpFaceZ:
         pass
     elif config.yUpFaceX:
@@ -59,7 +57,8 @@ def writeGeometry(fp, rmesh, config):
     progress = Progress()
     progress(0)
 
-    coord = rotateCoord(rmesh.getCoord(), config)
+    coord = rmesh.getCoord() - config.scale*config.offset
+    coord = rotateCoord(coord, config)
     nVerts = len(coord)
 
     fp.write('\n' +
@@ -171,7 +170,7 @@ def writeShapeKey(fp, name, shape, rmesh, config):
     # Verts
 
     progress(0)
-    target = np.array(rmesh.getCoord())
+    target = np.array(rmesh.getCoord() - config.scale * config.offset)
     target[shape.verts] += shape.data[np.s_[...]]
     target = rotateCoord(target, config)
     nVerts = len(target)
