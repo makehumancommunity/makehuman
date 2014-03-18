@@ -37,14 +37,17 @@ versionSub = ""                         # Short version description
 meshVersion = "hm08"                    # Version identifier of the basemesh
 ################################################################################
 
-def _versionDigitsStr():
+def getVersionDigitsStr():
+    """
+    String representation of the version number only (no additional info)
+    """
     return ".".join( [str(v) for v in version] )
 
 def _versionStr():
     if versionSub:
-        return _versionDigitsStr() + " " + versionSub
+        return getVersionDigitsStr() + " " + versionSub
     else:
-        return _versionDigitsStr()
+        return getVersionDigitsStr()
 
 def isRelease():
     """
@@ -87,7 +90,7 @@ def getShortVersion():
     if versionSub:
         return versionSub.replace(' ', '_').lower()
     else:
-        return "v" + _versionDigitsStr()
+        return "v" + getVersionDigitsStr()
 
 def getBasemeshVersion():
     """
