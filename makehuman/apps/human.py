@@ -693,6 +693,9 @@ class Human(guicommon.Object):
         def _setVal(ethnic, value):
             setattr(self, ethnic+'Val', value)
 
+        def _closeTo(value, limit, epsilon=0.001):
+            return abs(value - limit) <= epsilon
+
         ethnics = ['african', 'asian', 'caucasian']
         remaining = 1.0
         if exclude:
@@ -701,16 +704,24 @@ class Human(guicommon.Object):
 
         otherTotal = sum(_getVal(e) for e in ethnics)
         if otherTotal == 0.0:
+            # Prevent division by zero
+
             if len(ethnics) == 3 or _getVal(exclude) == 0:
                 # All values 0, this cannot be. Reset to default values.
                 for e in ethnics:
                     _setVal(e, 1.0 / 3)
                 if exclude:
                     _setVal(exclude, 1.0 / 3)
-            else:
+            elif exclude and _closeTo(_getVal(exclude), 1.0):
                 # One ethnicity is 1, the rest is 0
                 for e in ethnics:
                     _setVal(e, 0.0 )
+                _setVal(exclude, 1)
+            else:
+                # Increase values of other races (that were 0) to hit total sum of 1
+                for e in ethnics:
+                    _setVal(e, 0.01)
+                self._setEthnicVals(exclude)  # Re-normalize
         else:
             for e in ethnics:
                 _setVal(e, remaining * (_getVal(e) / otherTotal) )
