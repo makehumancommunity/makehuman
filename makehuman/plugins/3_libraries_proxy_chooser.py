@@ -30,7 +30,7 @@ import mh
 import proxychooser
 import filechooser as fc
 import os
-import mh2proxy
+import proxy
 
 
 class ProxyFileSort(fc.FileSort):
@@ -88,11 +88,11 @@ class ProxyTaskView(proxychooser.ProxyChooserTaskView):
     def getFileExtension(self):
         return 'proxy'
 
-    def proxySelected(self, proxy, obj):
-        self.human.setProxy(proxy)
-        self.human.genitalsProxy = proxy
+    def proxySelected(self, pxy, obj):
+        self.human.setProxy(pxy)
+        self.human.genitalsProxy = pxy
 
-    def proxyDeselected(self, proxy, obj):
+    def proxyDeselected(self, pxy, obj):
         self.human.genitalsObj = None
         self.human.genitalsProxy = None
 
@@ -119,18 +119,18 @@ class ProxyTaskView(proxychooser.ProxyChooserTaskView):
             return
 
         if mhclofile not in self._proxyCache:
-            proxy = mh2proxy.readProxyFile(self.human.meshData,
-                                           mhclofile,
-                                           type=self.proxyName.capitalize())
-            self._proxyCache[mhclofile] = proxy
+            pxy = proxy.readProxyFile(self.human.meshData,
+                                         mhclofile,
+                                         type=self.proxyName.capitalize())
+            self._proxyCache[mhclofile] = pxy
         else:
-            proxy = self._proxyCache[mhclofile]
+            pxy = self._proxyCache[mhclofile]
 
-        self.human.setProxy(proxy)
+        self.human.setProxy(pxy)
         self.human.updateProxyMesh()
 
         # Add to selection
-        self.selectedProxies.append(proxy)
+        self.selectedProxies.append(pxy)
 
         self.filechooser.selectItem(mhclofile)
 
