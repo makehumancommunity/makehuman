@@ -55,6 +55,10 @@ class Language(object):
             self.rtl = self.languageStrings['__options__'].get('rtl', False)
             
     def getLanguageString(self, string):
+        if not string:
+            return string
+        if string == "%%s":
+            return string
         if self.languageStrings is None:
             return string
         result = self.languageStrings.get(string)
