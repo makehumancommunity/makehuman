@@ -108,9 +108,20 @@ def getPath(subPath = ""):
 
     return formatPath(path)
 
+def getDataPath(subPath = ""):
+    """
+    Path to per-user data folder, should always be the same as getPath('data').
+    """
+    if subPath:
+        path = getPath( os.path.join("data", subPath) )
+    else:
+        path = getPath("data")
+    return formatPath(path)
+
 def getSysDataPath(subPath = ""):
     """
     Path to the data folder that is installed with MakeHuman system-wide.
+    NOTE: do NOT assume that getSysPath("data") == getSysDataPath()!
     """
     if subPath:
         path = getSysPath( os.path.join("data", subPath) )
@@ -154,7 +165,7 @@ def isSubPath(subpath, path):
     path = canonicalPath(path)
     return commonprefix([subpath, path]) == path
 
-def getRelativePath(path, relativeTo = [getPath(), getSysPath()]):
+def getRelativePath(path, relativeTo = [getDataPath(), getSysDataPath()]):
     """
     Return a relative file path, relative to one of the specified search paths.
     First valid path is returned, so order in which search paths are given matters.
@@ -171,7 +182,7 @@ def getRelativePath(path, relativeTo = [getPath(), getSysPath()]):
 
     return formatPath( os.path.relpath(path, relto) )
 
-def findFile(relPath, searchPaths = [getPath(), getSysPath()]):
+def findFile(relPath, searchPaths = [getDataPath(), getSysDataPath()]):
     """
     Inverse of getRelativePath: find an absolute path from specified relative
     path in one of the search paths.
