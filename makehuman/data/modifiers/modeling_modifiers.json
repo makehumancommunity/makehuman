@@ -1,0 +1,345 @@
+[
+  { "group": "head",
+    "modifiers": [
+      {"target": "head-age", "min": "less", "max": "more", "desc": "Age of the facial features."},
+      {"target": "head-angle", "min": "in", "max": "out"},
+      {"target": "head-oval"},
+      {"target": "head-round"},
+      {"target": "head-rectangular"},
+      {"target": "head-square"},
+      {"target": "head-triangular"},
+      {"target": "head-invertedtriangular"},
+      {"target": "head-diamond"},
+
+      {"target": "head-scale-depth", "min": "less", "max": "more"},
+      {"target": "head-scale-horiz", "min": "less", "max": "more"},
+      {"target": "head-scale-vert", "min": "more", "max": "less"},
+      {"target": "head-trans", "min": "in", "max": "out"},
+      {"target": "head-trans", "min": "down", "max": "up"},
+      {"target": "head-trans", "min": "forward", "max": "backward"}
+    ]
+  },
+
+  { "group": "forehead",
+    "modifiers": [
+      {"target": "forehead-trans-depth", "min": "forward", "max": "backward"},
+      {"target": "forehead-scale-vert", "min": "less", "max": "more"},
+      {"target": "forehead-nubian", "min": "less", "max": "more"},
+      {"target": "forehead-temple", "min": "in", "max": "out"}
+     ]
+  },
+
+  { "group": "eyebrows", 
+    "modifiers": [
+      {"target": "eyebrows-trans-depth", "min": "less", "max": "more"},
+      {"target": "eyebrows-angle", "min": "up", "max": "down"},
+      {"target": "eyebrows-trans-vert", "min": "less", "max": "more"}
+    ]
+  },
+
+  { "group": "neck", 
+    "modifiers": [
+      {"target": "neck-scale-depth", "min": "less", "max": "more"},
+      {"target": "neck-scale-horiz", "min": "less", "max": "more"},
+      {"target": "neck-scale-vert", "min": "more", "max": "less"},
+      {"target": "neck-trans-horiz", "min": "in", "max": "out"},
+      {"target": "neck-trans-vert", "min": "down", "max": "up"},
+      {"target": "neck-trans-depth", "min": "forward", "max": "backward"}
+    ]
+  },
+
+  { "group": "eyes", 
+    "modifiers": [
+      {"target": "r-eye-height1", "min": "min", "max": "max"},
+      {"target": "r-eye-height2", "min": "min", "max": "max"},
+      {"target": "r-eye-height3", "min": "min", "max": "max"},
+      {"target": "r-eye-push1", "min": "in", "max": "out"},
+      {"target": "r-eye-push2", "min": "in", "max": "out"},
+      {"target": "r-eye-move", "min": "in", "max": "out"},
+      {"target": "r-eye-move", "min": "up", "max": "down"},
+      {"target": "r-eye-size", "min": "small", "max": "big"},
+      {"target": "r-eye-corner1", "min": "up", "max": "down"},
+      {"target": "r-eye-corner2", "min": "up", "max": "down"},
+
+      {"target": "l-eye-height1", "min": "min", "max": "max"},
+      {"target": "l-eye-height2", "min": "min", "max": "max"},
+      {"target": "l-eye-height3", "min": "min", "max": "max"},
+      {"target": "l-eye-push1", "min": "in", "max": "out"},
+      {"target": "l-eye-push2", "min": "in", "max": "out"},
+      {"target": "l-eye-move", "min": "in", "max": "out"},
+      {"target": "l-eye-move", "min": "up", "max": "down"},
+      {"target": "l-eye-size", "min": "small", "max": "big"},
+      {"target": "l-eye-corner1", "min": "up", "max": "down"},
+      {"target": "l-eye-corner2", "min": "up", "max": "down"}
+    ]
+  },
+
+  { "group": "nose",
+    "modifiers": [
+      {"target": "nose-trans-vert", "min": "up", "max": "down"},
+      {"target": "nose-trans-depth", "min": "forward", "max": "backward"},
+      {"target": "nose-trans-horiz", "min": "in", "max": "out"},
+      {"target": "nose-scale-vert", "min": "incr", "max": "decr"},
+      {"target": "nose-scale-horiz", "min": "incr", "max": "decr"},
+      {"target": "nose-scale-depth", "min": "incr", "max": "decr"}
+    ]
+  },
+
+  { "group": "nose",
+    "modifiers": [
+      {"target": "nose-nostril-width", "min": "min", "max": "max"},
+      {"target": "nose-point-width", "min": "less", "max": "more"},
+      {"target": "nose-height", "min": "min", "max": "max"},
+      {"target": "nose-width1", "min": "min", "max": "max"},
+      {"target": "nose-width2", "min": "min", "max": "max"},
+      {"target": "nose-width3", "min": "min", "max": "max"},            
+
+      {"target": "nose-compression", "min": "compress", "max": "uncompress"},
+      {"target": "nose-curve", "min": "convex", "max": "concave"},
+      {"target": "nose-greek", "min": "moregreek", "max": "lessgreek"},
+      {"target": "nose-hump", "min": "morehump", "max": "lesshump"},
+      {"target": "nose-volume", "min": "potato", "max": "point"},            
+      {"target": "nose-nostrils-angle", "min": "up", "max": "down"},
+      {"target": "nose-point", "min": "up", "max": "down"},
+      {"target": "nose-septumangle", "min": "decr", "max": "incr"},
+      {"target": "nose-flaring", "min": "decr", "max": "incr"}
+    ]
+  },
+
+  { "group": "mouth",
+    "modifiers": [
+      {"target": "mouth-scale-horiz", "min": "incr", "max": "decr"},
+      {"target": "mouth-scale-vert", "min": "incr", "max": "decr"},
+      {"target": "mouth-scale-depth", "min": "incr", "max": "decr"},
+      {"target": "mouth-trans", "min": "in", "max": "out"},
+      {"target": "mouth-trans", "min": "up", "max": "down"},
+      {"target": "mouth-trans", "min": "forward", "max": "backward"},
+
+      {"target": "mouth-lowerlip-height", "min": "min", "max": "max"},            
+      {"target": "mouth-lowerlip-width", "min": "min", "max": "max"},
+      {"target": "mouth-upperlip-height", "min": "min", "max": "max"},
+      {"target": "mouth-upperlip-width", "min": "min", "max": "max"},
+      {"target": "mouth-cupidsbow-width", "min": "min", "max": "max"},
+
+      {"target": "mouth-lowerlip-ext", "min": "up", "max": "down"},
+      {"target": "mouth-angles", "min": "up", "max": "down"},
+      {"target": "mouth-lowerlip-middle", "min": "up", "max": "down"},
+      {"target": "mouth-lowerlip-volume", "min": "deflate", "max": "inflate"},
+      {"target": "mouth-philtrum-volume", "min": "increase", "max": "decrease"},
+      {"target": "mouth-upperlip-volume", "min": "deflate", "max": "inflate"},
+      {"target": "mouth-upperlip-ext", "min": "up", "max": "down"},
+      {"target": "mouth-upperlip-middle", "min": "up", "max": "down"},
+      {"target": "mouth-cupidsbow", "min": "decr", "max": "incr"}
+    ]
+  },
+
+  { "group": "ears",
+    "modifiers": [
+      {"target": "r-ear-trans-depth", "min": "backward", "max": "forward"},
+      {"target": "r-ear-size", "min": "big", "max": "small"},
+      {"target": "r-ear-trans-vert", "min": "down", "max": "up"},
+      {"target": "r-ear-height", "min": "min", "max": "max"},
+      {"target": "r-ear-lobe", "min": "min", "max": "max"},
+      {"target": "r-ear-shape1", "min": "pointed", "max": "triangle"},
+      {"target": "r-ear-rot", "min": "backward", "max": "forward"},
+      {"target": "r-ear-shape2", "min": "square", "max": "round"},
+      {"target": "r-ear-width", "min": "max", "max": "min"},
+      {"target": "r-ear-wing", "min": "out", "max": "in"},
+      {"target": "r-ear-flap", "min": "out", "max": "in"},
+
+      {"target": "l-ear-trans-depth", "min": "backward", "max": "forward"},
+      {"target": "l-ear-size", "min": "big", "max": "small"},
+      {"target": "l-ear-trans-vert", "min": "down", "max": "up"},
+      {"target": "l-ear-height", "min": "min", "max": "max"},
+      {"target": "l-ear-lobe", "min": "min", "max": "max"},
+      {"target": "l-ear-shape1", "min": "pointed", "max": "triangle"},
+      {"target": "l-ear-rot", "min": "backward", "max": "forward"},
+      {"target": "l-ear-shape2", "min": "square", "max": "round"},
+      {"target": "l-ear-width", "min": "max", "max": "min"},
+      {"target": "l-ear-wing", "min": "out", "max": "in"},
+      {"target": "l-ear-flap", "min": "out", "max": "in"}
+    ]
+  },
+
+  { "group": "chin",
+    "modifiers": [
+      {"target": "chin-prominent", "min": "less", "max": "more"},
+      {"target": "chin-width", "min": "min", "max": "max"},
+      {"target": "chin-height", "min": "min", "max": "max"},
+      {"target": "chin-bones", "min": "in", "max": "out"},
+      {"target": "chin-prognathism", "min": "less", "max": "more"}
+    ]
+  },
+
+  { "group": "cheek",
+    "modifiers": [
+      {"target": "l-cheek-volume", "min": "deflate", "max": "inflate"},                      
+      {"target": "l-cheek-bones", "min": "in", "max": "out"},
+      {"target": "l-cheek-inner", "min": "deflate", "max": "inflate"},
+      {"target": "l-cheek-trans-vert", "min": "down", "max": "up"},   
+      {"target": "r-cheek-volume", "min": "deflate", "max": "inflate"},
+      {"target": "r-cheek-bones", "min": "in", "max": "out"},
+      {"target": "r-cheek-inner", "min": "deflate", "max": "inflate"},
+      {"target": "r-cheek-trans-vert", "min": "down", "max": "up"}
+    ]
+  },
+
+  { "group": "torso",
+    "modifiers": [
+      {"target": "torso-scale-depth", "min": "decr", "max": "incr"},
+      {"target": "torso-scale-horiz", "min": "decr", "max": "incr"},
+      {"target": "torso-scale-vert", "min": "decr", "max": "incr"},
+      {"target": "torso-trans-horiz", "min": "in", "max": "out"},
+      {"target": "torso-trans-vert", "min": "down", "max": "up"},
+      {"target": "torso-trans-depth", "min": "forward", "max": "backward"},
+      {"target": "torso-vshape", "min": "less", "max": "more"}
+    ]
+  },
+
+  { "group": "hip",
+    "modifiers": [
+      {"target": "hip-scale-depth", "min": "decr", "max": "incr"},
+      {"target": "hip-scale-horiz", "min": "decr", "max": "incr"},
+      {"target": "hip-scale-vert", "min": "decr", "max": "incr"},
+      {"target": "hip-trans", "min": "in", "max": "out"},
+      {"target": "hip-trans", "min": "down", "max": "up"},
+      {"target": "hip-trans", "min": "forward", "max": "backward"}
+    ]
+  },
+
+  { "group": "stomach",
+    "modifiers": [
+      {"target": "stomach-tone", "min": "decr", "max": "incr"},
+      {"target": "stomach-pregnant", "min": "decr", "max": "incr"}
+    ]
+  },
+
+  { "group": "buttocks",
+    "modifiers": [
+      {"target": "buttocks-volume", "min": "decr", "max": "incr"}
+    ]
+  },
+
+  { "group": "pelvis",
+    "modifiers": [
+      {"target": "pelvis-tone", "min": "decr", "max": "incr"},
+      {"target": "bulge", "min": "decr", "max": "incr"}
+    ]
+  },
+
+  { "group": "armslegs",
+    "modifiers": [
+        {"target": "r-hand-fingers-diameter", "min": "decr", "max": "incr"},
+        {"target": "r-hand-fingers-length", "min": "decr", "max": "incr"}, 
+        {"target": "r-hand-scale", "min": "decr", "max": "incr"},       
+        {"target": "r-hand-trans", "min": "in", "max": "out"},            
+
+        {"target": "l-hand-fingers-diameter", "min": "decr", "max": "incr"},
+        {"target": "l-hand-fingers-length", "min": "decr", "max": "incr"}, 
+        {"target": "l-hand-scale", "min": "decr", "max": "incr"},              
+        {"target": "l-hand-trans", "min": "in", "max": "out"},            
+
+        {"target": "r-foot-scale", "min": "decr", "max": "incr"},            
+        {"target": "r-foot-trans", "min": "in", "max": "out"},
+        {"target": "r-foot-trans", "min": "down", "max": "up"},
+        {"target": "r-foot-trans", "min": "forward", "max": "backward"},
+
+        {"target": "l-foot-scale", "min": "decr", "max": "incr"},             
+        {"target": "l-foot-trans", "min": "in", "max": "out"},
+        {"target": "l-foot-trans", "min": "down", "max": "up"},
+        {"target": "l-foot-trans", "min": "forward", "max": "backward"},
+
+        {"target": "r-lowerarm-scale-depth", "min": "decr", "max": "incr"},
+        {"target": "r-lowerarm-scale-horiz", "min": "decr", "max": "incr"},
+        {"target": "r-lowerarm-scale-vert", "min": "decr", "max": "incr"},
+        {"target": "r-upperarm-scale-depth", "min": "decr", "max": "incr"},
+        {"target": "r-upperarm-scale-horiz", "min": "decr", "max": "incr"},
+        {"target": "r-upperarm-scale-vert", "min": "decr", "max": "incr"},
+
+        {"target": "l-lowerarm-scale-depth", "min": "decr", "max": "incr"},
+        {"target": "l-lowerarm-scale-horiz", "min": "decr", "max": "incr"},
+        {"target": "l-lowerarm-scale-vert", "min": "decr", "max": "incr"},
+        {"target": "l-upperarm-scale-depth", "min": "decr", "max": "incr"},
+        {"target": "l-upperarm-scale-horiz", "min": "decr", "max": "incr"},
+        {"target": "l-upperarm-scale-vert", "min": "decr", "max": "incr"},
+
+        {"target": "r-leg-genu", "min": "varun", "max": "valgus"},
+        {"target": "r-lowerleg-scale-depth", "min": "decr", "max": "incr"},
+        {"target": "r-lowerleg-scale-horiz", "min": "decr", "max": "incr"},
+        {"target": "r-lowerleg-scale-vert", "min": "decr", "max": "incr"},            
+        {"target": "r-upperleg-scale-depth", "min": "decr", "max": "incr"},
+        {"target": "r-upperleg-scale-horiz", "min": "decr", "max": "incr"},
+        {"target": "r-upperleg-scale-vert", "min": "decr", "max": "incr"},            
+
+        {"target": "l-leg-genu", "min": "varun", "max": "valgus"},
+        {"target": "l-lowerleg-scale-depth", "min": "decr", "max": "incr"},
+        {"target": "l-lowerleg-scale-horiz", "min": "decr", "max": "incr"},
+        {"target": "l-lowerleg-scale-vert", "min": "decr", "max": "incr"},            
+        {"target": "l-upperleg-scale-depth", "min": "decr", "max": "incr"},
+        {"target": "l-upperleg-scale-horiz", "min": "decr", "max": "incr"},
+        {"target": "l-upperleg-scale-vert", "min": "decr", "max": "incr"}
+    ]       
+  },
+
+  { "group": "breast",
+    "modifiers": [
+        {"macrovar": "BreastSize"},
+        {"macrovar": "BreastFirmness"},
+
+        {"target": "breast-trans-vert", "min": "down", "max": "up"},
+        {"target": "breast-dist", "min": "min", "max": "max"},
+        {"target": "breast-point", "min": "min", "max": "max"},
+        {"target": "breast-volume-vert", "min": "up", "max": "down"}
+    ]
+  },
+
+  { "group": "genitals",
+    "modifiers": [
+        {"target": "penis-length", "min": "min", "max": "max", 
+            "desc": "Length of the male genital (if proxy applied)."},
+        {"target": "penis-circ", "min": "min", "max": "max", 
+            "desc": "Circumference or thickness of the male genital (if proxy applied)."},
+        {"target": "penis-testicles", "min": "min", "max": "max", 
+            "desc": "Size of the testicles of the male genital (if proxy applied)."}
+    ]
+  },
+
+  { "group": "macrodetails",
+    "modifiers": [
+        {"macrovar": "Gender", 
+            "desc": "Gender of the human (min is female, max is male)."},
+        {"macrovar": "Age", 
+            "desc": "Age of the human (range from 1 year to 90 years old, with center position 25 years)."},
+        {"macrovar": "African", 
+            "desc": "African ethnicity of the human (the three ethnicity values are normalized so they sum to 100%)."},
+        {"macrovar": "Asian", 
+            "desc": "Asian ethnicity of the human (the three ethnicity values are normalized so they sum to 100%)."},
+        {"macrovar": "Caucasian", 
+            "desc": "Caucasian ethnicity of the human (the three ethnicity values are normalized so they sum to 100%)."}
+    ]
+  },
+
+  { "group": "macrodetails-universal",
+    "modifiers": [
+        {"target": "universal", "macrovar": "Muscle", 
+            "desc": "Amount of muscle mass."},
+        {"target": "universal", "macrovar": "Weight", 
+            "desc": "The weight of the human."}
+    ]
+  },
+
+  { "group": "macrodetails-height",
+    "modifiers": [
+        {"macrovar": "Height", 
+            "desc": "The height of the human."}
+    ]
+  },
+
+  { "group": "macrodetails-proportions",
+    "modifiers": [
+        {"macrovar": "BodyProportions", 
+            "desc": "Proportions of the human features, often subjectively referred to as qualities of beauty (min is unusual, center position is average and max is idealistic proportions)."}
+    ]
+  }
+
+]
