@@ -86,9 +86,11 @@ class Writer(mhx_writer.Writer):
     #-------------------------------------------------------------------------------
 
     def proxyShapes(self, type, test, fp, targets):
+        from .mhx_proxy import getProxyName
+
         for pxy in self.proxies.values():
             if pxy.name and pxy.type == type:
-                self.writeShapeKeysAndDrivers(fp, self.name+pxy.name, pxy, targets)
+                self.writeShapeKeysAndDrivers(fp, getProxyName(self, pxy), pxy, targets)
 
 
     def writeShape1(self, fp, sname, lr, trg, min, max, pxy, scale):

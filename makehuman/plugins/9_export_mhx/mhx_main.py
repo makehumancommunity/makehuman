@@ -174,10 +174,10 @@ class Writer(mhx_writer.Writer):
 
 
     def groupProxy(self, type, test, fp):
+        from .mhx_proxy import getProxyName
         amt = self.armature
         for pxy in self.proxies.values():
             if pxy.type == type:
-                name = amt.name + pxy.name
-                fp.write("    ob %s ;\n" % name)
+                fp.write("    ob %s ;\n" % getProxyName(amt, pxy))
         return
 

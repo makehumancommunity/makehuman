@@ -77,8 +77,7 @@ class Writer(mhx_writer.Writer):
 
         # Proxy mesh
 
-        proxyname = self.name+"_"+proxy.name
-        proxyname = proxyname.replace(" ", "_")
+        proxyname = getProxyName(self, proxy)
         fp.write(
             "Mesh %s %s \n" % (proxyname, proxyname) +
             "  Verts\n")
@@ -163,8 +162,6 @@ class Writer(mhx_writer.Writer):
             '      Property MhxProxyType "%s" ;\n' % proxy.type +
             '    end Object')
 
-        self.meshWriter.writeHideAnimationData(fp, self.armature, self.name, proxy.name, "")
-
     #-------------------------------------------------------------------------------
     #
     #-------------------------------------------------------------------------------
@@ -205,7 +202,7 @@ class Writer(mhx_writer.Writer):
         else:
             alpha = 1
 
-        prefix = self.name+"_"+proxy.name
+        prefix = getProxyName(self, proxy)
         matname = prefix + mat.name
         texnames = self.matWriter.writeTextures(fp, mat, prefix)
 
@@ -221,3 +218,6 @@ class Writer(mhx_writer.Writer):
 
         return matname
 
+
+def getProxyName(self, proxy):
+    return ("%s_%s" % (self.name, proxy.name)).replace(" ", "_")
