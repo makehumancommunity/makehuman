@@ -8,7 +8,7 @@ Handles WaveFront .obj 3D mesh files.
 
 **Product Home Page:** http://www.makehuman.org/
 
-**Code Home Page:**    http://code.google.com/p/makehuman/
+**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Manuel Bastioni, Marc Flerackers, Jonas Hauquier
 
