@@ -24,3 +24,8 @@ makehuman/data/languages/empty.ini
 buildscripts/build.conf
 buildscripts/win32/build
 buildscripts/win32/dist
+docs/odt/work
+docs/odt/data
+docs/odt/docexport.xml
+docs/odt/unescaped.xml
+
