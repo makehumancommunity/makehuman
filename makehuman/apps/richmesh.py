@@ -163,10 +163,13 @@ class RichMesh(object):
 
     def rescale(self, scale):
         obj = self.object
+
         newobj = module3d.Object3D(self.name)
         newobj.setCoords(scale*obj.coord)
         newobj.setUVs(obj.texco)
         newobj.setFaces(obj.fvert, obj.fuvs)
+        newobj.material = obj.material
+
         self.object = newobj
         self.object.calcNormals(True, True)
         self.object.update()
