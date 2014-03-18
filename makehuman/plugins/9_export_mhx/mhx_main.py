@@ -85,7 +85,7 @@ def exportMhx(human, filepath, config):
     writer = Writer(name, human, amt, config, proxies)
     writer.writeFile(fp)
     fp.close()
-    log.message("%s exported" % filepath.encode('utf-8'))
+    log.message("%s exported", filepath.encode('utf-8'))
     gui3d.app.progress(1.0)
 
 

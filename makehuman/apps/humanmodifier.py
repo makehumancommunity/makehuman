@@ -608,6 +608,4 @@ def debugModifiers():
         log.debug("    controls: %s", m.macroVariable)
         log.debug("    dependencies (variables): %s", str(m.macroDependencies))
         log.debug("    dependencies (modifier groups): %s", str(list(human.getModifierDependencies(m))))
-        log.debug("    influences (modifier groups): %s", str(list(human.getModifiersAffectedBy(m))))
-        log.debug("\n")
-
+        log.debug("    influences (modifier groups): %s\n", str(list(human.getModifiersAffectedBy(m))))
