@@ -132,9 +132,7 @@ class Writer(mhx_writer.Writer):
             self.proxyWriter.writeProxyType('Cage', 'T_Cage', 4, fp, 0.2, 0.25)
 
         gui3d.app.progress(0.25, text="Exporting main mesh")
-        fp.write("#if toggle&T_Mesh\n")
         self.meshWriter.writeMesh(fp, self.human.getSeedMesh())
-        fp.write("#endif\n")
 
         self.proxyWriter.writeProxyType('Proxymeshes', 'T_Proxy', 3, fp, 0.35, 0.4)
         self.proxyWriter.writeProxyType('Clothes', 'T_Clothes', 2, fp, 0.4, 0.55)
@@ -158,9 +156,7 @@ class Writer(mhx_writer.Writer):
             "Group %s\n"  % amt.name +
             "  Objects\n" +
             "    ob %s ;\n" % amt.name +
-            "#if toggle&T_Mesh\n" +
-            "    ob %sBody ;\n" % amt.name +
-            "#endif\n")
+            "    ob %sBody ;\n" % amt.name)
 
         self.groupProxy('Cage', 'T_Cage', fp)
         self.groupProxy('Proxymeshes', 'T_Proxy', fp)
@@ -179,11 +175,9 @@ class Writer(mhx_writer.Writer):
 
     def groupProxy(self, type, test, fp):
         amt = self.armature
-        fp.write("#if toggle&%s\n" % test)
         for pxy in self.proxies.values():
             if pxy.type == type:
                 name = amt.name + pxy.name
                 fp.write("    ob %s ;\n" % name)
-        fp.write("#endif\n")
         return
 
