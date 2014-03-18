@@ -94,7 +94,7 @@ def writeGeometry(fp, rmesh, config):
             '          <float_array count="%d" id="%s-Normals-array">\n' % (3*nNormals,rmesh.name) +
             '          ')
 
-        fp.write( ''.join([("%.4f %.4f %.4f " % tuple(normalize(no))) for no in obj.fnorm]) )
+        fp.write( ''.join([("%.4f %.4f %.4f " % tuple(no/math.sqrt(np.dot(no,no)))) for no in obj.fnorm]) )
 
         fp.write('\n' +
             '          </float_array>\n' +
@@ -155,11 +155,6 @@ def writeGeometry(fp, rmesh, config):
     progress(1)
 
 
-def normalize(vec):
-    vec = np.array(vec)
-    return vec/math.sqrt(np.dot(vec,vec))
-
-
 def writeShapeKey(fp, name, shape, rmesh, config):
     if len(shape.verts) == 0:
         log.debug("Shapekey %s has zero verts. Ignored" % name)
@@ -216,7 +211,7 @@ def writeShapeKey(fp, name, shape, rmesh, config):
         '          </vcount>\n' +
         '          <p>')
 
-    fp.write( ''.join([("%d %d %d %d " % (fv[0], fv[1], fv[2], fv[3])) for fv in obj.fvert]) )
+    fp.write( ''.join([("%d %d %d %d " % tuple(fv)) for fv in obj.fvert]) )
 
     fp.write('\n' +
         '          </p>\n' +
