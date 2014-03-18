@@ -151,18 +151,17 @@ def writeObjFile(path, objects, writeMTL = True, config = None):
         fp.write("mtllib %s\n" % os.path.basename(mtlfile))
 
     # Vertices
-    if config:
-        offs = config.scale * config.offset
-    else:
-        offs = np.array((0,0,0))
     for obj in objects:
-        fp.write("".join( ["v %.4f %.4f %.4f\n" % tuple(co-offs) for co in obj.coord] ))
+        if config:
+            coord = config.scale * (obj.coord - config.offset)
+        else:
+            coord = obj.coord
+        fp.write("".join( ["v %.4f %.4f %.4f\n" % tuple(co) for co in coord] ))
 
     # Vertex normals
     if config == None or config.useNormals:
         for obj in objects:
             obj.calcFaceNormals()
-            #obj.calcVertexNormals()
             fp.write("".join( ["vn %.4f %.4f %.4f\n" % tuple(no/math.sqrt(no.dot(no))) for no in obj.fnorm] ))
 
     # UV vertices
