@@ -38,7 +38,7 @@ Alternatively, run the script in the script editor (Alt-P), and access from the 
 bl_info = {
     'name': 'Import: MakeHuman Exchange (.mhx)',
     'author': 'Thomas Larsson',
-    'version': (1,16,23),
+    'version': (1,16,24),
     "blender": (2, 69, 0),
     'location': "File > Import > MakeHuman (.mhx)",
     'description': 'Import files in the MakeHuman eXchange format (.mhx)',
@@ -2672,7 +2672,8 @@ class MhxMainPanel(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        return (context.object and context.object.MhxRig)
+        ob = context.object
+        return (ob and ob.MhxRig and ob.MhxRig != "Rigify")
 
     def draw(self, context):
         layout = self.layout
@@ -3474,102 +3475,6 @@ class MhxControlPanel(bpy.types.Panel):
                 row.prop(ob, '["%s"]' % (prop+"_R"), text=prop[3:])
 
         return
-
-###################################################################################
-#
-#    Visibility panel
-#
-###################################################################################
-#
-#    class MhxVisibilityPanel(bpy.types.Panel):
-#
-
-class MhxVisibilityPanel(bpy.types.Panel):
-    bl_label = "MHX Visibility"
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "UI"
-    bl_options = {'DEFAULT_CLOSED'}
-
-    @classmethod
-    def poll(cls, context):
-        return (context.object and context.object.MhxRig)
-
-    def draw(self, context):
-        ob = context.object
-        layout = self.layout
-        props = list(ob.keys())
-        props.sort()
-        for prop in props:
-            if prop[0:3] == "Mhh":
-                layout.prop(ob, '["%s"]' % prop, text="Hide %s" % prop[3:])
-        #layout.separator()
-        #layout.operator("mhx.update_textures")
-        layout.separator()
-        layout.operator("mhx.add_hiders")
-        layout.operator("mhx.remove_hiders")
-        return
-
-class VIEW3D_OT_MhxUpdateTexturesButton(bpy.types.Operator):
-    bl_idname = "mhx.update_textures"
-    bl_label = "Update"
-    bl_options = {'UNDO'}
-
-    def execute(self, context):
-        scn = context.scene
-        for mat in bpy.data.materials:
-            if mat.animation_data:
-                try:
-                    mat["MhxDriven"]
-                except:
-                    continue
-                for driver in mat.animation_data.drivers:
-                    prop = mat.path_resolve(driver.data_path)
-                    value = driver.evaluate(scn.frame_current)
-                    prop[driver.array_index] = value
-        return{'FINISHED'}
-
-class VIEW3D_OT_MhxAddHidersButton(bpy.types.Operator):
-    bl_idname = "mhx.add_hiders"
-    bl_label = "Add Hide Property"
-    bl_options = {'UNDO'}
-
-    def execute(self, context):
-        rig = context.object
-        for ob in context.scene.objects:
-            if ob.select and ob != rig:
-                prop = "Mhh%s" % ob.name
-                defNewProp(prop, "Bool", "default=False")
-                rig[prop] = False
-                addHider(ob, "hide", rig, prop)
-                addHider(ob, "hide_render", rig, prop)
-        return{'FINISHED'}
-
-def addHider(ob, attr, rig, prop):
-    fcu = ob.driver_add(attr)
-    drv = fcu.driver
-    drv.type = 'SCRIPTED'
-    drv.expression = "x"
-    drv.show_debug_info = True
-    var = drv.variables.new()
-    var.name = "x"
-    targ = var.targets[0]
-    targ.id = rig
-    targ.data_path = '["%s"]' % prop
-    return
-
-class VIEW3D_OT_MhxRemoveHidersButton(bpy.types.Operator):
-    bl_idname = "mhx.remove_hiders"
-    bl_label = "Remove Hide Property"
-    bl_options = {'UNDO'}
-
-    def execute(self, context):
-        rig = context.object
-        for ob in context.scene.objects:
-            if ob.select and ob != rig:
-                ob.driver_remove("hide")
-                ob.driver_remove("hide_render")
-                del rig["Mhh%s" % ob.name]
-        return{'FINISHED'}
 
 ###################################################################################
 #
