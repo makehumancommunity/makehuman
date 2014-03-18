@@ -306,15 +306,15 @@
 
   { "group": "macrodetails",
     "modifiers": [
-        {"macrovar": "Gender", 
+        {"macrovar": "Gender",
             "desc": "Gender of the human (min is female, max is male)."},
         {"macrovar": "Age", 
             "desc": "Age of the human (range from 1 year to 90 years old, with center position 25 years)."},
-        {"macrovar": "African", 
+        {"macrovar": "African", "modifierType": "EthnicModifier",
             "desc": "African ethnicity of the human (the three ethnicity values are normalized so they sum to 100%)."},
-        {"macrovar": "Asian", 
+        {"macrovar": "Asian", "modifierType": "EthnicModifier",
             "desc": "Asian ethnicity of the human (the three ethnicity values are normalized so they sum to 100%)."},
-        {"macrovar": "Caucasian", 
+        {"macrovar": "Caucasian", "modifierType": "EthnicModifier",
             "desc": "Caucasian ethnicity of the human (the three ethnicity values are normalized so they sum to 100%)."}
     ]
   },
