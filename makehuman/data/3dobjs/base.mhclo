@@ -1,16 +1,31 @@
 # author Thomas Larsson
-# license AGPL3 (see also http://www.makehuman.org/node/320)
 # homepage http://www.makehuman.org/
-# uuid 9776b2e4-ca2e-4db2-9308-2b5de892c9b7
-# basemesh alpha_7
+# Copyright (C) 2014 Thomas Larsson
+# license AGPL3 (http://www.makehuman.org/doc/node/makehuman_mesh_license.html)
+#    This file is part of MakeHuman.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+uuid 9776b2e4-ca2e-4db2-9308-2b5de892c9b7
+basemesh alpha_7
+name base
+obj_file base.obj
+x_scale 4302 8697 1.4986
+z_scale 8208 8220 1.9328
+y_scale 8223 6827 2.0422
+use_projection 0
 
-# name base
-# obj_file base.obj
-# x_scale 4302 8697 1.4986
-# z_scale 8208 8220 1.9328
-# y_scale 8223 6827 2.0422
-# use_projection 0
-# verts 15340
+verts 15340
  6736  6735  7315 0.00000 0.79324 0.20676 0.00000 0.00356 0.02785
  7478  7490  7466 0.00000 0.78190 0.21810 0.00000 0.01381 -0.03530
  6741  6742  6747 0.41803 0.30788 0.27409 -0.00507 0.00102 0.01620
