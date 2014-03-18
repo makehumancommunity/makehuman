@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # This file contains a copy of numpy.unique from NumPy 1.6.2
 # Earlier versions had a bug, see:
