@@ -43,6 +43,7 @@ class ArmatureOptions(object):
         self.useHeadControl = False
         self.useReverseHip = False
         self.useMuscles = False
+        self.useTerminators = False
         self.useFaceRig = False
         self.useLocks = False
         self.useRotationLimits = False
@@ -191,6 +192,10 @@ class ArmatureOptions(object):
             pass
         try:
             self.terminals = struct["terminals"]
+        except KeyError:
+            pass
+        try:
+            self.useTerminators = struct["use_terminators"]
         except KeyError:
             pass
         try:
