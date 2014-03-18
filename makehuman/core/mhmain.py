@@ -653,6 +653,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.splash.hide()
         # self.splash.finish(self.mainwin)
+        self.splash = None
 
         # Restore main window size and position
         if self.settings.get('restoreWindowSize', False):
@@ -1011,6 +1012,9 @@ class MHApplication(gui3d.Application, mh.Application):
     def progress(self, value, text=None, *args):
         if text is not None:
             self.status(text, *args)
+
+        if self.splash:
+            self.splash.setProgress(value)
 
         if self.progressBar is None:
             return
@@ -1515,7 +1519,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.createShortcuts()
 
-        self.splash = gui.SplashScreen(gui3d.app.getThemeResource('images', 'splash.png'))
+        self.splash = gui.SplashScreen(gui3d.app.getThemeResource('images', 'splash.png'), mh.getVersionDigitsStr())
         self.splash.show()
 
         self.tabs = self.mainwin.tabs
