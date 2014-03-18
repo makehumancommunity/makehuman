@@ -227,6 +227,16 @@ class Object3D(object):
         return -(bmin + ((bmax - bmin)/2))
 
     def calcFaceNormals(self, ix = None):
+        """
+        Calculate the face normals. A right-handed coordinate system is assumed,
+        which requires mesh faces to be defined with counter clock-wise vertex order.
+
+        Faces are treated as if they were triangles (using only the 3 first verts), 
+        so for quads with non co-planar points, inaccuracies may occur (even though 
+        those have a high change of being corrected by neighbouring faces).
+        """
+        # We assume counter clock-wise winding order
+        # (if your normals are inversed, you're using clock-wise winding order)
         if ix is None:
             ix = np.s_[:]
         fvert = self.coord[self.fvert[ix]]
@@ -238,6 +248,10 @@ class Object3D(object):
         self.fnorm[ix] = np.cross(va, vb)
 
     def calcVertexNormals(self, ix = None):
+        """
+        Calculate per-vertex normals from the face normals for smooth shading
+        the model. Requires face normals to be calculated first.
+        """
         self.markCoords(ix, norm=True)
         if ix is None:
             ix = np.s_[:]
