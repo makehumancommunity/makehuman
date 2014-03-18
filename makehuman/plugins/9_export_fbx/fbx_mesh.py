@@ -92,8 +92,8 @@ def writeGeometryProp(fp, name, obj, config):
 '        } \n')
 
     # Must use normals for shapekeys
-    obj.calcFaceNormals()
-    nNormals = len(obj.fnorm)
+    obj.calcNormals()
+    nNormals = len(obj.vnorm)
     fp.write(
 """
         GeometryVersion: 124
@@ -106,7 +106,7 @@ def writeGeometryProp(fp, name, obj, config):
 '            Normals: *%d {\n' % (3*nNormals) +
 '                a: ')
 
-    string = "".join( ["%.4f,%.4f,%.4f," % tuple(no/math.sqrt(no.dot(no))) for no in obj.fnorm] )
+    string = "".join( ["%.4f,%.4f,%.4f," % tuple(no/math.sqrt(no.dot(no))) for no in obj.vnorm] )
     fp.write(string[:-1])
 
     fp.write('\n' +
@@ -114,7 +114,7 @@ def writeGeometryProp(fp, name, obj, config):
 '            NormalsIndex: *%d {\n' % (4*len(obj.fvert)) +
 '                a: ')
 
-    string = "".join( ["%d,%d,%d,%d," % (fn,fn,fn,fn) for fn in range(len(obj.fvert))] )
+    string = "".join( ['%d,%d,%d,%d,' % (fv[0],fv[1],fv[2],fv[3]) for fv in obj.fvert] )
     fp.write(string[:-1])
 
     fp.write('\n' +
