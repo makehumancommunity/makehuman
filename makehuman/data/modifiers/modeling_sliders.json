@@ -2,6 +2,7 @@
   "Face": {
     "saveName": "face",
     "cameraView": "faceCamera",
+    "sortOrder": 0.2,
     "_comment": "# TODO hardcode saveName as legacy loader, use modifier names for saving directly in the future (But we dont know which type of modifiers they are when loaded, and have not yet been inited by some plugin, so this could be a problem)",
     "modifiers": {
       "head shape": [
@@ -168,6 +169,7 @@
 
   "Torso": {
     "saveName": "torso",
+    "sortOrder": 0.3,
     "modifiers": {
       "Torso": [
           {"mod": "torso/torso-scale-depth-decr|incr", "cam": "leftView"},
@@ -203,6 +205,7 @@
 
   "Arms and Legs": {
     "saveName": "armslegs",
+    "sortOrder": 0.4,
     "modifiers": {
       "right hand": [
           {"mod": "armslegs/r-hand-fingers-diameter-decr|incr", "cam": "rightHandFrontCamera"},
@@ -268,6 +271,7 @@
 
   "Gender": {
     "saveName": "gendered",
+    "sortOrder": 0.1,
     "modifiers": {
       "Breast": [
           {"mod": "breast/BreastSize", "label": "Breast size"},
@@ -289,6 +293,7 @@
   "Macro modelling": {
     "label": "Main",
     "saveName": "macro",
+    "sortOrder": 0,
     "modifiers": {
       "Macro": [
           {"mod": "macrodetails/Gender", "label": "Gender"},
