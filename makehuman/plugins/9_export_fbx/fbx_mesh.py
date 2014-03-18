@@ -106,7 +106,7 @@ def writeGeometryProp(fp, name, obj, config):
 '            Normals: *%d {\n' % (3*nNormals) +
 '                a: ')
 
-    string = "".join( ["%.4f,%.4f,%.4f," % tuple(no/math.sqrt(no.dot(no))) for no in obj.vnorm] )
+    string = "".join( ["%.4f,%.4f,%.4f," % tuple(no) for no in obj.vnorm] )
     fp.write(string[:-1])
 
     fp.write('\n' +
