@@ -1,21 +1,17 @@
 Makehuman includes a number of third part software components, which have 
 their own respective licenses.
 
-In bin/win:
+Dependencies, included in packaged versions:
 
 BINARY          LICENSE TYPE        FILE WITH LICENSE    HOMEPAGE
 --------------  ---------------     -------------------  ------------------
-glew32.dll      BSD                 LICENSE-glew.txt     http://glew.sourceforge.net/
-jpeg.dll        ?
-libpng12.dll    ZLIB (with extras)  LICENSE-libpng.txt   http://www.libpng.org/pub/png/libpng.html
-libtiff-3.dll   ?
-SDL.dll         LGPL 2.1 *          LICENSE-SDL.txt
-SDL_image.dll   ?
-zlib1.dll       ZLIB                LICENSE-zlib.txt
+pyQt            GPLv3               pyQt4-license.txt    http://www.riverbankcomputing.co.uk
+Qt4             LGPLv2.1            qt4-license.txt      http://www.qt-project.org
+numpy           BSD (3-clause)      numpy-license.txt    http://www.numpy.org
+pyOpenGL        BSD (3-clause)      pyOpenGL-license.txt http://pyopengl.sourceforge.net
 
-* = SDL has later changed license to ZLIB, but the version we use is still
-    under LGPL
 
-For OSX:
+Optional:
 
+hglib           MIT                 hglib-license.txt    http://mercurial.selenic.com/wiki/PythonHglib
 
