@@ -14,7 +14,7 @@
 
 **Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
 
-    This file is part of MakeHuman.
+    This file is part of MakeHuman (www.makehuman.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
