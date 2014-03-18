@@ -8,7 +8,7 @@ GUI for the commandline MakeTarget tool
 
 **Product Home Page:** http://www.makehuman.org/
 
-**Code Home Page:**    http://code.google.com/p/makehuman/
+**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Jonas Hauquier
 
