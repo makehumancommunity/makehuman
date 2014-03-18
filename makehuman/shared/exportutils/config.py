@@ -92,23 +92,23 @@ class Config:
             return {}
 
         proxies = {}
-        for proxy in self.human.getProxies():
-            if proxy:
-                name = self.goodName(proxy.name)
-                proxies[name] = proxy
+        for pxy in self.human.getProxies():
+            if pxy:
+                name = self.goodName(pxy.name)
+                proxies[name] = pxy
 
         if self.human.proxy:
-            proxy = self.human.proxy
-            name = self.goodName(proxy.name)
-            proxies[name] = proxy
+            pxy = self.human.proxy
+            name = self.goodName(pxy.name)
+            proxies[name] = pxy
 
         if self.cage:
-            import mh2proxy
+            import proxy
             obj = G.app.selectedHuman
             filepath = getSysDataPath("cages/cage/cage.mhclo")
-            proxy = mh2proxy.readProxyFile(obj, filepath, type="Cage")
-            proxy.update(obj)
-            proxies[name] = proxy
+            pxy = proxy.readProxyFile(obj, filepath, type="Cage")
+            pxy.update(obj)
+            proxies[name] = pxy
 
         return proxies
 
