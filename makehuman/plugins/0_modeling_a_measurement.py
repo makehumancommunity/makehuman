@@ -89,26 +89,6 @@ class GroupBoxRadioButton(gui.RadioButton):
         self.task.groupBox.showWidget(self.groupBox)
         self.task.onSliderFocus(self.groupBox.children[0])
 
-class MeasureSlider(modifierslider.ModifierSlider):
-    def __init__(self, label, task, measure, modifier):
-
-        modifierslider.ModifierSlider.__init__(self, value=0.0, min=-1.0, max=1.0,
-            label=label, modifier=modifier, valueConverter=MeasurementValueConverter(task, measure, modifier))
-        self.measure = measure
-        self.task = task
-
-    def onChange(self, value):
-        super(MeasureSlider, self).onChange(value)
-        self.task.syncSliderLabels()
-
-    def onFocus(self, event):
-        super(MeasureSlider, self).onFocus(event)
-        self.task.onSliderFocus(self)
-
-    def onBlur(self, event):
-        super(MeasureSlider, self).onBlur(event)
-        self.task.onSliderBlur(self)
-
 class MeasureTaskView(gui3d.TaskView):
 
     def __init__(self, category):
@@ -203,7 +183,19 @@ class MeasureTaskView(gui3d.TaskView):
                     os.path.join(measureDataPath, "measure-%s-increase.target" % subname))
                 modifier.setHuman(gui3d.app.selectedHuman)
                 self.modifiers[subname] = modifier
-                slider = box.addWidget(MeasureSlider(sliderLabel[subname], self, subname, modifier))
+                slider = box.addWidget(modifierslider.ModifierSlider(sliderLabel[subname], modifier, MeasurementValueConverter(self, subname, modifier)))
+                slider.measure = subname
+                @slider.mhEvent
+                def onBlur(event):
+                    slider = event
+                    self.onSliderBlur(slider)
+                @slider.mhEvent
+                def onFocus(event):
+                    slider = event
+                    self.onSliderFocus(slider)
+                @slider.mhEvent
+                def onChange(event):
+                    self.syncGUIStats()
                 self.sliders.append(slider)
         self.lastActive = None
 
@@ -247,6 +239,8 @@ class MeasureTaskView(gui3d.TaskView):
         self.lastActive.setFocus()
 
         self.syncSliders()
+        self.syncGUIStats()
+        self.updateMeshes()
         human = gui3d.app.selectedHuman
         self.cloPickableProps = dict()
         for uuid, clo in human.clothesObjs.items():
@@ -286,8 +280,9 @@ class MeasureTaskView(gui3d.TaskView):
         self.measureMesh.update()
 
     def onHumanChanged(self, event):
-
-        self.updateMeshes()
+        if gui3d.app.currentTask == self:
+            self.updateMeshes()
+            self.syncSliders()
 
     def onHumanTranslated(self, event):
 
@@ -298,15 +293,10 @@ class MeasureTaskView(gui3d.TaskView):
         self.measureObject.setRotation(gui3d.app.selectedHuman.getRotation())
 
     def syncSliders(self):
-
         for slider in self.sliders:
             slider.update()
 
-        self.syncStatistics()
-        #self.syncBraSizes()
-
-    def syncSliderLabels(self):
-
+    def syncGUIStats(self):
         self.syncStatistics()
         #self.syncBraSizes()
 
