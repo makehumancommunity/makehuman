@@ -87,7 +87,7 @@ def writeMaterialFile(fp, mat, name, outdir):
         'specularColor  %.4g %.4g %.4g\n' % tuple(mat.specular_intensity * mat.specular_color) +
         'shininess %.4g\n' % max(0, min(mat.specular_hardness/511, 1)) +
         'opacity %.4g\n' % mat.alpha +
-        'ambientColor 0 0 0\n' +
+        'ambientColor  %.4g %.4g %.4g\n' % tuple(mat.ambient * mat.diffuse_intensity * mat.diffuse_color) +
         'emissiveColor %.4g %.4g %.4g\n' % tuple(mat.emit * mat.diffuse_intensity * mat.diffuse_color)  +
         'shadeless %s\n' % mat.use_shadeless +
         'wireframe False\n' +
