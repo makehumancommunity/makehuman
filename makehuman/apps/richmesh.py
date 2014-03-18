@@ -226,8 +226,6 @@ class RichMesh(object):
 
 
     def rescale(self, scale):
-        import mh2proxy
-
         obj = self.object
         newobj = module3d.Object3D(self.name)
         newobj.setCoords(scale*obj.coord)
