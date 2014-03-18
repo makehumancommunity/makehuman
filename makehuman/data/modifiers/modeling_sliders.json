@@ -1,0 +1,309 @@
+{
+  "Face": {
+    "saveName": "face",
+    "cameraView": "faceCamera",
+    "_comment": "# TODO hardcode saveName as legacy loader, use modifier names for saving directly in the future (But we dont know which type of modifiers they are when loaded, and have not yet been inited by some plugin, so this could be a problem)",
+    "modifiers": {
+      "head shape": [
+          {"mod": "head/head-age-less|more", "cam": "frontView"},
+          {"mod": "head/head-angle-in|out", "cam": "leftView"},
+          {"mod": "head/head-oval", "cam": "frontView"},
+          {"mod": "head/head-round", "cam": "frontView"},
+          {"mod": "head/head-rectangular", "cam": "frontView"},
+          {"mod": "head/head-square", "cam": "frontView"},
+          {"mod": "head/head-triangular", "cam": "frontView"},
+          {"mod": "head/head-invertedtriangular", "cam": "frontView"},
+          {"mod": "head/head-diamond", "cam": "frontView"}
+        ],
+      "head size": [
+          {"mod": "head/head-scale-depth-less|more", "cam": "leftView"},
+          {"mod": "head/head-scale-horiz-less|more", "cam": "frontView"},
+          {"mod": "head/head-scale-vert-more|less", "cam": "frontView"},
+          {"mod": "head/head-trans-in|out", "cam": "frontView"},
+          {"mod": "head/head-trans-down|up", "cam": "frontView"},
+          {"mod": "head/head-trans-forward|backward", "cam": "leftView"}
+        ],
+      "forehead": [
+          {"mod": "forehead/forehead-trans-depth-forward|backward", "cam": "leftView"},
+          {"mod": "forehead/forehead-scale-vert-less|more", "cam": "leftView"},
+          {"mod": "forehead/forehead-nubian-less|more", "cam": "leftView"},
+          {"mod": "forehead/forehead-temple-in|out", "cam": "frontView"}
+        ],
+      "eyebrows": [
+          {"mod": "eyebrows/eyebrows-trans-depth-less|more", "cam": "rightView"},
+          {"mod": "eyebrows/eyebrows-angle-up|down", "cam": "frontView"},
+          {"mod": "eyebrows/eyebrows-trans-vert-less|more", "cam": "frontView"}
+        ],
+      "neck": [
+          {"mod": "neck/neck-scale-depth-less|more", "cam": "leftView"},
+          {"mod": "neck/neck-scale-horiz-less|more", "cam": "frontView"},
+          {"mod": "neck/neck-scale-vert-more|less", "cam": "frontView"},
+          {"mod": "neck/neck-trans-horiz-in|out", "cam": "frontView"},
+          {"mod": "neck/neck-trans-vert-down|up", "cam": "frontView"},
+          {"mod": "neck/neck-trans-depth-forward|backward", "cam": "leftView"}
+        ],
+      "right eye": [
+          {"mod": "eyes/r-eye-height1-min|max", "cam": "frontView"},
+          {"mod": "eyes/r-eye-height2-min|max", "cam": "frontView"},
+          {"mod": "eyes/r-eye-height3-min|max", "cam": "frontView"},
+          {"mod": "eyes/r-eye-push1-in|out", "cam": "frontView"},
+          {"mod": "eyes/r-eye-push2-in|out", "cam": "frontView"},
+          {"mod": "eyes/r-eye-move-in|out", "cam": "frontView"},
+          {"mod": "eyes/r-eye-move-up|down", "cam": "frontView"},
+          {"mod": "eyes/r-eye-size-small|big", "cam": "frontView"},
+          {"mod": "eyes/r-eye-corner1-up|down", "cam": "frontView"},
+          {"mod": "eyes/r-eye-corner2-up|down", "cam": "frontView"}
+        ],
+      "left eye": [
+          {"mod": "eyes/l-eye-height1-min|max", "cam": "frontView"},
+          {"mod": "eyes/l-eye-height2-min|max", "cam": "frontView"},
+          {"mod": "eyes/l-eye-height3-min|max", "cam": "frontView"},
+          {"mod": "eyes/l-eye-push1-in|out", "cam": "frontView"},
+          {"mod": "eyes/l-eye-push2-in|out", "cam": "frontView"},
+          {"mod": "eyes/l-eye-move-in|out", "cam": "frontView"},
+          {"mod": "eyes/l-eye-move-up|down", "cam": "frontView"},
+          {"mod": "eyes/l-eye-size-small|big", "cam": "frontView"},
+          {"mod": "eyes/l-eye-corner1-up|down", "cam": "frontView"},
+          {"mod": "eyes/l-eye-corner2-up|down", "cam": "frontView"}
+        ],
+      "nose size": [
+          {"mod": "nose/nose-trans-vert-up|down", "cam": "frontView"},
+          {"mod": "nose/nose-trans-depth-forward|backward", "cam": "leftView"},
+          {"mod": "nose/nose-trans-horiz-in|out", "cam": "frontView"},
+          {"mod": "nose/nose-scale-vert-incr|decr", "cam": "frontView"},
+          {"mod": "nose/nose-scale-horiz-incr|decr", "cam": "frontView"},
+          {"mod": "nose/nose-scale-depth-incr|decr", "cam": "leftView"}
+        ],
+      "nose size details": [
+          {"mod": "nose/nose-nostril-width-min|max", "cam": "frontView"},
+          {"mod": "nose/nose-point-width-less|more", "cam": "frontView"},
+          {"mod": "nose/nose-height-min|max", "cam": "leftView"},
+          {"mod": "nose/nose-width1-min|max", "cam": "frontView"},
+          {"mod": "nose/nose-width2-min|max", "cam": "frontView"},
+          {"mod": "nose/nose-width3-min|max", "cam": "frontView"}
+        ],
+      "nose features": [
+          {"mod": "nose/nose-compression-compress|uncompress", "cam": "leftView"},
+          {"mod": "nose/nose-curve-convex|concave", "cam": "leftView"},
+          {"mod": "nose/nose-greek-moregreek|lessgreek", "cam": "leftView"},
+          {"mod": "nose/nose-hump-morehump|lesshump", "cam": "leftView"},
+          {"mod": "nose/nose-volume-potato|point", "cam": "leftView"},
+          {"mod": "nose/nose-nostrils-angle-up|down", "cam": "leftView"},
+          {"mod": "nose/nose-point-up|down", "cam": "leftView"},
+          {"mod": "nose/nose-septumangle-decr|incr", "cam": "leftView"},
+          {"mod": "nose/nose-flaring-decr|incr", "cam": "leftView"}
+        ],
+      "mouth size": [
+          {"mod": "mouth/mouth-scale-horiz-incr|decr", "cam": "frontView"},
+          {"mod": "mouth/mouth-scale-vert-incr|decr", "cam": "frontView"},
+          {"mod": "mouth/mouth-scale-depth-incr|decr", "cam": "leftView"},
+          {"mod": "mouth/mouth-trans-in|out", "cam": "frontView"},
+          {"mod": "mouth/mouth-trans-up|down", "cam": "frontView"},
+          {"mod": "mouth/mouth-trans-forward|backward", "cam": "leftView"}
+        ],
+      "mouth size details": [
+          {"mod": "mouth/mouth-lowerlip-height-min|max", "cam": "frontView"},
+          {"mod": "mouth/mouth-lowerlip-width-min|max", "cam": "frontView"},
+          {"mod": "mouth/mouth-upperlip-height-min|max", "cam": "frontView"},
+          {"mod": "mouth/mouth-upperlip-width-min|max", "cam": "frontView"},
+          {"mod": "mouth/mouth-cupidsbow-width-min|max", "cam": "frontView"}
+        ],
+      "mouth features": [
+          {"mod": "mouth/mouth-lowerlip-ext-up|down", "cam": "frontView"},
+          {"mod": "mouth/mouth-angles-up|down", "cam": "frontView"},
+          {"mod": "mouth/mouth-lowerlip-middle-up|down", "cam": "frontView"},
+          {"mod": "mouth/mouth-lowerlip-volume-deflate|inflate", "cam": "leftView"},
+          {"mod": "mouth/mouth-philtrum-volume-increase|decrease", "cam": "leftView"},
+          {"mod": "mouth/mouth-upperlip-volume-deflate|inflate", "cam": "leftView"},
+          {"mod": "mouth/mouth-upperlip-ext-up|down", "cam": "frontView"},
+          {"mod": "mouth/mouth-upperlip-middle-up|down", "cam": "frontView"},
+          {"mod": "mouth/mouth-cupidsbow-decr|incr", "cam": "frontView"}
+        ],
+      "right ear": [
+          {"mod": "ears/r-ear-trans-depth-backward|forward", "cam": "rightView"},
+          {"mod": "ears/r-ear-size-big|small", "cam": "rightView"},
+          {"mod": "ears/r-ear-trans-vert-down|up", "cam": "rightView"},
+          {"mod": "ears/r-ear-height-min|max", "cam": "rightView"},
+          {"mod": "ears/r-ear-lobe-min|max", "cam": "rightView"},
+          {"mod": "ears/r-ear-shape1-pointed|triangle", "cam": "rightView"},
+          {"mod": "ears/r-ear-rot-backward|forward", "cam": "rightView"},
+          {"mod": "ears/r-ear-shape2-square|round", "cam": "rightView"},
+          {"mod": "ears/r-ear-width-max|min", "cam": "rightView"},
+          {"mod": "ears/r-ear-wing-out|in", "cam": "frontView"},
+          {"mod": "ears/r-ear-flap-out|in", "cam": "frontView"}
+        ],
+      "left ear": [
+          {"mod": "ears/l-ear-trans-depth-backward|forward", "cam": "leftView"},
+          {"mod": "ears/l-ear-size-big|small", "cam": "leftView"},
+          {"mod": "ears/l-ear-trans-vert-down|up", "cam": "leftView"},
+          {"mod": "ears/l-ear-height-min|max", "cam": "leftView"},
+          {"mod": "ears/l-ear-lobe-min|max", "cam": "leftView"},
+          {"mod": "ears/l-ear-shape1-pointed|triangle", "cam": "leftView"},
+          {"mod": "ears/l-ear-rot-backward|forward", "cam": "leftView"},
+          {"mod": "ears/l-ear-shape2-square|round", "cam": "leftView"},
+          {"mod": "ears/l-ear-width-max|min", "cam": "leftView"},
+          {"mod": "ears/l-ear-wing-out|in", "cam": "frontView"},
+          {"mod": "ears/l-ear-flap-out|in", "cam": "frontView"}
+        ],
+      "chin": [
+          {"mod": "chin/chin-prominent-less|more", "cam": "leftView"},
+          {"mod": "chin/chin-width-min|max", "cam" : "frontView"},
+          {"mod": "chin/chin-height-min|max", "cam" : "frontView"},
+          {"mod": "chin/chin-bones-in|out", "cam" : "frontView"},
+          {"mod": "chin/chin-prognathism-less|more", "cam": "leftView"}
+        ],
+      "cheek": [
+          {"mod": "cheek/l-cheek-volume-deflate|inflate", "cam" : "frontView"},
+          {"mod": "cheek/l-cheek-bones-in|out", "cam" : "frontView"},
+          {"mod": "cheek/l-cheek-inner-deflate|inflate", "cam": "leftView"},
+          {"mod": "cheek/l-cheek-trans-vert-down|up", "cam" : "frontView"},
+          {"mod": "cheek/r-cheek-volume-deflate|inflate", "cam" : "frontView"},
+          {"mod": "cheek/r-cheek-bones-in|out", "cam" : "frontView"},
+          {"mod": "cheek/r-cheek-inner-deflate|inflate", "cam": "rightView"},
+          {"mod": "cheek/r-cheek-trans-vert-down|up", "cam" : "frontView"}
+        ]
+    }
+  },
+
+
+  "Torso": {
+    "saveName": "torso",
+    "modifiers": {
+      "Torso": [
+          {"mod": "torso/torso-scale-depth-decr|incr", "cam": "leftView"},
+          {"mod": "torso/torso-scale-horiz-decr|incr", "cam": "globalCamera"},
+          {"mod": "torso/torso-scale-vert-decr|incr", "cam": "globalCamera"},
+          {"mod": "torso/torso-trans-horiz-in|out", "cam": "globalCamera"},
+          {"mod": "torso/torso-trans-vert-down|up", "cam": "globalCamera"},
+          {"mod": "torso/torso-trans-depth-forward|backward", "cam": "leftView"},
+          {"mod": "torso/torso-vshape-less|more", "cam": "globalCamera"}
+        ],
+      "Hip": [
+          {"mod": "hip/hip-scale-depth-decr|incr", "cam": "globalCamera"},
+          {"mod": "hip/hip-scale-horiz-decr|incr", "cam": "globalCamera"},
+          {"mod": "hip/hip-scale-vert-decr|incr", "cam": "globalCamera"},
+          {"mod": "hip/hip-trans-in|out", "cam": "globalCamera"},
+          {"mod": "hip/hip-trans-down|up", "cam": "globalCamera"},
+          {"mod": "hip/hip-trans-forward|backward", "cam": "globalCamera"}
+        ],
+      "Stomach": [
+          {"mod": "stomach/stomach-tone-decr|incr", "cam": "globalCamera"},
+          {"mod": "stomach/stomach-pregnant-decr|incr", "cam": "globalCamera"}
+        ],
+      "Buttocks": [
+          {"mod": "buttocks/buttocks-volume-decr|incr", "cam": "globalCamera"}
+        ],
+      "Pelvis": [
+          {"mod": "pelvis/pelvis-tone-decr|incr", "cam": "globalCamera"},
+          {"mod": "pelvis/bulge-decr|incr", "cam": "globalCamera"}
+        ]
+    }
+  },
+
+
+  "Arms and Legs": {
+    "saveName": "armslegs",
+    "modifiers": {
+      "right hand": [
+          {"mod": "armslegs/r-hand-fingers-diameter-decr|incr", "cam": "rightHandFrontCamera"},
+          {"mod": "armslegs/r-hand-fingers-length-decr|incr", "cam": "rightHandFrontCamera"},
+          {"mod": "armslegs/r-hand-scale-decr|incr", "cam": "rightHandFrontCamera"},
+          {"mod": "armslegs/r-hand-trans-in|out", "cam": "rightHandFrontCamera"}
+        ],
+      "left hand": [
+          {"mod": "armslegs/l-hand-fingers-diameter-decr|incr", "cam": "leftHandFrontCamera"},
+          {"mod": "armslegs/l-hand-fingers-length-decr|incr", "cam": "leftHandFrontCamera"},
+          {"mod": "armslegs/l-hand-scale-decr|incr", "cam": "leftHandFrontCamera"},
+          {"mod": "armslegs/l-hand-trans-in|out", "cam": "leftHandFrontCamera"}
+        ],
+      "right foot": [
+          {"mod": "armslegs/r-foot-scale-decr|incr", "cam": "rightFootRightCamera"},
+          {"mod": "armslegs/r-foot-trans-in|out", "cam": "rightFootFrontCamera"},
+          {"mod": "armslegs/r-foot-trans-down|up", "cam": "rightFootFrontCamera"},
+          {"mod": "armslegs/r-foot-trans-forward|backward", "cam": "rightFootRightCamera"}
+        ],
+      "left foot": [
+          {"mod": "armslegs/l-foot-scale-decr|incr", "cam": "leftFootLeftCamera"},
+          {"mod": "armslegs/l-foot-trans-in|out", "cam": "leftFootFrontCamera"},
+          {"mod": "armslegs/l-foot-trans-down|up", "cam": "leftFootFrontCamera"},
+          {"mod": "armslegs/l-foot-trans-forward|backward", "cam": "leftFootLeftCamera"}
+        ],
+      "right arm": [
+          {"mod": "armslegs/r-lowerarm-scale-depth-decr|incr", "cam": "rightArmTopCamera"},
+          {"mod": "armslegs/r-lowerarm-scale-horiz-decr|incr", "cam": "rightArmFrontCamera"},
+          {"mod": "armslegs/r-lowerarm-scale-vert-decr|incr", "cam": "rightArmFrontCamera"},
+          {"mod": "armslegs/r-upperarm-scale-depth-decr|incr", "cam": "rightArmTopCamera"},
+          {"mod": "armslegs/r-upperarm-scale-horiz-decr|incr", "cam": "rightArmFrontCamera"},
+          {"mod": "armslegs/r-upperarm-scale-vert-decr|incr", "cam": "rightArmFrontCamera"}
+        ],
+      "left arm": [
+          {"mod": "armslegs/l-lowerarm-scale-depth-decr|incr", "cam": "leftArmTopCamera"},
+          {"mod": "armslegs/l-lowerarm-scale-horiz-decr|incr", "cam": "leftArmFrontCamera"},
+          {"mod": "armslegs/l-lowerarm-scale-vert-decr|incr", "cam": "leftArmFrontCamera"},
+          {"mod": "armslegs/l-upperarm-scale-depth-decr|incr", "cam": "leftArmTopCamera"},
+          {"mod": "armslegs/l-upperarm-scale-horiz-decr|incr", "cam": "leftArmFrontCamera"},
+          {"mod": "armslegs/l-upperarm-scale-vert-decr|incr", "cam": "leftArmFrontCamera"}
+        ],
+      "right leg": [
+          {"mod": "armslegs/r-leg-genu-varun|valgus", "cam": "rightLegFrontCamera"},
+          {"mod": "armslegs/r-lowerleg-scale-depth-decr|incr", "cam": "rightLegRightCamera"},
+          {"mod": "armslegs/r-lowerleg-scale-horiz-decr|incr", "cam": "rightLegFrontCamera"},
+          {"mod": "armslegs/r-lowerleg-scale-vert-decr|incr", "cam": "rightLegFrontCamera"},
+          {"mod": "armslegs/r-upperleg-scale-depth-decr|incr", "cam": "rightLegRightCamera"},
+          {"mod": "armslegs/r-upperleg-scale-horiz-decr|incr", "cam": "rightLegFrontCamera"},
+          {"mod": "armslegs/r-upperleg-scale-vert-decr|incr", "cam": "rightLegFrontCamera"}
+        ],
+      "left leg": [
+          {"mod": "armslegs/l-leg-genu-varun|valgus", "cam": "leftLegFrontCamera"},
+          {"mod": "armslegs/l-lowerleg-scale-depth-decr|incr", "cam": "leftLegLeftCamera"},
+          {"mod": "armslegs/l-lowerleg-scale-horiz-decr|incr", "cam": "leftLegFrontCamera"},
+          {"mod": "armslegs/l-lowerleg-scale-vert-decr|incr", "cam": "leftLegFrontCamera"},
+          {"mod": "armslegs/l-upperleg-scale-depth-decr|incr", "cam": "leftLegLeftCamera"},
+          {"mod": "armslegs/l-upperleg-scale-horiz-decr|incr", "cam": "leftLegFrontCamera"},
+          {"mod": "armslegs/l-upperleg-scale-vert-decr|incr", "cam": "leftLegFrontCamera"}
+        ]
+    }
+  },
+
+
+  "Gender": {
+    "saveName": "gendered",
+    "modifiers": {
+      "Breast": [
+          {"mod": "breast/BreastSize", "label": "Breast size"},
+          {"mod": "breast/BreastFirmness", "label": "Breast firmness"},
+          {"mod": "breast/breast-trans-vert-down|up", "label": "Vertical position"},
+          {"mod": "breast/breast-dist-min|max", "label": "Horizontal distance"},
+          {"mod": "breast/breast-point-min|max", "label": "Pointiness"},
+          {"mod": "breast/breast-volume-vert-up|down", "label": "Volume"}
+        ],
+      "Genitals": [
+          {"mod": "genitals/penis-length-min|max"},
+          {"mod": "genitals/penis-circ-min|max"},
+          {"mod": "genitals/penis-testicles-min|max"}
+        ]
+    }
+  },
+
+
+  "Macro modelling": {
+    "label": "Main",
+    "saveName": "macro",
+    "modifiers": {
+      "Macro": [
+          {"mod": "macrodetails/Gender", "label": "Gender"},
+          {"mod": "macrodetails/Age", "label": "Age"},
+          {"mod": "macrodetails-universal/Muscle", "label": "Muscle"},
+          {"mod": "macrodetails-universal/Weight", "label": "Weight"},
+          {"mod": "macrodetails-height/Height", "label": "Height"},
+          {"mod": "macrodetails-proportions/BodyProportions", "label": "Proportions"},
+          {"mod": "macrodetails/African", "label": "African"},
+          {"mod": "macrodetails/Asian", "label": "Asian"},
+          {"mod": "macrodetails/Caucasian", "label": "Caucasian"}
+        ]
+    }
+  }
+
+  
+}
+
