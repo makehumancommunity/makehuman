@@ -95,12 +95,12 @@ class ExampleTaskView(gui3d.TaskView):
         @self.aSlider.mhEvent
         def onChange(value):
             self.aSliderLabel.setTextFormat('Value is %f', value)
-            self.aProgressBar.setProgress(value, 1)
+            self.aProgressBar.setProgress(value)
 
         # we also create a progressbar, which is updated as the slider moves
 
         self.aProgressBar = box.addWidget(gui.ProgressBar())
-        self.aProgressBar.setProgress(0.5, 0)
+        self.aProgressBar.setProgress(0.5)
         
         # A text edit
 
