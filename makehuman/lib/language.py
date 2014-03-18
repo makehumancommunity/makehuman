@@ -27,7 +27,7 @@ Language file loading and translation.
 import os
 import log
 import json
-from getpath import getPath, getSysDataPath
+from getpath import getPath, getSysDataPath, getDataPath
 
 import collections
 
@@ -40,7 +40,7 @@ class Language(object):
 
     def setLanguage(self, lang):
         self.languageStrings = None
-        path = os.path.join(getSysDataPath("languages/"), lang + ".ini")
+        path = os.path.join(getSysDataPath("languages/"), lang + ".json")
         if not os.path.isfile(path):
             return
         with open(path, 'rU') as f:
@@ -143,6 +143,18 @@ class OrderedSet(collections.MutableSet):
         if isinstance(other, OrderedSet):
             return len(self) == len(other) and list(self) == list(other)
         return set(self) == set(other)
+
+def getLanguages():
+    """
+    The languages available on this MH installation, by listing all .json
+    files in the languages folder in user and system data path.
+    """
+    langDirFiles = ['english'] + os.listdir(getSysDataPath('languages'))
+    try:
+        langDirFiles = langDirFiles + os.listdir(getDataPath('languages'))
+    except:
+        pass
+    return [os.path.basename(filename).replace('.json', '') for filename in langDirFiles if filename.split(os.extsep)[-1] == "json"]
 
 
 language = Language()
