@@ -161,27 +161,6 @@ class RichMesh(object):
         self.weights = normWeights
 
 
-    def rescale(self, scale):
-        obj = self.object
-
-        newobj = module3d.Object3D(self.name)
-        newobj.setCoords(scale*obj.coord)
-        newobj.setUVs(obj.texco)
-        newobj.setFaces(obj.fvert, obj.fuvs)
-        newobj.material = obj.material
-
-        self.object = newobj
-        self.object.calcNormals(True, True)
-        self.object.update()
-        self.object.updateIndexBuffer()
-
-        newshapes = []
-        for name,shape in self.shapes:
-            newshape = FakeTarget(name, shape.verts, scale*shape.data)
-            newshapes.append((name, newshape))
-        self.shapes = newshapes
-
-
     def __repr__(self):
         return ("<RichMesh %s w %d t %d>" % (self.object, len(self.weights), len(self.shapes)))
 
