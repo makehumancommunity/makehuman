@@ -103,8 +103,8 @@ def setupMeshes(name, human, config=None, amt=None, rawTargets=[], hidden=False,
     if config.scale != 1.0:
         if amt:
             amt.rescale(config.scale)
-        for rmesh in rmeshes:
-            rmesh.rescale(config.scale)
+    #    for rmesh in rmeshes:
+    #        rmesh.rescale(config.scale)
 
     progbase = 0.12*(3-2*subdivide)
     progress(progbase)
