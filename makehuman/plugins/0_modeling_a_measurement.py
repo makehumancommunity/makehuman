@@ -183,7 +183,7 @@ class MeasureTaskView(gui3d.TaskView):
                     os.path.join(measureDataPath, "measure-%s-increase.target" % subname))
                 modifier.setHuman(gui3d.app.selectedHuman)
                 self.modifiers[subname] = modifier
-                slider = box.addWidget(modifierslider.ModifierSlider(sliderLabel[subname], modifier, MeasurementValueConverter(self, subname, modifier)))
+                slider = box.addWidget(modifierslider.ModifierSlider(modifier, sliderLabel[subname], MeasurementValueConverter(self, subname, modifier)))
                 slider.measure = subname
                 @slider.mhEvent
                 def onBlur(event):
