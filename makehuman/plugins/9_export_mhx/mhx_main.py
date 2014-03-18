@@ -64,7 +64,9 @@ def exportMhx(human, filepath, config):
     config.setOffset(human)
 
     filename = os.path.basename(filepath)
-    name = config.goodName(os.path.splitext(filename)[0])
+    name = os.path.splitext(filename)[0]
+    name = name.replace(" ","_").replace(":","_")
+    #name = config.goodName(name)
     amt = setupArmature(name, human, config)
     fp = codecs.open(filepath, 'w', encoding='utf-8')
     fp.write(
@@ -147,16 +149,13 @@ class Writer(mhx_writer.Writer):
 
     def writeGroups(self, fp):
         amt = self.armature
-        fp.write("""
-    # ---------------- Groups -------------------------------- #
-
-    """)
         fp.write(
-            "PostProcess %sBody %s 0000003f 00080000 %s 0000c000 ;\n" % (amt.name, amt.name, amt.visibleLayers) +
+            "# ---------------- Groups -------------------------------- #\n\n" +
+            "PostProcess %s %s 0000003f 00080000 %s 0000c000 ;\n" % (self.meshName(), amt.name, amt.visibleLayers) +
             "Group %s\n"  % amt.name +
             "  Objects\n" +
             "    ob %s ;\n" % amt.name +
-            "    ob %sBody ;\n" % amt.name)
+            "    ob %s ;\n" % self.meshName())
 
         self.groupProxy('Cage', 'T_Cage', fp)
         self.groupProxy('Proxymeshes', 'T_Proxy', fp)
@@ -174,10 +173,7 @@ class Writer(mhx_writer.Writer):
 
 
     def groupProxy(self, type, test, fp):
-        from .mhx_proxy import getProxyName
-        amt = self.armature
         for pxy in self.proxies.values():
             if pxy.type == type:
-                fp.write("    ob %s ;\n" % getProxyName(amt, pxy))
-        return
+                fp.write("    ob %s ;\n" % self.meshName(pxy))
 
