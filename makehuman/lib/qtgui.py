@@ -1252,23 +1252,31 @@ class FileEntryView(QtGui.QWidget, Widget):
 
 
 class SplashScreen(QtGui.QSplashScreen):
-    def __init__(self, image):
+    def __init__(self, image, version=""):
         super(SplashScreen, self).__init__(G.app.mainwin, QtGui.QPixmap(image))
-        #self._text = ''
-        #self._format = '%s'
         self._stdout = sys.stdout
-        self.messageRect = QtCore.QRect(10, 10, self.width()-20, 100)
+        self.messageRect = QtCore.QRect(354, 531, 432, 41)
         self.messageAlignment = QtCore.Qt.AlignLeft
         self.message = ''
+        self.progressBarRect = QtCore.QRect(660, 581, 124, 8)
+        self._version = version
+        self.versionRect = QtCore.QRect(186, 537, 88, 30)
+        self.setProgress(0)
 
-    #def setFormat(self, fmt):
-    #    self._format = fmt
+    def setProgress(self, progress):
+        self.progress = float(progress)
+        if self.progress < 0:
+            self.progress == 0.0
+        if self.progress > 1:
+            self.progress = 1.0
+
+    def getProgress(self):
+        return self.progress
 
     def escape(self, text):
         return text.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
 
     def logMessage(self, text):
-        #text = self._format % self.escape(text)
         text = self.escape(text)
         self.showMessage(text, alignment = QtCore.Qt.AlignHCenter)
         self.message = text
@@ -1278,9 +1286,26 @@ class SplashScreen(QtGui.QSplashScreen):
         color.setNamedColor('#ffffff')
         painter.setPen(color)
         font = painter.font()
-        font.setPointSizeF(15)
+        font.setPointSizeF(12)
         painter.setFont(font)
         painter.drawText(self.messageRect, self.messageAlignment, self.message);
+        if self._version:
+            font.setPointSizeF(22)
+            painter.setFont(font)
+            painter.drawText(self.versionRect, QtCore.Qt.AlignLeft, self._version)
+        color.setNamedColor('#000000')
+        painter.setPen(color)
+        color.setNamedColor('#f58220')
+        painter.setBrush(QtGui.QBrush(color))
+        pRect = self.progressBarRect
+        if self.getProgress() == 0:
+            progressedWidth = 0
+        else:
+            progressedWidth = int(pRect.width()*self.getProgress())
+        painter.drawRect(pRect.x(), pRect.y(), progressedWidth, pRect.height())
+        color.setNamedColor('#191718')
+        painter.setBrush(QtGui.QBrush(color))
+        painter.drawRect(pRect.x()+progressedWidth, pRect.y(), pRect.width()-progressedWidth, pRect.height())
 
 class StatusBar(QtGui.QStatusBar, Widget):
     def __init__(self):
