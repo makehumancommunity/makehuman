@@ -85,56 +85,9 @@ class RichMesh(object):
     def getCoord(self):
         return self.object.coord
 
-        if self._coord is not None:
-            return self._coord
-        elif self._pose:
-            obj = self.object
-            self._coord = np.zeros((len(obj.coord),3), float)
-            self._vnorm = np.zeros((len(obj.coord),3), float)
-            for bname,pmat in self._pose.items():
-                try:
-                    vw = self.vertexGroups[bname]
-                except KeyError:
-                    continue
-                rmat = np.array(pmat[:3,:3])
-                offset = np.array(len(vw.verts)*[pmat[:3,3]])
-                vec = np.dot(rmat, obj.coord[vw.verts].transpose())
-                vec += offset.transpose()
-                wvec = vw.weights * vec
-                self._coord[vw.verts] += wvec.transpose()
-
-                obj.calcNormals()
-                vec = np.dot(rmat, obj.vnorm[vw.verts].transpose())
-                wvec = vw.weights * vec
-                self._vnorm[vw.verts] += wvec.transpose()
-
-                '''
-                log.debug(bname)
-                log.debug(pmat)
-                log.debug(rmat)
-                log.debug(offset)
-                log.debug(obj.coord[vw.verts])
-                log.debug(vec.transpose())
-                log.debug(vec)
-                log.debug(wvec)
-                log.debug(self._coord[vw.verts])
-                log.debug("")
-                '''
-            return self._coord
-        else:
-            return self.object.coord
-
-
     def getVnorm(self):
         self.object.calcNormals()
         return self.object.vnorm
-
-        if self._vnorm is not None:
-            return self._vnorm
-        else:
-            self.object.calcNormals()
-            return self.object.vnorm
-
 
     def getTexco(self):
         return self.object.texco
