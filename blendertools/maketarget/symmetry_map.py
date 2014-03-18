@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 from collections import OrderedDict
 
 Left2Right = OrderedDict([
