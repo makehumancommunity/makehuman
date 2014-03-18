@@ -88,13 +88,13 @@ def writeGeometry(fp, rmesh, config):
 
     if config.useNormals:
         obj.calcFaceNormals()
-        nNormals = len(obj.fnorm)
+        nNormals = len(obj.vnorm)
         fp.write(
             '        <source id="%s-Normals">\n' % rmesh.name +
             '          <float_array count="%d" id="%s-Normals-array">\n' % (3*nNormals,rmesh.name) +
             '          ')
 
-        fp.write( ''.join([("%.4f %.4f %.4f " % tuple(no/math.sqrt(np.dot(no,no)))) for no in obj.fnorm]) )
+        fp.write( ''.join([("%.4f %.4f %.4f " % tuple(no/math.sqrt(np.dot(no,no)))) for no in obj.vnorm]) )
 
         fp.write('\n' +
             '          </float_array>\n' +
@@ -255,7 +255,7 @@ def writePolylist(fp, rmesh, config):
     for fn,fv in enumerate(obj.fvert):
         fuv = obj.fuvs[fn]
         if config.useNormals:
-            fp.write( ''.join([("%d %d %d " % (fv[n], fn, fuv[n])) for n in range(4)]) )
+            fp.write( ''.join([("%d %d %d " % (fv[n], fv[n], fuv[n])) for n in range(4)]) )
         else:
             fp.write( ''.join([("%d %d " % (fv[n], fuv[n])) for n in range(4)]) )
 
