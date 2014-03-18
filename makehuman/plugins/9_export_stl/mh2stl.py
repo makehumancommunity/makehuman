@@ -98,7 +98,7 @@ def exportStlAscii(human, filepath, config, exportJoints = False):
 
     fp.write('endsolid %s\n' % solid)
     fp.close()
-    progress(1, None, "STL export finished. Exported file: %s" % filepath)
+    progress(1, None, "STL export finished. Exported file: %s", filepath)
 
 
 def exportStlBinary(human, filepath, config, exportJoints = False):
@@ -156,5 +156,5 @@ def exportStlBinary(human, filepath, config, exportJoints = False):
 
     fp.seek(80)
     fp.write(struct.pack('<I', count))
-    progress(1, None, "STL export finished. Exported file: %s" % filepath)
+    progress(1, None, "STL export finished. Exported file: %s", filepath)
 
