@@ -975,15 +975,24 @@ class MHApplication(gui3d.Application, mh.Application):
 
     # Caption
     def setCaption(self, caption):
+        """Set the main window caption."""
         mh.setCaption(caption.encode('utf8'))
 
     def setFilenameCaption(self, filename):
+        """Calculate and set the window title according to the
+        name of the current open file and the version of MH."""
         if mh.isRelease():
-            self.setCaption("MakeHuman %s - [%s][*]" % (mh.getVersionStr(), filename))
+            self.setCaption(
+                "MakeHuman %s - [%s][*]" %
+                (mh.getVersionStr(), filename))
         else:
-            self.setCaption("MakeHuman r%s (%s) - [%s][*]" % (os.environ['HGREVISION'], os.environ['HGNODEID'], filename))
+            self.setCaption(
+                "MakeHuman r%s (%s) - [%s][*]" %
+                (os.environ['HGREVISION'], os.environ['HGNODEID'], filename))
 
     def setFileModified(self, modified):
+        """Mark the current open file as modified and
+        update the window title accordingly."""
         self.modified = modified
         self.mainwin.setWindowModified(self.modified)
 
@@ -1231,7 +1240,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def saveTarget(self, path=None):
         """
-        Export the current modifications to the human as one single target, 
+        Export the current modifications to the human as one single target,
         relative to the basemesh.
         """
         if path is None:
