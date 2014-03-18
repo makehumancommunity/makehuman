@@ -342,7 +342,7 @@ def buildDeb(dest = None):
         ver = hgrev
   else:
     ver = package_version
-  debfile = os.path.join(outputdir,package_name + "_" + ver + "_all.deb")
+  debfile = os.path.join(outputdir,package_name + "-" + ver + "_all.deb")
 
   debcmd = ["dpkg-deb", "-Z", "bzip2", "-z", "9", "-b", "../debroot", debfile]
 
