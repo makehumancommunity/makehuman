@@ -433,16 +433,19 @@ class GenericModifier(BaseModifier):
         """
         if path is None:
             return []
-        path = tuple(path.split('-'))
-        result = []
-        if path not in targets.getTargets().groups:
+
+        try:
+            targetsList = targets.getTargets().getTargetsByGroup(path)
+        except KeyError:
             log.debug('missing target %s', path)
-        for target in targets.getTargets().groups.get(path, []):
-            keys = [var
-                    for var in target.data.itervalues()
-                    if var is not None]
-            keys.append('-'.join(target.key))
-            result.append((target.path, keys))
+            targetsList = []
+
+        result = []
+        for component in targetsList:
+            targetgroup = '-'.join(component.key)
+            factordependencies = component.getVariables() + [targetgroup]
+            result.append( (component.path, factordependencies) )
+
         return result
 
     @staticmethod
@@ -494,7 +497,6 @@ class GenericModifier(BaseModifier):
     _variables = targets._value_cat.keys()
 
     def getFactors(self, value):
-        #print 'genericModifier: getFactors'
         return dict((name, getattr(self.human, name + 'Val'))
                     for name in self._variables)
 
@@ -537,7 +539,6 @@ class UniversalModifier(GenericModifier):
         self.targets = self.l_targets + self.r_targets + self.c_targets
 
     def getFactors(self, value):
-        #print "UniversalModifier factors:"
         factors = super(UniversalModifier, self).getFactors(value)
 
         if self.left is not None:
@@ -545,9 +546,6 @@ class UniversalModifier(GenericModifier):
         if self.center is not None:
             factors[self.center] = 1.0 - abs(value)
         factors[self.right] = max(0.0, value)
-
-        #print 'factors:'
-        #print factors
 
         return factors
 
