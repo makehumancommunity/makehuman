@@ -59,7 +59,7 @@ def writeGeometry(fp, rmesh, config):
 
     obj = rmesh.object
 
-    coord = obj.coord - config.scale*config.offset
+    coord = config.scale*(obj.coord - config.offset)
     coord = rotateCoord(coord, config)
     nVerts = len(coord)
 
@@ -87,14 +87,15 @@ def writeGeometry(fp, rmesh, config):
     # Normals
 
     if config.useNormals:
-        obj.calcFaceNormals()
+        obj.calcNormals()
+        vnorm = rotateCoord(obj.vnorm, config)
         nNormals = len(obj.vnorm)
         fp.write(
             '        <source id="%s-Normals">\n' % rmesh.name +
             '          <float_array count="%d" id="%s-Normals-array">\n' % (3*nNormals,rmesh.name) +
             '          ')
 
-        fp.write( ''.join([("%.4f %.4f %.4f " % tuple(no)) for no in obj.vnorm]) )
+        fp.write( ''.join([("%.4f %.4f %.4f " % tuple(no)) for no in vnorm]) )
 
         fp.write('\n' +
             '          </float_array>\n' +
@@ -166,9 +167,9 @@ def writeShapeKey(fp, name, shape, rmesh, config):
     # Verts
 
     progress(0)
-    target = np.array(obj.coord - config.scale * config.offset)
+    target = obj.coord - config.offset
     target[shape.verts] += shape.data[np.s_[...]]
-    target = rotateCoord(target, config)
+    target = rotateCoord(config.scale*target, config)
     nVerts = len(target)
 
     fp.write(

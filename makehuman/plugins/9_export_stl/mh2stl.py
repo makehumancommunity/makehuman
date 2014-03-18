@@ -74,10 +74,9 @@ def exportStlAscii(human, filepath, config, exportJoints = False):
 
     progress(0.3, 0.99, "Writing Objects")
     objprog = Progress(len(rmeshes))
-    offs = config.scale*config.offset
     for rmesh in rmeshes:
         obj = rmesh.object
-        coord = np.array([co-offs for co in obj.coord])
+        coord = config.scale*(obj.coord - config.offset)
         fp.write("".join( [(
             'facet normal %f %f %f\n' % tuple(obj.fnorm[fn]) +
             '\touter loop\n' +
@@ -132,12 +131,12 @@ def exportStlBinary(human, filepath, config, exportJoints = False):
 
     progress(0.3, 0.99, "Writing Objects")
     objprog = Progress(len(rmeshes))
-    offs = config.scale * config.offset
+    coord = config.scale * (obj.coord - config.offset)
     for rmesh in rmeshes:
         obj = rmesh.object
         for fn,fv in enumerate(obj.fvert):
             fno = obj.fnorm[fn]
-            co = obj.coord[fv] - offs
+            co = coord[fv]
 
             fp.write(struct.pack('<fff', fno[0], fno[1], fno[2]))
             fp.write(struct.pack('<fff', co[0][0], co[0][1], co[0][2]))
