@@ -294,7 +294,6 @@ class MHAppExporter(object):
 
     def getVersion(self):
         import makehuman
-        # TODO still causes svn warnings with current version of makehuman
         if self.VERSION_SUB is not None:
             makehuman.versionSub = self.VERSION_SUB
         if self.IS_RELEASE is not None:

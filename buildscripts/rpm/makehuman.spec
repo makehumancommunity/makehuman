@@ -8,7 +8,7 @@ URL:            http://www.makehuman.org
 License:        AGPLv3
 Group:          Applications/Graphics
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-BuildRequires:  subversion
+BuildRequires:  mercurial
 BuildRequires:  python
 Vendor:         MakeHuman.org
 Packager:       Joel Palmius <joepal1976@hotmail.com>
