@@ -179,6 +179,8 @@ class Parser:
         amt.done = True
 
         self.addBones(rig_bones.Armature, boneInfo)
+        if options.useTerminators:
+            self.addBones(rig_bones.TerminatorArmature, boneInfo)
         self.addBones(rig_face.Armature, boneInfo)
 
         for bname in options.terminals.keys():
