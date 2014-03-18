@@ -24,7 +24,7 @@ Abstract
 bl_info = {
     "name": "Make Target",
     "author": "Thomas Larsson",
-    "version": (1, 32),
+    "version": (1, 33),
     "blender": (2, 6, 9),
     "location": "View3D > Properties > Make Target",
     "description": "Make MakeHuman Target",
@@ -278,39 +278,8 @@ class McpPanel(bpy.types.Panel):
         layout.operator("mh.load_mhp")
 
 #----------------------------------------------------------
-#   class ExportObj(bpy.types.Operator, ExportHelper):
-#----------------------------------------------------------
-
-class ExportObj(bpy.types.Operator, ExportHelper):
-    '''Export to OBJ file format (.obj)'''
-    bl_idname = "mh.export_obj"
-    bl_description = 'Export to OBJ file format (.obj)'
-    bl_label = "Export MH OBJ"
-    bl_space_type = "PROPERTIES"
-    bl_region_type = "WINDOW"
-
-    filename_ext = ".obj"
-    filter_glob = StringProperty(default="*.obj", options={'HIDDEN'})
-    filepath = StringProperty(name="File Path", description="File path for the exported OBJ file", maxlen= 1024, default= "")
-
-    groupsAsMaterials = BoolProperty(name="Groups as materials", default=False)
-
-    def execute(self, context):
-        utils.setObjectMode(context)
-        export_mh_obj.exportObjFile(self.properties.filepath, self.groupsAsMaterials, context)
-        return {'FINISHED'}
-
-    def invoke(self, context, event):
-        context.window_manager.fileselect_add(self)
-        return {'RUNNING_MODAL'}
-
-#----------------------------------------------------------
 #   Register
 #----------------------------------------------------------
-
-def menu_func(self, context):
-    self.layout.operator(ExportObj.bl_idname, text="MakeHuman OBJ (.obj)...")
-
 
 def register():
     maketarget.init()
@@ -319,12 +288,10 @@ def register():
     except:
         pass
     bpy.utils.register_module(__name__)
-    bpy.types.INFO_MT_file_export.append(menu_func)
 
 
 def unregister():
     bpy.utils.unregister_module(__name__)
-    bpy.types.INFO_MT_file_export.remove(menu_func)
 
 
 if __name__ == "__main__":
