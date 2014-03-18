@@ -68,6 +68,21 @@ def initInterface(context):
         description="Show stitching",
         default=False)
 
+    bpy.types.Scene.McpShowDefaultSettings = BoolProperty(
+        name="Default Settings",
+        description="Show default settings",
+        default=False)
+
+    bpy.types.Scene.McpShowActions = BoolProperty(
+        name="Manage Actions",
+        description="Show manage actions",
+        default=False)
+
+    bpy.types.Scene.McpShowPosing = BoolProperty(
+        name="Posing",
+        description="Show posing",
+        default=False)
+
 
     # Load and retarget
 
@@ -307,10 +322,7 @@ def initInterface(context):
         description = "Automatically F-curves to fit T-pose at frame 0",
         default = True)
 
-    bpy.types.Object.McpTPoseLoaded = BoolProperty(
-        default = False)
-
-    bpy.types.Object.McpRestTPose = BoolProperty(
+    bpy.types.Object.McpTPoseDefined = BoolProperty(
         default = False)
 
     bpy.types.Object.McpTPoseFile = StringProperty(

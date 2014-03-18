@@ -955,7 +955,6 @@ class Human(guicommon.Object):
         **Parameters:** None.
 
         """
-
         self.symmetrize('l')
 
     def applySymmetryRight(self):
@@ -966,7 +965,6 @@ class Human(guicommon.Object):
         **Parameters:** None.
 
         """
-
         self.symmetrize('r')
 
     def symmetrize(self, direction='r'):
