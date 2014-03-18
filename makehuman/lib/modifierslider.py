@@ -29,11 +29,28 @@ from core import G
 
 class ModifierSlider(gui.Slider):
 
-    def __init__(self, value=0.0, min=0.0, max=1.0, label=None, modifier=None, valueConverter=None, image=None):
-        super(ModifierSlider, self).__init__(value, min, max, label, valueConverter=valueConverter, image=image)
+    def __init__(self, label=None, modifier=None, valueConverter=None, image=None, cameraView=None):
+        if image is not None:
+            if not os.path.isfile(image):
+                image = self.findImage(image)
+            if not os.path.isfile(image):
+                image = None
+        super(ModifierSlider, self).__init__(modifier.getValue(), modifier.getMin(), modifier.getMax(), label, valueConverter=valueConverter, image=image)
         self.modifier = modifier
         self.value = None
         self.changing = None
+        if cameraView:
+            self.view = getattr(G.app, cameraView)
+        else:
+            self.view = None
+
+
+    @staticmethod
+    def findImage(name):
+        if name is None:
+            return None
+        name = name.lower()
+        return targets.getTargets().images.get(name, name)
 
     def mousePressEvent(self, event):
         if self._handleMousePress(event):
@@ -119,42 +136,19 @@ class ModifierSlider(gui.Slider):
         G.app.callAsync(self._onChange)
         #self._onChange()
 
+    def onFocus(self, event):
+        if self.view:
+            if G.app.settings.get('cameraAutoZoom', True):
+                self.view()
+
     def update(self):
+        """Synchronize slider value with value of its modifier, make it up to
+        date.
+        """
         human = G.app.selectedHuman
         self.blockSignals(True)
         if not self.slider.isSliderDown():
             # Only update slider position when it is not being clicked or dragged
             self.setValue(self.modifier.getValue())
         self.blockSignals(False)
-
-
-class GenericSlider(ModifierSlider):
-    @staticmethod
-    def findImage(name):
-        if name is None:
-            return None
-        name = name.lower()
-        return targets.getTargets().images.get(name, name)
-
-    def __init__(self, min, max, modifier, label, image, view):
-        image = self.findImage(image)
-        if not os.path.isfile(image):
-            image = None
-        super(GenericSlider, self).__init__(min=min, max=max, label=label, modifier=modifier, image=image)
-        self.view = getattr(G.app, view)
-
-    def onFocus(self, event):
-        super(GenericSlider, self).onFocus(event)
-        if G.app.settings.get('cameraAutoZoom', True):
-            self.view()
-
-class MacroSlider(GenericSlider):
-    def __init__(self, modifier, label, image, view, min = 0.0, max = 1.0):
-        super(MacroSlider, self).__init__(min=min, max=max, modifier=modifier, label=label, image=image, view=view)
-
-class UniversalSlider(GenericSlider):
-    def __init__(self, modifier, label, image, view, min = None, max = 1.0):
-        if min is None:
-            min = -1.0 if modifier.left is not None else 0.0
-        super(UniversalSlider, self).__init__(min, max, modifier, label, image, view)
 

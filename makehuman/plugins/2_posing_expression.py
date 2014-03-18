@@ -50,6 +50,12 @@ class ExpressionSimpleModifier(humanmodifier.SimpleModifier):
         humanmodifier.SimpleModifier.__init__(self, 'expression', template)
         self.eventType = 'expression'
 
+    def getMax(self):
+        return 2.0
+
+    def getMin(self):
+        return -1.0
+
 
 class ExpressionWarpModifier(warpmodifier.WarpModifier):
 
@@ -60,17 +66,12 @@ class ExpressionWarpModifier(warpmodifier.WarpModifier):
         super(ExpressionWarpModifier, self).__init__('expression-units', targetName, "face", referenceVariables)
         self.eventType = 'expression'
 
+    def getMax(self):
+        return 2.0
 
-class ExpressionModifierSlider(modifierslider.ModifierSlider):
+    def getMin(self):
+        return -1.0
 
-    def __init__(self, taskview=None, label=None, modifier=None):
-        modifierslider.ModifierSlider.__init__(self, label=label, modifier=modifier, min=-1.0, max=2.0)
-        self.taskview = taskview
-
-    def onChange(self, value):
-        modifierslider.ModifierSlider.onChange(self, value)
-        for target in self.modifier.targets:
-            self.taskview.addTarget(target)
 
 #----------------------------------------------------------
 #   class ExpressionTaskView
@@ -118,7 +119,12 @@ class ExpressionTaskView(gui3d.TaskView):
                     modifier = ExpressionSimpleModifier(template)
 
                 modifier.setHuman(gui3d.app.selectedHuman)
-                slider = box.addWidget(ExpressionModifierSlider(taskview=self, label=subname.capitalize(), modifier=modifier))
+                slider = box.addWidget(modifierslider.ModifierSlider(label=subname.capitalize(), modifier=modifier))
+                @slider.mhEvent
+                def onChange(event):
+                    slider = event
+                    for target in slider.modifier.targets:
+                        self.addTarget(target)
                 slider.modifier = modifier
                 self.modifiers[name + '-' + subname] = modifier
                 self.sliders.append(slider)

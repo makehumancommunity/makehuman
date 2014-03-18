@@ -97,8 +97,8 @@ class ModifierTaskView(gui3d.TaskView):
                     modifier.setHuman(G.app.selectedHuman)
                     self.modifiers[tvar] = modifier
                     tpath = '-'.join(template[1:-1])
-                    slider = modifierslider.MacroSlider(modifier, opts['label'], ('%s.png' % tpath).lower(),
-                                                       opts['cam'], opts['min'], opts['max'])
+                    slider = modifierslider.ModifierSlider(opts['label'], modifier, None, ('%s.png' % tpath).lower(),
+                                                       opts['cam'])
                 else:
                     paired = len(template) == 4
                     if paired:
@@ -132,8 +132,8 @@ class ModifierTaskView(gui3d.TaskView):
                         clashIndex += 1
 
                     self.modifiers[modifierName] = modifier
-                    slider = modifierslider.UniversalSlider(modifier, opts['label'], '%s.png' % tpath,
-                                                           opts['cam'], opts['min'], opts['max'])
+                    slider = modifierslider.ModifierSlider(opts['label'], modifier, None, '%s.png' % tpath,
+                                                           opts['cam'])
 
                 box.addWidget(slider)
                 self.sliders.append(slider)
