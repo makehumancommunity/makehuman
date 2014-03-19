@@ -392,21 +392,21 @@ class Object3D(object):
 
         self._transparentPrimitives = 0
 
-        self.fvert = []
-        self.fnorm = []
-        self.fuvs = []
-        self.group = []
-        self.face_mask = []
+        self.fvert = []         # Reference to vertices that form the faces (idx = face idx)
+        self.fnorm = []         # Reference to normals at the verts of the faces (idx = face idx)
+        self.fuvs = []          # References to UVs at the verts of the faces (idx = face idx)
+        self.group = []         # Determines facegroup per face (idx = face idx)
+        self.face_mask = []     # Determines visibility per face (idx = face idx)
 
-        self.coord = []
-        self.vnorm = []
-        self.vtang = []
-        self.color = []
-        self.texco = []
-        self.vface = []
-        self.nfaces = 0
+        self.coord = []         # Vertex coordinates (positions) (idx = vertex idx)
+        self.vnorm = []         # Vertex normals (idx = vertex idx)
+        self.vtang = []         # Vertex tangents (idx = vertex idx)
+        self.color = []         # Vertex colors (idx = vertex idx)
+        self.texco = []         # UV coordinates (idx = vertex idx)
+        self.vface = []         # References the faces that a vertex belongs to (limited to MAX_FACES) (idx = vertex idx)
+        self.nfaces = 0         # Polycount
 
-        self.ucoor = False
+        self.ucoor = False      # Update flags for updating to OpenGL renderbuffers
         self.unorm = False
         self.utang = False
         self.ucolr = False
@@ -416,9 +416,11 @@ class Object3D(object):
 
         if hasattr(self, 'index'): del self.index
         if hasattr(self, 'grpix'): del self.grpix
-        self.vmap = None
-        self.tmap = None
 
+        self.vmap = None        # Maps unwelded vertices back to original welded ones (idx = unwelded vertex idx)
+        self.tmap = None        # Maps unwelded vertex texture (UV) coordinates back to original ones (idx = unwelded vertex idx)
+
+        # Unwelded vertex buffers used by OpenGL
         if hasattr(self, 'r_coord'): del self.r_coord
         if hasattr(self, 'r_texco'): del self.r_texco
         if hasattr(self, 'r_vnorm'): del self.r_vnorm
