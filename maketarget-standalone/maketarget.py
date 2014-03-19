@@ -14,7 +14,7 @@ Commandline MakeTarget tool
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
-**Licensing:**         AGPL3 (see also http://www.makehuman.org/node/319)
+**Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/external_tools_license.html)
 
     This file is part of MakeHuman (www.makehuman.org).
 
