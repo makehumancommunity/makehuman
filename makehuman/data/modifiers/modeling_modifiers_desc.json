@@ -1,9 +1,9 @@
 {
     "head/head-age-less|more": "Age of the facial features.",
 
-    "genitals/"penis-length-min|max": "Length of the male genital (if proxy applied).",
-    "genitals/"penis-circ-min|max": "Circumference or thickness of the male genital (if proxy applied).",
-    "genitals/"penis-testicles-min|max": "Size of the testicles of the male genital (if proxy applied).",
+    "genitals/penis-length-min|max": "Length of the male genital (if proxy applied).",
+    "genitals/penis-circ-min|max": "Circumference or thickness of the male genital (if proxy applied).",
+    "genitals/penis-testicles-min|max": "Size of the testicles of the male genital (if proxy applied).",
 
     "macrodetails/Gender": "Gender of the human (min is female, max is male).",
     "macrodetails/Age": "Age of the human (range from 1 year to 90 years old, with center position 25 years).",
@@ -12,7 +12,7 @@
     "macrodetails/Caucasian": "Caucasian ethnicity of the human (the three ethnicity values are normalized so they sum to 100%).",
 
     "macrodetails-universal/Muscle": "Amount of muscle mass.",
-    "macrodetails-universal/Weight": The weight of the human.",
+    "macrodetails-universal/Weight": "The weight of the human.",
 
     "macrodetails-height/Height": "The height/length of the human.",
 
