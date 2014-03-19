@@ -392,17 +392,18 @@ class Object3D(object):
 
         self._transparentPrimitives = 0
 
-        self.fvert = []         # Reference to vertex attributes (coordinate, uv, normal, ...) that form the faces (idx = face idx)
+        self.fvert = []         # Reference to vertex attributes (coordinate, normal, color, tang) that form the faces (idx = face idx)
         self.fnorm = []         # Stores the face normal of the faces (idx = face idx)
-        self.fuvs = []          # References to UVs at the verts of the faces (idx = face idx)
+        self.fuvs = []          # References to UVs at the verts of the faces (idx = face idx) (NOTE: UVs are not tied to vertex IDs, and are not necessarily uniform per vertex, like the other attributes!)
         self.group = []         # Determines facegroup per face (idx = face idx)
         self.face_mask = []     # Determines visibility per face (idx = face idx)
+
+        self.texco = []         # UV coordinates (idx = uv idx)
 
         self.coord = []         # Vertex coordinates (positions) (idx = vertex idx)
         self.vnorm = []         # Vertex normals (idx = vertex idx)
         self.vtang = []         # Vertex tangents (idx = vertex idx)
         self.color = []         # Vertex colors (idx = vertex idx)
-        self.texco = []         # UV coordinates (idx = vertex idx)
         self.vface = []         # References the faces that a vertex belongs to (limited to MAX_FACES) (idx = vertex idx)
         self.nfaces = 0         # Polycount
 
