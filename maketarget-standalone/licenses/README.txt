@@ -3,7 +3,7 @@ their own respective licenses.
 
 Dependencies:
 
-BINARY          LICENSE TYPE        FILE WITH LICENSE     HOMEPAGE
+LIBRARY         LICENSE TYPE        FILE WITH LICENSE     HOMEPAGE
 --------------  ---------------     -------------------   ------------------
 wx-python       wxWindows license   wx-python-license.txt http://www.wxpython.org
 wxwidgets       wxWindows license   wxwidgets-license.txt http://www.wxwidgets.org
