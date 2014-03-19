@@ -176,8 +176,8 @@ def writeObjFile(path, objects, writeMTL = True, config = None):
     # Vertex normals
     if config == None or config.useNormals:
         for obj in objects:
-            obj.calcFaceNormals()
-            fp.write("".join( ["vn %.4f %.4f %.4f\n" % tuple(no/math.sqrt(no.dot(no))) for no in obj.fnorm] ))
+            obj.calcNormals()
+            fp.write("".join( ["vn %.4f %.4f %.4f\n" % tuple(no) for no in obj.vnorm] ))
 
     # UV vertices
     for obj in objects:
@@ -195,11 +195,11 @@ def writeObjFile(path, objects, writeMTL = True, config = None):
             if obj.has_uv:
                 for fn,fv in enumerate(obj.fvert):
                     fuv = obj.fuvs[fn]
-                    line = [" %d/%d/%d" % (fv[n]+nVerts, fuv[n]+nTexVerts, fn) for n in range(4)]
+                    line = [" %d/%d/%d" % (fv[n]+nVerts, fuv[n]+nTexVerts, fv[n]+nVerts) for n in range(4)]
                     fp.write("f" + "".join(line) + "\n")
             else:
                 for fn,fv in enumerate(obj.fvert):
-                    line = [" %d//%d" % (fv[n]+nVerts, fn) for n in range(4)]
+                    line = [" %d//%d" % (fv[n]+nVerts, fv[n]+nVerts) for n in range(4)]
                     fp.write("f" + "".join(line) + "\n")
         else:
             if obj.has_uv:
