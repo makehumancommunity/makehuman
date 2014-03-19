@@ -3,7 +3,7 @@ their own respective licenses.
 
 Dependencies, included in packaged versions:
 
-BINARY          LICENSE TYPE        FILE WITH LICENSE    HOMEPAGE
+LIBRARY         LICENSE TYPE        FILE WITH LICENSE    HOMEPAGE
 --------------  ---------------     -------------------  ------------------
 pyQt            GPLv3               pyQt4-license.txt    http://www.riverbankcomputing.co.uk
 Qt4             LGPLv2.1            qt4-license.txt      http://www.qt-project.org
