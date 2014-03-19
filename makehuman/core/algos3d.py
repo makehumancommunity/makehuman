@@ -111,6 +111,9 @@ class Target(object):
         data = []
         with open(name) as fd:
             for line in fd:
+                line = line.strip()
+                if line.startswith('#'):
+                    continue
                 translationData = line.split()
                 if len(translationData) != 4:
                     continue
