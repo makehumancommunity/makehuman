@@ -114,7 +114,9 @@ def writeGeometryProp(fp, name, obj, config):
         GeometryVersion: 124
         LayerElementNormal: 0 {
             Version: 101
-            Name: ""
+"""
+'            Name: "%s_Normal"' % obj.name +
+"""
             MappingInformationType: "ByPolygonVertex"
             ReferenceInformationType: "IndexToDirect"
 """ +
@@ -143,7 +145,9 @@ def writeGeometryProp(fp, name, obj, config):
 """
         LayerElementMaterial: 0 {
             Version: 101
-            Name: "Dummy"
+""" +
+'            Name: "%s_Material"' % obj.name +
+"""
             MappingInformationType: "AllSame"
             ReferenceInformationType: "IndexToDirect"
             Materials: *1 {
@@ -154,7 +158,9 @@ def writeGeometryProp(fp, name, obj, config):
             MappingInformationType: "ByPolygonVertex"
             ReferenceInformationType: "IndexToDirect"
             BlendMode: "Translucent"
-            Name: "Dummy"
+""" +
+'            Name: "%s_Texture"' % obj.name +
+"""
             Version: 101
             TextureAlpha: 1.0
         }
@@ -194,34 +200,28 @@ def writeUvs1(fp, obj):
     nUvFaces = len(obj.fuvs)
 
     fp.write(
-"""
-        LayerElementUV: 0 {
-            Version: 101
-            Name: ""
-            MappingInformationType: "ByPolygonVertex"
-            ReferenceInformationType: "IndexToDirect"
-""")
-
-    fp.write(
-'            UV: *%d {\n' % (2*nUvVerts) +
-'                a: ')
+        '        LayerElementUV: 0 {\n' +
+        '            Version: 101\n' +
+        '            Name: "%s_UV"\n' % obj.name +
+        '            MappingInformationType: "ByPolygonVertex"\n' +
+        '            ReferenceInformationType: "IndexToDirect"\n' +
+        '            UV: *%d {\n' % (2*nUvVerts) +
+        '                a: ')
 
     string = "".join( ["%.4f,%.4f," % tuple(uv) for uv in obj.texco] )
     fp.write(string[:-1])
 
     fp.write('\n' +
-'            } \n'
-'            UVIndex: *%d {\n' % (4*nUvFaces) +
-'                a: ')
+        '            } \n'
+        '            UVIndex: *%d {\n' % (4*nUvFaces) +
+        '                a: ')
 
     string = "".join( ['%d,%d,%d,%d,' % tuple(fuv) for fuv in obj.fuvs] )
     fp.write(string[:-1])
 
-    fp.write(
-"""
-            }
-        }
-""")
+    fp.write('\n' +
+        '            }\n' +
+        '        }\n')
 
 
 def writeUvs2(fp, obj):
@@ -229,16 +229,13 @@ def writeUvs2(fp, obj):
     nUvFaces = len(obj.fuvs)
 
     fp.write(
-"""
-        LayerElementUV: 0 {
-            Version: 101
-            Name: ""
-            MappingInformationType: "ByPolygonVertex"
-            ReferenceInformationType: "IndexToDirect"
-""")
-    fp.write(
-'            UV: *%d {\n' % (8*nUvFaces) +
-'                a: ')
+        '        LayerElementUV: 0 {\n' +
+        '            Version: 101\n' +
+        '            Name: "%s_UV"\n' % obj.name +
+        '            MappingInformationType: "ByPolygonVertex"\n' +
+        '            ReferenceInformationType: "IndexToDirect"\n' +
+        '            UV: *%d {\n' % (8*nUvFaces) +
+        '                a: ')
 
     string = ""
     for fuv in obj.fuvs:
@@ -246,18 +243,16 @@ def writeUvs2(fp, obj):
     fp.write(string[:-1])
 
     fp.write('\n' +
-'            } \n'
-'            UVIndex: *%d {\n' % (4*nUvFaces) +
-'                a: ')
+        '            } \n'
+        '            UVIndex: *%d {\n' % (4*nUvFaces) +
+        '                a: ')
 
     string = "".join( ['%d,%d,%d,%d,' % (4*n,4*n+1,4*n+2,4*n+3) for n in range(nUvFaces)] )
     fp.write(string[:-1])
 
-    fp.write(
-"""
-            }
-        }
-""")
+    fp.write('\n' +
+        '            }\n' +
+        '        }\n')
 
 
 #--------------------------------------------------------------------
