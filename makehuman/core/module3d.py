@@ -393,7 +393,7 @@ class Object3D(object):
         self._transparentPrimitives = 0
 
         self.fvert = []         # Reference to vertices that form the faces (idx = face idx)
-        self.fnorm = []         # Reference to normals at the verts of the faces (idx = face idx)
+        self.fnorm = []         # Stores the face normal of the faces (idx = face idx)
         self.fuvs = []          # References to UVs at the verts of the faces (idx = face idx)
         self.group = []         # Determines facegroup per face (idx = face idx)
         self.face_mask = []     # Determines visibility per face (idx = face idx)
