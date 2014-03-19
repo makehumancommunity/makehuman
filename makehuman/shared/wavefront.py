@@ -47,6 +47,8 @@ import numpy as np
 def loadObjFile(path, obj = None):
     """
     Parse and load a Wavefront OBJ file as mesh.
+    Parser does not support normals, and assumes all objects should be smooth
+    shaded. Use duplicate vertices for achieving hard edges.
     """
     if obj == None:
         name = os.path.splitext( os.path.basename(path) )[0]
@@ -73,12 +75,15 @@ def loadObjFile(path, obj = None):
 
             command = lineData[0]
 
+            # Vertex coordinate
             if command == 'v':
                 verts.append((float(lineData[1]), float(lineData[2]), float(lineData[3])))
 
+            # Vertex texture (UV) coordinate
             elif command == 'vt':
                 uvs.append((float(lineData[1]), float(lineData[2])))
 
+            # Face definition (reference to vertex attributes)
             elif command == 'f':
                 if not fg:
                     if 0 not in faceGroups:
