@@ -47,6 +47,8 @@ import numpy as np
 def loadObjFile(path, obj = None):
     """
     Parse and load a Wavefront OBJ file as mesh.
+    Parser does not support normals, and assumes all objects should be smooth
+    shaded. Use duplicate vertices for achieving hard edges.
     """
     if obj == None:
         name = os.path.splitext( os.path.basename(path) )[0]
@@ -73,12 +75,15 @@ def loadObjFile(path, obj = None):
 
             command = lineData[0]
 
+            # Vertex coordinate
             if command == 'v':
                 verts.append((float(lineData[1]), float(lineData[2]), float(lineData[3])))
 
+            # Vertex texture (UV) coordinate
             elif command == 'vt':
                 uvs.append((float(lineData[1]), float(lineData[2])))
 
+            # Face definition (reference to vertex attributes)
             elif command == 'f':
                 if not fg:
                     if 0 not in faceGroups:
@@ -176,8 +181,8 @@ def writeObjFile(path, objects, writeMTL = True, config = None):
     # Vertex normals
     if config == None or config.useNormals:
         for obj in objects:
-            obj.calcFaceNormals()
-            fp.write("".join( ["vn %.4f %.4f %.4f\n" % tuple(no/math.sqrt(no.dot(no))) for no in obj.fnorm] ))
+            obj.calcNormals()
+            fp.write("".join( ["vn %.4f %.4f %.4f\n" % tuple(no) for no in obj.vnorm] ))
 
     # UV vertices
     for obj in objects:
@@ -195,11 +200,11 @@ def writeObjFile(path, objects, writeMTL = True, config = None):
             if obj.has_uv:
                 for fn,fv in enumerate(obj.fvert):
                     fuv = obj.fuvs[fn]
-                    line = [" %d/%d/%d" % (fv[n]+nVerts, fuv[n]+nTexVerts, fn) for n in range(4)]
+                    line = [" %d/%d/%d" % (fv[n]+nVerts, fuv[n]+nTexVerts, fv[n]+nVerts) for n in range(4)]
                     fp.write("f" + "".join(line) + "\n")
             else:
                 for fn,fv in enumerate(obj.fvert):
-                    line = [" %d//%d" % (fv[n]+nVerts, fn) for n in range(4)]
+                    line = [" %d//%d" % (fv[n]+nVerts, fv[n]+nVerts) for n in range(4)]
                     fp.write("f" + "".join(line) + "\n")
         else:
             if obj.has_uv:
