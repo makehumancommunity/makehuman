@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
 
 """
@@ -14,7 +14,22 @@ MakeHuman redhat package build script
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
-**Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
+**Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
+
+    This file is part of MakeHuman (www.makehuman.org).
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 **Coding Standards:**  See http://www.makehuman.org/node/165
 
@@ -36,8 +51,6 @@ package_name = "makehuman"  # Note: 'hg' will be appended if this is a nightly b
 
 package_version = None
 
-hgpath = "/usr/bin/hg"
-
 # ------------------------------
 
 import sys
@@ -49,7 +62,6 @@ import shutil
 def buildRpm():
   global package_name
   global package_version
-  global hgpath
 
   if os.geteuid() == 0:
     print "You are not allowed to run this script as root. You must run it as a normal user."
@@ -150,7 +162,6 @@ def parseConfig(configPath):
 def configure(confpath):
   global package_name
   global package_version
-  global hgpath
 
   def _conf_get(config, section, option, defaultVal):
     try:
@@ -164,7 +175,6 @@ def configure(confpath):
   else:
     print "Using config file at %s. NOTE: properties in config file will override any other settings!" % confpath
 
-    hgpath = _conf_get(conf, 'General', 'hgPath', hgpath)
     package_name = _conf_get(conf, 'Rpm', 'packageName', package_name)
     package_version = _conf_get(conf, 'Rpm', 'packageVersion', package_version)
 

@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 # ##### BEGIN GPL LICENSE BLOCK #####
 #
 #  This program is free software; you can redistribute it and/or
@@ -129,6 +132,7 @@ def findSrcArmature(context, rig):
         selectAndSetRestPose(rig, scn)
         amt.findArmature(rig)
         t_pose.autoTPose(rig, scn)
+        t_pose.defineTPose(rig)
         _sourceArmatures["Automatic"] = amt
         amt.display("Source")
 

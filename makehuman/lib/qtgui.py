@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
 """
@@ -12,7 +12,22 @@
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
-**Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
+**Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
+
+    This file is part of MakeHuman (www.makehuman.org).
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 **Coding Standards:**  See http://www.makehuman.org/node/165
 
@@ -1252,23 +1267,31 @@ class FileEntryView(QtGui.QWidget, Widget):
 
 
 class SplashScreen(QtGui.QSplashScreen):
-    def __init__(self, image):
+    def __init__(self, image, version=""):
         super(SplashScreen, self).__init__(G.app.mainwin, QtGui.QPixmap(image))
-        #self._text = ''
-        #self._format = '%s'
         self._stdout = sys.stdout
-        self.messageRect = QtCore.QRect(10, 10, self.width()-20, 100)
+        self.messageRect = QtCore.QRect(354, 531, 432, 41)
         self.messageAlignment = QtCore.Qt.AlignLeft
         self.message = ''
+        self.progressBarRect = QtCore.QRect(660, 581, 124, 8)
+        self._version = version
+        self.versionRect = QtCore.QRect(186, 537, 88, 30)
+        self.setProgress(0)
 
-    #def setFormat(self, fmt):
-    #    self._format = fmt
+    def setProgress(self, progress):
+        self.progress = float(progress)
+        if self.progress < 0:
+            self.progress == 0.0
+        if self.progress > 1:
+            self.progress = 1.0
+
+    def getProgress(self):
+        return self.progress
 
     def escape(self, text):
         return text.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
 
     def logMessage(self, text):
-        #text = self._format % self.escape(text)
         text = self.escape(text)
         self.showMessage(text, alignment = QtCore.Qt.AlignHCenter)
         self.message = text
@@ -1278,9 +1301,26 @@ class SplashScreen(QtGui.QSplashScreen):
         color.setNamedColor('#ffffff')
         painter.setPen(color)
         font = painter.font()
-        font.setPointSizeF(15)
+        font.setPointSizeF(12)
         painter.setFont(font)
         painter.drawText(self.messageRect, self.messageAlignment, self.message);
+        if self._version:
+            font.setPointSizeF(22)
+            painter.setFont(font)
+            painter.drawText(self.versionRect, QtCore.Qt.AlignLeft, self._version)
+        color.setNamedColor('#000000')
+        painter.setPen(color)
+        color.setNamedColor('#f58220')
+        painter.setBrush(QtGui.QBrush(color))
+        pRect = self.progressBarRect
+        if self.getProgress() == 0:
+            progressedWidth = 0
+        else:
+            progressedWidth = int(pRect.width()*self.getProgress())
+        painter.drawRect(pRect.x(), pRect.y(), progressedWidth, pRect.height())
+        color.setNamedColor('#191718')
+        painter.setBrush(QtGui.QBrush(color))
+        painter.drawRect(pRect.x()+progressedWidth, pRect.y(), pRect.width()-progressedWidth, pRect.height())
 
 class StatusBar(QtGui.QStatusBar, Widget):
     def __init__(self):

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
 """
@@ -12,7 +12,22 @@
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
-**Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
+**Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
+
+    This file is part of MakeHuman (www.makehuman.org).
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 **Coding Standards:**  See http://www.makehuman.org/node/165
 
@@ -77,7 +92,7 @@ def writeGeometryProp(fp, name, obj, config):
 '        Vertices: *%d {\n' % (3*nVerts) +
 '            a: ')
 
-    coord = obj.coord - config.scale*config.offset
+    coord = config.scale*(obj.coord - config.offset)
     string = "".join( ["%.4f,%.4f,%.4f," % tuple(co) for co in coord] )
     fp.write(string[:-1])
 
@@ -99,7 +114,9 @@ def writeGeometryProp(fp, name, obj, config):
         GeometryVersion: 124
         LayerElementNormal: 0 {
             Version: 101
-            Name: ""
+"""
+'            Name: "%s_Normal"' % obj.name +
+"""
             MappingInformationType: "ByPolygonVertex"
             ReferenceInformationType: "IndexToDirect"
 """ +
@@ -108,6 +125,15 @@ def writeGeometryProp(fp, name, obj, config):
 
     string = "".join( ["%.4f,%.4f,%.4f," % tuple(no) for no in obj.vnorm] )
     fp.write(string[:-1])
+
+    fp.write('\n' +
+'            }\n' +
+'            NormalsIndex: *%d {\n' % (4*len(obj.fvert)) +
+'                a: ')
+
+    string = "".join( ['%d,%d,%d,%d,' % (fv[0],fv[1],fv[2],fv[3]) for fv in obj.fvert] )
+    fp.write(string[:-1])
+
     fp.write('\n' +
 '            } \n')
 
@@ -119,7 +145,9 @@ def writeGeometryProp(fp, name, obj, config):
 """
         LayerElementMaterial: 0 {
             Version: 101
-            Name: "Dummy"
+""" +
+'            Name: "%s_Material"' % obj.name +
+"""
             MappingInformationType: "AllSame"
             ReferenceInformationType: "IndexToDirect"
             Materials: *1 {
@@ -130,7 +158,9 @@ def writeGeometryProp(fp, name, obj, config):
             MappingInformationType: "ByPolygonVertex"
             ReferenceInformationType: "IndexToDirect"
             BlendMode: "Translucent"
-            Name: "Dummy"
+""" +
+'            Name: "%s_Texture"' % obj.name +
+"""
             Version: 101
             TextureAlpha: 1.0
         }
@@ -170,34 +200,28 @@ def writeUvs1(fp, obj):
     nUvFaces = len(obj.fuvs)
 
     fp.write(
-"""
-        LayerElementUV: 0 {
-            Version: 101
-            Name: ""
-            MappingInformationType: "ByPolygonVertex"
-            ReferenceInformationType: "IndexToDirect"
-""")
-
-    fp.write(
-'            UV: *%d {\n' % (2*nUvVerts) +
-'                a: ')
+        '        LayerElementUV: 0 {\n' +
+        '            Version: 101\n' +
+        '            Name: "%s_UV"\n' % obj.name +
+        '            MappingInformationType: "ByPolygonVertex"\n' +
+        '            ReferenceInformationType: "IndexToDirect"\n' +
+        '            UV: *%d {\n' % (2*nUvVerts) +
+        '                a: ')
 
     string = "".join( ["%.4f,%.4f," % tuple(uv) for uv in obj.texco] )
     fp.write(string[:-1])
 
     fp.write('\n' +
-'            } \n'
-'            UVIndex: *%d {\n' % (4*nUvFaces) +
-'                a: ')
+        '            } \n'
+        '            UVIndex: *%d {\n' % (4*nUvFaces) +
+        '                a: ')
 
     string = "".join( ['%d,%d,%d,%d,' % tuple(fuv) for fuv in obj.fuvs] )
     fp.write(string[:-1])
 
-    fp.write(
-"""
-            }
-        }
-""")
+    fp.write('\n' +
+        '            }\n' +
+        '        }\n')
 
 
 def writeUvs2(fp, obj):
@@ -205,16 +229,13 @@ def writeUvs2(fp, obj):
     nUvFaces = len(obj.fuvs)
 
     fp.write(
-"""
-        LayerElementUV: 0 {
-            Version: 101
-            Name: ""
-            MappingInformationType: "ByPolygonVertex"
-            ReferenceInformationType: "IndexToDirect"
-""")
-    fp.write(
-'            UV: *%d {\n' % (8*nUvFaces) +
-'                a: ')
+        '        LayerElementUV: 0 {\n' +
+        '            Version: 101\n' +
+        '            Name: "%s_UV"\n' % obj.name +
+        '            MappingInformationType: "ByPolygonVertex"\n' +
+        '            ReferenceInformationType: "IndexToDirect"\n' +
+        '            UV: *%d {\n' % (8*nUvFaces) +
+        '                a: ')
 
     string = ""
     for fuv in obj.fuvs:
@@ -222,18 +243,16 @@ def writeUvs2(fp, obj):
     fp.write(string[:-1])
 
     fp.write('\n' +
-'            } \n'
-'            UVIndex: *%d {\n' % (4*nUvFaces) +
-'                a: ')
+        '            } \n'
+        '            UVIndex: *%d {\n' % (4*nUvFaces) +
+        '                a: ')
 
     string = "".join( ['%d,%d,%d,%d,' % (4*n,4*n+1,4*n+2,4*n+3) for n in range(nUvFaces)] )
     fp.write(string[:-1])
 
-    fp.write(
-"""
-            }
-        }
-""")
+    fp.write('\n' +
+        '            }\n' +
+        '        }\n')
 
 
 #--------------------------------------------------------------------

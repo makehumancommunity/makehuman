@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
 """
@@ -12,7 +12,22 @@
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
-**Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
+**Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
+
+    This file is part of MakeHuman (www.makehuman.org).
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 **Coding Standards:**  See http://www.makehuman.org/node/165
 
@@ -80,70 +95,6 @@ class RichMesh(object):
         for index,name in enumerate(weights):
             self.vertexGroups[name] = VertexGroup(name, index, self.weights[name])
             #log.debug(self.vertexGroups[name])
-
-
-    def getCoord(self):
-        return self.object.coord
-
-        if self._coord is not None:
-            return self._coord
-        elif self._pose:
-            obj = self.object
-            self._coord = np.zeros((len(obj.coord),3), float)
-            self._vnorm = np.zeros((len(obj.coord),3), float)
-            for bname,pmat in self._pose.items():
-                try:
-                    vw = self.vertexGroups[bname]
-                except KeyError:
-                    continue
-                rmat = np.array(pmat[:3,:3])
-                offset = np.array(len(vw.verts)*[pmat[:3,3]])
-                vec = np.dot(rmat, obj.coord[vw.verts].transpose())
-                vec += offset.transpose()
-                wvec = vw.weights * vec
-                self._coord[vw.verts] += wvec.transpose()
-
-                obj.calcVertexNormals()
-                vec = np.dot(rmat, obj.vnorm[vw.verts].transpose())
-                wvec = vw.weights * vec
-                self._vnorm[vw.verts] += wvec.transpose()
-
-                '''
-                log.debug(bname)
-                log.debug(pmat)
-                log.debug(rmat)
-                log.debug(offset)
-                log.debug(obj.coord[vw.verts])
-                log.debug(vec.transpose())
-                log.debug(vec)
-                log.debug(wvec)
-                log.debug(self._coord[vw.verts])
-                log.debug("")
-                '''
-            return self._coord
-        else:
-            return self.object.coord
-
-
-    def getVnorm(self):
-        self.object.calcVertexNormals()
-        return self.object.vnorm
-
-        if self._vnorm is not None:
-            return self._vnorm
-        else:
-            self.object.calcVertexNormals()
-            return self.object.vnorm
-
-
-    def getTexco(self):
-        return self.object.texco
-
-    def getFvert(self):
-        return self.object.fvert
-
-    def getFuvs(self):
-        return self.object.fuvs
 
 
     def getProxy(self):
@@ -223,24 +174,6 @@ class RichMesh(object):
                 normGroup.append((vn,w*factors[vn]))
 
         self.weights = normWeights
-
-
-    def rescale(self, scale):
-        obj = self.object
-        newobj = module3d.Object3D(self.name)
-        newobj.setCoords(scale*obj.coord)
-        newobj.setUVs(obj.texco)
-        newobj.setFaces(obj.fvert, obj.fuvs)
-        self.object = newobj
-        self.object.calcNormals(True, True)
-        self.object.update()
-        self.object.updateIndexBuffer()
-
-        newshapes = []
-        for name,shape in self.shapes:
-            newshape = FakeTarget(name, shape.verts, scale*shape.data)
-            newshapes.append((name, newshape))
-        self.shapes = newshapes
 
 
     def __repr__(self):

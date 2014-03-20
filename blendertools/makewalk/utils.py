@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 # ##### BEGIN GPL LICENSE BLOCK #####
 #
 #  This program is free software; you can redistribute it and/or
@@ -384,11 +387,6 @@ def setRotation(pb, rot, frame, group):
 #
 #   setRestPose(rig):
 #
-
-def setRestPose(rig):
-    unit = Matrix()
-    for pb in rig.pose.bones:
-        pb.matrix_basis = unit
 
 def selectAndSetRestPose(rig, scn):
     scn.objects.active = rig

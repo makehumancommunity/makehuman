@@ -1,13 +1,13 @@
 These instruction have been written for and tested on Fedora 19 64-bit. 
-You will never be able to run the MakeHuman SVN version on distros such
+You will never be able to run the MakeHuman HG version on distros such
 as RHEL/CentOS 6.4 or earlier, since they do not support python 2.7, 
 not even if you enable RPMForge. The instructions may or may not work
 on other RPM-based distros.
 
 
-STEP 1 INSTALL SUBVERSION
--------------------------
-Install subversion:
+STEP 1 INSTALL MERCURIAL
+------------------------
+Install mercurial (hg):
 
   yum install mercurial
 

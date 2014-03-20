@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
 
 """
@@ -14,7 +14,22 @@ MakeHuman python entry-point.
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
-**Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
+**Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
+
+    This file is part of MakeHuman (www.makehuman.org).
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 **Coding Standards:**  See http://www.makehuman.org/node/165
 
@@ -37,14 +52,17 @@ versionSub = ""                         # Short version description
 meshVersion = "hm08"                    # Version identifier of the basemesh
 ################################################################################
 
-def _versionDigitsStr():
+def getVersionDigitsStr():
+    """
+    String representation of the version number only (no additional info)
+    """
     return ".".join( [str(v) for v in version] )
 
 def _versionStr():
     if versionSub:
-        return _versionDigitsStr() + " " + versionSub
+        return getVersionDigitsStr() + " " + versionSub
     else:
-        return _versionDigitsStr()
+        return getVersionDigitsStr()
 
 def isRelease():
     """
@@ -87,7 +105,7 @@ def getShortVersion():
     if versionSub:
         return versionSub.replace(' ', '_').lower()
     else:
-        return "v" + _versionDigitsStr()
+        return "v" + getVersionDigitsStr()
 
 def getBasemeshVersion():
     """

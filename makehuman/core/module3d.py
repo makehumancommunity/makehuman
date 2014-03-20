@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
 """ 
@@ -12,7 +12,22 @@
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
-**Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
+**Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
+
+    This file is part of MakeHuman (www.makehuman.org).
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 **Coding Standards:**  See http://www.makehuman.org/node/165
 
@@ -227,6 +242,17 @@ class Object3D(object):
         return -(bmin + ((bmax - bmin)/2))
 
     def calcFaceNormals(self, ix = None):
+        """
+        Calculate the face normals. A right-handed coordinate system is assumed,
+        which requires mesh faces to be defined with counter clock-wise vertex order.
+        Face normals are not normalized.
+
+        Faces are treated as if they were triangles (using only the 3 first verts), 
+        so for quads with non co-planar points, inaccuracies may occur (even though 
+        those have a high change of being corrected by neighbouring faces).
+        """
+        # We assume counter clock-wise winding order
+        # (if your normals are inversed, you're using clock-wise winding order)
         if ix is None:
             ix = np.s_[:]
         fvert = self.coord[self.fvert[ix]]
@@ -238,6 +264,10 @@ class Object3D(object):
         self.fnorm[ix] = np.cross(va, vb)
 
     def calcVertexNormals(self, ix = None):
+        """
+        Calculate per-vertex normals from the face normals for smooth shading
+        the model. Requires face normals to be calculated first.
+        """
         self.markCoords(ix, norm=True)
         if ix is None:
             ix = np.s_[:]
@@ -362,21 +392,22 @@ class Object3D(object):
 
         self._transparentPrimitives = 0
 
-        self.fvert = []
-        self.fnorm = []
-        self.fuvs = []
-        self.group = []
-        self.face_mask = []
+        self.fvert = []         # Reference to vertex attributes (coordinate, normal, color, tang) that form the faces (idx = face idx)
+        self.fnorm = []         # Stores the face normal of the faces (idx = face idx)
+        self.fuvs = []          # References to UVs at the verts of the faces (idx = face idx) (NOTE: UVs are not tied to vertex IDs, and are not necessarily uniform per vertex, like the other attributes!)
+        self.group = []         # Determines facegroup per face (idx = face idx)
+        self.face_mask = []     # Determines visibility per face (idx = face idx)
 
-        self.coord = []
-        self.vnorm = []
-        self.vtang = []
-        self.color = []
-        self.texco = []
-        self.vface = []
-        self.nfaces = 0
+        self.texco = []         # UV coordinates (idx = uv idx)
 
-        self.ucoor = False
+        self.coord = []         # Vertex coordinates (positions) (idx = vertex idx)
+        self.vnorm = []         # Vertex normals (idx = vertex idx)
+        self.vtang = []         # Vertex tangents (idx = vertex idx)
+        self.color = []         # Vertex colors (idx = vertex idx)
+        self.vface = []         # References the faces that a vertex belongs to (limited to MAX_FACES) (idx = vertex idx)
+        self.nfaces = 0         # Polycount
+
+        self.ucoor = False      # Update flags for updating to OpenGL renderbuffers
         self.unorm = False
         self.utang = False
         self.ucolr = False
@@ -386,9 +417,11 @@ class Object3D(object):
 
         if hasattr(self, 'index'): del self.index
         if hasattr(self, 'grpix'): del self.grpix
-        self.vmap = None
-        self.tmap = None
 
+        self.vmap = None        # Maps unwelded vertices back to original welded ones (idx = unwelded vertex idx)
+        self.tmap = None        # Maps unwelded vertex texture (UV) coordinates back to original ones (idx = unwelded vertex idx)
+
+        # Unwelded vertex buffers used by OpenGL
         if hasattr(self, 'r_coord'): del self.r_coord
         if hasattr(self, 'r_texco'): del self.r_texco
         if hasattr(self, 'r_vnorm'): del self.r_vnorm

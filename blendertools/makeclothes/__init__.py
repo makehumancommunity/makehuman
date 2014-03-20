@@ -12,7 +12,22 @@
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
-**Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
+**Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/external_tools_license.html)
+
+    This file is part of MakeHuman (www.makehuman.org).
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 **Coding Standards:**  See http://www.makehuman.org/node/165
 
@@ -25,7 +40,7 @@ Utility for making clothes to MH characters.
 bl_info = {
     "name": "Make Clothes",
     "author": "Thomas Larsson",
-    "version": (0, 950),
+    "version": (0, 951),
     "blender": (2, 6, 9),
     "location": "View3D > Properties > Make MH clothes",
     "description": "Make clothes and UVs for MakeHuman characters",
@@ -122,6 +137,14 @@ class MakeClothesPanel(bpy.types.Panel):
         layout.separator()
         layout.operator("mhclo.make_clothes")
         layout.separator()
+
+        layout.prop(scn, "MCUseRigidFit")
+        if scn.MCUseRigidFit:
+            ins = inset(layout)
+            ins.prop(scn, "MCUseRigidSymmetry")
+            ins.operator("mhclo.define_bounding_box")
+            if ob.MhHuman:
+                ins.prop(ob, "MCBoundingBox")
 
         layout.prop(scn, "MCShowSelect")
         if scn.MCShowSelect:
@@ -285,6 +308,23 @@ class OBJECT_OT_ReadSettingsButton(bpy.types.Operator):
     def execute(self, context):
         maketarget.settings.readDefaultSettings(context, self.tool)
         return{'FINISHED'}
+
+#----------------------------------------------------------
+#
+#----------------------------------------------------------
+
+class OBJECT_OT_DefBoundBoxButton(bpy.types.Operator):
+    bl_idname = "mhclo.define_bounding_box"
+    bl_label = "Define Bounding Box"
+    bl_options = {'UNDO'}
+
+    def execute(self, context):
+        try:
+            makeclothes.defineBoundingBox(context)
+        except MHError:
+            handleMHError(context)
+        return{'FINISHED'}
+
 
 #----------------------------------------------------------
 #

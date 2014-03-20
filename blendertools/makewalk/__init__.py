@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 # ##### BEGIN GPL LICENSE BLOCK #####
 #
 #  This program is free software; you can redistribute it and/or
@@ -37,7 +40,7 @@ Alternatively, run the script in the script editor (Alt-P), and access from UI p
 bl_info = {
     "name": "MakeWalk",
     "author": "Thomas Larsson",
-    "version": (0, 942),
+    "version": (0, 943),
     "blender": (2, 6, 9),
     "location": "View3D > Tools > MakeWalk",
     "description": "Mocap tool for MakeHuman character",
@@ -159,7 +162,6 @@ class OptionsPanel(bpy.types.Panel):
         layout.prop(scn, "McpBvhScale")
         layout.prop(scn, "McpUseLimits")
         layout.prop(scn, "McpClearLocks")
-        layout.prop(scn, "McpMakeHumanTPose")
         layout.prop(scn, 'McpAutoSourceRig')
         layout.prop(scn, 'McpAutoTargetRig')
         layout.prop(scn, "McpIgnoreHiddenLayers")
@@ -406,13 +408,10 @@ class MhxTargetBonesPanel(bpy.types.Panel):
         layout.prop(scn, "McpIgnoreHiddenLayers")
         layout.prop(rig, "MhReverseHip")
         layout.operator("mcp.get_target_rig")
-
-        layout.separator()
-        layout.operator("mcp.set_t_pose")
-
         layout.separator()
         layout.prop(scn, "McpSaveTargetTPose")
         layout.operator("mcp.save_target_file")
+
         layout.separator()
 
         if scn.McpTargetRig:
@@ -468,36 +467,41 @@ class UtilityPanel(bpy.types.Panel):
         scn = context.scene
         rig = context.object
 
-        layout.label("Default Settings")
-        #layout.operator("mcp.init_interface")
-        layout.operator("mcp.save_defaults")
-        layout.operator("mcp.load_defaults")
+        layout.prop(scn, "McpShowDefaultSettings")
+        if scn.McpShowDefaultSettings:
+            ins = inset(layout)
+            ins.operator("mcp.save_defaults")
+            ins.operator("mcp.load_defaults")
 
         layout.separator()
-        layout.label("Manage Actions")
-        layout.prop_menu_enum(context.scene, "McpActions")
-        layout.prop(scn, 'McpFilterActions')
-        layout.operator("mcp.update_action_list")
-        layout.operator("mcp.set_current_action").prop = 'McpActions'
-        #layout.prop(scn, "McpReallyDelete")
-        layout.operator("mcp.delete")
-        layout.operator("mcp.delete_hash")
+        layout.prop(scn, "McpShowActions")
+        if scn.McpShowActions:
+            ins = inset(layout)
+            ins.prop_menu_enum(context.scene, "McpActions")
+            ins.prop(scn, 'McpFilterActions')
+            ins.operator("mcp.update_action_list")
+            ins.operator("mcp.set_current_action").prop = 'McpActions'
+            ins.operator("mcp.delete")
+            ins.operator("mcp.delete_hash")
+
+        layout.separator()
+        layout.prop(scn, "McpShowPosing")
+        if scn.McpShowPosing:
+            ins = inset(layout)
+            if not rig.McpTPoseDefined:
+                ins.prop(scn, "McpMakeHumanTPose")
+            ins.operator("mcp.set_t_pose")
+            ins.separator()
+            ins.operator("mcp.define_t_pose")
+            ins.operator("mcp.undefine_t_pose")
+            ins.separator()
+            ins.operator("mcp.load_pose")
+            ins.operator("mcp.save_pose")
+            ins.separator()
+            ins.operator("mcp.rest_current_pose")
 
         layout.separator()
         layout.operator("mcp.clear_temp_props")
-
-        layout.separator()
-        layout.label("T-pose")
-        layout.operator("mcp.set_t_pose")
-        layout.operator("mcp.clear_t_pose")
-        layout.operator("mcp.load_t_pose")
-        layout.operator("mcp.save_t_pose")
-
-        layout.separator()
-        layout.label("Rest Pose")
-        layout.operator("mcp.rest_current_pose")
-        #layout.operator("mcp.rest_t_pose")
-        #layout.operator("mcp.rest_default_pose")
 
         return
         layout.operator("mcp.copy_angles_fk_ik")

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
 """
@@ -12,7 +12,22 @@
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
-**Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
+**Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
+
+    This file is part of MakeHuman (www.makehuman.org).
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 **Coding Standards:**  See http://www.makehuman.org/node/165
 
@@ -88,6 +103,9 @@ class Human(guicommon.Object):
         self._modifier_varMapping = dict()              # Maps macro variable to the modifier group that modifies it
         self._modifier_dependencyMapping = dict()       # Maps a macro variable to all the modifiers that depend on it
         self._modifier_groups = dict()
+        self._modifier_type_cache = dict()
+
+        self.blockEthnicUpdates = False                 # When set to True, changes to race are not normalized automatically
 
 
     # TODO introduce better system for managing proxies, nothing done for clothes yet
@@ -634,17 +652,11 @@ class Human(guicommon.Object):
             return
 
         caucasian = min(max(caucasian, 0.0), 1.0)
-        old = 1 - self.caucasianVal
         self.caucasianVal = caucasian
-        if not sync:
-            return
-        new = 1 - self.caucasianVal
-        if old < 1e-6:
-            self.asianVal = new / 2
-            self.africanVal = new / 2
-        else:
-            self.asianVal *= new / old
-            self.africanVal *= new / old
+
+        if sync and not self.blockEthnicUpdates:
+            self._setEthnicVals('caucasian')
+
         self.callEvent('onChanging', events3d.HumanEvent(self, 'caucasian'))
 
     def getCaucasian(self):
@@ -658,17 +670,11 @@ class Human(guicommon.Object):
             return
 
         african = min(max(african, 0.0), 1.0)
-        old = 1 - self.africanVal
         self.africanVal = african
-        if not sync:
-            return
-        new = 1 - self.africanVal
-        if old < 1e-6:
-            self.caucasianVal = new / 2
-            self.asianVal = new / 2
-        else:
-            self.caucasianVal *= new / old
-            self.asianVal *= new / old
+
+        if sync and not self.blockEthnicUpdates:
+            self._setEthnicVals('african')
+
         self.callEvent('onChanging', events3d.HumanEvent(self, 'african'))
 
     def getAfrican(self):
@@ -682,31 +688,58 @@ class Human(guicommon.Object):
             return
 
         asian = min(max(asian, 0.0), 1.0)
-        old = 1 - self.asianVal
         self.asianVal = asian
-        if not sync:
-            return
-        new = 1 - self.asianVal
-        if old < 1e-6:
-            self.caucasianVal = new / 2
-            self.africanVal = new / 2
-        else:
-            self.caucasianVal *= new / old
-            self.africanVal *= new / old
+
+        if sync and not self.blockEthnicUpdates:
+            self._setEthnicVals('asian')
+
         self.callEvent('onChanging', events3d.HumanEvent(self, 'asian'))
 
     def getAsian(self):
         return self.asianVal
 
-    def syncRace(self):
-        total = self.caucasianVal + self.asianVal + self.africanVal
-        if total < 1e-6:
-            self.caucasianVal = self.asianVal = self.africanVal = 1.0/3
+    def _setEthnicVals(self, exclude=None):
+        """
+        Normalize the ethnic values (so that they sum to 1).
+        """
+        def _getVal(ethnic):
+            return getattr(self, ethnic+'Val')
+
+        def _setVal(ethnic, value):
+            setattr(self, ethnic+'Val', value)
+
+        def _closeTo(value, limit, epsilon=0.001):
+            return abs(value - limit) <= epsilon
+
+        ethnics = ['african', 'asian', 'caucasian']
+        remaining = 1.0
+        if exclude:
+            ethnics.remove(exclude)
+            remaining = 1.0 - _getVal(exclude)
+
+        otherTotal = sum(_getVal(e) for e in ethnics)
+        if otherTotal == 0.0:
+            # Prevent division by zero
+
+            if len(ethnics) == 3 or _getVal(exclude) == 0:
+                # All values 0, this cannot be. Reset to default values.
+                for e in ethnics:
+                    _setVal(e, 1.0 / 3)
+                if exclude:
+                    _setVal(exclude, 1.0 / 3)
+            elif exclude and _closeTo(_getVal(exclude), 1.0):
+                # One ethnicity is 1, the rest is 0
+                for e in ethnics:
+                    _setVal(e, 0.0 )
+                _setVal(exclude, 1)
+            else:
+                # Increase values of other races (that were 0) to hit total sum of 1
+                for e in ethnics:
+                    _setVal(e, 0.01)
+                self._setEthnicVals(exclude)  # Re-normalize
         else:
-            scale = 1.0 / total
-            self.caucasianVal *= scale
-            self.asianVal *= scale
-            self.africanVal *= scale
+            for e in ethnics:
+                _setVal(e, remaining * (_getVal(e) / otherTotal) )
 
     def setDetail(self, name, value):
         name = canonicalPath(name)
@@ -745,12 +778,26 @@ class Human(guicommon.Object):
             log.warning('Modifier group %s does not exist.', groupName)
             return []
 
+    def getModiersByType(self, classType):
+        """
+        Retrieve all modifiers of a specified class type.
+        """
+        if classType.__name__ not in self._modifier_type_cache:
+            modifiers = []
+            for m in self.modifiers:
+                if isinstance(m, classType):
+                    modifiers.append(m)
+            self._modifier_type_cache[classType.__name__] = modifiers
+        return self._modifier_type_cache[classType.__name__]
+
     def addModifier(self, modifier):
         #log.debug("Adding modifier of type %s: %s", type(modifier), modifier.fullName)
 
-        if modifier.fullName in self.modifiers:
+        if modifier.fullName in self._modifiers:
             log.error("Modifier with name %s is already attached to human.", modifier.fullName)
             raise RuntimeError("Modifier with name %s is already attached to human." % modifier.fullName)
+
+        self._modifier_type_cache = dict()
 
         self._modifiers[modifier.fullName] = modifier
 
@@ -844,6 +891,8 @@ class Human(guicommon.Object):
                 self._modifier_dependencyMapping[dep].remove(modifier)
                 if len(self._modifier_dependencyMapping[dep]) == 0:
                     del self._modifier_dependencyMapping[dep]
+
+            self._modifier_type_cache = dict()
         except:
             log.debug('Failed to remove modifier % from human.', modifier.fullName)
             pass
@@ -1025,6 +1074,7 @@ class Human(guicommon.Object):
         log.message("Loading human from MHM file %s.", filename)
 
         self.resetMeshValues()
+        self.blockEthnicUpdates = True
 
         # TODO perhaps create progress indicator that depends on line count of mhm file?
         f = open(filename, 'r')
@@ -1051,7 +1101,8 @@ class Human(guicommon.Object):
             lh(self, ['status', 'finished'])
         f.close()
 
-        self.syncRace()
+        self.blockEthnicUpdates = False
+        self._setEthnicVals()
 
         self.callEvent('onChanged', events3d.HumanEvent(self, 'load'))
 

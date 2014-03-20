@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
 """
@@ -12,7 +12,22 @@
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
-**Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
+**Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
+
+    This file is part of MakeHuman (www.makehuman.org).
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 **Coding Standards:**  See http://www.makehuman.org/node/165
 
@@ -673,6 +688,8 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.splash.hide()
         # self.splash.finish(self.mainwin)
+        self.splash.close()
+        self.splash = None
 
         # Restore main window size and position
         if self.settings.get('restoreWindowSize', False):
@@ -1029,6 +1046,9 @@ class MHApplication(gui3d.Application, mh.Application):
     def progress(self, value, text=None, *args):
         if text is not None:
             self.status(text, *args)
+
+        if self.splash:
+            self.splash.setProgress(value)
 
         if self.progressBar is None:
             return
@@ -1531,7 +1551,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.createShortcuts()
 
-        self.splash = gui.SplashScreen(gui3d.app.getThemeResource('images', 'splash.png'))
+        self.splash = gui.SplashScreen(gui3d.app.getThemeResource('images', 'splash.png'), mh.getVersionDigitsStr())
         self.splash.show()
 
         self.tabs = self.mainwin.tabs

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
 """
@@ -12,7 +12,22 @@
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
-**Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
+**Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
+
+    This file is part of MakeHuman (www.makehuman.org).
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 **Coding Standards:**  See http://www.makehuman.org/node/165
 
@@ -67,9 +82,9 @@ class ProxyRefVert:
     def fromSingle(self, words, vnum, proxy):
         self._exact = True
         v0 = int(words[0])
-        self._verts = (v0,v0,v0)
-        self._weights = (1,0,0)
-        self._offset = np.array((0,0,0), float)
+        self._verts = [v0]
+        self._weights = [1]
+        self._offset = np.zeros(3, float)
         self.addProxyVertWeight(proxy, v0, vnum, 1)
         return self
 
@@ -99,6 +114,21 @@ class ProxyRefVert:
         return self
 
 
+    def fromSixteen(self, words, vnum, proxy):
+        self._exact = False
+        self._verts = []
+        self._weights = []
+        self._offset = np.zeros(3, float)
+
+        for n in range(8):
+            vn = int(words[n])
+            wn = float(words[n+8])
+            self._verts.append(vn)
+            self._weights.append(wn)
+            self.addProxyVertWeight(proxy, vn, vnum, wn)
+        return self
+
+
     def addProxyVertWeight(self, proxy, v, pv, w):
         try:
             proxy.vertWeights[v].append((pv, w))
@@ -116,20 +146,36 @@ class ProxyRefVert:
         return self._offset
 
     def getCoord(self, scale):
-        rv0,rv1,rv2 = self._verts
-        v0 = self._parent.coord[rv0]
-        v1 = self._parent.coord[rv1]
-        v2 = self._parent.coord[rv2]
-        w0,w1,w2 = self._weights
-        return (w0*v0 + w1*v1 + w2*v2 + scale*self._offset)
+        coord = scale*self._offset.copy()
+        for n,rvn in enumerate(self._verts):
+            xn = self._parent.coord[rvn]
+            wn = self._weights[n]
+            coord += xn*wn
+            #log.debug("  %s %s %s" % (xn, wn, coord))
+        return coord
+
+        #rv0,rv1,rv2 = self._verts
+        #v0 = self._parent.coord[rv0]
+        #v1 = self._parent.coord[rv1]
+        #v2 = self._parent.coord[rv2]
+        #w0,w1,w2 = self._weights
+        #return (w0*v0 + w1*v1 + w2*v2 + scale*self._offset)
+
 
     def getConvertedCoord(self, converter, scale):
-        rv0,rv1,rv2 = self._verts
-        v0 = converter.refVerts[rv0].getCoord(Unit)
-        v1 = converter.refVerts[rv1].getCoord(Unit)
-        v2 = converter.refVerts[rv2].getCoord(Unit)
-        w0,w1,w2 = self._weights
-        return (w0*v0 + w1*v1 + w2*v2 + scale*self._offset)
+        coord = scale*self._offset.copy()
+        for n,rvn in enumerate(self._verts):
+            xn = converter.refVerts[rvn].getCoord(Unit)
+            wn = self._weights[n]
+            coord += xn*wn
+        return coord
+
+        #rv0,rv1,rv2 = self._verts
+        #v0 = converter.refVerts[rv0].getCoord(Unit)
+        #v1 = converter.refVerts[rv1].getCoord(Unit)
+        #v2 = converter.refVerts[rv2].getCoord(Unit)
+        #w0,w1,w2 = self._weights
+        #return (w0*v0 + w1*v1 + w2*v2 + scale*self._offset)
 
 #
 #    class Proxy
@@ -588,6 +634,8 @@ def readProxyFile(obj, filepath, type="Clothes"):
             proxy.refVerts.append(refVert)
             if len(words) == 1:
                 refVert.fromSingle(words, vnum, proxy)
+            elif len(words) == 16:
+                refVert.fromSixteen(words, vnum, proxy)
             else:
                 refVert.fromTriple(words, vnum, proxy)
             vnum += 1

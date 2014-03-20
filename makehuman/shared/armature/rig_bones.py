@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
 """
@@ -12,7 +12,22 @@
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
-**Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
+**Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
+
+    This file is part of MakeHuman (www.makehuman.org).
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 **Coding Standards:**  See http://www.makehuman.org/node/165
 
@@ -147,6 +162,10 @@ HeadsTails = {
     'shin.R' :             ('r-knee', 'r-ankle'),
     'foot.R' :             ('r-ankle', 'r-foot-1'),
     'toe.R' :              ('r-foot-1', 'r-toe-2'),
+
+    'skull' :              ('head-2', ('head-2', (0,0.2,0))),
+    'toe_end.L' :          ('l-toe-2', ('l-toe-2', (0,0,0.2))),
+    'toe_end.R' :          ('r-toe-2', ('r-toe-2', (0,0,0.2))),
 }
 
 Planes = {
@@ -251,6 +270,14 @@ Armature = {
     'shin.R' :             ("PlaneLeg.R", 'thigh.R', F_DEF|F_CON, L_RLEGFK, P_YZX),
     'foot.R' :             ("PlaneFoot.R", 'shin.R', F_DEF|F_CON, L_RLEGFK, P_YZX),
     'toe.R' :              ("PlaneFoot.R", 'foot.R', F_DEF|F_CON, L_RLEGFK, P_YZX),
+}
+
+# Terminators needed by OpenSim
+
+TerminatorArmature = {
+    'skull' :               (0, 'head', F_CON, L_HELP),
+    'toe_end.L' :           (0, 'toe.L', F_CON, L_HELP),
+    'toe_end.R' :           (0, 'toe.R', F_CON, L_HELP),
 }
 
 RotationLimits = {

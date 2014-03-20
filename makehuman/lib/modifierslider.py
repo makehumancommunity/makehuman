@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
 """
@@ -12,7 +12,22 @@
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
-**Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
+**Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
+
+    This file is part of MakeHuman (www.makehuman.org).
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 **Coding Standards:**  See http://www.makehuman.org/node/165
 
@@ -30,11 +45,26 @@ from core import G
 class ModifierSlider(gui.Slider):
 
     def __init__(self, modifier, label=None, valueConverter=None, image=None, cameraView=None):
-        if image is not None:
-            if not os.path.isfile(image):
-                image = self.findImage(image)
-            if not os.path.isfile(image):
-                image = None
+        if label is None:
+            # Guess a suitable slider label from target name
+            tlabel = modifier.name.split('-')
+            if "|" in tlabel[len(tlabel)-1]:
+                tlabel = tlabel[:-1]
+            if len(tlabel) > 1 and tlabel[0] == modifier.groupName:
+                label = tlabel[1:]
+            else:
+                label = tlabel
+            label = ' '.join([word.capitalize() for word in label])
+
+        if image is None:
+            tlabel = modifier.name.replace('|', '-').split('-')
+            # Guess a suitable image path from target name
+            image = ('%s.png' % '-'.join(tlabel)).lower()
+        if not os.path.isfile(image):
+            image = self.findImage(image)
+        if not os.path.isfile(image):
+            image = None
+
         super(ModifierSlider, self).__init__(modifier.getValue(), modifier.getMin(), modifier.getMax(), label, valueConverter=valueConverter, image=image)
         self.modifier = modifier
         self.value = None
@@ -61,20 +91,26 @@ class ModifierSlider(gui.Slider):
 
     def _handleMousePress(self, event):
         if event.button() == gui.QtCore.Qt.RightButton:
-            # Right clicking reset the slider to default position
-            if self.modifier.getValue() == self.modifier.getDefaultValue():
-                return False
-
-            # Reset slider to default action
-            import humanmodifier
-            G.app.do(humanmodifier.ModifierAction(self.modifier, 
-                                                  self.modifier.getValue(), 
-                                                  self.modifier.getDefaultValue(), 
-                                                  self.update))
+            self.resetValue()
             return False
         else:
             # Default behaviour
             return True
+
+    def resetValue(self):
+        """
+        Reset value of slider to default.
+        """
+        # Right clicking reset the slider to default position
+        if self.modifier.getValue() == self.modifier.getDefaultValue():
+            return False
+
+        # Reset slider to default action
+        import humanmodifier
+        G.app.do(humanmodifier.ModifierAction(self.modifier, 
+                                              self.modifier.getValue(), 
+                                              None,  # Reset 
+                                              self.update))
 
     def onChanging(self, value):
         if self.changing is not None:

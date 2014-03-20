@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
 """
@@ -14,7 +14,22 @@ Handles WaveFront .obj 3D mesh files.
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
-**Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
+**Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
+
+    This file is part of MakeHuman (www.makehuman.org).
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 **Coding Standards:**  See http://www.makehuman.org/node/165
 
@@ -32,6 +47,8 @@ import numpy as np
 def loadObjFile(path, obj = None):
     """
     Parse and load a Wavefront OBJ file as mesh.
+    Parser does not support normals, and assumes all objects should be smooth
+    shaded. Use duplicate vertices for achieving hard edges.
     """
     if obj == None:
         name = os.path.splitext( os.path.basename(path) )[0]
@@ -58,12 +75,15 @@ def loadObjFile(path, obj = None):
 
             command = lineData[0]
 
+            # Vertex coordinate
             if command == 'v':
                 verts.append((float(lineData[1]), float(lineData[2]), float(lineData[3])))
 
+            # Vertex texture (UV) coordinate
             elif command == 'vt':
                 uvs.append((float(lineData[1]), float(lineData[2])))
 
+            # Face definition (reference to vertex attributes)
             elif command == 'f':
                 if not fg:
                     if 0 not in faceGroups:
@@ -151,19 +171,18 @@ def writeObjFile(path, objects, writeMTL = True, config = None):
         fp.write("mtllib %s\n" % os.path.basename(mtlfile))
 
     # Vertices
-    if config:
-        offs = config.scale * config.offset
-    else:
-        offs = np.array((0,0,0))
     for obj in objects:
-        fp.write("".join( ["v %.4f %.4f %.4f\n" % tuple(co-offs) for co in obj.coord] ))
+        if config:
+            coord = config.scale * (obj.coord - config.offset)
+        else:
+            coord = obj.coord
+        fp.write("".join( ["v %.4f %.4f %.4f\n" % tuple(co) for co in coord] ))
 
     # Vertex normals
     if config == None or config.useNormals:
         for obj in objects:
-            obj.calcFaceNormals()
-            #obj.calcVertexNormals()
-            fp.write("".join( ["vn %.4f %.4f %.4f\n" % tuple(no/math.sqrt(no.dot(no))) for no in obj.fnorm] ))
+            obj.calcNormals()
+            fp.write("".join( ["vn %.4f %.4f %.4f\n" % tuple(no) for no in obj.vnorm] ))
 
     # UV vertices
     for obj in objects:
@@ -181,11 +200,11 @@ def writeObjFile(path, objects, writeMTL = True, config = None):
             if obj.has_uv:
                 for fn,fv in enumerate(obj.fvert):
                     fuv = obj.fuvs[fn]
-                    line = [" %d/%d/%d" % (fv[n]+nVerts, fuv[n]+nTexVerts, fn) for n in range(4)]
+                    line = [" %d/%d/%d" % (fv[n]+nVerts, fuv[n]+nTexVerts, fv[n]+nVerts) for n in range(4)]
                     fp.write("f" + "".join(line) + "\n")
             else:
                 for fn,fv in enumerate(obj.fvert):
-                    line = [" %d//%d" % (fv[n]+nVerts, fn) for n in range(4)]
+                    line = [" %d//%d" % (fv[n]+nVerts, fv[n]+nVerts) for n in range(4)]
                     fp.write("f" + "".join(line) + "\n")
         else:
             if obj.has_uv:
