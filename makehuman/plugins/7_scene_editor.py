@@ -227,7 +227,7 @@ class SceneEditorTaskView(guirender.RenderTaskView):
                 G.app.settings['Scene_Editor_FileDlgPath'] = filename
                 self.scene.load(filename)
 
-        def doSave(filename=None):
+        def doSave(filename):
             ok = self.scene.save(filename)
             if ok and G.app.currentScene.path is not None \
                 and G.app.currentScene.path == self.scene.path:
@@ -256,7 +256,7 @@ class SceneEditorTaskView(guirender.RenderTaskView):
             if self.scene.path is None:
                 self.saveAsButton.callEvent('onClicked', event)
             else:
-                doSave()
+                doSave(self.scene.path)
 
         @self.closeButton.mhEvent
         def onClicked(event):
@@ -279,7 +279,7 @@ class SceneEditorTaskView(guirender.RenderTaskView):
 
         @self.itemList.mhEvent
         def onClicked(item):
-            item.data.showProps()
+            item.getUserData().showProps()
 
         @self.addButton.mhEvent
         def onClicked(event):
@@ -292,7 +292,7 @@ class SceneEditorTaskView(guirender.RenderTaskView):
         for i, light in enumerate(self.scene.lights):
             self.itemList.addItem("Light " + str(i), data=LightSceneItem(self, light, i))
         for item in self.itemList.getItems():
-            self.propsBox.addWidget(item.data.widget)
+            self.propsBox.addWidget(item.getUserData().widget)
 
     def updateFileTitle(self):
         lbltxt = self.scene.filename

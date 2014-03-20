@@ -140,20 +140,6 @@ class SymmetryAction(gui3d.Action):
         return True
 
 
-class MHMFile(managed_file.File):
-    """Class for handling a .mhm file managed by MH as an object.
-
-    The class derives from managed_file.File, which means that it
-    will be responsible for remembering whether the data associated
-    with the .mhm file have been modified since the last save/load,
-    and for emitting events upon modifications, which will allow us
-    to update the main window's title bar accordingly.
-    """
-
-    def __init__(self):
-        managed_file.File.__init__(self)
-
-
 class MHApplication(gui3d.Application, mh.Application):
     def __init__(self):
         if G.app is not None:
@@ -283,7 +269,7 @@ class MHApplication(gui3d.Application, mh.Application):
         self.modules = {}
 
         self.selectedHuman = None
-        self.currentFile = MHMFile()
+        self.currentFile = managed_file.File()
         self._currentScene = None
         self.backplaneGrid = None
         self.groundplaneGrid = None
