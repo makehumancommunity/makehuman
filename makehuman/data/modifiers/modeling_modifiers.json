@@ -81,12 +81,8 @@
       {"target": "nose-trans-horiz", "min": "in", "max": "out"},
       {"target": "nose-scale-vert", "min": "incr", "max": "decr"},
       {"target": "nose-scale-horiz", "min": "incr", "max": "decr"},
-      {"target": "nose-scale-depth", "min": "incr", "max": "decr"}
-    ]
-  },
+      {"target": "nose-scale-depth", "min": "incr", "max": "decr"},
 
-  { "group": "nose",
-    "modifiers": [
       {"target": "nose-nostril-width", "min": "min", "max": "max"},
       {"target": "nose-point-width", "min": "less", "max": "more"},
       {"target": "nose-height", "min": "min", "max": "max"},

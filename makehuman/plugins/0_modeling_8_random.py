@@ -59,12 +59,15 @@ class RandomizeAction(gui3d.Action):
         return True
 
     def _assignModifierValues(self, valuesDict):
+        _tmp = self.human.symmetryModeEnabled
+        self.human.symmetryModeEnabled = False
         for mName, val in valuesDict.items():
             try:
                 self.human.getModifier(mName).setValue(val)
             except:
                 pass
         self.human.applyAllTargets(G.app.progress)
+        self.human.symmetryModeEnabled = _tmp
 
 class RandomTaskView(gui3d.TaskView):
 
@@ -115,19 +118,22 @@ def randomize(human, symmetry, macro, height, face, body):
 
     randomValues = {}
     for m in modifiers:
-        #if m.fullName in ["forehead/forehead-nubian-less|more", "forehead/forehead-scale-vert-less|more"]:
-        #    randomValues[m.fullName] = 0
         if m.fullName not in randomValues:
             if m.groupName == 'head':
+                sigma = 0.1
+            elif m.fullName in ["forehead/forehead-nubian-less|more", "forehead/forehead-scale-vert-less|more"]:
+                sigma = 0.02
+                # TODO add further restrictions on gender-dependent targets like pregnant and breast
+            elif m.groupName in ["forehead", "eyebrows", "neck", "eyes", "nose", "ears", "chin", "cheek", "mouth"]:
                 sigma = 0.1
             elif m.groupName == 'macrodetails':
                 # TODO perhaps assign uniform random values to macro modifiers?
                 sigma = 0.3
-            elif m.fullName in ["forehead/forehead-nubian-less|more", "forehead/forehead-scale-vert-less|more"]:
-                sigma = 0.02
-                # TODO add further restrictions on gender-dependent targets like pregnant and breast
+            #elif m.groupName == "armslegs":
+            #    sigma = 0.1
             else:
-                sigma = 0.2
+                #sigma = 0.2
+                sigma = 0.1
             randomValue = getRandomValue(m.getMin(), m.getMax(), m.getDefaultValue(), sigma)   # TODO also allow it to continue from current value?
             randomValues[m.fullName] = randomValue
             symm = m.getSymmetricOpposite()
@@ -136,10 +142,17 @@ def randomize(human, symmetry, macro, height, face, body):
                     randomValues[symm] = randomValue
                 else:
                     m2 = human.getModifier(symm)
-                    symmDeviation = float((1-symmetry) * abs(m2.getMax() - m2.getMin()))
+                    symmDeviation = float((1-symmetry) * abs(m2.getMax() - m2.getMin()))/2
                     symMin =  max(m2.getMin(), min(randomValue - (symmDeviation), m2.getMax()))
                     symMax =  max(m2.getMin(), min(randomValue + (symmDeviation), m2.getMax()))
                     randomValues[symm] = getRandomValue(symMin, symMax, randomValue, sigma)
+
+    if randomValues.get("macrodetails/Gender", 0) > 0.5 or \
+       randomValues.get("macrodetails/Age", 0.5) < 0.2 or \
+       randomValues.get("macrodetails/Age", 0.7) < 0.75:
+        # No pregnancy for male, too young or too old subjects
+        if "stomach/stomach-pregnant-decr|incr" in randomValues:
+            randomValues["stomach/stomach-pregnant-decr|incr"] = 0
 
     oldValues = dict( [(m.fullName, m.getValue()) for m in modifiers] )
 
