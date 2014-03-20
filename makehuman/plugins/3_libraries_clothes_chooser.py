@@ -101,7 +101,7 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
 
     def getClothesRenderOrder(self):
         """
-        Return UUIDs of clothes proxys sorted on proxy.z_depth render queue 
+        Return UUIDs of clothes proxys sorted on proxy.z_depth render queue
         parameter (the order in which they will be rendered).
         """
         decoratedClothesList = [(pxy.z_depth, pxy.uuid) for pxy in self.getSelection()]
@@ -139,13 +139,15 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
             proxyVertMask = np.ones(len(pxy.refVerts), dtype=bool)
             for idx,vs in enumerate(pxy.refVerts):
                 # Body verts to which proxy vertex with idx is mapped
-                (v1,v2,v3) = vs.getHumanVerts()
-                # Hide proxy vert if any of its referenced body verts are hidden (most agressive)
-                #proxyVertMask[idx] = vertsMask[v1] and vertsMask[v2] and vertsMask[v3]
-                # Alternative1: only hide if at least two referenced body verts are hidden (best result)
-                proxyVertMask[idx] = np.count_nonzero(vertsMask[[v1, v2, v3]]) > 1
-                # Alternative2: Only hide proxy vert if all of its referenced body verts are hidden (least agressive)
-                #proxyVertMask[idx] = vertsMask[v1] or vertsMask[v2] or vertsMask[v3]
+                hverts = vs.getHumanVerts()
+                if len(hverts) == 3:
+                    (v1,v2,v3) = hverts
+                    # Hide proxy vert if any of its referenced body verts are hidden (most agressive)
+                    #proxyVertMask[idx] = vertsMask[v1] and vertsMask[v2] and vertsMask[v3]
+                    # Alternative1: only hide if at least two referenced body verts are hidden (best result)
+                    proxyVertMask[idx] = np.count_nonzero(vertsMask[[v1, v2, v3]]) > 1
+                    # Alternative2: Only hide proxy vert if all of its referenced body verts are hidden (least agressive)
+                    #proxyVertMask[idx] = vertsMask[v1] or vertsMask[v2] or vertsMask[v3]
 
             proxyKeepVerts = np.argwhere(proxyVertMask)[...,0]
             proxyFaceMask = obj.mesh.getFaceMaskForVertices(proxyKeepVerts)

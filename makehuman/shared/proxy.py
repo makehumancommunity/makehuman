@@ -82,9 +82,9 @@ class ProxyRefVert:
     def fromSingle(self, words, vnum, proxy):
         self._exact = True
         v0 = int(words[0])
-        self._verts = (v0,v0,v0)
-        self._weights = (1,0,0)
-        self._offset = np.array((0,0,0), float)
+        self._verts = [v0]
+        self._weights = [1]
+        self._offset = np.zeros(3, float)
         self.addProxyVertWeight(proxy, v0, vnum, 1)
         return self
 
@@ -114,6 +114,21 @@ class ProxyRefVert:
         return self
 
 
+    def fromSixteen(self, words, vnum, proxy):
+        self._exact = False
+        self._verts = []
+        self._weights = []
+        self._offset = np.zeros(3, float)
+
+        for n in range(8):
+            vn = int(words[n])
+            wn = float(words[n+8])
+            self._verts.append(vn)
+            self._weights.append(wn)
+            self.addProxyVertWeight(proxy, vn, vnum, wn)
+        return self
+
+
     def addProxyVertWeight(self, proxy, v, pv, w):
         try:
             proxy.vertWeights[v].append((pv, w))
@@ -131,20 +146,36 @@ class ProxyRefVert:
         return self._offset
 
     def getCoord(self, scale):
-        rv0,rv1,rv2 = self._verts
-        v0 = self._parent.coord[rv0]
-        v1 = self._parent.coord[rv1]
-        v2 = self._parent.coord[rv2]
-        w0,w1,w2 = self._weights
-        return (w0*v0 + w1*v1 + w2*v2 + scale*self._offset)
+        coord = scale*self._offset.copy()
+        for n,rvn in enumerate(self._verts):
+            xn = self._parent.coord[rvn]
+            wn = self._weights[n]
+            coord += xn*wn
+            #log.debug("  %s %s %s" % (xn, wn, coord))
+        return coord
+
+        #rv0,rv1,rv2 = self._verts
+        #v0 = self._parent.coord[rv0]
+        #v1 = self._parent.coord[rv1]
+        #v2 = self._parent.coord[rv2]
+        #w0,w1,w2 = self._weights
+        #return (w0*v0 + w1*v1 + w2*v2 + scale*self._offset)
+
 
     def getConvertedCoord(self, converter, scale):
-        rv0,rv1,rv2 = self._verts
-        v0 = converter.refVerts[rv0].getCoord(Unit)
-        v1 = converter.refVerts[rv1].getCoord(Unit)
-        v2 = converter.refVerts[rv2].getCoord(Unit)
-        w0,w1,w2 = self._weights
-        return (w0*v0 + w1*v1 + w2*v2 + scale*self._offset)
+        coord = scale*self._offset.copy()
+        for n,rvn in enumerate(self._verts):
+            xn = converter.refVerts[rvn].getCoord(Unit)
+            wn = self._weights[n]
+            coord += xn*wn
+        return coord
+
+        #rv0,rv1,rv2 = self._verts
+        #v0 = converter.refVerts[rv0].getCoord(Unit)
+        #v1 = converter.refVerts[rv1].getCoord(Unit)
+        #v2 = converter.refVerts[rv2].getCoord(Unit)
+        #w0,w1,w2 = self._weights
+        #return (w0*v0 + w1*v1 + w2*v2 + scale*self._offset)
 
 #
 #    class Proxy
@@ -603,6 +634,8 @@ def readProxyFile(obj, filepath, type="Clothes"):
             proxy.refVerts.append(refVert)
             if len(words) == 1:
                 refVert.fromSingle(words, vnum, proxy)
+            elif len(words) == 16:
+                refVert.fromSixteen(words, vnum, proxy)
             else:
                 refVert.fromTriple(words, vnum, proxy)
             vnum += 1
