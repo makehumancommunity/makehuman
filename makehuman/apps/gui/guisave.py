@@ -89,11 +89,11 @@ class SaveTaskView(gui3d.TaskView):
         and give focus to the file entry."""
         gui3d.TaskView.onShow(self, event)
 
-        modelPath = G.app.selectedHuman.dir
+        modelPath = G.app.currentFile.dir
         if modelPath is None:
             modelPath = mh.getPath("models")
 
-        name = G.app.selectedHuman.filetitle
+        name = G.app.currentFile.filetitle
         if name is None:
             name = ""
 

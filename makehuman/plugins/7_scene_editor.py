@@ -70,7 +70,6 @@ class SceneItemAdder(SceneItem):
         @self.lightbtn.mhEvent
         def onClicked(event):
             self.sceneview.scene.addLight()
-            self.sceneview.readScene()
 
 
 class EnvironmentSceneItem(SceneItem):
@@ -174,7 +173,6 @@ class LightSceneItem(SceneItem):
         @self.removebtn.mhEvent
         def onClicked(event):
             self.sceneview.scene.removeLight(self.light)
-            self.sceneview.readScene()
 
 
 class SceneEditorTaskView(guirender.RenderTaskView):
@@ -200,32 +198,34 @@ class SceneEditorTaskView(guirender.RenderTaskView):
         self.adder = SceneItemAdder(self)
         self.propsBox.addWidget(self.adder.widget)
 
-        self.items = {}
         self.activeItem = None
         self.scene = scene.Scene()
         self.readScene()
+        self.updateFileTitle()
 
         def doLoad():
             filename = mh.getOpenFileName(
                 G.app.settings.get('Scene_Editor_FileDlgPath',
-                    mh.getPath('data/scenes')),
+                    mh.getDataPath('scenes')),
                 'MakeHuman scene (*.mhscene);;All files (*.*)')
             if filename:
                 G.app.settings['Scene_Editor_FileDlgPath'] = filename
                 self.scene.load(filename)
-                self.readScene()
 
         def doSave(filename=None):
             ok = self.scene.save(filename)
             if ok and G.app.currentScene.path is not None \
-                and os.path.normpath(G.app.currentScene.path) \
-                == os.path.normpath(self.scene.path):
+                and G.app.currentScene.path == self.scene.path:
                 # Refresh MH's current scene if it was modified.
                 G.app.currentScene.reload()
 
         @self.scene.mhEvent
-        def onChanged(scn):
-            self.updateScene()
+        def onModified(event):
+            self.updateFileTitle()
+            if event.objectWasChanged:
+                G.app.applyScene(self.scene)
+            if any(term in event.reasons for term in ("load", "add", "remove")):
+                self.readScene()
 
         @self.loadButton.mhEvent
         def onClicked(event):
@@ -239,10 +239,9 @@ class SceneEditorTaskView(guirender.RenderTaskView):
         @self.saveButton.mhEvent
         def onClicked(event):
             if self.scene.path is None:
-                self.saveAsButton.callEvent('onClicked', None)
+                self.saveAsButton.callEvent('onClicked', event)
             else:
                 doSave()
-            self.updateFileTitle()
 
         @self.closeButton.mhEvent
         def onClicked(event):
@@ -252,7 +251,6 @@ class SceneEditorTaskView(guirender.RenderTaskView):
                     'Close', 'Cancel', self.scene.close)
             else:
                 self.scene.close()
-            self.readScene()
 
         @self.saveAsButton.mhEvent
         def onClicked(event):
@@ -263,11 +261,10 @@ class SceneEditorTaskView(guirender.RenderTaskView):
             if filename:
                 G.app.settings['Scene_Editor_FileDlgPath'] = filename
                 doSave(filename)
-            self.updateFileTitle()
 
         @self.itemList.mhEvent
-        def onClicked(event):
-            self.items[self.itemList.getSelectedItem()].showProps()
+        def onClicked(item):
+            item.data.showProps()
 
         @self.addButton.mhEvent
         def onClicked(event):
@@ -275,27 +272,17 @@ class SceneEditorTaskView(guirender.RenderTaskView):
 
     def readScene(self):
         self.adder.showProps()
-        self.items.clear()
-        self.items = {'Environment': EnvironmentSceneItem(self)}
-        i = 0
-        for light in self.scene.lights:
-            i += 1
-            self.items['Light ' + str(i)] = LightSceneItem(self, light, i)
-        for item in self.items.values():
-            self.propsBox.addWidget(item.widget)
-        self.itemList.setData(self.items.keys()[::-1])
-
-        self.updateScene()
-
-    def updateScene(self):
-        G.app.applyScene(self.scene)
-        self.updateFileTitle()
+        self.itemList.setData([])
+        self.itemList.addItem("Environment", data=EnvironmentSceneItem(self))
+        for i, light in enumerate(self.scene.lights):
+            self.itemList.addItem("Light " + str(i), data=LightSceneItem(self, light, i))
+        for item in self.itemList.getItems():
+            self.propsBox.addWidget(item.data.widget)
 
     def updateFileTitle(self):
-        if self.scene.path is None:
+        lbltxt = self.scene.filename
+        if lbltxt is None:
             lbltxt = '<New scene>'
-        else:
-            lbltxt = os.path.basename(self.scene.path)
         if self.scene.modified:
             lbltxt += '*'
         self.fnlbl.setText(lbltxt)
@@ -304,7 +291,7 @@ class SceneEditorTaskView(guirender.RenderTaskView):
         guirender.RenderTaskView.onShow(self, event)
 
         # Set currently edited scene
-        self.updateScene()
+        G.app.applyScene(self.scene)
 
     def onHide(self, event):
         # Restore selected scene

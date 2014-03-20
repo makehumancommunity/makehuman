@@ -27,7 +27,6 @@ import cPickle as pickle
 
 import log
 import managed_file
-import events3d
 from material import Color
 
 mhscene_version = 5
@@ -174,19 +173,12 @@ class Environment(SceneObject):
              'skybox': None})
 
 
-class Scene(events3d.EventHandler, managed_file.File):
+class Scene(managed_file.File):
     def __init__(self, path=None):
-        events3d.EventHandler.__init__(self)
-
         self.lights = []
         self.environment = Environment(self)
 
         managed_file.File.__init__(self, path)
-
-    def changed(self):
-        """Method to be called whenever the Scene's contents are modified."""
-        self.modified = True
-        self.callEvent('onChanged', self)
 
     def load(self, path):
         """Load scene from a .mhscene file."""
@@ -244,9 +236,7 @@ class Scene(events3d.EventHandler, managed_file.File):
                     return False
                 hfile.close()
 
-        self._path = path
-        self.modified = False
-        self.callEvent('onChanged', self)
+        self.loaded(path)
         return True
 
     # Save scene to a .mhscene file.
@@ -283,15 +273,14 @@ class Scene(events3d.EventHandler, managed_file.File):
                 return False
             hfile.close()
 
-        self._path = path
-        self.modified = False
+        self.saved(path)
         return True
 
     def addLight(self):
-        self.changed()
         newlight = Light(self)
         self.lights.append(newlight)
+        self.changed(("add", "light"))
 
     def removeLight(self, light):
-        self.changed()
         self.lights.remove(light)
+        self.changed(("remove", "light"))
