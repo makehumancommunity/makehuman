@@ -122,11 +122,11 @@ class ModifierAction(guicommon.Action):
             opposite = self.human.getModifier( self.modifier.getSymmetricOpposite() )
             if self.after is None:
                 # Reset modifier to default value
-                opposite.setValue( self.modifier.getValue() )
-            else:
                 oldV = opposite.resetValue()
-                if isinstance(oldv, dict):
-                    self.before.update(oldv)
+                if isinstance(oldV, dict):
+                    self.before.update(oldV)
+            else:
+                opposite.setValue( self.modifier.getValue() )
 
         self.human.applyAllTargets(G.app.progress)
         self.postAction()
