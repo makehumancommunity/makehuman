@@ -96,7 +96,7 @@ class RandomTaskView(gui3d.TaskView):
                       face=self.face.selected,
                       body=self.body.selected)
 
-def randomize(human, symmetry, macro, height, face, body): 
+def randomize(human, symmetry, macro, height, face, body):
     modifierGroups = []
     if macro:
         modifierGroups = modifierGroups + ['macrodetails', 'macrodetails-universal', 'macrodetails-proportions']
@@ -119,22 +119,36 @@ def randomize(human, symmetry, macro, height, face, body):
     randomValues = {}
     for m in modifiers:
         if m.fullName not in randomValues:
+            randomValue = None
             if m.groupName == 'head':
                 sigma = 0.1
             elif m.fullName in ["forehead/forehead-nubian-less|more", "forehead/forehead-scale-vert-less|more"]:
                 sigma = 0.02
                 # TODO add further restrictions on gender-dependent targets like pregnant and breast
+            elif "trans-horiz" in m.fullName or m.fullName == "hip/hip-trans-in|out":
+                if symmetry == 1:
+                    randomValue = m.getDefaultValue()
+                else:
+                    mMin = m.getMin()
+                    mMax = m.getMax()
+                    w = float(abs(mMax - mMin) * (1 - symmetry))
+                    mMin = max(mMin, m.getDefaultValue() - w/2)
+                    mMax = min(mMax, m.getDefaultValue() + w/2)
+                    randomValue = getRandomValue(mMin, mMax, m.getDefaultValue(), 0.1)
             elif m.groupName in ["forehead", "eyebrows", "neck", "eyes", "nose", "ears", "chin", "cheek", "mouth"]:
                 sigma = 0.1
             elif m.groupName == 'macrodetails':
                 # TODO perhaps assign uniform random values to macro modifiers?
+                #randomValue = random.random()
                 sigma = 0.3
             #elif m.groupName == "armslegs":
             #    sigma = 0.1
             else:
                 #sigma = 0.2
                 sigma = 0.1
-            randomValue = getRandomValue(m.getMin(), m.getMax(), m.getDefaultValue(), sigma)   # TODO also allow it to continue from current value?
+
+            if randomValue is None:
+                randomValue = getRandomValue(m.getMin(), m.getMax(), m.getDefaultValue(), sigma)   # TODO also allow it to continue from current value?
             randomValues[m.fullName] = randomValue
             symm = m.getSymmetricOpposite()
             if symm and symm not in randomValues:
