@@ -43,9 +43,8 @@ from exportutils.config import Config
 
 class STLConfig(Config):
 
-    def __init__(self, exporter):
+    def __init__(self):
         Config.__init__(self)
-        self.selectedOptions(exporter)
         self.useRelPaths = True
 
 
@@ -62,15 +61,24 @@ class ExporterSTL(Exporter):
         self.stlAscii = options.addWidget(gui.RadioButton(stlOptions,  "ASCII", selected=True))
         self.stlBinary = options.addWidget(gui.RadioButton(stlOptions, "Binary"))
 
+    def getConfig(self):
+        cfg = STLConfig()
+        cfg.useTPose          = False # self.useTPose.selected
+        cfg.feetOnGround      = self.feetOnGround.selected
+        cfg.scale,cfg.unit    = self.taskview.getScale()
+        return cfg
+
     def export(self, human, filename):
         from . import mh2stl
         from progress import Progress
         progress = Progress.begin() (0, 1)
 
+        cfg = self.getConfig()
+        cfg.setHuman(human)
         if self.stlAscii.selected:
-            mh2stl.exportStlAscii(human, filename("stl"), STLConfig(self))
+            mh2stl.exportStlAscii(filename("stl"), cfg)
         else:
-            mh2stl.exportStlBinary(human, filename("stl"), STLConfig(self))
+            mh2stl.exportStlBinary(filename("stl"), cfg)
 
 def load(app):
     app.addExporter(ExporterSTL())

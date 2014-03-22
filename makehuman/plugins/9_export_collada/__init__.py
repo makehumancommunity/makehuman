@@ -43,40 +43,38 @@ from exportutils.config import Config
 
 
 class DaeConfig(Config):
-    def __init__(self, exporter):
-        from armature.options import ArmatureOptions
+    def __init__(self):
 
         Config.__init__(self)
-        self.selectedOptions(exporter)
 
         self.useRelPaths = True
         self.useNormals = True
 
         self.expressions = False
-        #self.expressions = exporter.expressions.selected
         self.useCustomTargets = False
-        #self.useCustomTargets = exporter.useCustomTargets.selected
         self.useTPose = False
-        #self.useTPose = exporter.useTPose.selected
 
-        self.yUpFaceZ = exporter.yUpFaceZ.selected
-        self.yUpFaceX = exporter.yUpFaceX.selected
-        self.zUpFaceNegY = exporter.zUpFaceNegY.selected
-        self.zUpFaceX = exporter.zUpFaceX.selected
+        self.yUpFaceZ = True
+        self.yUpFaceX = False
+        self.zUpFaceNegY = False
+        self.zUpFaceX = False
 
-        self.localY = True  # exporter.localY.selected
-        self.localX = False  # exporter.localX.selected
-        self.localG = False  # exporter.localG.selected
+        self.localY = True
+        self.localX = False
+        self.localG = False
 
-        self.rigOptions = exporter.getRigOptions()
-        if not self.rigOptions:
-            return
-            self.rigOptions = ArmatureOptions()
-        self.rigOptions.setExportOptions(
-            useExpressions = self.expressions,
-            useTPose = self.useTPose,
-        )
-
+    def getRigOptions(self):
+        rigOptions = super(DaeConfig, self).getRigOptions()
+        if rigOptions is None:
+            return None
+            #from armature.options import ArmatureOptions
+            #self.rigOptions = ArmatureOptions()
+        else:
+            rigOptions.setExportOptions(
+                useExpressions = self.expressions,
+                useTPose = self.useTPose,
+            )
+        return rigOptions
 
 
 class ExporterCollada(Exporter):
@@ -107,8 +105,31 @@ class ExporterCollada(Exporter):
     def export(self, human, filename):
         from .mh2collada import exportCollada
         self.taskview.exitPoseMode()
-        exportCollada(human, filename("dae"), DaeConfig(self))
+        cfg = self.getConfig()
+        cfg.setHuman(human)
+        exportCollada(filename("dae"), cfg)
         self.taskview.enterPoseMode()
+
+    def getConfig(self):
+        cfg = DaeConfig()
+        cfg.useTPose           = False # self.useTPose.selected
+        cfg.feetOnGround       = self.feetOnGround.selected
+        cfg.scale,cfg.unit    = self.taskview.getScale()
+
+        #cfg.expressions = self.expressions.selected
+        #cfg.useCustomTargets = self.useCustomTargets.selected
+        #cfg.useTPose = self.useTPose.selected
+
+        cfg.yUpFaceZ = self.yUpFaceZ.selected
+        cfg.yUpFaceX = self.yUpFaceX.selected
+        cfg.zUpFaceNegY = self.zUpFaceNegY.selected
+        cfg.zUpFaceX = self.zUpFaceX.selected
+
+        #cfg.localY = self.localY.selected
+        #cfg.localX = self.localX.selected
+        #cfg.localG = self.localG.selected
+
+        return cfg
 
 
 def load(app):
