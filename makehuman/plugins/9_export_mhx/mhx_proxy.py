@@ -24,7 +24,7 @@ Proxies
 
 import os
 import log
-core import G
+from core import G
 
 from . import mhx_writer
 #from . import mhx_mesh
