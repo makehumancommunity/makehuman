@@ -129,6 +129,7 @@ if __name__ == '__main__':
     if args.get('graft', False):
         import subprocess
         print 'To graft %s changesets from %s to %s, execute:' % (len(result), sourceBranch, targetBranch)
+        print 'hg update %s' % targetBranch
         revs = [r.node for r in result]
         dargs = [item for pair in zip(len(revs)*['-D'], revs) for item in pair]
         print 'hg graft %s' % " ".join(dargs)
