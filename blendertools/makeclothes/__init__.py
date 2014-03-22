@@ -54,6 +54,7 @@ if "bpy" in locals():
     import imp
     imp.reload(maketarget)
     imp.reload(mc)
+    imp.reload(rigidfit)
     imp.reload(materials)
     imp.reload(makeclothes)
     imp.reload(project)
@@ -66,6 +67,7 @@ else:
     from .error import MHError, handleMHError, initWarnings, handleWarnings
     from maketarget.utils import drawFileCheck
     from . import mc
+    from . import rigidfit
     from . import materials
     from . import makeclothes
     from . import project
@@ -320,7 +322,7 @@ class OBJECT_OT_DefBoundBoxButton(bpy.types.Operator):
 
     def execute(self, context):
         try:
-            makeclothes.defineBoundingBox(context)
+            rigidfit.defineBoundingBox(context)
         except MHError:
             handleMHError(context)
         return{'FINISHED'}

@@ -999,6 +999,7 @@ def makeClothes(context, doFindClothes):
         log = None
     matfile = materials.writeMaterial(clo, scn.MhClothesDir)
     if scn.MCUseRigidFit:
+        from .rigidfit import fitRigidly
         data = fitRigidly(context, hum, clo)
     elif doFindClothes:
         data = findClothes(context, hum, clo, log)
@@ -1335,79 +1336,6 @@ def setZDepth(scn):
     scn.MCZDepth = 50 + int((ZDepth[scn.MCZDepthName]-50)/2.6)
     return
 
-#----------------------------------------------------------
-#
-#----------------------------------------------------------
-
-def defineBoundingBox(context):
-    hum, box = getObjectPair(context)
-    checkObjectOK(hum, context, False)
-    corners = getBoundingBox(hum, box, context)
-    hum.MCBoundingBox = box.name
-    print("Corners:")
-    for hv in corners:
-        co = hv.co
-        print("%6d: %.5f %.5f %.5f" % (hv.index, co[0], co[1], co[2]))
-
-
-def getBoundingBox(hum, box, context):
-    if len(box.data.vertices) != 8:
-        raise MHError("Box %s must have exactly eight vertices" % box.name)
-    checkObjectOK(box, context, False)
-
-    corners = []
-    offs = box.location - hum.location
-    for bv in box.data.vertices:
-        for hv in hum.data.vertices:
-            vec = bv.co - hv.co + offs
-            if vec.length < Epsilon:
-                corners.append(hv)
-                break
-    print(corners)
-    if len(corners) != 8:
-        raise MHError("Some box vertices do not match human vertices")
-
-    return corners
-
-
-def fitRigidly(context, hum, clo):
-    scn = context.scene
-    box = scn.objects[hum.MCBoundingBox]
-    corners = getBoundingBox(hum, box, context)
-    if scn.MCUseRigidSymmetry:
-        lcorners = corners
-        rcorners = mirrorCorners(corners)
-    data = []
-
-    for pv in clo.data.vertices:
-        verts = []
-        rawWts = []
-        wtsSum = 0
-        exact = False
-        if scn.MCUseRigidSymmetry:
-            if pv.co[0] < 0:
-                corners = rcorners
-            else:
-                corners = lcorners
-
-        for hv in corners:
-            vec = pv.co - hv.co
-            if len(vec) < Epsilon:
-                exact = True
-                exactVert = hv
-                break
-            w = 1/vec.length
-            rawWts.append(w)
-            wtsSum += w
-            verts.append(hv.index)
-        if exact:
-            data.append((pv, True, [(exactVert, 0)], [1.0], []))
-        else:
-            wts = []
-            for w in rawWts:
-                wts.append(w/wtsSum)
-            data.append((pv, False, verts, wts, []))
-    return data
 
 ###################################################################################
 #
