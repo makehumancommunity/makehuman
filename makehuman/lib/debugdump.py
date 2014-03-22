@@ -89,6 +89,8 @@ class DebugDump(object):
         self.write("VERSION: %s", os.environ['MH_VERSION'])
         if 'HGREVISION' in os.environ and 'HGREVISION_SOURCE' in os.environ:
             self.write("HG REVISION: r%s (%s) [%s]", os.environ['HGREVISION'], os.environ['HGNODEID'], os.environ['HGREVISION_SOURCE'])
+        else:
+            self.write("HG REVISION: UNKNOWN")
         if 'HGBRANCH' in os.environ:
             self.write("HG BRANCH: %s", os.environ['HGBRANCH'])
         self.write("SHORT VERSION: %s", os.environ['MH_SHORT_VERSION'])
