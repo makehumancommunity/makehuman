@@ -45,9 +45,6 @@ import numpy as np
 import image_qt as image_lib
 import time
 
-import traceback
-traceback.print_stack()
-
 class Image(object):
     """Container for handling images.
 
