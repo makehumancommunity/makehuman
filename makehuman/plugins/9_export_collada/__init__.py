@@ -37,7 +37,6 @@ Abstract
 TODO
 """
 
-import gui
 from export import Exporter
 from exportutils.config import Config
 
@@ -86,6 +85,7 @@ class ExporterCollada(Exporter):
         self.orderPriority = 70.0
 
     def build(self, options, taskview):
+        import gui
         Exporter.build(self, options, taskview)
         #self.expressions     = options.addWidget(gui.CheckBox("Expressions", False))
         #self.useCustomTargets = options.addWidget(gui.CheckBox("Custom targets", False))
