@@ -48,7 +48,7 @@ import numpy as np
 #   class Config
 #
 
-class Config:
+class Config(object):
 
     def __init__(self):
         self.useTPose           = False
@@ -57,7 +57,6 @@ class Config:
         self.unit               = "dm"
         self.offset             = np.array((0.0, 0.0, 0.0))
 
-        self.rigOptions         = None
         self.useNormals         = False
         self.useRelPaths        = True
         self.cage               = False
@@ -177,4 +176,38 @@ class Config:
         string = name.replace(" ", "_").replace("-","_").lower()
         return string
 
+
+    def getRigType(self):
+        """
+        Return the name of the skeleton type currently set on the human.
+        """
+        if not hasattr(self.human, "getSkeleton"):
+            return None
+        skel = self.human.getSkeleton()
+        if skel:
+            return skel.name
+        else:
+            return None
+
+
+    def _getRigOptions(self):
+        return self.getRigOptions()
+
+    def _setRigOptions(self):
+        raise RuntimeError("Setting rigOptions directly not allowed!")
+
+    rigOptions = property(_getRigOptions, _setRigOptions)
+
+
+    def getRigOptions(self):
+        """
+        Retrieve custom rig options of the rig set on the human.
+        """
+        if not hasattr(self.human, "getSkeleton"):
+            return None
+        skel = self.human.getSkeleton()
+        if skel:
+            return skel.options
+        else:
+            return None
 
