@@ -38,20 +38,20 @@ TODO
 """
 
 import codecs
-import gui3d
+from core import G
 from progress import Progress
 
 def exportSkel(filename):
 
-    human = gui3d.app.selectedHuman
+    human = G.app.selectedHuman
     if not human.getSkeleton():
-        gui3d.app.prompt('Error', 'You did not select a skeleton from the library.', 'OK')
+        G.app.prompt('Error', 'You did not select a skeleton from the library.', 'OK')
         return
 
     f = codecs.open(filename, 'w', encoding="utf-8")
 
     bones = human.getSkeleton().getBones()
-    gui3d.app.status("Writing Bones")
+    G.app.status("Writing Bones")
 
     progress = Progress()
     for bone in bones:
@@ -59,7 +59,7 @@ def exportSkel(filename):
         progress.step()
 
     f.close()
-    gui3d.app.status("Skeleton export finished")
+    G.app.status("Skeleton export finished")
 
 def writeBone(f, bone):
 
