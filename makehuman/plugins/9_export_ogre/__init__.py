@@ -45,16 +45,13 @@ from exportutils.config import Config
 
 class OgreConfig(Config):
 
-    def __init__(self, exporter):
+    def __init__(self):
         Config.__init__(self)
-        self.selectedOptions(exporter)
         self.useRelPaths = True
 
-    def selectedOptions(self, exporter):
-        self.feetOnGround          = exporter.feetOnGround.selected
-        self.subdivide          = gui3d.app.selectedHuman.isSubdivided()
-
-        return self
+    @property
+    def subdivide(self):
+        return self.human.isSubdivided()
 
 class ExporterOgre(Exporter):
     def __init__(self):
@@ -65,12 +62,22 @@ class ExporterOgre(Exporter):
 
     def export(self, human, filename):
         reload(mh2ogre) # TODO ?
-        mh2ogre.exportOgreMesh(human, filename("mesh.xml"), OgreConfig(self))
+        cfg = self.getConfig()
+        cfg.setHuman(human)
+        mh2ogre.exportOgreMesh(filename("mesh.xml"), cfg)
 
     def build(self, options, taskview):
         self.taskview     = taskview
         self.feetOnGround = options.addWidget(gui.CheckBox("Feet on ground", True))
         #self.scales       = self.addScales(options)  # TODO reintroduce scales?
+
+    def getConfig(self):
+        cfg = OgreConfig()
+        cfg.useTPose          = False # self.useTPose.selected
+        cfg.feetOnGround      = self.feetOnGround.selected
+        cfg.scale,cfg.unit    = self.taskview.getScale()
+
+        return cfg
 
     def onShow(self, exportTaskView):
         exportTaskView.scaleBox.hide()
@@ -83,3 +90,4 @@ def load(app):
 
 def unload(app):
     pass
+

@@ -53,13 +53,13 @@ from . import mhx_pose
 #   Export MHX file
 #-------------------------------------------------------------------------------
 
-def exportMhx(human, filepath, config):
+def exportMhx(filepath, config):
     from .mhx_armature import setupArmature
 
     G.app.progress(0, text="Exporting MHX")
     log.message("Exporting %s" % filepath.encode('utf-8'))
     time1 = time.clock()
-    config.setHuman(human)
+    human = config.human
     config.setupTexFolder(filepath)
     config.setOffset(human)
 

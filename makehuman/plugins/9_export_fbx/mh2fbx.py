@@ -55,7 +55,7 @@ from . import fbx_material
 from . import fbx_anim
 
 
-def exportFbx(human, filepath, config):
+def exportFbx(filepath, config):
     from armature.armature import setupArmature
 
     #posemode.exitPoseMode()
@@ -63,7 +63,7 @@ def exportFbx(human, filepath, config):
 
     G.app.progress(0, text="Preparing")
 
-    config.setHuman(human)
+    human = config.human
     config.setupTexFolder(filepath)
 
     log.message("Write FBX file %s" % filepath)
