@@ -9,7 +9,7 @@ pyQt            GPLv3               pyQt4-license.txt    http://www.riverbankcom
 Qt4             LGPLv2.1            qt4-license.txt      http://www.qt-project.org
 numpy           BSD (3-clause)      numpy-license.txt    http://www.numpy.org
 pyOpenGL        BSD (3-clause)      pyOpenGL-license.txt http://pyopengl.sourceforge.net
-
+transformations BSD (3-clause)      transformations.txt  http://www.lfd.uci.edu/~gohlke/
 
 Optional:
 
