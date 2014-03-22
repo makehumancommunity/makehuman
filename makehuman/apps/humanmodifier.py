@@ -162,6 +162,7 @@ class BaseModifier(object):
         self.faces = None
         self.eventType = 'modifier'
         self.targets = []
+        self.description = ""
 
         # Macro variable controlled by this modifier
         self.macroVariable = None
@@ -699,6 +700,7 @@ def loadModifiers(filename, human):
     """
     log.debug("Loading modifiers from %s", filename)
     import json
+    import os
     from collections import OrderedDict
     modifiers = []
     data = json.load(open(filename, 'rb'), object_pairs_hook=OrderedDict)
@@ -726,4 +728,21 @@ def loadModifiers(filename, human):
         for modifier in modifiers:
             modifier.setHuman(human)
     log.message('Loaded %s modifiers from file %s', len(modifiers), filename)
+
+    # Attempt to load modifier descriptions
+    _tmp = os.path.splitext(filename)
+    descFile = _tmp[0]+'_desc'+_tmp[1]
+    if os.path.isfile(descFile):
+        data = json.load(open(descFile, 'rb'), object_pairs_hook=OrderedDict)
+        dCount = 0
+        for mName, mDesc in data.items():
+            try:
+                mod = human.getModifier(mName)
+                mod.description = mDesc
+                dCount += 1
+            except:
+                log.warning("Loaded description for %s but modifier does not exist!", mName)
+        log.message("Loaded %s modifier descriptions from file %s", dCount, descFile)
+
     return modifiers
+
