@@ -315,13 +315,13 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.progress(0.18)
 
-        userSceneDir = mh.getPath("data/scenes")
+        userSceneDir = mh.getDataPath("scenes")
         if not os.path.exists(userSceneDir):
             os.makedirs(userSceneDir)
 
         from scene import Scene
         from getpath import findFile
-        self.currentScene = Scene(findFile("scenes/default.mhscene"))
+        self._currentScene = Scene(findFile("scenes/default.mhscene"))
 
         @self._currentScene.mhEvent
         def onChanged(scene):
@@ -668,6 +668,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.splash.hide()
         # self.splash.finish(self.mainwin)
+        self.splash.close()
         self.splash = None
 
         # Restore main window size and position

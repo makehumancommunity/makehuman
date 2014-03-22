@@ -232,7 +232,7 @@ class SceneEditorTaskView(guirender.RenderTaskView):
 
         def doSave(filename=None):
             ok = self.scene.save(filename)
-            if ok and not G.app.currentScene.path is None \
+            if ok and G.app.currentScene.path is not None \
                 and os.path.normpath(G.app.currentScene.path) \
                 == os.path.normpath(self.scene.path):
                 # Refresh MH's current scene if it was modified.
@@ -244,7 +244,7 @@ class SceneEditorTaskView(guirender.RenderTaskView):
 
         @self.loadButton.mhEvent
         def onClicked(event):
-            if self.scene.unsaved:
+            if self.scene.modified:
                 G.app.prompt('Confirmation',
                     'Your scene is unsaved. Are you sure you want to close it?',
                     'Close', 'Cancel', doLoad)
@@ -261,7 +261,7 @@ class SceneEditorTaskView(guirender.RenderTaskView):
 
         @self.closeButton.mhEvent
         def onClicked(event):
-            if self.scene.unsaved:
+            if self.scene.modified:
                 G.app.prompt('Confirmation',
                     'Your scene is unsaved. Are you sure you want to close it?',
                     'Close', 'Cancel', self.scene.close)
@@ -311,7 +311,7 @@ class SceneEditorTaskView(guirender.RenderTaskView):
             lbltxt = '<New scene>'
         else:
             lbltxt = os.path.basename(self.scene.path)
-        if self.scene.unsaved:
+        if self.scene.modified:
             lbltxt += '*'
         self.fnlbl.setText(lbltxt)
 
