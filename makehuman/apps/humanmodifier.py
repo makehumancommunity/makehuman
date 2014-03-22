@@ -572,6 +572,12 @@ class UniversalModifier(GenericModifier):
 
         self.targets = self.l_targets + self.r_targets + self.c_targets
 
+    def getMin(self):
+        if self.left:
+            return -1.0
+        else:
+            return 0.0
+
     def getFactors(self, value):
         factors = super(UniversalModifier, self).getFactors(value)
 
