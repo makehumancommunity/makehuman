@@ -76,7 +76,7 @@ class Human(guicommon.Object):
         self._eyesProxy = None
         self._genitalsObj = genitalsObj
         self._genitalsProxy = None
-        self.eyebrowsObj = None
+        self.eyebrowsObj = None     # TODO why no setters for these?
         self.eyebrowsProxy = None
         self.eyelashesObj = None
         self.eyelashesProxy = None
