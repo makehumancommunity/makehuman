@@ -1109,6 +1109,7 @@ class Human(guicommon.Object):
         if update:
             self.applyAllTargets(progressCallback)
 
+        G.app.currentFile.loaded(filename)
         log.message("Done loading MHM file.")
 
     def save(self, filename, tags):
@@ -1122,4 +1123,4 @@ class Human(guicommon.Object):
             handler(self, f)
 
         f.close()
-
+        G.app.currentFile.saved(filename)
