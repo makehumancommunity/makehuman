@@ -325,6 +325,7 @@ class OBJECT_OT_DefBoundBoxButton(bpy.types.Operator):
             rigidfit.defineBoundingBox(context)
         except MHError:
             handleMHError(context)
+        print("Bounding box defined")
         return{'FINISHED'}
 
 
