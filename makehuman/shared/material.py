@@ -556,15 +556,11 @@ class Material(object):
         for name, param in self.shaderParameters.items():
             if name not in _materialShaderParams:
                 hasShaderParam = True
-                import sys
-                if 'image' in sys.modules.keys():
-                    # Only import image module if it was already loaded
-                    import image
-                    if isinstance(param, image.Image):
-                        if hasattr(param, "sourcePath"):
-                            f.write("shaderParam %s %s\n" % (name, self._texPath(param.sourcePath, filedir)) )
-                        continue
-                if isinstance(param, list):
+                import image
+                if isinstance(param, image.Image):
+                    if hasattr(param, "sourcePath"):
+                        f.write("shaderParam %s %s\n" % (name, self._texPath(param.sourcePath, filedir)) )
+                elif isinstance(param, list):
                     f.write("shaderParam %s %s\n" % (name, " ".join([str(p) for p in param])) )
                 elif isinstance(param, basestring) and not isNumeric(param):
                     # Assume param is a path
