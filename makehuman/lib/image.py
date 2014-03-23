@@ -39,10 +39,13 @@ Abstract
 
 The image module contains the definition of the Image class, the container
 that MakeHuman uses to handle images.
+
+Image only depends on the numpy library, except when image have to be loaded
+or saved to disk, in which case one of the back-ends (Qt or PIL) will have to 
+be imported (import happens only when needed).
 """
 
 import numpy as np
-import image_qt as image_lib
 import time
 
 class Image(object):
@@ -80,13 +83,14 @@ class Image(object):
         which are equivalent to W (Grayscale), WA (Grayscale with Alpha),
         RGB, and RGBA respectively.
         """
+        import image_qt as image_lib
 
         if path is not None:
             self._is_empty = False
             if isinstance(path, Image):
                 # Create a copy of the image.
                 self._data = path.data.copy()
-            elif isinstance(path, image_lib.QtGui.QPixmap):
+            elif _isQPixmap(path):
                 qimg = path.toImage()
                 self._data = image_lib.load(qimg)
             else:   # Path string / QImage.
@@ -152,38 +156,45 @@ class Image(object):
 
     def save(self, path):
         """Save the Image to a file."""
+        import image_qt as image_lib
+
         image_lib.save(path, self._data)
 
     def toQImage(self):
-        """Get a QImage copy of this Image."""
-        #return image_lib.toQImage(self.data)
+        """
+        Get a QImage copy of this Image.
+        Useful when the image should be shown in a Qt GUI
+        """
+        import image_qt
+
+        #return image_qt.toQImage(self.data)
         # ^ For some reason caused problems
         if self.components == 1:
-            fmt = image_lib.QtGui.QImage.Format_RGB888
+            fmt = image_qt.QtGui.QImage.Format_RGB888
             h, w, c = self.data.shape
             data = np.repeat(self.data[:, :, 0], 3).reshape((h, w, 3))
         elif self.components == 2:
-            fmt = image_lib.QtGui.QImage.Format_ARGB32
+            fmt = image_qt.QtGui.QImage.Format_ARGB32
             h, w, c = self.data.shape
             data = np.repeat(self.data[:, :, 0], 3).reshape((h, w, 3))
             data = np.insert(data, 3, values=self.data[:, :, 1], axis=2)
         elif self.components == 3:
             '''
-            fmt = image_lib.QtGui.QImage.Format_RGB888
+            fmt = image_qt.QtGui.QImage.Format_RGB888
             data = self.data
             '''
             # The above causes a crash or misaligned image raster.
             # Quickhack solution:
-            fmt = image_lib.QtGui.QImage.Format_ARGB32
+            fmt = image_qt.QtGui.QImage.Format_ARGB32
             _data = self.convert(components=4).data
             # There appear to be channel mis-alignments, another hack:
             data = np.zeros(_data.shape, dtype=_data.dtype)
             data[:, :, :] = _data[:, :, [2, 1, 0, 3]]
         else:
             # components == 4
-            fmt = image_lib.QtGui.QImage.Format_ARGB32
+            fmt = image_qt.QtGui.QImage.Format_ARGB32
             data = self.data
-        return image_lib.QtGui.QImage(
+        return image_qt.QtGui.QImage(
             data.tostring(), data.shape[1], data.shape[0], fmt)
 
     def resized_(self, width, height):
@@ -322,3 +333,16 @@ class Image(object):
         Returns False if the Image contains data or has been modified.
         """
         return self._is_empty
+
+def _isQPixmap(img):
+    """
+    Test an image object for being a QPixmap instance if Qt libraries were
+    loaded in the application.
+    """
+    import sys
+    if "PyQt4" in sys.modules.keys():
+        import image_qt
+        return isinstance(img, image_qt.QtGui.QPixmap)
+    else:
+        return False
+
