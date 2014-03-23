@@ -270,7 +270,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.selectedHuman = None
         self.currentFile = managed_file.File()
-        self._currentScene = None
+        self._selectedScene = None
         self.backplaneGrid = None
         self.groundplaneGrid = None
 
@@ -278,7 +278,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         @self.currentFile.mhEvent
         def onModified(event):
-            self.updateCaption()
+            self.updateFilenameCaption()
 
         #self.modelCamera = mh.Camera()
         #self.modelCamera.switchToOrtho()
@@ -327,14 +327,14 @@ class MHApplication(gui3d.Application, mh.Application):
 
         from scene import Scene
         from getpath import findFile
-        self._currentScene = Scene(findFile("scenes/default.mhscene"))
+        self._selectedScene = Scene(findFile("scenes/default.mhscene"))
 
-        @self._currentScene.mhEvent
+        @self._selectedScene.mhEvent
         def onModified(event):
             if event.objectWasChanged:
-                self._currentSceneChanged()
+                self._selectedSceneChanged()
 
-        self._currentSceneChanged()
+        self._selectedSceneChanged()
 
     def loadMainGui(self):
 
@@ -1001,7 +1001,7 @@ class MHApplication(gui3d.Application, mh.Application):
         """Set the main window caption."""
         mh.setCaption(caption.encode('utf8'))
 
-    def updateCaption(self):
+    def updateFilenameCaption(self):
         """Calculate and set the window title according to the
         name of the current open file and the version of MH."""
         filename = self.currentFile.filename
@@ -1132,27 +1132,23 @@ class MHApplication(gui3d.Application, mh.Application):
         self.setTargetCamera(4744, 2.3)
 
     # Global scene
-    def getCurrentScene(self):
-        return self._currentScene
+    def getSelectedScene(self):
+        return self._selectedScene
 
-    def setCurrentScene(self, scene):
-        self._currentScene = scene
-        self._currentSceneChanged()
+    def setSelectedScene(self, scene):
+        self._selectedScene = scene
+        self._selectedSceneChanged()
 
-    currentScene = property(getCurrentScene, setCurrentScene)
+    selectedScene = property(getSelectedScene, setSelectedScene)
 
-    def _currentSceneChanged(self):
-        # TODO: Possibly emit an onSceneChanged event
-        self.applyScene()
+    def _selectedSceneChanged(self):
+        # TODO: Possibly emit an onSelectedSceneChanged event
+        self.setScene(self.selectedScene)
 
-    def applyScene(self, scene=None):
-        if scene is None:
-            scene = self.currentScene
-
+    def setScene(self, scene):
         from glmodule import setSceneLighting
         setSceneLighting(scene)
-
-        # TODO: Possibly emit an onSceneApplied event
+        # TODO: Possibly emit an onSceneChanged event
 
     # Shortcuts
     def setShortcut(self, modifier, key, action):
