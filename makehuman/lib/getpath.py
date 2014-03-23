@@ -213,3 +213,31 @@ def findFile(relPath, searchPaths = [getDataPath(), getSysDataPath()]):
 
     return relPath
 
+def search(paths, extensions, recursive=True):
+    """
+    Search for files with specified extensions in specified paths.
+    """
+    if isinstance(paths, basestring):
+        paths = [paths]
+    if isinstance(extensions, basestring):
+        extensions = [extensions]
+
+    if recursive:
+        for path in paths:
+            for root, dirs, files in os.walk(path):
+                for f in files:
+                    ext = os.path.splitext(f)[1][1:].lower()
+                    if ext in extensions:
+                        if f.lower().endswith('.' + ext):
+                            yield os.path.join(root, f)
+    else:
+        for path in paths:
+            if not os.path.isdir(path):
+                continue
+            for f in os.listdir(path):
+                f = os.path.join(path, f)
+                if os.path.isfile(f):
+                    ext = os.path.splitext(f)[1][1:].lower()
+                    if ext in extensions:
+                        yield f
+
