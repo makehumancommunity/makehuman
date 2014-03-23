@@ -56,12 +56,12 @@ class SceneLibraryTaskView(guirender.RenderTaskView):
 
         @self.filechooser.mhEvent
         def onFileSelected(filename):
-            G.app.currentScene.load(filename)
+            G.app.selectedScene.load(filename)
 
     def onShow(self, event):
         guirender.RenderTaskView.onShow(self, event)
         self.filechooser.refresh()
-        self.filechooser.selectItem(G.app.currentScene.path)
+        self.filechooser.selectItem(G.app.selectedScene.path)
         self.filechooser.setFocus()
 
 
