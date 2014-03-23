@@ -92,7 +92,7 @@ class ModifierTaskView(gui3d.TaskView):
             box = boxLookup[categoryName]
 
         # Add slider to groupbox
-        self.modifiers[slider.modifier.fullName] = slider.modifier
+        self.modifiers[slider.modifier.name.replace('|','-')] = slider.modifier # TODO this strange naming scheme is legacy for MHM compatibility
         box.addWidget(slider)
         self.sliders.append(slider)
 
@@ -101,16 +101,6 @@ class ModifierTaskView(gui3d.TaskView):
 
     def getModifiers(self):
         return self.modifiers
-
-    def getSymmetricModifierPairNames(self):
-        return [dict(left = name, right = "l-" + name[2:])
-                for name in self.modifiers
-                if name.startswith("r-")]
-
-    def getSingularModifierNames(self):
-        return [name
-                for name in self.modifiers
-                if name[:2] not in ("r-", "l-")]
 
     # TODO is this still needed?
     def updateMacro(self):
