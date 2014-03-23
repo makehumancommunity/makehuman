@@ -263,15 +263,6 @@ class TaskView(View):
     def getModifiers(self):
         return {}
 
-    # return list of pairs of modifier names for symmetric body parts
-    # each pair is defined as { 'left':<left modifier name>, 'right':<right modifier name> }
-    def getSymmetricModifierPairNames(self):
-        return []
-
-    # return list of singular modifier names
-    def getSingularModifierNames(self):
-        return []
-
     def showWidgets(self):
         super(TaskView, self).showWidgets()
         mh.showPanels(self.left, self.right)
