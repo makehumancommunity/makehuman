@@ -741,6 +741,32 @@ class Human(guicommon.Object):
             for e in ethnics:
                 _setVal(e, remaining * (_getVal(e) / otherTotal) )
 
+    def getEthnicity(self):
+        """
+        Return the most dominant ethnicity of this human, as a string (african,
+        caucasian, asian).
+        Returns None if all ethnicities are represented equally.
+        """
+        if self.getAsian() > self.getAfrican():
+            if self.getAsian() > self.getCaucasian():
+                return 'asian'
+            elif getCaucasian() > self.getAsian():
+                return 'caucasian'
+            else:
+                return None
+        elif self.getAfrican() > self.getAsian():
+            if self.getAfrican() > self.getCaucasian():
+                return 'african'
+            elif self.getCaucasian() > self.getAfrican():
+                return 'caucasian'
+            else:
+                return None
+        # At this point we've established that asian == african
+        elif self.getCaucasian() > self.getAsian():
+            return 'caucasian'
+        else:
+            return None
+
     def setDetail(self, name, value):
         name = canonicalPath(name)
         if value:
