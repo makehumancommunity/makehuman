@@ -67,7 +67,7 @@ for name in SimpleProxyTypes:
 #
 
 _A7converter = None
-Unit = np.array((1.0,1.0,1.0))
+Unit3 = np.identity(3,float)
 
 #
 #   class ProxyRefVert:
@@ -114,21 +114,6 @@ class ProxyRefVert:
         return self
 
 
-    def fromSixteen(self, words, vnum, proxy):
-        self._exact = False
-        self._verts = []
-        self._weights = []
-        self._offset = np.zeros(3, float)
-
-        for n in range(8):
-            vn = int(words[n])
-            wn = float(words[n+8])
-            self._verts.append(vn)
-            self._weights.append(wn)
-            self.addProxyVertWeight(proxy, vn, vnum, wn)
-        return self
-
-
     def addProxyVertWeight(self, proxy, v, pv, w):
         try:
             proxy.vertWeights[v].append((pv, w))
@@ -142,40 +127,235 @@ class ProxyRefVert:
     def getWeights(self):
         return self._weights
 
-    def getOffset(self):
-        return self._offset
-
-    def getCoord(self, scale):
-        coord = scale*self._offset.copy()
+    def getCoord(self, matrix):
+        coord = np.dot(matrix, self._offset)
         for n,rvn in enumerate(self._verts):
             xn = self._parent.coord[rvn]
             wn = self._weights[n]
             coord += xn*wn
-            #log.debug("  %s %s %s" % (xn, wn, coord))
         return coord
 
-        #rv0,rv1,rv2 = self._verts
-        #v0 = self._parent.coord[rv0]
-        #v1 = self._parent.coord[rv1]
-        #v2 = self._parent.coord[rv2]
-        #w0,w1,w2 = self._weights
-        #return (w0*v0 + w1*v1 + w2*v2 + scale*self._offset)
 
-
-    def getConvertedCoord(self, converter, scale):
-        coord = scale*self._offset.copy()
+    def getConvertedCoord(self, converter, matrix):
+        coord = np.dot(matrix, self._offset)
         for n,rvn in enumerate(self._verts):
-            xn = converter.refVerts[rvn].getCoord(Unit)
+            xn = converter.refVerts[rvn].getCoord(Unit3)
             wn = self._weights[n]
             coord += xn*wn
         return coord
 
-        #rv0,rv1,rv2 = self._verts
-        #v0 = converter.refVerts[rv0].getCoord(Unit)
-        #v1 = converter.refVerts[rv1].getCoord(Unit)
-        #v2 = converter.refVerts[rv2].getCoord(Unit)
-        #w0,w1,w2 = self._weights
-        #return (w0*v0 + w1*v1 + w2*v2 + scale*self._offset)
+#
+#   class TMatrix:
+#   Transformation matrix. Replaces previous scale
+#
+
+class TMatrix:
+    def __init__(self):
+        self.scaleData = None
+        self.bboxData = None
+        self.lBboxData = None
+        self.rBboxData = None
+
+
+    def getScaleData(self, words, obj, idx):
+        vn1 = int(words[1])
+        vn2 = int(words[2])
+        den = float(words[3])
+        if not self.scaleData:
+            self.scaleData = [None, None, None]
+        self.scaleData[idx] = (vn1, vn2, den)
+
+
+    def getBBoxData(self, words, obj, idx, side):
+        vn1 = int(words[1])
+        vn2 = int(words[2])
+        x1 = float(words[3])
+        x2 = float(words[4])
+        bbdata = (vn1, vn2, x1, x2, side)
+        if side == "Left":
+            if not self.lBboxData:
+                self.lBboxData = [None, None, None]
+            self.lBboxData[idx] = bbdata
+        elif side == "Right":
+            if not self.rBboxData:
+                self.rBboxData = [None, None, None]
+            self.rBboxData[idx] = bbdata
+        else:
+            if not self.bboxData:
+                self.bboxData = [None, None, None]
+            self.bboxData[idx] = bbdata
+
+
+    def getMatrix(self, refvert=None, converter=None):
+        obj = G.app.selectedHuman.meshData
+        if self.scaleData:
+            matrix = np.identity(3, float)
+            for n in range(3):
+                (vn1, vn2, den) = self.scaleData[n]
+                if converter:
+                    co1 = converter.refVerts[vn1].getCoord(Unit3)
+                    co2 = converter.refVerts[vn2].getCoord(Unit3)
+                else:
+                    co1 = obj.coord[vn1]
+                    co2 = obj.coord[vn2]
+                num = abs(co1[n] - co2[n])
+                matrix[n][n] = (num/den)
+            return matrix
+
+        elif self.bboxData:
+            return self.matrixFromBBox(self.bboxData, obj)
+        elif self.lBboxData:
+            return self.matrixFromBBox(self.lBboxData, obj)
+        elif self.rBboxData:
+            return self.matrixFromBBox(self.rBboxData, obj)
+        else:
+            return Unit3
+
+
+    def matrixFromBBox(self, bbox, obj):
+
+        # sfaces and tfaces are the face coordinates
+        sfaces = np.zeros((3,2), float)
+        tfaces = np.zeros((3,2), float)
+        for n in range(3):
+            (vn1, vn2, sfaces[n,0], sfaces[n,1], side) = bbox[n]
+            tfaces[n,0] = obj.coord[vn1][n]
+            tfaces[n,1] = obj.coord[vn2][n]
+
+        # sverts and tverts are the vertex coordinates
+        sverts = []
+        tverts = []
+        for i in [0,1]:
+            for j,k in [(0,0),(0,1),(1,1),(1,0)]:
+                sverts.append( np.array((sfaces[0,i], sfaces[1,j], sfaces[2,k])) )
+                tverts.append( np.array((tfaces[0,i], tfaces[1,j], tfaces[2,k])) )
+
+        log.debug("ST AFF")
+        log.debug(sverts)
+        log.debug(tverts)
+
+        sbox = vertsToNumpy(sverts)
+        tbox = vertsToNumpy(tverts)
+
+        log.debug(sbox)
+        log.debug(tbox)
+        mat = affine_matrix_from_points(sbox, tbox)
+        log.debug(mat[:3,:3])
+        return mat[:3,:3]
+
+
+def vertsToNumpy(verts):
+    result = np.asarray(verts)
+    return np.asarray([result[:,0], result[:,1], result[:,2]], dtype=np.float32)
+
+
+def affine_matrix_from_points(v0, v1, shear=True, scale=True, usesvd=True):
+    """Return affine transform matrix to register two point sets.
+
+    v0 and v1 are shape (ndims, \*) arrays of at least ndims non-homogeneous
+    coordinates, where ndims is the dimensionality of the coordinate space.
+
+    If shear is False, a similarity transformation matrix is returned.
+    If also scale is False, a rigid/Euclidean transformation matrix
+    is returned.
+
+    By default the algorithm by Hartley and Zissermann [15] is used.
+    If usesvd is True, similarity and Euclidean transformation matrices
+    are calculated by minimizing the weighted sum of squared deviations
+    (RMSD) according to the algorithm by Kabsch [8].
+    Otherwise, and if ndims is 3, the quaternion based algorithm by Horn [9]
+    is used, which is slower when using this Python implementation.
+
+    The returned matrix performs rotation, translation and uniform scaling
+    (if specified).
+
+    >>> v0 = [[0, 1031, 1031, 0], [0, 0, 1600, 1600]]
+    >>> v1 = [[675, 826, 826, 677], [55, 52, 281, 277]]
+    >>> affine_matrix_from_points(v0, v1)
+    array([[   0.14549,    0.00062,  675.50008],
+           [   0.00048,    0.14094,   53.24971],
+           [   0.     ,    0.     ,    1.     ]])
+    >>> T = translation_matrix(np.random.random(3)-0.5)
+    >>> R = random_rotation_matrix(np.random.random(3))
+    >>> S = scale_matrix(random.random())
+    >>> M = concatenate_matrices(T, R, S)
+    >>> v0 = (np.random.rand(4, 100) - 0.5) * 20
+    >>> v0[3] = 1
+    >>> v1 = np.dot(M, v0)
+    >>> v0[:3] += np.random.normal(0, 1e-8, 300).reshape(3, -1)
+    >>> M = affine_matrix_from_points(v0[:3], v1[:3])
+    >>> np.allclose(v1, np.dot(M, v0))
+    True
+
+    More examples in superimposition_matrix()
+
+    """
+    v0 = np.array(v0, dtype=np.float64, copy=True)
+    v1 = np.array(v1, dtype=np.float64, copy=True)
+
+    ndims = v0.shape[0]
+    if ndims < 2 or v0.shape[1] < ndims or v0.shape != v1.shape:
+        raise ValueError("input arrays are of wrong shape or type")
+
+    # move centroids to origin
+    t0 = -np.mean(v0, axis=1)
+    M0 = np.identity(ndims+1)
+    M0[:ndims, ndims] = t0
+    v0 += t0.reshape(ndims, 1)
+    t1 = -np.mean(v1, axis=1)
+    M1 = np.identity(ndims+1)
+    M1[:ndims, ndims] = t1
+    v1 += t1.reshape(ndims, 1)
+
+    if shear:
+        # Affine transformation
+        A = np.concatenate((v0, v1), axis=0)
+        u, s, vh = np.linalg.svd(A.T)
+        vh = vh[:ndims].T
+        B = vh[:ndims]
+        C = vh[ndims:2*ndims]
+        t = np.dot(C, np.linalg.pinv(B))
+        t = np.concatenate((t, np.zeros((ndims, 1))), axis=1)
+        M = np.vstack((t, ((0.0,)*ndims) + (1.0,)))
+    elif usesvd or ndims != 3:
+        # Rigid transformation via SVD of covariance matrix
+        u, s, vh = np.linalg.svd(np.dot(v1, v0.T))
+        # rotation matrix from SVD orthonormal bases
+        R = np.dot(u, vh)
+        if np.linalg.det(R) < 0.0:
+            # R does not constitute right handed system
+            R -= np.outer(u[:, ndims-1], vh[ndims-1, :]*2.0)
+            s[-1] *= -1.0
+        # homogeneous transformation matrix
+        M = np.identity(ndims+1)
+        M[:ndims, :ndims] = R
+    else:
+        # Rigid transformation matrix via quaternion
+        # compute symmetric matrix N
+        xx, yy, zz = np.sum(v0 * v1, axis=1)
+        xy, yz, zx = np.sum(v0 * np.roll(v1, -1, axis=0), axis=1)
+        xz, yx, zy = np.sum(v0 * np.roll(v1, -2, axis=0), axis=1)
+        N = [[xx+yy+zz, 0.0,      0.0,      0.0],
+             [yz-zy,    xx-yy-zz, 0.0,      0.0],
+             [zx-xz,    xy+yx,    yy-xx-zz, 0.0],
+             [xy-yx,    zx+xz,    yz+zy,    zz-xx-yy]]
+        # quaternion: eigenvector corresponding to most positive eigenvalue
+        w, V = np.linalg.eigh(N)
+        q = V[:, np.argmax(w)]
+        q /= vector_norm(q)  # unit quaternion
+        # homogeneous transformation matrix
+        M = quaternion_matrix(q)
+
+    if scale and not shear:
+        # Affine transformation; scale is ratio of RMS deviations from centroid
+        v0 *= v0
+        v1 *= v1
+        M[:ndims, :ndims] *= math.sqrt(np.sum(v1) / np.sum(v0))
+
+    # move centroids back
+    M = np.dot(np.linalg.inv(M1), np.dot(M, M0))
+    M /= M[ndims, ndims]
+    return M
 
 #
 #    class Proxy
@@ -201,10 +381,7 @@ class Proxy:
         self.vertWeights = {}       # (proxy-vert, weight) list for each parent vert
         self.refVerts = []
 
-        self.scaleData = [None, None, None]
-        self.scale = np.array((1.0,1.0,1.0), float)
-        self.uniformScale = False
-        self.scaleCorrect = 1.0
+        self.tmatrix = TMatrix()    # Offset transformation matrix. Replaces scale
 
         self.z_depth = 50
         self.max_pole = None    # Signifies the maximum number of faces per vertex on the mesh topology. Set to none for default.
@@ -279,15 +456,6 @@ class Proxy:
             raise NameError("Unknown proxy type %s" % self.type)
 
 
-    def uniformizeScale(self):
-        if self.uniformScale:
-            x = self.scale[0]
-            y = self.scale[1]
-            z = self.scale[2]
-            r = self.scaleCorrect * math.sqrt(x*x + y*y + z*z)
-            self.scale = np.array((r,r,r))
-
-
     def getActualTexture(self, human):
         uuid = self.getUuid()
         mesh = None
@@ -303,17 +471,20 @@ class Proxy:
         return getpath.formatPath(mesh.texture)
 
 
-    def getCoords(self):
-        obj = G.app.selectedHuman.meshData
-        for n in range(3):
-            self.scale[n] = self.getScale(self.scaleData[n], obj, n)
-        self.uniformizeScale()
+    def getScaleData(self, words, obj, idx):
+        return self.tmatrix.getScaleData(words, obj, idx)
 
+    def getBBoxData(self, words, obj, idx, side):
+        return self.tmatrix.getBBoxData(words, obj, idx, side)
+
+
+    def getCoords(self):
         converter = self.getConverter()
+        matrix = self.tmatrix.getMatrix(refvert=self.refVerts[0], converter=converter)
         if converter:
-            return [refVert.getConvertedCoord(converter, self.scale) for refVert in self.refVerts]
+            return [refVert.getConvertedCoord(converter, matrix) for refVert in self.refVerts]
         else:
-            return [refVert.getCoord(self.scale) for refVert in self.refVerts]
+            return [refVert.getCoord(matrix) for refVert in self.refVerts]
 
 
     def update(self, obj):
@@ -342,23 +513,6 @@ class Proxy:
             return None
         else:
             raise NameError("Unknown basemesh for mhclo file: %s" % self.basemesh)
-
-
-    def getScale(self, data, obj, index):
-        if not data:
-            return 1.0
-        (vn1, vn2, den) = data
-
-        converter = self.getConverter()
-        if converter:
-            co1 = converter.refVerts[vn1].getCoord(Unit)
-            co2 = converter.refVerts[vn2].getCoord(Unit)
-        else:
-            co1 = obj.coord[vn1]
-            co2 = obj.coord[vn2]
-
-        num = abs(co1[index] - co2[index])
-        return num/den
 
 
     def getWeights(self, rawWeights, amt=None):
@@ -454,7 +608,6 @@ class Proxy:
                     data.append(dr)
             targets.append((key, FakeTarget(rawShape.name, verts, data)))
         return targets
-
 
 #
 #    readProxyFile(obj, filepath, type="Clothes"):
@@ -561,14 +714,31 @@ def readProxyFile(obj, filepath, type="Clothes"):
             proxy.uvLayers[layer] = getFileName(folder, uvFile, ".mhuv")
 
         elif key == 'x_scale':
-            proxy.scaleData[0] = getScaleData(words)
-            proxy.scale[0] = proxy.getScale(proxy.scaleData[0], obj, 0)
+            proxy.getScaleData(words, obj, 0)
         elif key == 'y_scale':
-            proxy.scaleData[1] = getScaleData(words)
-            proxy.scale[1] = proxy.getScale(proxy.scaleData[1], obj, 1)
+            proxy.getScaleData(words, obj, 1)
         elif key == 'z_scale':
-            proxy.scaleData[2] = getScaleData(words)
-            proxy.scale[2] = proxy.getScale(proxy.scaleData[2], obj, 2)
+            proxy.getScaleData(words, obj, 2)
+
+        elif key == 'bbox_x':
+            proxy.getBBoxData(words, obj, 0, None)
+        elif key == 'bbox_y':
+            proxy.getBBoxData(words, obj, 1, None)
+        elif key == 'bbox_z':
+            proxy.getBBoxData(words, obj, 2, None)
+        elif key == 'l_bbox_x':
+            proxy.getBBoxData(words, obj, 0, 'Left')
+        elif key == 'l_bbox_y':
+            proxy.getBBoxData(words, obj, 1, 'Left')
+        elif key == 'l_bbox_z':
+            proxy.getBBoxData(words, obj, 2, 'Left')
+        elif key == 'r_bbox_x':
+            proxy.getBBoxData(words, obj, 0, 'Right')
+        elif key == 'r_bbox_y':
+            proxy.getBBoxData(words, obj, 1, 'Right')
+        elif key == 'r_bbox_z':
+            proxy.getBBoxData(words, obj, 2, 'Right')
+
         elif key == 'uniform_scale':
             proxy.uniformScale = True
             if len(words) > 1:
@@ -678,12 +848,6 @@ def getFileName(folder, file, suffix):
         return os.path.join(folder, file+suffix)
 
 
-def getScaleData(words):
-    v1 = int(words[1])
-    v2 = int(words[2])
-    den = float(words[3])
-    return (v1, v2, den)
-
 
 def newFace(first, words, group, proxy):
     face = []
@@ -755,6 +919,7 @@ def updateProxyFileCache(paths, fileExt, cache = None):
             pass
     return cache
 
+
 def _findProxyFiles(folder, fileExt = "mhclo", depth = 6):
     if depth < 0:
         return []
@@ -771,6 +936,7 @@ def _findProxyFiles(folder, fileExt = "mhclo", depth = 6):
         elif os.path.isdir(path):
             result.extend(_findProxyFiles(path, fileExt, depth-1))
     return result
+
 
 def peekMetadata(proxyFilePath):
     """

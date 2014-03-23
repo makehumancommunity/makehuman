@@ -605,7 +605,9 @@ def writeClothes(context, hum, clo, data, matfile):
 
 
 def writeBBox(fp, string, vnums, hverts, useDistance):
-    for idx,cname in enumerate(["x", "z", "y"]):
+    yzswitch = [("x",1), ("z",-1), ("y",1)]
+    for idx in range(3):
+        cname,sign = yzswitch[idx]
         n1,n2 = vnums[idx]
         if n1 >=0 and n2 >= 0:
             x1 = hverts[n1].co[idx]
@@ -613,7 +615,7 @@ def writeBBox(fp, string, vnums, hverts, useDistance):
             if useDistance:
                 fp.write(string % (cname, n1, n2, abs(x1-x2)))
             else:
-                fp.write(string % (cname, n1, n2, x1, x2))
+                fp.write(string % (cname, n1, n2, sign*x1, sign*x2))
 
 
 def mirrorVert(vn):
