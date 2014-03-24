@@ -44,7 +44,7 @@ from collections import OrderedDict
 import numpy as np
 import log
 import module3d
-import gui3d
+from core import G
 
 from material import Material, Color
 
@@ -110,7 +110,7 @@ class RichMesh(object):
 
     def getMaterial(self):
         if self.type == 'Proxymeshes':
-            return gui3d.app.selectedHuman.material
+            return G.app.selectedHuman.material
         elif self.object:
             return self.object.material
         else:

@@ -76,7 +76,7 @@ class Human(guicommon.Object):
         self._eyesProxy = None
         self._genitalsObj = genitalsObj
         self._genitalsProxy = None
-        self.eyebrowsObj = None
+        self.eyebrowsObj = None     # TODO why no setters for these?
         self.eyebrowsProxy = None
         self.eyelashesObj = None
         self.eyelashesProxy = None
@@ -378,6 +378,18 @@ class Human(guicommon.Object):
         0 for completely female, 1 for fully male.
         """
         return self.gender
+
+    def getDominantGender(self):
+        """
+        The dominant gender of this human as a string (male or female).
+        None if both genders are equally represented.
+        """
+        if self.getGender() < 0.5:
+            return 'female'
+        elif self.getGender() > 0.5:
+            return 'male'
+        else:
+            return None
 
     def _setGenderVals(self):
         self.maleVal = self.gender
@@ -740,6 +752,32 @@ class Human(guicommon.Object):
         else:
             for e in ethnics:
                 _setVal(e, remaining * (_getVal(e) / otherTotal) )
+
+    def getEthnicity(self):
+        """
+        Return the most dominant ethnicity of this human, as a string (african,
+        caucasian, asian).
+        Returns None if all ethnicities are represented equally.
+        """
+        if self.getAsian() > self.getAfrican():
+            if self.getAsian() > self.getCaucasian():
+                return 'asian'
+            elif getCaucasian() > self.getAsian():
+                return 'caucasian'
+            else:
+                return None
+        elif self.getAfrican() > self.getAsian():
+            if self.getAfrican() > self.getCaucasian():
+                return 'african'
+            elif self.getCaucasian() > self.getAfrican():
+                return 'caucasian'
+            else:
+                return None
+        # At this point we've established that asian == african
+        elif self.getCaucasian() > self.getAsian():
+            return 'caucasian'
+        else:
+            return None
 
     def setDetail(self, name, value):
         name = canonicalPath(name)
