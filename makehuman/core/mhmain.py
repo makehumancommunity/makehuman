@@ -1137,7 +1137,7 @@ class MHApplication(gui3d.Application, mh.Application):
         self._scene = scene
         @self._scene.mhEvent
         def onModified(event):
-            if event.objectWasChanged:
+            if event.file == self.scene and event.objectWasChanged:
                 self._sceneChanged()
 
         self._sceneChanged()
