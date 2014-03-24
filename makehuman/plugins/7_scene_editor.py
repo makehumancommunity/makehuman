@@ -229,10 +229,10 @@ class SceneEditorTaskView(guirender.RenderTaskView):
 
         def doSave(filename):
             ok = self.scene.save(filename)
-            if ok and G.app.selectedScene.path is not None \
-                and G.app.selectedScene.path == self.scene.path:
+            if ok and G.app.scene.path is not None \
+                and G.app.scene.path == self.scene.path:
                 # Refresh MH's current scene if it was modified.
-                G.app.selectedScene.reload()
+                G.app.scene.reload()
 
         @self.scene.mhEvent
         def onModified(event):
@@ -310,7 +310,7 @@ class SceneEditorTaskView(guirender.RenderTaskView):
 
     def onHide(self, event):
         # Restore selected scene
-        G.app.setScene(G.app.selectedScene)
+        G.app.setScene(G.app.scene)
 
         guirender.RenderTaskView.onHide(self, event)
 
