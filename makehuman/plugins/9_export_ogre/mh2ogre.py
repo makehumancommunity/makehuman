@@ -291,23 +291,24 @@ def writeMaterialFile(human, filepath, rmeshes, config):
     lines = []
 
     for rmeshIdx, rmesh in enumerate(rmeshes):
+        mat = rmesh.material
         if rmeshIdx > 0:
             lines.append('')
         lines.append('material %s_%s_%s' % (formatName(name), rmeshIdx, formatName(rmesh.name) if formatName(rmesh.name) != name else "human"))
         lines.append('{')
-        lines.append('    receive_shadows on\n')
+        lines.append('    receive_shadows %s\n' % ("on" if mat.receiveShadows else "off"))
         lines.append('    technique')
         lines.append('    {')
         lines.append('        pass')
         lines.append('        {')
         lines.append('            lighting on\n')
-        lines.append('            ambient 0.8 0.8 0.8 1')
-        lines.append('            diffuse 0.8 0.8 0.8 1')
-        lines.append('            specular 0.1 0.1 0.1 1')
-        lines.append('            emissive 0 0 0\n')
-        if not rmesh.type:
-            # Enable transparency rendering on human
-            lines.append('            depth_write on')
+        lines.append('            ambient %f %f %f 1' % mat.ambientColor.asTuple())
+        lines.append('            diffuse %f %f %f %f' % tuple(mat.diffuseColor.asTuple() + (mat.opacity,)))
+        lines.append('            specular %f %f %f 1' % mat.specularColor.asTuple())
+        lines.append('            emissive %f %f %f\n' % mat.emissiveColor.asTuple())
+
+        lines.append('            depth_write %s' % ("off" if mat.transparent else "on"))
+        if mat.transparent:
             lines.append('            alpha_rejection greater 128\n')
 
         if rmesh.material.diffuseTexture is not None:
