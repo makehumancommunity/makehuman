@@ -270,7 +270,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.selectedHuman = None
         self.currentFile = managed_file.File()
-        self._selectedScene = None
+        self._scene = None
         self.backplaneGrid = None
         self.groundplaneGrid = None
 
@@ -327,14 +327,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         from scene import Scene
         from getpath import findFile
-        self._selectedScene = Scene(findFile("scenes/default.mhscene"))
-
-        @self._selectedScene.mhEvent
-        def onModified(event):
-            if event.objectWasChanged:
-                self._selectedSceneChanged()
-
-        self._selectedSceneChanged()
+        self.setScene( Scene(findFile("scenes/default.mhscene")) )
 
     def loadMainGui(self):
 
@@ -1131,23 +1124,29 @@ class MHApplication(gui3d.Application, mh.Application):
     def setRightLegRightCamera(self):
         self.setTargetCamera(4744, 2.3)
 
-    # Global scene
-    def getSelectedScene(self):
-        return self._selectedScene
-
-    def setSelectedScene(self, scene):
-        self._selectedScene = scene
-        self._selectedSceneChanged()
-
-    selectedScene = property(getSelectedScene, setSelectedScene)
-
-    def _selectedSceneChanged(self):
-        # TODO: Possibly emit an onSelectedSceneChanged event
-        self.setScene(self.selectedScene)
+    def getScene(self):
+        """
+        The scene used for rendering the viewport.
+        """
+        return self._scene
 
     def setScene(self, scene):
+        """
+        Set the scene used for rendering the viewport.
+        """
+        self._scene = scene
+        @self._scene.mhEvent
+        def onModified(event):
+            if event.objectWasChanged:
+                self._sceneChanged()
+
+        self._sceneChanged()
+
+    scene = property(getScene, setScene)
+
+    def _sceneChanged(self):
         from glmodule import setSceneLighting
-        setSceneLighting(scene)
+        setSceneLighting(self.scene)
         # TODO: Possibly emit an onSceneChanged event
 
     # Shortcuts
