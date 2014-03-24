@@ -42,7 +42,6 @@ import cPickle as pickle
 
 import log
 import managed_file
-import events3d
 from material import Color
 
 mhscene_version = 5
@@ -189,90 +188,69 @@ class Environment(SceneObject):
              'skybox': None})
 
 
-class Scene(events3d.EventHandler, managed_file.File):
+class Scene(managed_file.File):
     def __init__(self, path=None):
-        events3d.EventHandler.__init__(self)
-
         self.lights = []
         self.environment = Environment(self)
 
         managed_file.File.__init__(self, path)
 
-    def changed(self):
-        """Method to be called whenever the Scene's contents are modified."""
-        self.modified = True
-        self.callEvent('onChanged', self)
-
     def load(self, path):
         """Load scene from a .mhscene file."""
 
         if path is None:
-            log.debug('Loading hardcoded default scene')
+            return self.close()
 
-            self.lights = [Light(self)]
-            self.environment = Environment(self)
-            # TODO: Hardcoded defaults should be set here, not in classes.
+        log.debug('Loading scene file: %s', path)
 
+        try:
+            hfile = open(path, 'rb')
+        except IOError as e:
+            log.warning('Could not load %s: %s', path, e[1])
+            return False
+        except Exception as e:
+            log.error('Failed to load scene file %s\nError: %s',
+                path, repr(e), exc_info=True)
+            return False
         else:
-            log.debug('Loading scene file: %s', path)
-
             try:
-                hfile = open(path, 'rb')
-            except IOError as e:
-                log.warning('Could not load %s: %s', path, e[1])
+                # Ensure the file version is supported
+                filever = pickle.load(hfile)
+                checkVersions(
+                    (mhscene_minversion, filever, mhscene_version),
+                    FileVersionException)
+
+                # TODO: Save current state in temporary buffer
+                # before loading, for reverting in case of error
+                self.filever = filever
+                self.environment.load(hfile)
+                nlig = pickle.load(hfile)
+                self.lights = []
+                for i in xrange(nlig):
+                    light = Light(self)
+                    light.load(hfile)
+                    self.lights.append(light)
+            except FileVersionException as e:
+                log.warning('%s: %s', path, e)
+                hfile.close()
                 return False
             except Exception as e:
-                log.error('Failed to load scene file %s\nError: %s',
+                log.error('Failed to load scene file %s\nError: %s\n',
                     path, repr(e), exc_info=True)
-                return False
-            else:
-                try:
-                    # Ensure the file version is supported
-                    filever = pickle.load(hfile)
-                    checkVersions(
-                        (mhscene_minversion, filever, mhscene_version),
-                        FileVersionException)
-
-                    # TODO: Save current state in temporary buffer
-                    # before loading, for reverting in case of error
-                    self.filever = filever
-                    self.environment.load(hfile)
-                    nlig = pickle.load(hfile)
-                    self.lights = []
-                    for i in xrange(nlig):
-                        light = Light(self)
-                        light.load(hfile)
-                        self.lights.append(light)
-                except FileVersionException as e:
-                    log.warning('%s: %s', path, e)
-                    hfile.close()
-                    return False
-                except Exception as e:
-                    log.error('Failed to load scene file %s\nError: %s\n',
-                        path, repr(e), exc_info=True)
-                    # TODO: Revert to buffered saved state here instead
-                    if path != self.path:
-                        self.load(self.path)
-                    else:
-                        self.load(None)
-                    hfile.close()
-                    return False
+                # TODO: Revert to buffered saved state here instead
+                if path != self.path:
+                    self.load(self.path)
+                else:
+                    self.close()
                 hfile.close()
+                return False
+            hfile.close()
 
-        self._path = path
-        self.modified = False
-        self.callEvent('onChanged', self)
+        self.loaded(path)
         return True
 
     # Save scene to a .mhscene file.
-    def save(self, path=None):
-        if path is None:
-            if self.path is None:
-                log.notice(
-'Cannot save scene as it is not associated with any file. Please supply a path')
-                return False
-            else:
-                path = self.path
+    def save(self, path):
         log.debug('Saving scene file: %s', path)
 
         try:
@@ -298,15 +276,24 @@ class Scene(events3d.EventHandler, managed_file.File):
                 return False
             hfile.close()
 
-        self._path = path
-        self.modified = False
+        self.saved(path)
+        return True
+
+    def close(self):
+        log.debug('Loading default scene')
+
+        self.lights = [Light(self)]
+        self.environment = Environment(self)
+        # TODO: Hardcoded defaults should be set here, not in classes.
+
+        self.closed()
         return True
 
     def addLight(self):
-        self.changed()
         newlight = Light(self)
         self.lights.append(newlight)
+        self.changed(("add", "light"))
 
     def removeLight(self, light):
-        self.changed()
         self.lights.remove(light)
+        self.changed(("remove", "light"))
