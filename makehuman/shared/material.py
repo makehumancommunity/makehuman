@@ -173,6 +173,9 @@ _shaderConfigDefines = ['DIFFUSE', 'BUMPMAP', 'NORMALMAP', 'DISPLACEMENT', 'SPEC
 # Protected shader parameters that are set exclusively by means of material properties (configureShading())
 _materialShaderParams = ['diffuse', 'ambient', 'specular', 'emissive', 'diffuseTexture', 'bumpmapTexture', 'bumpmapIntensity', 'normalmapTexture', 'normalmapIntensity', 'displacementmapTexture', 'displacementmapTexture', 'specularmapTexture', 'specularmapIntensity', 'transparencymapTexture', 'transparencymapIntensity', 'aomapTexture', 'aomapIntensity']
 
+# Generic list of the names of texture members of material (append "Texture" to get the member name)
+textureTypes = ["diffuse", "bumpMap", "normalMap", "displacementMap", "specularMap", "transparencyMap", "aoMap"]
+
 # TODO a more generic approach to declaring material properties could reduce code duplication a lot
 class Material(object):
     """
@@ -1091,6 +1094,18 @@ class Material(object):
         else:
             return texture
 
+    def getTextureDict(self):
+        """
+        Dict with typename - texturepath pairs that returns all textures set on
+        this material (empty ones are excluded).
+        """
+        from collections import OrderedDict
+        result = OrderedDict()
+        for t in textureTypes:
+            tName = t+"Texture"
+            if getattr(self, tName) is not None:
+                result[tName] = getattr(self, tName)
+        return result
 
     def getDiffuseTexture(self):
         return self._diffuseTexture
