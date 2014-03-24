@@ -39,7 +39,6 @@ Abstract
 
 This module defines the File class, an object that represents a file that
 is being edited inside MakeHuman.
-
 """
 
 import os
