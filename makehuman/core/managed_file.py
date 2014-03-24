@@ -54,7 +54,7 @@ class FileModifiedEvent(events3d.Event):
     possibly about the reason that the event was triggered.
     """
 
-    def __init__(self, value, oldvalue, reason=None, data=None):
+    def __init__(self, file, value, oldvalue, reason=None, data=None):
         """FileModifiedEvent constructor.
 
         The FileModifiedEvent object has .value and .oldvalue members for
@@ -73,6 +73,7 @@ class FileModifiedEvent(events3d.Event):
 
         events3d.Event.__init__(self)
 
+        self.file = file
         self.value = value
         self.oldvalue = oldvalue
         self.reasons = set()
@@ -81,8 +82,8 @@ class FileModifiedEvent(events3d.Event):
 
     def __repr__(self):
         """Print out information about the FileModifiedEvent."""
-        return "FileModifiedEvent: flag state: %s, previous flag state: %s, reasons: %s" % (
-            repr(self.value), repr(self.oldvalue), repr(self.reasons))
+        return "FileModifiedEvent: file: %s, flag state: %s, previous flag state: %s, reasons: %s" % (
+            self.file.path, repr(self.value), repr(self.oldvalue), repr(self.reasons))
 
     def __nonzero__(self):
         """Boolean representation of the event. Returns its .value member."""
@@ -154,7 +155,7 @@ class File(events3d.EventHandler):
 
     def setModified(self, value):
         """Set the value of the modified flag and emit an event."""
-        event = FileModifiedEvent(value, self._modified)
+        event = FileModifiedEvent(self, value, self._modified)
         self._modified = value
         self.callEvent('onModified', event)
 
@@ -167,7 +168,7 @@ class File(events3d.EventHandler):
         Extra arguments are passed to the FileModifiedEvent constructor.
         """
 
-        event = FileModifiedEvent(True, self._modified, reason, data)
+        event = FileModifiedEvent(self, True, self._modified, reason, data)
         self._modified = True
         self.callEvent('onModified', event)
 
@@ -176,7 +177,7 @@ class File(events3d.EventHandler):
         if isinstance(path, basestring):
             path = os.path.normpath(path)
 
-        event = FileModifiedEvent(False, self._modified, reason, data)
+        event = FileModifiedEvent(self, False, self._modified, reason, data)
         self._modified = False
         event.addReason(extrareason)
         if path != self.path:
