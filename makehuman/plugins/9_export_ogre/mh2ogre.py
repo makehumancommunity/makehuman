@@ -53,7 +53,7 @@ import skeleton
 import log
 
 def exportOgreMesh(filepath, config, progressCallback = None):
-    progress = Progress.begin(logging = True, timing = True)
+    progress = Progress.begin()
 
     progress(0, 0.05, "Setting properties")
     human = config.human
