@@ -158,12 +158,13 @@ class Progress(object):
         if prog is None:
             prog = self.progress
 
-        if self.description:
-            desc = self.description
-            args = self.args
-        elif desc is None:
-            desc = ""
-            args = []
+        if not desc:
+            if self.description:
+                desc = self.description
+                args = self.args
+            else:
+                desc = ""
+                args = []
 
         if self.parent is None:
             if self.timing:
