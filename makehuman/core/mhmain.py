@@ -34,7 +34,7 @@
 Abstract
 --------
 
-TODO
+Main application GUI component.
 """
 
 import sys
