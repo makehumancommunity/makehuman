@@ -558,8 +558,8 @@ def writeClothes(context, hum, clo, data, matfile):
 
     vnums = getBodyPartVerts(scn)
     hverts = hum.data.vertices
-    if scn.MCUseSkewing:
-        if scn.MCUseBBoxSymmetry:
+    if scn.MCUseShearing:
+        if scn.MCUseBoundaryMirror:
             rvnums = {}
             for idx,pair in enumerate(vnums):
                 vn1, vn2 = pair
@@ -570,12 +570,12 @@ def writeClothes(context, hum, clo, data, matfile):
             else:
                 lvnums = rvnums
                 rvnums = vnums
-            writeBBox(fp, "l_bbox_%s %d %d %.4f %.4f\n", lvnums, hverts, False)
-            writeBBox(fp, "r_bbox_%s %d %d %.4f %.4f\n", rvnums, hverts, False)
+            writeShear(fp, "l_shear_%s %d %d %.4f %.4f\n", lvnums, hverts, False)
+            writeShear(fp, "r_shear_%s %d %d %.4f %.4f\n", rvnums, hverts, False)
         else:
-            writeBBox(fp, "bbox_%s %d %d %.4f %.4f\n", vnums, hverts, False)
+            writeShear(fp, "shear_%s %d %d %.4f %.4f\n", vnums, hverts, False)
     else:
-        writeBBox(fp, "%s_scale %d %d %.4f\n", vnums, hverts, True)
+        writeShear(fp, "%s_scale %d %d %.4f\n", vnums, hverts, True)
 
     writeStuff(fp, clo, context, matfile)
 
@@ -604,7 +604,7 @@ def writeClothes(context, hum, clo, data, matfile):
     print("%s done" % outfile)
 
 
-def writeBBox(fp, string, vnums, hverts, useDistance):
+def writeShear(fp, string, vnums, hverts, useDistance):
     yzswitch = [("x",1), ("z",-1), ("y",1)]
     for idx in range(3):
         cname,sign = yzswitch[idx]
@@ -1677,12 +1677,12 @@ def init():
         description = "Body Type To Load",
     default='None')
 
-    bpy.types.Scene.MCUseSkewing = BoolProperty(
-        name="Use Skewing",
-        description="Allow bounding box to be skewed",
+    bpy.types.Scene.MCUseShearing = BoolProperty(
+        name="Use Shearing",
+        description="Allow bounding box to be sheared",
         default=False)
 
-    bpy.types.Scene.MCUseBBoxSymmetry = BoolProperty(
+    bpy.types.Scene.MCUseBoundaryMirror = BoolProperty(
         name="Mirror Bounding Box",
         description="Mirror the bounding box for Left/Right vertex groups",
         default=False)
