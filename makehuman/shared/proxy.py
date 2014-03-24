@@ -152,9 +152,9 @@ class ProxyRefVert:
 class TMatrix:
     def __init__(self):
         self.scaleData = None
-        self.bboxData = None
-        self.lBboxData = None
-        self.rBboxData = None
+        self.shearData = None
+        self.lShearData = None
+        self.rShearData = None
 
 
     def getScaleData(self, words, obj, idx):
@@ -166,24 +166,24 @@ class TMatrix:
         self.scaleData[idx] = (vn1, vn2, den)
 
 
-    def getBBoxData(self, words, obj, idx, side):
+    def getShearData(self, words, obj, idx, side):
         vn1 = int(words[1])
         vn2 = int(words[2])
         x1 = float(words[3])
         x2 = float(words[4])
         bbdata = (vn1, vn2, x1, x2, side)
         if side == "Left":
-            if not self.lBboxData:
-                self.lBboxData = [None, None, None]
-            self.lBboxData[idx] = bbdata
+            if not self.lShearData:
+                self.lShearData = [None, None, None]
+            self.lShearData[idx] = bbdata
         elif side == "Right":
-            if not self.rBboxData:
-                self.rBboxData = [None, None, None]
-            self.rBboxData[idx] = bbdata
+            if not self.rShearData:
+                self.rShearData = [None, None, None]
+            self.rShearData[idx] = bbdata
         else:
-            if not self.bboxData:
-                self.bboxData = [None, None, None]
-            self.bboxData[idx] = bbdata
+            if not self.shearData:
+                self.shearData = [None, None, None]
+            self.shearData[idx] = bbdata
 
 
     def getMatrix(self, refvert=None, converter=None):
@@ -202,23 +202,23 @@ class TMatrix:
                 matrix[n][n] = (num/den)
             return matrix
 
-        elif self.bboxData:
-            return self.matrixFromBBox(self.bboxData, obj)
-        elif self.lBboxData:
-            return self.matrixFromBBox(self.lBboxData, obj)
-        elif self.rBboxData:
-            return self.matrixFromBBox(self.rBboxData, obj)
+        elif self.shearData:
+            return self.matrixFromShear(self.shearData, obj)
+        elif self.lShearData:
+            return self.matrixFromShear(self.lShearData, obj)
+        elif self.rShearData:
+            return self.matrixFromShear(self.rShearData, obj)
         else:
             return Unit3
 
 
-    def matrixFromBBox(self, bbox, obj):
+    def matrixFromShear(self, shear, obj):
 
         # sfaces and tfaces are the face coordinates
         sfaces = np.zeros((3,2), float)
         tfaces = np.zeros((3,2), float)
         for n in range(3):
-            (vn1, vn2, sfaces[n,0], sfaces[n,1], side) = bbox[n]
+            (vn1, vn2, sfaces[n,0], sfaces[n,1], side) = shear[n]
             tfaces[n,0] = obj.coord[vn1][n]
             tfaces[n,1] = obj.coord[vn2][n]
 
@@ -230,17 +230,9 @@ class TMatrix:
                 sverts.append( np.array((sfaces[0,i], sfaces[1,j], sfaces[2,k])) )
                 tverts.append( np.array((tfaces[0,i], tfaces[1,j], tfaces[2,k])) )
 
-        log.debug("ST AFF")
-        log.debug(sverts)
-        log.debug(tverts)
-
         sbox = vertsToNumpy(sverts)
         tbox = vertsToNumpy(tverts)
-
-        log.debug(sbox)
-        log.debug(tbox)
         mat = affine_matrix_from_points(sbox, tbox)
-        log.debug(mat[:3,:3])
         return mat[:3,:3]
 
 
@@ -469,13 +461,6 @@ class Proxy:
                     break
 
         return getpath.formatPath(mesh.texture)
-
-
-    def getScaleData(self, words, obj, idx):
-        return self.tmatrix.getScaleData(words, obj, idx)
-
-    def getBBoxData(self, words, obj, idx, side):
-        return self.tmatrix.getBBoxData(words, obj, idx, side)
 
 
     def getCoords(self):
@@ -714,30 +699,30 @@ def readProxyFile(obj, filepath, type="Clothes"):
             proxy.uvLayers[layer] = getFileName(folder, uvFile, ".mhuv")
 
         elif key == 'x_scale':
-            proxy.getScaleData(words, obj, 0)
+            proxy.tmatrix.getScaleData(words, obj, 0)
         elif key == 'y_scale':
-            proxy.getScaleData(words, obj, 1)
+            proxy.tmatrix.getScaleData(words, obj, 1)
         elif key == 'z_scale':
-            proxy.getScaleData(words, obj, 2)
+            proxy.tmatrix.getScaleData(words, obj, 2)
 
-        elif key == 'bbox_x':
-            proxy.getBBoxData(words, obj, 0, None)
-        elif key == 'bbox_y':
-            proxy.getBBoxData(words, obj, 1, None)
-        elif key == 'bbox_z':
-            proxy.getBBoxData(words, obj, 2, None)
-        elif key == 'l_bbox_x':
-            proxy.getBBoxData(words, obj, 0, 'Left')
-        elif key == 'l_bbox_y':
-            proxy.getBBoxData(words, obj, 1, 'Left')
-        elif key == 'l_bbox_z':
-            proxy.getBBoxData(words, obj, 2, 'Left')
-        elif key == 'r_bbox_x':
-            proxy.getBBoxData(words, obj, 0, 'Right')
-        elif key == 'r_bbox_y':
-            proxy.getBBoxData(words, obj, 1, 'Right')
-        elif key == 'r_bbox_z':
-            proxy.getBBoxData(words, obj, 2, 'Right')
+        elif key == 'shear_x':
+            proxy.tmatrix.getShearData(words, obj, 0, None)
+        elif key == 'shear_y':
+            proxy.tmatrix.getShearData(words, obj, 1, None)
+        elif key == 'shear_z':
+            proxy.tmatrix.getShearData(words, obj, 2, None)
+        elif key == 'l_shear_x':
+            proxy.tmatrix.getShearData(words, obj, 0, 'Left')
+        elif key == 'l_shear_y':
+            proxy.tmatrix.getShearData(words, obj, 1, 'Left')
+        elif key == 'l_shear_z':
+            proxy.tmatrix.getShearData(words, obj, 2, 'Left')
+        elif key == 'r_shear_x':
+            proxy.tmatrix.getShearData(words, obj, 0, 'Right')
+        elif key == 'r_shear_y':
+            proxy.tmatrix.getShearData(words, obj, 1, 'Right')
+        elif key == 'r_shear_z':
+            proxy.tmatrix.getShearData(words, obj, 2, 'Right')
 
         elif key == 'uniform_scale':
             proxy.uniformScale = True
