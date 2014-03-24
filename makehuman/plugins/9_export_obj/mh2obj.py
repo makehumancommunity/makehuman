@@ -46,11 +46,11 @@ from progress import Progress
 #    exportObj(human, filepath, config):
 #
 
-def exportObj(human, filepath, config=None):
+def exportObj(filepath, config=None):
     progress = Progress(0, None)
     if config is None:
         config = exportutils.config.Config()
-    config.setHuman(human)
+    human = config.human
     config.setupTexFolder(filepath)
     filename = os.path.basename(filepath)
     name = config.goodName(os.path.splitext(filename)[0])

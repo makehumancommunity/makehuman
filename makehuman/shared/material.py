@@ -557,11 +557,11 @@ class Material(object):
             if name not in _materialShaderParams:
                 hasShaderParam = True
                 import image
-                if isinstance(param, list):
-                    f.write("shaderParam %s %s\n" % (name, " ".join([str(p) for p in param])) )
-                elif isinstance(param, image.Image):
+                if isinstance(param, image.Image):
                     if hasattr(param, "sourcePath"):
                         f.write("shaderParam %s %s\n" % (name, self._texPath(param.sourcePath, filedir)) )
+                elif isinstance(param, list):
+                    f.write("shaderParam %s %s\n" % (name, " ".join([str(p) for p in param])) )
                 elif isinstance(param, basestring) and not isNumeric(param):
                     # Assume param is a path
                     f.write("shaderParam %s %s\n" % (name, self._texPath(param, filedir)) )
@@ -953,6 +953,11 @@ class Material(object):
     shader = property(getShader, setShader)
 
     def getShaderObj(self):
+        import sys
+        if 'shader' not in sys.modules.keys():
+            # Don't import shader module in application if it is not loaded yet
+            # Avoid unneeded dependency on OpenGL/shader modules
+            return None
         import shader
         if not shader.Shader.supported():
             return None

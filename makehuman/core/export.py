@@ -41,6 +41,10 @@ from core import G
 
 
 class Exporter(object):
+    """
+    Exporter GUI widget for use within ExportTaskView
+    """
+
     def __init__(self):
         self.group = "mesh"
         self.fileExtension = ""
@@ -56,23 +60,8 @@ class Exporter(object):
     def export(self, human, filename):
         raise NotImplementedError()
 
-    def getRigType(self):
-        if not hasattr(G.app.selectedHuman, "getSkeleton"):
-            return None
-        skel = G.app.selectedHuman.getSkeleton()
-        if skel:
-            return skel.name
-        else:
-            return None
-
-    def getRigOptions(self):
-        if not hasattr(G.app.selectedHuman, "getSkeleton"):
-            return None
-        skel = G.app.selectedHuman.getSkeleton()
-        if skel:
-            return skel.options
-        else:
-            return None
+    def getConfig(self, update):
+        raise NotImplementedError("getConfig not implemented for Exporter")
 
     def onShow(self, exportTaskView):
         """
