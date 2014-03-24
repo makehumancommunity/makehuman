@@ -53,7 +53,7 @@ import exportutils
 import numpy as np
 from progress import Progress
 
-def exportStlAscii(human, filepath, config, exportJoints = False):
+def exportStlAscii(filepath, config, exportJoints = False):
     """
     This function exports MakeHuman mesh and skeleton data to stereolithography ascii format.
 
@@ -70,8 +70,8 @@ def exportStlAscii(human, filepath, config, exportJoints = False):
 
     progress = Progress(0, None)
 
+    human = config.human
     obj = human.meshData
-    config.setHuman(human)
     config.setupTexFolder(filepath)
     filename = os.path.basename(filepath)
     name = config.goodName(os.path.splitext(filename)[0])

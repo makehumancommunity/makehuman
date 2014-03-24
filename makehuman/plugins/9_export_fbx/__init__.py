@@ -37,18 +37,16 @@ Abstract
 TODO
 """
 
-import gui
 from export import Exporter
 from exportutils.config import Config
 
 
 class FbxConfig(Config):
 
-    def __init__(self, exporter):
-        from armature.options import ArmatureOptions
-
+    def __init__(self):
         Config.__init__(self)
-        self.selectedOptions(exporter)
+
+        from armature.options import ArmatureOptions
 
         self.useRelPaths     = False
         self.expressions = False    #exporter.expressions.selected
@@ -67,14 +65,15 @@ class FbxConfig(Config):
         self.localX = False
         self.localG = False
 
-        self.rigOptions = exporter.getRigOptions()
-        if not self.rigOptions:
-            return
-        self.rigOptions.setExportOptions(
-            useExpressions = self.expressions,
-            useTPose = self.useTPose,
-            useLeftRight = False,
-        )
+    def getRigOptions(self):
+        rigOptions = super(FbxConfig, self).getRigOptions()
+        if rigOptions is not None:
+            rigOptions.setExportOptions(
+                useExpressions = self.expressions,
+                useTPose = self.useTPose,
+                useLeftRight = False,
+            )
+        return rigOptions
 
 
 
@@ -92,6 +91,7 @@ class ExporterFBX(Exporter):
         self.orderPriority = 80.0
 
     def build(self, options, taskview):
+        import gui
         Exporter.build(self, options, taskview)
         #self.expressions     = options.addWidget(gui.CheckBox("Expressions", False))
         #self.useCustomTargets = options.addWidget(gui.CheckBox("Custom targets", False))
@@ -99,12 +99,22 @@ class ExporterFBX(Exporter):
     def export(self, human, filename):
         from . import mh2fbx
         self.taskview.exitPoseMode()
-        mh2fbx.exportFbx(human, filename("fbx"), FbxConfig(self))
+        cfg = self.getConfig()
+        cfg.setHuman(human)
+        mh2fbx.exportFbx(filename("fbx"), cfg)
         self.taskview.enterPoseMode()
 
+    def getConfig(self):
+        cfg = FbxConfig()
+        cfg.useTPose          = False # self.useTPose.selected
+        cfg.feetOnGround      = self.feetOnGround.selected
+        cfg.scale,cfg.unit    = self.taskview.getScale()
+
+        return cfg
 
 def load(app):
     app.addExporter(ExporterFBX())
 
 def unload(app):
     pass
+

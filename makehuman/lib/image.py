@@ -39,12 +39,14 @@ Abstract
 
 The image module contains the definition of the Image class, the container
 that MakeHuman uses to handle images.
+
+Image only depends on the numpy library, except when image have to be loaded
+or saved to disk, in which case one of the back-ends (Qt or PIL) will have to 
+be imported (import happens only when needed).
 """
 
 import numpy as np
-import image_qt
 import time
-
 
 class Image(object):
     """Container for handling images.
@@ -81,17 +83,18 @@ class Image(object):
         which are equivalent to W (Grayscale), WA (Grayscale with Alpha),
         RGB, and RGBA respectively.
         """
+        import image_qt as image_lib
 
         if path is not None:
             self._is_empty = False
             if isinstance(path, Image):
                 # Create a copy of the image.
                 self._data = path.data.copy()
-            elif isinstance(path, image_qt.QtGui.QPixmap):
+            elif _isQPixmap(path):
                 qimg = path.toImage()
-                self._data = image_qt.load(qimg)
+                self._data = image_lib.load(qimg)
             else:   # Path string / QImage.
-                self._data = image_qt.load(path)
+                self._data = image_lib.load(path)
                 self.sourcePath = path
         elif data is not None:
             self._is_empty = False
@@ -99,7 +102,7 @@ class Image(object):
                 # Share data between images.
                 self._data = data.data
             elif isinstance(data, basestring):
-                self._data = image_qt.load(data)
+                self._data = image_lib.load(data)
             else:   # Data array.
                 self._data = data
         else:
@@ -153,10 +156,17 @@ class Image(object):
 
     def save(self, path):
         """Save the Image to a file."""
-        image_qt.save(path, self._data)
+        import image_qt as image_lib
+
+        image_lib.save(path, self._data)
 
     def toQImage(self):
-        """Get a QImage copy of this Image."""
+        """
+        Get a QImage copy of this Image.
+        Useful when the image should be shown in a Qt GUI
+        """
+        import image_qt
+
         #return image_qt.toQImage(self.data)
         # ^ For some reason caused problems
         if self.components == 1:
@@ -323,3 +333,16 @@ class Image(object):
         Returns False if the Image contains data or has been modified.
         """
         return self._is_empty
+
+def _isQPixmap(img):
+    """
+    Test an image object for being a QPixmap instance if Qt libraries were
+    loaded in the application.
+    """
+    import sys
+    if "PyQt4" in sys.modules.keys():
+        import image_qt
+        return isinstance(img, image_qt.QtGui.QPixmap)
+    else:
+        return False
+

@@ -24,7 +24,6 @@ Pose
 
 import log
 import os
-import mh
 import proxy
 import algos3d
 import exportutils
@@ -132,9 +131,10 @@ class Writer(mhx_writer.Writer):
 
         '''
         if config.expressions and not proxy:
-            exprList = exportutils.shapekeys.readExpressionMhm(mh.getSysDataPath("expressions"))
+            import getpath
+            exprList = exportutils.shapekeys.readExpressionMhm(getpath.getSysDataPath("expressions"))
             self.writeExpressions(fp, exprList, "Expression")
-            visemeList = exportutils.shapekeys.readExpressionMhm(mh.getSysDataPath("visemes"))
+            visemeList = exportutils.shapekeys.readExpressionMhm(getpath.getSysDataPath("visemes"))
             self.writeExpressions(fp, visemeList, "Viseme")
 
         if config.useAdvancedMHX:

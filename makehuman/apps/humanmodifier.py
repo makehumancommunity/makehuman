@@ -122,11 +122,11 @@ class ModifierAction(guicommon.Action):
             opposite = self.human.getModifier( self.modifier.getSymmetricOpposite() )
             if self.after is None:
                 # Reset modifier to default value
-                opposite.setValue( self.modifier.getValue() )
-            else:
                 oldV = opposite.resetValue()
-                if isinstance(oldv, dict):
-                    self.before.update(oldv)
+                if isinstance(oldV, dict):
+                    self.before.update(oldV)
+            else:
+                opposite.setValue( self.modifier.getValue() )
 
         self.human.applyAllTargets(G.app.progress)
         self.postAction()
@@ -572,6 +572,12 @@ class UniversalModifier(GenericModifier):
 
         self.targets = self.l_targets + self.r_targets + self.c_targets
 
+    def getMin(self):
+        if self.left:
+            return -1.0
+        else:
+            return 0.0
+
     def getFactors(self, value):
         factors = super(UniversalModifier, self).getFactors(value)
 
@@ -704,6 +710,7 @@ def loadModifiers(filename, human):
     import os
     from collections import OrderedDict
     modifiers = []
+    lookup = {}
     data = json.load(open(filename, 'rb'), object_pairs_hook=OrderedDict)
     for modifierGroup in data:
         groupName = modifierGroup['group']
@@ -725,6 +732,7 @@ def loadModifiers(filename, human):
                 modifier._defaultValue = mDef["defaultValue"]
 
             modifiers.append(modifier)
+            lookup[modifier.fullName] = modifier
     if human is not None:
         for modifier in modifiers:
             modifier.setHuman(human)
@@ -738,7 +746,7 @@ def loadModifiers(filename, human):
         dCount = 0
         for mName, mDesc in data.items():
             try:
-                mod = human.getModifier(mName)
+                mod = lookup[mName]
                 mod.description = mDesc
                 dCount += 1
             except:

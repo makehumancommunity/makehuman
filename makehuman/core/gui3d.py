@@ -36,6 +36,8 @@ Abstract
 
 This module contains classes defined to implement widgets that provide utility functions
 to the graphical user interface.
+
+Importing this module loads OpenGL dependencies.
 """
 
 import weakref
@@ -260,15 +262,6 @@ class TaskView(View):
 
     def getModifiers(self):
         return {}
-
-    # return list of pairs of modifier names for symmetric body parts
-    # each pair is defined as { 'left':<left modifier name>, 'right':<right modifier name> }
-    def getSymmetricModifierPairNames(self):
-        return []
-
-    # return list of singular modifier names
-    def getSingularModifierNames(self):
-        return []
 
     def showWidgets(self):
         super(TaskView, self).showWidgets()
