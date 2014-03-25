@@ -77,7 +77,7 @@ def exportMd5(filepath, config):
       *Config*.  Export configuration.
     """
 
-    progress = Progress()
+    progress = Progress.begin(logging=True, timing=True)
 
     human = config.human
     obj = human.meshData
@@ -125,6 +125,7 @@ def exportMd5(filepath, config):
     for rmeshIdx, rmesh in enumerate(rmeshes):
         # rmesh.type: None is human, "Proxymeshes" is human proxy, "Clothes" for clothing and "Hair" for hair
         objprog = Progress()
+        objprog(0.0, 0.1, "Writing %s mesh." % rmesh.name)
 
         obj = rmesh.object
 
@@ -150,7 +151,7 @@ def exportMd5(filepath, config):
 
         # Collect vertex weights
         if human.getSkeleton():
-            objprog(0, 0.2)
+            objprog(0.1, 0.2, "Writing skeleton")
             bodyWeights = human.getVertexWeights()
 
             if rmesh.type:
@@ -203,11 +204,10 @@ def exportMd5(filepath, config):
                 if vert not in vertWeights:
                     # Weight vertex completely to origin joint
                     vertWeights[vert] = [(0, 1.0)]
-            objprog(0.2, 0.3)
         else:
             vertWeights = None
-            objprog(0, 0.3)
 
+        objprog(0.3, 0.7, "Writing vertices for %s." % rmesh.name)
         # Write vertices
         wCount = 0
         for vert in xrange(numVerts):
@@ -222,8 +222,8 @@ def exportMd5(filepath, config):
             # vert [vertIndex] ( [texU] [texV] ) [weightIndex] [weightElem]
             f.write('\tvert %d ( %f %f ) %d %d\n' % (vert, u, 1.0-v, wCount, numWeights))
             wCount = wCount + numWeights
-        objprog(0.3, 0.5)
 
+        objprog(0.7, 0.8, "Writing faces for %s." % rmesh.name)
         # Write faces
         f.write('\n\tnumtris %d\n' % numFaces)
         fn = 0
@@ -234,8 +234,8 @@ def exportMd5(filepath, config):
             if fv[0] != fv[3]:
                 f.write('\ttri %d %d %d %d\n' % (fn, fv[0], fv[3], fv[2]))
                 fn += 1
-        objprog(0.5, 0.99)
 
+        objprog(0.8, 0.99, "Writing bone weights for %s." % rmesh.name)
         # Write bone weighting
         bwprog = Progress(len(obj.r_coord)).HighFrequency(200)
         if human.getSkeleton():
