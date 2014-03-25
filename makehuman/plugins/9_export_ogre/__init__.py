@@ -59,6 +59,7 @@ class ExporterOgre(Exporter):
         self.name = "Ogre3D"
         self.filter = "Ogre3D Mesh XML (*.mesh.xml)"
         self.fileExtension = "mesh.xml"
+        self.orderPriority = 60.0
 
     def export(self, human, filename):
         reload(mh2ogre) # TODO ?
