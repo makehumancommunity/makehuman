@@ -53,6 +53,7 @@ class ExporterSTL(Exporter):
         self.name = "Stereolithography (stl)"
         self.filter = "Stereolithography (*.stl)"
         self.fileExtension = "stl"
+        self.orderPriority = 5.0
 
     def build(self, options, taskview):
         import gui
