@@ -37,6 +37,8 @@ Abstract
 TODO
 """
 
+import mh2md5
+
 from progress import Progress
 from export import Exporter
 from exportutils.config import Config
@@ -66,7 +68,7 @@ class ExporterMD5(Exporter):
         self.taskview       = taskview
 
     def export(self, human, filename):
-        from . import mh2md5
+        reload(mh2md5)
         cfg = self.getConfig()
         cfg.setHuman(human)
 
