@@ -262,7 +262,7 @@ end Object
     def writeVertexGroups(self, fp, proxy):
         amt = self.armature
 
-        if proxy and proxy.weights:
+        if False and proxy and proxy.weights:
             self.writeRigWeights(fp, proxy.weights)
             return
         if proxy:
