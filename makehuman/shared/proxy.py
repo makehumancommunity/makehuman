@@ -62,184 +62,9 @@ SimpleProxyTypesLower = []
 for name in SimpleProxyTypes:
     SimpleProxyTypesLower.append(name.lower())
 
-#
-#
-#
-
 _A7converter = None
 Unit3 = np.identity(3,float)
 
-#
-#   class ProxyRefVert:
-#
-
-class ProxyRefVert:
-
-    def __init__(self, human):
-        self.human = human
-
-
-    def fromSingle(self, words, vnum, proxy):
-        v0 = int(words[0])
-        self._verts = (v0,0,1)
-        self._weights = (1.0,0.0,0.0)
-        self._offset = np.zeros(3, float)
-        self.addProxyVertWeight(proxy, v0, vnum, 1)
-        return self
-
-
-    def fromTriple(self, words, vnum, proxy):
-        v0 = int(words[0])
-        v1 = int(words[1])
-        v2 = int(words[2])
-        w0 = float(words[3])
-        w1 = float(words[4])
-        w2 = float(words[5])
-        if len(words) > 6:
-            d0 = float(words[6])
-            d1 = float(words[7])
-            d2 = float(words[8])
-        else:
-            (d0,d1,d2) = (0,0,0)
-
-        self._verts = (v0,v1,v2)
-        self._weights = (w0,w1,w2)
-        self._offset = np.array((d0,d1,d2), float)
-
-        self.addProxyVertWeight(proxy, v0, vnum, w0)
-        self.addProxyVertWeight(proxy, v1, vnum, w1)
-        self.addProxyVertWeight(proxy, v2, vnum, w2)
-        return self
-
-
-    def addProxyVertWeight(self, proxy, v, pv, w):
-        try:
-            proxy.vertWeights[v].append((pv, w))
-        except KeyError:
-            proxy.vertWeights[v] = [(pv,w)]
-        return
-
-    def getHumanVerts(self):
-        return self._verts
-
-    def getWeights(self):
-        return self._weights
-
-
-    def getCoord(self, matrix):
-        return (
-            np.dot(self.human.meshData.coord[self._verts], self._weights) +
-            np.dot(matrix, self._offset)
-            )
-
-
-    def getConvertedCoord(self, converter, matrix):
-        coord = np.dot(matrix, self._offset)
-        for n,rvn in enumerate(self._verts):
-            xn = converter.refVerts[rvn].getCoord(Unit3)
-            wn = self._weights[n]
-            coord += xn*wn
-        return coord
-
-#
-#   class TMatrix:
-#   Transformation matrix. Replaces previous scale
-#
-
-class TMatrix:
-    def __init__(self):
-        self.scaleData = None
-        self.shearData = None
-        self.lShearData = None
-        self.rShearData = None
-
-
-    def getScaleData(self, words, idx):
-        vn1 = int(words[1])
-        vn2 = int(words[2])
-        den = float(words[3])
-        if not self.scaleData:
-            self.scaleData = [None, None, None]
-        self.scaleData[idx] = (vn1, vn2, den)
-
-
-    def getShearData(self, words, idx, side):
-        vn1 = int(words[1])
-        vn2 = int(words[2])
-        x1 = float(words[3])
-        x2 = float(words[4])
-        bbdata = (vn1, vn2, x1, x2, side)
-        if side == "Left":
-            if not self.lShearData:
-                self.lShearData = [None, None, None]
-            self.lShearData[idx] = bbdata
-        elif side == "Right":
-            if not self.rShearData:
-                self.rShearData = [None, None, None]
-            self.rShearData[idx] = bbdata
-        else:
-            if not self.shearData:
-                self.shearData = [None, None, None]
-            self.shearData[idx] = bbdata
-
-
-    def getMatrix(self, hmesh, refvert=None, converter=None):
-        if self.scaleData:
-            matrix = np.identity(3, float)
-            for n in range(3):
-                (vn1, vn2, den) = self.scaleData[n]
-                if converter:
-                    co1 = converter.refVerts[vn1].getCoord(Unit3)
-                    co2 = converter.refVerts[vn2].getCoord(Unit3)
-                else:
-                    co1 = hmesh.coord[vn1]
-                    co2 = hmesh.coord[vn2]
-                num = abs(co1[n] - co2[n])
-                matrix[n][n] = (num/den)
-            return matrix
-
-        elif self.shearData:
-            return self.matrixFromShear(self.shearData, hmesh)
-        elif self.lShearData:
-            return self.matrixFromShear(self.lShearData, hmesh)
-        elif self.rShearData:
-            return self.matrixFromShear(self.rShearData, hmesh)
-        else:
-            return Unit3
-
-
-    def matrixFromShear(self, shear, obj):
-        from transformations import affine_matrix_from_points
-
-        # sfaces and tfaces are the face coordinates
-        sfaces = np.zeros((3,2), float)
-        tfaces = np.zeros((3,2), float)
-        for n in range(3):
-            (vn1, vn2, sfaces[n,0], sfaces[n,1], side) = shear[n]
-            tfaces[n,0] = obj.coord[vn1][n]
-            tfaces[n,1] = obj.coord[vn2][n]
-
-        # sverts and tverts are the vertex coordinates
-        sverts = []
-        tverts = []
-        for i in [0,1]:
-            for j,k in [(0,0),(0,1),(1,1),(1,0)]:
-                sverts.append( np.array((sfaces[0,i], sfaces[1,j], sfaces[2,k])) )
-                tverts.append( np.array((tfaces[0,i], tfaces[1,j], tfaces[2,k])) )
-
-        sbox = vertsToNumpy(sverts)
-        tbox = vertsToNumpy(tverts)
-        mat = affine_matrix_from_points(sbox, tbox)
-        return mat[:3,:3]
-
-
-def vertsToNumpy(verts):
-    result = np.asarray(verts)
-    return np.asarray([result[:,0], result[:,1], result[:,2]], dtype=np.float32)
-
-#
-#    class Proxy
-#
 
 class Proxy:
     def __init__(self, file, type, human):
@@ -727,6 +552,177 @@ def readProxyFile(human, filepath, type="Clothes"):
     proxy._finalize()
 
     return proxy
+
+
+
+#
+#   class ProxyRefVert:
+#
+
+class ProxyRefVert:
+
+    def __init__(self, human):
+        self.human = human
+
+
+    def fromSingle(self, words, vnum, proxy):
+        v0 = int(words[0])
+        self._verts = (v0,0,1)
+        self._weights = (1.0,0.0,0.0)
+        self._offset = np.zeros(3, float)
+        self.addProxyVertWeight(proxy, v0, vnum, 1)
+        return self
+
+
+    def fromTriple(self, words, vnum, proxy):
+        v0 = int(words[0])
+        v1 = int(words[1])
+        v2 = int(words[2])
+        w0 = float(words[3])
+        w1 = float(words[4])
+        w2 = float(words[5])
+        if len(words) > 6:
+            d0 = float(words[6])
+            d1 = float(words[7])
+            d2 = float(words[8])
+        else:
+            (d0,d1,d2) = (0,0,0)
+
+        self._verts = (v0,v1,v2)
+        self._weights = (w0,w1,w2)
+        self._offset = np.array((d0,d1,d2), float)
+
+        self.addProxyVertWeight(proxy, v0, vnum, w0)
+        self.addProxyVertWeight(proxy, v1, vnum, w1)
+        self.addProxyVertWeight(proxy, v2, vnum, w2)
+        return self
+
+
+    def addProxyVertWeight(self, proxy, v, pv, w):
+        try:
+            proxy.vertWeights[v].append((pv, w))
+        except KeyError:
+            proxy.vertWeights[v] = [(pv,w)]
+        return
+
+    def getHumanVerts(self):
+        return self._verts
+
+    def getWeights(self):
+        return self._weights
+
+
+    def getCoord(self, matrix):
+        return (
+            np.dot(self.human.meshData.coord[self._verts], self._weights) +
+            np.dot(matrix, self._offset)
+            )
+
+
+    def getConvertedCoord(self, converter, matrix):
+        coord = np.dot(matrix, self._offset)
+        for n,rvn in enumerate(self._verts):
+            xn = converter.refVerts[rvn].getCoord(Unit3)
+            wn = self._weights[n]
+            coord += xn*wn
+        return coord
+
+#
+#   class TMatrix:
+#   Transformation matrix. Replaces previous scale
+#
+
+class TMatrix:
+    def __init__(self):
+        self.scaleData = None
+        self.shearData = None
+        self.lShearData = None
+        self.rShearData = None
+
+
+    def getScaleData(self, words, idx):
+        vn1 = int(words[1])
+        vn2 = int(words[2])
+        den = float(words[3])
+        if not self.scaleData:
+            self.scaleData = [None, None, None]
+        self.scaleData[idx] = (vn1, vn2, den)
+
+
+    def getShearData(self, words, idx, side):
+        vn1 = int(words[1])
+        vn2 = int(words[2])
+        x1 = float(words[3])
+        x2 = float(words[4])
+        bbdata = (vn1, vn2, x1, x2, side)
+        if side == "Left":
+            if not self.lShearData:
+                self.lShearData = [None, None, None]
+            self.lShearData[idx] = bbdata
+        elif side == "Right":
+            if not self.rShearData:
+                self.rShearData = [None, None, None]
+            self.rShearData[idx] = bbdata
+        else:
+            if not self.shearData:
+                self.shearData = [None, None, None]
+            self.shearData[idx] = bbdata
+
+
+    def getMatrix(self, hmesh, refvert=None, converter=None):
+        if self.scaleData:
+            matrix = np.identity(3, float)
+            for n in range(3):
+                (vn1, vn2, den) = self.scaleData[n]
+                if converter:
+                    co1 = converter.refVerts[vn1].getCoord(Unit3)
+                    co2 = converter.refVerts[vn2].getCoord(Unit3)
+                else:
+                    co1 = hmesh.coord[vn1]
+                    co2 = hmesh.coord[vn2]
+                num = abs(co1[n] - co2[n])
+                matrix[n][n] = (num/den)
+            return matrix
+
+        elif self.shearData:
+            return self.matrixFromShear(self.shearData, hmesh)
+        elif self.lShearData:
+            return self.matrixFromShear(self.lShearData, hmesh)
+        elif self.rShearData:
+            return self.matrixFromShear(self.rShearData, hmesh)
+        else:
+            return Unit3
+
+
+    def matrixFromShear(self, shear, obj):
+        from transformations import affine_matrix_from_points
+
+        # sfaces and tfaces are the face coordinates
+        sfaces = np.zeros((3,2), float)
+        tfaces = np.zeros((3,2), float)
+        for n in range(3):
+            (vn1, vn2, sfaces[n,0], sfaces[n,1], side) = shear[n]
+            tfaces[n,0] = obj.coord[vn1][n]
+            tfaces[n,1] = obj.coord[vn2][n]
+
+        # sverts and tverts are the vertex coordinates
+        sverts = []
+        tverts = []
+        for i in [0,1]:
+            for j,k in [(0,0),(0,1),(1,1),(1,0)]:
+                sverts.append( np.array((sfaces[0,i], sfaces[1,j], sfaces[2,k])) )
+                tverts.append( np.array((tfaces[0,i], tfaces[1,j], tfaces[2,k])) )
+
+        sbox = vertsToNumpy(sverts)
+        tbox = vertsToNumpy(tverts)
+        mat = affine_matrix_from_points(sbox, tbox)
+        return mat[:3,:3]
+
+
+def vertsToNumpy(verts):
+    result = np.asarray(verts)
+    return np.asarray([result[:,0], result[:,1], result[:,2]], dtype=np.float32)
+
 
 
 def _getFileName(folder, file, suffix):
