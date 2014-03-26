@@ -40,7 +40,6 @@ TODO
 import os
 import math
 import numpy as np
-import guicommon
 from core import G
 import getpath
 import log
@@ -187,7 +186,7 @@ class Proxy:
 
     def loadMeshAndObject(self, human):
         import files3d
-        import gui3d
+        import guicommon
 
         mesh = files3d.loadMesh(self._obj_file, maxFaces = self.max_pole)
         if not mesh:
@@ -198,10 +197,12 @@ class Proxy:
         mesh.setCameraProjection(0)             # Set to model camera
         mesh.setSolid(human.mesh.solid)    # Set to wireframe if human is in wireframe
 
-        obj = self.object = gui3d.Object(mesh, human.getPosition())
-        obj.setRotation(human.getRotation())
-        gui3d.app.addObject(obj)
+        # TODO perhaps other properties should be copied from human to object, such as subdivision state. For other hints, and duplicate code, see guicommon Object.setProxy()
 
+        obj = self.object = guicommon.Object(mesh, human.getPosition())
+        obj.setRotation(human.getRotation())
+
+        # TODO why return both obj and mesh if you can access the mesh easily through obj.mesh?
         return mesh,obj
 
 
