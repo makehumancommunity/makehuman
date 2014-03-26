@@ -187,7 +187,7 @@ class TMatrix:
 
 
     def getMatrix(self, refvert=None, converter=None):
-        obj = G.app.selectedHuman.meshData
+        obj = G.app.selectedHuman.meshData  # TODO human object to use is hardcoded, pass as arg instead
         if self.scaleData:
             matrix = np.identity(3, float)
             for n in range(3):
@@ -462,6 +462,16 @@ class Proxy:
 
         return getpath.formatPath(mesh.texture)
 
+    def _finalize(self, obj):
+        """
+        Final step in parsing/loading a proxy file. Initializes numpy structures
+        for performance improvement.
+        """
+        self.n_refpoints = len(self.refVerts[0]._verts)
+        self.obj = obj
+        self.weights = np.asarray([v._weights for v in self.refVerts], dtype=np.float32)
+        self.ref_vIdxs = np.asarray([v._verts for v in self.refVerts], dtype=np.uint32)
+        self.offsets = np.asarray([v._offset for v in self.refVerts], dtype=np.float32)
 
     def getCoords(self):
         converter = self.getConverter()
@@ -469,7 +479,20 @@ class Proxy:
         if converter:
             return [refVert.getConvertedCoord(converter, matrix) for refVert in self.refVerts]
         else:
-            return [refVert.getCoord(matrix) for refVert in self.refVerts]
+            obj = self.obj
+            ref_vIdxs = self.ref_vIdxs
+            weights = self.weights
+
+            if self.n_refpoints == 3:
+                coord = obj.coord[ref_vIdxs[:,0]] * weights[:,0,None] + \
+                        obj.coord[ref_vIdxs[:,1]] * weights[:,1,None] + \
+                        obj.coord[ref_vIdxs[:,2]] * weights[:,2,None]
+            else:
+                coord = obj.coord[ref_vIdxs[:,0]] * weights[:,0,None]
+
+            coord += np.dot(matrix, self.offsets.transpose()).transpose()
+
+            return coord
 
 
     def update(self, obj):
@@ -657,21 +680,21 @@ def readProxyFile(obj, filepath, type="Clothes"):
             status = doDeleteVerts
 
         elif key == 'obj_file':
-            proxy.obj_file = getFileName(folder, words[1], ".obj")
+            proxy.obj_file = _getFileName(folder, words[1], ".obj")
 
         elif key == 'vertexgroup_file':
-            proxy.vertexgroup_file = getFileName(folder, words[1], ".json")
+            proxy.vertexgroup_file = _getFileName(folder, words[1], ".json")
             proxy.vertexGroups = io_json.loadJson(proxy.vertexgroup_file)
 
         elif key == 'material':
-            matFile = getFileName(folder, words[1], ".mhmat")
+            matFile = _getFileName(folder, words[1], ".mhmat")
             proxy.material_file = matFile
             proxy.material.fromFile(matFile)
 
         elif key == 'mhx_material':
             # Read .mhx material file (or only set a filepath reference to it)
             # MHX material file is supposed to contain only shading parameters that are specific for blender export that are not stored in the .mhmat file
-            matFile = getFileName(folder, words[1], ".mhx")
+            matFile = _getFileName(folder, words[1], ".mhx")
             proxy.mhxMaterial_file = matFile
             #readMaterial(line, material, proxy, False)
             pass
@@ -694,9 +717,9 @@ def readProxyFile(obj, filepath, type="Clothes"):
                 layer = 0
                 uvFile = words[1]
             #uvMap = material.UVMap(proxy.name+"UV"+str(layer))
-            #uvMap.read(proxy.mesh, getFileName(folder, uvFile, ".mhuv"))
+            #uvMap.read(proxy.mesh, _getFileName(folder, uvFile, ".mhuv"))
             # Delayed load, only store path here
-            proxy.uvLayers[layer] = getFileName(folder, uvFile, ".mhuv")
+            proxy.uvLayers[layer] = _getFileName(folder, uvFile, ".mhuv")
 
         elif key == 'x_scale':
             proxy.tmatrix.getScaleData(words, obj, 0)
@@ -776,7 +799,7 @@ def readProxyFile(obj, filepath, type="Clothes"):
             offset = float(words[2])
             proxy.modifiers.append( ['solidify', thickness, offset] )
         elif key == 'shapekey':
-            proxy.shapekeys.append( getFileName(folder, words[1], ".target") )
+            proxy.shapekeys.append( _getFileName(folder, words[1], ".target") )
         elif key == 'basemesh':
             proxy.basemesh = words[1]
 
@@ -822,10 +845,12 @@ def readProxyFile(obj, filepath, type="Clothes"):
         log.warning('Proxy file %s does not specify a Z depth. Using 50.', filepath)
         proxy.z_depth = 50
 
+    proxy._finalize(obj)
+
     return proxy
 
 
-def getFileName(folder, file, suffix):
+def _getFileName(folder, file, suffix):
     (name, ext) = os.path.split(file)
     if ext:
         return os.path.join(folder, file)
@@ -834,37 +859,9 @@ def getFileName(folder, file, suffix):
 
 
 
-def newFace(first, words, group, proxy):
-    face = []
-    texface = []
-    nCorners = len(words)
-    for n in range(first, nCorners):
-        numbers = words[n].split('/')
-        face.append(int(numbers[0])-1)
-        if len(numbers) > 1:
-            texface.append(int(numbers[1])-1)
-    proxy.faces.append((face,group))
-    if texface:
-        proxy.texFaces.append(texface)
-        if len(face) != len(texface):
-            raise NameError("texface %s %s", face, texface)
-    return
-
-
-def newTexFace(words, proxy):
-    texface = [int(word) for word in words]
-    proxy.texFaces.append(texface)
-
-
-def newTexVert(first, words, proxy):
-    vt = [float(word) for word in words[first:]]
-    proxy.texVerts.append(vt)
-
-
 #
+# Caching of proxy files in data folders
 #
-#
-
 
 def updateProxyFileCache(paths, fileExt, cache = None):
     """
