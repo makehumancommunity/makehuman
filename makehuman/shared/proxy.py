@@ -8,7 +8,7 @@
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Thomas Larsson
+**Authors:**           Thomas Larsson, Jonas Hauquier
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
@@ -241,6 +241,7 @@ def vertsToNumpy(verts):
     return np.asarray([result[:,0], result[:,1], result[:,2]], dtype=np.float32)
 
 
+# TODO is there a reason this method is copied from transformations.py ?
 def affine_matrix_from_points(v0, v1, shear=True, scale=True, usesvd=True):
     """Return affine transform matrix to register two point sets.
 
