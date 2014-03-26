@@ -202,6 +202,7 @@ class Proxy:
         obj = self.object = guicommon.Object(mesh, human.getPosition())
         obj.setRotation(human.getRotation())
 
+        # TODO why return both obj and mesh if you can access the mesh easily through obj.mesh?
         return mesh,obj
 
 
