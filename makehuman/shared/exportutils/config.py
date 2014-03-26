@@ -118,10 +118,10 @@ class Config(object):
 
         if self.cage:
             import proxy
-            obj = G.app.selectedHuman
+            human = G.app.selectedHuman
             filepath = getSysDataPath("cages/cage/cage.mhclo")
-            pxy = proxy.readProxyFile(obj, filepath, type="Cage")
-            pxy.update(obj)
+            pxy = proxy.readProxyFile(human, filepath, type="Cage")
+            pxy.update(human.meshData)
             proxies[name] = pxy
 
         return proxies
