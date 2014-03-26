@@ -131,10 +131,9 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
             obj = pxy.object
 
             # Convert basemesh vertex mask to local mask for proxy vertices
-            proxyVertMask = np.ones(len(pxy.refVerts), dtype=bool)
-            for idx,vs in enumerate(pxy.refVerts):
+            proxyVertMask = np.ones(len(pxy.ref_vIdxs), dtype=bool)
+            for idx,hverts in enumerate(pxy.ref_vIdxs):
                 # Body verts to which proxy vertex with idx is mapped
-                hverts = vs.getHumanVerts()
                 if len(hverts) == 3:
                     (v1,v2,v3) = hverts
                     # Hide proxy vert if any of its referenced body verts are hidden (most agressive)
