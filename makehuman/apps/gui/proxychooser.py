@@ -280,9 +280,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
                 pxy = None
 
         if not pxy:
-            pxy = proxy.readProxyFile(human.meshData,
-                                           mhclofile,
-                                           type=self.proxyName.capitalize())
+            pxy = proxy.readProxyFile(human, mhclofile, type=self.proxyName.capitalize())
             self._proxyCache[mhcloId] = pxy
 
         if pxy.uuid in [p.uuid for p in self.getSelection()]:
@@ -293,21 +291,12 @@ class ProxyChooserTaskView(gui3d.TaskView):
             # Deselect previously selected proxy
             self.deselectProxy(None, suppressSignal = True)
 
-        mesh = files3d.loadMesh(pxy.obj_file, maxFaces = pxy.max_pole)
+        mesh,obj = pxy.loadMeshAndObject(human)
         if not mesh:
-            log.error("Failed to load %s", pxy.obj_file)
             return
 
         self.filechooser.selectItem(mhclofile)
 
-        mesh.material = pxy.material
-        mesh.priority = pxy.z_depth           # Set render order
-        mesh.setCameraProjection(0)             # Set to model camera
-        mesh.setSolid(human.mesh.solid)    # Set to wireframe if human is in wireframe
-
-        obj = gui3d.Object(mesh, self.human.getPosition())
-        obj.setRotation(human.getRotation())
-        gui3d.app.addObject(obj)
 
         self.adaptProxyToHuman(pxy, obj)
         obj.setSubdivided(human.isSubdivided()) # Copy subdivided state of human

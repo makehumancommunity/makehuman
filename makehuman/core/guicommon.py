@@ -229,7 +229,7 @@ class Object(events3d.EventHandler):
         if proxy:
             import files3d
             self.proxy = proxy
-            self.__proxyMesh = files3d.loadMesh(proxy.obj_file)
+            self.__proxyMesh = proxy.loadMesh()
             for attr in ('x', 'y', 'z', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz',
                          'visibility', 'shadeless', 'pickable', 'cameraMode', 'material'):
                 setattr(self.__proxyMesh, attr, getattr(self.mesh, attr))
@@ -388,7 +388,7 @@ class Object(events3d.EventHandler):
         """
         This method updates the shader parameters for the currently shown mesh
         object, but also that of the original seed mesh if it is subdivided or
-        proxied. 
+        proxied.
         Use this method when you want to stream in shader parameters to human
         while sliders are being moved, because while dragging only the seed mesh
         is shown.

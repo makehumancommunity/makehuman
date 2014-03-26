@@ -243,7 +243,8 @@ class SkeletonLibrary(gui3d.TaskView):
         self.oldPxyMats = dict()
         xray_mat = material.fromFile(mh.getSysDataPath('materials/xray.mhmat'))
         self.human.material = xray_mat
-        for pxy, obj in self.human.getProxiesAndObjects():
+        for pxy in self.human.getProxies():
+            obj = pxy.obj
             self.oldPxyMats[pxy.uuid] = obj.material.clone()
             obj.material = xray_mat
 
@@ -271,9 +272,9 @@ class SkeletonLibrary(gui3d.TaskView):
         if self.skelObj:
             self.skelObj.hide()
         self.human.material = self.oldHumanMat
-        for pxy, obj in self.human.getProxiesAndObjects():
+        for pxy in self.human.getProxies():
             if pxy.uuid in self.oldPxyMats:
-                obj.material = self.oldPxyMats[pxy.uuid]
+                pxy.object.material = self.oldPxyMats[pxy.uuid]
 
         # Reset smooth setting
         self.human.setSubdivided(self.oldSmoothValue)
