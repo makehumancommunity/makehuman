@@ -229,7 +229,7 @@ class Object(events3d.EventHandler):
         if proxy:
             import files3d
             self.proxy = proxy
-            self.__proxyMesh = proxy.loadMesh()
+            self.__proxyMesh, _obj = proxy.loadMeshAndObject(self)
             for attr in ('x', 'y', 'z', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz',
                          'visibility', 'shadeless', 'pickable', 'cameraMode', 'material'):
                 setattr(self.__proxyMesh, attr, getattr(self.mesh, attr))

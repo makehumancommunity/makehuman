@@ -183,8 +183,7 @@ class TMatrix:
             self.shearData[idx] = bbdata
 
 
-    def getMatrix(self, refvert=None, converter=None):
-        obj = G.app.selectedHuman.meshData  # TODO human object to use is hardcoded, pass as arg instead
+    def getMatrix(self, hmesh, refvert=None, converter=None):
         if self.scaleData:
             matrix = np.identity(3, float)
             for n in range(3):
@@ -193,18 +192,18 @@ class TMatrix:
                     co1 = converter.refVerts[vn1].getCoord(Unit3)
                     co2 = converter.refVerts[vn2].getCoord(Unit3)
                 else:
-                    co1 = obj.coord[vn1]
-                    co2 = obj.coord[vn2]
+                    co1 = hmesh.coord[vn1]
+                    co2 = hmesh.coord[vn2]
                 num = abs(co1[n] - co2[n])
                 matrix[n][n] = (num/den)
             return matrix
 
         elif self.shearData:
-            return self.matrixFromShear(self.shearData, obj)
+            return self.matrixFromShear(self.shearData, hmesh)
         elif self.lShearData:
-            return self.matrixFromShear(self.lShearData, obj)
+            return self.matrixFromShear(self.lShearData, hmesh)
         elif self.rShearData:
-            return self.matrixFromShear(self.rShearData, obj)
+            return self.matrixFromShear(self.rShearData, hmesh)
         else:
             return Unit3
 
@@ -253,6 +252,8 @@ class Proxy:
         self.type = type
         self.object = None
         self.human = human
+        if not human:
+            halt
         self.file = file
         if file:
             self.mtime = os.path.getmtime(file)
@@ -313,16 +314,14 @@ class Proxy:
 
 
     def getSeedMesh(self):
-        human = G.app.selectedHuman
-        for pxy in human.getProxies():
+        for pxy in self.human.getProxies():
             if self == pxy:
                 return pxy.object.getSeedMesh()
 
         if self.type == "Proxymeshes":
-            if not human.proxy:
+            if not self.human.proxy:
                 return None
-            #return human.mesh
-            return human.getProxyMesh()
+            return self.human.getProxyMesh()
         elif self.type in ["Cage", "Converter"]:
             return None
         else:
@@ -330,8 +329,9 @@ class Proxy:
 
 
     def getMesh(self):
-        human = G.app.selectedHuman
-        for pxy in human.getProxies():
+        return self.object.mesh
+
+        for pxy in self.human.getProxies():
             if self == pxy:
                 return pxy.object.mesh
 
@@ -392,11 +392,11 @@ class Proxy:
 
     def getCoords(self):
         converter = self.getConverter()
-        matrix = self.tmatrix.getMatrix(refvert=self.refVerts[0], converter=converter)
+        hmesh = self.human.meshData
+        matrix = self.tmatrix.getMatrix(hmesh, refvert=self.refVerts[0], converter=converter)
         if converter:
             return [refVert.getConvertedCoord(converter, matrix) for refVert in self.refVerts]
         else:
-            hmesh = self.human.meshData
             ref_vIdxs = self.ref_vIdxs
             weights = self.weights
 
