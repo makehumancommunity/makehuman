@@ -306,11 +306,12 @@ class SceneEditorTaskView(guirender.RenderTaskView):
         guirender.RenderTaskView.onShow(self, event)
 
         # Set currently edited scene
+        self._appscene = G.app.scene
         G.app.setScene(self.scene)
 
     def onHide(self, event):
         # Restore selected scene
-        G.app.setScene(G.app.scene)
+        G.app.setScene(self._appscene)
 
         guirender.RenderTaskView.onHide(self, event)
 
