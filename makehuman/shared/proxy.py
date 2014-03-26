@@ -70,14 +70,13 @@ class Proxy:
         log.debug("Loading proxy file: %s.", file)
         import makehuman
 
-
         name = os.path.splitext(os.path.basename(file))[0]
         self.name = name.capitalize().replace(" ","_")
         self.type = type
         self.object = None
         self.human = human
         if not human:
-            halt
+            raise RuntimeError("Proxy constructor expects a valid human object.")
         self.file = file
         if file:
             self.mtime = os.path.getmtime(file)
@@ -87,49 +86,36 @@ class Proxy:
         self.basemesh = makehuman.getBasemeshVersion()
         self.tags = []
 
-        self.vertWeights = {}       # (proxy-vert, weight) list for each parent vert
-        self.refVerts = []
+        self.ref_vIdxs = None       # (Vidx1,Vidx2,Vidx3) list with references to human vertex indices, indexed by proxy vert
+        self.weights = None         # (w1,w2,w3) list, with weights per human vertex (mapped by ref_vIdxs), indexed by proxy vert
+        self.vertWeights = {}       # (proxy-vert, weight) list for each parent vert (reverse mapping of self.weights, indexed by human vertex)
+        self.offsets = None         # (x,y,z) list of vertex offsets, indexed by proxy vert
 
         self.tmatrix = TMatrix()    # Offset transformation matrix. Replaces scale
 
-        self.z_depth = 50
+        self.z_depth = -1       # Render order depth for the proxy object. Also used to determine which proxy object should mask others (delete faces)
         self.max_pole = None    # Signifies the maximum number of faces per vertex on the mesh topology. Set to none for default.
-        self.cull = False
 
         self.uvLayers = {}
-
-        self.useBaseMaterials = False
-        self.rig = None
-        self.mask = None
 
         self.material = material.Material(self.name)
 
         self._obj_file = None
-        self.vertexgroup_file = None
+        self.vertexgroup_file = None    # TODO document
         self.vertexGroups = None
         self.material_file = None
-        self.mhxMaterial_file = None
-        self.maskLayer = -1
+        self.maskLayer = -1     # TODO is this still used?
         self.textureLayer = 0
         self.objFileLayer = 0   # TODO what is this used for?
-        self.texVertsLayers = {}
-        self.texFacesLayers = {}
 
         self.deleteGroups = []
         self.deleteVerts = np.zeros(len(human.meshData.coord), bool)
 
-        self.z_depth = -1
-        self.max_pole = None
-        self.useProjection = True
-        self.ignoreOffset = False
-
+        # TODO are these still used?
         self.wire = False
         self.cage = False
         self.modifiers = []
         self.shapekeys = []
-        self.weights = None
-        self.clothings = []
-        self.transparencies = dict()
         return
 
 
@@ -206,34 +192,31 @@ class Proxy:
         return mesh,obj
 
 
-    def _finalize(self):
+    def _finalize(self, refVerts):
         """
         Final step in parsing/loading a proxy file. Initializes numpy structures
         for performance improvement.
         """
-        self.weights = np.asarray([v._weights for v in self.refVerts], dtype=np.float32)
-        self.ref_vIdxs = np.asarray([v._verts for v in self.refVerts], dtype=np.uint32)
-        self.offsets = np.asarray([v._offset for v in self.refVerts], dtype=np.float32)
+        self.weights = np.asarray([v._weights for v in refVerts], dtype=np.float32)
+        self.ref_vIdxs = np.asarray([v._verts for v in refVerts], dtype=np.uint32)
+        self.offsets = np.asarray([v._offset for v in refVerts], dtype=np.float32)
 
 
     def getCoords(self):
-        converter = self.getConverter()
         hmesh = self.human.meshData
-        matrix = self.tmatrix.getMatrix(hmesh, refvert=self.refVerts[0], converter=converter)
-        if converter:
-            return [refVert.getConvertedCoord(converter, matrix) for refVert in self.refVerts]
-        else:
-            ref_vIdxs = self.ref_vIdxs
-            weights = self.weights
+        matrix = self.tmatrix.getMatrix(hmesh)
 
-            coord = (
-                hmesh.coord[ref_vIdxs[:,0]] * weights[:,0,None] +
-                hmesh.coord[ref_vIdxs[:,1]] * weights[:,1,None] +
-                hmesh.coord[ref_vIdxs[:,2]] * weights[:,2,None] +
-                np.dot(matrix, self.offsets.transpose()).transpose()
-                )
+        ref_vIdxs = self.ref_vIdxs
+        weights = self.weights
 
-            return coord
+        coord = (
+            hmesh.coord[ref_vIdxs[:,0]] * weights[:,0,None] +
+            hmesh.coord[ref_vIdxs[:,1]] * weights[:,1,None] +
+            hmesh.coord[ref_vIdxs[:,2]] * weights[:,2,None] +
+            np.dot(matrix, self.offsets.transpose()).transpose()
+            )
+
+        return coord
 
 
     def update(self, mesh):
@@ -250,21 +233,11 @@ class Proxy:
             return self.name
 
 
-    def getConverter(self):
-        import makehuman
-        if self.basemesh in ["alpha_7", "alpha7"]:
-            global _A7converter
-            if _A7converter is None:
-                _A7converter = readProxyFile(G.app.selectedHuman, getpath.getSysDataPath("3dobjs/a7_converter.proxy"), type="Converter")
-            log.debug("Converting %s with %s", self.name, _A7converter)
-            return _A7converter
-        elif self.basemesh == makehuman.getBasemeshVersion():
-            return None
-        else:
-            raise NameError("Unknown basemesh for mhclo file: %s" % self.basemesh)
-
-
     def getWeights(self, rawWeights, amt=None):
+        """
+        Map armature weights mapped to the human to the proxy mesh through the
+        proxy mapping.
+        """
         if amt and self.vertexGroups:
             weights = OrderedDict()
             for name,data in self.vertexGroups:
@@ -282,13 +255,9 @@ class Proxy:
                         break
             return weights
 
-        converter = self.getConverter()
-        if converter:
-            rawWeights = converter.getWeights1(rawWeights)
-        return self.getWeights1(rawWeights)
+        return self._getWeights1(rawWeights)
 
-
-    def getWeights1(self, rawWeights):
+    def _getWeights1(self, rawWeights):
         weights = OrderedDict()
         if not rawWeights:
             return weights
@@ -307,11 +276,10 @@ class Proxy:
                         vgroup.append((pv, pw))
                         empty = False
             if not empty:
-                weights[key] = self.fixVertexGroup(vgroup)
+                weights[key] = self._fixVertexGroup(vgroup)
         return weights
 
-
-    def fixVertexGroup(self, vgroup):
+    def _fixVertexGroup(self, vgroup):
         fixedVGroup = []
         vgroup.sort()
         pv = -1
@@ -329,6 +297,8 @@ class Proxy:
 
 
     def getShapes(self, rawShapes, scale):
+        # TODO document
+
         from richmesh import FakeTarget
 
         targets = []
@@ -375,6 +345,7 @@ def readProxyFile(human, filepath, type="Clothes"):
 
     folder = os.path.realpath(os.path.expanduser(os.path.dirname(filepath)))
     proxy = Proxy(filepath, type, human)
+    refVerts = []
 
     status = 0
     vnum = 0
@@ -486,6 +457,7 @@ def readProxyFile(human, filepath, type="Clothes"):
             if len(words) > 1:
                 proxy.textureLayer = int(words[1])
 
+        # TODO are these still used? otherwise we can issue deprecation warnings
         # Blender-only properties
         elif key == 'wire':
             proxy.wire = True
@@ -516,11 +488,11 @@ def readProxyFile(human, filepath, type="Clothes"):
 
         elif status == doRefVerts:
             refVert = ProxyRefVert(human)
-            proxy.refVerts.append(refVert)
+            refVerts.append(refVert)
             if len(words) == 1:
-                refVert.fromSingle(words, vnum, proxy)
+                refVert.fromSingle(words, vnum, proxy.vertWeights)
             else:
-                refVert.fromTriple(words, vnum, proxy)
+                refVert.fromTriple(words, vnum, proxy.vertWeights)
             vnum += 1
 
         elif status == doWeights:
@@ -550,10 +522,9 @@ def readProxyFile(human, filepath, type="Clothes"):
         log.warning('Proxy file %s does not specify a Z depth. Using 50.', filepath)
         proxy.z_depth = 50
 
-    proxy._finalize()
+    proxy._finalize(refVerts)
 
     return proxy
-
 
 
 #
@@ -565,17 +536,15 @@ class ProxyRefVert:
     def __init__(self, human):
         self.human = human
 
-
-    def fromSingle(self, words, vnum, proxy):
+    def fromSingle(self, words, vnum, vertWeights):
         v0 = int(words[0])
         self._verts = (v0,0,1)
         self._weights = (1.0,0.0,0.0)
         self._offset = np.zeros(3, float)
-        self.addProxyVertWeight(proxy, v0, vnum, 1)
+        _addProxyVertWeight(vertWeights, v0, vnum, 1)
         return self
 
-
-    def fromTriple(self, words, vnum, proxy):
+    def fromTriple(self, words, vnum, vertWeights):
         v0 = int(words[0])
         v1 = int(words[1])
         v2 = int(words[2])
@@ -593,25 +562,13 @@ class ProxyRefVert:
         self._weights = (w0,w1,w2)
         self._offset = np.array((d0,d1,d2), float)
 
-        self.addProxyVertWeight(proxy, v0, vnum, w0)
-        self.addProxyVertWeight(proxy, v1, vnum, w1)
-        self.addProxyVertWeight(proxy, v2, vnum, w2)
+        _addProxyVertWeight(vertWeights, v0, vnum, w0)
+        _addProxyVertWeight(vertWeights, v1, vnum, w1)
+        _addProxyVertWeight(vertWeights, v2, vnum, w2)
         return self
-
-
-    def addProxyVertWeight(self, proxy, v, pv, w):
-        try:
-            proxy.vertWeights[v].append((pv, w))
-        except KeyError:
-            proxy.vertWeights[v] = [(pv,w)]
-        return
-
-    def getHumanVerts(self):
-        return self._verts
 
     def getWeights(self):
         return self._weights
-
 
     def getCoord(self, matrix):
         return (
@@ -619,14 +576,12 @@ class ProxyRefVert:
             np.dot(matrix, self._offset)
             )
 
-
-    def getConvertedCoord(self, converter, matrix):
-        coord = np.dot(matrix, self._offset)
-        for n,rvn in enumerate(self._verts):
-            xn = converter.refVerts[rvn].getCoord(Unit3)
-            wn = self._weights[n]
-            coord += xn*wn
-        return coord
+def _addProxyVertWeight(vertWeights, v, pv, w):
+    try:
+        vertWeights[v].append((pv, w))
+    except KeyError:
+        vertWeights[v] = [(pv,w)]
+    return
 
 #
 #   class TMatrix:
@@ -670,17 +625,13 @@ class TMatrix:
             self.shearData[idx] = bbdata
 
 
-    def getMatrix(self, hmesh, refvert=None, converter=None):
+    def getMatrix(self, hmesh):
         if self.scaleData:
             matrix = np.identity(3, float)
             for n in range(3):
                 (vn1, vn2, den) = self.scaleData[n]
-                if converter:
-                    co1 = converter.refVerts[vn1].getCoord(Unit3)
-                    co2 = converter.refVerts[vn2].getCoord(Unit3)
-                else:
-                    co1 = hmesh.coord[vn1]
-                    co2 = hmesh.coord[vn2]
+                co1 = hmesh.coord[vn1]
+                co2 = hmesh.coord[vn2]
                 num = abs(co1[n] - co2[n])
                 matrix[n][n] = (num/den)
             return matrix
@@ -817,4 +768,29 @@ def peekMetadata(proxyFilePath):
             break
     fp.close()
     return (uuid, tags)
+
+
+def _packStringList(strings):
+    text = ''
+    index = []
+    for string in strings:
+        index.append(len(text))
+        text += string
+    text = np.fromstring(text, dtype='S1')
+    index = np.array(index, dtype=np.uint32)
+    return text, index
+
+def _unpackStringList(text, index):
+    strings = []
+    last = None
+    for i in index:
+        if last is not None:
+            name = text[last:i].tostring()
+            strings.append(name)
+        last = i
+    if last is not None:
+        name = text[last:].tostring()
+        strings.append(name)
+
+    return strings
 
