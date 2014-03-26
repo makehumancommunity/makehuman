@@ -258,15 +258,16 @@ class MeasureTaskView(gui3d.TaskView):
         self.updateMeshes()
         human = gui3d.app.selectedHuman
         self.cloPickableProps = dict()
-        for uuid, clo in human.clothesObjs.items():
+        for uuid, pxy in human.clothesProxies.items():
+            obj = pxy.object
             self.cloPickableProps[uuid] = clo.mesh.pickable
             clo.mesh.setPickable(False)
 
     def onHide(self, event):
         human = gui3d.app.selectedHuman
         for uuid, pickable in self.cloPickableProps.items():
-            clo = human.clothesObjs[uuid]
-            clo.mesh.setPickable(pickable)
+            pxy = human.clothesProxies[uuid]
+            pxy.object.mesh.setPickable(pickable)
 
     def onSliderFocus(self, slider):
         self.lastActive = slider
@@ -429,7 +430,7 @@ class Ruler:
         self.Measures['thighcirc'] = [11071,11080,11081,11086,11076,11077,11074,11075,11072,11073,11069,11070,11087,11085,11084,12994,11083,11082,11079,11071]
         self.Measures['neckcirc'] = [7514,10358,7631,7496,7488,7489,7474,7475,7531,7537,7543,7549,7555,7561,7743,7722,856,1030,1051,850,844,838,832,826,820,756,755,770,769,777,929,3690,804,800,808,801,799,803,7513,7515,7521,7514]
         self.Measures['neckheight'] = [853,854,855,856,857,858,1496,1491]
-        
+
         self.Measures['upperarm']=[8383,8393,8392,8391,8390,8394,8395,8399,10455,10516,8396,8397,8398,8388,8387,8386,10431,8385,8384,8389]
         self.Measures['wrist']=[10208,10211,10212,10216,10471,10533,10213,10214,10215,10205,10204,10203,10437,10202,10201,10206,10200,10210,10209,10208]
         self.Measures['frontchest']=[1437,8125]
@@ -446,7 +447,7 @@ class Ruler:
         self.Measures['upperarmlenght'] = [8274,10037]
         self.Measures['lowerarmlenght'] = [10040,10548]
         self.Measures['hips'] = [4341,10968,10969,10971,10970,10967,10928,10927,10925,10926,10923,10924,10868,10875,10861,10862,4228,4227,4226,4242,4234,4294,4293,4296,4295,4297,4298,4342,4345,4346,4344,4343,4361,4341]
-                                            
+
 
     def getMeasure(self, human, measurementname, mode):
         measure = 0

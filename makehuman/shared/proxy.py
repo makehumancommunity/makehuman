@@ -75,12 +75,11 @@ Unit3 = np.identity(3,float)
 
 class ProxyRefVert:
 
-    def __init__(self, parent):
-        self._parent = parent
+    def __init__(self, human):
+        self.human = human
 
 
     def fromSingle(self, words, vnum, proxy):
-        self._exact = True
         v0 = int(words[0])
         self._verts = (v0,0,1)
         self._weights = (1.0,0.0,0.0)
@@ -90,7 +89,6 @@ class ProxyRefVert:
 
 
     def fromTriple(self, words, vnum, proxy):
-        self._exact = False
         v0 = int(words[0])
         v1 = int(words[1])
         v2 = int(words[2])
@@ -129,12 +127,10 @@ class ProxyRefVert:
 
 
     def getCoord(self, matrix):
-        coord = np.dot(matrix, self._offset)
-        for n,rvn in enumerate(self._verts):
-            xn = self._parent.coord[rvn]
-            wn = self._weights[n]
-            coord += xn*wn
-        return coord
+        return (
+            np.dot(self.human.meshData.coord[self._verts], self._weights) +
+            np.dot(matrix, self._offset)
+            )
 
 
     def getConvertedCoord(self, converter, matrix):
@@ -158,7 +154,7 @@ class TMatrix:
         self.rShearData = None
 
 
-    def getScaleData(self, words, obj, idx):
+    def getScaleData(self, words, idx):
         vn1 = int(words[1])
         vn2 = int(words[2])
         den = float(words[3])
@@ -167,7 +163,7 @@ class TMatrix:
         self.scaleData[idx] = (vn1, vn2, den)
 
 
-    def getShearData(self, words, obj, idx, side):
+    def getShearData(self, words, idx, side):
         vn1 = int(words[1])
         vn2 = int(words[2])
         x1 = float(words[3])
@@ -247,13 +243,16 @@ def vertsToNumpy(verts):
 #
 
 class Proxy:
-    def __init__(self, file, type):
+    def __init__(self, file, type, human):
         log.debug("Loading proxy file: %s.", file)
         import makehuman
+
 
         name = os.path.splitext(os.path.basename(file))[0]
         self.name = name.capitalize().replace(" ","_")
         self.type = type
+        self.object = None
+        self.human = human
         self.file = file
         if file:
             self.mtime = os.path.getmtime(file)
@@ -280,7 +279,7 @@ class Proxy:
 
         self.material = material.Material(self.name)
 
-        self.obj_file = None
+        self._obj_file = None
         self.vertexgroup_file = None
         self.vertexGroups = None
         self.material_file = None
@@ -292,7 +291,12 @@ class Proxy:
         self.texFacesLayers = {}
 
         self.deleteGroups = []
-        self.deleteVerts = None
+        self.deleteVerts = np.zeros(len(human.meshData.coord), bool)
+
+        self.z_depth = -1
+        self.max_pole = None
+        self.useProjection = True
+        self.ignoreOffset = False
 
         self.wire = False
         self.cage = False
@@ -310,9 +314,9 @@ class Proxy:
 
     def getSeedMesh(self):
         human = G.app.selectedHuman
-        for proxy,obj in human.getProxiesAndObjects():
-            if self == proxy:
-                return obj.getSeedMesh()
+        for pxy in human.getProxies():
+            if self == pxy:
+                return pxy.object.getSeedMesh()
 
         if self.type == "Proxymeshes":
             if not human.proxy:
@@ -327,9 +331,9 @@ class Proxy:
 
     def getMesh(self):
         human = G.app.selectedHuman
-        for proxy,obj in human.getProxiesAndObjects():
-            if self == proxy:
-                return obj.mesh
+        for pxy in human.getProxies():
+            if self == pxy:
+                return pxy.object.mesh
 
         if self.type == "Proxymeshes":
             if not human.proxy:
@@ -348,22 +352,43 @@ class Proxy:
         if human.proxy and uuid == human.proxy.uuid:
             mesh = human.mesh
         else:
-            for proxy,obj in human.getProxiesAndObjects():
-                if proxy and uuid == proxy.uuid:
-                    mesh = obj.mesh
+            for pxy in human.getProxies():
+                if pxy and uuid == pxy.uuid:
+                    mesh = pxy.object.mesh
                     break
 
         return getpath.formatPath(mesh.texture)
 
-    def _finalize(self, obj):
+
+    def loadMeshAndObject(self, human):
+        import files3d
+        import gui3d
+
+        mesh = files3d.loadMesh(self._obj_file, maxFaces = self.max_pole)
+        if not mesh:
+            log.error("Failed to load %s", self._obj_file)
+
+        mesh.material = self.material
+        mesh.priority = self.z_depth           # Set render order
+        mesh.setCameraProjection(0)             # Set to model camera
+        mesh.setSolid(human.mesh.solid)    # Set to wireframe if human is in wireframe
+
+        obj = self.object = gui3d.Object(mesh, human.getPosition())
+        obj.setRotation(human.getRotation())
+        gui3d.app.addObject(obj)
+
+        return mesh,obj
+
+
+    def _finalize(self):
         """
         Final step in parsing/loading a proxy file. Initializes numpy structures
         for performance improvement.
         """
-        self.obj = obj
         self.weights = np.asarray([v._weights for v in self.refVerts], dtype=np.float32)
         self.ref_vIdxs = np.asarray([v._verts for v in self.refVerts], dtype=np.uint32)
         self.offsets = np.asarray([v._offset for v in self.refVerts], dtype=np.float32)
+
 
     def getCoords(self):
         converter = self.getConverter()
@@ -371,25 +396,25 @@ class Proxy:
         if converter:
             return [refVert.getConvertedCoord(converter, matrix) for refVert in self.refVerts]
         else:
-            obj = self.obj
+            hmesh = self.human.meshData
             ref_vIdxs = self.ref_vIdxs
             weights = self.weights
 
             coord = (
-                obj.coord[ref_vIdxs[:,0]] * weights[:,0,None] +
-                obj.coord[ref_vIdxs[:,1]] * weights[:,1,None] +
-                obj.coord[ref_vIdxs[:,2]] * weights[:,2,None] +
+                hmesh.coord[ref_vIdxs[:,0]] * weights[:,0,None] +
+                hmesh.coord[ref_vIdxs[:,1]] * weights[:,1,None] +
+                hmesh.coord[ref_vIdxs[:,2]] * weights[:,2,None] +
                 np.dot(matrix, self.offsets.transpose()).transpose()
                 )
 
             return coord
 
 
-    def update(self, obj):
+    def update(self, mesh):
         log.debug("Updating proxy %s.", self.name)
         coords = self.getCoords()
-        obj.changeCoords(coords)
-        obj.calcNormals()
+        mesh.changeCoords(coords)
+        mesh.calcNormals()
 
 
     def getUuid(self):
@@ -404,7 +429,7 @@ class Proxy:
         if self.basemesh in ["alpha_7", "alpha7"]:
             global _A7converter
             if _A7converter is None:
-                _A7converter = readProxyFile(G.app.selectedHuman.meshData, getpath.getSysDataPath("3dobjs/a7_converter.proxy"), type="Converter")
+                _A7converter = readProxyFile(G.app.selectedHuman, getpath.getSysDataPath("3dobjs/a7_converter.proxy"), type="Converter")
             log.debug("Converting %s with %s", self.name, _A7converter)
             return _A7converter
         elif self.basemesh == makehuman.getBasemeshVersion():
@@ -508,14 +533,14 @@ class Proxy:
         return targets
 
 #
-#    readProxyFile(obj, filepath, type="Clothes"):
+#    readProxyFile(human, filepath, type="Clothes"):
 #
 
 doRefVerts = 1
 doWeights = 2
 doDeleteVerts = 3
 
-def readProxyFile(obj, filepath, type="Clothes"):
+def readProxyFile(human, filepath, type="Clothes"):
     try:
         fp = open(filepath, "rU")
     except IOError:
@@ -523,14 +548,8 @@ def readProxyFile(obj, filepath, type="Clothes"):
         return None
 
     folder = os.path.realpath(os.path.expanduser(os.path.dirname(filepath)))
+    proxy = Proxy(filepath, type, human)
 
-    proxy = Proxy(filepath, type)
-    proxy.deleteVerts = np.zeros(len(obj.coord), bool)
-
-    proxy.z_depth = -1
-    proxy.max_pole = None
-    proxy.useProjection = True
-    proxy.ignoreOffset = False
     status = 0
     vnum = 0
     for line in fp:
@@ -570,7 +589,7 @@ def readProxyFile(obj, filepath, type="Clothes"):
             status = doDeleteVerts
 
         elif key == 'obj_file':
-            proxy.obj_file = _getFileName(folder, words[1], ".obj")
+            proxy._obj_file = _getFileName(folder, words[1], ".obj")
 
         elif key == 'vertexgroup_file':
             proxy.vertexgroup_file = _getFileName(folder, words[1], ".json")
@@ -580,17 +599,6 @@ def readProxyFile(obj, filepath, type="Clothes"):
             matFile = _getFileName(folder, words[1], ".mhmat")
             proxy.material_file = matFile
             proxy.material.fromFile(matFile)
-
-        elif key == 'mhx_material':
-            # Read .mhx material file (or only set a filepath reference to it)
-            # MHX material file is supposed to contain only shading parameters that are specific for blender export that are not stored in the .mhmat file
-            matFile = _getFileName(folder, words[1], ".mhx")
-            proxy.mhxMaterial_file = matFile
-            #readMaterial(line, material, proxy, False)
-            pass
-        elif key == 'useBaseMaterials':
-            # TODO deprecated?
-            proxy.useBaseMaterials = True
 
         elif key == 'backface_culling':
             # TODO remove in future
@@ -612,42 +620,36 @@ def readProxyFile(obj, filepath, type="Clothes"):
             proxy.uvLayers[layer] = _getFileName(folder, uvFile, ".mhuv")
 
         elif key == 'x_scale':
-            proxy.tmatrix.getScaleData(words, obj, 0)
+            proxy.tmatrix.getScaleData(words, 0)
         elif key == 'y_scale':
-            proxy.tmatrix.getScaleData(words, obj, 1)
+            proxy.tmatrix.getScaleData(words, 1)
         elif key == 'z_scale':
-            proxy.tmatrix.getScaleData(words, obj, 2)
+            proxy.tmatrix.getScaleData(words, 2)
 
         elif key == 'shear_x':
-            proxy.tmatrix.getShearData(words, obj, 0, None)
+            proxy.tmatrix.getShearData(words, 0, None)
         elif key == 'shear_y':
-            proxy.tmatrix.getShearData(words, obj, 1, None)
+            proxy.tmatrix.getShearData(words, 1, None)
         elif key == 'shear_z':
-            proxy.tmatrix.getShearData(words, obj, 2, None)
+            proxy.tmatrix.getShearData(words, 2, None)
         elif key == 'l_shear_x':
-            proxy.tmatrix.getShearData(words, obj, 0, 'Left')
+            proxy.tmatrix.getShearData(words, 0, 'Left')
         elif key == 'l_shear_y':
-            proxy.tmatrix.getShearData(words, obj, 1, 'Left')
+            proxy.tmatrix.getShearData(words, 1, 'Left')
         elif key == 'l_shear_z':
-            proxy.tmatrix.getShearData(words, obj, 2, 'Left')
+            proxy.tmatrix.getShearData(words, 2, 'Left')
         elif key == 'r_shear_x':
-            proxy.tmatrix.getShearData(words, obj, 0, 'Right')
+            proxy.tmatrix.getShearData(words, 0, 'Right')
         elif key == 'r_shear_y':
-            proxy.tmatrix.getShearData(words, obj, 1, 'Right')
+            proxy.tmatrix.getShearData(words, 1, 'Right')
         elif key == 'r_shear_z':
-            proxy.tmatrix.getShearData(words, obj, 2, 'Right')
+            proxy.tmatrix.getShearData(words, 2, 'Right')
 
         elif key == 'uniform_scale':
             proxy.uniformScale = True
             if len(words) > 1:
                 proxy.scaleCorrect = float(words[1])
             proxy.uniformizeScale()
-        elif key == 'use_projection':
-            # TODO still used?
-            proxy.useProjection = int(words[1])
-        elif key == 'ignoreOffset':
-            # TODO still used?
-            proxy.ignoreOffset = int(words[1])
         elif key == 'delete':
             proxy.deleteGroups.append(words[1])
 
@@ -657,17 +659,6 @@ def readProxyFile(obj, filepath, type="Clothes"):
         elif key == 'texture_uv_layer':
             if len(words) > 1:
                 proxy.textureLayer = int(words[1])
-
-        # TODO keep this costume stuff?
-        elif key == 'clothing':
-            if len(words) > 2:
-                clothingPiece = (words[1], words[2])
-            else:
-                clothingPiece = (words[1], None)
-            proxy.clothings.append(clothingPiece)
-        elif key == 'transparencies':
-            uuid = words[1]
-            proxy.transparencies[uuid] = words[2].lower() in ["1", "yes", "true", "enable", "enabled"]
 
         # Blender-only properties
         elif key == 'wire':
@@ -698,12 +689,10 @@ def readProxyFile(obj, filepath, type="Clothes"):
 
 
         elif status == doRefVerts:
-            refVert = ProxyRefVert(obj)
+            refVert = ProxyRefVert(human)
             proxy.refVerts.append(refVert)
             if len(words) == 1:
                 refVert.fromSingle(words, vnum, proxy)
-            elif len(words) == 16:
-                refVert.fromSixteen(words, vnum, proxy)
             else:
                 refVert.fromTriple(words, vnum, proxy)
             vnum += 1
@@ -735,7 +724,7 @@ def readProxyFile(obj, filepath, type="Clothes"):
         log.warning('Proxy file %s does not specify a Z depth. Using 50.', filepath)
         proxy.z_depth = 50
 
-    proxy._finalize(obj)
+    proxy._finalize()
 
     return proxy
 

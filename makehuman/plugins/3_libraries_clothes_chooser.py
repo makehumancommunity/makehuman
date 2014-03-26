@@ -81,17 +81,12 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
 
     def proxySelected(self, pxy, obj):
         uuid = pxy.getUuid()
-
-        self.human.clothesObjs[uuid] = obj
         self.human.clothesProxies[uuid] = pxy
-
         self.updateFaceMasks(self.faceHidingTggl.selected)
 
     def proxyDeselected(self, pxy, obj, suppressSignal = False):
         uuid = pxy.uuid
-        del self.human.clothesObjs[uuid]
         del self.human.clothesProxies[uuid]
-
         if not suppressSignal:
             self.updateFaceMasks(self.faceHidingTggl.selected)
 
@@ -123,7 +118,7 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
             human.meshData.changeFaceMask(self.originalHumanMask)
             human.meshData.updateIndexBufferFaces()
             for uuid in [pxy.uuid for pxy in self.getSelection()]:
-                obj = human.clothesObjs[uuid]
+                obj = human.clothesProxies[uuid].object
                 faceMask = np.ones(obj.mesh.getFaceCount(), dtype=bool)
                 obj.mesh.changeFaceMask(faceMask)
                 obj.mesh.updateIndexBufferFaces()
@@ -133,7 +128,7 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
         log.debug("masked verts %s", np.count_nonzero(~vertsMask))
         for uuid in reversed(self.getClothesRenderOrder()):
             pxy = human.clothesProxies[uuid]
-            obj = human.clothesObjs[uuid]
+            obj = pxy.object
 
             # Convert basemesh vertex mask to local mask for proxy vertices
             proxyVertMask = np.ones(len(pxy.refVerts), dtype=bool)
@@ -222,13 +217,13 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
         if enabled:
             self.oldPxyMats = dict()
             xray_mat = material.fromFile(getpath.getSysDataPath('materials/xray.mhmat'))
-            for pxy, obj in self.human.getProxiesAndObjects():
-                self.oldPxyMats[pxy.uuid] = obj.material.clone()
-                obj.material = xray_mat
+            for pxy in self.human.getProxies():
+                self.oldPxyMats[pxy.uuid] = pxy.object.material.clone()
+                pxy.object.material = xray_mat
         else:
-            for pxy, obj in self.human.getProxiesAndObjects():
+            for pxy in self.human.getProxies():
                 if pxy.uuid in self.oldPxyMats:
-                    obj.material = self.oldPxyMats[pxy.uuid]
+                    pxy.object.material = self.oldPxyMats[pxy.uuid]
 
 class FaceHideCheckbox(gui.CheckBox):
     def enterEvent(self, event):
