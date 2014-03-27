@@ -280,7 +280,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
                 pxy = None
 
         if not pxy:
-            pxy = proxy.readProxyFile(human, mhclofile, type=self.proxyName.capitalize())
+            pxy = proxy.loadProxy(human, mhclofile, type=self.proxyName.capitalize())
             self._proxyCache[mhcloId] = pxy
 
         if pxy.uuid in [p.uuid for p in self.getSelection()]:
