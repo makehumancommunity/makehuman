@@ -207,7 +207,6 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
 
     def onHumanChanged(self, event):
         super(ClothesTaskView, self).onHumanChanged(event)
-        print dir(event)
         if event.change == 'reset':
             self.faceHidingTggl.setSelected(True)
         elif event.change == 'proxy' and event.pxy == 'genitals' \
