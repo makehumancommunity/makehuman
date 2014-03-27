@@ -103,7 +103,7 @@ class Human(guicommon.Object):
     # TODO introduce better system for managing proxies, nothing done for clothes yet
     def setHairProxy(self, proxy):
         self._hairProxy = proxy
-        event = events3d.HumanEvent(self, 'proxy')
+        event = events3d.HumanEvent(self, 'proxyChange')
         event.proxy = 'hair'
         self.callEvent('onChanged', event)
     def getHairProxy(self):
@@ -113,7 +113,7 @@ class Human(guicommon.Object):
 
     def setEyesProxy(self, proxy):
         self._eyesProxy = proxy
-        event = events3d.HumanEvent(self, 'proxy')
+        event = events3d.HumanEvent(self, 'proxyChange')
         event.proxy = 'eyes'
         self.callEvent('onChanged', event)
     def getEyesProxy(self):
@@ -123,7 +123,7 @@ class Human(guicommon.Object):
 
     def setGenitalsProxy(self, proxy):
         self._genitalsProxy = proxy
-        event = events3d.HumanEvent(self, 'proxy')
+        event = events3d.HumanEvent(self, 'proxyChange')
         event.proxy = 'genitals'
         self.callEvent('onChanged', event)
     def getGenitalsProxy(self):
