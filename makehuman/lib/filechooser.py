@@ -382,12 +382,15 @@ class MhmatFileLoader(FileHandler):
 
 class FileChooserBase(QtGui.QWidget, gui.Widget):
 
-    def __init__(self, path, extension, sort = FileSort(), doNotRecurse = False):
+    def __init__(self, path, extensions, sort = FileSort(), doNotRecurse = False):
         super(FileChooserBase, self).__init__()
         gui.Widget.__init__(self)
 
         self.setPaths(path)
-        self.extension = extension
+        if isinstance(extensions, basestring):
+            self.extensions = [extensions]
+        else:
+            self.extensions = extensions
         self.previewExtensions = None
         self.notFoundImage = None
         self.doNotRecurse = doNotRecurse
@@ -445,7 +448,7 @@ class FileChooserBase(QtGui.QWidget, gui.Widget):
         return False
 
     def search(self):
-        return getpath.search(self.paths, self.extension, recursive = not self.doNotRecurse)
+        return getpath.search(self.paths, self.extensions, recursive = not self.doNotRecurse)
 
     def clearList(self):
         for i in xrange(self.children.count()):
