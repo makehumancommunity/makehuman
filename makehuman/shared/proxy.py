@@ -841,6 +841,25 @@ def _getFileName(folder, file, suffix):
         return os.path.join(folder, file+suffix)
 
 
+def transferFaceMaskToProxy(vertsMask, proxy):
+    """
+    Transfer a vertex mask defined on the parent mesh to a proxie using the
+    proxy mapping to this parent mesh.
+    """
+    # Convert basemesh vertex mask to local mask for proxy vertices
+    proxyVertMask = np.ones(len(proxy.ref_vIdxs), dtype=bool)
+    for idx,hverts in enumerate(proxy.ref_vIdxs):
+        # Body verts to which proxy vertex with idx is mapped
+        if len(hverts) == 3:
+            (v1,v2,v3) = hverts
+            # Hide proxy vert if any of its referenced body verts are hidden (most agressive)
+            #proxyVertMask[idx] = vertsMask[v1] and vertsMask[v2] and vertsMask[v3]
+            # Alternative1: only hide if at least two referenced body verts are hidden (best result)
+            proxyVertMask[idx] = np.count_nonzero(vertsMask[[v1, v2, v3]]) > 1
+            # Alternative2: Only hide proxy vert if all of its referenced body verts are hidden (least agressive)
+            #proxyVertMask[idx] = vertsMask[v1] or vertsMask[v2] or vertsMask[v3]
+    return proxyVertMask
+
 
 #
 # Caching of proxy files in data folders
