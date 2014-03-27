@@ -86,6 +86,8 @@ class Proxy:
         self.basemesh = makehuman.getBasemeshVersion()
         self.tags = []
 
+        self.num_refverts = None
+
         self.ref_vIdxs = None       # (Vidx1,Vidx2,Vidx3) list with references to human vertex indices, indexed by proxy vert
         self.weights = None         # (w1,w2,w3) list, with weights per human vertex (mapped by ref_vIdxs), indexed by proxy vert
         self.vertWeights = {}       # (proxy-vert, weight) list for each parent vert (reverse mapping of self.weights, indexed by human vertex)
@@ -108,7 +110,7 @@ class Proxy:
         self.textureLayer = 0
         self.objFileLayer = 0   # TODO what is this used for?
 
-        self.deleteGroups = []
+        self.deleteGroups = []  # TODO is this still used?
         self.deleteVerts = np.zeros(len(human.meshData.coord), bool)
 
         # TODO are these still used?
@@ -490,8 +492,10 @@ def readProxyFile(human, filepath, type="Clothes"):
             refVert = ProxyRefVert(human)
             refVerts.append(refVert)
             if len(words) == 1:
+                proxy.num_refverts = 1
                 refVert.fromSingle(words, vnum, proxy.vertWeights)
             else:
+                proxy.num_refverts = 3
                 refVert.fromTriple(words, vnum, proxy.vertWeights)
             vnum += 1
 
@@ -527,6 +531,128 @@ def readProxyFile(human, filepath, type="Clothes"):
     return proxy
 
 
+def saveBinaryProxy(proxy, path):
+    fp = open(path, 'wb')
+    tagStr, tagIdx = _packStringList(proxy.tags)
+    uvStr,uvIdx = _packStringList([ proxy.uvLayers[k] for k in sorted(proxy.uvLayers.keys()) ])
+
+    vars_ = dict(
+        proxyType = np.fromstring(proxy.type, dtype='S1'),
+        name = np.fromstring(proxy.name, dtype='S1'),
+        uuid = np.fromstring(proxy.uuid, dtype='S1'),
+        basemesh = np.fromstring(proxy.basemesh, dtype='S1'),
+        tags_str = tagStr,
+        tags_idx = tagIdx,
+        num_refverts = np.asarray(proxy.num_refverts, dtype=np.int32),
+        deleteVerts = proxy.deleteVerts,
+        uvLayers_str = uvStr,
+        uvLayers_idx = uvIdx,
+        material_file = np.fromstring(proxy.material_file, dtype='S1'),
+        obj_file = np.fromstring(proxy._obj_file, dtype='S1'),
+    )
+
+    if proxy.z_depth is not None and proxy.z_depth != -1:
+        vars_["z_depth"] = np.asarray(proxy.z_depth, dtype=np.int32)
+
+    if proxy.max_pole:
+        vars_["max_pole"] = np.asarray(proxy.max_pole, dtype=np.uint32),
+
+    if proxy.num_refverts == 3:
+        vars_["ref_vIdxs"] = proxy.ref_vIdxs
+        vars_["offsets"] = proxy.offsets
+        vars_["weights"] = proxy.weights
+    else:
+        vars_["ref_vIdxs"] = proxy.ref_vIdxs[:,0]
+        vars_["weights"] = proxy.weights[:,0]
+
+    if proxy.vertexgroup_file:
+        vars_['vertexgroup_file'] = np.fromstring(proxy.vertexgroup_file, dtype='S1')
+
+    np.savez(fp, **vars_)
+    fp.close()
+
+def loadBinaryProxy(path, human):
+    log.debug("Loading binary proxy %s.", path)
+
+    npzfile = np.load(path)
+    proxyType = npzfile['proxyType'].tostring()
+
+    proxy = Proxy(path, proxyType, human)
+
+    proxy.name = npzfile['name'].tostring()
+    proxy.uuid = npzfile['uuid'].tostring()
+    proxy.basemesh = npzfile['basemesh'].tostring()
+
+    proxy.tags = set(_unpackStringList(npzfile['tags_str'], npzfile['tags_idx']))
+
+    if 'z_depth' in npzfile:
+        proxy.z_depth = int(npzfile['z_depth'])
+
+    if 'max_pole' in npzfile:
+        proxy.max_pole = int(npzfile['max_pole'])
+
+    proxy.num_refverts = int(npzfile['num_refverts'])
+
+    if proxy.num_refverts == 3:
+        proxy.ref_vIdxs = npzfile['ref_vIdxs']
+        proxy.offsets = npzfile['offsets']
+        proxy.weights = npzfile['weights']
+    else:
+        num_refs = npzfile['ref_vIdxs'].shape[0]
+        proxy.ref_vIdxs = np.zeros((num_refs,3), dtype=np.uint32)
+        proxy.ref_vIdxs[:,0] = npzfile['ref_vIdxs']
+        proxy.offsets = np.zeros((num_refs,3), dtype=np.float32)
+        proxy.weights = np.zeros((num_refs,3), dtype=np.float32)
+        proxy.weights[:,0] = npzfile['weights']
+    proxy.deleteVerts = npzfile['deleteVerts']
+
+    # Reconstruct reverse vertex (and weights) mapping
+    proxy.vertWeights = {}
+    if proxy.num_refverts == 3:
+        for pxy_vIdx in xrange(proxy.ref_vIdxs.shape[0]):
+            _addProxyVertWeight(proxy.vertWeights, proxy.ref_vIdxs[pxy_vIdx, 0], pxy_vIdx, proxy.weights[pxy_vIdx, 0])
+            _addProxyVertWeight(proxy.vertWeights, proxy.ref_vIdxs[pxy_vIdx, 1], pxy_vIdx, proxy.weights[pxy_vIdx, 1])
+            _addProxyVertWeight(proxy.vertWeights, proxy.ref_vIdxs[pxy_vIdx, 2], pxy_vIdx, proxy.weights[pxy_vIdx, 2])
+    else:
+        for pxy_vIdx in xrange(proxy.ref_vIdxs.shape[0]):
+            _addProxyVertWeight(proxy.vertWeights, proxy.ref_vIdxs[pxy_vIdx, 0], pxy_vIdx, 1.0)
+
+    proxy.tmatrix = TMatrix()
+
+    proxy.uvLayers = {}
+    for uvIdx, uvName in enumerate(_unpackStringList(npzfile['uvLayers_str'], npzfile['uvLayers_idx'])):
+        uvLayers[uvIdx] = uvName
+
+    proxy.material = material.Material(proxy.name)
+    proxy.material_file = npzfile['material_file'].tostring()
+    if proxy.material_file:
+        proxy.material.fromFile(proxy.material_file)
+
+    proxy._obj_file = npzfile['obj_file'].tostring()
+
+    if 'vertexgroup_file' in npzfile:
+        proxy.vertexgroup_file = npzfile['vertexgroup_file'].tostring()
+        if proxy.vertexgroup_file:
+            proxy.vertexGroups = io_json.loadJson(proxy.vertexgroup_file)
+
+    # Just set the defaults for these, no idea if they are still relevant
+    proxy.maskLayer = -1
+    proxy.textureLayer = 0
+    proxy.objFileLayer = 0
+    proxy.deleteGroups = []
+    proxy.wire = False
+    proxy.cage = False
+    proxy.modifiers = []
+    proxy.shapekeys = []
+
+
+    if proxy.z_depth == -1:
+        log.warning('Proxy file %s does not specify a Z depth. Using 50.', path)
+        proxy.z_depth = 50
+
+    return proxy
+
+
 #
 #   class ProxyRefVert:
 #
@@ -537,6 +663,7 @@ class ProxyRefVert:
         self.human = human
 
     def fromSingle(self, words, vnum, vertWeights):
+        # TODO store the number of reference verts in proxy so that we can efficiently save and load them.
         v0 = int(words[0])
         self._verts = (v0,0,1)
         self._weights = (1.0,0.0,0.0)
