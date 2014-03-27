@@ -885,7 +885,10 @@ def updateProxyFileCache(paths, fileExt, cache = None):
     return cache
 
 
-def _findProxyFiles(folder, fileExt = "mhclo", depth = 6):
+def _findProxyFiles(folder, fileExts = "mhclo", depth = 6):
+    if isinstance(fileExts, basestring):
+        fileExts = [fileExts]
+
     if depth < 0:
         return []
     try:
@@ -895,11 +898,12 @@ def _findProxyFiles(folder, fileExt = "mhclo", depth = 6):
     result = []
     for pname in files:
         path = os.path.join(folder, pname)
-        if os.path.isfile(path):
-            if os.path.splitext(path)[1] == "."+fileExt:
-                result.append(path)
-        elif os.path.isdir(path):
-            result.extend(_findProxyFiles(path, fileExt, depth-1))
+        for fileExt in fileExts:
+            if os.path.isfile(path):
+                if os.path.splitext(path)[1] == "."+fileExt:
+                    result.append(path)
+            elif os.path.isdir(path):
+                result.extend(_findProxyFiles(path, fileExt, depth-1))
     return result
 
 
