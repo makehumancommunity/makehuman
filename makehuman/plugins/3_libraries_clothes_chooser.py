@@ -228,11 +228,11 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
         if enabled:
             self.oldPxyMats = dict()
             xray_mat = material.fromFile(getpath.getSysDataPath('materials/xray.mhmat'))
-            for pxy in self.human.getProxies():
+            for pxy in self.human.getProxies(includeHumanProxy=False):
                 self.oldPxyMats[pxy.uuid] = pxy.object.material.clone()
                 pxy.object.material = xray_mat
         else:
-            for pxy in self.human.getProxies():
+            for pxy in self.human.getProxies(includeHumanProxy=False):
                 if pxy.uuid in self.oldPxyMats:
                     pxy.object.material = self.oldPxyMats[pxy.uuid]
 
