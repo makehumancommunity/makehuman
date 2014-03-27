@@ -175,7 +175,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
         """
         The file extension for proxy files of this type.
         """
-        return 'mhclo'
+        return ['mhpxy', 'mhclo']
 
     def getNotFoundIcon(self):
         """
