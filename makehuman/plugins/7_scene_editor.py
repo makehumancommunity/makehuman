@@ -46,8 +46,6 @@ import mh
 import gui
 from core import G
 import guirender
-
-import os
 import scene
 
 
@@ -229,12 +227,12 @@ class SceneEditorTaskView(guirender.RenderTaskView):
 
         def doSave(filename):
             ok = self.scene.save(filename)
-            if ok and G.app.scene.path is not None \
-                and G.app.scene.path == self.scene.path:
+            if ok and self._appscene.file.path is not None \
+                and self._appscene.file.path == self.scene.file.path:
                 # Refresh MH's current scene if it was modified.
-                G.app.scene.reload()
+                self._appscene.load(self._appscene.file.path)
 
-        @self.scene.mhEvent
+        @self.scene.file.mhEvent
         def onModified(event):
             self.updateFileTitle()
             if event.objectWasChanged:
@@ -244,7 +242,7 @@ class SceneEditorTaskView(guirender.RenderTaskView):
 
         @self.loadButton.mhEvent
         def onClicked(event):
-            if self.scene.modified:
+            if self.scene.file.modified:
                 G.app.prompt('Confirmation',
                     'Your scene is unsaved. Are you sure you want to close it?',
                     'Close', 'Cancel', doLoad)
@@ -253,14 +251,14 @@ class SceneEditorTaskView(guirender.RenderTaskView):
 
         @self.saveButton.mhEvent
         def onClicked(event):
-            if self.scene.path is None:
+            if self.scene.file.path is None:
                 self.saveAsButton.callEvent('onClicked', event)
             else:
-                doSave(self.scene.path)
+                doSave(self.scene.file.path)
 
         @self.closeButton.mhEvent
         def onClicked(event):
-            if self.scene.modified:
+            if self.scene.file.modified:
                 G.app.prompt('Confirmation',
                     'Your scene is unsaved. Are you sure you want to close it?',
                     'Close', 'Cancel', self.scene.close)
@@ -295,10 +293,10 @@ class SceneEditorTaskView(guirender.RenderTaskView):
             self.propsBox.addWidget(item.getUserData().widget)
 
     def updateFileTitle(self):
-        lbltxt = self.scene.filename
+        lbltxt = self.scene.file.name
         if lbltxt is None:
             lbltxt = '<New scene>'
-        if self.scene.modified:
+        if self.scene.file.modified:
             lbltxt += '*'
         self.fnlbl.setText(lbltxt)
 
