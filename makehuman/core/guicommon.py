@@ -229,16 +229,21 @@ class Object(events3d.EventHandler):
         if proxy:
             import files3d
             self.proxy = proxy
-            # TODO perhaps not duplicate this and only allow setting proxies with object already attached
-            self.__proxyMesh, _obj = proxy.loadMeshAndObject(self)
+
+            _obj = proxy.object
+            self.__proxyMesh = _obj.mesh
+
+            # Copy attributes from human mesh to proxy mesh
             for attr in ('x', 'y', 'z', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz',
                          'visibility', 'shadeless', 'pickable', 'cameraMode', 'material'):
                 setattr(self.__proxyMesh, attr, getattr(self.mesh, attr))
 
+            # Connect the proxy to this object directly
             self.__proxyMesh.object = self.mesh.object
 
             self.proxy.update(self.__proxyMesh)
 
+            # Attach to GL object if this object is attached to viewport
             if self.__seedMesh.object3d:
                 self.attachMesh(self.__proxyMesh)
 
