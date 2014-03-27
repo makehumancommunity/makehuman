@@ -91,7 +91,7 @@
           {"mod": "nose/nose-volume-potato|point", "cam": "leftView"},
           {"mod": "nose/nose-nostrils-angle-up|down", "cam": "leftView"},
           {"mod": "nose/nose-point-up|down", "cam": "leftView"},
-          {"mod": "nose/nose-septumangle-decr|incr", "cam": "leftView"},
+          {"mod": "nose/nose-septumangle-decr|incr", "cam": "leftView", "label": "Septum Angle"},
           {"mod": "nose/nose-flaring-decr|incr", "cam": "leftView"}
         ],
       "mouth size": [
