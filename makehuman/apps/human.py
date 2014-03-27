@@ -244,6 +244,9 @@ class Human(guicommon.Object):
         except KeyError:
             return None
 
+    def getProxyObjects(self):
+        return [ pxy.object for pxy in self.getProxies() ]
+
     # Overriding hide and show to account for both human base and the hairs!
 
     def show(self):
