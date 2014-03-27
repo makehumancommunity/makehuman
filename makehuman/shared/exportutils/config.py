@@ -116,11 +116,12 @@ class Config(object):
             name = self.goodName(pxy.name)
             proxies[name] = pxy
 
+        # TODO deprecated? is this going to be revived?
         if self.cage:
             import proxy
             human = G.app.selectedHuman
             filepath = getSysDataPath("cages/cage/cage.mhclo")
-            pxy = proxy.readProxyFile(human, filepath, type="Cage")
+            pxy = proxy.loadProxy(human, filepath, type="Cage")
             pxy.update(human.meshData)
             proxies[name] = pxy
 
