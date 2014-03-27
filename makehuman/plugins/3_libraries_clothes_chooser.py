@@ -56,7 +56,7 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
 
         #self.taggedClothes = {}
 
-        self.originalHumanMask = gui3d.app.selectedHuman.meshData.getFaceMask().copy()
+        self.originalHumanMask = self.human.meshData.getFaceMask().copy()
         self.faceHidingTggl = self.optionsBox.addWidget(FaceHideCheckbox("Hide faces under clothes"))
         @self.faceHidingTggl.mhEvent
         def onClicked(event):
@@ -94,7 +94,7 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
         super(ClothesTaskView, self).resetSelection()
         self.updateFaceMasks(self.faceHidingTggl.selected)
 
-    def getClothesRenderOrder(self):
+    def getClothesByRenderOrder(self):
         """
         Return UUIDs of clothes proxys sorted on proxy.z_depth render queue
         parameter (the order in which they will be rendered).
@@ -113,12 +113,15 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
 
         log.debug("Clothes library: updating face masks (face hiding %s).", "enabled" if enableFaceHiding else "disabled")
 
-        human = gui3d.app.selectedHuman
+        human = self.human
         if not enableFaceHiding:
             human.meshData.changeFaceMask(self.originalHumanMask)
             human.meshData.updateIndexBufferFaces()
-            for uuid in [pxy.uuid for pxy in self.getSelection()]:
-                obj = human.clothesProxies[uuid].object
+            proxies = self.getSelection()
+            if self.human.genitalsProxy:
+                proxies.append(self.human.genitalsProxy)
+            for pxy in proxies:
+                obj = pxy.object
                 faceMask = np.ones(obj.mesh.getFaceCount(), dtype=bool)
                 obj.mesh.changeFaceMask(faceMask)
                 obj.mesh.updateIndexBufferFaces()
@@ -126,8 +129,13 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
 
         vertsMask = np.ones(human.meshData.getVertexCount(), dtype=bool)
         log.debug("masked verts %s", np.count_nonzero(~vertsMask))
-        for uuid in reversed(self.getClothesRenderOrder()):
-            pxy = human.clothesProxies[uuid]
+
+        stackedProxies = [human.clothesProxies[uuid] for uuid in reversed(self.getClothesByRenderOrder())]
+        # Mask genitals too
+        if self.human.genitalsProxy:
+            stackedProxies.append( self.human.genitalsProxy )
+
+        for pxy in stackedProxies:
             obj = pxy.object
 
             # Convert basemesh vertex mask to local mask for proxy vertices
@@ -199,8 +207,13 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
 
     def onHumanChanged(self, event):
         super(ClothesTaskView, self).onHumanChanged(event)
+        print dir(event)
         if event.change == 'reset':
             self.faceHidingTggl.setSelected(True)
+        elif event.change == 'proxy' and event.pxy == 'genitals' \
+             and self.faceHidingTggl.selected:
+            # Update face masks if genital proxy was changed
+            self.updateFaceMasks(self.faceHidingTggl.selected)
 
     def saveHandler(self, human, file):
         super(ClothesTaskView, self).saveHandler(human, file)

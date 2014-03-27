@@ -119,7 +119,6 @@ class ProxyChooserTaskView(gui3d.TaskView):
         self._proxyFilePerUuid = None
 
         self.selectedProxies = []
-        self.proxyObjects = []
 
         self.createFileChooser()
 
@@ -306,7 +305,6 @@ class ProxyChooserTaskView(gui3d.TaskView):
 
         # Add to selection
         self.selectedProxies.append(pxy)
-        self.proxyObjects.append(obj)
 
         self.filechooser.selectItem(mhclofile)
 
@@ -330,10 +328,9 @@ class ProxyChooserTaskView(gui3d.TaskView):
             else:
                 return
 
-        obj = self.proxyObjects[idx]
         pxy = self.selectedProxies[idx]
+        obj = pxy.object
         gui3d.app.removeObject(obj)
-        del self.proxyObjects[idx]
         del self.selectedProxies[idx]
         self.filechooser.deselectItem(mhclofile)
 
@@ -363,14 +360,14 @@ class ProxyChooserTaskView(gui3d.TaskView):
         contain multiple entries, if this is library allows selecting only a
         single proxy, the list is either of length 0 or 1.
         """
-        return self.selectedProxies
+        return list(self.selectedProxies)
 
     def getObjects(self):
         """
         Returns a list of objects beloning to the proxies returned by getSelection()
         The order corresponds with that of getSelection().
         """
-        return self.proxyObjects
+        return [pxy.object for pxy in self.getSelection()]
 
     def hideObjects(self):
         """
