@@ -345,7 +345,7 @@ def loadProxy(human, path, type="Clothes"):
             if os.path.isfile(path) and os.path.getmtime(path) > os.path.getmtime(npzpath):
                 log.message('compiled proxy file out of date: %s', npzpath)
                 raise RuntimeError('compiled file out of date: %s', npzpath)
-            proxy = loadBinaryProxy(npzpath, human)
+            proxy = loadBinaryProxy(npzpath, human, type)
         except Exception as e:
             showTrace = not isinstance(e, RuntimeError)
             log.warning("Problem loading binary proxy: %s", e, exc_info=showTrace)
@@ -563,7 +563,7 @@ def saveBinaryProxy(proxy, path):
     uvStr,uvIdx = _packStringList([ proxy.uvLayers[k] for k in sorted(proxy.uvLayers.keys()) ])
 
     vars_ = dict(
-        proxyType = np.fromstring(proxy.type, dtype='S1'),
+        #proxyType = np.fromstring(proxy.type, dtype='S1'),     # TODO store proxy type?
         name = np.fromstring(proxy.name, dtype='S1'),
         uuid = np.fromstring(proxy.uuid, dtype='S1'),
         basemesh = np.fromstring(proxy.basemesh, dtype='S1'),
@@ -597,11 +597,14 @@ def saveBinaryProxy(proxy, path):
     np.savez(fp, **vars_)
     fp.close()
 
-def loadBinaryProxy(path, human):
+def loadBinaryProxy(path, human, type):
     log.debug("Loading binary proxy %s.", path)
 
     npzfile = np.load(path)
-    proxyType = npzfile['proxyType'].tostring()
+    #if type is None:
+    #    proxyType = npzfile['proxyType'].tostring()
+    #else:
+    proxyType = type
 
     proxy = Proxy(path, proxyType, human)
 
