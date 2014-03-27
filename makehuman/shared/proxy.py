@@ -848,9 +848,9 @@ def transferFaceMaskToProxy(vertsMask, proxy):
     """
     # Convert basemesh vertex mask to local mask for proxy vertices
     proxyVertMask = np.ones(len(proxy.ref_vIdxs), dtype=bool)
-    for idx,hverts in enumerate(proxy.ref_vIdxs):
-        # Body verts to which proxy vertex with idx is mapped
-        if len(hverts) == 3:
+    if proxy.num_refverts == 3:
+        for idx,hverts in enumerate(proxy.ref_vIdxs):
+            # Body verts to which proxy vertex with idx is mapped
             (v1,v2,v3) = hverts
             # Hide proxy vert if any of its referenced body verts are hidden (most agressive)
             #proxyVertMask[idx] = vertsMask[v1] and vertsMask[v2] and vertsMask[v3]
@@ -858,6 +858,8 @@ def transferFaceMaskToProxy(vertsMask, proxy):
             proxyVertMask[idx] = np.count_nonzero(vertsMask[[v1, v2, v3]]) > 1
             # Alternative2: Only hide proxy vert if all of its referenced body verts are hidden (least agressive)
             #proxyVertMask[idx] = vertsMask[v1] or vertsMask[v2] or vertsMask[v3]
+    else:
+        proxyVertMask[:] = vertsMask[proxy.ref_vIdxs[:,0]]
     return proxyVertMask
 
 
