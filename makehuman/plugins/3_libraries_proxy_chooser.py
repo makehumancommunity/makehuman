@@ -141,6 +141,8 @@ class ProxyTaskView(proxychooser.ProxyChooserTaskView):
         else:
             pxy = self._proxyCache[mhclofile]
 
+        mesh,obj = pxy.loadMeshAndObject(self.human)
+
         self.human.setProxy(pxy)
         self.human.updateProxyMesh()
 
