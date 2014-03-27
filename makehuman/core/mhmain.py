@@ -198,6 +198,7 @@ class MHApplication(gui3d.Application, mh.Application):
         if mh.isRelease():
             self.settings = {
                 'realtimeUpdates': True,
+                'realtimeFitting', True,
                 'sliderImages': True,
                 'excludePlugins': [
                     "0_modeling_5_editing",
@@ -233,6 +234,7 @@ class MHApplication(gui3d.Application, mh.Application):
         else:
             self.settings = {
                 'realtimeUpdates': True,
+                'realtimeFitting', True,
                 'realtimeNormalUpdates': True,
                 'cameraAutoZoom': False,
                 'lowspeed': 1,
