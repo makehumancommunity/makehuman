@@ -403,6 +403,7 @@ class FileChooserBase(QtGui.QWidget, gui.Widget):
         self.tagFilter = None
 
         self._autoRefresh = True
+        self.mutexExtensions = False
 
     def createSortBox(self):
         sortBox = gui.GroupBox('Sort')
@@ -448,7 +449,9 @@ class FileChooserBase(QtGui.QWidget, gui.Widget):
         return False
 
     def search(self):
-        return getpath.search(self.paths, self.extensions, recursive = not self.doNotRecurse)
+        return getpath.search(self.paths, self.extensions, 
+                              recursive = not self.doNotRecurse, 
+                              mutexExtensions = self.mutexExtensions)
 
     def clearList(self):
         for i in xrange(self.children.count()):
