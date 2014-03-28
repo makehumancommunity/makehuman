@@ -867,7 +867,7 @@ def transferFaceMaskToProxy(vertsMask, proxy):
 # Caching of proxy files in data folders
 #
 
-def updateProxyFileCache(paths, fileExt, cache = None):
+def updateProxyFileCache(paths, fileExts, cache = None):
     """
     Update cache of proxy files in the specified paths. If no cache is given as
     parameter, a new cache is created.
@@ -881,7 +881,7 @@ def updateProxyFileCache(paths, fileExt, cache = None):
     proxyFiles = []
     entries = dict((key, True) for key in cache.keys()) # lookup dict for old entries in cache
     for folder in paths:
-        proxyFiles.extend(_findProxyFiles(folder, fileExt, 6))
+        proxyFiles.extend(getpath.search(folder, fileExts, recursive=True, mutexExtensions=True))
     for proxyFile in proxyFiles:
         proxyId = getpath.canonicalPath(proxyFile)
 
@@ -906,50 +906,39 @@ def updateProxyFileCache(paths, fileExt, cache = None):
     return cache
 
 
-def _findProxyFiles(folder, fileExts = "mhclo", depth = 6):
-    if isinstance(fileExts, basestring):
-        fileExts = [fileExts]
-
-    if depth < 0:
-        return []
-    try:
-        files = os.listdir(folder)
-    except OSError:
-        return []
-    result = []
-    for pname in files:
-        path = os.path.join(folder, pname)
-        for fileExt in fileExts:
-            if os.path.isfile(path):
-                if os.path.splitext(path)[1] == "."+fileExt:
-                    result.append(path)
-            elif os.path.isdir(path):
-                result.extend(_findProxyFiles(path, fileExt, depth-1))
-    return result
-
-
 def peekMetadata(proxyFilePath):
     """
     Read UUID and tags from proxy file, and return as soon as vertex data
     begins. Reads only the necessary lines of the proxy file from disk, not the
     entire proxy file is loaded in memory.
     """
-    # TODO support binary proxy files too!
-    fp = open(proxyFilePath)
-    uuid = None
-    tags = set()
-    for line in fp:
-        words = line.split()
-        if len(words) == 0:
-            pass
-        elif words[0] == 'uuid':
-            uuid = words[1]
-        elif words[0] == 'tag':
-            tags.add(words[1].lower())
-        elif words[0] == 'verts':
-            break
-    fp.close()
-    return (uuid, tags)
+    #import zipfile
+    #if zipfile.is_zipfile(proxyFilePath):
+    # Using the extension is faster (and will have to do):
+    if os.path.splitext(proxyFilePath)[1][1:].lower() == 'mhpxy':
+        # Binary proxy file
+        npzfile = np.load(path)
+
+        uuid = npzfile['uuid'].tostring()
+        tags = set(_unpackStringList(npzfile['tags_str'], npzfile['tags_idx']))
+        return (uuid, tags)
+    else:
+        # ASCII proxy file
+        fp = open(proxyFilePath)
+        uuid = None
+        tags = set()
+        for line in fp:
+            words = line.split()
+            if len(words) == 0:
+                pass
+            elif words[0] == 'uuid':
+                uuid = words[1]
+            elif words[0] == 'tag':
+                tags.add(words[1].lower())
+            elif words[0] == 'verts':
+                break
+        fp.close()
+        return (uuid, tags)
 
 
 def _packStringList(strings):
