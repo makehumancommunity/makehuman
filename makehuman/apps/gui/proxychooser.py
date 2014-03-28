@@ -240,13 +240,13 @@ class ProxyChooserTaskView(gui3d.TaskView):
         # TODO remove, this is bogus
         raise NotImplementedError("Implement ProxyChooserTaskView.getObjectLayer()!")
 
-    def proxySelected(self, pxy, obj):
+    def proxySelected(self, pxy):
         """
         Do custom work specific to this library when a proxy object was loaded.
         """
         raise NotImplementedError("Implement ProxyChooserTaskView.proxySelected()!")
 
-    def proxyDeselected(self, pxy, obj, suppressSignal = False):
+    def proxyDeselected(self, pxy, suppressSignal = False):
         """
         Do custom work specific to this library when a proxy object was unloaded.
         """
@@ -309,7 +309,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
 
         self.filechooser.selectItem(mhclofile)
 
-        self.proxySelected(pxy, obj)
+        self.proxySelected(pxy)
 
         self.signalChange()
 
@@ -335,7 +335,8 @@ class ProxyChooserTaskView(gui3d.TaskView):
         del self.selectedProxies[idx]
         self.filechooser.deselectItem(mhclofile)
 
-        self.proxyDeselected(pxy, obj, suppressSignal)
+        self.proxyDeselected(pxy, suppressSignal)
+        pxy.object = None   # Drop pointer to object
 
         if not self.multiProxy:
             # Select None item in file list
