@@ -596,7 +596,7 @@ def saveBinaryProxy(proxy, path):
     if proxy.vertexgroup_file:
         vars_['vertexgroup_file'] = np.fromstring(proxy.vertexgroup_file, dtype='S1')
 
-    np.savez(fp, **vars_)
+    np.savez_compressed(fp, **vars_)
     fp.close()
 
 def loadBinaryProxy(path, human, type):
@@ -921,7 +921,7 @@ def peekMetadata(proxyFilePath):
     # Using the extension is faster (and will have to do):
     if os.path.splitext(proxyFilePath)[1][1:].lower() == 'mhpxy':
         # Binary proxy file
-        npzfile = np.load(path)
+        npzfile = np.load(proxyFilePath)
 
         uuid = npzfile['uuid'].tostring()
         tags = set(_unpackStringList(npzfile['tags_str'], npzfile['tags_idx']))
