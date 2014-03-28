@@ -570,12 +570,14 @@ def saveBinaryProxy(proxy, path):
         tags_str = tagStr,
         tags_idx = tagIdx,
         num_refverts = np.asarray(proxy.num_refverts, dtype=np.int32),
-        deleteVerts = proxy.deleteVerts,
         uvLayers_str = uvStr,
         uvLayers_idx = uvIdx,
         material_file = np.fromstring(proxy.material_file, dtype='S1'),
         obj_file = np.fromstring(proxy._obj_file, dtype='S1'),
     )
+
+    if np.any(proxy.deleteVerts):
+        vars_["deleteVerts"] = proxy.deleteVerts
 
     if proxy.z_depth is not None and proxy.z_depth != -1:
         vars_["z_depth"] = np.asarray(proxy.z_depth, dtype=np.int32)
@@ -633,7 +635,9 @@ def loadBinaryProxy(path, human, type):
         proxy.offsets = np.zeros((num_refs,3), dtype=np.float32)
         proxy.weights = np.zeros((num_refs,3), dtype=np.float32)
         proxy.weights[:,0] = npzfile['weights']
-    proxy.deleteVerts = npzfile['deleteVerts']
+
+    if "deleteVerts" in npzfile:
+        proxy.deleteVerts = npzfile['deleteVerts']
 
     # Reconstruct reverse vertex (and weights) mapping
     proxy.vertWeights = {}
