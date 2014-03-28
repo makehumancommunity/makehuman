@@ -108,7 +108,7 @@ class SaveTaskView(gui3d.TaskView):
         if modelPath is None:
             modelPath = mh.getPath("models")
 
-        name = G.app.currentFile.filetitle
+        name = G.app.currentFile.title
         if name is None:
             name = ""
 
