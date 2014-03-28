@@ -50,12 +50,10 @@ class EyesTaskView(proxychooser.ProxyChooserTaskView):
         #return 3
         return 5
 
-    def proxySelected(self, proxy, obj):
-        self.human.eyesObj = obj
+    def proxySelected(self, proxy):
         self.human.eyesProxy = proxy
 
-    def proxyDeselected(self, proxy, obj, suppressSignal = False):
-        self.human.eyesObj = None
+    def proxyDeselected(self, proxy, suppressSignal = False):
         self.human.eyesProxy = None
 
     def onShow(self, event):

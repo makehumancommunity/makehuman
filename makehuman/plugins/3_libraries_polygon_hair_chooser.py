@@ -50,12 +50,10 @@ class HairTaskView(proxychooser.ProxyChooserTaskView):
         #return 3
         return 20
 
-    def proxySelected(self, proxy, obj):
-        self.human.hairObj = obj
+    def proxySelected(self, proxy):
         self.human.hairProxy = proxy
 
-    def proxyDeselected(self, proxy, obj, suppressSignal = False):
-        self.human.hairObj = None
+    def proxyDeselected(self, proxy, suppressSignal = False):
         self.human.hairProxy = None
 
     def onShow(self, event):
