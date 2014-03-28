@@ -49,12 +49,10 @@ class TongueTaskView(proxychooser.ProxyChooserTaskView):
     def getObjectLayer(self):
         return 5
 
-    def proxySelected(self, proxy, obj):
-        self.human.tongueObj = obj
+    def proxySelected(self, proxy):
         self.human.tongueProxy = proxy
 
-    def proxyDeselected(self, proxy, obj, suppressSignal = False):
-        self.human.tongueObj = None
+    def proxyDeselected(self, proxy, suppressSignal = False):
         self.human.tongueProxy = None
 
     def onShow(self, event):

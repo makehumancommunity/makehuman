@@ -271,19 +271,19 @@ class MaterialTaskView(gui3d.TaskView):
                 if clo.material.filename !=  proxy.material.filename:
                     materialPath = self.getRelativeMaterialPath(clo.material.filename, proxy.file)
                     file.write('material %s %s %s\n' % (proxy.name, proxy.getUuid(), materialPath))
-        if human.hairObj and human.hairProxy:
+        if human.hairProxy:
             proxy = human.hairProxy
-            hairObj = human.hairObj
+            hairObj = proxy.object
             materialPath = self.getRelativeMaterialPath(hairObj.material.filename, proxy.file)
             file.write('material %s %s %s\n' % (proxy.name, proxy.getUuid(), materialPath))
-        if human.eyesObj and human.eyesProxy:
+        if human.eyesProxy:
             proxy = human.eyesProxy
-            eyesObj = human.eyesObj
+            eyesObj = proxy.object
             materialPath = self.getRelativeMaterialPath(eyesObj.material.filename, proxy.file)
             file.write('material %s %s %s\n' % (proxy.name, proxy.getUuid(), materialPath))
-        if human.genitalsObj and human.genitalsProxy:
+        if human.genitalsProxy:
             proxy = human.genitalsProxy
-            genitalsObj = human.genitalsObj
+            genitalsObj = proxy.object
             materialPath = self.getRelativeMaterialPath(genitalsObj.material.filename, proxy.file)
             file.write('material %s %s %s\n' % (proxy.name, proxy.getUuid(), materialPath))
 
