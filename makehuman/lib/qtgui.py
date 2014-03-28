@@ -1212,8 +1212,7 @@ class FileEntryView(QtGui.QWidget, Widget):
         @self.browse.mhEvent
         def onClicked(path):
             """When the browse button is used, update the path in
-            the line edit. If the mode is 'dir', confirm the entry
-            and emit an onFileSelected event."""
+            the line edit and confirm the entry."""
             if path:
                 self.edit.setText(path)
                 self._confirm()
@@ -1229,8 +1228,8 @@ class FileEntryView(QtGui.QWidget, Widget):
             self.edit.setText(directory)
 
     def setFilter(self, filter):
-        """Set the extension filter the browse dialog will use for browsing.
-        [notice: see note for _browse.]"""
+        """Set the extension filter the browse dialog will use for browsing."""
+        # NOTE: Shouldn't this be self.browse.filter?
         self.filter = getLanguageString(filter)
         if '(*.*)' not in self.filter:
             self.filter = ';;'.join(
