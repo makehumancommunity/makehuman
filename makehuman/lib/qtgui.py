@@ -1187,7 +1187,8 @@ class FileEntryView(QtGui.QWidget, Widget):
 
         self.layout = QtGui.QGridLayout(self)
 
-        self.browse = BrowseButton(mode)
+        self.mode = mode
+        self.browse = BrowseButton(self.mode)
         self.layout.addWidget(self.browse, 0, 0)
         self.layout.setColumnStretch(0, 0)
 
@@ -1197,7 +1198,7 @@ class FileEntryView(QtGui.QWidget, Widget):
         self.layout.addWidget(self.edit, 0, 1)
         self.layout.setColumnStretch(1, 1)
 
-        if mode != 'dir':
+        if self.mode != 'dir':
             self.confirm = QtGui.QPushButton(buttonLabel)
             self.layout.addWidget(self.confirm, 0, 2)
             self.layout.setColumnStretch(2, 0)
@@ -1224,7 +1225,7 @@ class FileEntryView(QtGui.QWidget, Widget):
         in the line edit."""
         self.directory = directory
         self.browse._path = directory
-        if self.browse._mode == 'dir':
+        if self.mode == 'dir':
             self.edit.setText(directory)
 
     def setFilter(self, filter):
