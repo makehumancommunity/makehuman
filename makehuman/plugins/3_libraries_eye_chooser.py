@@ -63,7 +63,9 @@ class EyesTaskView(proxychooser.ProxyChooserTaskView):
 
     def onHumanChanged(self, event):
         if event.change == 'reset':
+            # Load initial eyes
             self.selectProxy(mh.getSysDataPath("eyes/high-poly/high-poly.mhclo"))
+            # Reset default material on eyes (in case it was changed)
             self.getObjects()[0].mesh.material = self.getSelection()[0].material
             return
         super(EyesTaskView, self).onHumanChanged(event)
@@ -85,7 +87,7 @@ def load(app):
     taskview.registerLoadSaveHandlers()
 
     # Load initial eyes
-    taskview.selectProxy(mh.getSysDataPath("eyes/low-poly/low-poly.mhclo"))
+    taskview.selectProxy(mh.getSysDataPath("eyes/high-poly/high-poly.mhclo"))
 
 # This method is called when the plugin is unloaded from makehuman
 # At the moment this is not used, but in the future it will remove the added GUI elements
