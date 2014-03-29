@@ -43,6 +43,7 @@ import module3d
 import codecs
 import math
 import numpy as np
+from codecs import open  # TODO should Wavefront OBJ files contain unicode characters, or would it be better to strip them?
 
 def loadObjFile(path, obj = None):
     """
@@ -54,7 +55,7 @@ def loadObjFile(path, obj = None):
         name = os.path.splitext( os.path.basename(path) )[0]
         obj = module3d.Object3D(name)
 
-    objFile = open(path)
+    objFile = open(path, 'rU', encoding="utf-8")
 
     fg = None
     mtl = None
@@ -160,7 +161,7 @@ def writeObjFile(path, objects, writeMTL = True, config = None):
     if isinstance(path, file):
         fp = path
     else:
-        fp = codecs.open(path, 'w', encoding="utf-8")
+        fp = open(path, 'w', encoding="utf-8")
 
     fp.write(
         "# MakeHuman exported OBJ\n" +
@@ -223,7 +224,7 @@ def writeObjFile(path, objects, writeMTL = True, config = None):
     fp.close()
 
     if writeMTL:
-        fp = codecs.open(mtlfile, 'w', encoding="utf-8")
+        fp = open(mtlfile, 'w', encoding="utf-8")
         fp.write(
             '# MakeHuman exported MTL\n' +
             '# www.makehuman.org\n\n')

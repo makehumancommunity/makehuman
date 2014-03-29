@@ -63,6 +63,7 @@ class DebugDump(object):
         self.debugpath = None
 
     def open(self):
+        from codecs import open
         if self.debugpath is None:
             self.home = os.path.expanduser('~')
             self.debugpath = getpath.getPath()
@@ -71,9 +72,9 @@ class DebugDump(object):
                 os.makedirs(self.debugpath)
 
             self.debugpath = os.path.join(self.debugpath, "makehuman-debug.txt")
-            self.debug = open(self.debugpath, "w")
+            self.debug = open(self.debugpath, "w", encoding="utf-8")
         else:
-            self.debug = open(self.debugpath, "a")
+            self.debug = open(self.debugpath, "a", encoding="utf-8")
 
     def write(self, msg, *args):
         self.debug.write((msg % args) + "\n")
