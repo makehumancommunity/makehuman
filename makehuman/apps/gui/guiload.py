@@ -98,7 +98,8 @@ class HumanFileSort(fc.FileSort):
         meta = {}
                 
         meta['modified'] = os.path.getmtime(filename)
-        f = open(filename)
+        from codecs import open
+        f = open(filename, 'rU', encoding="utf-8")
         for line in f:
             lineData = line.split()
             field = lineData[0]

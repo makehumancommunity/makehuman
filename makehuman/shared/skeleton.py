@@ -54,6 +54,7 @@ import numpy.linalg as la
 import transformations as tm
 import matrix
 
+from codecs import open
 import log
 
 D = pi/180
@@ -274,7 +275,7 @@ class Skeleton(object):
         Sets current pose to
         """
         log.message("Mhp %s", filepath)
-        fp = open(filepath, "rU")
+        fp = open(filepath, "rU", encoding="utf-8")
 
         boneMap = self.getBoneToIdxMapping()
         nBones = len(boneMap.keys())
@@ -735,7 +736,7 @@ def loadTargetMapping(rigName, skel):
     if not os.path.isfile(path):
         raise RuntimeError("File %s with skeleton rig mapping does not exist.", path)
 
-    fp = open(path, "r")
+    fp = open(path, "rU", encoding="utf-8")
     status = 0
     bones = []
     renames = {}
@@ -787,7 +788,7 @@ def loadSourceMapping(srcName):
 
     log.message("Read source file %s", path)
     sourceMapping = {}
-    fp = open(path, "r")
+    fp = open(path, "rU", encoding="utf-8")
     status = 0
     for line in fp:
         words = line.split()

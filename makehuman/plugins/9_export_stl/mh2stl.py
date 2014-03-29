@@ -83,7 +83,8 @@ def exportStlAscii(filepath, config, exportJoints = False):
         config=config,
         subdivide=config.subdivide)
 
-    fp = open(filepath, 'w')
+    from codecs import open
+    fp = open(filepath, 'w', encoding="utf-8")
     solid = name.replace(' ','_')
     fp.write('solid %s\n' % solid)
 
