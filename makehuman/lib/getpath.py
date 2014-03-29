@@ -272,4 +272,8 @@ def pathToUnicode(path):
     system.
     Unicode representations of paths are fit for use in GUI.
     """
-    return path.decode(sys.getfilesystemencoding())
+    if isinstance(path, unicode):
+        return path
+    else:
+        return path.decode(sys.getfilesystemencoding())
+
