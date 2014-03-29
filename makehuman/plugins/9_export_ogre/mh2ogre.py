@@ -137,7 +137,7 @@ def writeMeshFile(human, filepath, rmeshes, config, progressCallback = None):
             coords[:,1] += getFeetOnGroundOffset(human)
         # Note: Ogre3d uses a y-up coordinate system (just like MH)
         lines.extend(['''\
-                <vertex>')
+                <vertex>
                     <position x="%s" y="%s" z="%s" />
                     <normal x="%s" y="%s" z="%s" />
                 </vertex>
