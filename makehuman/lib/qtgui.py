@@ -374,6 +374,13 @@ class Slider(QtGui.QWidget, Widget):
         else:
             self.image = None
 
+        self._sync(value)
+        self._update_image()
+
+        type(self)._instances.add(self)
+
+    def setValueConverter(self, valueConverter):
+        self._valueConverter = valueConverter
         if self.valueConverter:
             self.edit = NarrowLineEdit(5)
             self.connect(self.edit, QtCore.SIGNAL('returnPressed()'), self._enter)
@@ -387,10 +394,10 @@ class Slider(QtGui.QWidget, Widget):
             self.edit = None
             self.units = None
 
-        self._sync(value)
-        self._update_image()
+    def getValueConverter(self):
+        return self._valueConverter
 
-        type(self)._instances.add(self)
+    valueConverter = property(getValueConverter, setValueConverter)
 
     def sliderMousePressEvent(self, event):
         """
