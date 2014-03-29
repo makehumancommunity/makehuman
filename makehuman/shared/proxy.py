@@ -222,7 +222,7 @@ class Proxy:
 
 
     def update(self, mesh):
-        log.debug("Updating proxy %s.", self.name)
+        #log.debug("Updating proxy %s.", self.name)
         coords = self.getCoords()
         mesh.changeCoords(coords)
         mesh.calcNormals()
@@ -301,6 +301,7 @@ class Proxy:
     def getShapes(self, rawShapes, scale):
         # TODO document
 
+        # TODO dependency on richmesh?
         from richmesh import FakeTarget
 
         targets = []
