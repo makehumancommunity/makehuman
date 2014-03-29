@@ -42,10 +42,27 @@ import os
 
 __home_path = None
 
+def pathToUnicode(path):
+    """
+    Unicode representation of the filename.
+    String is decoded with the codeset used by the filesystem of the operating
+    system.
+    Unicode representations of paths are fit for use in GUI.
+    If the path parameter is not a string, it will be returned unchanged.
+    """
+    if path is None:
+        return path
+    elif isinstance(path, unicode):
+        return path
+    elif isinstance(path, basestring):
+        return path.decode(sys.getfilesystemencoding())
+    else:
+        return path
+
 def formatPath(path):
     if path is None:
         return None
-    return os.path.normpath(path).replace("\\", "/")
+    return pathToUnicode( os.path.normpath(path).replace("\\", "/") )
 
 def canonicalPath(path):
     """
@@ -93,7 +110,7 @@ def getHomePath():
 
     # Unix-based
     else:
-        __home_path = os.path.expanduser('~')
+        __home_path = pathToUnicode( os.path.expanduser('~') )
         return __home_path
 
 def getPath(subPath = ""):
@@ -246,7 +263,7 @@ def search(paths, extensions, recursive=True, mutexExtensions=False):
                         if mutexExtensions:
                             _aggregate_files_mutexExt(os.path.join(root, f))
                         else:
-                            yield os.path.join(root, f)
+                            yield pathToUnicode( os.path.join(root, f) )
     else:
         for path in paths:
             if not os.path.isdir(path):
@@ -259,21 +276,9 @@ def search(paths, extensions, recursive=True, mutexExtensions=False):
                         if mutexExtensions:
                             _aggregate_files_mutexExt(f)
                         else:
-                            yield f
+                            yield pathToUnicode( f )
 
     if mutexExtensions:
         for f in ["%s.%s" % (p,e) for p,e in discovered.items()]:
-            yield f
-
-def pathToUnicode(path):
-    """
-    Unicode representation of the filename.
-    String is decoded with the codeset used by the filesystem of the operating
-    system.
-    Unicode representations of paths are fit for use in GUI.
-    """
-    if isinstance(path, unicode):
-        return path
-    else:
-        return path.decode(sys.getfilesystemencoding())
+            yield pathToUnicode( f )
 
