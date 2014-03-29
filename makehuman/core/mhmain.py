@@ -61,10 +61,11 @@ import log
 
 @contextlib.contextmanager
 def outFile(path):
+    from codecs import open
     path = mh.getPath(path)
     tmppath = path + '.tmp'
     try:
-        with open(tmppath, 'w') as f:
+        with open(tmppath, 'w', encoding="utf-8") as f:
             yield f
         if os.path.exists(path):
             os.remove(path)
@@ -76,12 +77,13 @@ def outFile(path):
 
 @contextlib.contextmanager
 def inFile(path):
+    from codecs import open
     try:
         path = mh.getPath(path)
         if not os.path.isfile(path):
             yield []
             return
-        with open(path, 'r') as f:
+        with open(path, 'rU', encoding="utf-8") as f:
             yield f
     except:
         log.error('Failed to load file %s', path, exc_info=True)
@@ -889,7 +891,7 @@ class MHApplication(gui3d.Application, mh.Application):
         log._logLevelColors[log.ERROR] = 'red'
         log._logLevelColors[log.CRITICAL] = 'red'
 
-        f = open(os.path.join(mh.getSysDataPath("themes/"), theme + ".mht"), 'r')
+        f = open(os.path.join(mh.getSysDataPath("themes/"), theme + ".mht"), 'rU')
 
         update_log = False
         for data in f.readlines():

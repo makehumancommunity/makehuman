@@ -109,7 +109,7 @@ class Target(object):
 
     def _load_text(self, name):
         data = []
-        with open(name) as fd:
+        with open(name, 'rU') as fd:
             for line in fd:
                 line = line.strip()
                 if line.startswith('#'):
