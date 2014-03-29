@@ -996,7 +996,7 @@ class MHApplication(gui3d.Application, mh.Application):
     # Caption
     def setCaption(self, caption):
         """Set the main window caption."""
-        mh.setCaption(caption.encode('utf8'))
+        mh.setCaption(caption)
 
     def updateFilenameCaption(self):
         """Calculate and set the window title according to the
@@ -1005,13 +1005,16 @@ class MHApplication(gui3d.Application, mh.Application):
         if filename is None:
             filename = "Untitled"
         if mh.isRelease():
+            from getpath import pathToUnicode
             self.setCaption(
                 "MakeHuman %s - [%s][*]" %
-                (mh.getVersionStr(), filename))
+                (mh.getVersionStr(), pathToUnicode(filename)))
         else:
+            from getpath import pathToUnicode
             self.setCaption(
                 "MakeHuman r%s (%s) - [%s][*]" %
-                (os.environ['HGREVISION'], os.environ['HGNODEID'], filename))
+                (os.environ['HGREVISION'], os.environ['HGNODEID'], 
+                pathToUnicode(filename)))
         self.mainwin.setWindowModified(self.currentFile.modified)
 
     # Global status bar
