@@ -335,14 +335,19 @@ class Modifier(object):
 
 
 class SimpleModifier(Modifier):
+    """
+    Simple modifier constructed from a path to a target file.
+    """
 
-    def __init__(self, groupName, template):
-        name = template.replace('.target', '')
+    def __init__(self, groupName, basepath, targetpath):  #template):
+        import os
+        name = targetpath.replace('.target', '')
         name = name.replace('/', '-')
         name = name.replace('\\', '-')
         super(SimpleModifier, self).__init__(groupName, name)
-        self.template = template
-        self.targets = self.expandTemplate([(self.template, [])])
+
+        self.filename = os.path.join(basepath, targetpath)
+        self.targets = self.expandTemplate([(self.filename, [])])
 
         # TODO resolve macro dependencies as well?
 
