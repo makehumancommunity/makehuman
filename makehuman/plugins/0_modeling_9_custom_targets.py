@@ -181,7 +181,6 @@ class CustomTargetsTaskView(gui3d.TaskView):
             modifier.setValue(float(values[2]))
 
     def saveHandler(self, human, file):
-
         for name, modifier in self.modifiers.iteritems():
             value = modifier.getValue()
             if value:

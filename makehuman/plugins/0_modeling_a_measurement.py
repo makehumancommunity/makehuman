@@ -209,6 +209,28 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
     def onHumanRotated(self, event):
         self.measureObject.setRotation(G.app.selectedHuman.getRotation())
 
+    def loadHandler(self, human, values):
+        if values[0] == 'status':
+            return
+
+        if values[0] == self.saveName:
+            # TODO temporary backwards compat mapping, to solve in 1.1
+            mName = 'measure-'+values[1]+'-decrease-increase'
+            modifier = self.modifiers.get(mName, None)
+            if modifier:
+                modifier.setValue(float(values[2]))
+
+    def saveHandler(self, human, file):
+        for name, modifier in self.modifiers.iteritems():
+            if name is None:
+                continue
+            value = modifier.getValue()
+            # TODO backwards compat mapping
+            name = name.replace('-decrease-increase', '')
+            name = name.replace('measure-', '')
+            if value or isinstance(modifier, humanmodifier.MacroModifier):
+                file.write('%s %s %f\n' % (self.saveName, name, value))
+
     def syncGUIStats(self):
         self.syncStatistics()
         #self.syncBraSizes()
