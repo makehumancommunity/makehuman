@@ -127,17 +127,19 @@ class Object(events3d.EventHandler):
         return self._view()
 
     def show(self):
-
         self.visible = True
         self.setVisibility(True)
 
     def hide(self):
-
         self.visible = False
         self.setVisibility(False)
 
     def isVisible(self):
         return self.visible
+
+    @property
+    def name(self):
+        return self.mesh.name
 
     def setVisibility(self, visibility):
         if not self.view:

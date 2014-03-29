@@ -54,7 +54,6 @@ import human
 import guifiles
 import managed_file
 import algos3d
-#import posemode
 import gui
 import language
 import log
