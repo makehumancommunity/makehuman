@@ -46,7 +46,7 @@ import mh
 import gui
 import gui3d
 from core import G
-
+from getpath import pathToUnicode
 
 class SaveTaskView(gui3d.TaskView):
     """Task view for saving MakeHuman model files."""
@@ -113,5 +113,5 @@ class SaveTaskView(gui3d.TaskView):
             name = ""
 
         self.fileentry.setDirectory(modelPath)
-        self.fileentry.edit.setText(name)
+        self.fileentry.edit.setText(pathToUnicode(name))
         self.fileentry.setFocus()
