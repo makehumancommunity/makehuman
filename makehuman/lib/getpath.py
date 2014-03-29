@@ -264,3 +264,12 @@ def search(paths, extensions, recursive=True, mutexExtensions=False):
     if mutexExtensions:
         for f in ["%s.%s" % (p,e) for p,e in discovered.items()]:
             yield f
+
+def pathToUnicode(path):
+    """
+    Unicode representation of the filename.
+    String is decoded with the codeset used by the filesystem of the operating
+    system.
+    Unicode representations of paths are fit for use in GUI.
+    """
+    return path.decode(sys.getfilesystemencoding())
