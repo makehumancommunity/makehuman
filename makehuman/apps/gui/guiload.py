@@ -134,12 +134,7 @@ class LoadTaskView(gui3d.TaskView):
             self.loadMHM(filename)
 
     def loadMHM(self, filename):
-
-        gui3d.app.selectedHuman.load(filename, True, gui3d.app.progress)
-
-        del gui3d.app.undoStack[:]
-        del gui3d.app.redoStack[:]
-        gui3d.app.clearUndoRedo()
+        gui3d.app.loadHumanMHM(filename)
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)

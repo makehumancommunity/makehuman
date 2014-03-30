@@ -312,8 +312,13 @@ class MHApplication(gui3d.Application, mh.Application):
     def args(self):
         return G.args
 
-    def loadHuman(self):
+    def loadHumanMHM(self, filename):
+        self.selectedHuman.load(filename, True, self.progress)
+        self.clearUndoRedo()
+        # Reset mesh is never forced to wireframe
+        self.actions.wireframe.setChecked(False)
 
+    def loadHuman(self):
         self.progress(0.1)
 
         # Set a lower than default MAX_FACES value because we know the human has a good topology (will make it a little faster)
@@ -1295,6 +1300,8 @@ class MHApplication(gui3d.Application, mh.Application):
         self.selectedHuman.resetMeshValues()
         self.selectedHuman.applyAllTargets(self.progress)
         self.clearUndoRedo()
+        # Reset mesh is never forced to wireframe
+        self.actions.wireframe.setChecked(False)
 
     # Camera navigation
     def rotateCamera(self, axis, amount):
