@@ -97,13 +97,9 @@ class SaveTaskView(gui3d.TaskView):
         img.save(os.path.join(dir, name + '.thumb'))
 
         # Save the model
-        human = G.app.selectedHuman
-        human.save(path, name)
-        G.app.modified = False
+        G.app.selectedHuman.save(path, name)
+        G.app.updateCaption()
         #G.app.clearUndoRedo()
-
-        G.app.setFilenameCaption(filename)
-        G.app.setFileModified(False)
 
         self.parent.tasksByName['Load'].fileentry.text = dir
         self.parent.tasksByName['Load'].fileentry.edit.setText(dir)

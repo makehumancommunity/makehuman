@@ -42,7 +42,6 @@ import os
 import mh
 import gui3d
 import filechooser as fc
-import log
 import qtgui as gui
 
 class HumanFileSort(fc.FileSort):
@@ -138,19 +137,16 @@ class LoadTaskView(gui3d.TaskView):
         human = gui3d.app.selectedHuman
 
         human.load(filename, True, gui3d.app.progress)
+        gui3d.app.updateCaption()
 
         del gui3d.app.undoStack[:]
         del gui3d.app.redoStack[:]
-        gui3d.app.modified = False
         gui3d.app.clearUndoRedo()
 
         name = os.path.basename(filename).replace('.mhm', '')
 
         self.parent.tasksByName['Save'].fileentry.text = name
         self.parent.tasksByName['Save'].fileentry.edit.setText(name)
-        
-        gui3d.app.setFilenameCaption(filename)
-        gui3d.app.setFileModified(False)
 
     def onShow(self, event):
 
