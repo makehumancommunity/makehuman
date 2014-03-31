@@ -309,16 +309,17 @@ def writeMaterialFile(human, filepath, rmeshes, config):
 
         lines.append('            depth_write %s' % ("off" if mat.transparent else "on"))
         if mat.transparent:
-            lines.append('            alpha_rejection greater 128\n')
+            lines.append('            alpha_rejection greater 128')
+        lines.append('')
 
-        if rmesh.material.diffuseTexture is not None:
-            texfile = os.path.basename(rmesh.material.diffuseTexture)
-            lines.append('            texture_unit')
+        for textureType, texturePath in mat.getTextureDict().items():
+            texfile = os.path.basename(texturePath)
+            lines.append('            texture_unit %s' % textureType)
             lines.append('            {')
             lines.append('                texture %s' % texfile)
-            lines.append('            }')
+            lines.append('            }\n')
 
-        # TODO add support for normal maps, material properties, ...
+        # TODO still have to copy those textures over
         lines.append('        }')
         lines.append('    }')
         lines.append('}')
