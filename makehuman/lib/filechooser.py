@@ -450,29 +450,7 @@ class FileChooserBase(QtGui.QWidget, gui.Widget):
         return False
 
     def search(self):
-        if isinstance(self.extension, str):
-            extensions = [self.extension]
-        else:
-            extensions = self.extension
-
-        if self.doNotRecurse:
-            for path in self.paths:
-                if not os.path.isdir(path):
-                    continue
-                for f in os.listdir(path):
-                    f = os.path.join(path, f)
-                    if os.path.isfile(f):
-                        ext = os.path.splitext(f)[1][1:].lower()
-                        if ext in extensions:
-                            yield f
-        else:
-            for path in self.paths:
-                for root, dirs, files in os.walk(path):
-                    for f in files:
-                        ext = os.path.splitext(f)[1][1:].lower()
-                        if ext in extensions:
-                            if f.lower().endswith('.' + ext):
-                                yield os.path.join(root, f)
+        return getpath.search(self.paths, self.extension, recursive = not self.doNotRecurse)
 
     def clearList(self):
         for i in xrange(self.children.count()):
