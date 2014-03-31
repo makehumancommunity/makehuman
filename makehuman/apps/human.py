@@ -1061,14 +1061,14 @@ class Human(guicommon.Object):
         return verts.mean(axis=0)
 
     def load(self, filename, update=True, progressCallback=None):
-
+        from codecs import open
         log.message("Loading human from MHM file %s.", filename)
 
         self.resetMeshValues()
         self.blockEthnicUpdates = True
 
         # TODO perhaps create progress indicator that depends on line count of mhm file?
-        f = open(filename, 'r')
+        f = open(filename, 'r', encoding="utf-8")
 
         for lh in G.app.loadHandlers.values():
             lh(self, ['status', 'started'])
@@ -1103,8 +1103,8 @@ class Human(guicommon.Object):
         log.message("Done loading MHM file.")
 
     def save(self, filename, tags):
-
-        f = open(filename, 'w')
+        from codecs import open
+        f = open(filename, "w", encoding="utf-8")
         f.write('# Written by MakeHuman %s\n' % getVersionStr())
         f.write('version %s\n' % getShortVersion())
         f.write('tags %s\n' % tags)
