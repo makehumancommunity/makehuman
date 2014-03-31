@@ -832,7 +832,7 @@ class Human(guicommon.Object):
         if len(modifier.macroDependencies) > 0:
             for var in modifier.macroDependencies:
                 if var not in self._modifier_varMapping:
-                    log.error("Error var %s not mapped", var)
+                    log.error("Modifier dependency map: Error var %s not mapped", var)
                     continue
                 depMGroup = self._modifier_varMapping[var]
 
@@ -1068,7 +1068,7 @@ class Human(guicommon.Object):
         self.blockEthnicUpdates = True
 
         # TODO perhaps create progress indicator that depends on line count of mhm file?
-        f = open(filename, 'r', encoding="utf-8")
+        f = open(filename, 'rU', encoding="utf-8")
 
         for lh in G.app.loadHandlers.values():
             lh(self, ['status', 'started'])

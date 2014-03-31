@@ -43,6 +43,7 @@ import algos3d
 import os
 import zipfile
 import fnmatch
+from codecs import open
 
 def getAllFiles(rootPath, filterStrArr):
     result = [ None ]*len(filterStrArr)
@@ -83,7 +84,7 @@ if __name__ == '__main__':
                 print 'error converting target %s' % path
 
     print "Writing images list"
-    with open('data/images.list', 'w') as f:
+    with open('data/images.list', 'w', encoding="utf-8") as f:
         allImages = allFiles[1]
         for path in allImages:
             path = path.replace('\\','/')
