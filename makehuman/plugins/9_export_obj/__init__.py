@@ -43,11 +43,10 @@ from exportutils.config import Config
 
 class ObjConfig(Config):
 
-    def __init__(self, exporter):
+    def __init__(self):
         Config.__init__(self)
-        self.selectedOptions(exporter)
         self.useRelPaths = True
-        self.useNormals = exporter.useNormals.selected
+        self.useNormals = False
 
 
 class ExporterOBJ(Exporter):
@@ -67,7 +66,19 @@ class ExporterOBJ(Exporter):
         from . import mh2obj
 
         progress = Progress.begin() (0, 1)
-        mh2obj.exportObj(human, filename("obj"), ObjConfig(self))
+        cfg = self.getConfig()
+        cfg.setHuman(human)
+        mh2obj.exportObj(filename("obj"), cfg)
+
+    def getConfig(self):
+        cfg = ObjConfig()
+        cfg.useNormals = self.useNormals.selected
+
+        cfg.useTPose          = False # self.useTPose.selected
+        cfg.feetOnGround      = self.feetOnGround.selected
+        cfg.scale,cfg.unit    = self.taskview.getScale()
+
+        return cfg
 
 def load(app):
     app.addExporter(ExporterOBJ())

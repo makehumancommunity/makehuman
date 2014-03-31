@@ -59,42 +59,45 @@ from . import mhx_rigify
 
 class MhxConfig(Config):
 
-    def __init__(self, exporter):
-        from armature.options import ArmatureOptions
-        from .mhx_rigify import RigifyOptions
-
+    def __init__(self):
         Config.__init__(self)
-        self.scale,self.unit =      exporter.taskview.getScale()
+        self.scale,self.unit =      (1, "decimeter")
         self.useRelPaths =          True
         self.useAdvancedMHX =       False
+        self.useRigify =            False
+        self.useRotationLimits =    False
 
-        self.feetOnGround =         exporter.feetOnGround.selected
-        self.useFaceRig =           False   # exporter.useFaceRig.selected
-        self.expressions =          False   #exporter.expressions.selected
-        self.useCustomTargets =     False   #exporter.useCustomTargets.selected
+        self.feetOnGround =         True
+        self.useFaceRig =           False
+        self.expressions =          False
+        self.useCustomTargets =     False
 
-        if exporter.useRigify.selected:
-            self.rigOptions = RigifyOptions(self)
-            return
-        else:
-            self.rigOptions = exporter.getRigOptions()
-            if not self.rigOptions:
-                self.useAdvancedMHX = True
-                self.rigOptions = ArmatureOptions()
-                self.rigOptions.loadPreset("data/mhx/advanced.json", None)
+    def getRigOptions(self):
+        if self.useRigify:
+            from .mhx_rigify import RigifyOptions
+            return RigifyOptions(self)
 
-        self.rigOptions.setExportOptions(
-            useCustomShapes = True,
-            useConstraints = True,
-            useBoneGroups = True,
-            useLocks = True,
-            useRotationLimits = exporter.useRotationLimits.selected,
-            useCorrectives = False,
-            useFaceRig = self.useFaceRig,
-            useExpressions = self.expressions,
-            useLeftRight = False,
-        )
+        rigOptions = super(MhxConfig, self).getRigOptions()
+        if rigOptions is None:
+            # No rig is selected from skeleton library, use custom MHX rig
+            from armature.options import ArmatureOptions
+            self.useAdvancedMHX = True  # TODO this is ugly, a getter modifying the state of the object, probably should set rigOptions.useAdvancedMHX
+            rigOptions = ArmatureOptions()
+            rigOptions.loadPreset("data/mhx/advanced.json", None)
 
+            rigOptions.setExportOptions(
+                useCustomShapes = "all",
+                useConstraints = True,
+                useBoneGroups = True,
+                useLocks = True,
+                useRotationLimits = self.useRotationLimits,
+                useCorrectives = False,
+                useFaceRig = self.useFaceRig,
+                useExpressions = self.expressions,
+                useLeftRight = False,
+            )
+
+        return rigOptions
 
 class ExporterMHX(Exporter):
     def __init__(self):
@@ -113,10 +116,29 @@ class ExporterMHX(Exporter):
         #self.useCustomTargets = options.addWidget(gui.CheckBox("Custom targets", False))
         self.useRigify      = options.addWidget(gui.CheckBox("Export for Rigify", False))
 
+    def getConfig(self):
+        """
+        Construct config object from GUI settings
+        """
+        cfg = MhxConfig()
+        cfg.scale, cfg.unit = self.taskview.getScale()
+
+        cfg.feetOnGround = self.feetOnGround.selected
+
+        #cfg.useFaceRig = self.useFaceRig.selected
+        #cfg.expressions = self.expressions.selected
+        #cfg.useCustomTargets = self.useCustomTargets.selected
+
+        cfg.useRigify = self.useRigify.selected
+        cfg.useRotationLimits = self.useRotationLimits.selected
+
+        return cfg
 
     def export(self, human, filename):
         self.taskview.exitPoseMode()
-        mhx_main.exportMhx(human, filename("mhx"), MhxConfig(self))
+        cfg = self.getConfig()
+        cfg.setHuman(human)
+        mhx_main.exportMhx(filename("mhx"), cfg)
         self.taskview.enterPoseMode()
 
 

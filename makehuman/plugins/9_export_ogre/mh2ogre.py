@@ -53,11 +53,11 @@ import skeleton
 import log
 
 
-def exportOgreMesh(human, filepath, config, progressCallback = None):
+def exportOgreMesh(filepath, config, progressCallback = None):
     progress = Progress.begin(logging = True, timing = True)
 
     progress(0, 0.05, "Setting properties")
-    config.setHuman(human)
+    human = config.human
     feetOnGround = config.feetOnGround
     config.feetOnGround = False
     # TODO account for config.scale in skeleton
