@@ -76,6 +76,8 @@ class SkeletonAction(gui3d.Action):
 
 
 def _getSkeleton(self):
+    # TODO this is a very tedious way op keeping the skeleton updated, better just to performantly update the skeleton joints after a slider is released
+
     #log.debug("Get skeleton %s %s" % (self, self._skeleton))
     if not self._skeleton:
         return None
