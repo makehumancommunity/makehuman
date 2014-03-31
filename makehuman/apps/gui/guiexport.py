@@ -44,6 +44,7 @@ import gui
 import gui3d
 import guipose
 import log
+from getpath import pathToUnicode
 
 class ExportTaskView(guipose.PoseModeTaskView):
     def __init__(self, category):
@@ -171,9 +172,10 @@ class ExportTaskView(guipose.PoseModeTaskView):
         path,ext = os.path.splitext(unicode(self.fileentry.edit.text()))
         if ext:
             if extension:
-                self.fileentry.edit.setText("%s.%s" % (path, extension.lstrip('.')))
+                self.fileentry.edit.setText("%s.%s" % (pathToUnicode(path), 
+                                                       extension.lstrip('.')))
             else:
-                self.fileentry.edit.setText(path)
+                self.fileentry.edit.setText(pathToUnicode(path))
 
     def updateGui(self):
         for exporter, radio, options in self.formats:
