@@ -1222,7 +1222,7 @@ class FileEntryView(QtGui.QWidget, Widget):
             the line edit. If the mode is 'dir', confirm the entry
             and emit an onFileSelected event."""
             if path:
-                self.edit.setText(path)
+                self.edit.setText(pathToUnicode(path))
                 self._confirm()
 
     def setDirectory(self, directory):
@@ -1233,7 +1233,7 @@ class FileEntryView(QtGui.QWidget, Widget):
         self.directory = directory
         self.browse._path = directory
         if self.browse._mode == 'dir':
-            self.edit.setText(directory)
+            self.edit.setText(pathToUnicode(directory))
 
     def setFilter(self, filter):
         """Set the extension filter the browse dialog will use for browsing.
