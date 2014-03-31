@@ -102,7 +102,6 @@ class CustomTargetsTaskView(gui3d.TaskView):
         group = []
 
         for root, dirs, files in os.walk(self.targetsPath):
-
             groupBox = self.targetsBox.addWidget(gui.GroupBox('Targets'))
             self.folderBox.addWidget(FolderButton(self, group, os.path.basename(root), groupBox, len(self.folderBox.children) == 0))
             self.folders.append(groupBox)
