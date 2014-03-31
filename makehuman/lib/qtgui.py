@@ -1216,8 +1216,7 @@ class FileEntryView(QtGui.QWidget, Widget):
             and emit an onFileSelected event."""
             if path:
                 self.edit.setText(path)
-                if self.browse._mode == 'dir':
-                    self._confirm()
+                self._confirm()
 
     def setDirectory(self, directory):
         """Set the directory that the widget will use for saving or
@@ -1236,17 +1235,6 @@ class FileEntryView(QtGui.QWidget, Widget):
         if '(*.*)' not in self.filter:
             self.filter = ';;'.join(
                 [self.filter, getLanguageString('All Files') + ' (*.*)'])
-
-    def _browse(self, state=None):
-        """Method to be called when the browse button is clicked.
-        [notice: Is this actually used? I don't see it called anywhere.]
-        """
-        path = QtGui.QFileDialog.getSaveFileName(
-            G.app.mainwin, getLanguageString("Save File"),
-            self.directory, self.filter)
-        self.edit.setText(path)
-        if self.browse._mode == 'dir':
-            self._confirm()
 
     def _confirm(self, state=None):
         """Method to be called once the user has confirmed their choice,
