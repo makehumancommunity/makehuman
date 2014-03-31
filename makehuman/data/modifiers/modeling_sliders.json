@@ -294,6 +294,7 @@
     "label": "Main",
     "saveName": "macro",
     "sortOrder": 0,
+    "showMacroStats": true,
     "modifiers": {
       "Macro": [
           {"mod": "macrodetails/Gender", "label": "Gender"},
