@@ -555,27 +555,12 @@ def writeClothes(context, hum, clo, data, matfile):
     writeClothesHeader(fp, scn)
     fp.write("name %s\n" % clo.name.replace(" ","_"))
     fp.write("obj_file %s.obj\n" % mc.goodName(clo.name))
-
     vnums = getBodyPartVerts(scn)
-    hverts = hum.data.vertices
-    if scn.MCUseSkewing:
-        if scn.MCUseBBoxSymmetry:
-            rvnums = {}
-            for idx,pair in enumerate(vnums):
-                vn1, vn2 = pair
-                rvnums[idx] = (mirrorVert(vn1), mirrorVert(vn2))
-            vn = vnums[0][0]
-            if hverts[vn].co[0] > 0:
-                lvnums = vnums
-            else:
-                lvnums = rvnums
-                rvnums = vnums
-            writeBBox(fp, "l_bbox_%s %d %d %.4f %.4f\n", lvnums, hverts, False)
-            writeBBox(fp, "r_bbox_%s %d %d %.4f %.4f\n", rvnums, hverts, False)
-        else:
-            writeBBox(fp, "bbox_%s %d %d %.4f %.4f\n", vnums, hverts, False)
-    else:
-        writeBBox(fp, "%s_scale %d %d %.4f\n", vnums, hverts, True)
+    printScale(fp, hum, scn, 'x_scale', 0, vnums[0])
+    printScale(fp, hum, scn, 'z_scale', 1, vnums[1])
+    printScale(fp, hum, scn, 'y_scale', 2, vnums[2])
+    if scn.MCScaleUniform:
+        fp.write("uniform_scale %.4f\n" % scn.MCScaleCorrect)
 
     writeStuff(fp, clo, context, matfile)
 
@@ -597,32 +582,6 @@ def writeClothes(context, hum, clo, data, matfile):
     printMhcloUvLayers(fp, clo, scn, True)
     fp.close()
     print("%s done" % outfile)
-
-
-def writeBBox(fp, string, vnums, hverts, useDistance):
-    yzswitch = [("x",1), ("z",-1), ("y",1)]
-    for idx in range(3):
-        cname,sign = yzswitch[idx]
-        n1,n2 = vnums[idx]
-        if n1 >=0 and n2 >= 0:
-            x1 = hverts[n1].co[idx]
-            x2 = hverts[n2].co[idx]
-            if useDistance:
-                fp.write(string % (cname, n1, n2, abs(x1-x2)))
-            else:
-                fp.write(string % (cname, n1, n2, sign*x1, sign*x2))
-
-
-def mirrorVert(vn):
-    from maketarget.symmetry_map import Left2Right, Right2Left
-    try:
-        return Left2Right[vn]
-    except KeyError:
-        pass
-    try:
-        return Right2Left[vn]
-    except KeyError:
-        return vn
 
 
 def printMhcloUvLayers(fp, clo, scn, hasObj, offset=0):
@@ -850,6 +809,15 @@ def writeColor(fp, string1, string2, color, intensity):
         "%s %.4f %.4f %.4f\n" % (string1, color[0], color[1], color[2]) +
         "%s %.4g\n" % (string2, intensity))
 
+
+def printScale(fp, hum, scn, name, index, vnums):
+    verts = hum.data.vertices
+    n1,n2 = vnums
+    if n1 >=0 and n2 >= 0:
+        x1 = verts[n1].co[index]
+        x2 = verts[n2].co[index]
+        fp.write("%s %d %d %.4f\n" % (name, n1, n2, abs(x1-x2)/scn.MCScaleCorrect))
+    return
 
 #
 #   setupTexVerts(ob):
@@ -1672,16 +1640,10 @@ def init():
         description = "Body Type To Load",
     default='None')
 
-    bpy.types.Scene.MCUseSkewing = BoolProperty(
-        name="Use Skewing",
-        description="Allow bounding box to be skewed",
+    bpy.types.Scene.MCMaterials = BoolProperty(
+        name="Materials",
+        description="Use materials",
         default=False)
-
-    bpy.types.Scene.MCUseBBoxSymmetry = BoolProperty(
-        name="Mirror Bounding Box",
-        description="Mirror the bounding box for Left/Right vertex groups",
-        default=False)
-
 
     bpy.types.Scene.MCMaskLayer = IntProperty(
         name="Mask UV layer",

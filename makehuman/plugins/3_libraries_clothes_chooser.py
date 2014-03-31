@@ -57,7 +57,7 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
         #self.taggedClothes = {}
 
         self.originalHumanMask = self.human.meshData.getFaceMask().copy()
-        self.faceHidingTggl = self.optionsBox.addWidget(FaceHideCheckbox("Hide faces under clothes"))
+        self.faceHidingTggl = self.optionsBox.addWidget(gui.CheckBox("Hide faces under clothes"))
         @self.faceHidingTggl.mhEvent
         def onClicked(event):
             self.updateFaceMasks(self.faceHidingTggl.selected)

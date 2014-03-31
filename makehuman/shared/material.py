@@ -1274,7 +1274,7 @@ def getSkinBlender():
     return _autoSkinBlender
 
 def getFilePath(filename, folder = None):
-    if not filename:
+    if not filename or not isinstance(filename, basestring):
         return filename
 
     # Ensure unix style path
@@ -1288,19 +1288,11 @@ def getFilePath(filename, folder = None):
     # Treat as absolute path or search relative to application path
     if os.path.isfile(filename):
         return os.path.abspath(filename)
-    # Search in user data folder
-    from getpath import getPath, getSysDataPath, getSysPath
-    userPath = getPath(filename)
-    if os.path.isfile(userPath):
-        return os.path.abspath(userPath)
-    # Search in system path
-    sysPath = getSysPath(filename)
-    if os.path.isfile(sysPath):
-        return os.path.abspath(sysPath)
-    # Search in system data path
-    sysPath = getSysDataPath(filename)
-    if os.path.isfile(sysPath):
-        return os.path.abspath(sysPath)
+    # Search in user / sys data, and user / sys root folders
+    from getpath import findFile, getPath, getSysDataPath, getSysPath, getDataPath
+    path = findFile(filename, [getDataPath(), getSysDataPath(), getPath(), getSysPath()])
+    if os.path.isfile(path):
+        return os.path.abspath(abspath)
 
     # Nothing found
     return os.path.normpath(filename)
