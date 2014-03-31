@@ -48,7 +48,7 @@ def writeHeader(fp, filepath):
     today = datetime.datetime.now()
 
     fp.write("""; FBX 7.3.0 project file
-; Exported from MakeHuman TM
+; Exported from MakeHuman TM (www.makehuman.org)
 ; ----------------------------------------------------
 
 FBXHeaderExtension:  {
