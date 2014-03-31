@@ -321,7 +321,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.progress(0.18)
 
-        userSceneDir = mh.getPath("data/scenes")
+        userSceneDir = mh.getDataPath("scenes")
         if not os.path.exists(userSceneDir):
             os.makedirs(userSceneDir)
 
