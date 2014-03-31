@@ -459,7 +459,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
     def adaptAllProxies(self):
         proxyCount = len(self.getSelection())
         if proxyCount > 0:
-            log.message("Adapting all %s proxies (%s).", self.proxyName, proxyCount)
+            pass  #log.message("Adapting all %s proxies (%s).", self.proxyName, proxyCount)
         for pIdx, pxy in enumerate(self.getSelection()):
             obj = self.getObjects()[pIdx]
             self.adaptProxyToHuman(pxy, obj)
