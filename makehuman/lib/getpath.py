@@ -221,6 +221,7 @@ def search(paths, extensions, recursive=True):
         paths = [paths]
     if isinstance(extensions, basestring):
         extensions = [extensions]
+    extensions = [e[1:].lower() if e.startswith('.') else e.lower() for e in extensions]
 
     if recursive:
         for path in paths:
