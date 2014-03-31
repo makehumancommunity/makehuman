@@ -398,6 +398,10 @@ class MHApplication(gui3d.Application, mh.Application):
                     task.callEvent('onHumanChanged', event)
 
         @self.selectedHuman.mhEvent
+        def onModifiedState(event):
+            self.updateCaption()
+
+        @self.selectedHuman.mhEvent
         def onTranslated(event):
             for category in self.categories.itervalues():
                 for task in category.tasks:
@@ -1291,7 +1295,6 @@ class MHApplication(gui3d.Application, mh.Application):
     def _resetHuman(self):
         self.selectedHuman.close()
         self.selectedHuman.applyAllTargets(self.progress)
-        self.updateCaption()
         self.clearUndoRedo()
 
     # Camera navigation
