@@ -1672,10 +1672,16 @@ def init():
         description = "Body Type To Load",
     default='None')
 
-    bpy.types.Scene.MCMaterials = BoolProperty(
-        name="Materials",
-        description="Use materials",
+    bpy.types.Scene.MCUseSkewing = BoolProperty(
+        name="Use Skewing",
+        description="Allow bounding box to be skewed",
         default=False)
+
+    bpy.types.Scene.MCUseBBoxSymmetry = BoolProperty(
+        name="Mirror Bounding Box",
+        description="Mirror the bounding box for Left/Right vertex groups",
+        default=False)
+
 
     bpy.types.Scene.MCMaskLayer = IntProperty(
         name="Mask UV layer",

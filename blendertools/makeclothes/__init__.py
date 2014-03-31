@@ -187,8 +187,8 @@ class MakeClothesPanel(bpy.types.Panel):
         layout.prop(scn, "MCShowBoundary")
         if scn.MCShowBoundary:
             ins = inset(layout)
-            ins.prop(scn, "MCScaleUniform")
-            ins.prop(scn, "MCScaleCorrect")
+            ins.prop(scn, "MCUseSkewing")
+            ins.prop(scn, "MCUseBBoxSymmetry")
             ins.separator()
             ins.prop(scn, "MCBodyPart")
             vnums = makeclothes.getBodyPartVerts(scn)
