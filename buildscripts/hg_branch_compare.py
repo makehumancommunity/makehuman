@@ -136,6 +136,7 @@ if __name__ == '__main__':
 
         print "\n\nSummary:\n--------\n"
 
+    print "Found %s candidates to graft:\n" % len(result)
     for r in result:
         print formatChangeset(r)
         print '\n'
