@@ -49,12 +49,10 @@ class EyelashesTaskView(proxychooser.ProxyChooserTaskView):
     def getObjectLayer(self):
         return 5
 
-    def proxySelected(self, proxy, obj):
-        self.human.eyelashesObj = obj
+    def proxySelected(self, proxy):
         self.human.eyelashesProxy = proxy
 
-    def proxyDeselected(self, proxy, obj, suppressSignal = False):
-        self.human.eyelashesObj = None
+    def proxyDeselected(self, proxy, suppressSignal = False):
         self.human.eyelashesProxy = None
 
     def onShow(self, event):

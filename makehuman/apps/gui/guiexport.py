@@ -44,6 +44,7 @@ import gui
 import gui3d
 import guipose
 import log
+from getpath import pathToUnicode
 
 class ExportTaskView(guipose.PoseModeTaskView):
     def __init__(self, category):
@@ -113,9 +114,7 @@ class ExportTaskView(guipose.PoseModeTaskView):
                 log.error("Unknown export format selected!")
                 return
 
-            gui3d.app.prompt('Info', u'The mesh has been exported to %s.', 'OK', helpId='exportHelp', fmtArgs = dir)
-
-            mh.changeCategory('Modelling')
+            gui3d.app.prompt('Info', u'The mesh has been exported to %s.', 'OK', fmtArgs = dir)
 
 
     _scales = {
@@ -171,9 +170,10 @@ class ExportTaskView(guipose.PoseModeTaskView):
         path,ext = os.path.splitext(unicode(self.fileentry.edit.text()))
         if ext:
             if extension:
-                self.fileentry.edit.setText("%s.%s" % (path, extension.lstrip('.')))
+                self.fileentry.edit.setText("%s.%s" % (pathToUnicode(path), 
+                                                       extension.lstrip('.')))
             else:
-                self.fileentry.edit.setText(path)
+                self.fileentry.edit.setText(pathToUnicode(path))
 
     def updateGui(self):
         for exporter, radio, options in self.formats:
@@ -182,6 +182,7 @@ class ExportTaskView(guipose.PoseModeTaskView):
                 self.optionsBox.showWidget(options)
                 self.setFileExtension(exporter.fileExtension, exporter.filter)
                 exporter.onShow(self)
+                options.setVisible( len(options.children) > 0 )
                 self.recentlyShown = exporter
                 break
 
@@ -213,22 +214,11 @@ class ExportTaskView(guipose.PoseModeTaskView):
 
         self.fileentry.setFocus()
 
-        human = gui3d.app.selectedHuman
-        skel = human.getSkeleton()
-        if skel and skel.object:
-            skel.object.show()
-        gui3d.app.redraw()
-
 
     def onHide(self, event):
         guipose.PoseModeTaskView.onHide(self, event)
 
         human = gui3d.app.selectedHuman
-
-        skel = human.getSkeleton()
-        if skel and skel.object:
-            skel.object.hide()
-        gui3d.app.redraw()
 
         for exporter, radio, _ in self.formats:
             if radio.selected:

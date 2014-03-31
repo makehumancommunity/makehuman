@@ -63,6 +63,7 @@ class DebugDump(object):
         self.debugpath = None
 
     def open(self):
+        from codecs import open
         if self.debugpath is None:
             self.home = os.path.expanduser('~')
             self.debugpath = getpath.getPath()
@@ -71,9 +72,9 @@ class DebugDump(object):
                 os.makedirs(self.debugpath)
 
             self.debugpath = os.path.join(self.debugpath, "makehuman-debug.txt")
-            self.debug = open(self.debugpath, "w")
+            self.debug = open(self.debugpath, "w", encoding="utf-8")
         else:
-            self.debug = open(self.debugpath, "a")
+            self.debug = open(self.debugpath, "a", encoding="utf-8")
 
     def write(self, msg, *args):
         self.debug.write((msg % args) + "\n")
@@ -89,6 +90,8 @@ class DebugDump(object):
         self.write("VERSION: %s", os.environ['MH_VERSION'])
         if 'HGREVISION' in os.environ and 'HGREVISION_SOURCE' in os.environ:
             self.write("HG REVISION: r%s (%s) [%s]", os.environ['HGREVISION'], os.environ['HGNODEID'], os.environ['HGREVISION_SOURCE'])
+        else:
+            self.write("HG REVISION: UNKNOWN")
         if 'HGBRANCH' in os.environ:
             self.write("HG BRANCH: %s", os.environ['HGBRANCH'])
         self.write("SHORT VERSION: %s", os.environ['MH_SHORT_VERSION'])

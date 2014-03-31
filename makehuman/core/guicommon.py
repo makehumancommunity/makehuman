@@ -127,17 +127,19 @@ class Object(events3d.EventHandler):
         return self._view()
 
     def show(self):
-
         self.visible = True
         self.setVisibility(True)
 
     def hide(self):
-
         self.visible = False
         self.setVisibility(False)
 
     def isVisible(self):
         return self.visible
+
+    @property
+    def name(self):
+        return self.mesh.name
 
     def setVisibility(self, visibility):
         if not self.view:
@@ -200,13 +202,11 @@ class Object(events3d.EventHandler):
         return self.__proxyMesh
 
     def updateProxyMesh(self):
-
         if self.proxy and self.__proxyMesh:
             self.proxy.update(self.__proxyMesh)
             self.__proxyMesh.update()
 
     def isProxied(self):
-
         return self.mesh == self.__proxyMesh or self.mesh == self.__proxySubdivisionMesh
 
     def setProxy(self, proxy):
@@ -229,15 +229,21 @@ class Object(events3d.EventHandler):
         if proxy:
             import files3d
             self.proxy = proxy
-            self.__proxyMesh = files3d.loadMesh(proxy.obj_file)
+
+            self.__proxyMesh = proxy.object.mesh
+            proxy.object = self
+
+            # Copy attributes from human mesh to proxy mesh
             for attr in ('x', 'y', 'z', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz',
                          'visibility', 'shadeless', 'pickable', 'cameraMode', 'material'):
                 setattr(self.__proxyMesh, attr, getattr(self.mesh, attr))
 
+            # Connect the proxy to this object directly
             self.__proxyMesh.object = self.mesh.object
 
             self.proxy.update(self.__proxyMesh)
 
+            # Attach to GL object if this object is attached to viewport
             if self.__seedMesh.object3d:
                 self.attachMesh(self.__proxyMesh)
 
@@ -388,7 +394,7 @@ class Object(events3d.EventHandler):
         """
         This method updates the shader parameters for the currently shown mesh
         object, but also that of the original seed mesh if it is subdivided or
-        proxied. 
+        proxied.
         Use this method when you want to stream in shader parameters to human
         while sliders are being moved, because while dragging only the seed mesh
         is shown.

@@ -109,10 +109,10 @@ class MaterialTaskView(gui3d.TaskView):
 
     def applyClothesMaterial(self, uuid, filename):
         human = self.human
-        if uuid not in human.clothesObjs.keys():
+        if uuid not in human.clothesProxies.keys():
             log.warning("Cannot set material for clothes with UUID %s, no such item", uuid)
             return False
-        clo = human.clothesObjs[uuid]
+        clo = human.clothesProxies[uuid].object
         clo.mesh.material = material.fromFile(filename)
         return True
 
@@ -121,9 +121,9 @@ class MaterialTaskView(gui3d.TaskView):
         Get the currently set material for clothing item with specified UUID.
         """
         human = self.human
-        if uuid not in human.clothesObjs.keys():
+        if uuid not in human.clothesProxies.keys():
             return None
-        clo = human.clothesObjs[uuid]
+        clo = human.clothesProxies[uuid].object
         return clo.material.filename
 
     def getMaterialPaths(self, objType, proxy = None):
@@ -209,17 +209,17 @@ class MaterialTaskView(gui3d.TaskView):
             if human.hairProxy and human.hairProxy.getUuid() == uuid:
                 proxy = human.hairProxy
                 filepath = self.getMaterialPath(filepath, proxy.file)
-                human.hairObj.material = material.fromFile(filepath)
+                proxy.object.material = material.fromFile(filepath)
                 return
             elif human.eyesProxy and human.eyesProxy.getUuid() == uuid:
                 proxy = human.eyesProxy
                 filepath = self.getMaterialPath(filepath, proxy.file)
-                human.eyesObj.material = material.fromFile(filepath)
+                proxy.object.material = material.fromFile(filepath)
                 return
             elif human.genitalsProxy and human.genitalsProxy.getUuid() == uuid:
                 proxy = human.genitalsProxy
                 filepath = self.getMaterialPath(filepath, proxy.file)
-                human.genitalsObj.material = material.fromFile(filepath)
+                proxy.object.material = material.fromFile(filepath)
                 return
             elif not uuid in human.clothesProxies.keys():
                 log.error("Could not load material for proxy with uuid %s (%s)! No such proxy." % (uuid, name))
@@ -264,25 +264,26 @@ class MaterialTaskView(gui3d.TaskView):
 
     def saveHandler(self, human, file):
         file.write('skinMaterial %s\n' % self.getRelativeMaterialPath(human.material.filename))
-        for name, clo in human.clothesObjs.items():
+        for name, pxy in human.clothesProxies.items():
+            clo = pxy.object
             if clo:
                 proxy = human.clothesProxies[name]
                 if clo.material.filename !=  proxy.material.filename:
                     materialPath = self.getRelativeMaterialPath(clo.material.filename, proxy.file)
                     file.write('material %s %s %s\n' % (proxy.name, proxy.getUuid(), materialPath))
-        if human.hairObj and human.hairProxy:
+        if human.hairProxy:
             proxy = human.hairProxy
-            hairObj = human.hairObj
+            hairObj = proxy.object
             materialPath = self.getRelativeMaterialPath(hairObj.material.filename, proxy.file)
             file.write('material %s %s %s\n' % (proxy.name, proxy.getUuid(), materialPath))
-        if human.eyesObj and human.eyesProxy:
+        if human.eyesProxy:
             proxy = human.eyesProxy
-            eyesObj = human.eyesObj
+            eyesObj = proxy.object
             materialPath = self.getRelativeMaterialPath(eyesObj.material.filename, proxy.file)
             file.write('material %s %s %s\n' % (proxy.name, proxy.getUuid(), materialPath))
-        if human.genitalsObj and human.genitalsProxy:
+        if human.genitalsProxy:
             proxy = human.genitalsProxy
-            genitalsObj = human.genitalsObj
+            genitalsObj = proxy.object
             materialPath = self.getRelativeMaterialPath(genitalsObj.material.filename, proxy.file)
             file.write('material %s %s %s\n' % (proxy.name, proxy.getUuid(), materialPath))
 

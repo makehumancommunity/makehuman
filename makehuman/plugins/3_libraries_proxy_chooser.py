@@ -76,7 +76,8 @@ class ProxyFileSort(fc.FileSort):
         meta['modified'] = os.path.getmtime(filename)
         faces = 0
         try:
-            f = open(filename.replace('.proxy', '.obj'))
+            from codecs import open
+            f = open(filename.replace('.proxy', '.obj'), 'rU', encoding="utf-8")
             for line in f:
                 lineData = line.split()
                 if lineData and lineData[0] == 'f':
@@ -101,7 +102,7 @@ class ProxyTaskView(proxychooser.ProxyChooserTaskView):
         return "proxy"
 
     def getFileExtension(self):
-        return 'proxy'
+        return ['mhpxy', 'proxy']
 
     def proxySelected(self, pxy, obj):
         self.human.setProxy(pxy)
@@ -134,12 +135,14 @@ class ProxyTaskView(proxychooser.ProxyChooserTaskView):
             return
 
         if mhclofile not in self._proxyCache:
-            pxy = proxy.readProxyFile(self.human.meshData,
-                                         mhclofile,
-                                         type=self.proxyName.capitalize())
+            pxy = proxy.loadProxy(self.human,
+                                  mhclofile,
+                                  type=self.proxyName.capitalize())
             self._proxyCache[mhclofile] = pxy
         else:
             pxy = self._proxyCache[mhclofile]
+
+        mesh,obj = pxy.loadMeshAndObject(self.human)
 
         self.human.setProxy(pxy)
         self.human.updateProxyMesh()

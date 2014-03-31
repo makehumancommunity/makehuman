@@ -119,7 +119,6 @@ class ProxyChooserTaskView(gui3d.TaskView):
         self._proxyFilePerUuid = None
 
         self.selectedProxies = []
-        self.proxyObjects = []
 
         self.createFileChooser()
 
@@ -145,6 +144,9 @@ class ProxyChooserTaskView(gui3d.TaskView):
 
         self.filechooser.setIconSize(50,50)
         self.filechooser.enableAutoRefresh(False)
+        if not isinstance(self.getFileExtension(), basestring) and \
+           len(self.getFileExtension()) > 1:
+            self.filechooser.mutexExtensions = True
         #self.addLeftWidget(self.filechooser.createSortBox())
 
         if self.tagFilter:
@@ -175,7 +177,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
         """
         The file extension for proxy files of this type.
         """
-        return 'mhclo'
+        return ['mhpxy', 'mhclo']
 
     def getNotFoundIcon(self):
         """
@@ -241,13 +243,13 @@ class ProxyChooserTaskView(gui3d.TaskView):
         # TODO remove, this is bogus
         raise NotImplementedError("Implement ProxyChooserTaskView.getObjectLayer()!")
 
-    def proxySelected(self, pxy, obj):
+    def proxySelected(self, pxy):
         """
         Do custom work specific to this library when a proxy object was loaded.
         """
         raise NotImplementedError("Implement ProxyChooserTaskView.proxySelected()!")
 
-    def proxyDeselected(self, pxy, obj, suppressSignal = False):
+    def proxyDeselected(self, pxy, suppressSignal = False):
         """
         Do custom work specific to this library when a proxy object was unloaded.
         """
@@ -280,9 +282,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
                 pxy = None
 
         if not pxy:
-            pxy = proxy.readProxyFile(human.meshData,
-                                           mhclofile,
-                                           type=self.proxyName.capitalize())
+            pxy = proxy.loadProxy(human, mhclofile, type=self.proxyName.capitalize())
             self._proxyCache[mhcloId] = pxy
 
         if pxy.uuid in [p.uuid for p in self.getSelection()]:
@@ -293,32 +293,26 @@ class ProxyChooserTaskView(gui3d.TaskView):
             # Deselect previously selected proxy
             self.deselectProxy(None, suppressSignal = True)
 
-        mesh = files3d.loadMesh(pxy.obj_file, maxFaces = pxy.max_pole)
+        mesh,obj = pxy.loadMeshAndObject(human)
+        mesh.setPickable(True)  # Allow mouse picking for proxies attached to human
+        
         if not mesh:
-            log.error("Failed to load %s", pxy.obj_file)
             return
+
+        gui3d.app.addObject(obj)
 
         self.filechooser.selectItem(mhclofile)
 
-        mesh.material = pxy.material
-        mesh.priority = pxy.z_depth           # Set render order
-        mesh.setCameraProjection(0)             # Set to model camera
-        mesh.setSolid(human.mesh.solid)    # Set to wireframe if human is in wireframe
-
-        obj = gui3d.Object(mesh, self.human.getPosition())
-        obj.setRotation(human.getRotation())
-        gui3d.app.addObject(obj)
 
         self.adaptProxyToHuman(pxy, obj)
         obj.setSubdivided(human.isSubdivided()) # Copy subdivided state of human
 
         # Add to selection
         self.selectedProxies.append(pxy)
-        self.proxyObjects.append(obj)
 
         self.filechooser.selectItem(mhclofile)
 
-        self.proxySelected(pxy, obj)
+        self.proxySelected(pxy)
 
         self.signalChange()
 
@@ -338,14 +332,14 @@ class ProxyChooserTaskView(gui3d.TaskView):
             else:
                 return
 
-        obj = self.proxyObjects[idx]
         pxy = self.selectedProxies[idx]
+        obj = pxy.object
         gui3d.app.removeObject(obj)
-        del self.proxyObjects[idx]
         del self.selectedProxies[idx]
         self.filechooser.deselectItem(mhclofile)
 
-        self.proxyDeselected(pxy, obj, suppressSignal)
+        self.proxyDeselected(pxy, suppressSignal)
+        pxy.object = None   # Drop pointer to object
 
         if not self.multiProxy:
             # Select None item in file list
@@ -371,14 +365,14 @@ class ProxyChooserTaskView(gui3d.TaskView):
         contain multiple entries, if this is library allows selecting only a
         single proxy, the list is either of length 0 or 1.
         """
-        return self.selectedProxies
+        return list(self.selectedProxies)
 
     def getObjects(self):
         """
         Returns a list of objects beloning to the proxies returned by getSelection()
         The order corresponds with that of getSelection().
         """
-        return self.proxyObjects
+        return [pxy.object for pxy in self.getSelection()]
 
     def hideObjects(self):
         """
@@ -468,7 +462,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
     def adaptAllProxies(self):
         proxyCount = len(self.getSelection())
         if proxyCount > 0:
-            log.message("Adapting all %s proxies (%s).", self.proxyName, proxyCount)
+            pass  #log.message("Adapting all %s proxies (%s).", self.proxyName, proxyCount)
         for pIdx, pxy in enumerate(self.getSelection()):
             obj = self.getObjects()[pIdx]
             self.adaptProxyToHuman(pxy, obj)

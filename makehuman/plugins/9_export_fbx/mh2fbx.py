@@ -41,7 +41,7 @@ import os.path
 import sys
 import codecs
 
-import gui3d
+from core import G
 import exportutils
 import posemode
 import log
@@ -55,15 +55,15 @@ from . import fbx_material
 from . import fbx_anim
 
 
-def exportFbx(human, filepath, config):
+def exportFbx(filepath, config):
     from armature.armature import setupArmature
 
     #posemode.exitPoseMode()
     #posemode.enterPoseMode()
 
-    gui3d.app.progress(0, text="Preparing")
+    G.app.progress(0, text="Preparing")
 
-    config.setHuman(human)
+    human = config.human
     config.setupTexFolder(filepath)
 
     log.message("Write FBX file %s" % filepath)
@@ -79,7 +79,7 @@ def exportFbx(human, filepath, config):
         config=config,
         rawTargets=rawTargets)
 
-    gui3d.app.progress(0.5, text="Exporting %s" % filepath)
+    G.app.progress(0.5, text="Exporting %s" % filepath)
 
     fp = codecs.open(filepath, "w", encoding="utf-8")
     fbx_utils.resetId()
@@ -120,7 +120,7 @@ def exportFbx(human, filepath, config):
     fbx_header.writeTakes(fp)
     fp.close()
 
-    gui3d.app.progress(1)
+    G.app.progress(1)
     #posemode.exitPoseMode()
     log.message("%s written" % filepath)
 

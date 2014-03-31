@@ -8,7 +8,7 @@
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Glynn Clements
+**Authors:**           Jonas Hauquier, Glynn Clements
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
@@ -34,16 +34,18 @@
 Abstract
 --------
 
-TODO
+Standalone script to compile all .proxy and .mhclo proxy files into binary 
+.mhpxy (npz) files for faster loading.
 """
 
 import sys
-sys.path = ["./core", "./lib"] + sys.path
-import algos3d
+sys.path = ["./core", "./lib", "./shared", "./apps"] + sys.path
 import os
-import zipfile
 import fnmatch
-from codecs import open
+import proxy
+from getpath import isSubPath, getSysDataPath
+from human import Human
+import files3d
 
 def getAllFiles(rootPath, filterStrArr):
     result = [ None ]*len(filterStrArr)
@@ -61,32 +63,34 @@ def getFiles(root, filenames, filterStr):
     return foundFiles
 
 
-if __name__ == '__main__':
-    obj = algos3d.Target(None, None)
-    allFiles = getAllFiles('data', ['*.target', '*.png'])
-    npzPath = 'data/targets.npz'
-    with zipfile.ZipFile(npzPath, mode='w', compression=zipfile.ZIP_DEFLATED) as zip:
-        npzdir = os.path.dirname(npzPath)
-        allTargets = allFiles[0]
-        print len(allFiles)
-        for (i, path) in enumerate(allTargets):
-            try:
-                obj._load_text(path)
-                obj._save_binary(path)
-                iname, vname = obj._save_binary(path)
-                zip.write(iname, os.path.relpath(iname, npzdir))
-                zip.write(vname, os.path.relpath(vname, npzdir))
-                os.remove(iname)
-                os.remove(vname)
-                print "[%.0f%% done] converted target %s" % (100*(float(i)/float(len(allTargets))), path)
-            except None, e:
-                raise e
-                print 'error converting target %s' % path
+def compileProxy(path, human):
+    name = os.path.basename(path)
 
-    print "Writing images list"
-    with open('data/images.list', 'w', encoding="utf-8") as f:
-        allImages = allFiles[1]
-        for path in allImages:
-            path = path.replace('\\','/')
-            f.write(path + '\n')
+    try:
+        npzpath = os.path.splitext(path)[0] + '.mhpxy'
+        try:
+            proxy_ = proxy.loadTextProxy(human, path, type=None)
+        except:
+            print 'Could not load proxy file %s.' % path
+            import traceback
+            traceback.print_exc(file=sys.stdout)
+            return False
+        proxy.saveBinaryProxy(proxy_, npzpath)
+    except:
+        print 'Unable to save compiled proxy for file %s' % path
+        #import traceback
+        #traceback.print_exc(file=sys.stdout)
+        return False
+        
+    return True
+
+
+if __name__ == '__main__':
+    human = Human(files3d.loadMesh(getSysDataPath("3dobjs/base.obj")))
+    allFiles = getAllFiles('data', ['*.mhclo', '*.proxy'])
+    allProxies = allFiles[0]
+    for (i, path) in enumerate(allProxies):
+        compileProxy(path, human)
+        print "[%.0f%% done] converted proxy %s" % (100*(float(i)/float(len(allProxies))), path)
+
     print "All done."

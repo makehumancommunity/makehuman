@@ -41,174 +41,146 @@ import random
 import gui3d
 import events3d
 import gui
+from core import G
+
+class RandomizeAction(gui3d.Action):
+    def __init__(self, human, before, after):
+        super(RandomizeAction, self).__init__("Randomize")
+        self.human = human
+        self.before = before
+        self.after = after
+
+    def do(self):
+        self._assignModifierValues(self.after)
+        return True
+
+    def undo(self):
+        self._assignModifierValues(self.before)
+        return True
+
+    def _assignModifierValues(self, valuesDict):
+        _tmp = self.human.symmetryModeEnabled
+        self.human.symmetryModeEnabled = False
+        for mName, val in valuesDict.items():
+            try:
+                self.human.getModifier(mName).setValue(val)
+            except:
+                pass
+        self.human.applyAllTargets(G.app.progress)
+        self.human.symmetryModeEnabled = _tmp
 
 class RandomTaskView(gui3d.TaskView):
 
     def __init__(self, category):
         gui3d.TaskView.__init__(self, category, 'Random')
-        
-        toolbox = self.addLeftWidget(gui.SliderBox('Tools'))
+
+        self.human = G.app.selectedHuman
+        toolbox = self.addLeftWidget(gui.SliderBox('Randomize settings'))
         self.macro = toolbox.addWidget(gui.CheckBox("Macro", True))
-        self.height = toolbox.addWidget(gui.CheckBox("Height"))
-        self.face = toolbox.addWidget(gui.CheckBox("Face"))
-        self.symmetry = toolbox.addWidget(gui.Slider(value=-1.0, min=-1.0, max=1.0, label="Symmetry"))
-        self.amount = toolbox.addWidget(gui.Slider(value=0.5, label="Amount"))
-        self.create = toolbox.addWidget(gui.Button("Replace current"))
-        self.modify = toolbox.addWidget(gui.Button("Adjust current"))
+        self.face = toolbox.addWidget(gui.CheckBox("Face", True))
+        self.body = toolbox.addWidget(gui.CheckBox("Body", True))
+        self.height = toolbox.addWidget(gui.CheckBox("Height", False))
 
-        self.lastRandoms = {}
-        
-        @self.create.mhEvent
+        self.symmetry = toolbox.addWidget(gui.Slider(value=0.7, min=0.0, max=1.0, label="Symmetry"))
+        #self.amount = toolbox.addWidget(gui.Slider(value=0.5, label="Amount"))
+        #self.create = toolbox.addWidget(gui.Button("Replace current"))
+        #self.modify = toolbox.addWidget(gui.Button("Adjust current"))
+
+        self.randomBtn = toolbox.addWidget(gui.Button("Randomize"))
+        @self.randomBtn.mhEvent
         def onClicked(event):
-            
-            #human = gui3d.app.selectedHuman
-            # human.resetMeshValues()
-            self.lastRandoms = {}
-            
-            if self.macro.selected:
-                self.storeLastRandom('gender', 0.5, random.random()-0.5)
-                self.storeLastRandom('age', 0.5, random.random()-0.5)
-                self.storeLastRandom('muscle', 0.5, random.random()-0.5)
-                self.storeLastRandom('weight', 0.5, random.random()-0.5)
-                
-            if self.height.selected:
-                self.storeLastRandom( 'height', 0, random.random()*2-1 )
+            randomize(self.human,
+                      self.symmetry.getValue(), 
+                      macro=self.macro.selected, 
+                      height=self.height.selected, 
+                      face=self.face.selected,
+                      body=self.body.selected)
 
-            if self.face.selected:
-                category = gui3d.app.getCategory('Modelling')
-                taskview = category.getTaskByName('Face')
-                modifiers = taskview.getModifiers()
-                
-                symmetricModifiers = taskview.getSymmetricModifierPairNames()
-                for pair in symmetricModifiers:
-                    #print "symmetric: "+pair['left']+' and '+pair['right']
-                    leftValue = random.gauss( 0, 0.5 ) 
-                    rightValue = random.gauss(0, 0.5 )
-                    # store randoms for later
-                    self.storeLastRandom(pair['left'], 0, leftValue)
-                    self.storeLastRandom(pair['right'], 0, rightValue)
+def randomize(human, symmetry, macro, height, face, body):
+    modifierGroups = []
+    if macro:
+        modifierGroups = modifierGroups + ['macrodetails', 'macrodetails-universal', 'macrodetails-proportions']
+    if height:
+        modifierGroups = modifierGroups + ['macrodetails-height']
+    if face:
+        modifierGroups = modifierGroups + ['eyebrows', 'eyes', 'chin', 
+                         'forehead', 'head', 'mouth', 'nose', 'neck', 'ears',
+                         'cheek']
+    if body:
+        modifierGroups = modifierGroups + ['pelvis', 'hip', 'armslegs', 'stomach', 'breast', 'buttocks', 'torso']
 
-                singularModifiers = taskview.getSingularModifierNames()                
-                for modName in singularModifiers:
-                    #print "singular: "+modName
-                    # get random gaussian
-                    value = random.gauss( 0, 0.5 ) 
-                    # non-asymmetric modifiers should only go 0..1
-                    m = modifiers[modName]
-                    if m.clampValue(-1.0) >= 0:
-                        value = abs(value)
-                    # store for later
-                    self.storeLastRandom(modName, 0, value)
+    modifiers = []
+    for mGroup in modifierGroups:
+        modifiers = modifiers + human.getModifiersByGroup(mGroup)
+    # Make sure not all modifiers are always set in the same order 
+    # (makes it easy to vary dependent modifiers like ethnics)
+    random.shuffle(modifiers)
 
-            self.setModifiers()
-            
-        @self.modify.mhEvent
-        def onClicked(event):
-            human = gui3d.app.selectedHuman
-            
-            if self.macro.selected:
-                self.storeLastRandom( 'gender', human.getGender(), random.random()-0.5 )
-                self.storeLastRandom( 'age', human.getAge(), random.random()-0.5 )
-                self.storeLastRandom( 'weight', human.getWeight(), random.random()-0.5 )
-                self.storeLastRandom( 'muscle', human.getMuscle(), random.random()-0.5 )
-                
-            if self.height.selected:
-                self.storeLastRandom( 'height', human.getHeight(), random.random()-0.5)
-            
-            if self.face.selected:
-                category = gui3d.app.getCategory('Modelling')
-                taskview = category.getTaskByName('Face')
-                modifiers = taskview.getModifiers()
-                
-                symmetricModifiers = taskview.getSymmetricModifierPairNames()
-                for pair in symmetricModifiers:
-                    #print "symmetric: "+pair['left']+' and '+pair['right']
-                    leftValue = random.gauss( 0, 0.5 ) 
-                    rightValue = random.gauss( 0, 0.5 ) 
-                    # store randoms for later
-                    self.storeLastRandom(pair['left'], modifiers[pair['left']].getValue(human), leftValue)
-                    self.storeLastRandom(pair['right'], modifiers[pair['right']].getValue(human), rightValue)
-
-                singularModifiers = taskview.getSingularModifierNames()                
-                for modName in singularModifiers:
-                    #print "singular: "+modName
-                    # get random gaussian
-                    value = random.gauss( 0, 0.5 ) 
-                    # non-asymmetric modifiers should only go 0..1
-                    m = modifiers[modName]
-                    if m.clampValue(-1.0) >= 0:
-                        value = abs(value)
-                    # store for later
-                    self.storeLastRandom(modName, modifiers[modName].getValue(human), value)
-    
-            self.setModifiers()
-
-        @self.amount.mhEvent
-        def onChange(value):
-            self.setModifiers()
-
-        @self.symmetry.mhEvent
-        def onChange(value):
-            self.setModifiers()
-
-    def setModifiers(self):
-
-        human = gui3d.app.selectedHuman
-        #sliderMul = self.amount.getValue()
-
-        if self.macro.selected:
-            human.setGender( self.getRandom('gender', 0, 1 ))
-            human.setAge( self.getRandom('age', 0, 1 ))
-            human.setWeight( self.getRandom('weight', 0, 1 ))
-            human.setMuscle( self.getRandom('muscle', 0, 1 ))
-
-        if self.height.selected:
-            human.setHeight( self.getRandom('height', -1, 1 ))
-
-        if self.face.selected:
-            category = gui3d.app.getCategory('Modelling')
-            taskview = category.getTaskByName('Face')
-            modifiers = taskview.getModifiers()
-            symmetricModifiers = taskview.getSymmetricModifierPairNames()
-            symFactor = self.symmetry.getValue()
-            for pair in symmetricModifiers:
-                #print "applying "+pair['left']+" and "+pair['right']
-                leftValue = self.getRandom(pair['left'])
-                rightValue = self.getRandom(pair['right'])
-                # handle symmetry
-                # -1 = left value only
-                # 0 = no symmetry
-                # 1 = right value only
-                if symFactor < 0:
-                    # hold the right value constant, adjust the left value towards its target
-                    rightValue = leftValue*-symFactor + rightValue*(1.0+symFactor)
+    randomValues = {}
+    for m in modifiers:
+        if m.fullName not in randomValues:
+            randomValue = None
+            if m.groupName == 'head':
+                sigma = 0.1
+            elif m.fullName in ["forehead/forehead-nubian-less|more", "forehead/forehead-scale-vert-less|more"]:
+                sigma = 0.02
+                # TODO add further restrictions on gender-dependent targets like pregnant and breast
+            elif "trans-horiz" in m.fullName or m.fullName == "hip/hip-trans-in|out":
+                if symmetry == 1:
+                    randomValue = m.getDefaultValue()
                 else:
-                    # hold the right value constant, adjust the left value towards its target
-                    leftValue = rightValue*symFactor + leftValue*(1.0-symFactor)
-                # apply
-                modifiers[pair['left']].setValue(human, leftValue)
-                modifiers[pair['right']].setValue(human, rightValue)
+                    mMin = m.getMin()
+                    mMax = m.getMax()
+                    w = float(abs(mMax - mMin) * (1 - symmetry))
+                    mMin = max(mMin, m.getDefaultValue() - w/2)
+                    mMax = min(mMax, m.getDefaultValue() + w/2)
+                    randomValue = getRandomValue(mMin, mMax, m.getDefaultValue(), 0.1)
+            elif m.groupName in ["forehead", "eyebrows", "neck", "eyes", "nose", "ears", "chin", "cheek", "mouth"]:
+                sigma = 0.1
+            elif m.groupName == 'macrodetails':
+                # TODO perhaps assign uniform random values to macro modifiers?
+                #randomValue = random.random()
+                sigma = 0.3
+            #elif m.groupName == "armslegs":
+            #    sigma = 0.1
+            else:
+                #sigma = 0.2
+                sigma = 0.1
 
-            singularModifiers = taskview.getSingularModifierNames()
-            for modName in singularModifiers:
-                #print "applying "+modName
-                modifiers[modName].setValue(human, self.getRandom(modName) )
+            if randomValue is None:
+                randomValue = getRandomValue(m.getMin(), m.getMax(), m.getDefaultValue(), sigma)   # TODO also allow it to continue from current value?
+            randomValues[m.fullName] = randomValue
+            symm = m.getSymmetricOpposite()
+            if symm and symm not in randomValues:
+                if symmetry == 1:
+                    randomValues[symm] = randomValue
+                else:
+                    m2 = human.getModifier(symm)
+                    symmDeviation = float((1-symmetry) * abs(m2.getMax() - m2.getMin()))/2
+                    symMin =  max(m2.getMin(), min(randomValue - (symmDeviation), m2.getMax()))
+                    symMax =  max(m2.getMin(), min(randomValue + (symmDeviation), m2.getMax()))
+                    randomValues[symm] = getRandomValue(symMin, symMax, randomValue, sigma)
 
-        human.callEvent('onChanged', events3d.HumanEvent(human, 'random'))
-        human.applyAllTargets(gui3d.app.progress)
-        
-    # get the stored random value for the given modifierName, applying amount slider
-    def getRandom( self, modifierName, minVal=-1, maxVal=1 ):
-        if modifierName in self.lastRandoms:
-            newVal = self.lastRandoms[modifierName]['base'] + self.lastRandoms[modifierName]['value']*self.amount.getValue()
-            newVal = min(maxVal,max(minVal,newVal))
-            return newVal
-        else:
-            return 0
+    if randomValues.get("macrodetails/Gender", 0) > 0.5 or \
+       randomValues.get("macrodetails/Age", 0.5) < 0.2 or \
+       randomValues.get("macrodetails/Age", 0.7) < 0.75:
+        # No pregnancy for male, too young or too old subjects
+        if "stomach/stomach-pregnant-decr|incr" in randomValues:
+            randomValues["stomach/stomach-pregnant-decr|incr"] = 0
 
+    oldValues = dict( [(m.fullName, m.getValue()) for m in modifiers] )
 
-    def storeLastRandom( self, modifierName, baseValue, randOffset ):
-        self.lastRandoms[modifierName] = { 'base':baseValue, 'value':randOffset };
+    gui3d.app.do( RandomizeAction(human, oldValues, randomValues) )
+
+def getRandomValue(minValue, maxValue, middleValue, sigmaFactor = 0.2):
+    rangeWidth = float(abs(maxValue - minValue))
+    sigma = sigmaFactor * rangeWidth
+    randomVal = random.gauss(middleValue, sigma)
+    if randomVal < minValue:
+        randomVal = minValue + abs(randomVal - minValue)
+    elif randomVal > maxValue:
+        randomVal = maxValue - abs(randomVal - maxValue)
+    return max(minValue, min(randomVal, maxValue))
 
 def load(app):
     category = app.getCategory('Modelling')

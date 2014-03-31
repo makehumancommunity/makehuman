@@ -42,10 +42,27 @@ import os
 
 __home_path = None
 
+def pathToUnicode(path):
+    """
+    Unicode representation of the filename.
+    String is decoded with the codeset used by the filesystem of the operating
+    system.
+    Unicode representations of paths are fit for use in GUI.
+    If the path parameter is not a string, it will be returned unchanged.
+    """
+    if path is None:
+        return path
+    elif isinstance(path, unicode):
+        return path
+    elif isinstance(path, basestring):
+        return path.decode(sys.getfilesystemencoding())
+    else:
+        return path
+
 def formatPath(path):
     if path is None:
         return None
-    return os.path.normpath(path).replace("\\", "/")
+    return pathToUnicode( os.path.normpath(path).replace("\\", "/") )
 
 def canonicalPath(path):
     """
@@ -93,7 +110,7 @@ def getHomePath():
 
     # Unix-based
     else:
-        __home_path = os.path.expanduser('~')
+        __home_path = pathToUnicode( os.path.expanduser('~') )
         return __home_path
 
 def getPath(subPath = ""):
@@ -212,4 +229,56 @@ def findFile(relPath, searchPaths = [getDataPath(), getSysDataPath()]):
             return formatPath( path )
 
     return relPath
+
+def search(paths, extensions, recursive=True, mutexExtensions=False):
+    """
+    Search for files with specified extensions in specified paths.
+    If mutexExtensions is True, no duplicate files with only differing extension
+    will be returned. Instead, only the file with highest extension precedence 
+    (extensions occurs earlier in the extensions list) is kept.
+    """
+    if isinstance(paths, basestring):
+        paths = [paths]
+    if isinstance(extensions, basestring):
+        extensions = [extensions]
+    extensions = [e[1:].lower() if e.startswith('.') else e.lower() for e in extensions]
+
+    if mutexExtensions:
+        discovered = dict()
+        def _aggregate_files_mutexExt(filepath):
+            basep, ext = os.path.splitext(filepath)
+            ext = ext[1:]
+            if basep in discovered:
+                if extensions.index(ext) < extensions.index(discovered[basep]):
+                    discovered[basep] = ext
+            else:
+                discovered[basep] = ext
+
+    if recursive:
+        for path in paths:
+            for root, dirs, files in os.walk(path):
+                for f in files:
+                    ext = os.path.splitext(f)[1][1:].lower()
+                    if ext in extensions:
+                        if mutexExtensions:
+                            _aggregate_files_mutexExt(os.path.join(root, f))
+                        else:
+                            yield pathToUnicode( os.path.join(root, f) )
+    else:
+        for path in paths:
+            if not os.path.isdir(path):
+                continue
+            for f in os.listdir(path):
+                f = os.path.join(path, f)
+                if os.path.isfile(f):
+                    ext = os.path.splitext(f)[1][1:].lower()
+                    if ext in extensions:
+                        if mutexExtensions:
+                            _aggregate_files_mutexExt(f)
+                        else:
+                            yield pathToUnicode( f )
+
+    if mutexExtensions:
+        for f in ["%s.%s" % (p,e) for p,e in discovered.items()]:
+            yield pathToUnicode( f )
 

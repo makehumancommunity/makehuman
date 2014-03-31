@@ -42,15 +42,11 @@ TODO
 
 from . import mh2opengl
 
-import os
 from core import G
 import gui
 from guirender import RenderTaskView
 import mh
 
-class RenderingMethod(object):
-    def __init__(self):
-        pass
 
 class OpenGLTaskView(RenderTaskView):
 
@@ -65,26 +61,30 @@ class OpenGLTaskView(RenderTaskView):
         self.resBox = settingsBox.addWidget(gui.TextEdit(
             "x".join([str(self.renderingWidth), str(self.renderingHeight)])))
         self.AAbox = settingsBox.addWidget(gui.CheckBox("Anti-aliasing"))
-        self.AAbox.setSelected( G.app.settings.get('GL_RENDERER_AA', True) )
+        self.AAbox.setSelected(G.app.settings.get('GL_RENDERER_AA', True))
         self.renderButton = settingsBox.addWidget(gui.Button('Render'))
 
         self.lightmapSSS = gui.CheckBox("Lightmap SSS")
-        self.lightmapSSS.setSelected( G.app.settings.get('GL_RENDERER_SSS', False) )
+        self.lightmapSSS.setSelected(
+            G.app.settings.get('GL_RENDERER_SSS', False))
 
         self.optionsBox = self.addLeftWidget(gui.GroupBox('Options'))
         self.optionsWidgets = []
 
         renderMethodBox = self.addRightWidget(gui.GroupBox('Rendering methods'))
         self.renderMethodList = renderMethodBox.addWidget(gui.ListView())
-        self.renderMethodList.setSizePolicy(gui.SizePolicy.Ignored, gui.SizePolicy.Preferred)
+        self.renderMethodList.setSizePolicy(
+            gui.SizePolicy.Ignored, gui.SizePolicy.Preferred)
 
         # Rendering methods
         self.renderMethodList.addItem('Quick Render')
-        self.renderMethodList.addItem('Advanced Render', data = [self.lightmapSSS])
-        
+        self.renderMethodList.addItem('Advanced Render',
+            data=[self.lightmapSSS])
+
         if not mh.hasRenderToRenderbuffer():
             self.firstTimeWarn = True
-            # Can only use screen grabbing as fallback, resolution option disabled
+            # Can only use screen grabbing as fallback,
+            # resolution option disabled
             self.resBox.setEnabled(False)
             self.AAbox.setEnabled(False)
 
@@ -97,7 +97,7 @@ class OpenGLTaskView(RenderTaskView):
                 res = [int(x) for x in value.split("x")]
                 self.renderingWidth = res[0]
                 self.renderingHeight = res[1]
-            except: # The user hasn't typed the value correctly yet.
+            except:  # The user hasn't typed the value correctly yet.
                 pass
 
         @self.AAbox.mhEvent
@@ -111,15 +111,15 @@ class OpenGLTaskView(RenderTaskView):
         @self.renderMethodList.mhEvent
         def onClicked(item):
             self.listOptions(item.getUserData())
-            
+
         @self.renderButton.mhEvent
         def onClicked(event):
             settings = dict()
-            settings['scene'] = self.getScene()
+            settings['scene'] = G.app.scene
             settings['AA'] = self.AAbox.selected
             settings['dimensions'] = (self.renderingWidth, self.renderingHeight)
             settings['lightmapSSS'] = self.lightmapSSS.selected and self.lightmapSSS in self.optionsWidgets
-            
+
             mh2opengl.Render(settings)
 
     def onShow(self, event):
@@ -127,7 +127,9 @@ class OpenGLTaskView(RenderTaskView):
         self.renderButton.setFocus()
         if not mh.hasRenderToRenderbuffer() and self.firstTimeWarn:
             self.firstTimeWarn = False
-            G.app.prompt('Lack of 3D hardware support', 'Your graphics card lacks support for proper rendering.\nOnly limited functionality will be available.', 'Ok', None, None, None, 'renderingGPUSupportWarning')
+            G.app.prompt('Lack of 3D hardware support',
+                'Your graphics card lacks support for proper rendering.\nOnly limited functionality will be available.',
+                'Ok', None, None, None, 'renderingGPUSupportWarning')
 
     def onHide(self, event):
         RenderTaskView.onHide(self, event)
@@ -152,6 +154,6 @@ def load(app):
     taskview.sortOrder = 1.3
     category.addTask(taskview)
 
+
 def unload(app):
     pass
-

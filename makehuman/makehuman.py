@@ -279,10 +279,11 @@ def get_platform_paths():
         stderr_filename = os.path.join(home, "makehuman-error.txt")
 
 def redirect_standard_streams():
+    from codecs import open
     if stdout_filename:
-        sys.stdout = open(stdout_filename, "w")
+        sys.stdout = open(stdout_filename, "w", encoding="utf-8")
     if stderr_filename:
-        sys.stderr = open(stderr_filename, "w")
+        sys.stderr = open(stderr_filename, "w", encoding="utf-8")
 
 def close_standard_streams():
     sys.stdout.close()
@@ -347,8 +348,7 @@ def main():
         make_user_dir()
         get_platform_paths()
         redirect_standard_streams()
-        if not isRelease():
-            get_hg_revision()
+        get_hg_revision()
         os.environ['MH_VERSION'] = getVersionStr()
         os.environ['MH_SHORT_VERSION'] = getShortVersion()
         os.environ['MH_MESH_VERSION'] = getBasemeshVersion()

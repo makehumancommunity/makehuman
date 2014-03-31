@@ -34,7 +34,7 @@
 Abstract
 --------
 
-TODO
+Main application GUI component.
 """
 
 import sys
@@ -52,18 +52,19 @@ import geometry3d
 import animation3d
 import human
 import guifiles
+import managed_file
 import algos3d
-#import posemode
 import gui
 import language
 import log
 
 @contextlib.contextmanager
 def outFile(path):
+    from codecs import open
     path = mh.getPath(path)
     tmppath = path + '.tmp'
     try:
-        with open(tmppath, 'w') as f:
+        with open(tmppath, 'w', encoding="utf-8") as f:
             yield f
         if os.path.exists(path):
             os.remove(path)
@@ -75,12 +76,13 @@ def outFile(path):
 
 @contextlib.contextmanager
 def inFile(path):
+    from codecs import open
     try:
         path = mh.getPath(path)
         if not os.path.isfile(path):
             yield []
             return
-        with open(path, 'r') as f:
+        with open(path, 'rU', encoding="utf-8") as f:
             yield f
     except:
         log.error('Failed to load file %s', path, exc_info=True)
@@ -137,6 +139,7 @@ class SymmetryAction(gui3d.Action):
         self.human.applyAllTargets(G.app.progress)
         mh.redraw()
         return True
+
 
 class MHApplication(gui3d.Application, mh.Application):
     def __init__(self):
@@ -196,6 +199,7 @@ class MHApplication(gui3d.Application, mh.Application):
         if mh.isRelease():
             self.settings = {
                 'realtimeUpdates': True,
+                'realtimeFitting': True,
                 'sliderImages': True,
                 'excludePlugins': [
                     "0_modeling_5_editing",
@@ -231,6 +235,7 @@ class MHApplication(gui3d.Application, mh.Application):
         else:
             self.settings = {
                 'realtimeUpdates': True,
+                'realtimeFitting': True,
                 'realtimeNormalUpdates': True,
                 'cameraAutoZoom': False,
                 'lowspeed': 1,
@@ -257,7 +262,6 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.undoStack = []
         self.redoStack = []
-        self.modified = False
 
         self.actions = None
 
@@ -268,11 +272,16 @@ class MHApplication(gui3d.Application, mh.Application):
         self.modules = {}
 
         self.selectedHuman = None
-        self._currentScene = None
+        self.currentFile = managed_file.File()
+        self._scene = None
         self.backplaneGrid = None
         self.groundplaneGrid = None
 
         self.theme = None
+
+        @self.currentFile.mhEvent
+        def onModified(event):
+            self.updateFilenameCaption()
 
         #self.modelCamera = mh.Camera()
         #self.modelCamera.switchToOrtho()
@@ -303,8 +312,13 @@ class MHApplication(gui3d.Application, mh.Application):
     def args(self):
         return G.args
 
-    def loadHuman(self):
+    def loadHumanMHM(self, filename):
+        self.selectedHuman.load(filename, True, self.progress)
+        self.clearUndoRedo()
+        # Reset mesh is never forced to wireframe
+        self.actions.wireframe.setChecked(False)
 
+    def loadHuman(self):
         self.progress(0.1)
 
         # Set a lower than default MAX_FACES value because we know the human has a good topology (will make it a little faster)
@@ -315,19 +329,13 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.progress(0.18)
 
-        userSceneDir = mh.getPath("data/scenes")
+        userSceneDir = mh.getDataPath("scenes")
         if not os.path.exists(userSceneDir):
             os.makedirs(userSceneDir)
 
         from scene import Scene
         from getpath import findFile
-        self.currentScene = Scene(findFile("scenes/default.mhscene"))
-
-        @self._currentScene.mhEvent
-        def onChanged(scene):
-            self._currentSceneChanged()
-
-        self._currentSceneChanged()
+        self.setScene( Scene(findFile("scenes/default.mhscene")) )
 
     def loadMainGui(self):
 
@@ -596,10 +604,8 @@ class MHApplication(gui3d.Application, mh.Application):
             algos3d.getTarget(self.selectedHuman.meshData, target.path)
 
     def loadFinish(self):
-
+        #self.selectedHuman.callEvent('onChanged', events3d.HumanEvent(self.selectedHuman, 'reset'))
         self.selectedHuman.applyAllTargets(gui3d.app.progress)
-        self.selectedHuman.callEvent('onChanged', events3d.HumanEvent(self.selectedHuman, 'reset'))
-        self.selectedHuman.applyAllTargets(self.progress)
 
         self.prompt('Warning', 'MakeHuman is a character creation suite. It is designed for making anatomically correct humans.\nParts of this program may contain nudity.\nDo you want to proceed?', 'Yes', 'No', None, self.stop, 'nudityWarning')
         # self.splash.hide()
@@ -608,8 +614,7 @@ class MHApplication(gui3d.Application, mh.Application):
           ( not mh.Shader.supported() or mh.Shader.glslVersion() < (1,20) ):
             self.prompt('Warning', 'Your system does not support OpenGL shaders (GLSL v1.20 required).\nOnly simple shading will be available.', 'Ok', None, None, None, 'glslWarning')
 
-        gui3d.app.setFilenameCaption("Untitled")
-        self.setFileModified(False)
+        self.currentFile.modified = False
 
         #printtree(self)
 
@@ -668,6 +673,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.splash.hide()
         # self.splash.finish(self.mainwin)
+        self.splash.close()
         self.splash = None
 
         # Restore main window size and position
@@ -763,13 +769,13 @@ class MHApplication(gui3d.Application, mh.Application):
         if action.do():
             self.undoStack.append(action)
             del self.redoStack[:]
-            self.setFileModified(True)
+            self.currentFile.changed()
             log.message('do %s', action.name)
             self.syncUndoRedo()
 
     def did(self, action):
         self.undoStack.append(action)
-        self.setFileModified(True)
+        self.currentFile.changed()
         del self.redoStack[:]
         log.message('did %s', action.name)
         self.syncUndoRedo()
@@ -780,7 +786,7 @@ class MHApplication(gui3d.Application, mh.Application):
             log.message('undo %s', action.name)
             action.undo()
             self.redoStack.append(action)
-            self.setFileModified(True)
+            self.currentFile.changed()
             self.syncUndoRedo()
 
     def redo(self):
@@ -789,7 +795,7 @@ class MHApplication(gui3d.Application, mh.Application):
             log.message('redo %s', action.name)
             action.do()
             self.undoStack.append(action)
-            self.setFileModified(True)
+            self.currentFile.changed()
             self.syncUndoRedo()
 
     def syncUndoRedo(self):
@@ -887,7 +893,7 @@ class MHApplication(gui3d.Application, mh.Application):
         log._logLevelColors[log.ERROR] = 'red'
         log._logLevelColors[log.CRITICAL] = 'red'
 
-        f = open(os.path.join(mh.getSysDataPath("themes/"), theme + ".mht"), 'r')
+        f = open(os.path.join(mh.getSysDataPath("themes/"), theme + ".mht"), 'rU')
 
         update_log = False
         for data in f.readlines():
@@ -992,25 +998,26 @@ class MHApplication(gui3d.Application, mh.Application):
     # Caption
     def setCaption(self, caption):
         """Set the main window caption."""
-        mh.setCaption(caption.encode('utf8'))
+        mh.setCaption(caption)
 
-    def setFilenameCaption(self, filename):
+    def updateFilenameCaption(self):
         """Calculate and set the window title according to the
         name of the current open file and the version of MH."""
+        filename = self.currentFile.filename
+        if filename is None:
+            filename = "Untitled"
         if mh.isRelease():
+            from getpath import pathToUnicode
             self.setCaption(
                 "MakeHuman %s - [%s][*]" %
-                (mh.getVersionStr(), filename))
+                (mh.getVersionStr(), pathToUnicode(filename)))
         else:
+            from getpath import pathToUnicode
             self.setCaption(
                 "MakeHuman r%s (%s) - [%s][*]" %
-                (os.environ['HGREVISION'], os.environ['HGNODEID'], filename))
-
-    def setFileModified(self, modified):
-        """Mark the current open file as modified and
-        update the window title accordingly."""
-        self.modified = modified
-        self.mainwin.setWindowModified(self.modified)
+                (os.environ['HGREVISION'], os.environ['HGNODEID'], 
+                pathToUnicode(filename)))
+        self.mainwin.setWindowModified(self.currentFile.modified)
 
     # Global status bar
     def status(self, text, *args):
@@ -1126,28 +1133,30 @@ class MHApplication(gui3d.Application, mh.Application):
     def setRightLegRightCamera(self):
         self.setTargetCamera(4744, 2.3)
 
-    # Global scene
-    def getCurrentScene(self):
-        return self._currentScene
+    def getScene(self):
+        """
+        The scene used for rendering the viewport.
+        """
+        return self._scene
 
-    def setCurrentScene(self, scene):
-        self._currentScene = scene
-        self._currentSceneChanged()
+    def setScene(self, scene):
+        """
+        Set the scene used for rendering the viewport.
+        """
+        self._scene = scene
+        @self._scene.mhEvent
+        def onModified(event):
+            if event.file == self.scene and event.objectWasChanged:
+                self._sceneChanged()
 
-    currentScene = property(getCurrentScene, setCurrentScene)
+        self._sceneChanged()
 
-    def _currentSceneChanged(self):
-        # TODO: Possibly emit an onSceneChanged event
-        self.applyScene()
+    scene = property(getScene, setScene)
 
-    def applyScene(self, scene=None):
-        if scene is None:
-            scene = self.currentScene
-
+    def _sceneChanged(self):
         from glmodule import setSceneLighting
-        setSceneLighting(scene)
-
-        # TODO: Possibly emit an onSceneApplied event
+        setSceneLighting(self.scene)
+        # TODO: Possibly emit an onSceneChanged event
 
     # Shortcuts
     def setShortcut(self, modifier, key, action):
@@ -1281,18 +1290,18 @@ class MHApplication(gui3d.Application, mh.Application):
         self.status("Screengrab saved to %s", filename)
 
     def resetHuman(self):
-        if self.modified:
+        if self.currentFile.modified:
             self.prompt('Reset', 'By resetting the human you will lose all your changes, are you sure?', 'Yes', 'No', self._resetHuman)
         else:
             self._resetHuman()
 
     def _resetHuman(self):
-        human = self.selectedHuman
-        human.resetMeshValues()
-        human.applyAllTargets(self.progress)
-        self.setFilenameCaption("Untitled")
-        self.setFileModified(False)
+        self.currentFile.close()
+        self.selectedHuman.resetMeshValues()
+        self.selectedHuman.applyAllTargets(self.progress)
         self.clearUndoRedo()
+        # Reset mesh is never forced to wireframe
+        self.actions.wireframe.setChecked(False)
 
     # Camera navigation
     def rotateCamera(self, axis, amount):
@@ -1408,7 +1417,7 @@ class MHApplication(gui3d.Application, mh.Application):
         pass
 
     def promptAndExit(self):
-        if self.modified:
+        if self.currentFile.modified:
             self.prompt('Exit', 'You have unsaved changes. Are you sure you want to exit the application?', 'Yes', 'No', self.stop)
         else:
             self.stop()

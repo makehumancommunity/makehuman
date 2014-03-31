@@ -50,12 +50,10 @@ class EyesTaskView(proxychooser.ProxyChooserTaskView):
         #return 3
         return 5
 
-    def proxySelected(self, proxy, obj):
-        self.human.eyesObj = obj
+    def proxySelected(self, proxy):
         self.human.eyesProxy = proxy
 
-    def proxyDeselected(self, proxy, obj, suppressSignal = False):
-        self.human.eyesObj = None
+    def proxyDeselected(self, proxy, suppressSignal = False):
         self.human.eyesProxy = None
 
     def onShow(self, event):
@@ -65,7 +63,9 @@ class EyesTaskView(proxychooser.ProxyChooserTaskView):
 
     def onHumanChanged(self, event):
         if event.change == 'reset':
+            # Load initial eyes
             self.selectProxy(mh.getSysDataPath("eyes/high-poly/high-poly.mhclo"))
+            # Reset default material on eyes (in case it was changed)
             self.getObjects()[0].mesh.material = self.getSelection()[0].material
             return
         super(EyesTaskView, self).onHumanChanged(event)
@@ -87,7 +87,7 @@ def load(app):
     taskview.registerLoadSaveHandlers()
 
     # Load initial eyes
-    taskview.selectProxy(mh.getSysDataPath("eyes/low-poly/low-poly.mhclo"))
+    taskview.selectProxy(mh.getSysDataPath("eyes/high-poly/high-poly.mhclo"))
 
 # This method is called when the plugin is unloaded from makehuman
 # At the moment this is not used, but in the future it will remove the added GUI elements

@@ -173,6 +173,9 @@ _shaderConfigDefines = ['DIFFUSE', 'BUMPMAP', 'NORMALMAP', 'DISPLACEMENT', 'SPEC
 # Protected shader parameters that are set exclusively by means of material properties (configureShading())
 _materialShaderParams = ['diffuse', 'ambient', 'specular', 'emissive', 'diffuseTexture', 'bumpmapTexture', 'bumpmapIntensity', 'normalmapTexture', 'normalmapIntensity', 'displacementmapTexture', 'displacementmapTexture', 'specularmapTexture', 'specularmapIntensity', 'transparencymapTexture', 'transparencymapIntensity', 'aomapTexture', 'aomapIntensity']
 
+# Generic list of the names of texture members of material (append "Texture" to get the member name)
+textureTypes = ["diffuse", "bumpMap", "normalMap", "displacementMap", "specularMap", "transparencyMap", "aoMap"]
+
 # TODO a more generic approach to declaring material properties could reduce code duplication a lot
 class Material(object):
     """
@@ -320,9 +323,10 @@ class Material(object):
         """
         Parse .mhmat file and set as the properties of this material.
         """
+        from codecs import open
         log.debug("Loading material from file %s", filename)
         try:
-            f = open(filename, "rU")
+            f = open(filename, "rU", encoding="utf-8")
         except:
             f = None
         if f == None:
@@ -472,10 +476,10 @@ class Material(object):
             return os.path.normpath(filename).replace('\\', '/')
 
     def toFile(self, filename, comments = []):
-        import codecs
+        from codecs import open
 
         try:
-            f = codecs.open(filename, 'w', encoding='utf-8')
+            f = open(filename, 'w', encoding='utf-8')
         except:
             f = None
         if f == None:
@@ -557,11 +561,11 @@ class Material(object):
             if name not in _materialShaderParams:
                 hasShaderParam = True
                 import image
-                if isinstance(param, list):
-                    f.write("shaderParam %s %s\n" % (name, " ".join([str(p) for p in param])) )
-                elif isinstance(param, image.Image):
+                if isinstance(param, image.Image):
                     if hasattr(param, "sourcePath"):
                         f.write("shaderParam %s %s\n" % (name, self._texPath(param.sourcePath, filedir)) )
+                elif isinstance(param, list):
+                    f.write("shaderParam %s %s\n" % (name, " ".join([str(p) for p in param])) )
                 elif isinstance(param, basestring) and not isNumeric(param):
                     # Assume param is a path
                     f.write("shaderParam %s %s\n" % (name, self._texPath(param, filedir)) )
@@ -953,6 +957,11 @@ class Material(object):
     shader = property(getShader, setShader)
 
     def getShaderObj(self):
+        import sys
+        if 'shader' not in sys.modules.keys():
+            # Don't import shader module in application if it is not loaded yet
+            # Avoid unneeded dependency on OpenGL/shader modules
+            return None
         import shader
         if not shader.Shader.supported():
             return None
@@ -1086,6 +1095,18 @@ class Material(object):
         else:
             return texture
 
+    def getTextureDict(self):
+        """
+        Dict with typename - texturepath pairs that returns all textures set on
+        this material (empty ones are excluded).
+        """
+        from collections import OrderedDict
+        result = OrderedDict()
+        for t in textureTypes:
+            tName = t+"Texture"
+            if getattr(self, tName) is not None:
+                result[tName] = getattr(self, tName)
+        return result
 
     def getDiffuseTexture(self):
         return self._diffuseTexture
@@ -1253,7 +1274,7 @@ def getSkinBlender():
     return _autoSkinBlender
 
 def getFilePath(filename, folder = None):
-    if not filename:
+    if not filename or not isinstance(filename, basestring):
         return filename
 
     # Ensure unix style path
@@ -1267,19 +1288,11 @@ def getFilePath(filename, folder = None):
     # Treat as absolute path or search relative to application path
     if os.path.isfile(filename):
         return os.path.abspath(filename)
-    # Search in user data folder
-    from getpath import getPath, getSysDataPath, getSysPath
-    userPath = getPath(filename)
-    if os.path.isfile(userPath):
-        return os.path.abspath(userPath)
-    # Search in system path
-    sysPath = getSysPath(filename)
-    if os.path.isfile(sysPath):
-        return os.path.abspath(sysPath)
-    # Search in system data path
-    sysPath = getSysDataPath(filename)
-    if os.path.isfile(sysPath):
-        return os.path.abspath(sysPath)
+    # Search in user / sys data, and user / sys root folders
+    from getpath import findFile, getPath, getSysDataPath, getSysPath, getDataPath
+    path = findFile(filename, [getDataPath(), getSysDataPath(), getPath(), getSysPath()])
+    if os.path.isfile(path):
+        return os.path.abspath(abspath)
 
     # Nothing found
     return os.path.normpath(filename)
@@ -1334,7 +1347,8 @@ class UVMap:
 
 
 def loadUvObjFile(filepath):
-    fp = open(filepath, "rU")
+    from codecs import open
+    fp = open(filepath, "rU", encoding="utf-8")
     uvs = []
     fuvs = []
     for line in fp:

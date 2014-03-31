@@ -42,7 +42,6 @@ import os
 import mh
 import gui3d
 import filechooser as fc
-import log
 import qtgui as gui
 
 class HumanFileSort(fc.FileSort):
@@ -99,7 +98,8 @@ class HumanFileSort(fc.FileSort):
         meta = {}
                 
         meta['modified'] = os.path.getmtime(filename)
-        f = open(filename)
+        from codecs import open
+        f = open(filename, 'rU', encoding="utf-8")
         for line in f:
             lineData = line.split()
             field = lineData[0]
@@ -112,13 +112,12 @@ class HumanFileSort(fc.FileSort):
 class LoadTaskView(gui3d.TaskView):
 
     def __init__(self, category):
-        
-        modelPath = mh.getPath('models')
-        gui3d.TaskView.__init__(self, category, 'Load', )
+
+        gui3d.TaskView.__init__(self, category, 'Load')
+
+        self.modelPath = None
 
         self.fileentry = self.addTopWidget(gui.FileEntryView('Browse', mode='dir'))
-        self.fileentry.setDirectory(mh.getPath('models'))
-        self.fileentry.text = mh.getPath('models')
         self.fileentry.setFilter('MakeHuman Models (*.mhm)')
 
         @self.fileentry.mhEvent
@@ -126,7 +125,7 @@ class LoadTaskView(gui3d.TaskView):
             self.filechooser.setPaths([dirpath])
             self.filechooser.refresh()
 
-        self.filechooser = fc.IconListFileChooser(modelPath, 'mhm', 'thumb', mh.getSysDataPath('notfound.thumb'), sort=HumanFileSort())
+        self.filechooser = fc.IconListFileChooser(mh.getPath("models"), 'mhm', 'thumb', mh.getSysDataPath('notfound.thumb'), sort=HumanFileSort())
         self.addRightWidget(self.filechooser)
         self.addLeftWidget(self.filechooser.createSortBox())
 
@@ -135,42 +134,18 @@ class LoadTaskView(gui3d.TaskView):
             self.loadMHM(filename)
 
     def loadMHM(self, filename):
-        human = gui3d.app.selectedHuman
-
-        human.load(filename, True, gui3d.app.progress)
-
-        del gui3d.app.undoStack[:]
-        del gui3d.app.redoStack[:]
-        gui3d.app.modified = False
-        gui3d.app.clearUndoRedo()
-
-        name = os.path.basename(filename).replace('.mhm', '')
-
-        self.parent.tasksByName['Save'].fileentry.text = name
-        self.parent.tasksByName['Save'].fileentry.edit.setText(name)
-        
-        gui3d.app.setFilenameCaption(filename)
-        gui3d.app.setFileModified(False)
+        gui3d.app.loadHumanMHM(filename)
 
     def onShow(self, event):
-
         gui3d.TaskView.onShow(self, event)
-        self.filechooser.setPaths([self.fileentry.directory])
+
+        self.modelPath = gui3d.app.currentFile.dir
+        if self.modelPath is None:
+            self.modelPath = mh.getPath("models")
+
+        self.fileentry.setDirectory(self.modelPath)
+        self.filechooser.setPaths(self.modelPath)
         self.filechooser.setFocus()
 
         # HACK: otherwise the toolbar background disappears for some weird reason
-
         mh.redraw()
-
-    def onHide(self, event):
-        
-        gui3d.TaskView.onHide(self, event)
-
-class FilesCategory(gui3d.Category):
-
-    def __init__(self):
-        super(FilesCategory, self).__init__('Files')
-
-        self.addTask(SaveTaskView(self))
-        self.addTask(LoadTaskView(self))
-        self.addTask(ExportTaskView(self))

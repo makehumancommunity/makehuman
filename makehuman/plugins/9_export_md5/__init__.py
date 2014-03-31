@@ -37,21 +37,22 @@ Abstract
 TODO
 """
 
-import gui3d
-import gui
+import mh2md5
+
 from progress import Progress
 from export import Exporter
 from exportutils.config import Config
+from core import G
 
 class MD5Config(Config):
 
-    def __init__(self, exporter):
+    def __init__(self):
         Config.__init__(self)
-        self.selectedOptions(exporter)
         self.useRelPaths = True
+        self.feetOnGround = True
 
     def selectedOptions(self, exporter):
-        self.smooth = self.subdivide = gui3d.app.selectedHuman.isSubdivided()
+        self.smooth = self.subdivide = G.app.selectedHuman.isSubdivided()
 
         return self
 
@@ -62,17 +63,25 @@ class ExporterMD5(Exporter):
         self.name = "MD5"
         self.filter = "MD5 (*.md5)"
         self.fileExtension = "md5"
+        self.orderPriority = 10.0
 
     def build(self, options, taskview):
         self.taskview       = taskview
 
     def export(self, human, filename):
-        from . import mh2md5
-        cfg = MD5Config(self)
-        cfg.selectedOptions(self)
+        reload(mh2md5)
+        cfg = self.getConfig()
+        cfg.setHuman(human)
 
         progress = Progress.begin() (0, 1)
-        mh2md5.exportMd5(human, filename("md5mesh"), cfg)
+        mh2md5.exportMd5(filename("md5mesh"), cfg)
+
+    def getConfig(self):
+        cfg = MD5Config()
+        cfg.useTPose          = False # self.useTPose.selected
+        cfg.scale,cfg.unit    = self.taskview.getScale()
+
+        return cfg
 
     def onShow(self, exportTaskView):
         exportTaskView.scaleBox.hide()
@@ -85,3 +94,4 @@ def load(app):
 
 def unload(app):
     pass
+

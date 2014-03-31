@@ -20,7 +20,7 @@
 #
 [BuildPrepare]
 # HG revision in format rev_nb:node_id (default: not specified, obtain rev 
-# from hg, or data/VERSION file if skipHG is enabled)
+# from hg or data/VERSION file if skipHG is enabled)
 # Only set if you know what you're doing!
 #hgRev = 103:298d59a0c920
 

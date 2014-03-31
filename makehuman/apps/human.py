@@ -51,7 +51,7 @@ from makehuman import getBasemeshVersion, getShortVersion, getVersionStr, getVer
 
 class Human(guicommon.Object):
 
-    def __init__(self, mesh, hairObj=None, eyesObj=None, genitalsObj=None):
+    def __init__(self, mesh):
 
         guicommon.Object.__init__(self, mesh)
 
@@ -70,22 +70,14 @@ class Human(guicommon.Object):
         self._staticFaceMask = None
         self.maskFaces()
 
-        self._hairObj = hairObj
         self._hairProxy = None
-        self._eyesObj = eyesObj
         self._eyesProxy = None
-        self._genitalsObj = genitalsObj
         self._genitalsProxy = None
-        self.eyebrowsObj = None
         self.eyebrowsProxy = None
-        self.eyelashesObj = None
         self.eyelashesProxy = None
-        self.teethObj = None
         self.teethProxy = None
-        self.tongueObj = None
         self.tongueProxy = None
 
-        self.clothesObjs = {}
         self.clothesProxies = {}
 
         self.targetsDetailStack = {}  # All details targets applied, with their values
@@ -111,7 +103,7 @@ class Human(guicommon.Object):
     # TODO introduce better system for managing proxies, nothing done for clothes yet
     def setHairProxy(self, proxy):
         self._hairProxy = proxy
-        event = events3d.HumanEvent(self, 'proxy')
+        event = events3d.HumanEvent(self, 'proxyChange')
         event.proxy = 'hair'
         self.callEvent('onChanged', event)
     def getHairProxy(self):
@@ -119,19 +111,9 @@ class Human(guicommon.Object):
 
     hairProxy = property(getHairProxy, setHairProxy)
 
-    def setHairObj(self, obj):
-        self._hairObj = obj
-        event = events3d.HumanEvent(self, 'proxyObj')
-        event.obj = 'hair'
-        self.callEvent('onChanged', event)
-    def getHairObj(self):
-        return self._hairObj
-
-    hairObj = property(getHairObj, setHairObj)
-
     def setEyesProxy(self, proxy):
         self._eyesProxy = proxy
-        event = events3d.HumanEvent(self, 'proxy')
+        event = events3d.HumanEvent(self, 'proxyChange')
         event.proxy = 'eyes'
         self.callEvent('onChanged', event)
     def getEyesProxy(self):
@@ -139,36 +121,15 @@ class Human(guicommon.Object):
 
     eyesProxy = property(getEyesProxy, setEyesProxy)
 
-    def setEyesObj(self, obj):
-        self._eyesObj = obj
-        event = events3d.HumanEvent(self, 'proxyObj')
-        event.obj = 'eyes'
-        self.callEvent('onChanged', event)
-    def getEyesObj(self):
-        return self._eyesObj
-
-    eyesObj = property(getEyesObj, setEyesObj)
-
     def setGenitalsProxy(self, proxy):
         self._genitalsProxy = proxy
-        event = events3d.HumanEvent(self, 'proxy')
+        event = events3d.HumanEvent(self, 'proxyChange')
         event.proxy = 'genitals'
         self.callEvent('onChanged', event)
     def getGenitalsProxy(self):
         return self._genitalsProxy
 
     genitalsProxy = property(getGenitalsProxy, setGenitalsProxy)
-
-    def setGenitalsObj(self, obj):
-        self._genitalsObj = obj
-        # TODO better to let proxy libraries emit these events instead of human
-        event = events3d.HumanEvent(self, 'proxyObj')
-        event.obj = 'genitals'
-        self.callEvent('onChanged', event)
-    def getGenitalsObj(self):
-        return self._genitalsObj
-
-    genitalsObj = property(getGenitalsObj, setGenitalsObj)
 
 
     def getFaceMask(self):
@@ -228,6 +189,7 @@ class Human(guicommon.Object):
     # Proxy and object getters.
     # Returns only existing proxies
 
+    '''
     def getProxyObjects(self):
         objs = []
         for obj in [
@@ -244,6 +206,7 @@ class Human(guicommon.Object):
         for obj in self.clothesObjs.values():
             objs.append(obj)
         return objs
+    '''
 
     def getProxies(self, includeHumanProxy = True):
         proxies = []
@@ -264,37 +227,25 @@ class Human(guicommon.Object):
             proxies.append(pxy)
         return proxies
 
-    def getProxiesAndObjects(self):
-        pairs = []
-        for pxy,obj in [
-            (self.hairProxy, self.hairObj),
-            (self.eyesProxy, self.eyesObj),
-            (self.genitalsProxy, self.genitalsObj),
-            (self.eyebrowsProxy, self.eyebrowsObj),
-            (self.eyelashesProxy, self.eyelashesObj),
-            (self.teethProxy, self.teethObj),
-            (self.tongueProxy, self.tongueObj)]:
-            if pxy != None and obj != None:
-                pairs.append((pxy,obj))
-        for uuid,pxy in self.clothesProxies.items():
-            pairs.append((pxy, self.clothesObjs[uuid]))
-        return pairs
 
-    def getTypedSimpleProxiesAndObjects(self, ptype):
+    def getTypedSimpleProxies(self, ptype):
         ptype = ptype.capitalize()
         table = {
-            'Hair' :     (self.hairProxy, self.hairObj),
-            'Eyes' :     (self.eyesProxy, self.eyesObj),
-            'Genitals' : (self.genitalsProxy, self.genitalsObj),
-            'Eyebrows' : (self.eyebrowsProxy, self.eyebrowsObj),
-            'Eyelashes': (self.eyelashesProxy, self.eyelashesObj),
-            'Teeth':     (self.teethProxy, self.teethObj),
-            'Tongue':    (self.tongueProxy, self.tongueObj),
+            'Hair' :     self.hairProxy,
+            'Eyes' :     self.eyesProxy,
+            'Genitals' : self.genitalsProxy,
+            'Eyebrows' : self.eyebrowsProxy,
+            'Eyelashes': self.eyelashesProxy,
+            'Teeth':     self.teethProxy,
+            'Tongue':    self.tongueProxy,
             }
         try:
             return table[ptype]
         except KeyError:
-            return None,None
+            return None
+
+    def getProxyObjects(self):
+        return [ pxy.object for pxy in self.getProxies(includeHumanProxy=False) ]
 
     # Overriding hide and show to account for both human base and the hairs!
 
@@ -378,6 +329,18 @@ class Human(guicommon.Object):
         0 for completely female, 1 for fully male.
         """
         return self.gender
+
+    def getDominantGender(self):
+        """
+        The dominant gender of this human as a string (male or female).
+        None if both genders are equally represented.
+        """
+        if self.getGender() < 0.5:
+            return 'female'
+        elif self.getGender() > 0.5:
+            return 'male'
+        else:
+            return None
 
     def _setGenderVals(self):
         self.maleVal = self.gender
@@ -741,6 +704,32 @@ class Human(guicommon.Object):
             for e in ethnics:
                 _setVal(e, remaining * (_getVal(e) / otherTotal) )
 
+    def getEthnicity(self):
+        """
+        Return the most dominant ethnicity of this human, as a string (african,
+        caucasian, asian).
+        Returns None if all ethnicities are represented equally.
+        """
+        if self.getAsian() > self.getAfrican():
+            if self.getAsian() > self.getCaucasian():
+                return 'asian'
+            elif getCaucasian() > self.getAsian():
+                return 'caucasian'
+            else:
+                return None
+        elif self.getAfrican() > self.getAsian():
+            if self.getAfrican() > self.getCaucasian():
+                return 'african'
+            elif self.getCaucasian() > self.getAfrican():
+                return 'caucasian'
+            else:
+                return None
+        # At this point we've established that asian == african
+        elif self.getCaucasian() > self.getAsian():
+            return 'caucasian'
+        else:
+            return None
+
     def setDetail(self, name, value):
         name = canonicalPath(name)
         if value:
@@ -829,7 +818,7 @@ class Human(guicommon.Object):
         for dep in modifier.macroDependencies:
             groupName = self._modifier_varMapping.get(dep, None)
             if groupName and groupName == modifier.groupName:
-                # Do not include dependencies within the same modifier group 
+                # Do not include dependencies within the same modifier group
                 # (this step might be omitted if the mapping is still incomplete (dependency is not yet mapped to a group), and can later be fixed by removing the entry again from the reverse mapping)
                 continue
             if dep not in self._modifier_dependencyMapping:
@@ -843,7 +832,7 @@ class Human(guicommon.Object):
         if len(modifier.macroDependencies) > 0:
             for var in modifier.macroDependencies:
                 if var not in self._modifier_varMapping:
-                    log.error("Error var %s not mapped", var)
+                    log.error("Modifier dependency map: Error var %s not mapped", var)
                     continue
                 depMGroup = self._modifier_varMapping[var]
 
@@ -892,10 +881,23 @@ class Human(guicommon.Object):
                 if len(self._modifier_dependencyMapping[dep]) == 0:
                     del self._modifier_dependencyMapping[dep]
 
+            # Remove no longer controlled targets from stack (still requires applyAllTargets() for update)
+            targets = self._getModifierTargets()
+            for t in modifier.targets:
+                if t[0] not in targets:
+                    self.setDetail(t[0], None)
+
             self._modifier_type_cache = dict()
         except:
-            log.debug('Failed to remove modifier % from human.', modifier.fullName)
+            log.debug('Failed to remove modifier %s from human.', modifier.fullName, exc_info=True)
             pass
+
+    def _getModifierTargets(self):
+        """
+        Retrieve all targets controlled by modifiers currently attached to this
+        human.
+        """
+        return set( [t[0] for m in self.modifiers for t in m.targets] )
 
     def applyAllTargets(self, progressCallback=None, update=True):
         """
@@ -970,7 +972,6 @@ class Human(guicommon.Object):
         **Parameters:** None.
 
         """
-
         self.symmetrize('l')
 
     def applySymmetryRight(self):
@@ -981,7 +982,6 @@ class Human(guicommon.Object):
         **Parameters:** None.
 
         """
-
         self.symmetrize('r')
 
     def symmetrize(self, direction='r'):
@@ -1040,6 +1040,7 @@ class Human(guicommon.Object):
         self.africanVal = 1.0/3
 
     def resetMeshValues(self):
+        self.setSubdivided(False, update=False)
         self.setDefaultValues()
 
         self.targetsDetailStack = {}
@@ -1072,14 +1073,17 @@ class Human(guicommon.Object):
         return verts.mean(axis=0)
 
     def load(self, filename, update=True, progressCallback=None):
-
+        from codecs import open
         log.message("Loading human from MHM file %s.", filename)
+        self.callEvent('onChanging', events3d.HumanEvent(self, 'load'))
 
         self.resetMeshValues()
         self.blockEthnicUpdates = True
 
+        subdivide = False
+
         # TODO perhaps create progress indicator that depends on line count of mhm file?
-        f = open(filename, 'r')
+        f = open(filename, 'rU', encoding="utf-8")
 
         for lh in G.app.loadHandlers.values():
             lh(self, ['status', 'started'])
@@ -1091,8 +1095,10 @@ class Human(guicommon.Object):
                 if lineData[0] == 'version':
                     log.message('Version %s', lineData[1])
                 elif lineData[0] == 'tags':
-                    for tag in lineData:
+                    for tag in lineData[1:]:
                         log.debug('Tag %s', tag)
+                elif lineData[0] == 'subdivide':
+                    subdivide = lineData[1].lower() in ['true', 'yes']
                 elif lineData[0] in G.app.loadHandlers:
                     G.app.loadHandlers[lineData[0]](self, lineData)
                 else:
@@ -1111,11 +1117,14 @@ class Human(guicommon.Object):
         if update:
             self.applyAllTargets(progressCallback)
 
+        self.setSubdivided(subdivide)
+
+        G.app.currentFile.loaded(filename)
         log.message("Done loading MHM file.")
 
     def save(self, filename, tags):
-
-        f = open(filename, 'w')
+        from codecs import open
+        f = open(filename, "w", encoding="utf-8")
         f.write('# Written by MakeHuman %s\n' % getVersionStr())
         f.write('version %s\n' % getShortVersion())
         f.write('tags %s\n' % tags)
@@ -1123,5 +1132,7 @@ class Human(guicommon.Object):
         for handler in G.app.saveHandlers:
             handler(self, f)
 
-        f.close()
+        f.write('subdivide %s' % self.isSubdivided())
 
+        f.close()
+        G.app.currentFile.saved(filename)

@@ -158,12 +158,13 @@ class Progress(object):
         if prog is None:
             prog = self.progress
 
-        if self.description:
-            desc = self.description
-            args = self.args
-        elif desc is None:
-            desc = ""
-            args = []
+        if not desc:
+            if self.description:
+                desc = self.description
+                args = self.args
+            else:
+                desc = ""
+                args = []
 
         if self.parent is None:
             if self.timing:
@@ -174,12 +175,12 @@ class Progress(object):
                     self.totalTime += deltaT
                     if self.logging:
                         import log
-                        log.debug("  took %s seconds", deltaT)
+                        log.debug("  took %.4f seconds", deltaT)
                 self.time = t
 
             if self.logging:
                 import log
-                log.debug("Progress %s%%: %s", prog, desc)
+                log.debug("Progress %.2f%%: %s", prog, desc)
                 
             if not self.progressCallback is None:
                 self.progressCallback(prog, desc, *args)

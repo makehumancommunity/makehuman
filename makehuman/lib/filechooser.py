@@ -94,7 +94,7 @@ class FileChooserRectangle(gui.Button):
 
         image = self._imageCache[imagePath]
         self.preview = QtGui.QLabel()
-        self.preview.setPixmap(image)
+        self.preview.setPixmap(getpath.pathToUnicode(image))
         self.layout.addWidget(self.preview, 0, 0)
         self.layout.setRowStretch(0, 1)
         self.layout.setColumnMinimumWidth(0, self._size[0])
@@ -305,8 +305,8 @@ class FileHandler(object):
 
     def refresh(self, files):
         for file in files:
-            label = os.path.basename(file)
-            if isinstance(self.fileChooser.extension, str):
+            label = getpath.pathToUnicode( os.path.basename(file) )
+            if isinstance(self.fileChooser.extensions, str):
                 label = os.path.splitext(label)[0]
             self.fileChooser.addItem(file, label, self.getPreview(file))
 
@@ -331,13 +331,13 @@ class FileHandler(object):
         preview = filename
         if preview and fc.previewExtensions:
             #log.debug('%s, %s', fc.extension, fc.previewExtensions)
-            preview = filename.replace('.' + fc.extension, '.' + fc.previewExtensions[0])
+            preview = os.path.splitext(filename)[0]+ '.' + fc.previewExtensions[0]
             i = 1
             while not os.path.exists(preview) and i < len(fc.previewExtensions):
-                preview = filename.replace('.' + fc.extension, '.' + fc.previewExtensions[i])
+                preview = os.path.splitext(filename)[0] + '.' + fc.previewExtensions[i]
                 i = i + 1
 
-        if not os.path.exists(preview) and fc.notFoundImage:
+        if not os.path.isfile(preview) and fc.notFoundImage:
             # preview = os.path.join(fc.path, fc.notFoundImage)
             # TL: full filepath needed, so we don't look into user dir.
             preview = fc.notFoundImage
@@ -359,8 +359,8 @@ class TaggedFileLoader(FileHandler):
         """
         import exportutils.config
         for file in files:
-            label = os.path.basename(file)
-            if isinstance(self.fileChooser.extension, str):
+            label = getpath.pathToUnicode( os.path.basename(file) )
+            if len(self.fileChooser.extensions) > 0:
                 label = os.path.splitext(label)[0]
             tags = self.library.getTags(filename = file)
             self.fileChooser.addItem(file, label, self.getPreview(file), tags)
@@ -382,12 +382,15 @@ class MhmatFileLoader(FileHandler):
 
 class FileChooserBase(QtGui.QWidget, gui.Widget):
 
-    def __init__(self, path, extension, sort = FileSort(), doNotRecurse = False):
+    def __init__(self, path, extensions, sort = FileSort(), doNotRecurse = False):
         super(FileChooserBase, self).__init__()
         gui.Widget.__init__(self)
 
         self.setPaths(path)
-        self.extension = extension
+        if isinstance(extensions, basestring):
+            self.extensions = [extensions]
+        else:
+            self.extensions = extensions
         self.previewExtensions = None
         self.notFoundImage = None
         self.doNotRecurse = doNotRecurse
@@ -400,6 +403,7 @@ class FileChooserBase(QtGui.QWidget, gui.Widget):
         self.tagFilter = None
 
         self._autoRefresh = True
+        self.mutexExtensions = False
 
     def createSortBox(self):
         sortBox = gui.GroupBox('Sort')
@@ -445,29 +449,9 @@ class FileChooserBase(QtGui.QWidget, gui.Widget):
         return False
 
     def search(self):
-        if isinstance(self.extension, str):
-            extensions = [self.extension]
-        else:
-            extensions = self.extension
-
-        if self.doNotRecurse:
-            for path in self.paths:
-                if not os.path.isdir(path):
-                    continue
-                for f in os.listdir(path):
-                    f = os.path.join(path, f)
-                    if os.path.isfile(f):
-                        ext = os.path.splitext(f)[1][1:].lower()
-                        if ext in extensions:
-                            yield f
-        else:
-            for path in self.paths:
-                for root, dirs, files in os.walk(path):
-                    for f in files:
-                        ext = os.path.splitext(f)[1][1:].lower()
-                        if ext in extensions:
-                            if f.lower().endswith('.' + ext):
-                                yield os.path.join(root, f)
+        return getpath.search(self.paths, self.extensions, 
+                              recursive = not self.doNotRecurse, 
+                              mutexExtensions = self.mutexExtensions)
 
     def clearList(self):
         for i in xrange(self.children.count()):
@@ -554,9 +538,9 @@ class FileChooser(FileChooserBase):
     :type sort: FileSort
     """
 
-    def __init__(self, path, extension, previewExtensions='bmp', notFoundImage=None, sort=FileSort()):
+    def __init__(self, path, extensions, previewExtensions='bmp', notFoundImage=None, sort=FileSort()):
         self.location = gui.TextView('')
-        super(FileChooser, self).__init__(path, extension, sort)
+        super(FileChooser, self).__init__(path, extensions, sort)
 
         self.setPreviewExtensions(previewExtensions)
 
@@ -615,8 +599,8 @@ class FileChooser(FileChooserBase):
 
 class ListFileChooser(FileChooserBase):
 
-    def __init__(self, path, extension, name="File chooser" , multiSelect=False, verticalScrolling=False, sort=FileSort(), noneItem = False, doNotRecurse = False):
-        super(ListFileChooser, self).__init__(path, extension, sort, doNotRecurse)
+    def __init__(self, path, extensions, name="File chooser" , multiSelect=False, verticalScrolling=False, sort=FileSort(), noneItem = False, doNotRecurse = False):
+        super(ListFileChooser, self).__init__(path, extensions, sort, doNotRecurse)
         self.listItems = []
         self.multiSelect = multiSelect
         self.noneItem = noneItem
@@ -785,8 +769,8 @@ class ListFileChooser(FileChooserBase):
                 self.setSelection(selections[0])
 
 class IconListFileChooser(ListFileChooser):
-    def __init__(self, path, extension, previewExtensions='bmp', notFoundImage=None, clearImage=None, name="File chooser", multiSelect=False, verticalScrolling=False, sort=FileSort(), noneItem = False, doNotRecurse = False):
-        super(IconListFileChooser, self).__init__(path, extension, name, multiSelect, verticalScrolling, sort, noneItem, doNotRecurse)
+    def __init__(self, path, extensions, previewExtensions='bmp', notFoundImage=None, clearImage=None, name="File chooser", multiSelect=False, verticalScrolling=False, sort=FileSort(), noneItem = False, doNotRecurse = False):
+        super(IconListFileChooser, self).__init__(path, extensions, name, multiSelect, verticalScrolling, sort, noneItem, doNotRecurse)
         self.setPreviewExtensions(previewExtensions)
         self.notFoundImage = notFoundImage
         self.clearImage = clearImage
@@ -796,6 +780,7 @@ class IconListFileChooser(ListFileChooser):
 
     def addItem(self, file, label, preview, tags=[], pos = None):
         item = super(IconListFileChooser, self).addItem(file, label, preview, tags, pos)
+        preview = getpath.pathToUnicode(preview)
         if preview not in self._iconCache:
             pixmap = QtGui.QPixmap(preview)
             size = pixmap.size()
