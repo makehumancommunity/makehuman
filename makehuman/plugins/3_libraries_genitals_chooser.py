@@ -50,12 +50,10 @@ class GenitalsTaskView(proxychooser.ProxyChooserTaskView):
         #return 3
         return 5
 
-    def proxySelected(self, proxy, obj):
-        self.human.genitalsObj = obj
+    def proxySelected(self, proxy):
         self.human.genitalsProxy = proxy
 
-    def proxyDeselected(self, proxy, obj, suppressSignal = False):
-        self.human.genitalsObj = None
+    def proxyDeselected(self, proxy, suppressSignal = False):
         self.human.genitalsProxy = None
 
     def onShow(self, event):
