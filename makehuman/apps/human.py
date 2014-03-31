@@ -972,7 +972,6 @@ class Human(guicommon.Object):
         **Parameters:** None.
 
         """
-
         self.symmetrize('l')
 
     def applySymmetryRight(self):
@@ -983,7 +982,6 @@ class Human(guicommon.Object):
         **Parameters:** None.
 
         """
-
         self.symmetrize('r')
 
     def symmetrize(self, direction='r'):
@@ -1042,6 +1040,7 @@ class Human(guicommon.Object):
         self.africanVal = 1.0/3
 
     def resetMeshValues(self):
+        self.setSubdivided(False, update=False)
         self.setDefaultValues()
 
         self.targetsDetailStack = {}
@@ -1080,6 +1079,8 @@ class Human(guicommon.Object):
         self.resetMeshValues()
         self.blockEthnicUpdates = True
 
+        subdivide = False
+
         # TODO perhaps create progress indicator that depends on line count of mhm file?
         f = open(filename, 'rU', encoding="utf-8")
 
@@ -1093,8 +1094,10 @@ class Human(guicommon.Object):
                 if lineData[0] == 'version':
                     log.message('Version %s', lineData[1])
                 elif lineData[0] == 'tags':
-                    for tag in lineData:
+                    for tag in lineData[1:]:
                         log.debug('Tag %s', tag)
+                elif lineData[0] == 'subdivide':
+                    subdivide = lineData[1].lower() in ['true', 'yes']
                 elif lineData[0] in G.app.loadHandlers:
                     G.app.loadHandlers[lineData[0]](self, lineData)
                 else:
@@ -1113,6 +1116,9 @@ class Human(guicommon.Object):
         if update:
             self.applyAllTargets(progressCallback)
 
+        self.setSubdivided(subdivide)
+
+        G.app.currentFile.loaded(filename)
         log.message("Done loading MHM file.")
 
     def save(self, filename, tags):
@@ -1125,5 +1131,7 @@ class Human(guicommon.Object):
         for handler in G.app.saveHandlers:
             handler(self, f)
 
-        f.close()
+        f.write('subdivide %s' % self.isSubdivided())
 
+        f.close()
+        G.app.currentFile.saved(filename)
