@@ -1075,6 +1075,7 @@ class Human(guicommon.Object):
     def load(self, filename, update=True, progressCallback=None):
         from codecs import open
         log.message("Loading human from MHM file %s.", filename)
+        self.callEvent('onChanging', events3d.HumanEvent(self, 'load'))
 
         self.resetMeshValues()
         self.blockEthnicUpdates = True
