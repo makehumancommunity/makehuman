@@ -26,7 +26,7 @@ MAJOR_VERSION = 1
 MINOR_VERSION = 16
 
 import module3d
-import gui3d
+from core import G
 import os
 import time
 import codecs
@@ -56,7 +56,7 @@ from . import mhx_pose
 def exportMhx(human, filepath, config):
     from .mhx_armature import setupArmature
 
-    gui3d.app.progress(0, text="Exporting MHX")
+    G.app.progress(0, text="Exporting MHX")
     log.message("Exporting %s" % filepath.encode('utf-8'))
     time1 = time.clock()
     config.setHuman(human)
@@ -88,7 +88,7 @@ def exportMhx(human, filepath, config):
     writer.writeFile(fp)
     fp.close()
     log.message("%s exported", filepath.encode('utf-8'))
-    gui3d.app.progress(1.0)
+    G.app.progress(1.0)
 
 
 class Writer(mhx_writer.Writer):
@@ -123,17 +123,17 @@ class Writer(mhx_writer.Writer):
         fp.write("NoScale True ;\n")
         amt.writeGizmos(fp)
 
-        gui3d.app.progress(0.1, text="Exporting armature")
+        G.app.progress(0.1, text="Exporting armature")
         amt.writeArmature(fp, MINOR_VERSION, self)
 
-        gui3d.app.progress(0.15, text="Exporting materials")
+        G.app.progress(0.15, text="Exporting materials")
         fp.write("\nNoScale False ;\n\n")
         self.matWriter.writeMaterials(fp)
 
         if config.cage:
             self.proxyWriter.writeProxyType('Cage', 'T_Cage', 4, fp, 0.2, 0.25)
 
-        gui3d.app.progress(0.25, text="Exporting main mesh")
+        G.app.progress(0.25, text="Exporting main mesh")
         self.meshWriter.writeMesh(fp, self.human.getSeedMesh())
 
         self.proxyWriter.writeProxyType('Proxymeshes', 'T_Proxy', 3, fp, 0.35, 0.4)

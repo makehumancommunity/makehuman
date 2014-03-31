@@ -24,7 +24,7 @@ Proxies
 
 import os
 import log
-import gui3d
+core import G
 
 from . import mhx_writer
 #from . import mhx_mesh
@@ -55,7 +55,7 @@ class Writer(mhx_writer.Writer):
         t = t0
         for proxy in self.proxies.values():
             if proxy.type == type:
-                gui3d.app.progress(t, "Exporting %s", proxy.name)
+                G.app.progress(t, "Exporting %s", proxy.name)
                 self.writeProxy(fp, proxy, layer)
                 t += dt
 
