@@ -45,10 +45,10 @@ from exportutils.config import Config
 
 class MD5Config(Config):
 
-    def __init__(self, exporter):
+    def __init__(self):
         Config.__init__(self)
-        self.selectedOptions(exporter)
         self.useRelPaths = True
+        self.feetOnGround = True
 
     def selectedOptions(self, exporter):
         self.smooth = self.subdivide = gui3d.app.selectedHuman.isSubdivided()
@@ -68,11 +68,18 @@ class ExporterMD5(Exporter):
 
     def export(self, human, filename):
         from . import mh2md5
-        cfg = MD5Config(self)
-        cfg.selectedOptions(self)
+        cfg = self.getConfig()
+        cfg.setHuman(human)
 
         progress = Progress.begin() (0, 1)
-        mh2md5.exportMd5(human, filename("md5mesh"), cfg)
+        mh2md5.exportMd5(filename("md5mesh"), cfg)
+
+    def getConfig(self):
+        cfg = MD5Config()
+        cfg.useTPose          = False # self.useTPose.selected
+        cfg.scale,cfg.unit    = self.taskview.getScale()
+
+        return cfg
 
     def onShow(self, exportTaskView):
         exportTaskView.scaleBox.hide()

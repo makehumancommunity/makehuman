@@ -62,7 +62,7 @@ ZYRotation = np.array(((1,0,0,0),(0,0,-1,0),(0,1,0,0),(0,0,0,1)), dtype=np.float
 scale = 5  # Override scale setting to a sensible default for doom-style engines
 
 
-def exportMd5(human, filepath, config):
+def exportMd5(filepath, config):
     """
     This function exports MakeHuman mesh and skeleton data to id Software's MD5 format.
 
@@ -79,8 +79,8 @@ def exportMd5(human, filepath, config):
 
     progress = Progress()
 
+    human = config.human
     obj = human.meshData
-    config.setHuman(human)
     config.zUp = True
     config.feetOnGround = True    # TODO this only works when exporting MHX mesh (a design error in exportutils)
     config.scale = 1
