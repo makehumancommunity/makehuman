@@ -10,7 +10,7 @@ Metadata Search Functionality for Tagged Settings Libraries.
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Manuel Bastioni
+**Authors:**           Marc Flerackers
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
@@ -132,8 +132,9 @@ def loadRecord(archivePath, recordID):
       *string*.  The ID of the record to load.
     """
 
+    from codecs import open
     time1 = time.time()
-    f = open(archivePath)
+    f = open(archivePath, 'rU', encoding="utf-8")
     record = None
     for line in f:
         if line.find(recordID) != -1:
@@ -159,9 +160,9 @@ def searchRecord(archivePath, field):
     field:     
       *string*.  The field to search for.
     """
-
+    from codecs import open
     time1 = time.time()
-    f = open(archivePath)
+    f = open(archivePath, 'rU', encoding="utf-8")
     recordIDs = []
     for line in f:
         if line.find(field) != -1:
@@ -187,12 +188,13 @@ def saveRecord(archivePath, recordToSave):
       *string*.  The record to save.
     """
 
+    from codecs import open
     time1 = time.time()
     recordID = recordToSave.split()[0]
     records = []
     isExistent = None
     try:
-        f = open(archivePath)
+        f = open(archivePath, 'w', encoding="utf-8")
         i = 0
         for line in f:
             if line.find(recordID) != -1:
@@ -210,7 +212,7 @@ def saveRecord(archivePath, recordToSave):
     if not isExistent:
         records.append(recordToSave)
 
-    f = open(archivePath, 'w')
+    f = open(archivePath, 'w', encoding="utf-8")
     for record in records:
         f.write('%s\n' % record)
     f.close()
