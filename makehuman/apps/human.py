@@ -208,10 +208,6 @@ class Human(guicommon.Object):
         return objs
     '''
 
-    def setProxy(self, proxy):
-        proxy.object.mesh.setPickable(True)
-        super(Human,self).setProxy(proxy)
-
     def getProxies(self, includeHumanProxy = True):
         proxies = []
         for pxy in [
