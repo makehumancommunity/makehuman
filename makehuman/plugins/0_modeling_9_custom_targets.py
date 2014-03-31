@@ -43,11 +43,12 @@ TODO
 __docformat__ = 'restructuredtext'
 
 import gui3d
-import mh
+import getpath
 import os
 import humanmodifier
 import modifierslider
 import gui
+from core import G
 
 class FolderButton(gui.RadioButton):
 
@@ -64,7 +65,7 @@ class CustomTargetsTaskView(gui3d.TaskView):
     def __init__(self, category, app):
         self.app = app
         gui3d.TaskView.__init__(self, category, 'Custom')
-        self.targetsPath = mh.getPath('data/custom')
+        self.targetsPath = getpath.getPath('data/custom')
         if not os.path.exists(self.targetsPath):
             os.makedirs(self.targetsPath)
 
@@ -80,18 +81,61 @@ class CustomTargetsTaskView(gui3d.TaskView):
             self.searchTargets()
 
         self.folders = []
+        self.sliders = []
+        self.modifiers = {}
 
         self.searchTargets()
 
     def searchTargets(self):
-
-        self.sliders = []
-        self.modifiers = {}
         active = None
+
+        self.unloadTargets()
+        group = []
+
+        for root, dirs, files in os.walk(self.targetsPath):
+            groupBox = self.targetsBox.addWidget(gui.GroupBox('Targets'))
+            folderGroup = self.folderBox.addWidget(FolderButton(self, group, os.path.basename(root), groupBox, len(self.folderBox.children) == 0))
+            folderGroup.targetCount = 0
+            self.folders.append(groupBox)
+
+            for f in files:
+                if f.endswith(".target"):
+                    self.createTargetControls(groupBox, os.path.join(root, f))
+                    folderGroup.targetCount += 1
+
+        for folder in self.folders:
+            for child in folder.children:
+                child.update()
+
+        if active is not None:
+            for child in self.folderBox.children:
+                if active == child.getLabel():
+                    child.setSelected(True)
+
+        selectOther = False
+        visible = []
+        for child in self.folderBox.children:
+            if child.targetCount == 0:
+                child.hide()
+                if child.selected:
+                    selectOther = True
+            else:
+                visible.append(child)
+        if selectOther and len(visible) > 0:
+            visible[0].setSelected(True)
+            
+
+        self.syncVisibility()
+
+        self.syncStatus()
+
+    def unloadTargets(self):
+        self.sliders = []
 
         for folder in self.folders:
             self.targetsBox.removeWidget(folder)
             folder.destroy()
+
         for child in self.folderBox.children[:]:
             if child.selected:
                 active = child.getLabel()
@@ -99,29 +143,13 @@ class CustomTargetsTaskView(gui3d.TaskView):
             child.destroy()
 
         self.folders = []
-        group = []
 
-        for root, dirs, files in os.walk(self.targetsPath):
-            groupBox = self.targetsBox.addWidget(gui.GroupBox('Targets'))
-            self.folderBox.addWidget(FolderButton(self, group, os.path.basename(root), groupBox, len(self.folderBox.children) == 0))
-            self.folders.append(groupBox)
+        human = G.app.selectedHuman
+        for mod in self.modifiers.values():
+            human.removeModifier(mod)
+            
+        self.modifiers = {}
 
-            for f in files:
-                if f.endswith(".target"):
-                    self.createTargetControls(groupBox, root, f)
-
-        for folder in self.folders:
-            for child in folder.children:
-                child.update()
-
-        if active is not None:
-            for child in self.folderBox.children[:]:
-                if active == child.getLabel():
-                    child.setSelected(True)
-
-        self.syncVisibility()
-
-        self.syncStatus()
 
     def syncStatus(self):
         if not self.isVisible():
@@ -132,20 +160,20 @@ class CustomTargetsTaskView(gui3d.TaskView):
             gui3d.app.statusPersist('No custom targets found. To add a custom target, place the file in %s',
                                     self.targetsPath)
 
-    def createTargetControls(self, box, targetPath, targetFile):
+    def createTargetControls(self, box, targetFile):
         # When the slider is dragged and released, an onChange event is fired
         # By default a slider goes from 0.0 to 1.0, and the initial position will be 0.0 unless specified
 
-        # We want the slider to start from the middle
-        targetName = os.path.splitext(targetFile)[0]
+        targetFile = os.path.relpath(targetFile, self.targetsPath)
 
-        modifier = humanmodifier.SimpleModifier('custom', os.path.join(targetPath, targetFile))
-        modifier.setHuman(gui3d.app.selectedHuman)
-        self.modifiers[targetName] = modifier
-        self.sliders.append(box.addWidget(modifierslider.ModifierSlider(modifier=modifier, label=targetName)))
+        modifier = humanmodifier.SimpleModifier('custom', self.targetsPath, targetFile)
+        modifier.setHuman(G.app.selectedHuman)
+        self.modifiers[modifier.name] = modifier
+
+        label = modifier.name.replace('-',' ').capitalize()
+        self.sliders.append(box.addWidget(modifierslider.ModifierSlider(modifier=modifier, label=label)))
 
     def syncSliders(self):
-
         for slider in self.sliders:
             slider.update()
 
@@ -157,7 +185,6 @@ class CustomTargetsTaskView(gui3d.TaskView):
                     button.groupBox.children[0].setFocus()
 
     def onShow(self, event):
-
         gui3d.TaskView.onShow(self, event)
         self.syncVisibility()
         self.syncSliders()
@@ -179,6 +206,12 @@ class CustomTargetsTaskView(gui3d.TaskView):
         modifier = self.modifiers.get(values[1], None)
         if modifier:
             modifier.setValue(float(values[2]))
+
+        # Equally good alternative:
+        #try:
+        #    human.getModifier("custom/"+values[1]).setValue(float(values[2]))
+        #except:
+        #    pass
 
     def saveHandler(self, human, file):
         for name, modifier in self.modifiers.iteritems():
