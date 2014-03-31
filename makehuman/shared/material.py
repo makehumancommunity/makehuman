@@ -558,6 +558,7 @@ class Material(object):
                 hasShaderParam = True
                 import sys
                 if 'image' in sys.modules.keys():
+                    # Only import image module if it was already loaded
                     import image
                     if isinstance(param, image.Image):
                         if hasattr(param, "sourcePath"):
