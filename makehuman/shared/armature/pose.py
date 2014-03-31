@@ -208,8 +208,9 @@ class Pose:
         if human.proxy:
             human.updateProxyMesh()
 
-        for proxy,obj in human.getProxiesAndObjects():
-            mesh = obj.getSeedMesh()
+        for pxy in human.getProxies():
+            obj = pxy.object
+            mesh = pxy.getSeedMesh()
             proxy.update(mesh)
             mesh.update()
             if obj.isSubdivided():
