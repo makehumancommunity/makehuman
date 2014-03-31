@@ -953,6 +953,11 @@ class Material(object):
     shader = property(getShader, setShader)
 
     def getShaderObj(self):
+        import sys
+        if 'shader' not in sys.modules.keys():
+            # Don't import shader module in application if it is not loaded yet
+            # Avoid unneeded dependency on OpenGL/shader modules
+            return None
         import shader
         if not shader.Shader.supported():
             return None
