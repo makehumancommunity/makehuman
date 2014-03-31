@@ -122,7 +122,7 @@ class LoadTaskView(gui3d.TaskView):
             self.filechooser.setPaths([dirpath])
             self.filechooser.refresh()
 
-        self.filechooser = fc.IconListFileChooser(None, 'mhm', 'thumb', mh.getSysDataPath('notfound.thumb'), sort=HumanFileSort())
+        self.filechooser = fc.IconListFileChooser(mh.getPath("models"), 'mhm', 'thumb', mh.getSysDataPath('notfound.thumb'), sort=HumanFileSort())
         self.addRightWidget(self.filechooser)
         self.addLeftWidget(self.filechooser.createSortBox())
 
