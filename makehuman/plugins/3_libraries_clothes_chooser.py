@@ -104,6 +104,7 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
         if self.blockFaceMasking:
             return
 
+        import proxy
         log.debug("Clothes library: updating face masks (face hiding %s).", "enabled" if enableFaceHiding else "disabled")
 
         human = self.human
@@ -113,6 +114,8 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
             proxies = self.getSelection()
             if self.human.genitalsProxy:
                 proxies.append(self.human.genitalsProxy)
+            if human.proxy:
+                proxies.append(human.proxy)
             for pxy in proxies:
                 obj = pxy.object
                 faceMask = np.ones(obj.mesh.getFaceCount(), dtype=bool)
@@ -131,18 +134,7 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
         for pxy in stackedProxies:
             obj = pxy.object
 
-            # Convert basemesh vertex mask to local mask for proxy vertices
-            proxyVertMask = np.ones(len(pxy.ref_vIdxs), dtype=bool)
-            for idx,hverts in enumerate(pxy.ref_vIdxs):
-                # Body verts to which proxy vertex with idx is mapped
-                if len(hverts) == 3:
-                    (v1,v2,v3) = hverts
-                    # Hide proxy vert if any of its referenced body verts are hidden (most agressive)
-                    #proxyVertMask[idx] = vertsMask[v1] and vertsMask[v2] and vertsMask[v3]
-                    # Alternative1: only hide if at least two referenced body verts are hidden (best result)
-                    proxyVertMask[idx] = np.count_nonzero(vertsMask[[v1, v2, v3]]) > 1
-                    # Alternative2: Only hide proxy vert if all of its referenced body verts are hidden (least agressive)
-                    #proxyVertMask[idx] = vertsMask[v1] or vertsMask[v2] or vertsMask[v3]
+            proxyVertMask = proxy.transferFaceMaskToProxy(vertsMask, pxy)
 
             proxyKeepVerts = np.argwhere(proxyVertMask)[...,0]
             proxyFaceMask = obj.mesh.getFaceMaskForVertices(proxyKeepVerts)
@@ -164,12 +156,22 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
         human.meshData.changeFaceMask(np.logical_and(basemeshMask, self.originalHumanMask))
         human.meshData.updateIndexBufferFaces()
 
+        # Transfer face mask to human proxy if set
+        if human.isProxied():
+            pxy = human.proxy
+            obj = pxy.object
+
+            proxyVertMask = proxy.transferFaceMaskToProxy(vertsMask, pxy)
+            proxyFaceMask = obj.mesh.getFaceMaskForVertices(np.argwhere(proxyVertMask)[...,0])
+
+            obj.mesh.changeFaceMask(proxyFaceMask)
+            obj.mesh.updateIndexBufferFaces()
+
         # Transfer face mask to subdivided mesh if it is set
         if human.isSubdivided():
             human.updateSubdivisionMesh(rebuildIndexBuffer=True, progressCallback=gui3d.app.progress)
 
         log.debug("%s faces masked for basemesh", np.count_nonzero(~basemeshMask))
-
 
     def onShow(self, event):
         super(ClothesTaskView, self).onShow(event)
