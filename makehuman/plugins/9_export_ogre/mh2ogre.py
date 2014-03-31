@@ -137,13 +137,14 @@ def writeMeshFile(human, filepath, rmeshes, config, progressCallback = None):
             coords[:,1] += getFeetOnGroundOffset(human)
         # Note: Ogre3d uses a y-up coordinate system (just like MH)
         lines.extend(['''\
-                <vertex>
-                    <position x="%s" y="%s" z="%s" />
-                    <normal x="%s" y="%s" z="%s" />
-                </vertex>
-            </vertexbuffer>''' % (coords[vIdx,0], coords[vIdx,1], coords[vIdx,2],
+                    <vertex>
+                        <position x="%s" y="%s" z="%s" />
+                        <normal x="%s" y="%s" z="%s" />
+                    </vertex>''' % (coords[vIdx,0], coords[vIdx,1], coords[vIdx,2],
                                     obj.r_vnorm[vIdx,0], obj.r_vnorm[vIdx,1], obj.r_vnorm[vIdx,2]) \
             for vIdx in xrange(coords.shape[0]) ])
+        lines.append('                </vertexbuffer>')
+
 
         loopprog(0.8 - 0.1*bool(human.getSkeleton()), 0.9, "Writing UVs of %s." % rmesh.name)
         # UV Texture Coordinates
