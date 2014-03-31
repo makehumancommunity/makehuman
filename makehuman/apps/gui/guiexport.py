@@ -213,22 +213,11 @@ class ExportTaskView(guipose.PoseModeTaskView):
 
         self.fileentry.setFocus()
 
-        human = gui3d.app.selectedHuman
-        skel = human.getSkeleton()
-        if skel and skel.object:
-            skel.object.show()
-        gui3d.app.redraw()
-
 
     def onHide(self, event):
         guipose.PoseModeTaskView.onHide(self, event)
 
         human = gui3d.app.selectedHuman
-
-        skel = human.getSkeleton()
-        if skel and skel.object:
-            skel.object.hide()
-        gui3d.app.redraw()
 
         for exporter, radio, _ in self.formats:
             if radio.selected:
