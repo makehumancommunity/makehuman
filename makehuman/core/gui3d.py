@@ -36,6 +36,8 @@ Abstract
 
 This module contains classes defined to implement widgets that provide utility functions
 to the graphical user interface.
+
+Importing this module loads OpenGL dependencies.
 """
 
 import weakref
