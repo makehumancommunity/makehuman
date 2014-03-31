@@ -423,7 +423,12 @@ class FileChooserBase(QtGui.QWidget, gui.Widget):
         return self.tagFilter
 
     def setPaths(self, value):
-        self.paths = value if isinstance(value, list) else [value]
+        if isinstance(value, list):
+            self.paths = value
+        elif value is None:
+            self.paths = []
+        else:
+            self.paths = [value]
 
     def getPaths(self):
         return self.paths
