@@ -292,8 +292,11 @@ class ProxyChooserTaskView(gui3d.TaskView):
             self.deselectProxy(None, suppressSignal = True)
 
         mesh,obj = pxy.loadMeshAndObject(human)
+        
         if not mesh:
             return
+
+        gui3d.app.addObject(obj)
 
         self.filechooser.selectItem(mhclofile)
 
