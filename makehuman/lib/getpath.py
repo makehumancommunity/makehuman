@@ -213,9 +213,12 @@ def findFile(relPath, searchPaths = [getDataPath(), getSysDataPath()]):
 
     return relPath
 
-def search(paths, extensions, recursive=True):
+def search(paths, extensions, recursive=True, mutexExtensions=False):
     """
     Search for files with specified extensions in specified paths.
+    If mutexExtensions is True, no duplicate files with only differing extension
+    will be returned. Instead, only the file with highest extension precedence 
+    (extensions occurs earlier in the extensions list) is kept.
     """
     if isinstance(paths, basestring):
         paths = [paths]
@@ -223,13 +226,26 @@ def search(paths, extensions, recursive=True):
         extensions = [extensions]
     extensions = [e[1:].lower() if e.startswith('.') else e.lower() for e in extensions]
 
+    if mutexExtensions:
+        discovered = dict()
+        def _aggregate_files_mutexExt(filepath):
+            basep, ext = os.path.splitext(filepath)
+            ext = ext[1:]
+            if basep in discovered:
+                if extensions.index(ext) < extensions.index(discovered[basep]):
+                    discovered[basep] = ext
+            else:
+                discovered[basep] = ext
+
     if recursive:
         for path in paths:
             for root, dirs, files in os.walk(path):
                 for f in files:
                     ext = os.path.splitext(f)[1][1:].lower()
                     if ext in extensions:
-                        if f.lower().endswith('.' + ext):
+                        if mutexExtensions:
+                            _aggregate_files_mutexExt(os.path.join(root, f))
+                        else:
                             yield os.path.join(root, f)
     else:
         for path in paths:
@@ -240,5 +256,24 @@ def search(paths, extensions, recursive=True):
                 if os.path.isfile(f):
                     ext = os.path.splitext(f)[1][1:].lower()
                     if ext in extensions:
-                        yield f
+                        if mutexExtensions:
+                            _aggregate_files_mutexExt(f)
+                        else:
+                            yield f
+
+    if mutexExtensions:
+        for f in ["%s.%s" % (p,e) for p,e in discovered.items()]:
+            yield f
+
+def pathToUnicode(path):
+    """
+    Unicode representation of the filename.
+    String is decoded with the codeset used by the filesystem of the operating
+    system.
+    Unicode representations of paths are fit for use in GUI.
+    """
+    if isinstance(path, unicode):
+        return path
+    else:
+        return path.decode(sys.getfilesystemencoding())
 
