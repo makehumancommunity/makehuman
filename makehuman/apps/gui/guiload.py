@@ -137,7 +137,6 @@ class LoadTaskView(gui3d.TaskView):
         human = gui3d.app.selectedHuman
 
         human.load(filename, True, gui3d.app.progress)
-        gui3d.app.updateCaption()
 
         del gui3d.app.undoStack[:]
         del gui3d.app.redoStack[:]

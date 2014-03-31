@@ -98,7 +98,6 @@ class SaveTaskView(gui3d.TaskView):
 
         # Save the model
         G.app.selectedHuman.save(path, name)
-        G.app.updateCaption()
         #G.app.clearUndoRedo()
 
         self.parent.tasksByName['Load'].fileentry.text = dir
