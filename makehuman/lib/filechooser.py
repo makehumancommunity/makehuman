@@ -94,7 +94,7 @@ class FileChooserRectangle(gui.Button):
 
         image = self._imageCache[imagePath]
         self.preview = QtGui.QLabel()
-        self.preview.setPixmap(image)
+        self.preview.setPixmap(getpath.pathToUnicode(image))
         self.layout.addWidget(self.preview, 0, 0)
         self.layout.setRowStretch(0, 1)
         self.layout.setColumnMinimumWidth(0, self._size[0])
@@ -777,6 +777,7 @@ class IconListFileChooser(ListFileChooser):
 
     def addItem(self, file, label, preview, tags=[], pos = None):
         item = super(IconListFileChooser, self).addItem(file, label, preview, tags, pos)
+        preview = getpath.pathToUnicode(preview)
         if preview not in self._iconCache:
             pixmap = QtGui.QPixmap(preview)
             size = pixmap.size()
