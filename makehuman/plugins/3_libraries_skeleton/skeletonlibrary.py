@@ -244,7 +244,7 @@ class SkeletonLibrary(gui3d.TaskView):
         xray_mat = material.fromFile(mh.getSysDataPath('materials/xray.mhmat'))
         self.human.material = xray_mat
         for pxy in self.human.getProxies():
-            obj = pxy.obj
+            obj = pxy.object
             self.oldPxyMats[pxy.uuid] = obj.material.clone()
             obj.material = xray_mat
 
