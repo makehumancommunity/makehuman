@@ -710,6 +710,7 @@ def loadModifiers(filename, human):
     import os
     from collections import OrderedDict
     modifiers = []
+    lookup = {}
     data = json.load(open(filename, 'rb'), object_pairs_hook=OrderedDict)
     for modifierGroup in data:
         groupName = modifierGroup['group']
@@ -731,6 +732,7 @@ def loadModifiers(filename, human):
                 modifier._defaultValue = mDef["defaultValue"]
 
             modifiers.append(modifier)
+            lookup[modifier.fullName] = modifier
     if human is not None:
         for modifier in modifiers:
             modifier.setHuman(human)
@@ -744,7 +746,7 @@ def loadModifiers(filename, human):
         dCount = 0
         for mName, mDesc in data.items():
             try:
-                mod = human.getModifier(mName)
+                mod = lookup[mName]
                 mod.description = mDesc
                 dCount += 1
             except:
