@@ -63,6 +63,7 @@ class ExporterMD5(Exporter):
         self.name = "MD5"
         self.filter = "MD5 (*.md5)"
         self.fileExtension = "md5"
+        self.orderPriority = 10.0
 
     def build(self, options, taskview):
         self.taskview       = taskview
