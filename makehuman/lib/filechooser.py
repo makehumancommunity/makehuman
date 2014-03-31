@@ -305,7 +305,7 @@ class FileHandler(object):
 
     def refresh(self, files):
         for file in files:
-            label = os.path.basename(file)
+            label = getpath.pathToUnicode( os.path.basename(file) )
             if isinstance(self.fileChooser.extensions, str):
                 label = os.path.splitext(label)[0]
             self.fileChooser.addItem(file, label, self.getPreview(file))
@@ -337,7 +337,7 @@ class FileHandler(object):
                 preview = os.path.splitext(filename)[0] + '.' + fc.previewExtensions[i]
                 i = i + 1
 
-        if not os.path.exists(preview) and fc.notFoundImage:
+        if not os.path.isfile(preview) and fc.notFoundImage:
             # preview = os.path.join(fc.path, fc.notFoundImage)
             # TL: full filepath needed, so we don't look into user dir.
             preview = fc.notFoundImage
@@ -359,7 +359,7 @@ class TaggedFileLoader(FileHandler):
         """
         import exportutils.config
         for file in files:
-            label = os.path.basename(file)
+            label = getpath.pathToUnicode( os.path.basename(file) )
             if len(self.fileChooser.extensions) > 0:
                 label = os.path.splitext(label)[0]
             tags = self.library.getTags(filename = file)
