@@ -65,12 +65,6 @@ class HumanObjectSelector(gui.QtGui.QWidget, gui.Widget):
         self.skinRadio = self.humanBox.addWidget(gui.RadioButton(self.objectSelector, "Skin", selected=True))
         self.skinRadio.selectionName = 'skin'
 
-        '''
-        self.hairRadio = self.humanBox.addWidget(gui.RadioButton(self.objectSelector, "Hair", selected=False))
-        self.eyesRadio = self.humanBox.addWidget(gui.RadioButton(self.objectSelector, "Eyes", selected=False))
-        self.genitalsRadio = self.humanBox.addWidget(gui.RadioButton(self.objectSelector, "Genitals", selected=False))
-        '''
-
         for pType in proxy.SimpleProxyTypes:
             self._addSelectorItem(pType.lower(), pType, self.humanBox, False)
 
@@ -86,25 +80,25 @@ class HumanObjectSelector(gui.QtGui.QWidget, gui.Widget):
 
     def getSelected(self):
         if self._selected in proxy.SimpleProxyTypesLower:
-            _proxy,obj = self.human.getTypedSimpleProxiesAndObjects(self._selected)
-            if obj:
+            pxy = self.human.getTypedSimpleProxies(self._selected)
+            if pxy.object:
                 return self._selected
             else:
                 return 'skin'
 
-        if self._selected in self.human.clothesObjs.keys():
+        if self._selected in self.human.clothesProxies.keys():
             return self._selected
         else:
             return 'skin'
 
     def setSelected(self, value):
         if value in proxy.SimpleProxyTypesLower:
-            _proxy,obj = self.human.getTypedSimpleProxiesAndObjects(value)
-            if obj:
+            pxy = self.human.getTypedSimpleProxies(value)
+            if pxy.object:
                 self._selected = value
             else:
                 self._selected = 'skin'
-        elif value in self.human.clothesObjs.keys():
+        elif value in self.human.clothesProxies.keys():
             self._selected = value
         else:
             self._selected = 'skin'
@@ -119,12 +113,13 @@ class HumanObjectSelector(gui.QtGui.QWidget, gui.Widget):
         if objType == 'skin':
             return self.human
         elif objType in proxy.SimpleProxyTypesLower:
-            _, obj = self.human.getTypedSimpleProxiesAndObjects(objType)
-            return obj
+            pxy = self.human.getTypedSimpleProxies(objType)
+            return pxy.object
         else:
             uuid = objType
-            if uuid in self.human.clothesObjs:
-                return self.human.clothesObjs[uuid]
+            if uuid in self.human.clothesProxies:
+                pxy = self.human.clothesProxies[uuid]
+                return pxy.object
             else:
                 return None
 
@@ -139,8 +134,7 @@ class HumanObjectSelector(gui.QtGui.QWidget, gui.Widget):
             else:
                 return None
         elif objType in proxy.SimpleProxyTypesLower:
-            pxy, _ = self.human.getTypedSimpleProxiesAndObjects(objType)
-            return pxy
+            return self.human.getTypedSimpleProxies(objType)
         else:
             uuid = objType
             if uuid in self.human.clothesProxies:
@@ -157,8 +151,8 @@ class HumanObjectSelector(gui.QtGui.QWidget, gui.Widget):
         self.skinRadio.setChecked(selected == 'skin')
 
         for radio in self.objectSelector[1:self.humanObjectCount]:
-            _, obj = self.human.getTypedSimpleProxiesAndObjects(radio.selectionName)
-            radio.setEnabled(obj is not None)
+            pxy = self.human.getTypedSimpleProxies(radio.selectionName)
+            radio.setEnabled(pxy is not None)
             radio.setChecked(selected == radio.selectionName)
 
         self._populateClothesSelector()
@@ -174,8 +168,8 @@ class HumanObjectSelector(gui.QtGui.QWidget, gui.Widget):
             radioBtn.destroy()
         del self.objectSelector[self.humanObjectCount:]
 
-        for uuid in human.clothesObjs.keys():
-            self._addSelectorItem(uuid, human.clothesProxies[uuid].name, self.clothesBox, (self.selected == uuid))
+        for uuid,pxy in human.clothesProxies.items():
+            self._addSelectorItem(uuid, pxy.name, self.clothesBox, (self.selected == uuid))
 
         '''
         self.clothesSelections = []
