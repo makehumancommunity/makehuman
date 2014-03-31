@@ -52,14 +52,9 @@ import os
 
 class BvhConfig(Config):
 
-    def __init__(self, exporter):
+    def __init__(self):
         Config.__init__(self)
-        self.selectedOptions(exporter)
         self.useRelPaths = True
-
-    def selectedOptions(self, exporter):
-        self.scale,self.unit    = exporter.taskview.getScale()
-        return self
 
 class ExporterBVH(Exporter):
     def __init__(self):
@@ -73,13 +68,20 @@ class ExporterBVH(Exporter):
         self.taskview       = taskview
         self.exportAnimations = options.addWidget(gui.CheckBox("Animations", True))
 
+    def getConfig(self):
+        cfg = BvhConfig()
+        cfg.scale,cfg.unit    = self.taskview.getScale()
+
+        return cfg
+
     def export(self, human, filename):
         if not human.getSkeleton():
             gui3d.app.prompt('Error', 'You did not select a skeleton from the library.', 'OK')
             return
 
         skel = human.getSkeleton()
-        cfg = BvhConfig(self)
+        cfg = self.getConfig()
+        cfg.setHuman(human)
 
         if self.exportAnimations and len(human.animated.getAnimations()) > 0:
             baseFilename = os.path.splitext(filename("bvh"))[0]

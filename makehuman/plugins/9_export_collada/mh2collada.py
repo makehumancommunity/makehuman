@@ -64,12 +64,12 @@ Delta = [0,0.01,0]
 # exportCollada(human, filepath, config):
 #
 
-def exportCollada(human, filepath, config):
+def exportCollada(filepath, config):
     from armature.armature import setupArmature
     progress = Progress()
 
     time1 = time.clock()
-    config.setHuman(human)
+    human = config.human
     config.setupTexFolder(filepath)
     filename = os.path.basename(filepath)
     name = config.goodName(os.path.splitext(filename)[0])
