@@ -379,6 +379,18 @@ class Human(guicommon.Object):
         """
         return self.gender
 
+    def getDominantGender(self):
+        """
+        The dominant gender of this human as a string (male or female).
+        None if both genders are equally represented.
+        """
+        if self.getGender() < 0.5:
+            return 'female'
+        elif self.getGender() > 0.5:
+            return 'male'
+        else:
+            return None
+
     def _setGenderVals(self):
         self.maleVal = self.gender
         self.femaleVal = 1 - self.gender
