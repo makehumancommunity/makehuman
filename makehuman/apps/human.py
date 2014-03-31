@@ -51,7 +51,7 @@ from makehuman import getBasemeshVersion, getShortVersion, getVersionStr, getVer
 
 class Human(guicommon.Object):
 
-    def __init__(self, mesh, hairObj=None, eyesObj=None, genitalsObj=None):
+    def __init__(self, mesh):
 
         guicommon.Object.__init__(self, mesh)
 
@@ -70,22 +70,14 @@ class Human(guicommon.Object):
         self._staticFaceMask = None
         self.maskFaces()
 
-        self._hairObj = hairObj
         self._hairProxy = None
-        self._eyesObj = eyesObj
         self._eyesProxy = None
-        self._genitalsObj = genitalsObj
         self._genitalsProxy = None
-        self.eyebrowsObj = None     # TODO why no setters for these?
         self.eyebrowsProxy = None
-        self.eyelashesObj = None
         self.eyelashesProxy = None
-        self.teethObj = None
         self.teethProxy = None
-        self.tongueObj = None
         self.tongueProxy = None
 
-        self.clothesObjs = {}
         self.clothesProxies = {}
 
         self.targetsDetailStack = {}  # All details targets applied, with their values
@@ -119,16 +111,6 @@ class Human(guicommon.Object):
 
     hairProxy = property(getHairProxy, setHairProxy)
 
-    def setHairObj(self, obj):
-        self._hairObj = obj
-        event = events3d.HumanEvent(self, 'proxyObj')
-        event.obj = 'hair'
-        self.callEvent('onChanged', event)
-    def getHairObj(self):
-        return self._hairObj
-
-    hairObj = property(getHairObj, setHairObj)
-
     def setEyesProxy(self, proxy):
         self._eyesProxy = proxy
         event = events3d.HumanEvent(self, 'proxy')
@@ -139,16 +121,6 @@ class Human(guicommon.Object):
 
     eyesProxy = property(getEyesProxy, setEyesProxy)
 
-    def setEyesObj(self, obj):
-        self._eyesObj = obj
-        event = events3d.HumanEvent(self, 'proxyObj')
-        event.obj = 'eyes'
-        self.callEvent('onChanged', event)
-    def getEyesObj(self):
-        return self._eyesObj
-
-    eyesObj = property(getEyesObj, setEyesObj)
-
     def setGenitalsProxy(self, proxy):
         self._genitalsProxy = proxy
         event = events3d.HumanEvent(self, 'proxy')
@@ -158,17 +130,6 @@ class Human(guicommon.Object):
         return self._genitalsProxy
 
     genitalsProxy = property(getGenitalsProxy, setGenitalsProxy)
-
-    def setGenitalsObj(self, obj):
-        self._genitalsObj = obj
-        # TODO better to let proxy libraries emit these events instead of human
-        event = events3d.HumanEvent(self, 'proxyObj')
-        event.obj = 'genitals'
-        self.callEvent('onChanged', event)
-    def getGenitalsObj(self):
-        return self._genitalsObj
-
-    genitalsObj = property(getGenitalsObj, setGenitalsObj)
 
 
     def getFaceMask(self):
@@ -228,6 +189,7 @@ class Human(guicommon.Object):
     # Proxy and object getters.
     # Returns only existing proxies
 
+    '''
     def getProxyObjects(self):
         objs = []
         for obj in [
@@ -244,6 +206,7 @@ class Human(guicommon.Object):
         for obj in self.clothesObjs.values():
             objs.append(obj)
         return objs
+    '''
 
     def getProxies(self, includeHumanProxy = True):
         proxies = []
@@ -264,37 +227,22 @@ class Human(guicommon.Object):
             proxies.append(pxy)
         return proxies
 
-    def getProxiesAndObjects(self):
-        pairs = []
-        for pxy,obj in [
-            (self.hairProxy, self.hairObj),
-            (self.eyesProxy, self.eyesObj),
-            (self.genitalsProxy, self.genitalsObj),
-            (self.eyebrowsProxy, self.eyebrowsObj),
-            (self.eyelashesProxy, self.eyelashesObj),
-            (self.teethProxy, self.teethObj),
-            (self.tongueProxy, self.tongueObj)]:
-            if pxy != None and obj != None:
-                pairs.append((pxy,obj))
-        for uuid,pxy in self.clothesProxies.items():
-            pairs.append((pxy, self.clothesObjs[uuid]))
-        return pairs
 
-    def getTypedSimpleProxiesAndObjects(self, ptype):
+    def getTypedSimpleProxies(self, ptype):
         ptype = ptype.capitalize()
         table = {
-            'Hair' :     (self.hairProxy, self.hairObj),
-            'Eyes' :     (self.eyesProxy, self.eyesObj),
-            'Genitals' : (self.genitalsProxy, self.genitalsObj),
-            'Eyebrows' : (self.eyebrowsProxy, self.eyebrowsObj),
-            'Eyelashes': (self.eyelashesProxy, self.eyelashesObj),
-            'Teeth':     (self.teethProxy, self.teethObj),
-            'Tongue':    (self.tongueProxy, self.tongueObj),
+            'Hair' :     self.hairProxy,
+            'Eyes' :     self.eyesProxy,
+            'Genitals' : self.genitalsProxy,
+            'Eyebrows' : self.eyebrowsProxy,
+            'Eyelashes': self.eyelashesProxy,
+            'Teeth':     self.teethProxy,
+            'Tongue':    self.tongueProxy,
             }
         try:
             return table[ptype]
         except KeyError:
-            return None,None
+            return None
 
     # Overriding hide and show to account for both human base and the hairs!
 
@@ -867,7 +815,7 @@ class Human(guicommon.Object):
         for dep in modifier.macroDependencies:
             groupName = self._modifier_varMapping.get(dep, None)
             if groupName and groupName == modifier.groupName:
-                # Do not include dependencies within the same modifier group 
+                # Do not include dependencies within the same modifier group
                 # (this step might be omitted if the mapping is still incomplete (dependency is not yet mapped to a group), and can later be fixed by removing the entry again from the reverse mapping)
                 continue
             if dep not in self._modifier_dependencyMapping:

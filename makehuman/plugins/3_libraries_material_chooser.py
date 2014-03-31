@@ -109,10 +109,10 @@ class MaterialTaskView(gui3d.TaskView):
 
     def applyClothesMaterial(self, uuid, filename):
         human = self.human
-        if uuid not in human.clothesObjs.keys():
+        if uuid not in human.clothesProxies.keys():
             log.warning("Cannot set material for clothes with UUID %s, no such item", uuid)
             return False
-        clo = human.clothesObjs[uuid]
+        clo = human.clothesProxies[uuid].object
         clo.mesh.material = material.fromFile(filename)
         return True
 
@@ -121,9 +121,9 @@ class MaterialTaskView(gui3d.TaskView):
         Get the currently set material for clothing item with specified UUID.
         """
         human = self.human
-        if uuid not in human.clothesObjs.keys():
+        if uuid not in human.clothesProxies.keys():
             return None
-        clo = human.clothesObjs[uuid]
+        clo = human.clothesProxies[uuid].object
         return clo.material.filename
 
     def getMaterialPaths(self, objType, proxy = None):
@@ -264,7 +264,8 @@ class MaterialTaskView(gui3d.TaskView):
 
     def saveHandler(self, human, file):
         file.write('skinMaterial %s\n' % self.getRelativeMaterialPath(human.material.filename))
-        for name, clo in human.clothesObjs.items():
+        for name, pxy in human.clothesProxies.items():
+            clo = pxy.object
             if clo:
                 proxy = human.clothesProxies[name]
                 if clo.material.filename !=  proxy.material.filename:
