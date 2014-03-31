@@ -72,12 +72,12 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
     def getObjectLayer(self):
         return 10
 
-    def proxySelected(self, pxy, obj):
+    def proxySelected(self, pxy):
         uuid = pxy.getUuid()
         self.human.clothesProxies[uuid] = pxy
         self.updateFaceMasks(self.faceHidingTggl.selected)
 
-    def proxyDeselected(self, pxy, obj, suppressSignal = False):
+    def proxyDeselected(self, pxy, suppressSignal = False):
         uuid = pxy.uuid
         del self.human.clothesProxies[uuid]
         if not suppressSignal:
