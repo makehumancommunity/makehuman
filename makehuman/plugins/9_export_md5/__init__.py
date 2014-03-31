@@ -37,11 +37,10 @@ Abstract
 TODO
 """
 
-import gui3d
-import gui
 from progress import Progress
 from export import Exporter
 from exportutils.config import Config
+from core import G
 
 class MD5Config(Config):
 
@@ -51,7 +50,7 @@ class MD5Config(Config):
         self.feetOnGround = True
 
     def selectedOptions(self, exporter):
-        self.smooth = self.subdivide = gui3d.app.selectedHuman.isSubdivided()
+        self.smooth = self.subdivide = G.app.selectedHuman.isSubdivided()
 
         return self
 
@@ -92,3 +91,4 @@ def load(app):
 
 def unload(app):
     pass
+

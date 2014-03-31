@@ -37,7 +37,6 @@ Abstract
 TODO
 """
 
-import gui
 from export import Exporter
 from exportutils.config import Config
 
@@ -56,6 +55,7 @@ class ExporterSTL(Exporter):
         self.fileExtension = "stl"
 
     def build(self, options, taskview):
+        import gui
         Exporter.build(self, options, taskview)
         stlOptions = []
         self.stlAscii = options.addWidget(gui.RadioButton(stlOptions,  "ASCII", selected=True))

@@ -37,8 +37,6 @@ Abstract
 TODO
 """
 
-import log
-import gui
 from export import Exporter
 from exportutils.config import Config
 
@@ -108,6 +106,7 @@ class ExporterMHX(Exporter):
         self.orderPriority = 90.0
 
     def build(self, options, taskview):
+        import gui
         self.taskview       = taskview
         self.feetOnGround   = options.addWidget(gui.CheckBox("Feet on ground", True))
         self.useRotationLimits   = options.addWidget(gui.CheckBox("Rotation limits", False))
