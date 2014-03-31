@@ -257,7 +257,6 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.undoStack = []
         self.redoStack = []
-        self.modified = False
 
         self.actions = None
 
@@ -608,7 +607,6 @@ class MHApplication(gui3d.Application, mh.Application):
           ( not mh.Shader.supported() or mh.Shader.glslVersion() < (1,20) ):
             self.prompt('Warning', 'Your system does not support OpenGL shaders (GLSL v1.20 required).\nOnly simple shading will be available.', 'Ok', None, None, None, 'glslWarning')
 
-        gui3d.app.setFilenameCaption("Untitled")
         self.setFileModified(False)
 
         #printtree(self)
@@ -994,9 +992,12 @@ class MHApplication(gui3d.Application, mh.Application):
         """Set the main window caption."""
         mh.setCaption(caption.encode('utf8'))
 
-    def setFilenameCaption(self, filename):
+    def updateCaption(self):
         """Calculate and set the window title according to the
         name of the current open file and the version of MH."""
+        filename = self.selectedHuman.filename
+        if filename is None:
+            filename = "Untitled"
         if mh.isRelease():
             self.setCaption(
                 "MakeHuman %s - [%s][*]" %
@@ -1005,12 +1006,13 @@ class MHApplication(gui3d.Application, mh.Application):
             self.setCaption(
                 "MakeHuman r%s (%s) - [%s][*]" %
                 (os.environ['HGREVISION'], os.environ['HGNODEID'], filename))
+        self.mainwin.setWindowModified(self.selectedHuman.modified)
 
     def setFileModified(self, modified):
         """Mark the current open file as modified and
         update the window title accordingly."""
-        self.modified = modified
-        self.mainwin.setWindowModified(self.modified)
+        self.selectedHuman.modified = modified
+        self.updateCaption()
 
     # Global status bar
     def status(self, text, *args):
@@ -1281,17 +1283,15 @@ class MHApplication(gui3d.Application, mh.Application):
         self.status("Screengrab saved to %s", filename)
 
     def resetHuman(self):
-        if self.modified:
+        if self.selectedHuman.modified:
             self.prompt('Reset', 'By resetting the human you will lose all your changes, are you sure?', 'Yes', 'No', self._resetHuman)
         else:
             self._resetHuman()
 
     def _resetHuman(self):
-        human = self.selectedHuman
-        human.resetMeshValues()
-        human.applyAllTargets(self.progress)
-        self.setFilenameCaption("Untitled")
-        self.setFileModified(False)
+        self.selectedHuman.close()
+        self.selectedHuman.applyAllTargets(self.progress)
+        self.updateCaption()
         self.clearUndoRedo()
 
     # Camera navigation
@@ -1408,7 +1408,7 @@ class MHApplication(gui3d.Application, mh.Application):
         pass
 
     def promptAndExit(self):
-        if self.modified:
+        if self.selectedHuman.modified:
             self.prompt('Exit', 'You have unsaved changes. Are you sure you want to exit the application?', 'Yes', 'No', self.stop)
         else:
             self.stop()
