@@ -46,7 +46,7 @@ from core import G
 import events3d
 import language
 #import log
-from getpath import getSysDataPath, getPath, isSubPath
+from getpath import getSysDataPath, getPath, isSubPath, pathToUnicode
 
 
 def getLanguageString(text):
@@ -325,7 +325,7 @@ class Slider(QtGui.QWidget, Widget):
     @classmethod
     def _getImage(cls, path):
         if path not in cls._imageCache:
-            cls._imageCache[path] = QtGui.QPixmap(path)
+            cls._imageCache[path] = getPixmap(path)
         return cls._imageCache[path]
 
     def __init__(self, value=0.0, min=0.0, max=1.0, label=None, vertical=False, valueConverter=None, image=None, scale=1000):
@@ -1263,7 +1263,7 @@ class FileEntryView(QtGui.QWidget, Widget):
 
 class SplashScreen(QtGui.QSplashScreen):
     def __init__(self, image, version=""):
-        super(SplashScreen, self).__init__(G.app.mainwin, QtGui.QPixmap(image))
+        super(SplashScreen, self).__init__(G.app.mainwin, getPixmap(image))
         self._stdout = sys.stdout
         self.messageRect = QtCore.QRect(354, 531, 432, 41)
         self.messageAlignment = QtCore.Qt.AlignLeft
@@ -1970,4 +1970,4 @@ def getPixmap(img):
     elif isinstance(img, QtGui.QImage):
         return QtGui.QPixmap.fromImage(img)
     else:
-        return QtGui.QPixmap(img)
+        return QtGui.QPixmap(pathToUnicode(img))
