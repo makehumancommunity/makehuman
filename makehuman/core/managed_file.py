@@ -30,6 +30,7 @@ is being edited inside MakeHuman.
 import os
 import log
 import events3d
+from getpath import pathToUnicode
 
 
 class FileModifiedEvent(events3d.Event):
@@ -165,9 +166,9 @@ class File(events3d.EventHandler):
         event = FileModifiedEvent(self, False, self._modified, reason, data)
         self._modified = False
         event.addReason(extrareason)
-        if path != self.path:
+        if pathToUnicode(path) != self.path:
             event.addReason("newpath")
-            self._path = path
+            self._path = pathToUnicode(path)
         self.callEvent('onModified', event)
 
     def saved(self, path, reason=None, data=None):
