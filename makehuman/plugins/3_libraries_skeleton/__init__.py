@@ -41,9 +41,6 @@ Skeletons are used for skeletal animation (skinning) and posing.
 
 # TODO add sort by number of bones
 
-import gui3d
-import mh
-
 from . import skeletonlibrary
 
 #------------------------------------------------------------------------------------------
@@ -51,6 +48,8 @@ from . import skeletonlibrary
 #------------------------------------------------------------------------------------------
 
 def load(app):
+    import gui3d
+    import mh
     category = app.getCategory('Pose/Animate')
     maintask = skeletonlibrary.SkeletonLibrary(category)
     maintask.sortOrder = 3

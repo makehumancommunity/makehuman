@@ -42,9 +42,8 @@ import bvh
 
 from export import Exporter
 from exportutils.config import Config
-import gui
-import gui3d
 import log
+from core import G
 
 import os
 
@@ -65,6 +64,7 @@ class ExporterBVH(Exporter):
         self.fileExtension = "bvh"
 
     def build(self, options, taskview):
+        import gui
         self.taskview       = taskview
         self.exportAnimations = options.addWidget(gui.CheckBox("Animations", True))
 
@@ -76,7 +76,7 @@ class ExporterBVH(Exporter):
 
     def export(self, human, filename):
         if not human.getSkeleton():
-            gui3d.app.prompt('Error', 'You did not select a skeleton from the library.', 'OK')
+            G.app.prompt('Error', 'You did not select a skeleton from the library.', 'OK')
             return
 
         skel = human.getSkeleton()

@@ -37,7 +37,6 @@ Abstract
 TODO
 """
 
-import gui
 from export import Exporter
 from exportutils.config import Config
 
@@ -58,6 +57,7 @@ class ExporterOBJ(Exporter):
         self.orderPriority = 60.0
 
     def build(self, options, taskview):
+        import gui
         Exporter.build(self, options, taskview)
         self.useNormals = options.addWidget(gui.CheckBox("Normals", False))
 
