@@ -291,6 +291,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
             self.deselectProxy(None, suppressSignal = True)
 
         mesh,obj = pxy.loadMeshAndObject(human)
+        mesh.setPickable(True)  # Allow mouse picking for proxies attached to human
         
         if not mesh:
             return
