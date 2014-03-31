@@ -141,7 +141,7 @@ class LoadTaskView(gui3d.TaskView):
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
 
-        modelPath = gui3d.app.selectedHuman.dir
+        modelPath = gui3d.app.currentFile.dir
         if modelPath is None:
             modelPath = mh.getPath("models")
 
