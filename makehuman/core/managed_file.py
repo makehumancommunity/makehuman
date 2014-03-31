@@ -77,7 +77,7 @@ class FileModifiedEvent(events3d.Event):
         """Add the given reason to the event's reason list."""
         if reason is not None:
             if hasattr(reason, '__iter__'):
-                self.reasons |= reason
+                self.reasons |= set(reason)
             else:
                 self.reasons.add(reason)
 
@@ -131,10 +131,7 @@ class File(events3d.EventHandler):
         self._path = None
         self._modified = False
 
-        ok = self.load(path)
-        if not ok:
-            log.warning('Unable to load %s', path)
-            self.load(None)
+        self.load(path)
 
     def getModified(self):
         """Get the state of the modified flag."""
@@ -167,7 +164,7 @@ class File(events3d.EventHandler):
         event = FileModifiedEvent(False, self._modified, reason, data)
         self._modified = False
         event.addReason(extrareason)
-        if path != self.path():
+        if path != self.path:
             event.addReason("newpath")
             self._path = path
         self.callEvent('onModified', event)
@@ -179,6 +176,10 @@ class File(events3d.EventHandler):
     def loaded(self, path, reason=None, data=None):
         """Method to be called after loading the file from a path."""
         self._associate(path, "load", reason, data)
+
+    def closed(self, reason=None, data=None):
+        """Method to be called after closing the file."""
+        self._associate(None, ("load", "close"), reason, data)
 
     @property
     def path(self):
@@ -225,7 +226,8 @@ class File(events3d.EventHandler):
         and shall call the saved() method upon success.
         """
 
-        pass
+        self.saved(path)
+        return True
 
     def load(self, path):
         """Method that the user will call to load the File from disk.
@@ -233,13 +235,25 @@ class File(events3d.EventHandler):
         The method is intented to be overwritten by the implementation,
         and shall call the loaded() method upon success.
 
-        Implementations shall be able to process load(None). Such case may be
-        treated as loading of a default (built-in) file.
-
-        Implementations shall return True upon success, and False upon failure.
+        Implementations should process load(None) as a call to close().
         """
 
-        pass
+        if path is None:
+            return self.close()
+
+        self.loaded(path)
+        return True
+
+    def close(self):
+        """Method that the user will call to close the File.
+        It presets the File object to its initial state.
+
+        The method is intented to be overwritten by the implementation,
+        and shall call the closed() method upon success.
+        """
+
+        self.closed()
+        return True
 
     def reload(self):
         """Reload the currently associated file.
@@ -248,12 +262,3 @@ class File(events3d.EventHandler):
         """
 
         return self.load(self.path)
-
-    def close(self):
-        """Unassociate the File object from its file on the disk.
-
-        This restores the File object to its initial state,
-        potentially releasing any resources.
-        """
-
-        return self.load(None)
