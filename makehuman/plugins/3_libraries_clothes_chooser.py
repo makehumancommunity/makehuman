@@ -200,8 +200,9 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
         super(ClothesTaskView, self).onHumanChanged(event)
         if event.change == 'reset':
             self.faceHidingTggl.setSelected(True)
-        elif event.change == 'proxy' and event.pxy == 'genitals' \
-             and self.faceHidingTggl.selected:
+        elif event.change == 'proxy' and \
+             (event.pxy == 'genitals' or event.pxy == 'proxymeshes') and \
+             self.faceHidingTggl.selected:
             # Update face masks if genital proxy was changed
             self.updateFaceMasks(self.faceHidingTggl.selected)
 
