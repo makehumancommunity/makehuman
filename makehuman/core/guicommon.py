@@ -200,13 +200,11 @@ class Object(events3d.EventHandler):
         return self.__proxyMesh
 
     def updateProxyMesh(self):
-
         if self.proxy and self.__proxyMesh:
             self.proxy.update(self.__proxyMesh)
             self.__proxyMesh.update()
 
     def isProxied(self):
-
         return self.mesh == self.__proxyMesh or self.mesh == self.__proxySubdivisionMesh
 
     def setProxy(self, proxy):
@@ -230,8 +228,8 @@ class Object(events3d.EventHandler):
             import files3d
             self.proxy = proxy
 
-            _obj = proxy.object
-            self.__proxyMesh = _obj.mesh
+            self.__proxyMesh = proxy.object.mesh
+            proxy.object = self
 
             # Copy attributes from human mesh to proxy mesh
             for attr in ('x', 'y', 'z', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz',
