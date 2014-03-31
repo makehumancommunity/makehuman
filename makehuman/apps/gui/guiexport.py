@@ -184,6 +184,7 @@ class ExportTaskView(guipose.PoseModeTaskView):
                 self.optionsBox.showWidget(options)
                 self.setFileExtension(exporter.fileExtension, exporter.filter)
                 exporter.onShow(self)
+                options.setVisible( len(options.children) > 0 )
                 self.recentlyShown = exporter
                 break
 
