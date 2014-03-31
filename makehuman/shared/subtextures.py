@@ -43,10 +43,11 @@ and manipulating subtextures as Image objects.
 import os
 import inifile
 import image
+from codecs import open
 
 def combine(image, mhstx):
     img = image.Image(image)
-    f = open(mhstx, 'rU')
+    f = open(mhstx, 'rU', encoding="utf-8")
     try:
         subTextures = inifile.parseINI(f.read(), [("(","["), (")","]")])
     except:
