@@ -745,6 +745,7 @@ def peekMetadata(proxyFilePath):
     begins. Reads only the necessary lines of the proxy file from disk, not the
     entire proxy file is loaded in memory.
     """
+    # TODO support binary proxy files too!
     fp = open(proxyFilePath)
     uuid = None
     tags = set()
