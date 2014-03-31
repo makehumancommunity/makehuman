@@ -48,6 +48,9 @@ from hglib.util import cmdbuilder
 import re
 import os
 
+def isMergeCommit(hgClient, rev):
+    return len(hgClient.parents(rev.node)) > 1
+
 def compare(sourceBranch="default", targetBranch="stable"):
     excludeFile = None
     excludes = []
@@ -88,7 +91,10 @@ def compare(sourceBranch="default", targetBranch="stable"):
             grafted.append(sourceRev)
 
     # Filtered result
-    return [cs for cs in cDiff if (cs.node not in grafted and cs.node[:12] not in excludes)]
+    # Also filter out merge commits (which are skipped by graft anyway)
+    return [cs for cs in cDiff if (cs.node not in grafted and \
+                                   cs.node[:12] not in excludes and \
+                                   not isMergeCommit(c, cs) )]
 
 
 def formatChangeset(cs):
