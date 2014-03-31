@@ -48,55 +48,6 @@ import getpath
 from core import G
 import guimodifier
 
-class MeasurementValueConverter(object):
-
-    def __init__(self, task, modifier):
-        self.task = task
-        self.modifier = modifier
-        self.value = 0.0
-
-    @property
-    def units(self):
-        return 'cm' if G.app.settings['units'] == 'metric' else 'in'
-
-    @property
-    def measure(self):
-        return self.modifier.fullName
-
-    def dataToDisplay(self, value):
-        self.value = value
-        return self.task.getMeasure(self.measure)
-
-    def displayToData(self, value):
-        goal = float(value)
-        measure = self.task.getMeasure(self.measure)
-        minValue = -1.0
-        maxValue = 1.0
-        if math.fabs(measure - goal) < 0.01:
-            return self.value
-        else:
-            tries = 10
-            while tries:
-                if math.fabs(measure - goal) < 0.01:
-                    break;
-                if goal < measure:
-                    maxValue = self.value
-                    if value == minValue:
-                        break
-                    self.value = minValue + (self.value - minValue) / 2.0
-                    self.modifier.updateValue(self.value, 0)
-                    measure = self.task.getMeasure(self.measure)
-                else:
-                    minValue = self.value
-                    if value == maxValue:
-                        break
-                    self.value = self.value + (maxValue - self.value) / 2.0
-                    self.modifier.updateValue(self.value, 0)
-                    measure = self.task.getMeasure(self.measure)
-                tries -= 1
-        return self.value
-
-
 class MeasureTaskView(guimodifier.ModifierTaskView):
 
     def __init__(self, category, name, label=None, saveName=None, cameraView=None):
@@ -309,22 +260,54 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
         self.uk.setTextFormat('UK: %d%s', band, ukcups[cup])
 
 
+class MeasurementValueConverter(object):
 
-def load(app):
-    """
-    Plugin load function, needed by design.
-    """
-    category = app.getCategory('Modelling')
+    def __init__(self, task, modifier):
+        self.task = task
+        self.modifier = modifier
+        self.value = 0.0
 
-    humanmodifier.loadModifiers(getpath.getSysDataPath('modifiers/measurement_modifiers.json'), app.selectedHuman)
-    guimodifier.loadModifierTaskViews(getpath.getSysDataPath('modifiers/measurement_sliders.json'), app.selectedHuman, category, taskviewClass=MeasureTaskView)
+    @property
+    def units(self):
+        return 'cm' if G.app.settings['units'] == 'metric' else 'in'
 
+    @property
+    def measure(self):
+        return self.modifier.fullName
 
-    # TODO ??
-    #taskview.showGroup('neck')
+    def dataToDisplay(self, value):
+        self.value = value
+        return self.task.getMeasure(self.measure)
 
-def unload(app):
-    pass
+    def displayToData(self, value):
+        goal = float(value)
+        measure = self.task.getMeasure(self.measure)
+        minValue = -1.0
+        maxValue = 1.0
+        if math.fabs(measure - goal) < 0.01:
+            return self.value
+        else:
+            tries = 10
+            while tries:
+                if math.fabs(measure - goal) < 0.01:
+                    break;
+                if goal < measure:
+                    maxValue = self.value
+                    if value == minValue:
+                        break
+                    self.value = minValue + (self.value - minValue) / 2.0
+                    self.modifier.updateValue(self.value, 0)
+                    measure = self.task.getMeasure(self.measure)
+                else:
+                    minValue = self.value
+                    if value == maxValue:
+                        break
+                    self.value = self.value + (maxValue - self.value) / 2.0
+                    self.modifier.updateValue(self.value, 0)
+                    measure = self.task.getMeasure(self.measure)
+                tries -= 1
+        return self.value
+
 
 class Ruler:
 
@@ -391,4 +374,22 @@ class Ruler:
             return 10.0 * measure
         else:
             return 10.0 * measure * 0.393700787
+
+
+
+def load(app):
+    """
+    Plugin load function, needed by design.
+    """
+    category = app.getCategory('Modelling')
+
+    humanmodifier.loadModifiers(getpath.getSysDataPath('modifiers/measurement_modifiers.json'), app.selectedHuman)
+    guimodifier.loadModifierTaskViews(getpath.getSysDataPath('modifiers/measurement_sliders.json'), app.selectedHuman, category, taskviewClass=MeasureTaskView)
+
+
+    # TODO ??
+    #taskview.showGroup('neck')
+
+def unload(app):
+    pass
 
