@@ -41,6 +41,7 @@ for task views that implement renderers and rendering related tasks.
 from core import G
 from guipose import PoseModeTaskView
 
+
 class RenderTaskView(PoseModeTaskView):
     def __init__(self, category, name, label=None):
         PoseModeTaskView.__init__(self, category, name, label)
@@ -49,7 +50,7 @@ class RenderTaskView(PoseModeTaskView):
         self.taskViewShader = None
 
     # Render task views enable pose mode when shown, so that the selected pose
-    # is seen and rendered, and a light-based shader (default phong) is
+    # is seen and rendered, and a light-based shader (default None) is
     # selected, so that the actual scene lighting is simulated.
 
     def onShow(self, event):
@@ -72,7 +73,7 @@ class RenderTaskView(PoseModeTaskView):
     def getRenderingWidth(self):
         return G.app.settings.get('rendering_width', 800)
 
-    def setRenderingWidth(self, value = None):
+    def setRenderingWidth(self, value=None):
         G.app.settings['rendering_width'] = 0 if not value else int(value)
 
     renderingWidth = property(getRenderingWidth, setRenderingWidth)
@@ -80,19 +81,7 @@ class RenderTaskView(PoseModeTaskView):
     def getRenderingHeight(self):
         return G.app.settings.get('rendering_height', 600)
 
-    def setRenderingHeight(self, value = None):
+    def setRenderingHeight(self, value=None):
         G.app.settings['rendering_height'] = 0 if not value else int(value)
 
     renderingHeight = property(getRenderingHeight, setRenderingHeight)
-
-    # getScene(): Static method for getting the currently selected scene.
-    # If scene selector plugin isn't available, it returns the default scene.
-    @staticmethod
-    def getScene():
-        mhscene = None
-        try:
-            mhscene = G.app.getCategory('Rendering').getTaskByName('Scene').scene
-        except:
-            import scene
-            mhscene = scene.Scene()
-        return mhscene

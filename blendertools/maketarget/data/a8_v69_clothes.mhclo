@@ -15,9 +15,9 @@
 #
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 uuid 26a27336-ba1a-4ec1-a087-4acbf89efa45
-basemesh hm08
+basemesh alpha8
+
 name A8_v74_clothes
 obj_file a8_v74.obj
 x_scale 13868 14308 16.0466

@@ -40,7 +40,7 @@ Utility for making clothes to MH characters.
 bl_info = {
     "name": "Make Clothes",
     "author": "Thomas Larsson",
-    "version": (0, 950),
+    "version": (0, 949),
     "blender": (2, 6, 9),
     "location": "View3D > Properties > Make MH clothes",
     "description": "Make clothes and UVs for MakeHuman characters",
@@ -187,8 +187,8 @@ class MakeClothesPanel(bpy.types.Panel):
         layout.prop(scn, "MCShowBoundary")
         if scn.MCShowBoundary:
             ins = inset(layout)
-            ins.prop(scn, "MCUseSkewing")
-            ins.prop(scn, "MCUseBBoxSymmetry")
+            ins.prop(scn, "MCScaleUniform")
+            ins.prop(scn, "MCScaleCorrect")
             ins.separator()
             ins.prop(scn, "MCBodyPart")
             vnums = makeclothes.getBodyPartVerts(scn)
