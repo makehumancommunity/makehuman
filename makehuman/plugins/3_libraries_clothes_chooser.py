@@ -56,8 +56,8 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
 
         #self.taggedClothes = {}
 
-        self.originalHumanMask = gui3d.app.selectedHuman.meshData.getFaceMask().copy()
-        self.faceHidingTggl = self.optionsBox.addWidget(gui.CheckBox("Hide faces under clothes"))
+        self.originalHumanMask = self.human.meshData.getFaceMask().copy()
+        self.faceHidingTggl = self.optionsBox.addWidget(FaceHideCheckbox("Hide faces under clothes"))
         @self.faceHidingTggl.mhEvent
         def onClicked(event):
             self.updateFaceMasks(self.faceHidingTggl.selected)
@@ -74,17 +74,12 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
 
     def proxySelected(self, pxy, obj):
         uuid = pxy.getUuid()
-
-        self.human.clothesObjs[uuid] = obj
         self.human.clothesProxies[uuid] = pxy
-
         self.updateFaceMasks(self.faceHidingTggl.selected)
 
     def proxyDeselected(self, pxy, obj, suppressSignal = False):
         uuid = pxy.uuid
-        del self.human.clothesObjs[uuid]
         del self.human.clothesProxies[uuid]
-
         if not suppressSignal:
             self.updateFaceMasks(self.faceHidingTggl.selected)
 
@@ -92,9 +87,9 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
         super(ClothesTaskView, self).resetSelection()
         self.updateFaceMasks(self.faceHidingTggl.selected)
 
-    def getClothesRenderOrder(self):
+    def getClothesByRenderOrder(self):
         """
-        Return UUIDs of clothes proxys sorted on proxy.z_depth render queue 
+        Return UUIDs of clothes proxys sorted on proxy.z_depth render queue
         parameter (the order in which they will be rendered).
         """
         decoratedClothesList = [(pxy.z_depth, pxy.uuid) for pxy in self.getSelection()]
@@ -111,12 +106,15 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
 
         log.debug("Clothes library: updating face masks (face hiding %s).", "enabled" if enableFaceHiding else "disabled")
 
-        human = gui3d.app.selectedHuman
+        human = self.human
         if not enableFaceHiding:
             human.meshData.changeFaceMask(self.originalHumanMask)
             human.meshData.updateIndexBufferFaces()
-            for uuid in [pxy.uuid for pxy in self.getSelection()]:
-                obj = human.clothesObjs[uuid]
+            proxies = self.getSelection()
+            if self.human.genitalsProxy:
+                proxies.append(self.human.genitalsProxy)
+            for pxy in proxies:
+                obj = pxy.object
                 faceMask = np.ones(obj.mesh.getFaceCount(), dtype=bool)
                 obj.mesh.changeFaceMask(faceMask)
                 obj.mesh.updateIndexBufferFaces()
@@ -124,21 +122,27 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
 
         vertsMask = np.ones(human.meshData.getVertexCount(), dtype=bool)
         log.debug("masked verts %s", np.count_nonzero(~vertsMask))
-        for uuid in reversed(self.getClothesRenderOrder()):
-            pxy = human.clothesProxies[uuid]
-            obj = human.clothesObjs[uuid]
+
+        stackedProxies = [human.clothesProxies[uuid] for uuid in reversed(self.getClothesByRenderOrder())]
+        # Mask genitals too
+        if self.human.genitalsProxy:
+            stackedProxies.append( self.human.genitalsProxy )
+
+        for pxy in stackedProxies:
+            obj = pxy.object
 
             # Convert basemesh vertex mask to local mask for proxy vertices
-            proxyVertMask = np.ones(len(pxy.refVerts), dtype=bool)
-            for idx,vs in enumerate(pxy.refVerts):
+            proxyVertMask = np.ones(len(pxy.ref_vIdxs), dtype=bool)
+            for idx,hverts in enumerate(pxy.ref_vIdxs):
                 # Body verts to which proxy vertex with idx is mapped
-                (v1,v2,v3) = vs.getHumanVerts()
-                # Hide proxy vert if any of its referenced body verts are hidden (most agressive)
-                #proxyVertMask[idx] = vertsMask[v1] and vertsMask[v2] and vertsMask[v3]
-                # Alternative1: only hide if at least two referenced body verts are hidden (best result)
-                proxyVertMask[idx] = np.count_nonzero(vertsMask[[v1, v2, v3]]) > 1
-                # Alternative2: Only hide proxy vert if all of its referenced body verts are hidden (least agressive)
-                #proxyVertMask[idx] = vertsMask[v1] or vertsMask[v2] or vertsMask[v3]
+                if len(hverts) == 3:
+                    (v1,v2,v3) = hverts
+                    # Hide proxy vert if any of its referenced body verts are hidden (most agressive)
+                    #proxyVertMask[idx] = vertsMask[v1] and vertsMask[v2] and vertsMask[v3]
+                    # Alternative1: only hide if at least two referenced body verts are hidden (best result)
+                    proxyVertMask[idx] = np.count_nonzero(vertsMask[[v1, v2, v3]]) > 1
+                    # Alternative2: Only hide proxy vert if all of its referenced body verts are hidden (least agressive)
+                    #proxyVertMask[idx] = vertsMask[v1] or vertsMask[v2] or vertsMask[v3]
 
             proxyKeepVerts = np.argwhere(proxyVertMask)[...,0]
             proxyFaceMask = obj.mesh.getFaceMaskForVertices(proxyKeepVerts)
@@ -194,6 +198,10 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
         super(ClothesTaskView, self).onHumanChanged(event)
         if event.change == 'reset':
             self.faceHidingTggl.setSelected(True)
+        elif event.change == 'proxy' and event.pxy == 'genitals' \
+             and self.faceHidingTggl.selected:
+            # Update face masks if genital proxy was changed
+            self.updateFaceMasks(self.faceHidingTggl.selected)
 
     def saveHandler(self, human, file):
         super(ClothesTaskView, self).saveHandler(human, file)
