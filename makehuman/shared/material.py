@@ -1303,7 +1303,7 @@ def getFilePath(filename, folder = None):
     from getpath import findFile, getPath, getSysDataPath, getSysPath, getDataPath
     path = findFile(filename, [getDataPath(), getSysDataPath(), getPath(), getSysPath()])
     if os.path.isfile(path):
-        return os.path.abspath(abspath)
+        return os.path.abspath(path)
 
     # Nothing found
     return os.path.normpath(filename)
