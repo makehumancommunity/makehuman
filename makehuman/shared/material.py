@@ -468,12 +468,23 @@ class Material(object):
         """
         Produce a portable path for writing to file.
         """
+        def _get_relative(filename, relativeTo):
+            from getpath import getJailedPath
+            path = getJailedPath(filename, relativeTo)
+            if path:
+                return path
+            else:
+                log.warning("Beware! Writing a material with a texture path outside of data folders! Your material will not be portable.")
+                from getpath import canonicalPath
+                return canonicalPath(filename)
+
         if materialPath:
-            return os.path.relpath(filename, materialPath).replace('\\', '/')
+            return _get_relative(filename, materialPath)
         elif self.filepath:
-            return os.path.relpath(filename, self.filepath).replace('\\', '/')
+            return _get_relative(filename, self.filepath)
         else:
-            return os.path.normpath(filename).replace('\\', '/')
+            from getpath import formatPath
+            return formatPath(filename)
 
     def toFile(self, filename, comments = []):
         from codecs import open
@@ -553,7 +564,7 @@ class Material(object):
             f.write("uvMap %s\n\n" % self._texPath(self.uvMap, filedir) )
 
         if self.shader:
-            f.write("shader %s\n\n" % self.shader.replace('\\', '/'))
+            f.write("shader %s\n\n" % self._texPath(self.shader, filedir))
 
         hasShaderParam = False
         global _materialShaderParams
