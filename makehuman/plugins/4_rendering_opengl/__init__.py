@@ -115,7 +115,7 @@ class OpenGLTaskView(RenderTaskView):
         @self.renderButton.mhEvent
         def onClicked(event):
             settings = dict()
-            settings['scene'] = G.app.selectedScene
+            settings['scene'] = G.app.scene
             settings['AA'] = self.AAbox.selected
             settings['dimensions'] = (self.renderingWidth, self.renderingHeight)
             settings['lightmapSSS'] = self.lightmapSSS.selected and self.lightmapSSS in self.optionsWidgets

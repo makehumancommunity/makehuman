@@ -76,7 +76,8 @@ class ProxyFileSort(fc.FileSort):
         meta['modified'] = os.path.getmtime(filename)
         faces = 0
         try:
-            f = open(filename.replace('.proxy', '.obj'))
+            from codecs import open
+            f = open(filename.replace('.proxy', '.obj'), 'rU', encoding="utf-8")
             for line in f:
                 lineData = line.split()
                 if lineData and lineData[0] == 'f':

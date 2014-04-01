@@ -832,7 +832,7 @@ class Human(guicommon.Object):
         if len(modifier.macroDependencies) > 0:
             for var in modifier.macroDependencies:
                 if var not in self._modifier_varMapping:
-                    log.error("Error var %s not mapped", var)
+                    log.error("Modifier dependency map: Error var %s not mapped", var)
                     continue
                 depMGroup = self._modifier_varMapping[var]
 
@@ -881,10 +881,23 @@ class Human(guicommon.Object):
                 if len(self._modifier_dependencyMapping[dep]) == 0:
                     del self._modifier_dependencyMapping[dep]
 
+            # Remove no longer controlled targets from stack (still requires applyAllTargets() for update)
+            targets = self._getModifierTargets()
+            for t in modifier.targets:
+                if t[0] not in targets:
+                    self.setDetail(t[0], None)
+
             self._modifier_type_cache = dict()
         except:
-            log.debug('Failed to remove modifier % from human.', modifier.fullName)
+            log.debug('Failed to remove modifier %s from human.', modifier.fullName, exc_info=True)
             pass
+
+    def _getModifierTargets(self):
+        """
+        Retrieve all targets controlled by modifiers currently attached to this
+        human.
+        """
+        return set( [t[0] for m in self.modifiers for t in m.targets] )
 
     def applyAllTargets(self, progressCallback=None, update=True):
         """
@@ -1027,6 +1040,7 @@ class Human(guicommon.Object):
         self.africanVal = 1.0/3
 
     def resetMeshValues(self):
+        self.setSubdivided(False, update=False)
         self.setDefaultValues()
 
         self.targetsDetailStack = {}
@@ -1059,14 +1073,17 @@ class Human(guicommon.Object):
         return verts.mean(axis=0)
 
     def load(self, filename, update=True, progressCallback=None):
-
+        from codecs import open
         log.message("Loading human from MHM file %s.", filename)
+        self.callEvent('onChanging', events3d.HumanEvent(self, 'load'))
 
         self.resetMeshValues()
         self.blockEthnicUpdates = True
 
+        subdivide = False
+
         # TODO perhaps create progress indicator that depends on line count of mhm file?
-        f = open(filename, 'r')
+        f = open(filename, 'rU', encoding="utf-8")
 
         for lh in G.app.loadHandlers.values():
             lh(self, ['status', 'started'])
@@ -1078,8 +1095,10 @@ class Human(guicommon.Object):
                 if lineData[0] == 'version':
                     log.message('Version %s', lineData[1])
                 elif lineData[0] == 'tags':
-                    for tag in lineData:
+                    for tag in lineData[1:]:
                         log.debug('Tag %s', tag)
+                elif lineData[0] == 'subdivide':
+                    subdivide = lineData[1].lower() in ['true', 'yes']
                 elif lineData[0] in G.app.loadHandlers:
                     G.app.loadHandlers[lineData[0]](self, lineData)
                 else:
@@ -1098,18 +1117,22 @@ class Human(guicommon.Object):
         if update:
             self.applyAllTargets(progressCallback)
 
+        self.setSubdivided(subdivide)
+
         G.app.currentFile.loaded(filename)
         log.message("Done loading MHM file.")
 
     def save(self, filename, tags):
-
-        f = open(filename, 'w')
+        from codecs import open
+        f = open(filename, "w", encoding="utf-8")
         f.write('# Written by MakeHuman %s\n' % getVersionStr())
         f.write('version %s\n' % getShortVersion())
         f.write('tags %s\n' % tags)
 
         for handler in G.app.saveHandlers:
             handler(self, f)
+
+        f.write('subdivide %s' % self.isSubdivided())
 
         f.close()
         G.app.currentFile.saved(filename)

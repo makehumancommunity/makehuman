@@ -50,6 +50,8 @@ def load(path):
     if isinstance(path, QtGui.QImage):
         im = path
     else:
+        import getpath
+        path = getpath.pathToUnicode(path)
         im = QtGui.QImage(path)
     if im.isNull():
         raise RuntimeError("unable to load image '%s'" % path)
@@ -104,6 +106,9 @@ def save(path, data):
     """
     Save Image (data) to file.
     """
+    import getpath
+    path = getpath.pathToUnicode(path)
+
     im = toQImage(data)
     format = "PNG" if path.lower().endswith('.thumb') else None
     if not im.save(path, format):

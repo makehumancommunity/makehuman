@@ -46,6 +46,7 @@ import numpy as np
 import material
 import mh
 from humanobjchooser import HumanObjectSelector
+from getpath import pathToUnicode
 
 class MaterialEditorTaskView(gui3d.TaskView):
     def __init__(self, category):
@@ -503,8 +504,8 @@ class MaterialEditorTaskView(gui3d.TaskView):
         self.listMaterialSettings(obj)
 
         if obj.material.filepath:
-            self.saveMaterialBtn._path = obj.material.filepath
-            self.loadMaterialBtn._path = obj.material.filepath
+            self.saveMaterialBtn._path = pathToUnicode(obj.material.filepath)
+            self.loadMaterialBtn._path = pathToUnicode(obj.material.filepath)
         else:
             self.saveMaterialBtn._path = mh.getPath('data')
             self.loadMaterialBtn._path = mh.getSysDataPath()
@@ -645,9 +646,9 @@ class FileValue(gui.GroupBox):
         self.browseBtn = self.addWidget(gui.BrowseButton(), 1, 0)
 
         if value:
-            self.browseBtn._path = value
+            self.browseBtn._path = pathToUnicode(value)
         elif defaultPath:
-            self.browseBtn._path = defaultPath
+            self.browseBtn._path = pathToUnicode(defaultPath)
 
         @self.browseBtn.mhEvent
         def onClicked(path):
@@ -825,7 +826,7 @@ class TextureValue(gui.QtGui.QWidget, gui.Widget):
     def __init__(self, parent, value, defaultPath = None):
         super(TextureValue, self).__init__()
         self.parent = parent
-        self._path = value
+        self._path = pathToUnicode(value)
 
         self.layout = gui.QtGui.QGridLayout(self)
         self.imageView = gui.ImageView()
@@ -838,15 +839,15 @@ class TextureValue(gui.QtGui.QWidget, gui.Widget):
         self.value = value
 
         if value and isinstance(value, basestring):
-            self.browseBtn._path = value
+            self.browseBtn._path = pathToUnicode(value)
         elif defaultPath:
-            self.browseBtn._path = defaultPath
+            self.browseBtn._path = pathToUnicode(defaultPath)
 
         @self.browseBtn.mhEvent
         def onClicked(path):
             if not path:
                 return
-            self._path = path
+            self._path = pathToUnicode(path)
             self.imageView.setImage(self.value)
             self.parent.callEvent('onActivate', self.value)
 
@@ -854,11 +855,11 @@ class TextureValue(gui.QtGui.QWidget, gui.Widget):
         return self._path
 
     def setValue(self, value):
-        self._path = value
+        self._path = pathToUnicode(value)
         if value:
             self.imageView.setImage(value)
             if isinstance(value, basestring):
-                self.browseBtn._path = value
+                self.browseBtn._path = pathToUnicode(value)
         else:
             self.imageView.setImage(mh.getSysDataPath('notfound.thumb'))
 

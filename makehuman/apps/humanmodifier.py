@@ -150,7 +150,13 @@ class ModifierAction(guicommon.Action):
         return True
 
 
-class BaseModifier(object):
+class Modifier(object):
+    """
+    The most basic modifier. All modifiers should inherit from this, directly or
+    indirectly.
+    A modifier manages a set of targets applied with a certain weight that
+    influence the human model.
+    """
 
     def __init__(self, groupName, name):
         self.groupName = groupName.replace('/', '-')
@@ -315,103 +321,39 @@ class BaseModifier(object):
         else:
             return None
 
+    def getSimilar(self):
+        """
+        Retrieve the other modifiers of the same type on the human.
+        """
+        return [m for m in self.human.getModiersByType(type(self)) if m != self]
+
     def __str__(self):
         return "%s %s" % (type(self).__name__, self.fullName)
 
     def __repr__(self):
         return self.__str__()
 
-class Modifier(BaseModifier):
-    # TODO what is the difference between this and UniversalModifier (this appears only used by the measurement plugin) -- might perhaps be useful for ad-hoc target applications, by directly specifying the file
 
-    def __init__(self, left, right):
-        lpath = Modifier.split_path(left)
-        rpath = Modifier.split_path(right)
-        common = Modifier.longest_subpath(lpath, rpath)
-        lExt = '-'.join(lpath[len(common):])
-        rExt = '-'.join(rpath[len(common):])
-        name = '-'.join(common) + '-' + lExt + "|" + rExt
+class SimpleModifier(Modifier):
+    """
+    Simple modifier constructed from a path to a target file.
+    """
 
-        super(Modifier, self).__init__("targetfile-modifier", name)
-
-        #log.debug("Modifier(%s,%s)  :             %s", left, right, self.fullName)
-
-        self.left = left
-        self.right = right
-        self.targets = [[self.left], [self.right]]
-
-    def getMin(self):
-        if self.left is None:
-            return 0.0
-        else:
-            return -1.0
-
-    @staticmethod
-    def split_path(pathStr):
-        pathStr = pathStr.replace('\\', '-')
-        pathStr = pathStr.replace('/', '-')
-        pathStr = pathStr.replace('.target', '')
-
-        components = pathStr.split('-')
-        return components
-
-    @staticmethod
-    def longest_subpath(p1, p2):
-        """
-        Longest common sequence of components of two paths starting at position 0.
-        """
-        subp = []
-        for idx, component in enumerate(p1):
-            if idx >= len(p2):
-                return subp
-            if component == p2[idx]:
-                subp.append(component)
-        return subp
-
-    def setValue(self, value, skipDependencies = False):
-
-        value = max(-1.0, min(1.0, value))
-
-        left = -value if value < 0.0 else 0.0
-        right = value if value > 0.0 else 0.0
-
-        self.human.setDetail(self.left, left)
-        self.human.setDetail(self.right, right)
-
-        if skipDependencies:
-            return
-
-        # Update dependent modifiers
-        self.propagateUpdate(realtime = False)
-
-    def getValue(self):
-
-        value = self.human.getDetail(self.left)
-        if value:
-            return -value
-        value = self.human.getDetail(self.right)
-        if value:
-            return value
-        else:
-            return 0.0
-
-class SimpleModifier(BaseModifier):
-    # TODO do we need SimpleModifier and Modifier?
-
-    def __init__(self, groupName, template):
-        name = template.replace('.target', '')
+    def __init__(self, groupName, basepath, targetpath):  #template):
+        import os
+        name = targetpath.replace('.target', '')
         name = name.replace('/', '-')
         name = name.replace('\\', '-')
         super(SimpleModifier, self).__init__(groupName, name)
-        self.template = template
-        self.targets = self.expandTemplate([(self.template, [])])
+
+        self.filename = os.path.join(basepath, targetpath)
+        self.targets = self.expandTemplate([(self.filename, [])])
 
         # TODO resolve macro dependencies as well?
 
         #log.debug("SimpleModifier(%s,%s)  :             %s", groupName, template, self.fullName)
 
     def expandTemplate(self, targets):
-
         targets = [(target[0], target[1] + ['dummy']) for target in targets]
 
         return targets
@@ -427,9 +369,14 @@ class SimpleModifier(BaseModifier):
     def clampValue(self, value):
         return max(0.0, min(1.0, value))
 
-class GenericModifier(BaseModifier):
+class ManagedTargetModifier(Modifier):
+    """
+    Modifier that uses the targets module for managing its targets.
+    Abstract baseclass
+    """
+
     def __init__(self, groupName, name):
-        super(GenericModifier, self).__init__(groupName, name)
+        super(ManagedTargetModifier, self).__init__(groupName, name)
 
     @staticmethod
     def findTargets(path):
@@ -517,10 +464,6 @@ class GenericModifier(BaseModifier):
         # Update dependent modifiers
         self.propagateUpdate(realtime = False)
 
-    @staticmethod
-    def parseTarget(target):
-        return target[0].split('/')[-1].split('.')[0].split('-')
-
     def getValue(self):
         right = sum([self.human.getDetail(target[0]) for target in self.r_targets])
         if right:
@@ -534,7 +477,11 @@ class GenericModifier(BaseModifier):
         return dict((name, getattr(self.human, name + 'Val'))
                     for name in self._variables)
 
-class UniversalModifier(GenericModifier):
+class UniversalModifier(ManagedTargetModifier):
+    """
+    Simple target-based modifier that controls 1, 2 or 3 targets, managed by
+    the targets module.
+    """
     def __init__(self, groupName, targetName, leftExt=None, rightExt=None, centerExt=None):
         self.targetName = groupName + "-" + targetName
         if leftExt and rightExt:
@@ -589,7 +536,16 @@ class UniversalModifier(GenericModifier):
 
         return factors
 
-class MacroModifier(GenericModifier):
+class MacroModifier(ManagedTargetModifier):
+    """
+    More complex modifier that controls many targets, managed by the targets
+    module. Macro modifiers don't influence target weights directly, but instead
+    control the value of macro variables on the human, which determine the final
+    combination of the group of macro targets.
+    Because macro modifiers don't control targets directly, it's possible to
+    have many macro modifiers that control the same group of targets, but do so
+    by influencing a different macro variable.
+    """
     def __init__(self, groupName, variable):
         super(MacroModifier, self).__init__(groupName, variable)
         self._defaultValue = 0.5
@@ -649,6 +605,10 @@ class MacroModifier(GenericModifier):
         pass
 
 class EthnicModifier(MacroModifier):
+    """
+    Specialisation of macro modifier to manage three closely connected modifiers
+    whose total sum of values has to sum to 1.
+    """
     def __init__(self, groupName, variable):
         super(EthnicModifier, self).__init__(groupName, variable)
 
@@ -672,12 +632,6 @@ class EthnicModifier(MacroModifier):
 
         self.human.blockEthnicUpdates = _tmp
         return oldVals
-
-    def getSimilar(self):
-        """
-        Retrieve the other modifiers of the same type on the human.
-        """
-        return [m for m in self.human.getModiersByType(type(self)) if m != self]
 
 def getTargetWeights(targets, factors, value = 1.0, ignoreNotfound = False):
     result = dict()
