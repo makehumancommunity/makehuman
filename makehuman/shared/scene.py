@@ -188,7 +188,7 @@ class Environment(SceneObject):
              'skybox': None})
 
 
-class Scene(managed_file.File):
+class Scene(object):
     def __init__(self, path=None):
         self.lights = []
         self.environment = Environment(self)
