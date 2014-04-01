@@ -56,7 +56,7 @@ class SceneLibraryTaskView(guirender.RenderTaskView):
 
         @self.filechooser.mhEvent
         def onFileSelected(filename):
-            G.app.selectedScene.load(filename)
+            G.app.scene.load(filename)
 
     def onShow(self, event):
         guirender.RenderTaskView.onShow(self, event)
