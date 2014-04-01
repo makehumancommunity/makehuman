@@ -119,7 +119,7 @@ class FileModifiedEvent(events3d.Event):
             return event
 
         event.addReason("load")
-        if newfileobj.path != oldfileobj.path:
+        if oldfileobj is None or newfileobj.path != oldfileobj.path:
             event.addReason("newpath")
         return event
 
