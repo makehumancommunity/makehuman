@@ -102,6 +102,27 @@ class FileModifiedEvent(events3d.Event):
         """
         return "newpath" in self.reasons
 
+    @classmethod
+    def fromObjectAssignment(cls, newfileobj, oldfileobj):
+        """Class method that returns a new FileModifiedEvent object
+        properly modified to inform about a modification event,
+        in the case that the change was done with the use of
+        assignment (instead of the standard object's methods
+        e.g. load() etc.).
+        """
+        newvalue = newfileobj.modified if newfileobj else False
+        oldvalue = oldfileobj.modified if oldfileobj else False
+        event = cls(newfileobj, newvalue, oldvalue, "assignment")
+
+        if newfileobj is None:
+            event.addReason("delete")
+            return event
+
+        event.addReason("load")
+        if newfileobj.path != oldfileobj.path:
+            event.addReason("newpath")
+        return event
+
 
 class File(events3d.EventHandler):
     """Object class representing a file that is being opened and edited

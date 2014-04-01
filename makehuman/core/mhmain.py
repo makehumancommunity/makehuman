@@ -1141,26 +1141,38 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def setScene(self, scene):
         """
-        Set the scene used for rendering the viewport.
+        Set the scene used for rendering the viewport,
+        and connect its events with appropriate handler methods.
         """
+        setSceneEvent = managed_file.FileModifiedEvent.fromObjectAssignment(
+            scene.file if scene else None,
+            self._scene.file if self._scene else None)
+
         self._scene = scene
+
+        if self._scene is None:
+            return
+
         @self._scene.file.mhEvent
         def onModified(event):
-            if event.file == self.scene and event.objectWasChanged:
-                self._sceneChanged()
+            self._sceneChanged(event)
 
-        self._sceneChanged()
+        self._sceneChanged(setSceneEvent)
 
     scene = property(getScene, setScene)
 
-    def _sceneChanged(self):
+    def _sceneChanged(self, event):
         """
-        Method to be called after the scene has changed,
-        that updates the application according to the new scene.
+        Method to be called internally when the scene is modified,
+        that updates the view according to the modified scene,
+        and emits the onSceneChanged event application - wide.
         """
-        from glmodule import setSceneLighting
-        setSceneLighting(self.scene)
-        # TODO: Possibly emit an onSceneChanged event
+        if event.file == self.scene.file and event.objectWasChanged:
+            from glmodule import setSceneLighting
+            setSceneLighting(self.scene)
+            for category in self.categories.itervalues():
+                for task in category.tasks:
+                    task.callEvent('onSceneChanged', event)
 
     # Shortcuts
     def setShortcut(self, modifier, key, action):
