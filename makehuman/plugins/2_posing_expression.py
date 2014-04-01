@@ -220,7 +220,8 @@ class ExpressionTaskView(gui3d.TaskView):
         warpmodifier.resetWarpBuffer()
 
         if filename:
-            f = open(filename, 'r')
+            from codecs import open
+            f = open(filename, 'rU', encoding="utf-8")
             for data in f.readlines():
                 lineData = data.split()
                 if len(lineData) > 0 and not lineData[0] == '#':

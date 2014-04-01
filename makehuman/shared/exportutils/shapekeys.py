@@ -116,12 +116,13 @@ def initTimes(flist, t0, t1):
 
 
 def readExpressionMhm(folder):
+    from codecs import open
     exprList = []
     for file in os.listdir(folder):
         (fname, ext) = os.path.splitext(file)
         if ext == ".mhm":
             path = os.path.join(folder, file)
-            fp = open(path, "rU")
+            fp = open(path, "rU", encoding="utf-8")
             units = []
             for line in fp:
                 words = line.split()

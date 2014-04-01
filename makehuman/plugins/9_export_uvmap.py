@@ -57,6 +57,13 @@ class ExporterUV(Exporter):
         filepath = filename("png")
         dstImg.save(filepath)
 
+    def onShow(self, exportTaskView):
+        exportTaskView.scaleBox.hide()
+
+    def onHide(self, exportTaskView):
+        exportTaskView.scaleBox.show()
+
+
 def load(app):
     app.addExporter(ExporterUV())
 
