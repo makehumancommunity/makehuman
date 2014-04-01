@@ -201,7 +201,7 @@ class Scene(object):
         """Load scene from a .mhscene file."""
 
         if path is None:
-            return self.close()
+            return self.reset()
 
         log.debug('Loading scene file: %s', path)
 
@@ -281,7 +281,7 @@ class Scene(object):
         self.file.saved(path)
         return True
 
-    def close(self):
+    def reset(self):
         log.debug('Loading default scene')
 
         self.lights = [Light(self)]
