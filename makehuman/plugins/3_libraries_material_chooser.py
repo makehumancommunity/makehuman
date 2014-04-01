@@ -209,17 +209,17 @@ class MaterialTaskView(gui3d.TaskView):
             if human.hairProxy and human.hairProxy.getUuid() == uuid:
                 proxy = human.hairProxy
                 filepath = self.getMaterialPath(filepath, proxy.file)
-                human.hairObj.material = material.fromFile(filepath)
+                proxy.object.material = material.fromFile(filepath)
                 return
             elif human.eyesProxy and human.eyesProxy.getUuid() == uuid:
                 proxy = human.eyesProxy
                 filepath = self.getMaterialPath(filepath, proxy.file)
-                human.eyesObj.material = material.fromFile(filepath)
+                proxy.object.material = material.fromFile(filepath)
                 return
             elif human.genitalsProxy and human.genitalsProxy.getUuid() == uuid:
                 proxy = human.genitalsProxy
                 filepath = self.getMaterialPath(filepath, proxy.file)
-                human.genitalsObj.material = material.fromFile(filepath)
+                proxy.object.material = material.fromFile(filepath)
                 return
             elif not uuid in human.clothesProxies.keys():
                 log.error("Could not load material for proxy with uuid %s (%s)! No such proxy." % (uuid, name))

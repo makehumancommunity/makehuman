@@ -144,6 +144,9 @@ class ProxyChooserTaskView(gui3d.TaskView):
 
         self.filechooser.setIconSize(50,50)
         self.filechooser.enableAutoRefresh(False)
+        if not isinstance(self.getFileExtension(), basestring) and \
+           len(self.getFileExtension()) > 1:
+            self.filechooser.mutexExtensions = True
         #self.addLeftWidget(self.filechooser.createSortBox())
 
         if self.tagFilter:
@@ -282,7 +285,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
             pxy = proxy.loadProxy(human, mhclofile, type=self.proxyName.capitalize())
             self._proxyCache[mhcloId] = pxy
 
-        if pxy.uuid in [p.uuid for p in self.getSelection()]:
+        if pxy.uuid in [p.uuid for p in self.getSelection() if p is not None]:
             log.debug("Proxy with UUID %s (%s) already loaded in %s library. Skipping.", pxy.uuid, pxy.file, self.proxyName)
             return
 
@@ -459,7 +462,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
     def adaptAllProxies(self):
         proxyCount = len(self.getSelection())
         if proxyCount > 0:
-            log.message("Adapting all %s proxies (%s).", self.proxyName, proxyCount)
+            pass  #log.message("Adapting all %s proxies (%s).", self.proxyName, proxyCount)
         for pIdx, pxy in enumerate(self.getSelection()):
             obj = self.getObjects()[pIdx]
             self.adaptProxyToHuman(pxy, obj)

@@ -94,7 +94,7 @@ class FileChooserRectangle(gui.Button):
 
         image = self._imageCache[imagePath]
         self.preview = QtGui.QLabel()
-        self.preview.setPixmap(image)
+        self.preview.setPixmap(getpath.pathToUnicode(image))
         self.layout.addWidget(self.preview, 0, 0)
         self.layout.setRowStretch(0, 1)
         self.layout.setColumnMinimumWidth(0, self._size[0])
@@ -305,7 +305,7 @@ class FileHandler(object):
 
     def refresh(self, files):
         for file in files:
-            label = os.path.basename(file)
+            label = getpath.pathToUnicode( os.path.basename(file) )
             if isinstance(self.fileChooser.extensions, str):
                 label = os.path.splitext(label)[0]
             self.fileChooser.addItem(file, label, self.getPreview(file))
@@ -337,7 +337,7 @@ class FileHandler(object):
                 preview = os.path.splitext(filename)[0] + '.' + fc.previewExtensions[i]
                 i = i + 1
 
-        if not os.path.exists(preview) and fc.notFoundImage:
+        if not os.path.isfile(preview) and fc.notFoundImage:
             # preview = os.path.join(fc.path, fc.notFoundImage)
             # TL: full filepath needed, so we don't look into user dir.
             preview = fc.notFoundImage
@@ -359,7 +359,7 @@ class TaggedFileLoader(FileHandler):
         """
         import exportutils.config
         for file in files:
-            label = os.path.basename(file)
+            label = getpath.pathToUnicode( os.path.basename(file) )
             if len(self.fileChooser.extensions) > 0:
                 label = os.path.splitext(label)[0]
             tags = self.library.getTags(filename = file)
@@ -403,6 +403,7 @@ class FileChooserBase(QtGui.QWidget, gui.Widget):
         self.tagFilter = None
 
         self._autoRefresh = True
+        self.mutexExtensions = False
 
     def createSortBox(self):
         sortBox = gui.GroupBox('Sort')
@@ -448,7 +449,9 @@ class FileChooserBase(QtGui.QWidget, gui.Widget):
         return False
 
     def search(self):
-        return getpath.search(self.paths, self.extensions, recursive = not self.doNotRecurse)
+        return getpath.search(self.paths, self.extensions, 
+                              recursive = not self.doNotRecurse, 
+                              mutexExtensions = self.mutexExtensions)
 
     def clearList(self):
         for i in xrange(self.children.count()):
@@ -777,6 +780,7 @@ class IconListFileChooser(ListFileChooser):
 
     def addItem(self, file, label, preview, tags=[], pos = None):
         item = super(IconListFileChooser, self).addItem(file, label, preview, tags, pos)
+        preview = getpath.pathToUnicode(preview)
         if preview not in self._iconCache:
             pixmap = QtGui.QPixmap(preview)
             size = pixmap.size()
