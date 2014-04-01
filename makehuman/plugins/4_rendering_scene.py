@@ -41,6 +41,7 @@ import mh
 import guirender
 from core import G
 import filechooser as fc
+import scene
 
 
 class SceneLibraryTaskView(guirender.RenderTaskView):
@@ -56,12 +57,12 @@ class SceneLibraryTaskView(guirender.RenderTaskView):
 
         @self.filechooser.mhEvent
         def onFileSelected(filename):
-            G.app.scene.load(filename)
+            G.app.setScene(scene.Scene(filename))
 
     def onShow(self, event):
         guirender.RenderTaskView.onShow(self, event)
         self.filechooser.refresh()
-        self.filechooser.selectItem(G.app.scene.path)
+        self.filechooser.selectItem(G.app.scene.file.path)
         self.filechooser.setFocus()
 
 

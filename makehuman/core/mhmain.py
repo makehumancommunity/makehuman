@@ -1003,7 +1003,7 @@ class MHApplication(gui3d.Application, mh.Application):
     def updateFilenameCaption(self):
         """Calculate and set the window title according to the
         name of the current open file and the version of MH."""
-        filename = self.currentFile.filename
+        filename = self.currentFile.name
         if filename is None:
             filename = "Untitled"
         if mh.isRelease():
@@ -1144,7 +1144,7 @@ class MHApplication(gui3d.Application, mh.Application):
         Set the scene used for rendering the viewport.
         """
         self._scene = scene
-        @self._scene.mhEvent
+        @self._scene.file.mhEvent
         def onModified(event):
             if event.file == self.scene and event.objectWasChanged:
                 self._sceneChanged()
@@ -1154,6 +1154,10 @@ class MHApplication(gui3d.Application, mh.Application):
     scene = property(getScene, setScene)
 
     def _sceneChanged(self):
+        """
+        Method to be called after the scene has changed,
+        that updates the application according to the new scene.
+        """
         from glmodule import setSceneLighting
         setSceneLighting(self.scene)
         # TODO: Possibly emit an onSceneChanged event
@@ -1296,7 +1300,7 @@ class MHApplication(gui3d.Application, mh.Application):
             self._resetHuman()
 
     def _resetHuman(self):
-        self.currentFile.close()
+        self.currentFile.closed()
         self.selectedHuman.resetMeshValues()
         self.selectedHuman.applyAllTargets(self.progress)
         self.clearUndoRedo()
