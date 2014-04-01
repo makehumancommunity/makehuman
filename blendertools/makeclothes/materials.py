@@ -100,22 +100,12 @@ def writeMaterialFile(fp, mat, name, outdir):
         '// Color shading attributes\n'
         'diffuseColor  %.4g %.4g %.4g\n' % tuple(mat.diffuse_intensity * mat.diffuse_color) +
         'specularColor  %.4g %.4g %.4g\n' % tuple(mat.specular_intensity * mat.specular_color) +
-        'shininess %.4g\n' % max(0, min(mat.specular_hardness/511, 1)) +
+        'shininess %.4g\n' % max(0, min(mat.specular_hardness/255, 1)) +
         'opacity %.4g\n' % mat.alpha +
-        'ambientColor  %.4g %.4g %.4g\n' % tuple(mat.ambient * mat.diffuse_intensity * mat.diffuse_color) +
-        'emissiveColor %.4g %.4g %.4g\n' % tuple(mat.emit * mat.diffuse_intensity * mat.diffuse_color)  +
-        'shadeless %s\n' % mat.use_shadeless +
-        'wireframe False\n' +
-        'transparent %s\n' % mat.use_transparency +
-        'alphaToCoverage True\n' +
-        'backfaceCull True\n' +
-        'depthless False\n' +
-        'castShadows %s\n' % mat.use_cast_buffer_shadows +
-        'receiveShadows %s\n' % mat.use_shadows +
         '\n' +
         '// Textures and properties\n')
 
-    useDiffuse = useSpecular = useBump = useNormal = useDisplacement = False
+    useDiffuse = useSpecular = useBump = useNormal = useDisplacement = "false"
     for slotNo,mtex in enumerate(mat.texture_slots):
         if mtex is None or not mat.use_textures[slotNo]:
             continue
@@ -132,22 +122,22 @@ def writeMaterialFile(fp, mat, name, outdir):
 
         if mtex.use_map_color_diffuse:
             fp.write('diffuseTexture %s\n' % texpath)
-            useDiffuse = True
+            useDiffuse = "true"
         if mtex.use_map_alpha:
-            useAlpha = True
+            useAlpha = "true"
         if mtex.use_map_specular:
             fp.write('specularTexture %s\n' % texpath)
-            useSpecular = True
+            useSpecular = "true"
         if mtex.use_map_normal:
             if True:
                 fp.write('bumpTexture %s\n' % texpath)
-                useBump = True
+                useBump = "true"
             else:
                 fp.write('normalTexture %s\n' % texpath)
-                useNormal = True
+                useNormal = "true"
         if mtex.use_map_displacement:
             fp.write('displacementTexture %s\n' % texpath)
-            useDisplacement = True
+            useDisplacement = "true"
 
         trgpath = os.path.join(outdir, texpath)
         print("Copy texture %s => %s" % (filepath, trgpath))
@@ -163,11 +153,9 @@ def writeMaterialFile(fp, mat, name, outdir):
         '\n' +
         '// Configure built-in shader defines\n' +
         'shaderConfig diffuse %s\n' % useDiffuse +
-        'shaderConfig transparency %s\n' % useDiffuse +
         'shaderConfig bump %s\n' % useBump +
         'shaderConfig normal  %s\n' % useNormal +
         'shaderConfig displacement  %s\n' % useDisplacement +
         'shaderConfig spec  %s\n' % useSpecular +
-        'shaderConfig ambientOcclusion True\n' +
-        'shaderConfig vertexColors False\n')
+        'shaderConfig vertexColors false\n')
 
