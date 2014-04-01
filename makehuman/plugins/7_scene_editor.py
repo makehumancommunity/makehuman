@@ -211,6 +211,8 @@ class SceneEditorTaskView(guirender.RenderTaskView):
         self.propsBox.addWidget(self.adder.widget)
         self.activeItem = None
 
+        self._scene = None
+
         def doLoad():
             filename = mh.getOpenFileName(
                 G.app.settings.get('Scene_Editor_FileDlgPath',
@@ -225,7 +227,7 @@ class SceneEditorTaskView(guirender.RenderTaskView):
             if ok and self._scene.file.path is not None \
                 and self._scene.file.path == self.scene.file.path:
                 # Refresh MH's current scene if it was modified.
-                self._scene.load(self._appscene.file.path)
+                self._scene.load(self._scene.file.path)
 
         @self.loadButton.mhEvent
         def onClicked(event):

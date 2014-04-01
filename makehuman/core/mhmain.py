@@ -1167,12 +1167,16 @@ class MHApplication(gui3d.Application, mh.Application):
         that updates the view according to the modified scene,
         and emits the onSceneChanged event application - wide.
         """
-        if event.file == self.scene.file and event.objectWasChanged:
+        if event.file != self.scene.file:
+            return
+
+        if event.objectWasChanged:
             from glmodule import setSceneLighting
             setSceneLighting(self.scene)
-            for category in self.categories.itervalues():
-                for task in category.tasks:
-                    task.callEvent('onSceneChanged', event)
+
+        for category in self.categories.itervalues():
+            for task in category.tasks:
+                task.callEvent('onSceneChanged', event)
 
     # Shortcuts
     def setShortcut(self, modifier, key, action):

@@ -193,7 +193,9 @@ class Scene(object):
         self.lights = []
         self.environment = Environment(self)
 
-        managed_file.File.__init__(self, path)
+        self.file = managed_file.File()
+
+        self.load(path)
 
     def load(self, path):
         """Load scene from a .mhscene file."""
@@ -246,7 +248,7 @@ class Scene(object):
                 return False
             hfile.close()
 
-        self.loaded(path)
+        self.file.loaded(path)
         return True
 
     # Save scene to a .mhscene file.
@@ -276,7 +278,7 @@ class Scene(object):
                 return False
             hfile.close()
 
-        self.saved(path)
+        self.file.saved(path)
         return True
 
     def reset(self):
@@ -286,14 +288,17 @@ class Scene(object):
         self.environment = Environment(self)
         # TODO: Hardcoded defaults should be set here, not in classes.
 
-        self.closed()
+        self.file.closed()
         return True
+
+    def changed(self, *args, **kwargs):
+        self.file.changed(*args, **kwargs)
 
     def addLight(self):
         newlight = Light(self)
         self.lights.append(newlight)
-        self.changed(("add", "light"))
+        self.file.changed(("add", "light"))
 
     def removeLight(self, light):
         self.lights.remove(light)
-        self.changed(("remove", "light"))
+        self.file.changed(("remove", "light"))
