@@ -285,7 +285,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
             pxy = proxy.loadProxy(human, mhclofile, type=self.proxyName.capitalize())
             self._proxyCache[mhcloId] = pxy
 
-        if pxy.uuid in [p.uuid for p in self.getSelection()]:
+        if pxy.uuid in [p.uuid for p in self.getSelection() if p is not None]:
             log.debug("Proxy with UUID %s (%s) already loaded in %s library. Skipping.", pxy.uuid, pxy.file, self.proxyName)
             return
 
