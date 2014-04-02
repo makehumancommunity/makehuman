@@ -1250,6 +1250,9 @@ class MHApplication(gui3d.Application, mh.Application):
     def saveAs(self):
         self.goToSave('saveAs')
 
+    def quicksave(self):
+        self.goToSave('quicksave')
+
     def goToSave(self, *args, **kwargs):
         mh.changeTask("Files", "Save", *args, **kwargs)
         self.redraw()
@@ -1474,7 +1477,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.actions.rendering = action('rendering', 'Rendering',     self.goToRendering)
         self.actions.modelling = action('modelling', 'Modelling',     self.goToModelling)
-        self.actions.save      = action('save',      'Save',          self.goToSave)
+        self.actions.save      = action('save',      'Save',          self.quicksave)
         self.actions.exit      = action('exit'     , 'Exit',          self.promptAndExit)
 
         self.actions.rotateU   = action('rotateU',   'Rotate Up',     self.rotateUp)
