@@ -1248,7 +1248,13 @@ class MHApplication(gui3d.Application, mh.Application):
         self.redraw()
 
     def quicksave(self):
-        mh.changeTask("Files", "Save", "quicksave")
+        if self.currentFile.path:
+            from guisave import saveMHM
+            self.currentTask.hide()
+            saveMHM(self.currentFile.path)
+            self.currentTask.show()
+        else:
+            self.goToSave()
         self.redraw()
 
     def goToSave(self):
