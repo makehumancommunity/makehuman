@@ -338,7 +338,27 @@ doDeleteVerts = 3
 
 def loadProxy(human, path, type="Clothes"):
     try:
-        proxy = loadTextProxy(human, path, type)    # TODO perhaps proxy type should be stored in .mhclo file too
+        npzpath = os.path.splitext(path)[0] + '.mhpxy'
+        try:
+            if not os.path.isfile(npzpath):
+                log.message('compiled proxy file missing: %s', npzpath)
+                raise RuntimeError('compiled proxy file missing: %s', npzpath)
+            if os.path.isfile(path) and os.path.getmtime(path) > os.path.getmtime(npzpath):
+                log.message('compiled proxy file out of date: %s', npzpath)
+                raise RuntimeError('compiled file out of date: %s', npzpath)
+            proxy = loadBinaryProxy(npzpath, human, type)
+        except Exception as e:
+            showTrace = not isinstance(e, RuntimeError)
+            log.warning("Problem loading binary proxy: %s", e, exc_info=showTrace)
+            proxy = loadTextProxy(human, path, type)    # TODO perhaps proxy type should be stored in .mhclo file too
+            if getpath.isSubPath(npzpath, getpath.getPath()):
+                # Only write compiled binary proxies to user data path
+                try:
+                    saveBinaryProxy(proxy, npzpath)
+                except StandardError:
+                    log.notice('unable to save compiled proxy: %s', npzpath)
+            else:
+                log.debug('Not writing compiled proxies to system paths (%s).', npzpath)
     except:
         log.error('Unable to load proxy file: %s', path, exc_info=True)
         return None

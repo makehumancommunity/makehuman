@@ -1194,7 +1194,8 @@ class FileEntryView(QtGui.QWidget, Widget):
 
         self.layout = QtGui.QGridLayout(self)
 
-        self.browse = BrowseButton(mode)
+        self.mode = mode
+        self.browse = BrowseButton(self.mode)
         self.layout.addWidget(self.browse, 0, 0)
         self.layout.setColumnStretch(0, 0)
 
@@ -1204,7 +1205,7 @@ class FileEntryView(QtGui.QWidget, Widget):
         self.layout.addWidget(self.edit, 0, 1)
         self.layout.setColumnStretch(1, 1)
 
-        if mode != 'dir':
+        if self.mode != 'dir':
             self.confirm = QtGui.QPushButton(buttonLabel)
             self.layout.addWidget(self.confirm, 0, 2)
             self.layout.setColumnStretch(2, 0)
@@ -1231,7 +1232,7 @@ class FileEntryView(QtGui.QWidget, Widget):
         in the line edit."""
         self.directory = directory
         self.browse._path = directory
-        if self.browse._mode == 'dir':
+        if self.mode == 'dir':
             self.edit.setText(pathToUnicode(directory))
 
     def setFilter(self, filter):
@@ -1320,16 +1321,24 @@ class StatusBar(QtGui.QStatusBar, Widget):
     def __init__(self):
         super(StatusBar, self).__init__()
         Widget.__init__(self)
+        self.connect(self, QtCore.SIGNAL('messageChanged(QString)'), self._messageChanged)
         self._perm = QtGui.QLabel()
         self.addWidget(self._perm, 1)
         self.duration = 2000
 
-    def showMessage(self, text, *args):
+    def _messageChanged(self, message):
+        # Clear the style sheet when the temporary message expires
+        if message == "":
+            self.setStyleSheet("")
+
+    def showMessage(self, text, *args, **kwargs):
         text = getLanguageString(text) % args
+        self.setStyleSheet(kwargs['styleSheet'] if 'styleSheet' in kwargs else "")
         super(StatusBar, self).showMessage(text, self.duration)
 
-    def setMessage(self, text, *args):
+    def setMessage(self, text, *args, **kwargs):
         text = getLanguageString(text) % args
+        self._perm.setStyleSheet(kwargs['styleSheet'] if 'styleSheet' in kwargs else "")
         self._perm.setText(text)
 
 class VScrollLayout(QtGui.QLayout):

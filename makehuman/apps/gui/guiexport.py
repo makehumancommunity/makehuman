@@ -114,9 +114,7 @@ class ExportTaskView(guipose.PoseModeTaskView):
                 log.error("Unknown export format selected!")
                 return
 
-            gui3d.app.prompt('Info', u'The mesh has been exported to %s.', 'OK', helpId='exportHelp', fmtArgs = dir)
-
-            mh.changeCategory('Modelling')
+            gui3d.app.prompt('Info', u'The mesh has been exported to %s.', 'OK', fmtArgs = dir)
 
 
     _scales = {
