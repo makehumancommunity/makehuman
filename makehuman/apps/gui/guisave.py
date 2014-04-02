@@ -105,8 +105,7 @@ class SaveTaskView(gui3d.TaskView):
         and give focus to the file entry."""
         gui3d.TaskView.onShow(self, event)
 
-        if G.app.currentFile.path and 'saveAs' not in event.args\
-            and 'quicksave' in event.args:
+        if G.app.currentFile.path and 'quicksave' in event.args:
             self.saveMHM(G.app.currentFile.path)
 
         modelPath = G.app.currentFile.dir
