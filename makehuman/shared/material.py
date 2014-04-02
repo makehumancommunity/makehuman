@@ -859,6 +859,9 @@ class Material(object):
         else:
             return result
 
+    def supportsAo(self):
+        return self.supportsAmbientOcclusion()
+
     def supportsAmbientOcclusion(self):
         result = (self.aoMapTexture != None)
         if self.shaderObj and result:
@@ -1106,7 +1109,7 @@ class Material(object):
         else:
             return texture
 
-    def getTextureDict(self, includeUniforms=True, includeUnused=False):
+    def getTextureDict(self, includeUniforms=True, includeUnused=False, includeInMemory=True):
         """
         Dict with typename - texturepath pairs that returns all textures set on
         this material which are configured to be used (empty ones are excluded).
@@ -1114,6 +1117,8 @@ class Material(object):
         properties will be returned too.
         If includeUnused is set to true, all textures set on the material are
         returned, whether they are used for shading or not.
+        If includeInMemory is True, the result can contain Image objects, which
+        are not stored on disk but reside in memory.
         """
         from collections import OrderedDict
         result = OrderedDict()
@@ -1129,9 +1134,8 @@ class Material(object):
                 if name not in _materialShaderParams and \
                    (includeUnused or name in usedByShader):
                     import image
-                    if isinstance(param, image.Image):
-                        if hasattr(param, "sourcePath"):
-                            uniformSamplers[name] = param.sourcePath
+                    if isinstance(param, image.Image) and includeInMemory:
+                        uniformSamplers[name] = param
                     elif isinstance(param, basestring) and not isNumeric(param):
                         # Assume param is a path
                         uniformSamplers[name] = param
@@ -1286,40 +1290,48 @@ class Material(object):
     aoMapIntensity = property(getAOMapIntensity, setAOMapIntensity)
 
 
-    def exportTextures(self, exportPath, excludeUniforms=False, excludeTextures=[], progressCallback=None):
+    def exportTextures(self, exportPath, excludeUniforms=False, excludeTextures=[]):
         """
         Export the textures referenced by this material to the specified folder.
-        The result of this operation is returned as a Material object cloned
-        from this one, with the texture paths set to the new paths they were 
-        exported to.
+        The result of this operation is returned as a dict with the file
+        paths of the exported textures.
         """
+        from progress import Progress
         import shutil
         if not os.path.exists(exportPath):
             os.makedirs(exportPath)
-        result = Material(self)  # Return a copy of this material with adapted texture paths
 
         textures = self.getTextureDict(not excludeUniforms)
         for t in excludeTextures:
             if t in textures:
                 del textures[t]
 
-        idx = 0
+        progress = Progress(len(textures))
         for tName,tPath in textures.items():
-            if progressCallback:
-                progressCallback(float(idx) / len(textures), "Exporting texture %s", tName)
-
-            newPath = os.path.join(exportPath, os.path.basename(tPath))
-            if tName in _materialShaderParams:
-                setattr(result, tName, newPath)
+            progress.step("Exporting texture %s", tName)
+            import image
+            if isinstance(tPath, image.Image):
+                if hasattr(tPath, "sourcePath"):
+                    newPath = os.path.join(exportPath, os.path.basename(tPath.sourcePath))
+                    if os.path.splitext(newPath)[1] != '.png':
+                        newPath = newPath + '.png'
+                else:
+                    # Generate random name
+                    import random
+                    newPath = 'texture-%s.png' % int(random.random()*100)
+                tPath.save(newPath)
+                tPath = None
             else:
-                result.setShaderParameter(tName, newPath)
-            shutil.copy(tPath, newPath)
-            idx += 1
+                newPath = os.path.join(exportPath, os.path.basename(tPath))
 
-        if progressCallback:
-            progressCallback(1.0, "Exported all textures of material %s", self.name)
+            if tPath:
+                shutil.copy(tPath, newPath)
 
-        return result
+            textures[tName] = newPath
+
+        progress(1.0, "Exported all textures of material %s", self.name)
+
+        return textures
 
 def fromFile(filename):
     """
@@ -1380,9 +1392,9 @@ def getShaderPath(shader, folder = None):
 
 def isNumeric(string):
     try:
-        return unicode(string).isnumeric()
+        float(string)
+        return True
     except:
-        # On decoding errors
         return False
 
 def getIntensity(color):
