@@ -1289,8 +1289,12 @@ class Material(object):
     def exportTextures(self, exportPath, excludeUniforms=False, excludeTextures=[], progressCallback=None):
         """
         Export the textures referenced by this material to the specified folder.
+        The result of this operation is returned as a Material object cloned
+        from this one, with the texture paths set to the new paths they were 
+        exported to.
         """
         import shutil
+        result = Material(self)  # Return a copy of this material with adapted texture paths
 
         textures = self.getTextureDict(not excludeUniforms)
         for t in excludeTextures:
@@ -1302,11 +1306,18 @@ class Material(object):
             if progressCallback:
                 progressCallback(float(idx) / len(textures), "Exporting texture %s", tName)
 
-            shutil.copy(tPath, os.path.join(exportPath, os.path.basename(tPath)))
+            newPath = os.path.join(exportPath, os.path.basename(tPath))
+            if tName in _materialShaderParams:
+                setattr(result, tName, newPath)
+            else:
+                result.setShaderParameter(tName, newPath)
+            shutil.copy(tPath, newPath)
             idx += 1
 
         if progressCallback:
             progressCallback(1.0, "Exported all textures of material %s", self.name)
+
+        return result
 
 def fromFile(filename):
     """
