@@ -105,17 +105,14 @@ class SaveTaskView(gui3d.TaskView):
         and give focus to the file entry."""
         gui3d.TaskView.onShow(self, event)
 
-        if G.app.currentFile.path and 'quicksave' in event.args:
-            saveMHM(G.app.currentFile.path)
-
         self.modelPath = G.app.currentFile.dir
         if self.modelPath is None:
             self.modelPath = mh.getPath("models")
+        self.fileentry.setDirectory(self.modelPath)
 
         name = G.app.currentFile.title
         if name is None:
             name = ""
-
-        self.fileentry.setDirectory(self.modelPath)
         self.fileentry.edit.setText(pathToUnicode(name))
+
         self.fileentry.setFocus()
