@@ -135,9 +135,9 @@ class ProxyTaskView(proxychooser.ProxyChooserTaskView):
             return
 
         if mhclofile not in self._proxyCache:
-            pxy = proxy.readProxyFile(self.human,
-                                      mhclofile,
-                                      type=self.proxyName.capitalize())
+            pxy = proxy.loadProxy(self.human,
+                                  mhclofile,
+                                  type=self.proxyName.capitalize())
             self._proxyCache[mhclofile] = pxy
         else:
             pxy = self._proxyCache[mhclofile]
