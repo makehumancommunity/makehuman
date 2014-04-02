@@ -165,7 +165,7 @@ class View(events3d.EventHandler):
 
         self.objects.remove(object)
 
-    def show(self):
+    def show(self, *args, **kwargs):
         self._visible = True
         self._updateVisibility()
 
@@ -304,8 +304,9 @@ class Category(View):
 
         @self.tabs.mhEvent
         def onTabSelected(tab):
+            args, kwargs = tab.switchArgs if hasattr(tab, 'switchArgs') else ([], dict())
             self.task = tab.name
-            app.switchTask(tab.name)
+            app.switchTask(tab.name, *args, **kwargs)
 
     def addTask(self, task):
         if task.name in self.tasksByName:
@@ -462,7 +463,7 @@ class Application(events3d.EventHandler):
 
         return category
 
-    def switchTask(self, name):
+    def switchTask(self, name, *args, **kwargs):
         if not self.currentCategory:
             return
         newTask = self.currentCategory.tasksByName[name]
@@ -479,10 +480,10 @@ class Application(events3d.EventHandler):
 
         if self.currentTask:
             log.debug('showing task %s', self.currentTask.name)
-            self.currentTask.show()
+            self.currentTask.show(*args, **kwargs)
             self.currentTask.showWidgets()
 
-    def switchCategory(self, name):
+    def switchCategory(self, name, *args, **kwargs):
 
         # Do we need to switch at all
 
@@ -509,7 +510,7 @@ class Application(events3d.EventHandler):
         self.currentCategory = category
 
         log.debug('showing category %s', self.currentCategory.name)
-        self.currentCategory.show()
+        self.currentCategory.show(*args, **kwargs)
         self.currentCategory.showWidgets()
 
         self.switchTask(category.task)
