@@ -48,6 +48,7 @@ class OgreConfig(Config):
     def __init__(self):
         Config.__init__(self)
         self.useRelPaths = True
+        self.exportShaders = False  # TODO add support for this
 
     @property
     def subdivide(self):

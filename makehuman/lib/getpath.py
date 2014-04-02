@@ -197,7 +197,7 @@ def isSubPath(subpath, path):
     path = canonicalPath(path)
     return commonprefix([subpath, path]) == path
 
-def getRelativePath(path, relativeTo = [getDataPath(), getSysDataPath()]):
+def getRelativePath(path, relativeTo = [getDataPath(), getSysDataPath()], strict=False):
     """
     Return a relative file path, relative to one of the specified search paths.
     First valid path is returned, so order in which search paths are given matters.
@@ -210,11 +210,14 @@ def getRelativePath(path, relativeTo = [getDataPath(), getSysDataPath()]):
         if isSubPath(path, p):
             relto = p
     if relto is None:
-        return path
+        if strict:
+            return None
+        else:
+            return path
 
     return formatPath( os.path.relpath(path, relto) )
 
-def findFile(relPath, searchPaths = [getDataPath(), getSysDataPath()]):
+def findFile(relPath, searchPaths = [getDataPath(), getSysDataPath()], strict=False):
     """
     Inverse of getRelativePath: find an absolute path from specified relative
     path in one of the search paths.
@@ -228,7 +231,10 @@ def findFile(relPath, searchPaths = [getDataPath(), getSysDataPath()]):
         if os.path.isfile(path):
             return formatPath( path )
 
-    return relPath
+    if strict:
+        return None
+    else:
+        return relPath
 
 def search(paths, extensions, recursive=True, mutexExtensions=False):
     """
@@ -282,3 +288,27 @@ def search(paths, extensions, recursive=True, mutexExtensions=False):
         for f in ["%s.%s" % (p,e) for p,e in discovered.items()]:
             yield pathToUnicode( f )
 
+def getJailedPath(filepath, relativeTo, jailLimits=[getDataPath(), getSysDataPath()]):
+    """
+    Get a path to filepath, relative to relativeTo path, confined within the
+    jailLimits folders. Returns None if the path would fall outside of the jail.
+    This is a portable path which can be used for distributing eg. materials
+    (texture paths are portable).
+    Returns None if the filepath falls outside of the jail folders. Returns
+    a path to filename relative to relativeTo path if it is a subpath of it,
+    else returns a path relative to the jailLimits.
+    """
+    def _withinJail(path):
+        for j in jailLimits:
+            if isSubPath(path, j):
+                return True
+        return False
+
+    if _withinJail(filepath):
+        relPath = getRelativePath(filepath, relativeTo, strict=True)
+        if relPath:
+            return relPath
+        else:
+            return getRelativePath(filepath, jailLimits)
+    else:
+        return None
