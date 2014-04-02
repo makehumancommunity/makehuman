@@ -1294,6 +1294,8 @@ class Material(object):
         exported to.
         """
         import shutil
+        if not os.path.exists(exportPath):
+            os.makedirs(exportPath)
         result = Material(self)  # Return a copy of this material with adapted texture paths
 
         textures = self.getTextureDict(not excludeUniforms)
