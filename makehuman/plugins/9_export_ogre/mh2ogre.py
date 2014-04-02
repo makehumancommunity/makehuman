@@ -313,14 +313,19 @@ def writeMaterialFile(human, filepath, rmeshes, config):
             lines.append('            alpha_rejection greater 128')
         lines.append('')
 
-        textures = mat.exportTextures(os.path.join(folderpath, 'textures'), excludeUniforms=not config.exportShaders)
+        textures = mat.exportTextures(os.path.join(folderpath, 'textures'))
 
         for textureType, texturePath in textures.items():
+            if config.exportShaders:
+                include = True
+            else:
+                include = (textureType == 'diffuseTexture')
             texfile = "textures/" + os.path.basename(texturePath)
-            lines.append('            texture_unit %s' % textureType)
-            lines.append('            {')
-            lines.append('                texture %s' % texfile)
-            lines.append('            }\n')
+            pre = '' if include else '//'
+            lines.append('            %stexture_unit %s' % (pre, textureType))
+            lines.append('            %s{' % pre)
+            lines.append('            %s    texture %s' % (pre, texfile))
+            lines.append('            %s}\n' % pre)
 
         lines.append('        }')
         lines.append('    }')
