@@ -1322,24 +1322,16 @@ class StatusBar(QtGui.QStatusBar, Widget):
     def __init__(self):
         super(StatusBar, self).__init__()
         Widget.__init__(self)
-        self.connect(self, QtCore.SIGNAL('messageChanged(QString)'), self._messageChanged)
         self._perm = QtGui.QLabel()
         self.addWidget(self._perm, 1)
         self.duration = 2000
 
-    def _messageChanged(self, message):
-        # Clear the style sheet when the temporary message expires
-        if message == "":
-            self.setStyleSheet("")
-
-    def showMessage(self, text, *args, **kwargs):
+    def showMessage(self, text, *args):
         text = getLanguageString(text) % args
-        self.setStyleSheet(kwargs['styleSheet'] if 'styleSheet' in kwargs else "")
         super(StatusBar, self).showMessage(text, self.duration)
 
-    def setMessage(self, text, *args, **kwargs):
+    def setMessage(self, text, *args):
         text = getLanguageString(text) % args
-        self._perm.setStyleSheet(kwargs['styleSheet'] if 'styleSheet' in kwargs else "")
         self._perm.setText(text)
 
 class VScrollLayout(QtGui.QLayout):
