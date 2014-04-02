@@ -52,7 +52,7 @@ import exportutils
 import skeleton
 import log
 
-def exportOgreMesh(filepath, config, progressCallback = None):
+def exportOgreMesh(filepath, config):
     progress = Progress.begin()
 
     progress(0, 0.05, "Setting properties")
@@ -83,7 +83,7 @@ def exportOgreMesh(filepath, config, progressCallback = None):
     progress(1.0, None, "Ogre export finished.")
 
 
-def writeMeshFile(human, filepath, rmeshes, config, progressCallback = None):
+def writeMeshFile(human, filepath, rmeshes, config):
     progress = Progress(len(rmeshes))
 
     filename = os.path.basename(filepath)
@@ -305,7 +305,7 @@ def writeMaterialFile(human, filepath, rmeshes, config):
         lines.append('            lighting on\n')
         lines.append('            ambient %f %f %f 1' % mat.ambientColor.asTuple())
         lines.append('            diffuse %f %f %f %f' % tuple(mat.diffuseColor.asTuple() + (mat.opacity,)))
-        lines.append('            specular %f %f %f 1' % mat.specularColor.asTuple())
+        lines.append('            specular %f %f %f %f' % tuple(mat.specularColor.asTuple() + (128*(mat.shininess), )))
         lines.append('            emissive %f %f %f\n' % mat.emissiveColor.asTuple())
 
         lines.append('            depth_write %s' % ("off" if mat.transparent else "on"))
@@ -313,14 +313,15 @@ def writeMaterialFile(human, filepath, rmeshes, config):
             lines.append('            alpha_rejection greater 128')
         lines.append('')
 
-        for textureType, texturePath in mat.getTextureDict().items():
-            texfile = os.path.basename(texturePath)
+        textures = mat.exportTextures(os.path.join(folderpath, 'textures'), excludeUniforms=not config.exportShaders)
+
+        for textureType, texturePath in textures.items():
+            texfile = "textures/" + os.path.basename(texturePath)
             lines.append('            texture_unit %s' % textureType)
             lines.append('            {')
             lines.append('                texture %s' % texfile)
             lines.append('            }\n')
 
-        # TODO still have to copy those textures over
         lines.append('        }')
         lines.append('    }')
         lines.append('}')
