@@ -1020,15 +1020,15 @@ class MHApplication(gui3d.Application, mh.Application):
         self.mainwin.setWindowModified(self.currentFile.modified)
 
     # Global status bar
-    def status(self, text, *args, **kwargs):
+    def status(self, text, *args):
         if self.statusBar is None:
             return
-        self.statusBar.showMessage(text, *args, **kwargs)
+        self.statusBar.showMessage(text, *args)
 
-    def statusPersist(self, text, *args, **kwargs):
+    def statusPersist(self, text, *args):
         if self.statusBar is None:
             return
-        self.statusBar.setMessage(text, *args, **kwargs)
+        self.statusBar.setMessage(text, *args)
 
     # Global progress bar
     def progress(self, value, text=None, *args):

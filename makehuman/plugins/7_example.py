@@ -63,7 +63,6 @@ class ExampleTaskView(gui3d.TaskView):
         def onClicked(event):
             self.pushed += 1
             self.aButtonLabel.setTextFormat('Pushed %d times', self.pushed)
-            gui3d.app.status("You pressed the button", styleSheet="color:yellow")
 
         # We add a toggle button to the current task
         # A toggle button fires an event when it is clicked but retains its selected state after the mouse is up,
