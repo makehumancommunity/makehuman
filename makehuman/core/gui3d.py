@@ -167,11 +167,11 @@ class View(events3d.EventHandler):
 
     def show(self, *args, **kwargs):
         self._visible = True
-        self._updateVisibility()
+        self._updateVisibility(*args, **kwargs)
 
-    def hide(self):
+    def hide(self, *args, **kwargs):
         self._visible = False
-        self._updateVisibility()
+        self._updateVisibility(*args, **kwargs)
 
     def isShown(self):
         return self._visible
@@ -179,7 +179,7 @@ class View(events3d.EventHandler):
     def isVisible(self):
         return self._totalVisibility
 
-    def _updateVisibility(self):
+    def _updateVisibility(self, *args, **kwargs):
         previousVisibility = self._totalVisibility
 
         self._totalVisibility = self._visible and (not self.parent or self.parent.isVisible())
@@ -191,16 +191,19 @@ class View(events3d.EventHandler):
             v._updateVisibility()
 
         if self._totalVisibility != previousVisibility:
+            event = events3d.Event
+            event.args = args
+            event.kwargs = kwargs
             if self._totalVisibility:
-                self.callEvent('onShow', None)
+                self.callEvent('onShow', event)
             else:
-                self.callEvent('onHide', None)
+                self.callEvent('onHide', event)
 
     def onShow(self, event):
-        self.show()
+        self.show(*event.args, **event.kwargs)
 
     def onHide(self, event):
-        self.hide()
+        self.hide(*event.args, **event.kwargs)
 
     def onMouseDown(self, event):
         self.parent.callEvent('onMouseDown', event)
