@@ -1106,17 +1106,36 @@ class Material(object):
         else:
             return texture
 
-    def getTextureDict(self):
+    def getTextureDict(self, includeUniforms=True, includeUnused=False):
         """
         Dict with typename - texturepath pairs that returns all textures set on
-        this material (empty ones are excluded).
+        this material which are configured to be used (empty ones are excluded).
+        If includeUniforms is True, textures supplied as uniform shader
+        properties will be returned too.
+        If includeUnused is set to true, all textures set on the material are
+        returned, whether they are used for shading or not.
         """
         from collections import OrderedDict
         result = OrderedDict()
         for t in textureTypes:
             tName = t+"Texture"
-            if getattr(self, tName) is not None:
+            if (includeUnused and getattr(self, tName) is not None) or \
+               getattr(self, "supports"+t.replace("Map","").capitalize())():
                 result[tName] = getattr(self, tName)
+        if includeUniforms:
+            uniformSamplers = OrderedDict()
+            usedByShader = self.shaderUniforms
+            for name, param in self.shaderParameters.items():
+                if name not in _materialShaderParams and \
+                   (includeUnused or name in usedByShader):
+                    import image
+                    if isinstance(param, image.Image):
+                        if hasattr(param, "sourcePath"):
+                            uniformSamplers[name] = param.sourcePath
+                    elif isinstance(param, basestring) and not isNumeric(param):
+                        # Assume param is a path
+                        uniformSamplers[name] = param
+            result.update(uniformSamplers)
         return result
 
     def getDiffuseTexture(self):
@@ -1266,6 +1285,28 @@ class Material(object):
 
     aoMapIntensity = property(getAOMapIntensity, setAOMapIntensity)
 
+
+    def exportTextures(self, exportPath, excludeUniforms=False, excludeTextures=[], progressCallback=None):
+        """
+        Export the textures referenced by this material to the specified folder.
+        """
+        import shutil
+
+        textures = self.getTextureDict(not excludeUniforms)
+        for t in excludeTextures:
+            if t in textures:
+                del textures[t]
+
+        idx = 0
+        for tName,tPath in textures.items():
+            if progressCallback:
+                progressCallback(float(idx) / len(textures), "Exporting texture %s", tName)
+
+            shutil.copy(tPath, os.path.join(exportPath, os.path.basename(tPath)))
+            idx += 1
+
+        if progressCallback:
+            progressCallback(1.0, "Exported all textures of material %s", self.name)
 
 def fromFile(filename):
     """
