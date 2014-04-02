@@ -1,0 +1,579 @@
+Copyright:
+
+    Copyright (c) 2005-2009, NumPy Developers <numpy-dev@numpy.org>
+
+License:
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are
+    met:
+
+        * Redistributions of source code must retain the above copyright
+           notice, this list of conditions and the following disclaimer.
+
+        * Redistributions in binary form must reproduce the above
+           copyright notice, this list of conditions and the following
+           disclaimer in the documentation and/or other materials provided
+           with the distribution.
+
+        * Neither the name of the NumPy Developers nor the names of any
+           contributors may be used to endorse or promote products derived
+           from this software without specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+    A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+    OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+    LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+    DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+These files have differenct copyright and/or license notices than above:
+
+numpy/core/include/numpy/fenv/fenv.{c,h}
+    Copyright (c) 2004 David Schultz <das@FreeBSD.ORG>
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions
+    are met:
+    1. Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
+    2. Redistributions in binary form must reproduce the above copyright
+       notice, this list of conditions and the following disclaimer in the
+       documentation and/or other materials provided with the distribution.
+  
+    THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+    ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+    ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+    FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+    DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+    OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+    SUCH DAMAGE.
+
+
+numpy/core/src/umath/ufunc_object.c
+    Travis E. Oliphant  2005, 2006 oliphant@ee.byu.edu (oliphant.travis@ieee.org)
+    Brigham Young University
+
+    based on the
+
+    Original Implementation:
+    Copyright (c) 1995, 1996, 1997 Jim Hugunin, hugunin@mit.edu
+
+    with inspiration and code from
+    Numarray
+    Space Science Telescope Institute
+    J. Todd Miller
+    Perry Greenfield
+    Rick White
+
+
+numpy/core/arrayprint.py
+    Written by Konrad Hinsen <hinsenk@ere.umontreal.ca>
+    last revision: 1996-3-13
+    modified by Jim Hugunin 1997-3-3 for repr's and str's (and other details)
+    and by Perry Greenfield 2000-4-1 for numarray
+    and by Travis Oliphant  2005-8-22 for numpy
+
+
+numpy/oldnumeric/ma.py
+    Copyright 1999, 2000, 2001 Regents of the University of California.
+    Released for unlimited redistribution.
+    Adapted for numpy_core 2005 by Travis Oliphant and
+    (mainly) Paul Dubois.
+
+
+numpy/core/src/multiarray/{arrayobject.c, usertypes.c}
+    Based on Original Numeric implementation
+    Copyright (c) 1995, 1996, 1997 Jim Hugunin, hugunin@mit.edu
+
+    with contributions from many Numeric Python developers 1995-2004
+
+    Heavily modified in 2005 with inspiration from Numarray
+
+    by
+
+    Travis Oliphant,  oliphant@ee.byu.edu
+    Brigham Young Univeristy
+
+    maintainer email:  oliphant.travis@ieee.org
+
+    Numarray design (which provided guidance) by
+    Space Science Telescope Institute
+    (J. Todd Miller, Perry Greenfield, Rick White)
+
+
+numpy/core/src/multiarray/multiarraymodule.c
+    Original file
+    Copyright (c) 1995, 1996, 1997 Jim Hugunin, hugunin@mit.edu
+
+    Modified for numpy in 2005
+
+    Travis E. Oliphant
+    oliphant@ee.byu.edu
+    Brigham Young University
+
+
+numpy/core/src/npymath/npy_math.c.src
+    Some of the code is taken from msun library in FreeBSD, with the following
+    notice:
+  
+    ====================================================
+    Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
+   
+    Developed at SunPro, a Sun Microsystems, Inc. business.
+    Permission to use, copy, modify, and distribute this
+    software is freely granted, provided that this notice
+    is preserved.
+    ====================================================
+
+
+numpy/core/src/npymath/npy_math_complex.c.src
+    Most of the code is taken from the msun library in FreeBSD (HEAD @ 30th June
+    2009), under the following license:
+   
+    Copyright (c) 2007 David Schultz <das@FreeBSD.ORG>
+    All rights reserved.
+   
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions
+    are met:
+    1. Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
+    2. Redistributions in binary form must reproduce the above copyright
+       notice, this list of conditions and the following disclaimer in the
+       documentation and/or other materials provided with the distribution.
+   
+    THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+    ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+    ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+    FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+    DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+    OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+    OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+    SUCH DAMAGE.
+
+
+numpy/core/src/npymath/npy_math_private.h
+    ====================================================
+    Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
+  
+    Developed at SunPro, a Sun Microsystems, Inc. business.
+    Permission to use, copy, modify, and distribute this
+    software is freely granted, provided that this notice
+    is preserved.
+    ====================================================
+
+
+numpy/distutils/cpuinfo.py
+    Copyright 2002 Pearu Peterson all rights reserved,
+    Pearu Peterson <pearu@cens.ioc.ee>
+    Permission to use, modify, and distribute this software is given under the
+    terms of the NumPy (BSD style) license.  See LICENSE.txt that came with
+    this distribution for specifics.
+
+    NO WARRANTY IS EXPRESSED OR IMPLIED.  USE AT YOUR OWN RISK.
+    Pearu Peterson
+
+
+numpy/distutils/system_info.py
+    Authors:
+      Pearu Peterson <pearu@cens.ioc.ee>, February 2002
+      David M. Cooke <cookedm@physics.mcmaster.ca>, April 2002
+
+    Copyright 2002 Pearu Peterson all rights reserved,
+    Pearu Peterson <pearu@cens.ioc.ee>
+    Permission to use, modify, and distribute this software is given under the
+    terms of the NumPy (BSD style) license.  See LICENSE.txt that came with
+    this distribution for specifics.
+
+    NO WARRANTY IS EXPRESSED OR IMPLIED.  USE AT YOUR OWN RISK.
+
+
+numpy/random/mtrand/distributions.c
+    Copyright 2005 Robert Kern (robert.kern@gmail.com)
+  
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the
+    "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the Software, and to
+    permit persons to whom the Software is furnished to do so, subject to
+    the following conditions:
+   
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+   
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+    The implementations of rk_hypergeometric_hyp(), rk_hypergeometric_hrua(),
+    and rk_triangular() were adapted from Ivan Frohne's rv.py which has this 
+    license:
+   
+               Copyright 1998 by Ivan Frohne; Wasilla, Alaska, U.S.A.
+                               All Rights Reserved
+  
+    Permission to use, copy, modify and distribute this software and its
+    documentation for any purpose, free of charge, is granted subject to the
+    following conditions:
+      The above copyright notice and this permission notice shall be included in
+      all copies or substantial portions of the software.
+  
+      THE SOFTWARE AND DOCUMENTATION IS PROVIDED WITHOUT WARRANTY OF ANY KIND,
+      EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO MERCHANTABILITY, FITNESS
+      FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHOR
+      OR COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM OR DAMAGES IN A CONTRACT
+      ACTION, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+      SOFTWARE OR ITS DOCUMENTATION.
+  
+
+numpy/random/mtrand/randomkit.h
+    Copyright (c) 2003-2005, Jean-Sebastien Roy (js@jeannot.org)
+  
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the
+    "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the Software, and to
+    permit persons to whom the Software is furnished to do so, subject to
+    the following conditions:
+  
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+  
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  
+
+numpy/random/mtrand/initarray.c
+    The following changes have been made to it in 2005 by Robert Kern:
+
+      * init_by_array has been declared extern, has a void return, and uses the
+        rk_state structure to hold its data.
+
+     The original file has the following verbatim comments: 
+
+     ------------------------------------------------------------------
+     The code in this module was based on a download from:
+        http://www.math.keio.ac.jp/~matumoto/MT2002/emt19937ar.html
+
+     It was modified in 2002 by Raymond Hettinger as follows:
+
+      * the principal computational lines untouched except for tabbing.
+
+      * renamed genrand_res53() to random_random() and wrapped
+        in python calling/return code.
+
+      * genrand_int32() and the helper functions, init_genrand()
+        and init_by_array(), were declared static, wrapped in
+        Python calling/return code.  also, their global data
+        references were replaced with structure references.
+
+      * unused functions from the original were deleted.
+        new, original C python code was added to implement the
+        Random() interface.
+
+     The following are the verbatim comments from the original code:
+
+     A C-program for MT19937, with initialization improved 2002/1/26.
+     Coded by Takuji Nishimura and Makoto Matsumoto.
+
+     Before using, initialize the state by using init_genrand(seed)
+     or init_by_array(init_key, key_length).
+
+     Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,
+     All rights reserved.
+
+     Redistribution and use in source and binary forms, with or without
+     modification, are permitted provided that the following conditions
+     are met:
+
+       1. Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+
+       2. Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+       3. The names of its contributors may not be used to endorse or promote
+      products derived from this software without specific prior written
+      permission.
+
+     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+     "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+     LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+     A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+     CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+     EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+     PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+     PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+     LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+     NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+     Any feedback is very welcome.
+     http://www.math.keio.ac.jp/matumoto/emt.html
+     email: matumoto@math.keio.ac.jp
+
+
+numpy/random/mtrand/randomkit.c
+    Copyright (c) 2003-2005, Jean-Sebastien Roy (js@jeannot.org)
+  
+    The rk_random and rk_seed functions algorithms and the original design of 
+    the Mersenne Twister RNG:
+  
+      Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,
+      All rights reserved.
+  
+      Redistribution and use in source and binary forms, with or without
+      modification, are permitted provided that the following conditions
+      are met:
+   
+      1. Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+  
+      2. Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+  
+      3. The names of its contributors may not be used to endorse or promote
+      products derived from this software without specific prior written
+      permission.
+  
+      THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+      "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+      LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+      A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+      CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+      EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+      PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+      PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+      LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+      NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+      SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  
+    Original algorithm for the implementation of rk_interval function from
+    Richard J. Wagner's implementation of the Mersenne Twister RNG, optimised by
+    Magnus Jonsson.
+  
+    Constants used in the rk_double implementation by Isaku Wada.
+   
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the
+    "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the Software, and to
+    permit persons to whom the Software is furnished to do so, subject to
+    the following conditions:
+   
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+   
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+numpy/random/mtrand/{mtrand.pyx, distributions.h}
+    Copyright 2005 Robert Kern (robert.kern@gmail.com)
+ 
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the
+    "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the Software, and to
+    permit persons to whom the Software is furnished to do so, subject to
+    the following conditions:
+ 
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+ 
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+numpy/random/mtrand/Python.pxi
+    Author:    Robert Kern
+    Copyright: 2004, Enthought, Inc.
+    License:   BSD Style
+
+
+numpy/f2py/*
+    Copyright 1999-2011 Pearu Peterson all rights reserved,
+    Pearu Peterson <pearu@ioc.ee>
+    Permission to use, modify, and distribute this software is given under the
+    terms of the NumPy License.
+
+    NO WARRANTY IS EXPRESSED OR IMPLIED.  USE AT YOUR OWN RISK.
+
+
+numpy/f2py/docs/{usersguide.}/default.css
+    Author: David Goodger
+    Contact: goodger@users.sourceforge.net
+    copyright: This stylesheet has been placed in the public domain.
+
+
+numpy/ma/*
+    This package was initially written for numarray by Paul F. Dubois
+    at Lawrence Livermore National Laboratory.
+    In 2006, the package was completely rewritten by Pierre Gerard-Marchant
+    (University of Georgia) to make the MaskedArray class a subclass of ndarray,
+    and to improve support of structured arrays.
+
+    Copyright 1999, 2000, 2001 Regents of the University of California.
+    Released for unlimited redistribution.
+
+    * Adapted for numpy_core 2005 by Travis Oliphant and (mainly) Paul Dubois.
+    * Subclassing of the base ndarray 2006 by Pierre Gerard-Marchant
+      (pgmdevlist_AT_gmail_DOT_com)
+    * Improvements suggested by Reggie Dugard (reggie_AT_merfinllc_DOT_com)
+
+    Author: Pierre Gerard-Marchant <pierregm_at_uga_dot_edu>
+
+
+numpy/core/src/multiarray/{lowlevel_strided_loops.c.src, nditer.c.src,
+                           nditer_pywrap.c}
+    Copyright (c) 2010 by Mark Wiebe (mwwiebe@gmail.com)
+    The Univerity of British Columbia
+
+
+doc/cython/c_numpy.pxd, doc/pyrex/c_numpy.pxd
+    Author: Travis Oliphant
+
+
+doc/cython/c_python.pxd
+    Author: Robert Kern
+    Copyright: 2004, Enthought, Inc.
+    License: BSD Style
+
+From doc/sphinxext/LICENSE.txt:
+
+-------------------------------------------------------------------------------
+    The files
+    - numpydoc.py
+    - autosummary.py
+    - autosummary_generate.py
+    - docscrape.py
+    - docscrape_sphinx.py
+    - phantom_import.py
+    have the following license:
+
+Copyright (C) 2008 Stefan van der Walt <stefan@mentat.za.net>, Pauli Virtanen <pav@iki.fi>
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+
+-------------------------------------------------------------------------------
+    The files
+    - compiler_unparse.py
+    - comment_eater.py
+    - traitsdoc.py
+    have the following license:
+
+This software is OSI Certified Open Source Software.
+OSI Certified is a certification mark of the Open Source Initiative.
+
+Copyright (c) 2006, Enthought, Inc.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+ * Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+ * Neither the name of Enthought, Inc. nor the names of its contributors may
+   be used to endorse or promote products derived from this software without
+   specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+-------------------------------------------------------------------------------
+    The files
+    - only_directives.py
+    - plot_directive.py
+    originate from Matplotlib (http://matplotlib.sf.net/) which has
+    the following license:
+
+Copyright (c) 2002-2008 John D. Hunter; All Rights Reserved.
+
+1. This LICENSE AGREEMENT is between John D. Hunter (“JDH”), and the Individual or Organization (“Licensee”) accessing and otherwise using matplotlib software in source or binary form and its associated documentation.
+
+2. Subject to the terms and conditions of this License Agreement, JDH hereby grants Licensee a nonexclusive, royalty-free, world-wide license to reproduce, analyze, test, perform and/or display publicly, prepare derivative works, distribute, and otherwise use matplotlib 0.98.3 alone or in any derivative version, provided, however, that JDH’s License Agreement and JDH’s notice of copyright, i.e., “Copyright (c) 2002-2008 John D. Hunter; All Rights Reserved” are retained in matplotlib 0.98.3 alone or in any derivative version prepared by Licensee.
+
+3. In the event Licensee prepares a derivative work that is based on or incorporates matplotlib 0.98.3 or any part thereof, and wants to make the derivative work available to others as provided herein, then Licensee hereby agrees to include in any such work a brief summary of the changes made to matplotlib 0.98.3.
+
+4. JDH is making matplotlib 0.98.3 available to Licensee on an “AS IS” basis. JDH MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED. BY WAY OF EXAMPLE, BUT NOT LIMITATION, JDH MAKES NO AND DISCLAIMS ANY REPRESENTATION OR WARRANTY OF MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF MATPLOTLIB 0.98.3 WILL NOT INFRINGE ANY THIRD PARTY RIGHTS.
+
+5. JDH SHALL NOT BE LIABLE TO LICENSEE OR ANY OTHER USERS OF MATPLOTLIB 0.98.3 FOR ANY INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES OR LOSS AS A RESULT OF MODIFYING, DISTRIBUTING, OR OTHERWISE USING MATPLOTLIB 0.98.3, OR ANY DERIVATIVE THEREOF, EVEN IF ADVISED OF THE POSSIBILITY THEREOF.
+
+6. This License Agreement will automatically terminate upon a material breach of its terms and conditions.
+
+7. Nothing in this License Agreement shall be deemed to create any relationship of agency, partnership, or joint venture between JDH and Licensee. This License Agreement does not grant permission to use JDH trademarks or trade name in a trademark sense to endorse or promote products or services of Licensee, or any third party.
+
+8. By copying, installing or otherwise using matplotlib 0.98.3, Licensee agrees to be bound by the terms and conditions of this License Agreement.
