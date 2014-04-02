@@ -468,12 +468,23 @@ class Material(object):
         """
         Produce a portable path for writing to file.
         """
+        def _get_relative(filename, relativeTo):
+            from getpath import getJailedPath
+            path = getJailedPath(filename, relativeTo)
+            if path:
+                return path
+            else:
+                log.warning("Beware! Writing a material with a texture path outside of data folders! Your material will not be portable.")
+                from getpath import canonicalPath
+                return canonicalPath(filename)
+
         if materialPath:
-            return os.path.relpath(filename, materialPath).replace('\\', '/')
+            return _get_relative(filename, materialPath)
         elif self.filepath:
-            return os.path.relpath(filename, self.filepath).replace('\\', '/')
+            return _get_relative(filename, self.filepath)
         else:
-            return os.path.normpath(filename).replace('\\', '/')
+            from getpath import formatPath
+            return formatPath(filename)
 
     def toFile(self, filename, comments = []):
         from codecs import open
@@ -553,7 +564,7 @@ class Material(object):
             f.write("uvMap %s\n\n" % self._texPath(self.uvMap, filedir) )
 
         if self.shader:
-            f.write("shader %s\n\n" % self.shader.replace('\\', '/'))
+            f.write("shader %s\n\n" % self._texPath(self.shader, filedir))
 
         hasShaderParam = False
         global _materialShaderParams
@@ -848,6 +859,9 @@ class Material(object):
         else:
             return result
 
+    def supportsAo(self):
+        return self.supportsAmbientOcclusion()
+
     def supportsAmbientOcclusion(self):
         result = (self.aoMapTexture != None)
         if self.shaderObj and result:
@@ -1095,17 +1109,37 @@ class Material(object):
         else:
             return texture
 
-    def getTextureDict(self):
+    def getTextureDict(self, includeUniforms=True, includeUnused=False, includeInMemory=True):
         """
         Dict with typename - texturepath pairs that returns all textures set on
-        this material (empty ones are excluded).
+        this material which are configured to be used (empty ones are excluded).
+        If includeUniforms is True, textures supplied as uniform shader
+        properties will be returned too.
+        If includeUnused is set to true, all textures set on the material are
+        returned, whether they are used for shading or not.
+        If includeInMemory is True, the result can contain Image objects, which
+        are not stored on disk but reside in memory.
         """
         from collections import OrderedDict
         result = OrderedDict()
         for t in textureTypes:
             tName = t+"Texture"
-            if getattr(self, tName) is not None:
+            if (includeUnused and getattr(self, tName) is not None) or \
+               getattr(self, "supports"+t.replace("Map","").capitalize())():
                 result[tName] = getattr(self, tName)
+        if includeUniforms:
+            uniformSamplers = OrderedDict()
+            usedByShader = self.shaderUniforms
+            for name, param in self.shaderParameters.items():
+                if name not in _materialShaderParams and \
+                   (includeUnused or name in usedByShader):
+                    import image
+                    if isinstance(param, image.Image) and includeInMemory:
+                        uniformSamplers[name] = param
+                    elif isinstance(param, basestring) and not isNumeric(param):
+                        # Assume param is a path
+                        uniformSamplers[name] = param
+            result.update(uniformSamplers)
         return result
 
     def getDiffuseTexture(self):
@@ -1256,6 +1290,49 @@ class Material(object):
     aoMapIntensity = property(getAOMapIntensity, setAOMapIntensity)
 
 
+    def exportTextures(self, exportPath, excludeUniforms=False, excludeTextures=[]):
+        """
+        Export the textures referenced by this material to the specified folder.
+        The result of this operation is returned as a dict with the file
+        paths of the exported textures.
+        """
+        from progress import Progress
+        import shutil
+        if not os.path.exists(exportPath):
+            os.makedirs(exportPath)
+
+        textures = self.getTextureDict(not excludeUniforms)
+        for t in excludeTextures:
+            if t in textures:
+                del textures[t]
+
+        progress = Progress(len(textures))
+        for tName,tPath in textures.items():
+            progress.step("Exporting texture %s", tName)
+            import image
+            if isinstance(tPath, image.Image):
+                if hasattr(tPath, "sourcePath"):
+                    newPath = os.path.join(exportPath, os.path.basename(tPath.sourcePath))
+                    if os.path.splitext(newPath)[1] != '.png':
+                        newPath = newPath + '.png'
+                else:
+                    # Generate random name
+                    import random
+                    newPath = 'texture-%s.png' % int(random.random()*100)
+                tPath.save(newPath)
+                tPath = None
+            else:
+                newPath = os.path.join(exportPath, os.path.basename(tPath))
+
+            if tPath:
+                shutil.copy(tPath, newPath)
+
+            textures[tName] = newPath
+
+        progress(1.0, "Exported all textures of material %s", self.name)
+
+        return textures
+
 def fromFile(filename):
     """
     Create a material from a .mhmat file.
@@ -1292,7 +1369,7 @@ def getFilePath(filename, folder = None):
     from getpath import findFile, getPath, getSysDataPath, getSysPath, getDataPath
     path = findFile(filename, [getDataPath(), getSysDataPath(), getPath(), getSysPath()])
     if os.path.isfile(path):
-        return os.path.abspath(abspath)
+        return os.path.abspath(path)
 
     # Nothing found
     return os.path.normpath(filename)
@@ -1315,9 +1392,9 @@ def getShaderPath(shader, folder = None):
 
 def isNumeric(string):
     try:
-        return unicode(string).isnumeric()
+        float(string)
+        return True
     except:
-        # On decoding errors
         return False
 
 def getIntensity(color):
