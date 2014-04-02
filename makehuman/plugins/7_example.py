@@ -156,7 +156,7 @@ class ExampleTaskView(gui3d.TaskView):
         human.meshData.markCoords(coor=True, norm=True)
 
     def onShow(self, event):
-        gui3d.app.statusPersist('This is an example plugin; see plugins/6_help_example_plugin.py')
+        gui3d.app.statusPersist('This is an example plugin; see plugins/7_example.py')
 
     def onHide(self, event):
         gui3d.app.statusPersist('')
