@@ -95,8 +95,7 @@ class SaveTaskView(gui3d.TaskView):
         G.app.selectedHuman.save(path, name)
         #G.app.clearUndoRedo()
 
-        gui3d.app.status('Your model has been saved to %s.', modelPath,
-            styleSheet="color: rgb(180, 255, 80); background-color: rgb(0, 0, 180)")
+        gui3d.app.status('Your model has been saved to %s.', modelPath)
 
         # TODO: Switch to last task?
 
