@@ -70,8 +70,7 @@ class SaveTaskView(gui3d.TaskView):
             self.saveMHM(filename)
 
     def saveMHM(self, filename):
-        """Method that does the saving of the .mhm and the thumbnail once
-        the save path is selected."""
+        """Save the .mhm and the thumbnail to the selected save path."""
         if not filename.lower().endswith('.mhm'):
             filename += '.mhm'
 
@@ -96,13 +95,19 @@ class SaveTaskView(gui3d.TaskView):
         G.app.selectedHuman.save(path, name)
         #G.app.clearUndoRedo()
 
-        gui3d.app.prompt('Info', u'Your model has been saved to %s.', 'OK', fmtArgs = modelPath)
+        gui3d.app.status('Your model has been saved to %s.', modelPath,
+            styleSheet="color: rgb(180, 255, 80); background-color: rgb(0, 0, 180)")
+
+        # TODO: Switch to last task?
 
     def onShow(self, event):
         """Handler for the TaskView onShow event.
         Once the task view is shown, preset the save directory
         and give focus to the file entry."""
         gui3d.TaskView.onShow(self, event)
+
+        if G.app.currentFile.path and 'saveAs' not in event.args:
+            self.saveMHM(G.app.currentFile.path)
 
         modelPath = G.app.currentFile.dir
         if modelPath is None:
