@@ -1581,8 +1581,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         @self.tabs.mhEvent
         def onTabSelected(tab):
-            args, kwargs = tab.switchArgs if hasattr(tab, 'switchArgs') else ([], dict())
-            self.switchCategory(tab.name, *args, **kwargs)
+            self.switchCategory(tab.name)
 
     def run(self):
         self.start()
