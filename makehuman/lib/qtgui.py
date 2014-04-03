@@ -893,11 +893,28 @@ class TextEdit(QtGui.QLineEdit, Widget):
         elif key == QtCore.Qt.Key_Down:
             self._key_down()
             event.accept()
+        elif key == QtCore.Qt.Key_Tab and self.tabPressed():
+            event.accept()
         else:
             mod = int(event.modifiers())
             if mod > 0:
                 self.callEvent('onModifier', (mod, key))
             super(TextEdit, self).keyPressEvent(event)
+
+    def event(self, event):
+        if event.type() == QtCore.QEvent.KeyPress and \
+           event.key() == QtCore.Qt.Key_Tab and \
+           self.tabPressed():
+                return True
+
+        return super(TextEdit, self).event(event)
+
+    def tabPressed(self):
+        """
+        Override and return True to override custom behaviour when TAB key
+        is pressed
+        """
+        return False  # Continue default event handling
 
     def _key_up(self):
         self.callEvent('onUpArrow', None)
