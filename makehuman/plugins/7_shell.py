@@ -93,6 +93,33 @@ class ShellTaskView(gui3d.TaskView):
 
         @self.line.mhEvent
         def onTabPressed(edit):
+            def _longest_common_substring(s1, s2):
+                """
+                This is simply the O(n) left-aligned version
+                """
+                limit = min(len(s1), len(s2))
+                i = 0
+                while i < limit and s1[i] == s2[i]:
+                    i += 1
+                return s1[:i]
+
+            def _largest_common(strings):
+                strings = list(strings)
+                try:
+                    strings.remove('...')
+                except:
+                    pass
+
+                if len(strings) == 0:
+                    return ""
+                elif len(strings) == 1:
+                    return strings[0]
+                else:
+                    result = strings[0]
+                    for s in strings[1:]:
+                        result = _longest_common_substring(result, s)
+                    return result
+
             line = edit.getText()
             suggestions = self.getSuggestions(line)
 
@@ -102,6 +129,7 @@ class ShellTaskView(gui3d.TaskView):
                 self.write('\n'.join(suggestions)+"\n")
                 scrollbar = self.text.verticalScrollBar()
                 scrollbar.setSliderPosition(scrollbar.maximum())
+                edit.setText(_largest_common(suggestions))
             elif len(suggestions) == 1:
                 edit.setText(suggestions[0])
 
