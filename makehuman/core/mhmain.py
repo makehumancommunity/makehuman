@@ -1247,15 +1247,15 @@ class MHApplication(gui3d.Application, mh.Application):
         mh.changeCategory("Modelling")
         self.redraw()
 
-    def quicksave(self):
+    def doSave(self):
         if self.currentFile.path:
             from guisave import saveMHM
             self.currentTask.hide()
             saveMHM(self.currentFile.path)
             self.currentTask.show()
+            self.redraw()
         else:
             self.goToSave()
-        self.redraw()
 
     def goToSave(self):
         mh.changeTask("Files", "Save")
@@ -1481,7 +1481,6 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.actions.rendering = action('rendering', 'Rendering',     self.goToRendering)
         self.actions.modelling = action('modelling', 'Modelling',     self.goToModelling)
-        self.actions.save      = action('save',      'Save',          self.quicksave)
         self.actions.exit      = action('exit'     , 'Exit',          self.promptAndExit)
 
         self.actions.rotateU   = action('rotateU',   'Rotate Up',     self.rotateUp)
@@ -1502,7 +1501,7 @@ class MHApplication(gui3d.Application, mh.Application):
         toolbar = self.file_toolbar = mh.addToolBar("File")
 
         self.actions.load      = action('load',      'Load',          self.goToLoad)
-        self.actions.saveAs    = action('saveas',    'Save',          self.goToSave)
+        self.actions.save      = action('save',      'Save',          self.doSave)
         self.actions.export    = action('export',    'Export',        self.goToExport)
 
 
