@@ -101,8 +101,6 @@ class ShellTaskView(gui3d.TaskView):
             if len(suggestions) > 1:
                 self.write('\n'.join(suggestions)+"\n")
                 scrollbar = self.text.verticalScrollBar()
-                print scrollbar
-                print scrollbar.maximum()
                 scrollbar.setSliderPosition(scrollbar.maximum())
             elif len(suggestions) == 1:
                 edit.setText(suggestions[0])
