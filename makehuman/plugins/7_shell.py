@@ -49,7 +49,7 @@ from core import G
 import log
 from PyQt4 import QtCore, QtGui
 
-MAX_COMPLETIONS = 10
+MAX_COMPLETIONS = -1
 
 class ShellTextEdit(gui.TextEdit):
     def tabPressed(self):
