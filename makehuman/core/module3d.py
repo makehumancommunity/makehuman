@@ -451,6 +451,7 @@ class Object3D(object):
         if hasattr(self, 'grpix'): del self.grpix
 
         self.vmap = None        # Maps unwelded vertices back to original welded ones (idx = unwelded vertex idx)
+                                # TODO it would be very useful to have a reverse mapping of vmap too, for example for mapping rig weights (see eg. Ogre exporter)
         self.tmap = None        # Maps unwelded vertex texture (UV) coordinates back to original ones (idx = unwelded vertex idx)
 
         # Unwelded vertex buffers used by OpenGL
