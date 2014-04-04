@@ -71,11 +71,10 @@ class FaceGroup(object):
 
     def __init__(self, object, name, idx):
         self.object = object
-        self.parent = object
         self.name = name
         self.idx = idx
         self.color = None
-        self.colorID = self.black
+        self.colorID = self.black.copy()
 
     def __str__(self):
         """
@@ -85,7 +84,6 @@ class FaceGroup(object):
         **Parameters:** This method has no parameters.
 
         """
-
         return 'facegroup %s' % self.name
 
     def setColor(self, rgba):
@@ -106,15 +104,19 @@ class FaceGroup(object):
     
     object = property(getObject, setObject)
 
+    @property
+    def parent(self):
+        return self.object
+
 class Object3D(object):
     def __init__(self, objName, vertsPerPrimitive=4):
         self.clear()
 
         self.name = objName
         self.vertsPerPrimitive = vertsPerPrimitive
-        self._loc = np.zeros(3)
-        self.rot = np.zeros(3)
-        self.scale = np.ones(3)
+        self._loc = np.zeros(3, dtype=np.float32)
+        self.rot = np.zeros(3, dtype=np.float32)
+        self.scale = np.ones(3, dtype=np.float32)
         self._faceGroups = []
         self._material = material.Material(objName+"_Material")  # Render material
         self._groups_rev = {}
@@ -132,6 +134,36 @@ class Object3D(object):
         self._r_color_diff = None
 
         self.__object = None
+
+    def clone(self, scale = 1.0):
+        other = type(self)(self.name, self.vertsPerPrimitive)
+
+        for prop in ['material', 'cameraMode', 'visibility', 'pickable', 
+                     'calculateTangents', 'priority', 'MAX_FACES', 
+                     'lockRotation']:
+            setattr(other, prop, getattr(self, prop))
+
+        other.loc = self.loc.copy()
+        other.rot = self.rot.copy()
+        other.scale = self.scale.copy()
+
+        for fg in self.faceGroups:
+            ofg = other.createFaceGroup(fg.name)
+            if fg.color is not None:
+                ofg.color = fg.color.copy()
+            else:
+                ofg.color = fg.color
+
+        other.setCoords(scale * self.coord.copy())
+        other.setColor(self.color.copy())
+        other.setUVs(self.texco.copy())
+        other.setFaces(self.fvert.copy(), self.fuvs.copy(), self.group.copy())
+        other.changeFaceMask(self.face_mask.copy())
+
+        other.calcNormals()
+        other.updateIndexBuffer()
+
+        return other
 
     def getLoc(self):
         return self._loc
@@ -421,6 +453,8 @@ class Object3D(object):
         self.vmap = None        # Maps unwelded vertices back to original welded ones (idx = unwelded vertex idx)
         self.tmap = None        # Maps unwelded vertex texture (UV) coordinates back to original ones (idx = unwelded vertex idx)
 
+        self._inverse_vmap = None   # Cached inverse of vmap: maps original welded vert idx (coord) to one or multiple unwelded vert idxs (r_coord)
+
         # Unwelded vertex buffers used by OpenGL
         if hasattr(self, 'r_coord'): del self.r_coord
         if hasattr(self, 'r_texco'): del self.r_texco
@@ -575,6 +609,23 @@ class Object3D(object):
             indices = np.s_[...]
         return self.fuvs[indices]
 
+    @property
+    def inverse_vmap(self):
+        """
+        The inverse of vmap: a mapping of original welded (relating to UVs) 
+        vertex (coord indices) to a set of unwelded vertices that represent the 
+        same coordinate (r_coord indices).
+        """
+        if self._inverse_vmap is None:
+            # TODO this loop is quite slow and could benefit from numpy optimization
+            originalToUnweldedMap = {}
+            for unweldedIdx, originalIdx in enumerate(self.vmap):
+                if originalIdx not in originalToUnweldedMap:
+                    originalToUnweldedMap[originalIdx] = []
+                originalToUnweldedMap[originalIdx].append(unweldedIdx)
+            self._inverse_vmap = originalToUnweldedMap
+        return self._inverse_vmap
+
     def _update_faces(self):
         map_ = np.argsort(self.fvert.flat)
         vi = self.fvert.flat[map_]
@@ -612,6 +663,7 @@ class Object3D(object):
 
         self.vmap = unwelded[:,0]
         self.tmap = unwelded[:,1]
+        self._inverse_vmap = None
         del unwelded
 
         self.r_coord = np.empty((nverts, 3), dtype=np.float32)

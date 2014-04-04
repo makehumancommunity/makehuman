@@ -1247,6 +1247,16 @@ class MHApplication(gui3d.Application, mh.Application):
         mh.changeCategory("Modelling")
         self.redraw()
 
+    def doSave(self):
+        if self.currentFile.path:
+            from guisave import saveMHM
+            self.currentTask.hide()
+            saveMHM(self.currentFile.path)
+            self.currentTask.show()
+            self.redraw()
+        else:
+            self.goToSave()
+
     def goToSave(self):
         mh.changeTask("Files", "Save")
         self.redraw()
@@ -1491,7 +1501,7 @@ class MHApplication(gui3d.Application, mh.Application):
         toolbar = self.file_toolbar = mh.addToolBar("File")
 
         self.actions.load      = action('load',      'Load',          self.goToLoad)
-        self.actions.save      = action('save',      'Save',          self.goToSave)
+        self.actions.save      = action('save',      'Save',          self.doSave)
         self.actions.export    = action('export',    'Export',        self.goToExport)
 
 

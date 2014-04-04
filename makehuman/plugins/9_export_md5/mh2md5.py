@@ -175,11 +175,7 @@ def exportMd5(filepath, config):
                     weights = weights2
 
             # Remap vertex weights to the unwelded vertices of the object (obj.coord to obj.r_coord)
-            originalToUnweldedMap = {}
-            for unweldedIdx, originalIdx in enumerate(obj.vmap):
-                if originalIdx not in originalToUnweldedMap.keys():
-                    originalToUnweldedMap[originalIdx] = []
-                originalToUnweldedMap[originalIdx].append(unweldedIdx)
+            originalToUnweldedMap = obj.inverse_vmap
 
             # Build a weights list indexed per vertex
             jointIndexes = {}
