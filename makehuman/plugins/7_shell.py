@@ -160,7 +160,7 @@ class ShellTaskView(gui3d.TaskView):
         while suggestion and _inRange(i):
             suggestion = completer.complete(line, i)
             if suggestion:
-                if i == MAX_COMPLETIONS:
+                if i == MAX_COMPLETIONS and MAX_COMPLETIONS != 0:
                     result.append('...')
                 else:
                     if suggestion not in result:
