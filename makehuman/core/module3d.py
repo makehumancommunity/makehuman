@@ -164,7 +164,7 @@ class Object3D(object):
         if filterMaskedVerts:
             self.filterMaskedVerts(other, update=False)
             if scale != 1:
-                other.setCoords(scale * other.coord)
+                other.coord = scale * other.coord
         else:
             other.setCoords(scale * self.coord)
             other.setColor(self.color.copy())
@@ -191,9 +191,11 @@ class Object3D(object):
         """
         other.parent = self
 
+        # Forward vertex mapping:
         # parent_map[idx] = mIdx: other.coord[idx] -> self.coord[mIdx]
         other.parent_map = np.unique(self.getVerticesForFaceMask(self.face_mask))
 
+        # Reverse vertex mapping:
         # inverse_parent_map[idx] = mIdx: self.coord[idx] -> other.coord[mIdx]
         other.inverse_parent_map = - np.ones(self.getVertexCount(), dtype=np.int32)
         other.inverse_parent_map[other.parent_map] = np.arange(self.getVertexCount(), dtype=np.int32)
@@ -202,15 +204,22 @@ class Object3D(object):
         other.setCoords(self.coord[other.parent_map])
         other.setColor(self.color[other.parent_map])
 
-        # TODO Filter out unused UVs
-        other.setUVs(self.texco.copy())
-
         # Filter out and remap masked faces
         fvert = self.fvert[self.face_mask]
         for i in xrange(self.vertsPerPrimitive):
             fvert[:,i] = other.inverse_parent_map[fvert[:,i]]
 
-        other.setFaces(fvert, self.fuvs[self.face_mask], self.group[self.face_mask])
+        # Filter out and remap unused UVs
+        fuvs = self.fuvs[self.face_mask]
+        uv_idx = np.unique(fuvs.reshape(-1))
+        inverse_uv_idx = - np.ones(self.fuvs.shape[0], dtype=np.int32)
+        inverse_uv_idx[uv_idx] = np.arange(self.fuvs.shape[0], dtype=np.int32)
+        for i in xrange(self.vertsPerPrimitive):
+            fuvs[:,i] = inverse_uv_idx[fuvs[:,i]]
+
+        other.setUVs(self.texco[uv_idx])
+
+        other.setFaces(fvert, fuvs, self.group[self.face_mask])
 
         if update:
             other.calcNormals()
