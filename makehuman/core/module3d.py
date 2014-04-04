@@ -135,7 +135,14 @@ class Object3D(object):
 
         self.__object = None
 
-    def clone(self, scale = 1.0):
+    def clone(self, scale=1.0, filterMaskedVerts=False):
+        """
+        Create a clone of this mesh, with adapted scale.
+        If filterVerts is True, all vertices that are not required (do not
+        belong to any visible face) are removed and vertex mapping is added to
+        cloned object (see filterMaskedVerts()). For a face mapping, the
+        facemask of the original mesh can be used.
+        """
         other = type(self)(self.name, self.vertsPerPrimitive)
 
         for prop in ['material', 'cameraMode', 'visibility', 'pickable', 
@@ -154,16 +161,60 @@ class Object3D(object):
             else:
                 ofg.color = fg.color
 
-        other.setCoords(scale * self.coord.copy())
-        other.setColor(self.color.copy())
-        other.setUVs(self.texco.copy())
-        other.setFaces(self.fvert.copy(), self.fuvs.copy(), self.group.copy())
-        other.changeFaceMask(self.face_mask.copy())
+        if filterMaskedVerts:
+            self.filterMaskedVerts(other, update=False)
+            if scale != 1:
+                other.setCoords(scale * other.coord)
+        else:
+            other.setCoords(scale * self.coord)
+            other.setColor(self.color.copy())
+            other.setUVs(self.texco.copy())
+            other.setFaces(self.fvert.copy(), self.fuvs.copy(), self.group.copy())
+            other.changeFaceMask(self.face_mask.copy())
 
         other.calcNormals()
         other.updateIndexBuffer()
 
         return other
+
+    def filterMaskedVerts(self, other, update=True):
+        """
+        Set the vertices, faces and vertex attributes of other object to the
+        vertices and faces of this mesh object, with the hidden faces and
+        vertices filtered out.
+
+        The other mesh contains a parent_map which maps vertex indices from
+        the other to its original mesh and inverse_parent_map which maps vertex
+        indexes from original to other (-1 if removed).
+
+        other.parent is set to the original mesh.
+        """
+        other.parent = self
+
+        # parent_map[idx] = mIdx: other.coord[idx] -> self.coord[mIdx]
+        other.parent_map = np.unique(self.getVerticesForFaceMask(self.face_mask))
+
+        # inverse_parent_map[idx] = mIdx: self.coord[idx] -> other.coord[mIdx]
+        other.inverse_parent_map = - np.ones(self.getVertexCount(), dtype=np.int32)
+        other.inverse_parent_map[other.parent_map] = np.arange(self.getVertexCount(), dtype=np.int32)
+        #other.inverse_parent_map = np.ma.masked_less(other.inverse_parent_map, 0)  # TODO might be useful
+
+        other.setCoords(self.coord[other.parent_map])
+        other.setColor(self.color[other.parent_map])
+
+        # TODO Filter out unused UVs
+        other.setUVs(self.texco.copy())
+
+        # Filter out and remap masked faces
+        fvert = self.fvert[self.face_mask]
+        for i in xrange(self.vertsPerPrimitive):
+            fvert[:,i] = other.inverse_parent_map[fvert[:,i]]
+
+        other.setFaces(fvert, self.fuvs[self.face_mask], self.group[self.face_mask])
+
+        if update:
+            other.calcNormals()
+            other.updateIndexBuffer()
 
     def getLoc(self):
         return self._loc
