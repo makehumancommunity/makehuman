@@ -38,8 +38,8 @@ Alternatively, run the script in the script editor (Alt-P), and access from the 
 bl_info = {
     'name': 'Import: MakeHuman Exchange (.mhx)',
     'author': 'Thomas Larsson',
-    'version': (1,16,20),
-    "blender": (2, 69, 0),
+    'version': (1,16,21),
+    "blender": (2, 70, 0),
     'location': "File > Import > MakeHuman (.mhx)",
     'description': 'Import files in the MakeHuman eXchange format (.mhx)',
     'warning': '',
@@ -48,7 +48,7 @@ bl_info = {
 
 MAJOR_VERSION = bl_info["version"][0]
 MINOR_VERSION = bl_info["version"][1]
-FROM_VERSION = 13
+FROM_VERSION = 16
 
 majorVersion = MAJOR_VERSION
 minorVersion = MINOR_VERSION
@@ -96,10 +96,9 @@ theMhxFile = ""
 T_EnforceVersion = 0x01
 T_Clothes = 0x02
 T_HardParents = 0x0
-T_CrashSafe = 0x0
+T_CrashSafe = 0x04
 
 T_Diamond = 0x10
-T_Replace = 0x20
 T_Shapekeys = 0x40
 T_ShapeDrivers = 0x80
 
@@ -112,47 +111,84 @@ T_Proxy = 0x400
 T_Cage = 0x800
 
 T_Rigify = 0x1000
-T_Opcns = 0x2000
 T_Symm = 0x4000
 
 DefaultToggle = ( T_EnforceVersion + T_Mesh + T_Armature +
-    T_Shapekeys + T_Proxy + T_Clothes + T_Rigify )
+    T_Shapekeys + T_ShapeDrivers + T_Proxy + T_Clothes + T_Rigify )
 
 toggle = DefaultToggle
 toggleSettings = toggle
 loadedData = None
 
 #
-#   mhxEval(expr) - an attempt at a reasonably safe eval.
-#   Note that expr never contains any whitespace due to the behavior
-#   of the mhx tokenizer.
+#   mhxEval(expr) - a safe eval but stymied eval.
 #
 
 def mhxEval(expr, locls={}):
-    globls = {
-        '__builtins__' : {},
-        'toggle' : toggle,
-        'theScale' : theScale,
-        'One' : One,
-        'T_EnforceVersion' : T_EnforceVersion,
-        'T_Clothes' : T_Clothes,
-        'T_HardParents' : T_HardParents,
-        'T_CrashSafe' : T_CrashSafe,
-        'T_Diamond' : T_Diamond,
-        'T_Replace' : T_Replace,
-        'T_Shapekeys' : T_Shapekeys,
-        'T_ShapeDrivers' : T_ShapeDrivers,
-        'T_Face' : T_Face,
-        'T_Shape' : T_Shape,
-        'T_Mesh' : T_Mesh,
-        'T_Armature' : T_Armature,
-        'T_Proxy' : T_Proxy,
-        'T_Cage' : T_Cage,
-        'T_Rigify' : T_Rigify,
-        'T_Opcns' : T_Opcns,
-        'T_Symm' : T_Symm,
-    }
-    return eval(expr, globls, locls)
+    if expr == "True":
+        return True
+    elif expr == "False":
+        return False
+    elif expr == "None":
+        return None
+    elif expr == "{}":
+        return {}
+    elif expr == "[]":
+        return []
+
+    try:
+        return int(expr)
+    except ValueError:
+        pass
+
+    try:
+        return float(expr)
+    except ValueError:
+        pass
+
+    try:
+        return locls[expr]
+    except KeyError:
+        pass
+
+    try:
+        return globals()[expr]
+    except KeyError:
+        pass
+
+    if expr[0] in ['"',"'"] and expr[-1] == expr[0]:
+        return expr[1:-1]
+
+    elif expr[0] in ["(","["]:
+        words = expr[1:-1].split(",")
+        lst = []
+        for word in words:
+            lst.append(mhxEval(word, locls))
+        if expr[0] == "(":
+            if len(words) == 1:
+                return lst[0]
+            else:
+                return tuple(lst)
+        else:
+            return lst
+
+    for op in ['==', '!=', '*', '&']:
+        words = expr.split(op)
+        if len(words) == 2:
+            x = mhxEval(words[0])
+            y = mhxEval(words[1])
+            if op == '==':
+                return (x==y)
+            elif op == '!=':
+                return (x!=y)
+            elif op == '*':
+                return x*y
+            elif op == '&':
+                return x&y
+
+    halt
+    raise MyError("Failed to evaluate expression:\n%s" % expr)
+
 
 #
 #    Dictionaries
@@ -225,6 +261,22 @@ Plural = {
     'Lamp' : 'lamps',
     'World' : 'worlds',
 }
+
+# ---------------------------------------------------------------------
+#
+# ---------------------------------------------------------------------
+
+def importMhxFile(self, context):
+    global toggle
+    toggle = DefaultToggle
+    if self.helpers:
+         toggle |= T_Diamond
+    try:
+        if not context.user_preferences.system.use_scripts_auto_execute:
+            MyError("Auto Run Python Scripts must be turned on.\nIt is found under\n File > User Preferences > File")
+        readMhxFile(self.filepath)
+    except MhxError:
+        print("Error when loading MHX file %s:\n" % self.filepath + theMessage)
 
 #
 #    readMhxFile(filePath):
@@ -683,6 +735,7 @@ def parseKeyFramePoint(pt, args, tokens):
 #
 
 def parseAnimationData(rna, args, tokens):
+    return
     if not mhxEval(args[1]):
         return
     if rna.animation_data is None:
@@ -736,9 +789,9 @@ def parseDriver(adata, dataPath, index, rna, args, tokens):
         expr = "rna"
         for n in range(len(words)-1):
             expr += "." + words[n]
-        expr += ".driver_add('%s', index)" % channel
+        datum = mhxEval(expr, locals())
 
-    fcu = mhxEval(expr, locals())
+    fcu = datum.driver_add(channel, index)
     drv = fcu.driver
     drv.type = args[0]
     for (key, val, sub) in tokens:
@@ -2821,8 +2874,7 @@ def fixConstraint(cns1, cns2, gen, bones):
             cns2.subtarget = bone.realname
             cns2.head_tail = cns1.head_tail
         elif not bone.realname1:
-            print(bone)
-            halt
+            raise RuntimeError("Bug %s" % bone)
         elif cns1.head_tail < 0.5:
             cns2.subtarget = bone.realname1
             cns2.head_tail = 2*cns1.head_tail
@@ -2967,22 +3019,6 @@ class SuccessOperator(bpy.types.Operator):
 
 from bpy_extras.io_utils import ImportHelper, ExportHelper
 
-MhxBoolProps = [
-    ("enforce", "Enforce version", "Only accept MHX files of correct version", T_EnforceVersion),
-    #("crash_safe", "Crash-safe", "Disable features that have caused Blender crashes", T_CrashSafe),
-    ("mesh", "Mesh", "Use main mesh", T_Mesh),
-    ("proxy", "Proxies", "Use proxies", T_Proxy),
-    #("armature", "Armature", "Use armature", T_Armature),
-    #("replace", "Replace scene", "Replace scene", T_Replace),
-    ("cage", "Cage", "Load mesh deform cage", T_Cage),
-    ("clothes", "Clothes", "Include clothes", T_Clothes),
-    ("shapekeys", "Shapekeys", "Include shapekeys", T_Shapekeys),
-    ("drivers", "Drivers", "Include drivers", T_ShapeDrivers),
-    #("symm", "Symmetric shapes", "Keep shapekeys symmetric", T_Symm),
-    ("diamond", "Helper geometry", "Keep helper geometry", T_Diamond),
-    ("rigify", "Rigify", "Create rigify control rig", T_Rigify),
-]
-
 class ImportMhx(bpy.types.Operator, ImportHelper):
     """Import from MHX file format (.mhx)"""
     bl_idname = "import_scene.makehuman_mhx"
@@ -2996,56 +3032,16 @@ class ImportMhx(bpy.types.Operator, ImportHelper):
     filter_glob = StringProperty(default="*.mhx", options={'HIDDEN'})
     filepath = StringProperty(subtype='FILE_PATH')
 
-    scale = FloatProperty(name="Scale", description="Default meter, decimeter = 1.0", default = theScale)
-    advanced = BoolProperty(name="Override default settings", description="Use advanced import settings", default=False)
-    for (prop, name, desc, flag) in MhxBoolProps:
-        expr = '%s = BoolProperty(name="%s", description="%s", default=(toggleSettings&%s != 0))' % (prop, name, desc, flag)
-        exec(expr)   # Trusted source: this file.
-
+    helpers = BoolProperty(name="Helper geometry", description="Keep helper geometry", default=False)
 
     def draw(self, context):
-        layout = self.layout
-        layout.prop(self, "advanced")
-        if self.advanced:
-            layout.prop(self, "scale")
-            for (prop, name, desc, flag) in MhxBoolProps:
-                layout.prop(self, prop)
-
+        self.layout.prop(self, "helpers")
 
     def execute(self, context):
-        global toggle, toggleSettings, theScale, MhxBoolProps
-        if not self.advanced:
-            toggle = DefaultToggle
-        else:
-            toggle = T_Armature
-            for (prop, name, desc, flag) in MhxBoolProps:
-                expr = '(%s if self.%s else 0)' % (flag, prop)
-                toggle |=  eval(expr)   # trusted source: this file
-            toggleSettings = toggle
-        print("execute flags %x" % toggle)
-        theScale = self.scale
-
-        #filepathname = self.filepath.encode('utf-8', 'strict')
-        try:
-            if not context.user_preferences.system.use_scripts_auto_execute:
-                MyError("Auto Run Python Scripts must be turned on.\nIt is found under\n File > User Preferences > File")
-            readMhxFile(self.filepath)
-            #bpy.ops.mhx.success('INVOKE_DEFAULT', message = self.filepath)
-        except MhxError:
-            print("Error when loading MHX file %s:\n" % self.filepath + theMessage)
-
-        if self.advanced:
-            writeDefaults()
-            self.advanced = False
+        importMhxFile(self, context)
         return {'FINISHED'}
 
-
     def invoke(self, context, event):
-        global toggle, theScale, MhxBoolProps
-        readDefaults()
-        self.scale = theScale
-        for (prop, name, desc, flag) in MhxBoolProps:
-            setattr(self, prop, mhxEval('(toggle&%s != 0)' % flag))
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
