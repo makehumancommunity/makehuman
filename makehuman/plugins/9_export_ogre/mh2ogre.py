@@ -48,46 +48,42 @@ import os
 from progress import Progress
 import codecs
 import transformations
-import exportutils
 import skeleton
 import log
+import proxy
 
 def exportOgreMesh(filepath, config):
     progress = Progress.begin()
 
-    progress(0, 0.05, "Setting properties")
+    progress(0, 0.05, "Setting properties")  # TODO this leads to a disastrous amount of confusion among translators 
     human = config.human
-    feetOnGround = config.feetOnGround
+    feetOnGround = config.feetOnGround  # TODO this is probably not even worth an option, always feet on ground should be a good default
     config.feetOnGround = False
     # TODO account for config.scale in skeleton
-    config.setupTexFolder(filepath)
+    config.setupTexFolder(filepath) # TODO unused
     filename = os.path.basename(filepath)
-    name = formatName(config.goodName(os.path.splitext(filename)[0]))
+    name = formatName(os.path.splitext(filename)[0])
 
     progress(0.05, 0.2, "Collecting Objects")
-    rmeshes = exportutils.collect.setupMeshes(
-        name,
-        human,
-        config=config,
-        subdivide=config.subdivide)
+    meshes = human.getMeshes()
 
     config.feetOnGround = feetOnGround
 
     progress(0.2, 0.95 - 0.35*bool(human.getSkeleton()))
-    writeMeshFile(human, filepath, rmeshes, config)
+    writeMeshFile(human, filepath, meshes, config)
     if human.getSkeleton():
         progress(0.6, 0.95, "Writing Skeleton")
         writeSkeletonFile(human, filepath, config)
     progress(0.95, 0.99, "Writing Materials")
-    writeMaterialFile(human, filepath, rmeshes, config)
+    writeMaterialFile(human, filepath, meshes, config)
     progress(1.0, None, "Ogre export finished.")
 
 
-def writeMeshFile(human, filepath, rmeshes, config):
-    progress = Progress(len(rmeshes))
+def writeMeshFile(human, filepath, meshes, config):
+    progress = Progress(len(meshes))
 
     filename = os.path.basename(filepath)
-    name = formatName(config.goodName(os.path.splitext(filename)[0]))
+    name = formatName(os.path.splitext(filename)[0])
 
     f = codecs.open(filepath, 'w', encoding="utf-8")
     lines = []
@@ -96,14 +92,23 @@ def writeMeshFile(human, filepath, rmeshes, config):
     lines.append('<mesh>')
     lines.append('    <submeshes>')
 
-    for rmeshIdx, rmesh in enumerate(rmeshes):
+    for objIdx, mesh in enumerate(meshes):
         loopprog = Progress()
-        loopprog(0.0, 0.1, "Writing %s mesh." % rmesh.name)
-        obj = rmesh.object
-        # Make sure vertex normals are calculated
-        obj.calcNormals()
-        # Calculate rendering data so we can use the unwelded vertices
-        obj.updateIndexBuffer()
+
+        loopprog(0.0, 0.1, "Writing %s mesh.", mesh.name)
+
+        if isinstance(mesh, proxy.Proxy):
+            # Object is proxy
+            pxy = mesh
+            obj = pxy.object.mesh
+        else:
+            # Object is human mesh
+            pxy = mesh.proxy
+            obj = mesh.mesh
+
+        # Scale and filter out masked vertices/faces
+        obj = obj.clone(scale=1, filterMaskedVerts=True)  # here obj.parent is set to the original obj
+
         numVerts = len(obj.r_coord)
 
         if obj.vertsPerPrimitive == 4:
@@ -113,8 +118,8 @@ def writeMeshFile(human, filepath, rmeshes, config):
             # Tris
             numFaces = len(obj.r_faces)
 
-        loopprog(0.1, 0.3, "Writing faces of %s." % rmesh.name)
-        lines.append('        <submesh material="%s_%s_%s" usesharedvertices="false" use32bitindexes="false" operationtype="triangle_list">' % (formatName(name), rmeshIdx, formatName(rmesh.name) if formatName(rmesh.name) != name else "human"))
+        loopprog(0.1, 0.3, "Writing faces of %s.", obj.name)
+        lines.append('        <submesh material="%s_%s_%s" usesharedvertices="false" use32bitindexes="false" operationtype="triangle_list">' % (formatName(name), objIdx, formatName(obj.name) if formatName(obj.name) != name else "human"))
 
         # Faces
         lines.append('            <faces count="%s">' % numFaces)
@@ -128,7 +133,7 @@ def writeMeshFile(human, filepath, rmeshes, config):
             lines.extend( ['                <face v1="%s" v2="%s" v3="%s" />' % (fv[0], fv[1], fv[2]) for fv in obj.r_faces])
         lines.append('            </faces>')
 
-        loopprog(0.3, 0.7, "Writing vertices of %s." % rmesh.name)
+        loopprog(0.3, 0.7, "Writing vertices of %s.", obj.name)
         # Vertices
         lines.append('            <geometry vertexcount="%s">' % numVerts)
         lines.append('                <vertexbuffer positions="true" normals="true">')
@@ -146,7 +151,7 @@ def writeMeshFile(human, filepath, rmeshes, config):
         lines.append('                </vertexbuffer>')
 
 
-        loopprog(0.8 - 0.1*bool(human.getSkeleton()), 0.9, "Writing UVs of %s." % rmesh.name)
+        loopprog(0.8 - 0.1*bool(human.getSkeleton()), 0.9, "Writing UVs of %s.", obj.name)
         # UV Texture Coordinates
         lines.append('                <vertexbuffer texture_coord_dimensions_0="2" texture_coords="1">')
         if obj.has_uv:
@@ -163,32 +168,22 @@ def writeMeshFile(human, filepath, rmeshes, config):
         lines.append('            </geometry>')
 
         if human.getSkeleton():
-            loopprog(0.9, 0.99, "Writing bone assignments of %s." % rmesh.name)
+            loopprog(0.9, 0.99, "Writing bone assignments of %s.", obj.name)
         else:
-            loopprog(0.99, None, "Written %s." % rmesh.name)
+            loopprog(0.99, None, "Written %s.", obj.name)
 
         # Skeleton bone assignments
         if human.getSkeleton():
             bodyWeights = human.getVertexWeights()
-            if rmesh.type:
-                # Determine vertex weights for proxy
-                weights = skeleton.getProxyWeights(rmesh.proxy, bodyWeights, obj)
+            if pxy:
+                # Determine vertex weights for proxy (map to unfiltered proxy mesh)
+                weights = skeleton.getProxyWeights(pxy, bodyWeights, obj.parent)
             else:
                 # Use vertex weights for human body
                 weights = bodyWeights
-                # Account for vertices that are filtered out
-                if rmesh.vertexMapping != None:
-                    filteredVIdxMap = rmesh.vertexMapping
-                    weights2 = {}
-                    for (boneName, (verts,ws)) in weights.items():
-                        verts2 = []
-                        ws2 = []
-                        for i, vIdx in enumerate(verts):
-                            if vIdx in filteredVIdxMap:
-                                verts2.append(filteredVIdxMap[vIdx])
-                                ws2.append(ws[i])
-                        weights2[boneName] = (verts2, ws2)
-                    weights = weights2
+
+            # Account for vertices that are filtered out
+            filteredVIdxMap = obj.inverse_parent_map
 
             # Remap vertex weights to the unwelded vertices of the object (obj.coord to obj.r_coord)
             originalToUnweldedMap = obj.inverse_vmap
@@ -198,13 +193,16 @@ def writeMeshFile(human, filepath, rmeshes, config):
             for (boneName, (verts,ws)) in weights.items():
                 bIdx = boneNames.index(boneName)
                 for i, vIdx in enumerate(verts):
-                    w = ws[i]
-                    try:
-                        lines.extend( ['                <vertexboneassignment vertexindex="%s" boneindex="%s" weight="%s" />' % (r_vIdx, bIdx, w)
-                                        for r_vIdx in originalToUnweldedMap[vIdx]] )
-                    except:
-                        # unused coord
-                        pass
+                    if filteredVIdxMap[vIdx] >= 0:
+                        # Vertex for weight is included in the filtered mesh
+                        vIdx = filteredVIdxMap[vIdx]
+                        w = ws[i]
+                        try:
+                            lines.extend( ['                <vertexboneassignment vertexindex="%s" boneindex="%s" weight="%s" />' % (r_vIdx, bIdx, w)
+                                            for r_vIdx in originalToUnweldedMap[vIdx]] )
+                        except:
+                            # unused coord
+                            pass
             lines.append('            </boneassignments>')
 
         progress.step()
@@ -212,8 +210,15 @@ def writeMeshFile(human, filepath, rmeshes, config):
 
     lines.append('    </submeshes>')
     lines.append('    <submeshnames>')
-    for rmeshIdx, rmesh in enumerate(rmeshes):
-        lines.append('        <submeshname name="%s" index="%s" />' % (formatName(rmesh.name) if formatName(rmesh.name) != name else "human", rmeshIdx))
+    for objIdx, mesh in enumerate(meshes):
+        # TODO this isinstance test everytime is a hassle, perhaps getMeshes() can return meshes in nicer form
+        if isinstance(mesh, proxy.Proxy):
+            # Object is proxy
+            obj = mesh.object.mesh
+        else:
+            # Object is human mesh
+            obj = mesh.mesh
+        lines.append('        <submeshname name="%s" index="%s" />' % (formatName(obj.name) if formatName(obj.name) != name else "human", objIdx))
     lines.append('    </submeshnames>')
 
     if human.getSkeleton():
@@ -227,7 +232,7 @@ def writeMeshFile(human, filepath, rmeshes, config):
 def writeSkeletonFile(human, filepath, config):
     Pprogress = Progress(3)  # Parent.
     filename = os.path.basename(filepath)
-    name = formatName(config.goodName(os.path.splitext(filename)[0]))
+    name = formatName(os.path.splitext(filename)[0])
     filename = name + ".skeleton.xml"
     filepath = os.path.join(os.path.dirname(filepath), filename)
 
@@ -277,21 +282,28 @@ def writeSkeletonFile(human, filepath, config):
     Pprogress.finish()
 
 
-def writeMaterialFile(human, filepath, rmeshes, config):
-    progress = Progress(len(rmeshes))
+def writeMaterialFile(human, filepath, meshes, config):
+    progress = Progress(len(meshes))
     folderpath = os.path.dirname(filepath)
-    name = formatName(config.goodName(os.path.splitext(os.path.basename(filepath))[0]))
+    name = formatName(os.path.splitext(os.path.basename(filepath))[0])
     filename = name + ".material"
     filepath = os.path.join(folderpath, filename)
 
     f = codecs.open(filepath, 'w', encoding="utf-8")
     lines = []
 
-    for rmeshIdx, rmesh in enumerate(rmeshes):
-        mat = rmesh.material
-        if rmeshIdx > 0:
+    for objIdx, mesh in enumerate(meshes):
+        if isinstance(mesh, proxy.Proxy):
+            # Object is proxy
+            obj = mesh.object.mesh
+        else:
+            # Object is human mesh
+            obj = mesh.mesh
+
+        mat = obj.material
+        if objIdx > 0:
             lines.append('')
-        lines.append('material %s_%s_%s' % (formatName(name), rmeshIdx, formatName(rmesh.name) if formatName(rmesh.name) != name else "human"))
+        lines.append('material %s_%s_%s' % (formatName(name), objIdx, formatName(obj.name) if formatName(obj.name) != name else "human"))
         lines.append('{')
         lines.append('    receive_shadows %s\n' % ("on" if mat.receiveShadows else "off"))
         lines.append('    technique')
@@ -361,10 +373,15 @@ def writeAnimation(human, linebuffer, animTrack):
 
 
 def formatName(name):
+    def _goodName(name):
+        return name.replace(" ", "_").replace("-","_").lower()
+
     if name.endswith('.mesh'):
-        return name[:-5]
+        return _goodName(name[:-5])
+    elif name.endswith('.obj'):
+        return _goodName(name[:-4])
     else:
-        return name
+        return _goodName(name)
 
 
 def getFeetOnGroundOffset(human):
