@@ -1,0 +1,36 @@
+# MB 
+#	bone	 	MHX bone	twist
+
+Name:	MB
+
+Armature:
+	hips		hips	 
+	lowerback	spine	
+	spine		spine-1	 
+	spine1		chest	
+	neck		neck	
+	neck1		head	 
+
+	leftshoulder	clavicle.L
+	leftarm		upper_arm.L	 
+	leftforearm	forearm.L	
+	lefthand	hand.L	
+
+	rightshoulder	clavicle.R 
+	rightarm	upper_arm.R	 
+	rightforearm	forearm.R	
+	righthand	hand.R	
+
+	leftupleg	thigh.L	
+	leftleg		shin.L	 
+	leftfoot	foot.L	 
+	lefttoebase	toe.L	
+
+	rightupleg	thigh.R	
+	rightleg	shin.R	 
+	rightfoot	foot.R	 
+	righttoebase	toe.R	
+
+T-pose:	cmu_tpose.json
+
+
