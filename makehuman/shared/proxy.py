@@ -118,7 +118,6 @@ class Proxy:
         self.cage = False
         self.modifiers = []
         self.shapekeys = []
-        return
 
 
     def __repr__(self):
@@ -202,6 +201,21 @@ class Proxy:
         self.weights = np.asarray([v._weights for v in refVerts], dtype=np.float32)
         self.ref_vIdxs = np.asarray([v._verts for v in refVerts], dtype=np.uint32)
         self.offsets = np.asarray([v._offset for v in refVerts], dtype=np.float32)
+
+
+    def _reloadReverseMapping(self):
+        """
+        Reconstruct reverse vertex (and weights) mapping
+        """
+        self.vertWeights = {}
+        if self.num_refverts == 3:
+            for pxy_vIdx in xrange(self.ref_vIdxs.shape[0]):
+                _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 0], pxy_vIdx, self.weights[pxy_vIdx, 0])
+                _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 1], pxy_vIdx, self.weights[pxy_vIdx, 1])
+                _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 2], pxy_vIdx, self.weights[pxy_vIdx, 2])
+        else:
+            for pxy_vIdx in xrange(self.ref_vIdxs.shape[0]):
+                _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 0], pxy_vIdx, 1.0)
 
 
     def getCoords(self):
@@ -554,9 +568,11 @@ def saveBinaryProxy(proxy, path):
         num_refverts = np.asarray(proxy.num_refverts, dtype=np.int32),
         uvLayers_str = uvStr,
         uvLayers_idx = uvIdx,
-        material_file = np.fromstring(proxy.material_file, dtype='S1'),
         obj_file = np.fromstring(proxy._obj_file, dtype='S1'),
     )
+
+    if proxy.material_file:
+        vars_["material_file"] = np.fromstring(proxy.material_file, dtype='S1')
 
     if np.any(proxy.deleteVerts):
         vars_["deleteVerts"] = proxy.deleteVerts
@@ -622,15 +638,7 @@ def loadBinaryProxy(path, human, type):
         proxy.deleteVerts = npzfile['deleteVerts']
 
     # Reconstruct reverse vertex (and weights) mapping
-    proxy.vertWeights = {}
-    if proxy.num_refverts == 3:
-        for pxy_vIdx in xrange(proxy.ref_vIdxs.shape[0]):
-            _addProxyVertWeight(proxy.vertWeights, proxy.ref_vIdxs[pxy_vIdx, 0], pxy_vIdx, proxy.weights[pxy_vIdx, 0])
-            _addProxyVertWeight(proxy.vertWeights, proxy.ref_vIdxs[pxy_vIdx, 1], pxy_vIdx, proxy.weights[pxy_vIdx, 1])
-            _addProxyVertWeight(proxy.vertWeights, proxy.ref_vIdxs[pxy_vIdx, 2], pxy_vIdx, proxy.weights[pxy_vIdx, 2])
-    else:
-        for pxy_vIdx in xrange(proxy.ref_vIdxs.shape[0]):
-            _addProxyVertWeight(proxy.vertWeights, proxy.ref_vIdxs[pxy_vIdx, 0], pxy_vIdx, 1.0)
+    proxy._reloadReverseMapping()
 
     proxy.tmatrix = TMatrix()
 
@@ -639,7 +647,8 @@ def loadBinaryProxy(path, human, type):
         uvLayers[uvIdx] = uvName
 
     proxy.material = material.Material(proxy.name)
-    proxy.material_file = npzfile['material_file'].tostring()
+    if 'material_file' in npzfile:
+        proxy.material_file = npzfile['material_file'].tostring()
     if proxy.material_file:
         proxy.material.fromFile(proxy.material_file)
 
