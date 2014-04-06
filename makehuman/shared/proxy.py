@@ -370,7 +370,7 @@ def loadProxy(human, path, type="Clothes"):
                 try:
                     saveBinaryProxy(proxy, npzpath)
                 except StandardError:
-                    log.notice('unable to save compiled proxy: %s', npzpath)
+                    log.notice('unable to save compiled proxy: %s', npzpath, exc_info=True)
             else:
                 log.debug('Not writing compiled proxies to system paths (%s).', npzpath)
     except:
@@ -588,9 +588,11 @@ def saveBinaryProxy(proxy, path):
         num_refverts = np.asarray(proxy.num_refverts, dtype=np.int32),
         uvLayers_str = uvStr,
         uvLayers_idx = uvIdx,
-        material_file = np.fromstring(proxy.material_file, dtype='S1'),
         obj_file = np.fromstring(proxy._obj_file, dtype='S1'),
     )
+
+    if proxy.material_file:
+        vars_["material_file"] = np.fromstring(proxy.material_file, dtype='S1')
 
     if np.any(proxy.deleteVerts):
         vars_["deleteVerts"] = proxy.deleteVerts
@@ -665,7 +667,8 @@ def loadBinaryProxy(path, human, type):
         uvLayers[uvIdx] = uvName
 
     proxy.material = material.Material(proxy.name)
-    proxy.material_file = npzfile['material_file'].tostring()
+    if 'material_file' in npzfile:
+        proxy.material_file = npzfile['material_file'].tostring()
     if proxy.material_file:
         proxy.material.fromFile(proxy.material_file)
 
