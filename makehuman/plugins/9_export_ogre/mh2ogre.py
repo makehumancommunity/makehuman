@@ -119,6 +119,7 @@ def writeMeshFile(human, filepath, meshes, config):
             numFaces = len(obj.r_faces)
 
         loopprog(0.1, 0.3, "Writing faces of %s.", obj.name)
+        # TODO add proxy type name in material name as well
         lines.append('        <submesh material="%s_%s_%s" usesharedvertices="false" use32bitindexes="false" operationtype="triangle_list">' % (formatName(name), objIdx, formatName(obj.name) if formatName(obj.name) != name else "human"))
 
         # Faces
