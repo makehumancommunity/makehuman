@@ -247,6 +247,14 @@ class Human(guicommon.Object):
     def getProxyObjects(self):
         return [ pxy.object for pxy in self.getProxies(includeHumanProxy=False) ]
 
+    def getMeshes(self):
+        """
+        All mesh objects that belong to this human, usually everything that has
+        to be exported. This can replace exportutils.collect
+        Result is a list of objects of class Human and Proxy.
+        """
+        return [self] + self.getProxies()
+
     # Overriding hide and show to account for both human base and the hairs!
 
     def show(self):
@@ -1075,7 +1083,9 @@ class Human(guicommon.Object):
     def load(self, filename, update=True, progressCallback=None):
         from codecs import open
         log.message("Loading human from MHM file %s.", filename)
-        self.callEvent('onChanging', events3d.HumanEvent(self, 'load'))
+        event = events3d.HumanEvent(self, 'load')
+        event.path = filename
+        self.callEvent('onChanging', event)
 
         self.resetMeshValues()
         self.blockEthnicUpdates = True
@@ -1112,18 +1122,23 @@ class Human(guicommon.Object):
         self.blockEthnicUpdates = False
         self._setEthnicVals()
 
-        self.callEvent('onChanged', events3d.HumanEvent(self, 'load'))
+        self.callEvent('onChanged', event)
 
         if update:
             self.applyAllTargets(progressCallback)
 
         self.setSubdivided(subdivide)
 
-        G.app.currentFile.loaded(filename)
         log.message("Done loading MHM file.")
 
     def save(self, filename, tags):
         from codecs import open
+        from progress import Progress
+        progress = Progress(len(G.app.saveHandlers))
+        event = events3d.HumanEvent(self, 'save')
+        event.path = filename
+        self.callEvent('onChanging', event)
+
         f = open(filename, "w", encoding="utf-8")
         f.write('# Written by MakeHuman %s\n' % getVersionStr())
         f.write('version %s\n' % getShortVersion())
@@ -1131,8 +1146,10 @@ class Human(guicommon.Object):
 
         for handler in G.app.saveHandlers:
             handler(self, f)
+            progress.step()
 
         f.write('subdivide %s' % self.isSubdivided())
 
         f.close()
-        G.app.currentFile.saved(filename)
+        progress(1)
+        self.callEvent('onChanged', event)

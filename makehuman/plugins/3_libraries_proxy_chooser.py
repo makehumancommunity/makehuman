@@ -102,7 +102,7 @@ class ProxyTaskView(proxychooser.ProxyChooserTaskView):
         return "proxy"
 
     def getFileExtension(self):
-        return 'proxy'
+        return ['mhpxy', 'proxy']
 
     def proxySelected(self, pxy, obj):
         self.human.setProxy(pxy)

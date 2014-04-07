@@ -352,7 +352,27 @@ doDeleteVerts = 3
 
 def loadProxy(human, path, type="Clothes"):
     try:
-        proxy = loadTextProxy(human, path, type)    # TODO perhaps proxy type should be stored in .mhclo file too
+        npzpath = os.path.splitext(path)[0] + '.mhpxy'
+        try:
+            if not os.path.isfile(npzpath):
+                log.message('compiled proxy file missing: %s', npzpath)
+                raise RuntimeError('compiled proxy file missing: %s', npzpath)
+            if os.path.isfile(path) and os.path.getmtime(path) > os.path.getmtime(npzpath):
+                log.message('compiled proxy file out of date: %s', npzpath)
+                raise RuntimeError('compiled file out of date: %s', npzpath)
+            proxy = loadBinaryProxy(npzpath, human, type)
+        except Exception as e:
+            showTrace = not isinstance(e, RuntimeError)
+            log.warning("Problem loading binary proxy: %s", e, exc_info=showTrace)
+            proxy = loadTextProxy(human, path, type)    # TODO perhaps proxy type should be stored in .mhclo file too
+            if getpath.isSubPath(npzpath, getpath.getPath()):
+                # Only write compiled binary proxies to user data path
+                try:
+                    saveBinaryProxy(proxy, npzpath)
+                except StandardError:
+                    log.notice('unable to save compiled proxy: %s', npzpath, exc_info=True)
+            else:
+                log.debug('Not writing compiled proxies to system paths (%s).', npzpath)
     except:
         log.error('Unable to load proxy file: %s', path, exc_info=True)
         return None
@@ -840,10 +860,14 @@ def transferFaceMaskToProxy(vertsMask, proxy):
     """
     Transfer a vertex mask defined on the parent mesh to a proxie using the
     proxy mapping to this parent mesh.
+    A vertex mask defines for each vertex if it should be hidden, only faces
+    that have all vertices hidden will be hidden.
+    True in vertex mask means: show vertex, false means hide (masked)
     """
     # Convert basemesh vertex mask to local mask for proxy vertices
     proxyVertMask = np.ones(len(proxy.ref_vIdxs), dtype=bool)
     if proxy.num_refverts == 3:
+        '''
         for idx,hverts in enumerate(proxy.ref_vIdxs):
             # Body verts to which proxy vertex with idx is mapped
             (v1,v2,v3) = hverts
@@ -853,6 +877,14 @@ def transferFaceMaskToProxy(vertsMask, proxy):
             proxyVertMask[idx] = np.count_nonzero(vertsMask[[v1, v2, v3]]) > 1
             # Alternative2: Only hide proxy vert if all of its referenced body verts are hidden (least agressive)
             #proxyVertMask[idx] = vertsMask[v1] or vertsMask[v2] or vertsMask[v3]
+        '''
+        # Faster numpy implementation of the above:
+        unmasked_row_col = np.nonzero(vertsMask[proxy.ref_vIdxs])
+        unmasked_rows = unmasked_row_col[0]
+        unmasked_count = np.bincount(unmasked_rows)
+        # only hide/mask a vertex if at least two referenced body verts are hidden/masked
+        masked_idxs = np.nonzero(unmasked_count < 2)
+        proxyVertMask[masked_idxs] = False
     else:
         proxyVertMask[:] = vertsMask[proxy.ref_vIdxs[:,0]]
     return proxyVertMask

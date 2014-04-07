@@ -114,9 +114,7 @@ class ExportTaskView(guipose.PoseModeTaskView):
                 log.error("Unknown export format selected!")
                 return
 
-            gui3d.app.prompt('Info', u'The mesh has been exported to %s.', 'OK', helpId='exportHelp', fmtArgs = dir)
-
-            mh.changeCategory('Modelling')
+            gui3d.app.prompt('Info', u'The mesh has been exported to %s.', 'OK', fmtArgs = dir)
 
 
     _scales = {
@@ -208,6 +206,13 @@ class ExportTaskView(guipose.PoseModeTaskView):
 
         self._requiresUpdate = False
         self.updateGui()
+
+    def onHumanChanged(self, event):
+        # If a human was loaded, update the line edit
+        if event.change in ('load', 'save'):
+            self.fileentry.edit.setText(gui3d.app.currentFile.title)
+        elif event.change == 'reset':
+            self.fileentry.edit.setText(u"")
 
     def onShow(self, event):
         guipose.PoseModeTaskView.onShow(self, event)

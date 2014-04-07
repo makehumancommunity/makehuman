@@ -318,6 +318,8 @@ class MHApplication(gui3d.Application, mh.Application):
         # Reset mesh is never forced to wireframe
         self.actions.wireframe.setChecked(False)
 
+    # TO THINK: Maybe move guiload's saveMHM here as saveHumanMHM?
+
     def loadHuman(self):
         self.progress(0.1)
 
@@ -402,6 +404,12 @@ class MHApplication(gui3d.Application, mh.Application):
             if event.change == 'smooth':
                 # Update smooth action state (without triggering it)
                 self.actions.smooth.setChecked(self.selectedHuman.isSubdivided())
+            elif event.change == 'load':
+                self.currentFile.loaded(event.path)
+            elif event.change == 'save':
+                self.currentFile.saved(event.path)
+            elif event.change == 'reset':
+                self.currentFile.closed()
             for category in self.categories.itervalues():
                 for task in category.tasks:
                     task.callEvent('onHumanChanged', event)
@@ -1247,6 +1255,16 @@ class MHApplication(gui3d.Application, mh.Application):
         mh.changeCategory("Modelling")
         self.redraw()
 
+    def doSave(self):
+        if self.currentFile.path:
+            from guisave import saveMHM
+            self.currentTask.hide()
+            saveMHM(self.currentFile.path)
+            self.currentTask.show()
+            self.redraw()
+        else:
+            self.goToSave()
+
     def goToSave(self):
         mh.changeTask("Files", "Save")
         self.redraw()
@@ -1316,7 +1334,6 @@ class MHApplication(gui3d.Application, mh.Application):
             self._resetHuman()
 
     def _resetHuman(self):
-        self.currentFile.closed()
         self.selectedHuman.resetMeshValues()
         self.selectedHuman.applyAllTargets(self.progress)
         self.clearUndoRedo()
@@ -1491,7 +1508,7 @@ class MHApplication(gui3d.Application, mh.Application):
         toolbar = self.file_toolbar = mh.addToolBar("File")
 
         self.actions.load      = action('load',      'Load',          self.goToLoad)
-        self.actions.save      = action('save',      'Save',          self.goToSave)
+        self.actions.save      = action('save',      'Save',          self.doSave)
         self.actions.export    = action('export',    'Export',        self.goToExport)
 
 

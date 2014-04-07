@@ -277,20 +277,3 @@ def deleteGroup(name, groups):
             return True
     return False
 
-def getpath(path):
-    if isinstance(path, tuple):
-        (folder, file) = path
-        path = os.path.join(folder, file)
-    if path:
-        return os.path.realpath(os.path.expanduser(path))
-    else:
-        return None
-
-def copy(frompath, topath):
-    frompath = getpath(frompath)
-    if frompath:
-        try:
-            shutil.copy(frompath, topath)
-        except (IOError, os.error), why:
-            log.error("Can't copy %s" % str(why))
-
