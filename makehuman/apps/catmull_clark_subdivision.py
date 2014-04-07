@@ -56,14 +56,10 @@ class SubdivisionObject(Object3D):
         self.cameraMode = object.cameraMode
         self.visibility = object.visibility
         self.pickable = object.pickable
-        self.material = object.material
-        self.shadeless = object.shadeless
-        self.solid = object.solid
         self.transparentPrimitives = object.transparentPrimitives * 4
         self.object = object.object
         self.parent = object    # TODO avoid conflicts with clone()'s parent
         self.priority = object.priority
-        self.cull = object.cull
 
     def create(self, progressCallback):
         log.debug('Applying Catmull-Clark subdivision on %s.', self.parent.name)

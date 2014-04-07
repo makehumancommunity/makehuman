@@ -179,15 +179,15 @@ class Proxy:
         if not mesh:
             log.error("Failed to load %s", self._obj_file)
 
-        mesh.material = self.material
         mesh.priority = self.z_depth           # Set render order
         mesh.setCameraProjection(0)             # Set to model camera
-        mesh.setSolid(human.mesh.solid)    # Set to wireframe if human is in wireframe
 
         # TODO perhaps other properties should be copied from human to object, such as subdivision state. For other hints, and duplicate code, see guicommon Object.setProxy()
 
         obj = self.object = guicommon.Object(mesh, human.getPosition())
+        obj.material = self.material
         obj.setRotation(human.getRotation())
+        obj.setSolid(human.solid)    # Set to wireframe if human is in wireframe
 
         # TODO why return both obj and mesh if you can access the mesh easily through obj.mesh?
         return mesh,obj

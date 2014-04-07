@@ -114,8 +114,6 @@ def meshFromSkeleton(skel, type="Prism"):
     mesh.update()
 
     mesh.setCameraProjection(0)
-    mesh.setShadeless(0)
-    mesh.setSolid(0)
     mesh.priority = 30
 
     return mesh
@@ -255,8 +253,6 @@ def meshFromJoints(jointPositions, jointNames=None, scale = 1.0):
     mesh.update()
 
     mesh.setCameraProjection(0)
-    mesh.setShadeless(0)
-    mesh.setSolid(0)
     mesh.priority = 30
 
     return mesh
