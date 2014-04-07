@@ -881,7 +881,7 @@ def transferFaceMaskToProxy(vertsMask, proxy):
         # Faster numpy implementation of the above:
         unmasked_row_col = np.nonzero(vertsMask[proxy.ref_vIdxs])
         unmasked_rows = unmasked_row_col[0]
-        unmasked_count = np.bincount(unmasked_rows)
+        unmasked_count = np.bincount(unmasked_rows) # count number of unmasked verts per row
         # only hide/mask a vertex if at least two referenced body verts are hidden/masked
         masked_idxs = np.nonzero(unmasked_count < 2)
         proxyVertMask[masked_idxs] = False
