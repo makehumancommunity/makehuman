@@ -145,15 +145,15 @@ class Object3D(object):
 
     @property
     def translation(self):
-        return self.parent.loc[:]
+        return self.object.loc[:]
 
     @property
     def rotation(self):
-        return self.parent.rot[:]
+        return self.object.rot[:]
 
     @property
     def scale(self):
-        return self.parent.scale[:]
+        return self.object.scale[:]
 
     @property
     def nTransparentPrimitives(self):
@@ -165,47 +165,47 @@ class Object3D(object):
 
     @property
     def transform(self):
-        return self.parent.transform
+        return self.object.transform
 
     @property
     def lockRotation(self):
-        return self.parent.lockRotation
+        return self.object.lockRotation
 
     @property
     def x(self):
-        return self.parent.x
+        return self.object.x
 
     @property
     def y(self):
-        return self.parent.y
+        return self.object.y
 
     @property
     def z(self):
-        return self.parent.z
+        return self.object.z
 
     @property
     def rx(self):
-        return self.parent.rx
+        return self.object.rx
 
     @property
     def ry(self):
-        return self.parent.ry
+        return self.object.ry
 
     @property
     def rz(self):
-        return self.parent.rz
+        return self.object.rz
 
     @property
     def sx(self):
-        return self.parent.sx
+        return self.object.sx
 
     @property
     def sy(self):
-        return self.parent.sy
+        return self.object.sy
 
     @property
     def sz(self):
-        return self.parent.sz
+        return self.object.sz
 
     @property
     def shaderObj(self):

@@ -581,8 +581,8 @@ class MHApplication(gui3d.Application, mh.Application):
         backGridMesh.minSubgridZoom = (1.0/spacing) * float(subgrids)/5
         self.backplaneGrid = gui3d.Object(backGridMesh)
         self.backplaneGrid.excludeFromProduction = True
+        self.backplaneGrid.placeAtFeet = True
         #self.backplaneGrid.setPosition([0,offset,0])
-        backGridMesh.placeAtFeet = True
         self.addObject(self.backplaneGrid)
 
         # Ground grid
@@ -595,8 +595,8 @@ class MHApplication(gui3d.Application, mh.Application):
         groundGridMesh.minSubgridZoom = (1.0/spacing) * float(subgrids)/5
         self.groundplaneGrid = gui3d.Object(groundGridMesh)
         self.groundplaneGrid.excludeFromProduction = True
+        self.groundplaneGrid.placeAtFeet = True
         #self.groundplaneGrid.setPosition([0,offset,0])
-        groundGridMesh.placeAtFeet = True
         groundGridMesh.restrictVisibleAboveGround = True
         self.addObject(self.groundplaneGrid)
 
