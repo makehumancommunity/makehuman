@@ -1,0 +1,12 @@
+{
+    "name" : "Muscles",
+
+    "description" :
+        "The default rig with muscle bones. Use this for weighting muscles.",
+
+    "settings" : {
+        "useMuscles" : true
+    }
+}
+
+
