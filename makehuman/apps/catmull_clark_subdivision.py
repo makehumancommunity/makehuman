@@ -318,10 +318,23 @@ class SubdivisionObject(Object3D):
         self.has_uv = parent.has_uv
 
     def update_coords(self):
+        """
+        Recalculate positions of subdiv coordinates
+        
+         v0  e0  v1
+         
+         e3  c   e1
+        
+         v3  e2  v2
+
+        with vi base verts at interpolated positions (bvert)
+        with c newly introduced center verts in the center of each face (cvert)
+        with ei newly introduced verts at the centers of the poly edges (evert)
+        """
         parent = self.parent
 
         bvert = self.coord[:self.cbase]            # Base verts
-        cvert = self.coord[self.cbase:self.ebase]  # Subdivided verts
+        cvert = self.coord[self.cbase:self.ebase]  # Poly center verts
         evert = self.coord[self.ebase:]            # Edge verts
 
         cvert[...] = np.sum(parent.coord[parent.fvert[self.face_map]], axis=1) / 4
