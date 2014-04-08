@@ -394,8 +394,7 @@ class Object(events3d.EventHandler):
             proxy.object = self
 
             # Copy attributes from human mesh to proxy mesh
-            for attr in ('x', 'y', 'z', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz',
-                         'visibility', 'shadeless', 'pickable', 'cameraMode', 'material'):
+            for attr in ('visibility', 'shadeless', 'pickable', 'cameraMode', 'material'):
                 setattr(self.__proxyMesh, attr, getattr(self.mesh, attr))
 
             # Connect the proxy to this object directly
