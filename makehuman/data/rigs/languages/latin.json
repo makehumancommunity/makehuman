@@ -1,0 +1,27 @@
+{
+    "language" : "Latin",
+    "bones" : {
+        "head":     "caput",
+        "neck":     "collum",
+        "hips":     "coxae",
+        "spine":    "spinae",
+        "chest":    "cistum",
+
+        "upper_arm":"brachium",
+        "forearm":  "bracchioque",
+        "hand":     "manus",
+        "palm":     "palm",
+        "finger":   "digitus",
+
+        "f_thumb":    "f_primus",
+        "f_index":    "f_secundus",
+        "f_middle":   "f_tertius",
+        "f_ring":     "f_quartus",
+        "f_pinky":    "f_quintus",
+
+        "thigh":    "femore",
+        "shin":     "tibiae",
+        "foot":     "pedites",
+        "toe":      "pedum"
+    }
+}
