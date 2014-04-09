@@ -96,8 +96,8 @@ class SaveTaskView(gui3d.TaskView):
         self.fileentry.setFilter('MakeHuman Models (*.mhm)')
 
         @self.fileentry.mhEvent
-        def onFileSelected(filename):
-            saveMHM(os.path.join(self.modelPath, filename))
+        def onFileSelected(event):
+            saveMHM(event.path)
 
     def onShow(self, event):
         """Handler for the TaskView onShow event.
@@ -105,14 +105,14 @@ class SaveTaskView(gui3d.TaskView):
         and give focus to the file entry."""
         gui3d.TaskView.onShow(self, event)
 
-        self.modelPath = G.app.currentFile.dir
-        if self.modelPath is None:
-            self.modelPath = mh.getPath("models")
-        self.fileentry.setDirectory(self.modelPath)
+        modelPath = G.app.currentFile.dir
+        if modelPath is None:
+            modelPath = mh.getPath("models")
+        self.fileentry.directory = modelPath
 
         name = G.app.currentFile.title
         if name is None:
             name = ""
-        self.fileentry.edit.setText(pathToUnicode(name))
+        self.fileentry.text = name
 
         self.fileentry.setFocus()
