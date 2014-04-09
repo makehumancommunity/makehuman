@@ -118,11 +118,11 @@ class LoadTaskView(gui3d.TaskView):
         self.modelPath = None
 
         self.fileentry = self.addTopWidget(gui.FileEntryView('Browse', mode='dir'))
-        self.fileentry.setFilter('MakeHuman Models (*.mhm)')
+        self.fileentry.filter = 'MakeHuman Models (*.mhm)'
 
         @self.fileentry.mhEvent
-        def onFileSelected(dirpath):
-            self.filechooser.setPaths([dirpath])
+        def onFileSelected(event):
+            self.filechooser.setPaths([event.path])
             self.filechooser.refresh()
 
         self.filechooser = fc.IconListFileChooser(mh.getPath("models"), 'mhm', 'thumb', mh.getSysDataPath('notfound.thumb'), sort=HumanFileSort())
@@ -144,7 +144,7 @@ class LoadTaskView(gui3d.TaskView):
         if self.modelPath is None:
             self.modelPath = mh.getPath("models")
 
-        self.fileentry.setDirectory(self.modelPath)
+        self.fileentry.directory = self.modelPath
         self.filechooser.setPaths(self.modelPath)
         self.filechooser.setFocus()
 
