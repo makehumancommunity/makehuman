@@ -51,9 +51,7 @@ from getpath import pathToUnicode
 
 def saveMHM(path):
     """Save the .mhm and the thumbnail to the selected save path."""
-    if not path.lower().endswith('.mhm'):
-        path += '.mhm'
-    path = os.path.normpath(path)
+    path = pathToUnicode(os.path.normpath(path))
 
     savedir = os.path.dirname(path)
     if not os.path.exists(savedir):
@@ -96,8 +94,17 @@ class SaveTaskView(gui3d.TaskView):
         self.fileentry.setFilter('MakeHuman Models (*.mhm)')
 
         @self.fileentry.mhEvent
-        def onFileSelected(filename):
-            saveMHM(os.path.join(self.modelPath, filename))
+        def onFileSelected(event):
+            path = event.path
+            if not path.lower().endswith(".mhm"):
+                path += ".mhm"
+            if event.source in ('return', 'button') and \
+                os.path.exists(path) and \
+                path != G.app.currentFile.path:
+                G.app.prompt("File exists", "The file already exists. Overwrite?", 
+                    "Yes", "No", lambda: saveMHM(path))
+            else:
+                saveMHM(path)
 
     def onShow(self, event):
         """Handler for the TaskView onShow event.
@@ -105,14 +112,14 @@ class SaveTaskView(gui3d.TaskView):
         and give focus to the file entry."""
         gui3d.TaskView.onShow(self, event)
 
-        self.modelPath = G.app.currentFile.dir
-        if self.modelPath is None:
-            self.modelPath = mh.getPath("models")
-        self.fileentry.setDirectory(self.modelPath)
+        modelPath = G.app.currentFile.dir
+        if modelPath is None:
+            modelPath = mh.getPath("models")
+        self.fileentry.directory = modelPath
 
         name = G.app.currentFile.title
         if name is None:
             name = ""
-        self.fileentry.edit.setText(pathToUnicode(name))
+        self.fileentry.text = name
 
         self.fileentry.setFocus()
