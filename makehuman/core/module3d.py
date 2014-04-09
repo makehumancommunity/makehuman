@@ -1007,8 +1007,7 @@ class Object3D(object):
         return np.vstack((v0, v1))
 
     def __str__(self):
-        x, y, z = self.loc
-        return 'object3D named: %s, nverts: %s, nfaces: %s, at |%s,%s,%s|' % (self.name, self.getVertexCount(), self.getFaceCount(), x, y, z)
+        return 'object3D named: %s, nverts: %s, nfaces: %s' % (self.name, self.getVertexCount(), self.getFaceCount())
 
 def dot_v3(v3_arr1, v3_arr2):
     """
