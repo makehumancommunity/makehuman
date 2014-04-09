@@ -163,8 +163,8 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
         self.cloPickableProps = dict()
         for uuid, pxy in human.clothesProxies.items():
             obj = pxy.object
-            self.cloPickableProps[uuid] = clo.mesh.pickable
-            clo.mesh.setPickable(False)
+            self.cloPickableProps[uuid] = obj.mesh.pickable
+            obj.mesh.setPickable(False)
 
     def onHide(self, event):
         human = G.app.selectedHuman
