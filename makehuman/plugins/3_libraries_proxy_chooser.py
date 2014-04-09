@@ -182,7 +182,7 @@ class ProxyTaskView(proxychooser.ProxyChooserTaskView):
     def isProxySelected(self):
         return self.human.isProxied()
 
-    def adaptAllProxies(self):
+    def adaptAllProxies(self, **kwargs):
         pass
 
 
