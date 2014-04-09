@@ -80,8 +80,8 @@ def Render(settings):
 
         progress(0.9, 0.95, "Setting up renderer")
         human.material.diffuseTexture = lmap
-        human.mesh.configureShading(diffuse = True)
-        human.mesh.shadeless = True
+        human.configureShading(diffuse = True)
+        human.shadeless = True
         progress(0.95, 0.98, None)
     else:
         progress(0, 0.99, None)
