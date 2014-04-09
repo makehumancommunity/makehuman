@@ -389,6 +389,29 @@ class SubdivisionObject(Object3D):
         self.update_coords()
         super(SubdivisionObject, self).update()
 
+    def changeFaceMask(self, mask, indices=None, remapFromUnsubdivided=True):
+        """
+        Change face mask of subdivided mesh.
+        If remapFromUnsubdivided is True (default), the mask parameter is
+        expected to be a face mask for the original mesh (self.parent).
+        In this case a remapping to the subdivided faces will occur (indices 
+        parameter is ignored).
+
+        If remapFromUnsubdivided is False, a facemask can be applied directly
+        on the subdivided mesh faces.
+        """
+        if remapFromUnsubdivided:
+            nBaseFaces = len(self.face_map)
+
+            # Duplicate the facemask to 4 faces per seedmesh face
+            subdiv_face_mask = np.zeros((nBaseFaces, 4), dtype=bool)
+            subdiv_face_mask[:] = mask[self.face_map][:,None]
+            subdiv_face_mask = subdiv_face_mask.reshape(4*nBaseFaces)
+
+            super(SubdivisionObject, self).changeFaceMask(subdiv_face_mask)
+        else:
+            super(SubdivisionObject, self).changeFaceMask(mask)
+
 def createSubdivisionObject(object, progressCallback=None):
     obj = SubdivisionObject(object)
     obj.create(progressCallback)
