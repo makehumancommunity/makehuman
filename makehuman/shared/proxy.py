@@ -142,19 +142,6 @@ class Proxy:
     def getMesh(self):
         return self.object.mesh
 
-        for pxy in self.human.getProxies():
-            if self == pxy:
-                return pxy.object.mesh
-
-        if self.type == "Proxymeshes":
-            if not human.proxy:
-                return None
-            return human.mesh
-        elif self.type in ["Cage", "Converter"]:
-            return None
-        else:
-            raise NameError("Unknown proxy type %s" % self.type)
-
 
     def getActualTexture(self, human):
         uuid = self.getUuid()
