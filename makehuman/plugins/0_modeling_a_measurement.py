@@ -73,9 +73,6 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
         self.uk = self.braBox.addWidget(gui.TextView('UK: '))
         '''
 
-        # TODO
-        #self.groupBox.showWidget(self.groupBoxes['neck'])
-
     def addSlider(self, sliderCategory, slider):
         super(MeasureTaskView, self).addSlider(sliderCategory, slider)
 
@@ -93,29 +90,6 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
         def onChange(event):
             self.syncGUIStats()
         self.sliders.append(slider)
-
-    def onMouseDown(self, event):
-        part = G.app.getSelectedFaceGroup()
-        bodyZone = G.app.selectedHuman.getPartNameForGroupName(part.name)
-        log.debug("body zone %s", bodyZone)
-        if bodyZone in G.app.selectedHuman.bodyZones:
-            # TODO body zones have probably been abandoned after removal of microtarget groups
-            if bodyZone == "neck":
-                self.showGroup('Neck')
-            elif (bodyZone == "r-upperarm") or (bodyZone == "l-upperarm"):
-                self.showGroup('Upper arm')
-            elif (bodyZone == "r-lowerarm") or (bodyZone == "l-lowerarm"):
-                self.showGroup('Lower arm')
-            elif (bodyZone == "torso") or (bodyZone == "pelvis"):
-                self.showGroup('Torso')
-            elif bodyZone == "hip":
-                self.showGroup('Hips')
-            elif (bodyZone == "l-upperleg") or (bodyZone == "r-upperleg"):
-                self.showGroup('Upper leg')
-            elif (bodyZone == "l-lowerleg") or (bodyZone == "r-lowerleg"):
-                self.showGroup('Lower leg')
-            elif (bodyZone == "l-foot") or (bodyZone == "r-foot"):
-                self.showGroup('Ankle')
 
     def _createMeasureMesh(self):
         self.measureMesh = module3d.Object3D('measure', 2)
@@ -160,17 +134,9 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
         self.syncGUIStats()
         self.updateMeshes()
         human = G.app.selectedHuman
-        self.cloPickableProps = dict()
-        for uuid, pxy in human.clothesProxies.items():
-            obj = pxy.object
-            self.cloPickableProps[uuid] = obj.mesh.pickable
-            obj.mesh.setPickable(False)
 
     def onHide(self, event):
         human = G.app.selectedHuman
-        for uuid, pickable in self.cloPickableProps.items():
-            pxy = human.clothesProxies[uuid]
-            pxy.object.mesh.setPickable(pickable)
 
     def onSliderFocus(self, slider):
         self.lastActive = slider
