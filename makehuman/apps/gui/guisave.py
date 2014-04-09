@@ -51,9 +51,7 @@ from getpath import pathToUnicode
 
 def saveMHM(path):
     """Save the .mhm and the thumbnail to the selected save path."""
-    if not path.lower().endswith('.mhm'):
-        path += '.mhm'
-    path = os.path.normpath(path)
+    path = pathToUnicode(os.path.normpath(path))
 
     savedir = os.path.dirname(path)
     if not os.path.exists(savedir):
@@ -97,7 +95,16 @@ class SaveTaskView(gui3d.TaskView):
 
         @self.fileentry.mhEvent
         def onFileSelected(event):
-            saveMHM(event.path)
+            path = event.path
+            if not path.lower().endswith(".mhm"):
+                path += ".mhm"
+            if event.source in ('return', 'button') and \
+                os.path.exists(path) and \
+                path != G.app.currentFile.path:
+                G.app.prompt("File exists", "The file already exists. Overwrite?", 
+                    "Yes", "No", lambda: saveMHM(path))
+            else:
+                saveMHM(path)
 
     def onShow(self, event):
         """Handler for the TaskView onShow event.
