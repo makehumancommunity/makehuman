@@ -41,6 +41,7 @@ import events3d
 
 import numpy as np
 import matrix
+import material
 
 class Action(object):
     def __init__(self, name):
@@ -74,6 +75,8 @@ class Object(events3d.EventHandler):
         self.mesh.object = self
         self.mesh.setVisibility(visible)
 
+        self._material = material.Material(self.name+"_Material")  # Render material
+
         self._loc = np.zeros(3, dtype=np.float32)
         self._rot = np.zeros(3, dtype=np.float32)
         self._scale = np.ones(3, dtype=np.float32)
@@ -102,7 +105,6 @@ class Object(events3d.EventHandler):
         pass
 
     def _attach(self):
-
         if self.view.isVisible() and self.visible:
             self.mesh.setVisibility(1)
         else:
@@ -336,25 +338,6 @@ class Object(events3d.EventHandler):
         return m
 
 
-    def setTexture(self, texture):
-        self.mesh.setTexture(texture)
-
-    def getTexture(self):
-        return self.mesh.texture
-
-    def clearTexture(self):
-        self.mesh.setTexture(None)
-
-    def hasTexture(self):
-        return self.mesh.hasTexture()
-
-    def setSolid(self, solid):
-        for mesh in self._meshes():
-            mesh.setSolid(solid)
-
-    def isSolid(self):
-        return self.__seedMesh.solid
-
     def getSeedMesh(self):
         return self.__seedMesh
 
@@ -373,8 +356,6 @@ class Object(events3d.EventHandler):
         isSubdivided = self.isSubdivided()
 
         if self.proxy:
-            # Copy proxy mesh material settings back to original mesh
-            self.__seedMesh.material = self.mesh.material
             self.proxy = None
             self.detachMesh(self.__proxyMesh)
             self.__proxyMesh.clear()
@@ -394,7 +375,7 @@ class Object(events3d.EventHandler):
             proxy.object = self
 
             # Copy attributes from human mesh to proxy mesh
-            for attr in ('visibility', 'shadeless', 'pickable', 'cameraMode', 'material'):
+            for attr in ('visibility', 'pickable', 'cameraMode'):
                 setattr(self.__proxyMesh, attr, getattr(self.mesh, attr))
 
             # Connect the proxy to this object directly
@@ -409,7 +390,6 @@ class Object(events3d.EventHandler):
             self.mesh.setVisibility(0)
             self.mesh = self.__proxyMesh
             self.mesh.setVisibility(1)
-            self.__proxyMesh.setSolid(self.__seedMesh.solid)
 
         self.setSubdivided(isSubdivided)
 
@@ -430,7 +410,7 @@ class Object(events3d.EventHandler):
 
         if self.isProxied():
             if not self.__proxySubdivisionMesh:
-                self.__proxySubdivisionMesh = cks.createSubdivisionObject(self.__proxyMesh, progressCallback)
+                self.__proxySubdivisionMesh = cks.createSubdivisionObject(self.__proxyMesh, None, progressCallback)
                 if self.__seedMesh.object3d:
                     self.attachMesh(self.__proxySubdivisionMesh)
             elif update:
@@ -439,7 +419,7 @@ class Object(events3d.EventHandler):
             return self.__proxySubdivisionMesh
         else:
             if not self.__subdivisionMesh:
-                self.__subdivisionMesh = cks.createSubdivisionObject(self.__seedMesh, progressCallback)
+                self.__subdivisionMesh = cks.createSubdivisionObject(self.__seedMesh, self.staticFaceMask, progressCallback)
                 if self.__seedMesh.object3d:
                     self.attachMesh(self.__subdivisionMesh)
             elif update:
@@ -470,15 +450,8 @@ class Object(events3d.EventHandler):
             originalMesh = self.mesh
             self.mesh = self.getSubdivisionMesh(update, progressCallback)
             self.mesh.setVisibility(1)
-
-            # Copy material
-            self.mesh.setMaterial(originalMesh.material)
-
         else:
             originalMesh = self.__seedMesh if self.mesh == self.__subdivisionMesh else self.__proxyMesh
-
-            # Copy material
-            originalMesh.material = self.mesh.material
 
             self.mesh.setVisibility(0)
             self.mesh = originalMesh
@@ -498,9 +471,7 @@ class Object(events3d.EventHandler):
             self.getSubdivisionMesh(True)
 
     def _setMeshUVMap(self, filename, mesh):
-        import material
-
-        if filename == mesh.material.uvMap:
+        if filename == self.material.uvMap:
             # No change, do nothing
             return
 
@@ -515,7 +486,7 @@ class Object(events3d.EventHandler):
         faceMask = mesh.getFaceMask()
         faceGroups = mesh.group
 
-        mesh.material.uvMap = filename
+        self.material.uvMap = filename
 
         if not filename:
             # Restore original UVs
@@ -537,31 +508,247 @@ class Object(events3d.EventHandler):
         mesh.changeFaceMask(faceMask)
         mesh.updateIndexBuffer()
 
-    def setShader(self, path):
+    @property
+    def staticFaceMask(self):
+        if not hasattr(self, '_staticFaceMask') or \
+           self._staticFaceMask is None:
+            # If not already set, consider the current face mask state of the
+            # mesh to be the static face mask
+            self._staticFaceMask = self.__seedMesh.face_mask.copy()
+        return self._staticFaceMask
+
+    def changeVertexMask(self, vertsMask):
         """
-        Set shader
-        Make sure the seed mesh is updated as well, so that visual appearence
-        of the mesh remains consistent during dragging of target sliders.
-        Because while dragging sliders, the original seed mesh is shown.
+        Apply a face mask to the meshes (original seed mesh, subdivided mesh
+        and proxied meshes).
         """
-        self.mesh.setShader(path)
-        if self.isSubdivided() or self.isProxied():
-            # Update seed mesh
-            self.getSeedMesh().setShader(path)
+        if vertsMask is None:
+            # Undo face mask set by vertex mask
+            self.__seedMesh.changeFaceMask(self.staticFaceMask)
+            self.__seedMesh.updateIndexBufferFaces()
+            if self.__subdivisionMesh:
+                self.__subdivisionMesh.changeFaceMask(self.staticFaceMask)
+                self.__subdivisionMesh.updateIndexBufferFaces()
+            if self.__proxyMesh:
+                self.__proxyMesh.changeFaceMask(np.ones(self.__proxyMesh.getFaceCount(), dtype=bool))
+                self.__proxyMesh.updateIndexBufferFaces()
+            if self.__proxySubdivisionMesh:
+                self.__proxySubdivisionMesh.changeFaceMask(np.ones(self.__proxySubdivisionMesh.getFaceCount(), dtype=bool))
+                self.__proxySubdivisionMesh.updateIndexBufferFaces()
+            return
+
+        # Mask seed mesh
+        faceMask = self.__seedMesh.getFaceMaskForVertices(np.argwhere(vertsMask)[...,0])
+        self.__seedMesh.changeFaceMask(np.logical_and(faceMask, self.staticFaceMask))
+        self.__seedMesh.updateIndexBufferFaces()
+
+        import log
+        log.debug("%s faces masked for %s", np.count_nonzero(~faceMask), self.__seedMesh.name)
+
+        # Mask smoothed seed mesh
+        if self.__subdivisionMesh:
+            # Remap faceMask to subdivision mesh base faces, accounting for the
+            # excluded faces of the static facemask (staticFaceMask).
+            
+            # Statically masked faces (staticFaceMask) are excluded from 
+            # subdivision mesh geometry, for performance.
+            # Dynamically masked faces (eg. using this method) are not excluded
+            # from the subdivision mesh and simply masked, allowing faster
+            # changes to the face mask without requiring a rebuild of the
+            # subdivision mesh.
+            self.__subdivisionMesh.changeFaceMask(faceMask)
+            self.__subdivisionMesh.updateIndexBufferFaces()
+
+        # Mask proxy and subdivided proxy mesh
+        if self.__proxyMesh:
+            import proxy
+            # Transfer face mask to proxy
+            proxyVertMask = proxy.transferFaceMaskToProxy(vertsMask, self.proxy)
+            proxyFaceMask = self.__proxyMesh.getFaceMaskForVertices(np.argwhere(proxyVertMask)[...,0])
+
+            self.__proxyMesh.changeFaceMask(proxyFaceMask)
+            self.__proxyMesh.updateIndexBufferFaces()
+
+            if self.__proxySubdivisionMesh:
+                self.__proxySubdivisionMesh.changeFaceMask(proxyFaceMask)
+                self.__proxySubdivisionMesh.updateIndexBufferFaces()
+
+
+    ##
+    # Material properties
+    ##
+
+    def setTexture(self, path):
+        """
+        This method is used to specify the path of a file on disk containing the object texture.
+
+        :param path: The path of a texture file.
+        :type path: str
+        :param cache: The texture cache to use.
+        :type cache: dict
+        """
+        self.material.diffuseTexture = path
+
+    def getTexture(self):
+        return self.material.diffuseTexture
+
+    texture = property(getTexture, setTexture)
+
+    def clearTexture(self):
+        """
+        This method is used to clear an object's texture.
+        """
+        self.material.diffuseTexture = None
+
+    def hasTexture(self):
+        return self.texture is not None
+
+    def setShader(self, shader):
+        """
+        This method is used to specify the shader.
+        
+        :param shader: The path to a pair of shader files.
+        :type shader: string
+        """
+        self.material.setShader(shader)
+
+    def getShader(self):
+        return self.material.shader
+
+    shader = property(getShader, setShader)
+
+    @property
+    def shaderObj(self):
+        return self.material.shaderObj
+
+    def configureShading(self, diffuse=None, bump = None, normal=None, displacement=None, spec = None, vertexColors = None):
+        """
+        Configure shader options and set the necessary properties based on
+        the material configuration of this object.
+        This can be done without an actual shader being set for this object.
+        Call this method when changes are made to the material property.
+        """
+        self.material.configureShading(diffuse, bump, normal, displacement, spec, vertexColors)
+
+    def getMaterial(self):
+        return self._material
+
+    def setMaterial(self, material):
+        if self.material.uvMap != material.uvMap:
+            # UV map has changed
+            self.setUVMap(material.uvMap)
+        self._material.copyFrom(material)
+
+    material = property(getMaterial, setMaterial)
 
     def setShaderParameter(self, name, value):
         """
-        This method updates the shader parameters for the currently shown mesh
-        object, but also that of the original seed mesh if it is subdivided or
-        proxied.
-        Use this method when you want to stream in shader parameters to human
-        while sliders are being moved, because while dragging only the seed mesh
-        is shown.
+        Updates the shader parameters.
         """
-        self.mesh.setShaderParameter(name, value)
-        if self.isSubdivided() or self.isProxied():
-            # Update seed mesh
-            self.getSeedMesh().setShaderParameter(name, value)
+        self.material.setShaderParameter(name, value)
+
+    @property
+    def shaderParameters(self):
+        return self.material.shaderParameters
+
+    @property
+    def shaderConfig(self):
+        return self.material.shaderConfig
+
+    @property
+    def shaderDefines(self):
+        return self.material.shaderDefines
+
+    def addShaderDefine(self, defineStr):
+        self.material.addShaderDefine(defineStr)
+
+    def removeShaderDefine(self, defineStr):
+        self.material.removeShaderDefine(defineStr)
+
+    def clearShaderDefines(self):
+        self.material.clearShaderDefines()
+
+    def setShadeless(self, shadeless):
+        """
+        This method is used to specify whether or not the object is affected by lights.
+        This is used for certain GUI controls to give them a more 2D type
+        appearance (predominantly the top bar of GUI controls).
+
+        NOTE enabling this option disables the use of the shader configured in the material.
+
+        :param shadeless: Whether or not the object is unaffected by lights.
+        :type shadeless: Boolean
+        """
+        self.material.shadeless = shadeless
+
+    def getShadeless(self):
+        return self.material.shadeless
+
+    shadeless = property(getShadeless, setShadeless)
+
+    def setDepthless(self, depthless):
+        """
+        This method is used to specify whether or not the object occludes or is occluded
+        by other objects
+
+        :param depthless: Whether or not the object is occluded or occludes.
+        :type depthless: Boolean
+        """
+        self.material.depthless = depthless
+
+    def getDepthless(self):
+        return self.material.depthless
+
+    depthless = property(getDepthless, setDepthless)
+
+    def setSolid(self, solid):
+        """
+        This method is used to specify whether or not the object is drawn solid or wireframe.
+
+        :param solid: Whether or not the object is drawn solid or wireframe.
+        :type solid: Boolean
+        """
+        self.material.wireframe = not solid
+
+    def isSolid(self):
+        return self.solid
+
+
+    def getSolid(self):
+        return not self.material.wireframe
+
+    solid = property(getSolid, setSolid)
+
+    def setCull(self, cull):
+        """
+        This method is used to specify whether or not the object is back-face culled.
+
+        :param cull: Whether and how to cull
+        :type cull: 0 => no culling, >0 => draw front faces, <0 => draw back faces
+        """
+
+        # Because we don't really need frontface culling, we simplify to only backface culling
+        if (isinstance(cull, bool) and cull) or cull > 0:
+            self.material.backfaceCull = True
+        else:
+            self.material.backfaceCull = False
+
+    def getCull(self):
+        # Because we don't really need frontface culling, we simplify to only backface culling
+        if self.material.backfaceCull:
+            return 1
+        else:
+            return 0
+
+    cull = property(getCull, setCull)
+
+    def getAlphaToCoverage(self):
+        return self.material.alphaToCoverage
+
+    def setAlphaToCoverage(self, a2cEnabled):
+        self.material.alphaToCoverage = a2cEnabled
+
+    alphaToCoverage = property(getAlphaToCoverage, setAlphaToCoverage)
 
     def setUVMap(self, filename):
         subdivided = self.isSubdivided()
@@ -584,16 +771,7 @@ class Object(events3d.EventHandler):
             # Re-generate the subdivided mesh with new UV coordinates
             self.setSubdivided(True)
 
-    # TODO store material in this object instead of in mesh
-    def setMaterial(self, material):
-        self.setUVMap(material.uvMap)
-        self.mesh.setMaterial(material)
-        self.__seedMesh.setMaterial(material)
 
-    def getMaterial(self):
-        return self.mesh.getMaterial()
-
-    material = property(getMaterial, setMaterial)
 
     def onMouseDown(self, event):
         if self.view:

@@ -582,6 +582,7 @@ class MHApplication(gui3d.Application, mh.Application):
         self.backplaneGrid = gui3d.Object(backGridMesh)
         self.backplaneGrid.excludeFromProduction = True
         self.backplaneGrid.placeAtFeet = True
+        self.backplaneGrid.setShadeless(1)
         #self.backplaneGrid.setPosition([0,offset,0])
         self.addObject(self.backplaneGrid)
 
@@ -596,6 +597,7 @@ class MHApplication(gui3d.Application, mh.Application):
         self.groundplaneGrid = gui3d.Object(groundGridMesh)
         self.groundplaneGrid.excludeFromProduction = True
         self.groundplaneGrid.placeAtFeet = True
+        self.groundplaneGrid.setShadeless(1)
         #self.groundplaneGrid.setPosition([0,offset,0])
         groundGridMesh.restrictVisibleAboveGround = True
         self.addObject(self.groundplaneGrid)
