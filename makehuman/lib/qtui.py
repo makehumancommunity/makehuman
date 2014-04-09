@@ -511,6 +511,17 @@ class Frame(QtGui.QMainWindow):
             if child.isWidgetType():
                 self.refreshLayout(child)
 
+    def saveGeometry(self):
+        """Return a saveable string representing the window's geometry.
+        It can be used for saving the window's shape into a settings file."""
+        return str(QtGui.QMainWindow.saveGeometry(self).toHex())
+
+    def restoreGeometry(self, data):
+        """Set the window shape according to a string saved
+        with saveGeometry()."""
+        QtGui.QMainWindow.restoreGeometry(self, QtCore.QByteArray.fromHex(data))
+
+
 class LogWindow(qtgui.ListView):
 
     def __init__(self):
