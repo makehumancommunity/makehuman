@@ -410,7 +410,7 @@ class Object(events3d.EventHandler):
 
         if self.isProxied():
             if not self.__proxySubdivisionMesh:
-                self.__proxySubdivisionMesh = cks.createSubdivisionObject(self.__proxyMesh, progressCallback)
+                self.__proxySubdivisionMesh = cks.createSubdivisionObject(self.__proxyMesh, self.staticFaceMask, progressCallback)
                 if self.__seedMesh.object3d:
                     self.attachMesh(self.__proxySubdivisionMesh)
             elif update:
@@ -419,7 +419,7 @@ class Object(events3d.EventHandler):
             return self.__proxySubdivisionMesh
         else:
             if not self.__subdivisionMesh:
-                self.__subdivisionMesh = cks.createSubdivisionObject(self.__seedMesh, progressCallback)
+                self.__subdivisionMesh = cks.createSubdivisionObject(self.__seedMesh, self.staticFaceMask, progressCallback)
                 if self.__seedMesh.object3d:
                     self.attachMesh(self.__subdivisionMesh)
             elif update:
@@ -508,6 +508,15 @@ class Object(events3d.EventHandler):
         mesh.changeFaceMask(faceMask)
         mesh.updateIndexBuffer()
 
+    @property
+    def staticFaceMask(self):
+        if not hasattr(self, '_staticFaceMask') or \
+           self._staticFaceMask is None:
+            # If not already set, consider the current face mask state of the
+            # mesh to be the static face mask
+            self._staticFaceMask = self.__seedMesh.face_mask.copy()
+        return self._staticFaceMask
+
     def changeVertexMask(self, vertsMask):
         """
         Apply a face mask to the meshes (original seed mesh, subdivided mesh
@@ -515,10 +524,10 @@ class Object(events3d.EventHandler):
         """
         if vertsMask is None:
             # Undo face mask set by vertex mask
-            self.__seedMesh.changeFaceMask(self._originalSeedFaceMask)
+            self.__seedMesh.changeFaceMask(self.staticFaceMask)
             self.__seedMesh.updateIndexBufferFaces()
             if self.__subdivisionMesh:
-                self.__subdivisionMesh.changeFaceMask(self._originalSeedFaceMask)
+                self.__subdivisionMesh.changeFaceMask(self.staticFaceMask)
                 self.__subdivisionMesh.updateIndexBufferFaces()
             if self.__proxyMesh:
                 self.__proxyMesh.changeFaceMask(np.ones(self.__proxyMesh.getFaceCount(), dtype=bool))
@@ -526,18 +535,11 @@ class Object(events3d.EventHandler):
             if self.__proxySubdivisionMesh:
                 self.__proxySubdivisionMesh.changeFaceMask(np.ones(self.__proxySubdivisionMesh.getFaceCount(), dtype=bool))
                 self.__proxySubdivisionMesh.updateIndexBufferFaces()
-
-            self._originalSeedFaceMask = None
-
             return
-
-        if not hasattr(self, '_originalSeedFaceMask') or \
-           self._originalSeedFaceMask is None:
-            self._originalSeedFaceMask = self.__seedMesh.face_mask.copy()
 
         # Mask seed mesh
         faceMask = self.__seedMesh.getFaceMaskForVertices(np.argwhere(vertsMask)[...,0])
-        self.__seedMesh.changeFaceMask(np.logical_and(faceMask, self._originalSeedFaceMask))
+        self.__seedMesh.changeFaceMask(np.logical_and(faceMask, self.staticFaceMask))
         self.__seedMesh.updateIndexBufferFaces()
 
         import log
@@ -546,9 +548,9 @@ class Object(events3d.EventHandler):
         # Mask smoothed seed mesh
         if self.__subdivisionMesh:
             # Remap faceMask to subdivision mesh base faces, accounting for the
-            # excluded faces of the static facemask (_originalSeedFaceMask).
+            # excluded faces of the static facemask (staticFaceMask).
             
-            # Statically masked faces (_originalSeedFaceMask) are excluded from 
+            # Statically masked faces (staticFaceMask) are excluded from 
             # subdivision mesh geometry, for performance.
             # Dynamically masked faces (eg. using this method) are not excluded
             # from the subdivision mesh and simply masked, allowing faster
