@@ -154,7 +154,7 @@ def loadObjFile(path, obj = None):
     return obj
 
 
-def writeObjFile(path, objects, writeMTL = True, config = None):
+def writeObjFile(path, objects, writeMTL=True, config=None, filterMaskedFaces=True):
     if not isinstance(objects, list):
         objects = [objects]
 
@@ -171,8 +171,16 @@ def writeObjFile(path, objects, writeMTL = True, config = None):
         mtlfile = path.replace(".obj",".mtl")
         fp.write("mtllib %s\n" % os.path.basename(mtlfile))
 
+    # Scale and filter out masked faces and unused verts
+    if filterMaskedFaces:
+        # Set scale to 1 and scale manually so it works for unfiltered too
+        filteredObjs = [o.clone(scale=1, filterMaskedVerts=True) for o in objects]
+    else:
+        # Unfiltered
+        filteredObjs = objects
+
     # Vertices
-    for obj in objects:
+    for obj in filteredObjs:
         if config:
             coord = config.scale * (obj.coord - config.offset)
         else:
@@ -181,40 +189,48 @@ def writeObjFile(path, objects, writeMTL = True, config = None):
 
     # Vertex normals
     if config == None or config.useNormals:
-        for obj in objects:
+        for obj in filteredObjs:
             obj.calcNormals()
             fp.write("".join( ["vn %.4f %.4f %.4f\n" % tuple(no) for no in obj.vnorm] ))
 
     # UV vertices
-    for obj in objects:
+    for obj in filteredObjs:
         if obj.has_uv:
             fp.write("".join( ["vt %.4f %.4f\n" % tuple(uv) for uv in obj.texco] ))
 
     # Faces
     nVerts = 1
     nTexVerts = 1
-    for obj in objects:
+    for obj in filteredObjs:
         fp.write("usemtl %s\n" % obj.material.name)
         fp.write("g %s\n" % obj.name)
 
         if config == None or config.useNormals:
             if obj.has_uv:
                 for fn,fv in enumerate(obj.fvert):
+                    if not obj.face_mask[fn]:
+                        continue
                     fuv = obj.fuvs[fn]
                     line = [" %d/%d/%d" % (fv[n]+nVerts, fuv[n]+nTexVerts, fv[n]+nVerts) for n in range(4)]
                     fp.write("f" + "".join(line) + "\n")
             else:
                 for fn,fv in enumerate(obj.fvert):
+                    if not obj.face_mask[fn]:
+                        continue
                     line = [" %d//%d" % (fv[n]+nVerts, fv[n]+nVerts) for n in range(4)]
                     fp.write("f" + "".join(line) + "\n")
         else:
             if obj.has_uv:
                 for fn,fv in enumerate(obj.fvert):
+                    if not obj.face_mask[fn]:
+                        continue
                     fuv = obj.fuvs[fn]
                     line = [" %d/%d" % (fv[n]+nVerts, fuv[n]+nTexVerts) for n in range(4)]
                     fp.write("f" + "".join(line) + "\n")
             else:
-                for fv in obj.fvert:
+                for fn,fv in enumerate(obj.fvert):
+                    if not obj.face_mask[fn]:
+                        continue
                     line = [" %d" % (fv[n]+nVerts) for n in range(4)]
                     fp.write("f" + "".join(line) + "\n")
 
@@ -228,7 +244,7 @@ def writeObjFile(path, objects, writeMTL = True, config = None):
         fp.write(
             '# MakeHuman exported MTL\n' +
             '# www.makehuman.org\n\n')
-        for obj in objects:
+        for obj in filteredObjs:
             writeMaterial(fp, obj.material, config)
         fp.close()
 
