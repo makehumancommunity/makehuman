@@ -88,9 +88,9 @@ def compileProxy(path, human):
 if __name__ == '__main__':
     human = Human(files3d.loadMesh(getSysDataPath("3dobjs/base.obj")))
     allFiles = getAllFiles('data', ['*.mhclo', '*.proxy'])
-    allProxies = allFiles[0]
-    for (i, path) in enumerate(allProxies):
-        compileProxy(path, human)
-        print "[%.0f%% done] converted proxy %s" % (100*(float(i)/float(len(allProxies))), path)
+    for allProxies in allFiles:
+        for (i, path) in enumerate(allProxies):
+            compileProxy(path, human)
+            print "[%.0f%% done] converted proxy %s" % (100*(float(i)/float(len(allProxies))), path)
 
     print "All done."
