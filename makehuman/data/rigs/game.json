@@ -1,0 +1,16 @@
+{
+    "name" : "Game",
+
+    "description" :
+        "A minimal rig intended for games.",
+
+    "settings" : {
+        "mergeSpine" : true,
+        "mergeShoulders" : true,
+        "mergeFingers" : true,
+        "mergePalms" : true,
+        "mergeHead" : true
+    }
+}
+
+
