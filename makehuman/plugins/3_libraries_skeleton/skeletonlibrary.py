@@ -243,7 +243,7 @@ class SkeletonLibrary(gui3d.TaskView):
         self.oldPxyMats = dict()
         xray_mat = material.fromFile(mh.getSysDataPath('materials/xray.mhmat'))
         self.human.material = xray_mat
-        for pxy in self.human.getProxies():
+        for pxy in self.human.getProxies(includeHumanProxy=False):
             obj = pxy.object
             self.oldPxyMats[pxy.uuid] = obj.material.clone()
             obj.material = xray_mat
@@ -272,7 +272,7 @@ class SkeletonLibrary(gui3d.TaskView):
         if self.skelObj:
             self.skelObj.hide()
         self.human.material = self.oldHumanMat
-        for pxy in self.human.getProxies():
+        for pxy in self.human.getProxies(includeHumanProxy=False):
             if pxy.uuid in self.oldPxyMats:
                 pxy.object.material = self.oldPxyMats[pxy.uuid]
 
