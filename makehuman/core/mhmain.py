@@ -581,8 +581,9 @@ class MHApplication(gui3d.Application, mh.Application):
         backGridMesh.minSubgridZoom = (1.0/spacing) * float(subgrids)/5
         self.backplaneGrid = gui3d.Object(backGridMesh)
         self.backplaneGrid.excludeFromProduction = True
+        self.backplaneGrid.placeAtFeet = True
+        self.backplaneGrid.setShadeless(1)
         #self.backplaneGrid.setPosition([0,offset,0])
-        backGridMesh.placeAtFeet = True
         self.addObject(self.backplaneGrid)
 
         # Ground grid
@@ -595,8 +596,9 @@ class MHApplication(gui3d.Application, mh.Application):
         groundGridMesh.minSubgridZoom = (1.0/spacing) * float(subgrids)/5
         self.groundplaneGrid = gui3d.Object(groundGridMesh)
         self.groundplaneGrid.excludeFromProduction = True
+        self.groundplaneGrid.placeAtFeet = True
+        self.groundplaneGrid.setShadeless(1)
         #self.groundplaneGrid.setPosition([0,offset,0])
-        groundGridMesh.placeAtFeet = True
         groundGridMesh.restrictVisibleAboveGround = True
         self.addObject(self.groundplaneGrid)
 
@@ -686,13 +688,8 @@ class MHApplication(gui3d.Application, mh.Application):
 
         # Restore main window size and position
         if self.settings.get('restoreWindowSize', False):
-            self.mainwin.resize(
-                self.settings.get('windowWidth', mainwinSize[0]),
-                self.settings.get('windowHeight', mainwinSize[1]))
-
-            self.mainwin.move(
-                self.settings.get('windowXPos', mainwinPos[0]),
-                self.settings.get('windowYPos', mainwinPos[1]))
+            self.mainwin.restoreGeometry(self.settings.get(
+                'windowGeometry', self.mainwin.saveGeometry()))
         else:
             self.mainwin.resize(mainwinSize[0], mainwinSize[1])
             self.mainwin.move(mainwinPos[0], mainwinPos[1])
@@ -723,11 +720,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def onStop(self, event):
         if self.settings.get('restoreWindowSize', False):
-            self.settings['windowWidth'] = self.mainwin.width()
-            self.settings['windowHeight'] = self.mainwin.height()
-
-            self.settings['windowXPos'] = self.mainwin.pos().x()
-            self.settings['windowYPos'] = self.mainwin.pos().y()
+            self.settings['windowGeometry'] = self.mainwin.saveGeometry()
 
         self.saveSettings(True)
         self.unloadPlugins()

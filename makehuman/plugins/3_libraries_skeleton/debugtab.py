@@ -75,30 +75,6 @@ class SkeletonDebugLibrary(gui3d.TaskView):
         self.boneBox = self.addRightWidget(gui.GroupBox('Bones'))
         self.boneSelector = []
 
-        # Add event listeners to skeleton mesh for bone highlighting
-        @mainLib.mhEvent
-        def onMouseEntered(event):
-            """
-            Event fired when mouse hovers over a skeleton mesh facegroup
-            """
-            gui3d.TaskView.onMouseEntered(self, event)
-            mainLib.removeBoneHighlights()
-            mainLib.highlightBone(event.group.name)
-
-        @mainLib.mhEvent
-        def onMouseExited(event):
-            """
-            Event fired when mouse hovers off of a skeleton mesh facegroup
-            """
-            gui3d.TaskView.onMouseExited(self, event)
-            mainLib.removeBoneHighlights()
-
-            # Highlight bone selected in bone explorer again
-            for rdio in self.boneSelector:
-                if rdio.selected:
-                    mainLib.clearBoneWeights()
-                    mainLib.highlightBone(str(rdio.text()))
-
         #
         #   Options. For fine-tuning
         #
