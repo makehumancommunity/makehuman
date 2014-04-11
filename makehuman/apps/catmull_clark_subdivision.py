@@ -48,25 +48,29 @@ from module3d import Object3D
 import log
 
 class SubdivisionObject(Object3D):
-    def __init__(self, object):
+    def __init__(self, object, staticFaceMask=None):
+        """
+        If staticFaceMask is specified (which is a face mask valid on object), 
+        the masked faces and their vertices are not included as geometry in
+        this subdivision object (higher performance).
+        After building a subdivision object, a (dynamic) face mask can still be
+        set on the faces of the subdiv mesh.
+        """
         name = object.name + '.sub'
         super(SubdivisionObject, self).__init__(name, 4)
 
         self.MAX_FACES = object.MAX_FACES
-        self.loc = object.loc.copy()
-        self.rot = object.rot.copy()
-        self.scale = object.scale.copy()
         self.cameraMode = object.cameraMode
         self.visibility = object.visibility
         self.pickable = object.pickable
-        self.material = object.material
-        self.shadeless = object.shadeless
-        self.solid = object.solid
         self.transparentPrimitives = object.transparentPrimitives * 4
         self.object = object.object
-        self.parent = object
+        self.parent = object    # TODO avoid conflicts with clone()'s parent
         self.priority = object.priority
-        self.cull = object.cull
+        if staticFaceMask is None:
+            self._staticFaceMask = np.ones(object.getFaceCount(), dtype=bool)
+        else:
+            self._staticFaceMask = staticFaceMask
 
     def create(self, progressCallback):
         log.debug('Applying Catmull-Clark subdivision on %s.', self.parent.name)
@@ -86,16 +90,12 @@ class SubdivisionObject(Object3D):
         ntexco = len(parent.texco)
         nfaces = len(parent.fvert)
 
-        group_mask = np.ones(len(parent._faceGroups), dtype=bool)
-
         for g in parent._faceGroups:
             fg = self.createFaceGroup(g.name)
-            if ('joint' in fg.name or 'helper' in g.name):
-                group_mask[fg.idx] = False
 
         progress(1)
 
-        face_mask = group_mask[parent.group]
+        face_mask = self.staticFaceMask
         self.face_map = np.argwhere(face_mask)[...,0]
         self.face_rmap = np.zeros(nfaces, dtype=int) - 1
         nfaces = len(self.face_map)
@@ -129,8 +129,8 @@ class SubdivisionObject(Object3D):
         fuv = uv_rmap[parent.fuvs[self.face_map]]
         tedges = np.dstack((fuv,np.roll(fuv,-1,axis=1)))
 
-        self.cbase = nverts
-        self.ebase = nverts + nfaces
+        self.cbase = nverts            # Index of first subdivided vert
+        self.ebase = nverts + nfaces   # Edge base index 
 
         self.tcbase = ntexco
         self.tebase = ntexco + nfaces
@@ -286,14 +286,8 @@ class SubdivisionObject(Object3D):
 
         progress(19)
 
-    def dump(self):
-        for k in dir(self):
-            v = getattr(self, k)
-            if isinstance(v, type(self.fvert)):
-                fmt = '%.6f' if v.dtype in (np.float32, float) else '%d'
-                if len(v.shape) > 2:
-                    v = v.reshape((-1,v.shape[-1]))
-                np.savetxt('dump/%s.txt' % k, v, fmt=fmt)
+        self.parent_map = self.vtx_map
+        self.inverse_parent_map = vtx_rmap
 
     def update_uvs(self):
         parent = self.parent
@@ -321,11 +315,24 @@ class SubdivisionObject(Object3D):
         self.has_uv = parent.has_uv
 
     def update_coords(self):
+        """
+        Recalculate positions of subdiv coordinates
+        
+         v0  e0  v1
+         
+         e3  c   e1
+        
+         v3  e2  v2
+
+        with vi base verts at interpolated positions (bvert)
+        with c newly introduced center verts in the center of each face (cvert)
+        with ei newly introduced verts at the centers of the poly edges (evert)
+        """
         parent = self.parent
 
-        bvert = self.coord[:self.cbase]
-        cvert = self.coord[self.cbase:self.ebase]
-        evert = self.coord[self.ebase:]
+        bvert = self.coord[:self.cbase]            # Base verts
+        cvert = self.coord[self.cbase:self.ebase]  # Poly center verts
+        evert = self.coord[self.ebase:]            # Edge verts
 
         cvert[...] = np.sum(parent.coord[parent.fvert[self.face_map]], axis=1) / 4
 
@@ -379,10 +386,42 @@ class SubdivisionObject(Object3D):
         self.update_coords()
         super(SubdivisionObject, self).update()
 
-def createSubdivisionObject(object, progressCallback=None):
-    obj = SubdivisionObject(object)
+    def changeFaceMask(self, mask, indices=None, remapFromUnsubdivided=True):
+        """
+        Change face mask of subdivided mesh.
+        If remapFromUnsubdivided is True (default), the mask parameter is
+        expected to be a face mask for the original mesh (self.parent).
+        In this case a remapping to the subdivided faces will occur (indices 
+        parameter is ignored).
+
+        If remapFromUnsubdivided is False, a facemask can be applied directly
+        on the subdivided mesh faces.
+        """
+        if remapFromUnsubdivided:
+            nBaseFaces = len(self.face_map)
+
+            # Duplicate the facemask to 4 faces per seedmesh face
+            subdiv_face_mask = np.zeros((nBaseFaces, 4), dtype=bool)
+            subdiv_face_mask[:] = mask[self.face_map][:,None]
+            subdiv_face_mask = subdiv_face_mask.reshape(4*nBaseFaces)
+
+            super(SubdivisionObject, self).changeFaceMask(subdiv_face_mask)
+        else:
+            super(SubdivisionObject, self).changeFaceMask(mask)
+
+    @property
+    def staticFaceMask(self):
+        return self._staticFaceMask
+
+    def clone(self, scale=1.0, filterMaskedVerts=False):
+        # First clone the seed mesh
+        otherSeed = self.parent.clone(scale, filterMaskedVerts)
+        # Then generate a subdivision for it
+        return createSubdivisionObject(otherSeed)
+
+def createSubdivisionObject(object, staticFaceMask=None, progressCallback=None):
+    obj = SubdivisionObject(object, staticFaceMask)
     obj.create(progressCallback)
-    # obj.dump()
     return obj
 
 def updateSubdivisionObject(object, progressCallback=None):

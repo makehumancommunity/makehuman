@@ -41,6 +41,7 @@ import wavefront
 import os
 import exportutils
 from progress import Progress
+import proxy
 
 #
 #    exportObj(human, filepath, config):
@@ -56,14 +57,9 @@ def exportObj(filepath, config=None):
     name = config.goodName(os.path.splitext(filename)[0])
 
     progress(0, 0.3, "Collecting Objects")
-    rmeshes = exportutils.collect.setupMeshes(
-        name,
-        human,
-        config=config,
-        subdivide=config.subdivide)
+    objects = [m.object.mesh if isinstance(m, proxy.Proxy) else m.mesh for m in human.getMeshes()]
 
     progress(0.3, 0.99, "Writing Objects")
-    objects = [rmesh.object for rmesh in rmeshes]
     wavefront.writeObjFile(filepath, objects, True, config)
 
     progress(1.0, None, "OBJ Export finished. Output file: %s" % filepath)

@@ -137,8 +137,8 @@ class BackgroundChooser(gui3d.TaskView):
         self.opacity = 40
         mesh.setColor([255, 255, 255, self.opacity*2.55])
         mesh.setPickable(False)
-        mesh.setShadeless(True)
-        mesh.setDepthless(True)
+        self.backgroundImage.setShadeless(True)
+        self.backgroundImage.setDepthless(True)
         mesh.priority = -90
 
         # Add icon to action toolbar
@@ -343,7 +343,7 @@ class BackgroundChooser(gui3d.TaskView):
             (posX, posY), scale = self.transformations[side]
             self.setBackgroundPosition(posX, posY)
             self.setBackgroundScale(scale)
-            self.backgroundImage.mesh.setTexture(filename)
+            self.backgroundImage.setTexture(filename)
         else:
             self.backgroundImage.hide()
         mh.redraw()
@@ -431,12 +431,12 @@ class TextureProjectionView(gui3d.TaskView) :
 
         @self.shadelessButton.mhEvent
         def onClicked(event):
-            gui3d.app.selectedHuman.mesh.setShadeless(1 if self.shadelessButton.selected else 0)
+            gui3d.app.selectedHuman.setShadeless(1 if self.shadelessButton.selected else 0)
 
     def onShow(self, event):
 
         gui3d.TaskView.onShow(self, event)
-        self.human.mesh.setShadeless(1 if self.shadelessButton.selected else 0)
+        self.human.setShadeless(1 if self.shadelessButton.selected else 0)
 
         self.oldDiffuseShaderSetting = self.human.material.shaderConfig['diffuse']
         self.human.mesh.configureShading(diffuse = True)
@@ -445,7 +445,7 @@ class TextureProjectionView(gui3d.TaskView) :
     def onHide(self, event):
 
         gui3d.TaskView.onHide(self, event)
-        self.human.mesh.setShadeless(0)
+        self.human.setShadeless(0)
 
         self.human.mesh.configureShading(diffuse = self.oldDiffuseShaderSetting)
         mh.redraw()
@@ -484,7 +484,7 @@ class TextureProjectionView(gui3d.TaskView) :
                 dstImg))
         log.debug("Enabling shadeless rendering on body")
         self.shadelessButton.setChecked(True)
-        self.human.mesh.setShadeless(1)
+        self.human.setShadeless(1)
         mh.redraw()
 
     def projectLighting(self):
@@ -503,7 +503,7 @@ class TextureProjectionView(gui3d.TaskView) :
                 dstImg))
         log.debug("Enabling shadeless rendering on body")
         self.shadelessButton.setChecked(True)
-        self.human.mesh.setShadeless(1)
+        self.human.setShadeless(1)
         mh.redraw()
 
     def projectUV(self):
@@ -522,7 +522,7 @@ class TextureProjectionView(gui3d.TaskView) :
                 dstImg))
         log.debug("Enabling shadeless rendering on body")
         self.shadelessButton.setChecked(True)
-        self.human.mesh.setShadeless(1)
+        self.human.setShadeless(1)
         mh.redraw()
 
 
