@@ -1156,7 +1156,7 @@ def checkObjectOK(ob, context, isClothing):
         try:
             ob.data.uv_layers[scn.MCTextureLayer]
         except:
-            word = "no texture layers"
+            word = "no UV maps"
             err = True
 
         if len(ob.data.uv_textures) > 1:
