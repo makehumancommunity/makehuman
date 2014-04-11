@@ -248,8 +248,7 @@ def findClothes(context, hum, clo):
 
     humanVerts = {}
     humanGroup = {}
-    pExact = None
-    bExact = None
+    pExactIndex = None
     for pgrp in clo.vertex_groups:
         for bgrp in hum.vertex_groups:
             if pgrp.name == bgrp.name:
@@ -259,20 +258,34 @@ def findClothes(context, hum, clo):
                     for bg in bv.groups:
                         if bg.group == bgrp.index:
                             bverts.append(bv)
-                if pgrp.name.lower() == "exact":
-                    pExact = pgrp
-                    bExact = bgrp
-                break
+            if pgrp.name == "Exact":
+                pExactIndex = pgrp.index
 
     # Associate verts
 
     bestVerts = []
     for pv in clo.data.vertices:
-        # Check that clothes vert belongs to at least one group
-        try:
-            pindex = pv.groups[0].group
-        except:
+
+        # Check that there is a single clothes vertex group, except perhaps
+        # for the Exact group.
+        forceExact = False
+        if len(pv.groups) == 0:
             pindex = -1
+        elif len(pv.groups) == 1:
+            pindex = pv.groups[0].group
+            if pindex == pExactIndex:
+                pindex = -1
+        elif len(pv.groups) == 2:
+            pindex = pv.groups[0].group
+            pindex1 = pv.groups[1].group
+            if pindex == pExactIndex:
+                forceExact = True
+                pindex = pindex1
+            elif pindex1 == pExactIndex:
+                forceExact = True
+        else:
+            pindex = -1
+
         if pindex < 0:
             selectVerts([pv], clo)
             raise MHError("Clothes %s vert %d not member of any group" % (clo.name, pv.index))
@@ -333,6 +346,9 @@ def findClothes(context, hum, clo):
 
         if gname[0:3] != "Mid" and gname[-2:] != "_M":
             bindex = -1
+        if forceExact:
+            exact = True
+            mverts = [mverts[0]]
         bestVerts.append((pv, bindex, exact, mverts, []))
 
     print("Setting up face table")
@@ -1178,12 +1194,16 @@ def checkSingleVertexGroups(clo, scn):
             #print("Key", g.group, g.weight)
             n += 1
         if n != 1:
-            v.select = True
             for g in v.groups:
                 for vg in clo.vertex_groups:
                     if vg.index == g.group:
-                        print("  ", vg.name)
-            raise MHError("Vertex %d in %s belongs to %d groups. Must be exactly one" % (v.index, clo.name, n))
+                        if vg.name == "Exact":
+                            n -= 1
+                        else:
+                            print("  ", vg.name)
+            if n != 1:
+                v.select = True
+                raise MHError("Vertex %d in %s belongs to %d groups. Must be exactly one" % (v.index, clo.name, n))
     return
 
 
