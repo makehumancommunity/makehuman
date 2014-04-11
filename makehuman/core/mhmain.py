@@ -688,8 +688,13 @@ class MHApplication(gui3d.Application, mh.Application):
 
         # Restore main window size and position
         if self.settings.get('restoreWindowSize', False):
-            self.mainwin.restoreGeometry(self.settings.get(
-                'windowGeometry', self.mainwin.saveGeometry()))
+            self.mainwin.resize(
+                self.settings.get('windowWidth', mainwinSize[0]),
+                self.settings.get('windowHeight', mainwinSize[1]))
+
+            self.mainwin.move(
+                self.settings.get('windowXPos', mainwinPos[0]),
+                self.settings.get('windowYPos', mainwinPos[1]))
         else:
             self.mainwin.resize(mainwinSize[0], mainwinSize[1])
             self.mainwin.move(mainwinPos[0], mainwinPos[1])
@@ -720,7 +725,11 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def onStop(self, event):
         if self.settings.get('restoreWindowSize', False):
-            self.settings['windowGeometry'] = self.mainwin.saveGeometry()
+            self.settings['windowWidth'] = self.mainwin.width()
+            self.settings['windowHeight'] = self.mainwin.height()
+
+            self.settings['windowXPos'] = self.mainwin.pos().x()
+            self.settings['windowYPos'] = self.mainwin.pos().y()
 
         self.saveSettings(True)
         self.unloadPlugins()
