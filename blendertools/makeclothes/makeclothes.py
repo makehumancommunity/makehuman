@@ -1160,7 +1160,7 @@ def checkObjectOK(ob, context, isClothing):
             err = True
 
         if len(ob.data.uv_textures) > 1:
-            word = "%d texture layers. Must be exactly one." % len(ob.data.uv_textures)
+            word = "%d UV maps. Must be exactly one." % len(ob.data.uv_textures)
             err = True
 
         if len(ob.data.materials) >= 2:
