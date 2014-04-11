@@ -142,19 +142,6 @@ class Proxy:
     def getMesh(self):
         return self.object.mesh
 
-        for pxy in self.human.getProxies():
-            if self == pxy:
-                return pxy.object.mesh
-
-        if self.type == "Proxymeshes":
-            if not human.proxy:
-                return None
-            return human.mesh
-        elif self.type in ["Cage", "Converter"]:
-            return None
-        else:
-            raise NameError("Unknown proxy type %s" % self.type)
-
 
     def getActualTexture(self, human):
         uuid = self.getUuid()
@@ -179,15 +166,15 @@ class Proxy:
         if not mesh:
             log.error("Failed to load %s", self._obj_file)
 
-        mesh.material = self.material
         mesh.priority = self.z_depth           # Set render order
         mesh.setCameraProjection(0)             # Set to model camera
-        mesh.setSolid(human.mesh.solid)    # Set to wireframe if human is in wireframe
 
         # TODO perhaps other properties should be copied from human to object, such as subdivision state. For other hints, and duplicate code, see guicommon Object.setProxy()
 
         obj = self.object = guicommon.Object(mesh, human.getPosition())
+        obj.material = self.material
         obj.setRotation(human.getRotation())
+        obj.setSolid(human.solid)    # Set to wireframe if human is in wireframe
 
         # TODO why return both obj and mesh if you can access the mesh easily through obj.mesh?
         return mesh,obj
@@ -856,6 +843,7 @@ def _getFileName(folder, file, suffix):
         return os.path.join(folder, file+suffix)
 
 
+# TODO a bit unaptly named, should perhaps be called transferVertexMaskToProxy
 def transferFaceMaskToProxy(vertsMask, proxy):
     """
     Transfer a vertex mask defined on the parent mesh to a proxie using the

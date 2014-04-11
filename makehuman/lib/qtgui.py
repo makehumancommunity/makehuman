@@ -1179,9 +1179,31 @@ class Dialog(QtGui.QDialog):
 class FileEntryView(QtGui.QWidget, Widget):
     """Widget for entering paths and filenames.
 
-    It can be used in file save / load task views, for browsing directories and
-    opening or saving files.
+    It can be used in file save / load task views,
+    for browsing directories and opening or saving files.
     """
+
+    class FileSelectedEvent(events3d.Event):
+        """Event class for the the File Entry that defines an event type
+        to be emitted once the user confirms their choice on the file name."""
+
+        def __init__(self, path, source):
+            """Constructor of the FileSelected event.
+
+            The event consists of the path of the selected file
+            as well as the source that triggered the event,
+            which can be 'browse' for when the browse button is clicked,
+            'return' for when the return key is pressed while writing in
+            the text edit, or 'button' for when the widget's button is
+            clicked."""
+
+            events3d.Event.__init__(self)
+            self.path = path
+            self.source = source
+
+        def __repr__(self):
+            return "FileSelectedEvent: Path: %s Source: '%s'" % (
+                repr(self.path), repr(self.source))
 
     def __init__(self, buttonLabel, mode='open'):
         """FileEntryView constructor.
@@ -1204,69 +1226,125 @@ class FileEntryView(QtGui.QWidget, Widget):
         super(FileEntryView, self).__init__()
         Widget.__init__(self)
 
-        buttonLabel = getLanguageString(buttonLabel)
+        # Define controls
 
-        self.directory = os.getcwd()
-        self.filter = ''
-
-        self.layout = QtGui.QGridLayout(self)
-
-        self.mode = mode
-        self.browse = BrowseButton(self.mode)
-        self.layout.addWidget(self.browse, 0, 0)
-        self.layout.setColumnStretch(0, 0)
+        self.browse = BrowseButton()
 
         self.edit = QtGui.QLineEdit()
         self.edit.setValidator(
             QtGui.QRegExpValidator(QtCore.QRegExp(r'[^\/:*?"<>|]*'), None))
-        self.layout.addWidget(self.edit, 0, 1)
-        self.layout.setColumnStretch(1, 1)
 
-        if self.mode != 'dir':
-            self.confirm = QtGui.QPushButton(buttonLabel)
-            self.layout.addWidget(self.confirm, 0, 2)
-            self.layout.setColumnStretch(2, 0)
+        buttonLabel = getLanguageString(buttonLabel)
+        self.confirm = QtGui.QPushButton(buttonLabel)
 
-            self.connect(
-                self.confirm, QtCore.SIGNAL('clicked(bool)'), self._confirm)
-            self.connect(
-                self.edit, QtCore.SIGNAL(' returnPressed()'), self._confirm)
-
-        self.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Fixed)
+        # Register events
 
         @self.browse.mhEvent
         def onClicked(path):
             """When the browse button is used, update the path in
             the line edit and confirm the entry."""
             if path:
-                self.edit.setText(pathToUnicode(path))
-                self._confirm()
+                self.path = path
+                self._confirm('browse')
+
+        self.connect(self.edit, QtCore.SIGNAL(' returnPressed()'),
+            lambda: self._confirm('return'))
+
+        self.connect(self.confirm, QtCore.SIGNAL('clicked(bool)'),
+            lambda _: self._confirm('button'))
+
+        # Create GUI
+
+        self.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Fixed)
+
+        self.layout = QtGui.QGridLayout(self)
+
+        self.layout.addWidget(self.browse, 0, 0)
+        self.layout.setColumnStretch(0, 0)
+
+        self.layout.addWidget(self.edit, 0, 1)
+        self.layout.setColumnStretch(1, 1)
+
+        self.mode = mode
+
+        if self.mode != 'dir':
+            self.layout.addWidget(self.confirm, 0, 2)
+            self.layout.setColumnStretch(2, 0)
+
+    def getMode(self):
+        """Get the FileEntryView's mode of operation."""
+        return self.browse.mode
+
+    def setMode(self, mode):
+        """Set the FileEntryView's mode of operation."""
+        self.browse.mode = mode
+
+    mode = property(getMode, setMode)
+
+    def getDirectory(self):
+        """Get the FileEntryView's current directory."""
+        return self.browse.path
 
     def setDirectory(self, directory):
         """Set the directory that the widget will use for saving or
         opening the filename, and as an initial path for browsing in
         the dialog. If the mode is 'dir', the given path is written
         in the line edit."""
-        self.directory = directory
-        self.browse._path = directory
+        self.browse.path = directory
         if self.mode == 'dir':
-            self.edit.setText(pathToUnicode(directory))
+            self.text = self.directory
+
+    directory = property(getDirectory, setDirectory)
+
+    def getPath(self):
+        """Get the FileEntryView's selected path."""
+        if self.mode == 'dir':
+            return self.directory
+        else:
+            return pathToUnicode(os.path.normpath(os.path.join(
+                self.directory, self.text)))
+
+    def setPath(self, path):
+        """Set the path of the FileEntryView.
+        This will update the widget's current directory,
+        as well as the file name in the text edit."""
+        if self.mode == 'dir':
+            self.directory = path
+        else:
+            self.directory = os.path.dirname(path)
+            self.text = os.path.basename(self.path)
+
+    path = property(getPath, setPath)
+
+    def getText(self):
+        return pathToUnicode(str(self.edit.text()))
+
+    def setText(self, text):
+        self.edit.setText(pathToUnicode(text))
+
+    text = property(getText, setText)
+
+    def getFilter(self):
+        """Get the extension filter the widget uses for browsing."""
+        return self.browse.filter
 
     def setFilter(self, filter):
-        """Set the extension filter the browse dialog will use for browsing."""
-        # NOTE: Shouldn't this be self.browse.filter?
-        self.filter = getLanguageString(filter)
-        if '(*.*)' not in self.filter:
-            self.filter = ';;'.join(
-                [self.filter, getLanguageString('All Files') + ' (*.*)'])
+        """Set the extension filter the widget will use for browsing."""
+        self.browse.filter = filter
 
-    def _confirm(self, state=None):
+    filter = property(getFilter, setFilter)
+
+    def _confirm(self, source):
         """Method to be called once the user has confirmed their choice,
         either by pressing the confirmation button, by pressing the return
-        button in the line edit, or by using the browser while in 'dir' mode.
-        It emits an onFileSelected event if the line edit is not empty."""
-        if len(self.edit.text()):
-            self.callEvent('onFileSelected', unicode(self.edit.text()))
+        button in the line edit, or by using the browser.
+        It emits an onFileSelected event if the path is not empty."""
+        if self.mode == 'dir' and source in ('return', 'button'):
+            self.directory = self.text
+
+        if len(self.text):
+            self.callEvent('onFileSelected',
+                self.FileSelectedEvent(self.path, source))
         else:
             import log
             log.notice("The text box is empty. Please enter a valid file name.")
@@ -1276,10 +1354,6 @@ class FileEntryView(QtGui.QWidget, Widget):
         """Handler for the event of the widget being given focus. It passes
         the focus directly to the line edit."""
         self.edit.setFocus()
-
-    def onFileSelected(self, shortcut):
-        """Self-capture handler for the onFileSelected event."""
-        pass
 
 
 class SplashScreen(QtGui.QSplashScreen):
@@ -1612,41 +1686,76 @@ class SpinBox(QtGui.QSpinBox, Widget):
         self.blockSignals(False)
 
 class BrowseButton(Button):
+
+    @staticmethod
+    def conformFilter(filter):
+        """Static method that corrects a filter string, if needed, by
+        translating it and adding the default 'All Files' filter to it."""
+        filter = getLanguageString(filter)
+        if '(*.*)' not in filter:
+            filter = ';;'.join([filter, getLanguageString('All Files') + ' (*.*)'])
+        return filter
+
+    @staticmethod
+    def getExistingPath(path):
+        if not os.path.isdir(path) and not os.path.isfile(path):
+            path = os.path.split(path)[0]
+            homePath = os.path.abspath(getPath(''))
+            if os.path.isdir(homePath) and isSubPath(os.path.abspath(path), homePath):
+                # Find first existing folder within MH home path
+                while path and not os.path.isdir(path):
+                    path = os.path.split(path)[0]
+            if not os.path.isdir(path):
+                path = os.getcwd()
+        return pathToUnicode(os.path.normpath(path))
+
     def __init__(self, mode = 'open'):
+        super(BrowseButton, self).__init__("...")
+        self._path = self.getExistingPath("")
+        self._filter = ''
+        self._mode = None
+
+        self.mode = mode
+
+    def getMode(self):
+        return self._mode
+
+    def setMode(self, mode):
         mode = mode.lower()
         if mode not in ('open', 'save', 'dir'):
             raise RuntimeError("mode '%s' not recognised; must be 'open', 'save', or 'dir'")
-        super(BrowseButton, self).__init__("...")
-        self._path = ''
-        self._filter = ''
         self._mode = mode
 
+    mode = property(getMode, setMode)
+
+    def getPath(self):
+        return self._path
+
     def setPath(self, path):
-        self._path = path
+        self._path = pathToUnicode(os.path.normpath(path))
+
+    path = property(getPath, setPath)
+
+    def getFilter(self):
+        return self._filter
 
     def setFilter(self, filter):
-        self._filter = filter
+        self._filter = self.conformFilter(filter)
+
+    filter = property(getFilter, setFilter)
 
     def _clicked(self, state):
-        if not os.path.isdir(self._path) and not os.path.isfile(self._path):
-            self._path = os.path.split(self._path)[0]
-            homePath = os.path.abspath(getPath(''))
-            if os.path.isdir(homePath) and isSubPath(os.path.abspath(self._path), homePath):
-                # Find first existing folder within MH home path
-                while self._path and not os.path.isdir(self._path):
-                    self._path = os.path.split(self._path)[0]
-            if not os.path.isdir(self._path):
-                self._path = os.getcwd()
+        path = self.getExistingPath(self.path)
         if self._mode == 'open':
-            path = str(QtGui.QFileDialog.getOpenFileName(G.app.mainwin, directory=self._path, filter=self._filter))
+            path = str(QtGui.QFileDialog.getOpenFileName(G.app.mainwin, directory=path, filter=self.filter))
         elif self._mode == 'save':
-            path = str(QtGui.QFileDialog.getSaveFileName(G.app.mainwin, directory=self._path, filter=self._filter))
+            path = str(QtGui.QFileDialog.getSaveFileName(G.app.mainwin, directory=path, filter=self.filter))
         elif self._mode == 'dir':
-            path = str(QtGui.QFileDialog.getExistingDirectory(G.app.mainwin, directory=self._path))
+            path = str(QtGui.QFileDialog.getExistingDirectory(G.app.mainwin, directory=path))
 
         if path:
-            self._path = path
-        self.callEvent('onClicked', path)
+            self.path = path
+        self.callEvent('onClicked', pathToUnicode(path))
 
 class ColorPickButton(Button):
     """
