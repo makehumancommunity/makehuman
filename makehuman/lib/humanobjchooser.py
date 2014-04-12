@@ -81,7 +81,7 @@ class HumanObjectSelector(gui.QtGui.QWidget, gui.Widget):
     def getSelected(self):
         if self._selected in proxy.SimpleProxyTypesLower:
             pxy = self.human.getTypedSimpleProxies(self._selected)
-            if pxy.object:
+            if pxy and pxy.object:
                 return self._selected
             else:
                 return 'skin'
