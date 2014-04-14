@@ -145,7 +145,7 @@ class BVH():
 
     # TODO guess source armature from a BVH rig
 
-    def createAnimationTrack(self, jointsOrder = None, name="BVHMotion"):
+    def createAnimationTrack(self, jointsOrder=None, name="BVHMotion"):
         """
         Create an animation track from the motion stored in this BHV file.
         """
@@ -274,7 +274,7 @@ class BVH():
         for joint in self.getJoints():
             joint.calculateFrames()     # TODO we don't need to calculate pose matrices for end effectors
 
-    def fromSkeleton(self, skel, animationTrack = None, dummyJoints = True):
+    def fromSkeleton(self, skel, animationTrack=None, dummyJoints=True):
         """
         Construct a BVH object from a skeleton structure and optionally an 
         animation track. If no animation track is specified, a dummy animation
@@ -284,7 +284,7 @@ class BVH():
         position offset from their parent bone tail. This often happens when
         multiple bones are attached to one parent bones, for example in the
         shoulder, hip and hand areas.
-        When dummyJoints is set to false, for each bone in the skeeton, exactly
+        When dummyJoints is set to false, for each bone in the skeleton, exactly
         one BVH joint will be created. How this is interpreted depends on the
         tool importing the BVH file. Some create only a bone between the parent
         and its first child joint, and create empty offsets to the other childs.
@@ -668,7 +668,7 @@ def load(filename, convertFromZUp = False):
     result.fromFile(filename)
     return result
 
-def createFromSkeleton(skel, animationTrack = None):
+def createFromSkeleton(skel, animationTrack=None, dummyJoints=True):
     result = BVH()
-    result.fromSkeleton(skel, animationTrack)
+    result.fromSkeleton(skel, animationTrack, dummyJoints)
     return result
