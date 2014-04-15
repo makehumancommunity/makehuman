@@ -221,14 +221,12 @@
         ],
       "right foot": [
           {"mod": "armslegs/r-foot-scale-decr|incr", "cam": "rightFootRightCamera", "label": "Scale foot"},
-          {"mod": "armslegs/r-foot-trans-in|out", "cam": "rightFootFrontCamera", "label": "Move horizontally"},
-          {"mod": "armslegs/r-foot-trans-down|up", "cam": "rightFootFrontCamera", "label": "Move vertically"},
+          {"mod": "armslegs/r-foot-trans-in|out", "cam": "rightFootFrontCamera", "label": "Move horizontally"},         
           {"mod": "armslegs/r-foot-trans-forward|backward", "cam": "rightFootRightCamera", "label": "Move depth"}
         ],
       "left foot": [
           {"mod": "armslegs/l-foot-scale-decr|incr", "cam": "leftFootLeftCamera", "label": "Scale foot"},
-          {"mod": "armslegs/l-foot-trans-in|out", "cam": "leftFootFrontCamera", "label": "Move horizontally"},
-          {"mod": "armslegs/l-foot-trans-down|up", "cam": "leftFootFrontCamera", "label": "Move vertically"},
+          {"mod": "armslegs/l-foot-trans-in|out", "cam": "leftFootFrontCamera", "label": "Move horizontally"},          
           {"mod": "armslegs/l-foot-trans-forward|backward", "cam": "leftFootLeftCamera", "label": "Move depth"}
         ],
       "right arm": [
@@ -251,7 +249,6 @@
           {"mod": "armslegs/r-leg-genu-varun|valgus", "cam": "rightLegFrontCamera", "label": "Move knee horizontally"},
           {"mod": "armslegs/r-lowerleg-scale-depth-decr|incr", "cam": "rightLegRightCamera", "label": "Lowerleg scale depth"},
           {"mod": "armslegs/r-lowerleg-scale-horiz-decr|incr", "cam": "rightLegFrontCamera", "label": "Lowerleg scale horizontally"},
-          {"mod": "armslegs/r-lowerleg-scale-vert-decr|incr", "cam": "rightLegFrontCamera", "label": "Lowerleg scale vertically"},
           {"mod": "armslegs/r-upperleg-scale-depth-decr|incr", "cam": "rightLegRightCamera", "label": "Upperleg scale depth"},
           {"mod": "armslegs/r-upperleg-scale-horiz-decr|incr", "cam": "rightLegFrontCamera", "label": "Upperleg scale horizontally"},
           {"mod": "armslegs/r-upperleg-scale-vert-decr|incr", "cam": "rightLegFrontCamera", "label": "Move knee vertically"}
@@ -259,8 +256,7 @@
       "left leg": [
           {"mod": "armslegs/l-leg-genu-varun|valgus", "cam": "leftLegFrontCamera", "label": "Move knee horizontally"},
           {"mod": "armslegs/l-lowerleg-scale-depth-decr|incr", "cam": "leftLegLeftCamera", "label": "Lowerleg scale depth"},
-          {"mod": "armslegs/l-lowerleg-scale-horiz-decr|incr", "cam": "leftLegFrontCamera", "label": "Lowerleg scale horizontally"},
-          {"mod": "armslegs/l-lowerleg-scale-vert-decr|incr", "cam": "leftLegFrontCamera", "label": "Lowerleg scale vertically"},
+          {"mod": "armslegs/l-lowerleg-scale-horiz-decr|incr", "cam": "leftLegFrontCamera", "label": "Lowerleg scale horizontally"},          
           {"mod": "armslegs/l-upperleg-scale-depth-decr|incr", "cam": "leftLegLeftCamera", "label": "Upperleg scale depth"},
           {"mod": "armslegs/l-upperleg-scale-horiz-decr|incr", "cam": "leftLegFrontCamera", "label": "Upperleg scale horizontally"},
           {"mod": "armslegs/l-upperleg-scale-vert-decr|incr", "cam": "leftLegFrontCamera", "label": "Move knee vertically"}
