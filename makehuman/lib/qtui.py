@@ -479,6 +479,13 @@ class Frame(QtGui.QMainWindow):
         self.progressBar = qtgui.ProgressBar()
         self.bottom.addWidget(self.progressBar)
 
+    def resizeEvent(self, event):
+        """QMainWindow method override that is called upon resizing the window,
+        including after the maximize / restore or fullscreen actions."""
+        if 'normal geometry' in self.windowState:
+            self.normalStateGeometry = self.storeGeometry()
+        QtGui.QMainWindow.resizeEvent(self, event)
+
     def addPanels(self):
         left = TaskPanel()
         right = TaskPanel()
@@ -511,19 +518,63 @@ class Frame(QtGui.QMainWindow):
             if child.isWidgetType():
                 self.refreshLayout(child)
 
-    def storeGeometry(self):
-        """Return a dictionary describing the window's geometry.
-        It can be used for saving the window's shape into a settings file."""
-        return {'width': self.width(),
-                'height': self.height(),
-                'x': self.pos().x(),
-                'y': self.pos().y()}
+    def getWindowState(self):
+        """Return a set of window state strings that apply to the frame.
 
-    def restoreGeometry(self, data):
+        Multiple window states may apply to the same window, for example
+        a window might be shown minimized, but set to be maximized when
+        restored."""
+        # TODO: Caching
+        stateflags = QtGui.QMainWindow.windowState(self)
+        state = set()
+        if stateflags & QtCore.Qt.WindowMaximized:
+            state.add('maximized')
+        if stateflags & QtCore.Qt.WindowMinimized:
+            state.add('minimized')
+        if stateflags & QtCore.Qt.WindowFullScreen:
+            state.add('fullscreen')
+        if stateflags & QtCore.Qt.WindowActive:
+            state.add('active')
+        if not (stateflags &
+            (QtCore.Qt.WindowMaximized | QtCore.Qt.WindowFullScreen)):
+            state.add('normal geometry')
+            if not stateflags & QtCore.Qt.WindowMinimized:
+                state.add('normal')
+        return state
+
+    def setWindowState(self, state):
+        """Set the window state according to a window state set
+        retrieved by getWindowState()."""
+        # Order matters here. A window might be maximized when restored,
+        # but currently minimized in taskbar.
+        if 'maximized' in state:
+            self.showMaximized()
+        if 'fullscreen' in state:
+            self.showFullscreen()
+        if 'normal geometry' in state:
+            self.showNormal()
+        if 'minimized' in state:
+            self.showMinimized()
+
+    windowState = property(getWindowState, setWindowState)
+
+    def storeGeometry(self):
+        """Return a saveable dictionary describing the window's geometry.
+        It can be used for saving the window's shape into a settings file."""
+        geometry = {'width': self.width(), 'height': self.height(),
+            'x': self.pos().x(), 'y': self.pos().y()
+            } if 'normal geometry' in self.windowState \
+            else self.normalStateGeometry
+        geometry['state'] = list(self.windowState)
+        return geometry
+
+    def restoreGeometry(self, geometry):
         """Set the window shape according to a dictionary saved
         with storeGeometry()."""
-        self.resize(data['width'], data['height'])
-        self.move(data['x'], data['y'])
+        self.normalStateGeometry = geometry
+        self.resize(geometry['width'], geometry['height'])
+        self.move(geometry['x'], geometry['y'])
+        self.windowState = set(geometry['state'])
 
 
 class LogWindow(qtgui.ListView):
