@@ -219,6 +219,7 @@ def get_hg_revision_1():
     if hgrev is None:
         rev = "?"
         revid = "UNKNOWN"
+        hgrev = (rev, revid)
     else:
         rev, revid = hgrev
     os.environ['HGREVISION_SOURCE'] = "none found"
