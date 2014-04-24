@@ -1,0 +1,31 @@
+# MakeHuman default skin material
+
+name DefaultSkin
+
+// Color shading attributes
+ambientColor 0.11 0.11 0.11
+specularColor 0.3 0.3 0.3
+shininess 0.96
+emissiveColor 0.0 0.0 0.0
+opacity 1.0
+translucency 0.0
+
+// Enable auto skin tone blending based on ethnicity
+autoBlendSkin true
+
+sssEnabled true
+sssRScale 4.0
+sssGScale 2.0
+sssBScale 1.0
+
+// Set LitSphere shader programme
+shader data/shaders/glsl/litsphere
+
+// Configure built-in shader defines
+shaderConfig diffuse false
+shaderConfig vertexColors false
+shaderConfig bump true
+shaderConfig spec true
+shaderConfig normal false
+shaderConfig displacement false
+
