@@ -7,6 +7,7 @@
     "modifiers": {
       "head shape": [
           {"mod": "head/head-age-less|more", "cam": "frontView"},
+          {"mod": "head/head-skinny|fat", "cam": "frontView", "label": "Head skinny/fat"},
           {"mod": "head/head-angle-in|out", "cam": "leftView"},
           {"mod": "head/head-oval", "cam": "frontView"},
           {"mod": "head/head-round", "cam": "frontView"},
