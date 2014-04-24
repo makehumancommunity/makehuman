@@ -3,6 +3,7 @@
     "modifiers": [
       {"target": "head-age", "min": "less", "max": "more"},
       {"target": "head-angle", "min": "in", "max": "out"},
+      {"target": "head", "min": "skinny", "max": "fat"},
       {"target": "head-oval"},
       {"target": "head-round"},
       {"target": "head-rectangular"},
