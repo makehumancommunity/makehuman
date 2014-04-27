@@ -1344,11 +1344,11 @@ class SplashScreen(QtGui.QSplashScreen):
         color.setNamedColor('#ffffff')
         painter.setPen(color)
         font = painter.font()
-        font.setPointSizeF(12)
+        font.setPixelSize(16)
         painter.setFont(font)
         painter.drawText(self.messageRect, self.messageAlignment, self.message);
         if self._version:
-            font.setPointSizeF(22)
+            font.setPixelSize(29)
             painter.setFont(font)
             painter.drawText(self.versionRect, QtCore.Qt.AlignLeft, self._version)
         color.setNamedColor('#000000')
