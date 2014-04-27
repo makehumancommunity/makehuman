@@ -274,10 +274,11 @@ def writeSkeletonFile(human, filepath, config):
         for anim in human.animations:
             writeAnimation(human, lines, anim.getAnimationTrack())
         lines.append('    </animations>')
-        lines.append('</skeleton>')
 
-        f.write("\n".join(lines))
-        f.close()
+    lines.append('</skeleton>')
+
+    f.write("\n".join(lines))
+    f.close()
     Pprogress.finish()
 
 
