@@ -135,7 +135,6 @@ class RichMesh(object):
         obj.createFaceGroup("Full Object")
         obj.setFaces(faceVerts, faceUvs)
         obj.calcNormals(True, True)
-        obj.update()
         obj.updateIndexBuffer()
         self.setVertexGroups(weights)
         self.shapes = shapes
