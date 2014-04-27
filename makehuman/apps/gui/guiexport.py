@@ -209,6 +209,13 @@ class ExportTaskView(guipose.PoseModeTaskView):
         self._requiresUpdate = False
         self.updateGui()
 
+    def onHumanChanged(self, event):
+        # If a human was loaded, update the line edit
+        if event.change == 'load':
+            self.fileentry.edit.setText(gui3d.app.currentFile.title)
+        elif event.change == 'reset':
+            self.fileentry.edit.setText(u"")
+
     def onShow(self, event):
         guipose.PoseModeTaskView.onShow(self, event)
 
