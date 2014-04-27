@@ -100,7 +100,7 @@ class MHAppExporter(object):
         self.skipScripts = skipScripts
         self.noDownload = noDownload
 
-        sys.path = sys.path + [self.sourceFile('makehuman'), self.sourceFile('makehuman/lib')]
+        sys.path = [self.sourceFile('makehuman'), self.sourceFile('makehuman/lib')] + sys.path
 
         self.configure()
 
