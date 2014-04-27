@@ -1124,6 +1124,8 @@ class Human(guicommon.Object):
 
     def save(self, filename, tags):
         from codecs import open
+        from progress import Progress
+        progress = Progress(len(G.app.saveHandlers))
         f = open(filename, "w", encoding="utf-8")
         f.write('# Written by MakeHuman %s\n' % getVersionStr())
         f.write('version %s\n' % getShortVersion())
@@ -1131,8 +1133,11 @@ class Human(guicommon.Object):
 
         for handler in G.app.saveHandlers:
             handler(self, f)
+            progress.step()
 
         f.write('subdivide %s' % self.isSubdivided())
 
         f.close()
+        progress(1)
         G.app.currentFile.saved(filename)
+
