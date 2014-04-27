@@ -633,10 +633,9 @@ class MHApplication(gui3d.Application, mh.Application):
     def startupSequence(self):
         self._processCommandlineArgs(beforeLoaded = True)
 
-        mainwinSize = (self.mainwin.width(), self.mainwin.height())
-        mainwinPos = (self.mainwin.pos().x(), self.mainwin.pos().y())
-        mainwinFrame = (self.mainwin.frameGeometry().width(), self.mainwin.frameGeometry().height())
-        mainwinBorder = (mainwinFrame[0] - mainwinSize[0], mainwinFrame[1] - mainwinSize[1])
+        mainwinGeometry = self.mainwin.storeGeometry()
+        mainwinBorder = (self.mainwin.frameGeometry().width() - self.mainwin.width(),
+             self.mainwin.frameGeometry().height() - self.mainwin.height())
 
         # Move main window completely behind splash screen
         self.mainwin.resize(self.splash.width() - mainwinBorder[0], self.splash.height() - mainwinBorder[1])
@@ -686,16 +685,10 @@ class MHApplication(gui3d.Application, mh.Application):
 
         # Restore main window size and position
         if self.settings.get('restoreWindowSize', False):
-            self.mainwin.resize(
-                self.settings.get('windowWidth', mainwinSize[0]),
-                self.settings.get('windowHeight', mainwinSize[1]))
-
-            self.mainwin.move(
-                self.settings.get('windowXPos', mainwinPos[0]),
-                self.settings.get('windowYPos', mainwinPos[1]))
+            self.mainwin.restoreGeometry(self.settings.get(
+                'windowGeometry', mainwinGeometry))
         else:
-            self.mainwin.resize(mainwinSize[0], mainwinSize[1])
-            self.mainwin.move(mainwinPos[0], mainwinPos[1])
+            self.mainwin.restoreGeometry(mainwinGeometry)
 
         self._processCommandlineArgs(beforeLoaded = False)
 
@@ -723,11 +716,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def onStop(self, event):
         if self.settings.get('restoreWindowSize', False):
-            self.settings['windowWidth'] = self.mainwin.width()
-            self.settings['windowHeight'] = self.mainwin.height()
-
-            self.settings['windowXPos'] = self.mainwin.pos().x()
-            self.settings['windowYPos'] = self.mainwin.pos().y()
+            self.settings['windowGeometry'] = self.mainwin.storeGeometry()
 
         self.saveSettings(True)
         self.unloadPlugins()
