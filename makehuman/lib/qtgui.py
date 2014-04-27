@@ -1162,9 +1162,31 @@ class Dialog(QtGui.QDialog):
 class FileEntryView(QtGui.QWidget, Widget):
     """Widget for entering paths and filenames.
 
-    It can be used in file save / load task views, for browsing directories and
-    opening or saving files.
+    It can be used in file save / load task views,
+    for browsing directories and opening or saving files.
     """
+
+    class FileSelectedEvent(events3d.Event):
+        """Event class for the the File Entry that defines an event type
+        to be emitted once the user confirms their choice on the file name."""
+
+        def __init__(self, path, source):
+            """Constructor of the FileSelected event.
+
+            The event consists of the path of the selected file
+            as well as the source that triggered the event,
+            which can be 'browse' for when the browse button is clicked,
+            'return' for when the return key is pressed while writing in
+            the text edit, or 'button' for when the widget's button is
+            clicked."""
+
+            events3d.Event.__init__(self)
+            self.path = path
+            self.source = source
+
+        def __repr__(self):
+            return "FileSelectedEvent: Path: %s Source: '%s'" % (
+                repr(self.path), repr(self.source))
 
     def __init__(self, buttonLabel, mode='open'):
         """FileEntryView constructor.
@@ -1187,42 +1209,64 @@ class FileEntryView(QtGui.QWidget, Widget):
         super(FileEntryView, self).__init__()
         Widget.__init__(self)
 
-        buttonLabel = getLanguageString(buttonLabel)
+        # Define controls
 
-        self.directory = os.getcwd()
-        self._filter = ''
-
-        self.layout = QtGui.QGridLayout(self)
-
-        self.browse = BrowseButton(mode)
-        self.layout.addWidget(self.browse, 0, 0)
-        self.layout.setColumnStretch(0, 0)
+        self.browse = BrowseButton()
 
         self.edit = QtGui.QLineEdit()
         self.edit.setValidator(
             QtGui.QRegExpValidator(QtCore.QRegExp(r'[^\/:*?"<>|]*'), None))
-        self.layout.addWidget(self.edit, 0, 1)
-        self.layout.setColumnStretch(1, 1)
 
-        if mode != 'dir':
-            self.confirm = QtGui.QPushButton(buttonLabel)
-            self.layout.addWidget(self.confirm, 0, 2)
-            self.layout.setColumnStretch(2, 0)
+        buttonLabel = getLanguageString(buttonLabel)
+        self.confirm = QtGui.QPushButton(buttonLabel)
 
-            self.connect(
-                self.confirm, QtCore.SIGNAL('clicked(bool)'), self._confirm)
-            self.connect(
-                self.edit, QtCore.SIGNAL(' returnPressed()'), self._confirm)
-
-        self.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Fixed)
+        # Register events
 
         @self.browse.mhEvent
         def onClicked(path):
             """When the browse button is used, update the path in
             the line edit and confirm the entry."""
             if path:
-                self.edit.setText(pathToUnicode(path))
-                self._confirm()
+                self.path = path
+                self._confirm('browse')
+
+        self.connect(self.edit, QtCore.SIGNAL(' returnPressed()'),
+            lambda: self._confirm('return'))
+
+        self.connect(self.confirm, QtCore.SIGNAL('clicked(bool)'),
+            lambda _: self._confirm('button'))
+
+        # Create GUI
+
+        self.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Fixed)
+
+        self.layout = QtGui.QGridLayout(self)
+
+        self.layout.addWidget(self.browse, 0, 0)
+        self.layout.setColumnStretch(0, 0)
+
+        self.layout.addWidget(self.edit, 0, 1)
+        self.layout.setColumnStretch(1, 1)
+
+        self.mode = mode
+
+        if self.mode != 'dir':
+            self.layout.addWidget(self.confirm, 0, 2)
+            self.layout.setColumnStretch(2, 0)
+
+    def getMode(self):
+        """Get the FileEntryView's mode of operation."""
+        return self.browse.mode
+
+    def setMode(self, mode):
+        """Set the FileEntryView's mode of operation."""
+        self.browse.mode = mode
+
+    mode = property(getMode, setMode)
+
+    def getDirectory(self):
+        """Get the FileEntryView's current directory."""
+        return self.browse.path
 
     def setDirectory(self, directory):
         """Set the directory that the widget will use for saving or
@@ -1235,22 +1279,26 @@ class FileEntryView(QtGui.QWidget, Widget):
             self.edit.setText(pathToUnicode(directory))
 
     def getFilter(self):
-        return self._filter
+        """Get the extension filter the widget uses for browsing."""
+        return self.browse.filter
 
     def setFilter(self, filter):
         """Set the extension filter the widget will use for browsing."""
         self.browse.filter = filter
-        self._filter = self.browse.filter
 
     filter = property(getFilter, setFilter)
 
-    def _confirm(self, state=None):
+    def _confirm(self, source):
         """Method to be called once the user has confirmed their choice,
         either by pressing the confirmation button, by pressing the return
-        button in the line edit, or by using the browser while in 'dir' mode.
-        It emits an onFileSelected event if the line edit is not empty."""
-        if len(self.edit.text()):
-            self.callEvent('onFileSelected', unicode(self.edit.text()))
+        button in the line edit, or by using the browser.
+        It emits an onFileSelected event if the path is not empty."""
+        if self.mode == 'dir' and source in ('return', 'button'):
+            self.directory = self.text
+
+        if len(self.text):
+            self.callEvent('onFileSelected',
+                self.FileSelectedEvent(self.path, source))
         else:
             import log
             log.notice("The text box is empty. Please enter a valid file name.")
@@ -1260,11 +1308,6 @@ class FileEntryView(QtGui.QWidget, Widget):
         """Handler for the event of the widget being given focus. It passes
         the focus directly to the line edit."""
         self.edit.setFocus()
-
-    def onFileSelected(self, shortcut):
-        """Self-capture handler for the onFileSelected event."""
-        pass
-
 
 class SplashScreen(QtGui.QSplashScreen):
     def __init__(self, image, version=""):

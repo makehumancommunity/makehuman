@@ -44,7 +44,7 @@ import gui
 import gui3d
 import guipose
 import log
-from getpath import pathToUnicode
+
 
 class ExportTaskView(guipose.PoseModeTaskView):
     def __init__(self, category):
@@ -54,11 +54,9 @@ class ExportTaskView(guipose.PoseModeTaskView):
         self.recentlyShown = None
         self._requiresUpdate = True
 
-        exportPath = mh.getPath('exports')
-
         self.fileentry = self.addTopWidget(gui.FileEntryView('Export', mode='save'))
-        self.fileentry.setDirectory(exportPath)
-        self.fileentry.setFilter('All Files (*.*)')
+        self.fileentry.directory = mh.getPath('exports')
+        self.fileentry.filter = 'All Files (*.*)'
 
         self.exportBodyGroup = []
         self.exportHairGroup = []
@@ -90,9 +88,8 @@ class ExportTaskView(guipose.PoseModeTaskView):
         self.updateGui()
 
         @self.fileentry.mhEvent
-        def onFileSelected(filename):
-            path = os.path.normpath(os.path.join(exportPath, filename))
-            dir, name = os.path.split(path)
+        def onFileSelected(event):
+            dir, name = os.path.split(event.path)
             name, ext = os.path.splitext(name)
 
             if not os.path.exists(dir):
@@ -168,14 +165,13 @@ class ExportTaskView(guipose.PoseModeTaskView):
         return [exporter.name for exporter, _, _ in self.formats]
 
     def setFileExtension(self, extension, filter='All Files (*.*)'):
-        self.fileentry.setFilter(filter)
-        path,ext = os.path.splitext(unicode(self.fileentry.edit.text()))
+        self.fileentry.filter = filter
+        path, ext = os.path.splitext(self.fileentry.text)
         if ext:
             if extension:
-                self.fileentry.edit.setText("%s.%s" % (pathToUnicode(path), 
-                                                       extension.lstrip('.')))
+                self.fileentry.text = "%s.%s" % (path, extension.lstrip('.'))
             else:
-                self.fileentry.edit.setText(pathToUnicode(path))
+                self.fileentry.text = path
 
     def updateGui(self):
         for exporter, radio, options in self.formats:
@@ -212,9 +208,9 @@ class ExportTaskView(guipose.PoseModeTaskView):
     def onHumanChanged(self, event):
         # If a human was loaded, update the line edit
         if event.change in ('load', 'save'):
-            self.fileentry.edit.setText(gui3d.app.currentFile.title)
+            self.fileentry.text = gui3d.app.currentFile.title
         elif event.change == 'reset':
-            self.fileentry.edit.setText(u"")
+            self.fileentry.text = ""
 
     def onShow(self, event):
         guipose.PoseModeTaskView.onShow(self, event)
@@ -223,11 +219,8 @@ class ExportTaskView(guipose.PoseModeTaskView):
 
         self.fileentry.setFocus()
 
-
     def onHide(self, event):
         guipose.PoseModeTaskView.onHide(self, event)
-
-        human = gui3d.app.selectedHuman
 
         for exporter, radio, _ in self.formats:
             if radio.selected:
