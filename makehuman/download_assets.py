@@ -41,14 +41,14 @@ index file.
 
 ## CONFIG #################################
 ftpUrl = "download.tuxfamily.org"
-ftpPath = "/makehuman/a8/"
+ftpPath = "/makehuman/assets/"
 defaultRepo = "base"
 
 default_nodelete = False
 ###########################################
 
 def version():
-    return "1.1"
+    return "1.2"
 
 
 import os
@@ -62,19 +62,32 @@ from getpath import getSysDataPath, isSubPath, getSysPath
 def downloadFromFTP(ftp, filePath, destination):
     fileSize = ftp.size(filePath)
     downloaded = [0]    # Is a list so we can pass and change it in an inner func
-    f = open(destination, 'wb')
+    global f
+    if destination:
+        f = open(destination, 'wb')
+    else:
+        f = ""
+
     def writeChunk(data):
-        f.write(data)
+        global f
+        if destination:
+            f.write(data)
+        else:
+            f = f+str(data)
 
         downloaded[0] += len(data)
         percentage = 100 * float(downloaded[0]) / fileSize
-        sys.stdout.write("  Downloaded %d%% of %d bytes\r" % (percentage, fileSize))
+        if destination:
+            sys.stdout.write("  Downloaded %d%% of %d bytes\r" % (percentage, fileSize))
 
-        if percentage >= 100:
+        if percentage >= 100 and destination:
             sys.stdout.write('\n')
 
     ftp.retrbinary('RETR '+filePath, writeChunk)
-    f.close()
+    if destination:
+        f.close()
+    else:
+        return f
 
 
 def downloadFile(ftp, filePath, destination, fileProgress):
@@ -194,6 +207,46 @@ def getFTPContents(ftp):
 
     return result
 
+def downloadFromHTTP(url, destination):
+    import urllib
+
+    def chunk_report(bytes_so_far, chunk_size, total_size):
+        percentage = float(bytes_so_far) / total_size
+        percentage = round(percentage*100, 2)
+        sys.stdout.write("  Downloaded %d%% of %d bytes\r" % (percentage, total_size))
+        sys.stdout.flush()
+
+        if bytes_so_far >= total_size:
+            sys.stdout.write('\n')
+
+    def chunk_read(response, chunk_size=512, report_hook=None):
+        total_size = response.info().getheader('Content-Length').strip()
+        total_size = int(total_size)
+        bytes_so_far = 0
+
+        while True:
+            chunk = response.read(chunk_size)
+            f.write(chunk)
+            bytes_so_far += len(chunk)
+
+            if not chunk:
+                break
+
+            if report_hook:
+                report_hook(bytes_so_far, chunk_size, total_size)
+
+        return bytes_so_far
+
+    f = open(destination, 'wb')
+    response = urllib.urlopen(url)
+    if response.getcode() != 200:
+        raise RuntimeError('Failed to download file %s (error code %s)' % (url, response.getcode()))
+    chunk_read(response, report_hook=chunk_report)
+    f.close()
+
+def isArchived(ftp):
+    return 'archive_url.txt' in ftp.nlst()
+
 def getArgs():
     if len(sys.argv) < 2:
         return dict()
@@ -211,6 +264,15 @@ def getArgs():
     argOptions = vars(parser.parse_args())
     return argOptions
 
+def getVersion():
+    """
+    Version of MakeHuman software
+    """
+    import sys
+    sys.path = ["."] + sys.path
+    import makehuman
+    return '.'.join([str(i) for i in makehuman.version[:2]])
+
 
 if __name__ == '__main__':
     global DONTREMOVE
@@ -222,14 +284,17 @@ if __name__ == '__main__':
             raise RuntimeError('Invalid argument for "repository", illegal character')
     DONTREMOVE = args.get('nodelete', default_nodelete)
 
-    print 'Refreshing assets from repository "%s"' % repo
+    # Obtain MH version to download assets for
+    version = getVersion()
 
-    ftpPath = os.path.join(ftpPath, repo.lstrip('/'))
+    print 'Refreshing assets from repository "%s" (version %s)' % (repo, version)
+
+    ftpPath = os.path.join(ftpPath, version.lstrip('/'), repo.lstrip('/'))
     ftpPath = os.path.normpath(ftpPath)
     ## Use simple sync mechanism, maybe in the future we can use rsync over http?
     # Download contents list
     baseName = os.path.basename(ftpPath)
-    contentsFile = getSysPath(baseName+'_contents.txt')
+    contentsFile = getSysPath('%s_%s_contents.txt' % (baseName, version.replace('.','-')))
     if os.path.isfile(contentsFile):
         # Parse previous contents file
         oldContents = parseContentsFile(contentsFile)
@@ -244,6 +309,23 @@ if __name__ == '__main__':
     ftp = FTP(ftpUrl)
     ftp.login()
     ftp.cwd(ftpPath.replace('\\', '/'))
+
+    # Verify if there is an archive reference URL
+    if isArchived(ftp):
+        print "Redirected to asset archive"
+        archiveUrl = downloadFromFTP(ftp, 'archive_url.txt', None).strip()
+        print "Downloading archive from HTTP (%s)" % archiveUrl
+        filename = os.path.basename(archiveUrl)
+        zipDest = os.path.join(getSysPath(), filename)
+        # Download and extract archive
+        downloadFromHTTP(archiveUrl, zipDest)
+        print "Extracting zip archive..."
+        import zipfile
+        zFile = zipfile.ZipFile(zipDest)
+        zFile.extractall(getSysDataPath())
+
+        print "All done."
+        sys.exit()
 
     # Get contents from FTP
     newContents = getFTPContents(ftp)
