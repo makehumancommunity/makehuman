@@ -814,6 +814,7 @@ class Material(object):
     def supportsDiffuse(self):
         result = (self.diffuseTexture != None)
         if self.shaderObj and result:
+            # TODO appplies to fixed function shading too...
             return ('DIFFUSE' in self.shaderObj.defineables \
                     or 'diffuseTexture' in self.shaderUniforms)
         else:
@@ -1125,7 +1126,7 @@ class Material(object):
         for t in textureTypes:
             tName = t+"Texture"
             if (includeUnused and getattr(self, tName) is not None) or \
-               getattr(self, "supports"+t.replace("Map","").capitalize())():
+               getattr(self, "supports"+t.replace("Map","").capitalize())():  # TODO influenced by shader availability (perhaps a simple != None test is better)
                 result[tName] = getattr(self, tName)
         if includeUniforms:
             uniformSamplers = OrderedDict()
