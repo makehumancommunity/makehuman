@@ -1075,7 +1075,9 @@ class Human(guicommon.Object):
     def load(self, filename, update=True, progressCallback=None):
         from codecs import open
         log.message("Loading human from MHM file %s.", filename)
-        self.callEvent('onChanging', events3d.HumanEvent(self, 'load'))
+        event = events3d.HumanEvent(self, 'load')
+        event.path = filename
+        self.callEvent('onChanging', event)
 
         self.resetMeshValues()
         self.blockEthnicUpdates = True
@@ -1112,8 +1114,7 @@ class Human(guicommon.Object):
         self.blockEthnicUpdates = False
         self._setEthnicVals()
 
-        G.app.currentFile.loaded(filename)
-        self.callEvent('onChanged', events3d.HumanEvent(self, 'load'))
+        self.callEvent('onChanged', event)
 
         if update:
             self.applyAllTargets(progressCallback)
@@ -1126,6 +1127,10 @@ class Human(guicommon.Object):
         from codecs import open
         from progress import Progress
         progress = Progress(len(G.app.saveHandlers))
+        event = events3d.HumanEvent(self, 'save')
+        event.path = filename
+        self.callEvent('onChanging', event)
+
         f = open(filename, "w", encoding="utf-8")
         f.write('# Written by MakeHuman %s\n' % getVersionStr())
         f.write('version %s\n' % getShortVersion())
@@ -1139,5 +1144,4 @@ class Human(guicommon.Object):
 
         f.close()
         progress(1)
-        G.app.currentFile.saved(filename)
-
+        self.callEvent('onChanged', event)
