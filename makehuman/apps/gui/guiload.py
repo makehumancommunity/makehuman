@@ -131,10 +131,11 @@ class LoadTaskView(gui3d.TaskView):
 
         @self.filechooser.mhEvent
         def onFileSelected(filename):
-            self.loadMHM(filename)
-
-    def loadMHM(self, filename):
-        gui3d.app.loadHumanMHM(filename)
+            if gui3d.app.currentFile.modified:
+                gui3d.app.prompt("Load", "You have unsaved changes. Are you sure you want to close the current file?",
+                    "Yes", "No", lambda: gui3d.app.loadHumanMHM(filename))
+            else:
+                gui3d.app.loadHumanMHM(filename)
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
