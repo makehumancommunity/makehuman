@@ -1273,10 +1273,39 @@ class FileEntryView(QtGui.QWidget, Widget):
         opening the filename, and as an initial path for browsing in
         the dialog. If the mode is 'dir', the given path is written
         in the line edit."""
-        self.directory = directory
-        self.browse._path = directory
-        if self.browse._mode == 'dir':
-            self.edit.setText(pathToUnicode(directory))
+        self.browse.path = directory
+        if self.mode == 'dir':
+            self.text = self.directory
+
+    directory = property(getDirectory, setDirectory)
+
+    def getPath(self):
+        """Get the FileEntryView's selected path."""
+        if self.mode == 'dir':
+            return self.directory
+        else:
+            return pathToUnicode(os.path.normpath(os.path.join(
+                self.directory, self.text)))
+
+    def setPath(self, path):
+        """Set the path of the FileEntryView.
+        This will update the widget's current directory,
+        as well as the file name in the text edit."""
+        if self.mode == 'dir':
+            self.directory = path
+        else:
+            self.directory = os.path.dirname(path)
+            self.text = os.path.basename(self.path)
+
+    path = property(getPath, setPath)
+
+    def getText(self):
+        return pathToUnicode(str(self.edit.text()))
+
+    def setText(self, text):
+        self.edit.setText(pathToUnicode(text))
+
+    text = property(getText, setText)
 
     def getFilter(self):
         """Get the extension filter the widget uses for browsing."""
@@ -1639,17 +1668,6 @@ class SpinBox(QtGui.QSpinBox, Widget):
         self.blockSignals(False)
 
 class BrowseButton(Button):
-    def __init__(self, mode = 'open'):
-        mode = mode.lower()
-        if mode not in ('open', 'save', 'dir'):
-            raise RuntimeError("mode '%s' not recognised; must be 'open', 'save', or 'dir'")
-        super(BrowseButton, self).__init__("...")
-        self._path = ''
-        self._filter = ''
-        self._mode = mode
-
-    def setPath(self, path):
-        self._path = path
 
     @staticmethod
     def conformFilter(filter):
@@ -1660,6 +1678,46 @@ class BrowseButton(Button):
             filter = ';;'.join([filter, getLanguageString('All Files') + ' (*.*)'])
         return filter
 
+    @staticmethod
+    def getExistingPath(path):
+        if not os.path.isdir(path) and not os.path.isfile(path):
+            path = os.path.split(path)[0]
+            homePath = os.path.abspath(getPath(''))
+            if os.path.isdir(homePath) and isSubPath(os.path.abspath(path), homePath):
+                # Find first existing folder within MH home path
+                while path and not os.path.isdir(path):
+                    path = os.path.split(path)[0]
+            if not os.path.isdir(path):
+                path = os.getcwd()
+        return pathToUnicode(os.path.normpath(path))
+
+    def __init__(self, mode = 'open'):
+        super(BrowseButton, self).__init__("...")
+        self._path = self.getExistingPath("")
+        self._filter = ''
+        self._mode = None
+
+        self.mode = mode
+
+    def getMode(self):
+        return self._mode
+
+    def setMode(self, mode):
+        mode = mode.lower()
+        if mode not in ('open', 'save', 'dir'):
+            raise RuntimeError("mode '%s' not recognised; must be 'open', 'save', or 'dir'")
+        self._mode = mode
+
+    mode = property(getMode, setMode)
+
+    def getPath(self):
+        return self._path
+
+    def setPath(self, path):
+        self._path = pathToUnicode(os.path.normpath(path))
+
+    path = property(getPath, setPath)
+
     def getFilter(self):
         return self._filter
 
@@ -1669,25 +1727,17 @@ class BrowseButton(Button):
     filter = property(getFilter, setFilter)
 
     def _clicked(self, state):
-        if not os.path.isdir(self._path) and not os.path.isfile(self._path):
-            self._path = os.path.split(self._path)[0]
-            homePath = os.path.abspath(getPath(''))
-            if os.path.isdir(homePath) and isSubPath(os.path.abspath(self._path), homePath):
-                # Find first existing folder within MH home path
-                while self._path and not os.path.isdir(self._path):
-                    self._path = os.path.split(self._path)[0]
-            if not os.path.isdir(self._path):
-                self._path = os.getcwd()
+        path = self.getExistingPath(self.path)
         if self._mode == 'open':
-            path = str(QtGui.QFileDialog.getOpenFileName(G.app.mainwin, directory=self._path, filter=self._filter))
+            path = str(QtGui.QFileDialog.getOpenFileName(G.app.mainwin, directory=path, filter=self.filter))
         elif self._mode == 'save':
-            path = str(QtGui.QFileDialog.getSaveFileName(G.app.mainwin, directory=self._path, filter=self._filter))
+            path = str(QtGui.QFileDialog.getSaveFileName(G.app.mainwin, directory=path, filter=self.filter))
         elif self._mode == 'dir':
-            path = str(QtGui.QFileDialog.getExistingDirectory(G.app.mainwin, directory=self._path))
+            path = str(QtGui.QFileDialog.getExistingDirectory(G.app.mainwin, directory=path))
 
         if path:
-            self._path = path
-        self.callEvent('onClicked', path)
+            self.path = path
+        self.callEvent('onClicked', pathToUnicode(path))
 
 class ColorPickButton(Button):
     """
