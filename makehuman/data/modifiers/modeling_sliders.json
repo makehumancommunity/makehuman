@@ -249,7 +249,6 @@
           {"mod": "armslegs/r-leg-genu-varun|valgus", "cam": "rightLegFrontCamera"},
           {"mod": "armslegs/r-lowerleg-scale-depth-decr|incr", "cam": "rightLegRightCamera"},
           {"mod": "armslegs/r-lowerleg-scale-horiz-decr|incr", "cam": "rightLegFrontCamera"},
-          {"mod": "armslegs/r-lowerleg-scale-vert-decr|incr", "cam": "rightLegFrontCamera"},
           {"mod": "armslegs/r-upperleg-scale-depth-decr|incr", "cam": "rightLegRightCamera"},
           {"mod": "armslegs/r-upperleg-scale-horiz-decr|incr", "cam": "rightLegFrontCamera"},
           {"mod": "armslegs/r-upperleg-scale-vert-decr|incr", "cam": "rightLegFrontCamera"}
@@ -258,7 +257,6 @@
           {"mod": "armslegs/l-leg-genu-varun|valgus", "cam": "leftLegFrontCamera"},
           {"mod": "armslegs/l-lowerleg-scale-depth-decr|incr", "cam": "leftLegLeftCamera"},
           {"mod": "armslegs/l-lowerleg-scale-horiz-decr|incr", "cam": "leftLegFrontCamera"},
-          {"mod": "armslegs/l-lowerleg-scale-vert-decr|incr", "cam": "leftLegFrontCamera"},
           {"mod": "armslegs/l-upperleg-scale-depth-decr|incr", "cam": "leftLegLeftCamera"},
           {"mod": "armslegs/l-upperleg-scale-horiz-decr|incr", "cam": "leftLegFrontCamera"},
           {"mod": "armslegs/l-upperleg-scale-vert-decr|incr", "cam": "leftLegFrontCamera"}
