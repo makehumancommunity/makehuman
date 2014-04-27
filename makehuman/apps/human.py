@@ -1112,6 +1112,7 @@ class Human(guicommon.Object):
         self.blockEthnicUpdates = False
         self._setEthnicVals()
 
+        G.app.currentFile.loaded(filename)
         self.callEvent('onChanged', events3d.HumanEvent(self, 'load'))
 
         if update:
@@ -1119,7 +1120,6 @@ class Human(guicommon.Object):
 
         self.setSubdivided(subdivide)
 
-        G.app.currentFile.loaded(filename)
         log.message("Done loading MHM file.")
 
     def save(self, filename, tags):
