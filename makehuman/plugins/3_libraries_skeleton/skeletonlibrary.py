@@ -341,7 +341,7 @@ class SkeletonLibrary(gui3d.TaskView):
         skel.setToRestPose() # Make sure skeleton is in rest pose when constructing the skeleton mesh
         self.skelMesh = skeleton_drawing.meshFromSkeleton(skel, "Prism")
         self.skelMesh.priority = 100
-        self.skelMesh.setPickable(True)
+        self.skelMesh.setPickable(False)
         self.skelObj = gui3d.app.addObject(gui3d.Object(self.skelMesh, self.human.getPosition()) )
         self.skelObj.setRotation(self.human.getRotation())
 
@@ -375,7 +375,7 @@ class SkeletonLibrary(gui3d.TaskView):
 
         self.jointsMesh = skeleton_drawing.meshFromJoints(jointPositions, jointGroupNames)
         self.jointsMesh.priority = 100
-        self.jointsMesh.setPickable(True)
+        self.jointsMesh.setPickable(False)
         self.jointsObj = self.addObject( gui3d.Object(self.jointsMesh, self.human.getPosition()) )
         self.jointsObj.setRotation(self.human.getRotation())
 
@@ -384,32 +384,6 @@ class SkeletonLibrary(gui3d.TaskView):
         self.jointsMesh.markCoords(colr=True)
         self.jointsMesh.sync_color()
 
-        # Add event listeners to joint mesh for joint highlighting
-        @self.jointsObj.mhEvent
-        def onMouseEntered(event):
-            """
-            Event fired when mouse hovers over a joint mesh facegroup
-            """
-            gui3d.TaskView.onMouseEntered(self, event)
-
-            # Highlight joint
-            self.selectedJoint = event.group
-            setColorForFaceGroup(self.jointsMesh, self.selectedJoint.name, [216, 110, 39, 255])
-            gui3d.app.statusPersist(event.group.name)
-            gui3d.app.redraw()
-
-        @self.jointsObj.mhEvent
-        def onMouseExited(event):
-            """
-            Event fired when mouse hovers off of a joint mesh facegroup
-            """
-            gui3d.TaskView.onMouseExited(self, event)
-
-            # Disable highlight on joint
-            if self.selectedJoint:
-                setColorForFaceGroup(self.jointsMesh, self.selectedJoint.name, [255,255,0,255])
-                gui3d.app.statusPersist('')
-                gui3d.app.redraw()
         mh.redraw()
 
 
