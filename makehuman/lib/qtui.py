@@ -524,8 +524,15 @@ class Frame(QtGui.QMainWindow):
         Multiple window states may apply to the same window, for example
         a window might be shown minimized, but set to be maximized when
         restored."""
-        # TODO: Caching
         stateflags = QtGui.QMainWindow.windowState(self)
+
+        # Use caching for faster generation on successive calls
+        if hasattr(self, '_windowStateFlagsCache') and \
+            stateflags == self._windowStateFlagsCache:
+            return self._windowStateCache
+        else:
+            self._windowStateFlagsCache = stateflags
+
         state = set()
         if stateflags & QtCore.Qt.WindowMaximized:
             state.add('maximized')
@@ -540,6 +547,8 @@ class Frame(QtGui.QMainWindow):
             state.add('normal geometry')
             if not stateflags & QtCore.Qt.WindowMinimized:
                 state.add('normal')
+
+        self._windowStateCache = state.copy()
         return state
 
     def setWindowState(self, state):
