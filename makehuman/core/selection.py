@@ -104,10 +104,6 @@ class SelectionColorMap:
         :param obj: The object3D object for which color dictionary entries need to be generated.
         :type obj: module3d.Object 3D
         """
-
-        # print "DEBUG COLOR AND GROUPS, obj", obj.name
-        # print "---------------------------"
-
         for g in obj.faceGroups:
             self.colorID += 1
 
@@ -121,7 +117,8 @@ class SelectionColorMap:
             
             self.colorIDToFaceGroup[self.colorID] = g
 
-            # print "SELECTION DEBUG INFO: facegroup %s of obj %s has the colorID = %s,%s,%s or %s"%(g.name,obj.name,idR,idG,idB, self.colorID)
+            # import log
+            # log.debug("SELECTION DEBUG INFO: facegroup %s of obj %s has the colorID = %s,%s,%s or %s", g.name,obj.name,idR,idG,idB, self.colorID)
 
     def getSelectedFaceGroup(self, picked):
         """
