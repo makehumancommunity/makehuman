@@ -1190,7 +1190,7 @@ class FileEntryView(QtGui.QWidget, Widget):
         buttonLabel = getLanguageString(buttonLabel)
 
         self.directory = os.getcwd()
-        self.filter = ''
+        self._filter = ''
 
         self.layout = QtGui.QGridLayout(self)
 
@@ -1234,13 +1234,15 @@ class FileEntryView(QtGui.QWidget, Widget):
         if self.browse._mode == 'dir':
             self.edit.setText(pathToUnicode(directory))
 
+    def getFilter(self):
+        return self._filter
+
     def setFilter(self, filter):
-        """Set the extension filter the browse dialog will use for browsing."""
-        # NOTE: Shouldn't this be self.browse.filter?
-        self.filter = getLanguageString(filter)
-        if '(*.*)' not in self.filter:
-            self.filter = ';;'.join(
-                [self.filter, getLanguageString('All Files') + ' (*.*)'])
+        """Set the extension filter the widget will use for browsing."""
+        self.browse.filter = filter
+        self._filter = self.browse.filter
+
+    filter = property(getFilter, setFilter)
 
     def _confirm(self, state=None):
         """Method to be called once the user has confirmed their choice,
@@ -1606,8 +1608,22 @@ class BrowseButton(Button):
     def setPath(self, path):
         self._path = path
 
+    @staticmethod
+    def conformFilter(filter):
+        """Static method that corrects a filter string, if needed, by
+        translating it and adding the default 'All Files' filter to it."""
+        filter = getLanguageString(filter)
+        if '(*.*)' not in filter:
+            filter = ';;'.join([filter, getLanguageString('All Files') + ' (*.*)'])
+        return filter
+
+    def getFilter(self):
+        return self._filter
+
     def setFilter(self, filter):
-        self._filter = filter
+        self._filter = self.conformFilter(filter)
+
+    filter = property(getFilter, setFilter)
 
     def _clicked(self, state):
         if not os.path.isdir(self._path) and not os.path.isfile(self._path):
