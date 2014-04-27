@@ -108,11 +108,11 @@ class SaveTaskView(gui3d.TaskView):
         self.modelPath = G.app.currentFile.dir
         if self.modelPath is None:
             self.modelPath = mh.getPath("models")
+        self.fileentry.setDirectory(self.modelPath)
 
         name = G.app.currentFile.title
         if name is None:
             name = ""
-
-        self.fileentry.setDirectory(self.modelPath)
         self.fileentry.edit.setText(pathToUnicode(name))
+
         self.fileentry.setFocus()
