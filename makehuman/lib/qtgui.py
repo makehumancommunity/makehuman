@@ -1249,6 +1249,10 @@ class FileEntryView(QtGui.QWidget, Widget):
         It emits an onFileSelected event if the line edit is not empty."""
         if len(self.edit.text()):
             self.callEvent('onFileSelected', unicode(self.edit.text()))
+        else:
+            import log
+            log.notice("The text box is empty. Please enter a valid file name.")
+            self.setFocus()
 
     def onFocus(self, event):
         """Handler for the event of the widget being given focus. It passes
