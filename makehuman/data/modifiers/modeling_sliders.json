@@ -222,13 +222,11 @@
       "right foot": [
           {"mod": "armslegs/r-foot-scale-decr|incr", "cam": "rightFootRightCamera"},
           {"mod": "armslegs/r-foot-trans-in|out", "cam": "rightFootFrontCamera"},
-          {"mod": "armslegs/r-foot-trans-down|up", "cam": "rightFootFrontCamera"},
           {"mod": "armslegs/r-foot-trans-forward|backward", "cam": "rightFootRightCamera"}
         ],
       "left foot": [
           {"mod": "armslegs/l-foot-scale-decr|incr", "cam": "leftFootLeftCamera"},
           {"mod": "armslegs/l-foot-trans-in|out", "cam": "leftFootFrontCamera"},
-          {"mod": "armslegs/l-foot-trans-down|up", "cam": "leftFootFrontCamera"},
           {"mod": "armslegs/l-foot-trans-forward|backward", "cam": "leftFootLeftCamera"}
         ],
       "right arm": [
