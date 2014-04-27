@@ -48,6 +48,36 @@ import gui3d
 from core import G
 from getpath import pathToUnicode
 
+
+def saveMHM(path):
+    """Save the .mhm and the thumbnail to the selected save path."""
+    if not path.lower().endswith('.mhm'):
+        path += '.mhm'
+    path = os.path.normpath(path)
+
+    savedir = os.path.dirname(path)
+    if not os.path.exists(savedir):
+        os.makedirs(savedir)
+
+    name = os.path.splitext(os.path.basename(path))[0]
+
+    # Save square sized thumbnail
+    size = min(G.windowWidth, G.windowHeight)
+    img = mh.grabScreen(
+        (G.windowWidth - size) / 2, (G.windowHeight - size) / 2, size, size)
+
+    # Resize thumbnail to max 128x128
+    if size > 128:
+        img.resize(128, 128)
+    img.save(os.path.join(savedir, name + '.thumb'))
+
+    # Save the model
+    G.app.selectedHuman.save(path, name)
+    #G.app.clearUndoRedo()
+
+    G.app.status('Your model has been saved to %s.', path)
+
+
 class SaveTaskView(gui3d.TaskView):
     """Task view for saving MakeHuman model files."""
 
@@ -67,36 +97,7 @@ class SaveTaskView(gui3d.TaskView):
 
         @self.fileentry.mhEvent
         def onFileSelected(filename):
-            self.saveMHM(filename)
-
-    def saveMHM(self, filename):
-        """Method that does the saving of the .mhm and the thumbnail once
-        the save path is selected."""
-        if not filename.lower().endswith('.mhm'):
-            filename += '.mhm'
-
-        modelPath = self.fileentry.directory
-        if not os.path.exists(modelPath):
-            os.makedirs(modelPath)
-
-        path = os.path.normpath(os.path.join(modelPath, filename))
-        name = os.path.splitext(filename)[0]
-
-        # Save square sized thumbnail
-        size = min(G.windowWidth, G.windowHeight)
-        img = mh.grabScreen(
-            (G.windowWidth - size) / 2, (G.windowHeight - size) / 2, size, size)
-
-        # Resize thumbnail to max 128x128
-        if size > 128:
-            img.resize(128, 128)
-        img.save(os.path.join(modelPath, name + '.thumb'))
-
-        # Save the model
-        G.app.selectedHuman.save(path, name)
-        #G.app.clearUndoRedo()
-
-        gui3d.app.prompt('Info', u'Your model has been saved to %s.', 'OK', fmtArgs = modelPath)
+            saveMHM(os.path.join(self.modelPath, filename))
 
     def onShow(self, event):
         """Handler for the TaskView onShow event.
@@ -104,14 +105,14 @@ class SaveTaskView(gui3d.TaskView):
         and give focus to the file entry."""
         gui3d.TaskView.onShow(self, event)
 
-        modelPath = G.app.currentFile.dir
-        if modelPath is None:
-            modelPath = mh.getPath("models")
+        self.modelPath = G.app.currentFile.dir
+        if self.modelPath is None:
+            self.modelPath = mh.getPath("models")
 
         name = G.app.currentFile.title
         if name is None:
             name = ""
 
-        self.fileentry.setDirectory(modelPath)
+        self.fileentry.setDirectory(self.modelPath)
         self.fileentry.edit.setText(pathToUnicode(name))
         self.fileentry.setFocus()
