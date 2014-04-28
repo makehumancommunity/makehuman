@@ -314,9 +314,12 @@ if __name__ == '__main__':
     if isArchived(ftp):
         print "Redirected to asset archive"
         archiveUrl = downloadFromFTP(ftp, 'archive_url.txt', None).strip()
-        print "Downloading archive from HTTP (%s)" % archiveUrl
         filename = os.path.basename(archiveUrl)
         zipDest = os.path.join(getSysPath(), filename)
+        if os.path.exists(zipDest):
+            print "Archive %s already exists, not downloading again." % zipDest
+            sys.exit()
+        print "Downloading archive from HTTP (%s)" % archiveUrl
         # Download and extract archive
         downloadFromHTTP(archiveUrl, zipDest)
         print "Extracting zip archive..."
