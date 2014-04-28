@@ -315,10 +315,12 @@ def get_platform_paths():
 
 def redirect_standard_streams():
     from codecs import open
+    import locale
+    encoding = locale.getpreferredencoding()
     if stdout_filename:
-        sys.stdout = open(stdout_filename, "w", encoding="utf-8", errors="replace")
+        sys.stdout = open(stdout_filename, "w", encoding=encoding, errors="replace")
     if stderr_filename:
-        sys.stderr = open(stderr_filename, "w", encoding="utf-8", errors="replace")
+        sys.stderr = open(stderr_filename, "w", encoding=encoding, errors="replace")
 
 def close_standard_streams():
     sys.stdout.close()
