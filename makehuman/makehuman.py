@@ -184,7 +184,12 @@ def get_hg_revision_1():
             os.environ['HGBRANCH'] = hgrev[2]
         return hgrev
     except Exception as e:
-        print >> sys.stderr,  "NOTICE: Failed to get hg version number from command line: " + format(str(e)) + " (This is just a head's up, not a critical error)"
+        # TL: Workaround for issue 309.
+        # Put e in brackets to avoid crash if error message contains non-ascii characters.
+        # Done in four places in this file.
+        # Should be done properly with codecs, but it seems to me that avoiding
+        # crash on start-up is critical enough to warrant a workaround.
+        print >> sys.stderr,  "NOTICE: Failed to get hg version number from command line: " + format(str([e])) + " (This is just a head's up, not a critical error)"
 
     try:
         hgrev = get_revision_hglib()
@@ -195,7 +200,7 @@ def get_hg_revision_1():
             os.environ['HGBRANCH'] = hgrev[2]
         return hgrev
     except Exception as e:
-        print >> sys.stderr,  "NOTICE: Failed to get hg version number using hglib: " + format(str(e)) + " (This is just a head's up, not a critical error)"
+        print >> sys.stderr,  "NOTICE: Failed to get hg version number using hglib: " + format(str([e])) + " (This is just a head's up, not a critical error)"
 
     try:
         hgrev = get_revision_entries()
@@ -204,7 +209,7 @@ def get_hg_revision_1():
         os.environ['HGNODEID'] = str(hgrev[1])
         return hgrev
     except Exception as e:
-        print >> sys.stderr,  "NOTICE: Failed to get hg version from file: " + format(str(e)) + " (This is just a head's up, not a critical error)"
+        print >> sys.stderr,  "NOTICE: Failed to get hg version from file: " + format(str([e])) + " (This is just a head's up, not a critical error)"
 
     #TODO Disabled this fallback for now, it's possible to do this using the hg keyword extension, but not recommended and this metric was never really reliable (it only caused more confusion)
     '''
@@ -250,7 +255,7 @@ def get_hg_revision():
         os.environ['HGREVISION_SOURCE'] = "skipped for build"
 
     return (os.environ['HGREVISION'], os.environ['HGNODEID'])
-    
+
 def set_sys_path():
     """
     Append local module folders to python search path.
@@ -306,13 +311,13 @@ def init_logging():
     import log
     log.init()
     log.message('Initialized logging')
-    
+
 def debug_dump():
     try:
         import debugdump
         debugdump.dump.reset()
     except debugdump.DependencyError as e:
-        print >> sys.stderr,  "Dependency error: " + format(str(e))
+        print >> sys.stderr,  "Dependency error: " + format(str([e]))
         import log
         log.error("Dependency error: %s", e)
         sys.exit(-1)
@@ -356,7 +361,7 @@ def main():
         args = parse_arguments()
         init_logging()
     except Exception as e:
-        print >> sys.stderr,  "error: " + format(str(e))
+        print >> sys.stderr,  "error: " + format(str([e]))
         import traceback
         bt = traceback.format_exc()
         print >> sys.stderr, bt
