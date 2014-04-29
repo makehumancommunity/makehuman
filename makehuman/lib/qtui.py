@@ -482,7 +482,7 @@ class Frame(QtGui.QMainWindow):
     def changeEvent(self, event):
         """QMainWindow method override that is called whenever a change
         happens on the widget."""
-        if event.type() == QtCore.Qt.QEvent.WindowStateChange:
+        if event.type() == QtCore.QEvent.WindowStateChange:
             if 'normal geometry' in self.windowState:
                 self.normalStateGeometry = self.storeGeometry()
         QtGui.QMainWindow.changeEvent(self, event)
