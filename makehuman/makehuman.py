@@ -113,6 +113,40 @@ def getBasemeshVersion():
     """
     return meshVersion
 
+def unicode(msg):
+    """
+    Override default unicode constructor to try and resolve some issues with
+    mismatched string codecs.
+    Perhaps this is overkill, but better safe than sorry.
+    """
+    try:
+        # First attempt the builtin unicode() function without interference
+        return __builtins__.unicode(msg)
+    except:
+        pass
+    try:
+        # In case msg is an exception, attempt to decode its message
+        return unicode(msg.message)
+    except:
+        pass
+    try:
+        # Try decoding as utf-8 bytestring
+        return __builtins__.unicode(msg, encoding="utf-8")
+    except:
+        pass
+    try:
+        # Try guessing system default encoding and decode as such
+        import locale
+        return __builtins__.unicode(msg, encoding=locale.getpreferredencoding())
+    except:
+        pass
+    try:
+        # Attempt to decode object's __str__ into unicode
+        return str(msg).decode("utf-8", errors="replace")
+    except:
+        pass
+    return u"unable to encode message"
+
 def getCwd():
     """
     Retrieve the folder where makehuman.py or makehuman.exe is located.
@@ -184,7 +218,7 @@ def get_hg_revision_1():
             os.environ['HGBRANCH'] = hgrev[2]
         return hgrev
     except Exception as e:
-        print >> sys.stderr,  "NOTICE: Failed to get hg version number from command line: " + format(str(e)) + " (This is just a head's up, not a critical error)"
+        print >> sys.stderr,  u"NOTICE: Failed to get hg version number from command line: " + format(unicode(e)) + u" (This is just a head's up, not a critical error)"
 
     try:
         hgrev = get_revision_hglib()
@@ -195,7 +229,7 @@ def get_hg_revision_1():
             os.environ['HGBRANCH'] = hgrev[2]
         return hgrev
     except Exception as e:
-        print >> sys.stderr,  "NOTICE: Failed to get hg version number using hglib: " + format(str(e)) + " (This is just a head's up, not a critical error)"
+        print >> sys.stderr,  u"NOTICE: Failed to get hg version number using hglib: " + format(unicode(e)) + u" (This is just a head's up, not a critical error)"
 
     try:
         hgrev = get_revision_entries()
@@ -204,7 +238,7 @@ def get_hg_revision_1():
         os.environ['HGNODEID'] = str(hgrev[1])
         return hgrev
     except Exception as e:
-        print >> sys.stderr,  "NOTICE: Failed to get hg version from file: " + format(str(e)) + " (This is just a head's up, not a critical error)"
+        print >> sys.stderr,  u"NOTICE: Failed to get hg version from file: " + format(unicode(e)) + u" (This is just a head's up, not a critical error)"
 
     #TODO Disabled this fallback for now, it's possible to do this using the hg keyword extension, but not recommended and this metric was never really reliable (it only caused more confusion)
     '''
@@ -234,15 +268,15 @@ def get_hg_revision():
     versionFile = getpath.getSysDataPath("VERSION")
     if os.path.exists(versionFile):
         version_ = open(versionFile).read().strip()
-        print >> sys.stderr,  "data/VERSION file detected using value from version file: %s" % version_
+        print >> sys.stderr,  u"data/VERSION file detected using value from version file: %s" % version_
         os.environ['HGREVISION'] = str(version_.split(':')[0])
         os.environ['HGNODEID'] = str(version_.split(':')[1])
         os.environ['HGREVISION_SOURCE'] = "data/VERSION static revision data"
     elif not isBuild():
-        print >> sys.stderr,  "NO VERSION file detected retrieving revision info from HG"
+        print >> sys.stderr,  u"NO VERSION file detected retrieving revision info from HG"
         # Set HG rev in environment so it can be used elsewhere
         hgrev = get_hg_revision_1()
-        print >> sys.stderr,  "Detected HG revision: r%s (%s)" % (hgrev[0], hgrev[1])
+        print >> sys.stderr,  u"Detected HG revision: r%s (%s)" % (hgrev[0], hgrev[1])
     else:
         # Don't bother trying to retrieve HG info for a build release, there should be a data/VERSION file
         os.environ['HGREVISION'] = ""
@@ -250,7 +284,7 @@ def get_hg_revision():
         os.environ['HGREVISION_SOURCE'] = "skipped for build"
 
     return (os.environ['HGREVISION'], os.environ['HGNODEID'])
-    
+
 def set_sys_path():
     """
     Append local module folders to python search path.
@@ -306,13 +340,13 @@ def init_logging():
     import log
     log.init()
     log.message('Initialized logging')
-    
+
 def debug_dump():
     try:
         import debugdump
         debugdump.dump.reset()
     except debugdump.DependencyError as e:
-        print >> sys.stderr,  "Dependency error: " + format(str(e))
+        print >> sys.stderr,  u"Dependency error: " + format(unicode(e))
         import log
         log.error("Dependency error: %s", e)
         sys.exit(-1)
@@ -356,7 +390,7 @@ def main():
         args = parse_arguments()
         init_logging()
     except Exception as e:
-        print >> sys.stderr,  "error: " + format(str(e))
+        print >> sys.stderr,  "error: " + format(unicode(e))
         import traceback
         bt = traceback.format_exc()
         print >> sys.stderr, bt
