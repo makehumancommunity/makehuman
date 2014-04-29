@@ -529,7 +529,7 @@ class Frame(QtGui.QMainWindow):
         # Use caching for faster generation on successive calls
         if hasattr(self, '_windowStateFlagsCache') and \
             stateflags == self._windowStateFlagsCache:
-            return self._windowStateCache.copy()
+            return self._windowStateCache
         else:
             self._windowStateFlagsCache = stateflags
 
