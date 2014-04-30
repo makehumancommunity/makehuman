@@ -1312,7 +1312,7 @@ class FileEntryView(QtGui.QWidget, Widget):
             self.directory = path
         else:
             self.directory = os.path.dirname(path)
-            self.text = os.path.basename(self.path)
+            self.text = os.path.basename(path)
 
     path = property(getPath, setPath)
 
