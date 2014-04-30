@@ -158,7 +158,7 @@ def buildDeb(dest = None):
 
 
   # Folder where hg contents are exported and prepared for packaging (scripts are run)
-  exportdir = os.path.normpath(os.path.realpath( os.path.join(hgrootdir, '..', 'mh-export-deb') ))
+  exportdir = os.path.normpath(os.path.realpath( os.path.join(hgrootdir, '..', package_name + '-export-deb') ))
   print "Source export directory: " + exportdir
 
 
