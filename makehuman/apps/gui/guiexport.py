@@ -53,6 +53,7 @@ class ExportTaskView(guipose.PoseModeTaskView):
         self.formats = []
         self.recentlyShown = None
         self._requiresUpdate = True
+        self.showOverwriteWarning = False
 
         self.fileentry = self.addTopWidget(gui.FileEntryView('Export', mode='save'))
         self.fileentry.directory = mh.getPath('exports')
@@ -100,19 +101,22 @@ class ExportTaskView(guipose.PoseModeTaskView):
                     log.warning("expected extension '.%s' but got '%s'", targetExt, ext)
                 return os.path.join(dir, name + '.' + targetExt)
 
-            found = False
-            for exporter, radio, options in self.formats:
-                if radio.selected:
-                    exporter.export(gui3d.app.selectedHuman, filename)
-                    found = True
-                    break
-
-            if not found:
+            for exporter in [f[0] for f in self.formats if f[1].selected]:
+                if self.showOverwriteWarning and \
+                    event.source in ('button', 'return') and \
+                    os.path.exists(os.path.join(dir, name + '.' + exporter.fileExtension)):
+                    if not gui3d.app.prompt("File exists", "The file already exists. Overwrite?", "Yes", "No"):
+                        break;
+                exporter.export(gui3d.app.selectedHuman, filename)
+                gui3d.app.status(u'The mesh has been exported to %s.', dir)
+                self.showOverwriteWarning = False
+                break
+            else:
                 log.error("Unknown export format selected!")
-                return
 
-            gui3d.app.prompt('Info', u'The mesh has been exported to %s.', 'OK', fmtArgs = dir)
-
+        @self.fileentry.mhEvent
+        def onChange(text):
+            self.showOverwriteWarning = True
 
     _scales = {
         "decimeter": 1.0,

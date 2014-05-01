@@ -1167,10 +1167,14 @@ class Dialog(QtGui.QDialog):
 
         which = self.exec_()
 
-        if which == QtGui.QDialog.Accepted and button1Action:
-            button1Action()
-        elif which == QtGui.QDialog.Rejected and button2Action:
-            button2Action()
+        if which == QtGui.QDialog.Accepted:
+            if button1Action:
+                button1Action()
+            return True
+        elif which == QtGui.QDialog.Rejected:
+            if button2Action:
+                button2Action()
+            return False
 
         if helpId and self.check.isChecked():
             self.helpIds.add(helpId)
@@ -1249,6 +1253,9 @@ class FileEntryView(QtGui.QWidget, Widget):
 
         self.connect(self.edit, QtCore.SIGNAL(' returnPressed()'),
             lambda: self._confirm('return'))
+
+        self.connect(self.edit, QtCore.SIGNAL('textEdited(QString)'),
+            lambda s: self.callEvent('onChange', unicode(s)))
 
         self.connect(self.confirm, QtCore.SIGNAL('clicked(bool)'),
             lambda _: self._confirm('button'))

@@ -1059,7 +1059,7 @@ class MHApplication(gui3d.Application, mh.Application):
         if self.dialog is None:
             self.dialog = gui.Dialog(self.mainwin)
             self.dialog.helpIds.update(self.helpIds)
-        self.dialog.prompt(title, text, button1Label, button2Label, button1Action, button2Action, helpId, fmtArgs)
+        return self.dialog.prompt(title, text, button1Label, button2Label, button1Action, button2Action, helpId, fmtArgs)
 
     def setGlobalCamera(self):
         human = self.selectedHuman
