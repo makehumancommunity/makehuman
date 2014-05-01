@@ -51,7 +51,8 @@ Create a debian DEB package for the MakeHuman application.
 
 
 # --- CONFIGURATION SETTINGS --- 
-package_name = "makehuman"  # Note: 'hg' will be appended if this is a nightly build
+package_name = "makehuman"  
+package_explicit = False  # Add "hg" to package_name only if package_name was not explicitly set in build.conf
 package_version = None
 package_replaces = "makehuman-nightly,makehuman-alpha,makehumansvn"   # TODO for release, do we need to add 'makehumanhg' to the replaces as well?
 
@@ -98,6 +99,7 @@ def configure(confpath):
   global package_name
   global package_version
   global package_replaces
+  global package_explicit
   global hgpath
 
   def _conf_get(config, section, option, defaultVal):
@@ -116,12 +118,15 @@ def configure(confpath):
     package_name = _conf_get(conf, 'Deb', 'packageName', package_name)
     package_replaces = _conf_get(conf, 'Deb', 'packageReplaces', package_replaces)
     package_version = _conf_get(conf, 'Deb', 'packageVersion', package_version)
+    if not (package_name == "makehuman"):
+      package_explicit = True
 
 
 def buildDeb(dest = None):
   global package_name
   global package_version
   global package_replaces
+  global package_explicit
   global hgpath
   global files_to_chmod_executable
 
@@ -181,7 +186,7 @@ def buildDeb(dest = None):
   scriptdir = os.path.abspath( os.path.join(exportdir, 'makehuman') )    # .. Folder containing makehuman.py (source to package)
   print "Makehuman directory: " + scriptdir
 
-  if not exportInfo.isRelease:
+  if not exportInfo.isRelease and not package_explicit:
     package_name = package_name + 'hg'
 
   target = os.path.join(destdir,"debroot")                    # /dest/debroot    contents of deb archive (= target)
