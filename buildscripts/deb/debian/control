@@ -4,7 +4,7 @@ Homepage: http://www.makehuman.org
 Package: PKGNAME
 Version: VERSION
 Maintainer: Joel Palmius <joepal1976@hotmail.com>
-Depends: python,python-qt4,python-opengl,python-numpy,python-qt4-gl
+Depends: python2.7,python-qt4,python-opengl,python-numpy,python-qt4-gl
 Suggests: blender
 Provides: makehuman
 Replaces: REPLACES
