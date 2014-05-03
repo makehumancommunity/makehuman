@@ -20,8 +20,8 @@ MakeHuman pyinstaller spec file for Windows build
 Abstract
 --------
 
-Create a windows executable package for the MakeHuman application.
-"""
+Create a windows executable package for the MakeHuman application."
+""" 
 
 
 import sys
@@ -29,24 +29,33 @@ import subprocess
 import zipfile
 import os
 import shutil
+import re
 
 sys.path = sys.path + ['..']
 import build_prepare
+
+package_name = "makehuman"  
+package_explicit = False 
+package_version = None
+dist_dir = None
+hgpath = "hg"
+hg_root_path = os.path.abspath( os.path.join("..","..") )
 
 def hgRootPath(subpath=""):
     """
     The source location, root folder of the hg repository.
     (we assume cwd is in buildscripts/win32 relative to hg root)
     """
-    return os.path.join('..', '..', subpath)
+    global hg_root_path
+    return os.path.join(hg_root_path, subpath)
 
 def exportPath(subpath=""):
     """
     The export path, where the source files to be packaged are exported.
     """
     global hgRootPath
-    prefix = os.environ.get('JENKINS_JOB','mh');
-    return os.path.join(hgRootPath(), '..', prefix + '_export_win32', subpath)
+    global package_name
+    return os.path.abspath(os.path.join(hgRootPath(), '..', package_name + '_export_win32', subpath))
 
 def distPath(subpath=""):
     """
@@ -54,7 +63,52 @@ def distPath(subpath=""):
     data from export path is copied. This folder will eventually be packaged
     for distribution.
     """
+    global dist_dir
+
+    if not dist_dir is None:
+        return os.path.join(dist_dir, subpath)
     return os.path.join('dist', subpath)
+
+def parseConfig(configPath):
+    if os.path.isfile(configPath):
+        import ConfigParser
+        config = ConfigParser.ConfigParser()
+        config.read(configPath)
+        return config
+    else:
+        return None
+
+def configure(confpath):
+  global package_name
+  global package_version
+  global package_explicit
+  global hgpath
+  global dist_dir
+  global parseConfig
+  global exportPath
+
+  def _conf_get(config, section, option, defaultVal):
+    try:
+        return config.get(section, option)
+    except:
+        return defaultVal
+
+  conf = parseConfig(confpath)
+  if conf is None:
+    print "No config file at %s, using defaults or options passed on commandline." % confpath
+  else:
+    print "Using config file at %s. NOTE: properties in config file will override any other settings!" % confpath
+
+    hgpath = _conf_get(conf, 'General', 'hgPath', hgpath)
+    package_name = _conf_get(conf, 'Win32', 'packageName', package_name)
+    package_version = _conf_get(conf, 'Win32', 'packageVersion', package_version)
+    dist_dir = _conf_get(conf, 'Win32', 'distDir', dist_dir)
+    if not (package_name == "makehuman"):
+      package_explicit = True
+
+configure("../build.conf")
+if not dist_dir is None and not os.path.exists(dist_dir):
+    os.makedirs(dist_dir)
 
 # Export source to export folder and run scripts
 if os.path.exists(exportPath()):
@@ -73,8 +127,7 @@ qtConf.close()
 exportInfo.datas.append(os.path.join(i.rootSubpath, 'qt.conf'))
 
 # Change to the export dir for building
-#os.chdir(exportPath())
-
+os.chdir(exportPath())
 
 VERSION = exportInfo.version
 HGREV = exportInfo.revision
@@ -85,8 +138,7 @@ if exportInfo.isRelease:
 else:
     VERSION_FN= str(HGREV) + '-' + NODEID
 
-
-appExecutable = exportPath( i.mainExecutable )
+appExecutable = exportPath( 'makehuman\makehuman.py' )
 
 a = Analysis([appExecutable] + i.getPluginFiles(),
              pathex= [ exportPath(p) for p in i.pathEx ],
@@ -169,8 +221,12 @@ elif sys.platform == 'win32':
         strip=None,
         upx=True,
         name='makehuman')
-    target_dir = distPath('makehuman')
-    zipfilename = distPath('makehuman-%s-win32.zip' % VERSION_FN)
+    target_dir = hgRootPath('buildscripts\win32\dist\makehuman')
+    if package_explicit and not package_version is None and not package_name is None:
+        label = package_name + "-" + package_version
+    else:
+        label = package_name + "-" + VERSION_FN;
+    zipfilename = distPath('%s-win32.zip' % label)
     zip = zipfile.ZipFile(zipfilename, 'w', zipfile.ZIP_DEFLATED)
     rootlen = len(target_dir) + 1
     for base, dirs, files in os.walk(target_dir):
