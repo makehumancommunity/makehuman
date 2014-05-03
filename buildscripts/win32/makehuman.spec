@@ -45,7 +45,8 @@ def exportPath(subpath=""):
     The export path, where the source files to be packaged are exported.
     """
     global hgRootPath
-    return os.path.join(hgRootPath(), '..', 'mh_export_win32', subpath)
+    prefix = os.environ.get('JENKINS_JOB','mh');
+    return os.path.join(hgRootPath(), '..', prefix + '_export_win32', subpath)
 
 def distPath(subpath=""):
     """
