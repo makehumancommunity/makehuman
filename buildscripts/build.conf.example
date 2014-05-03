@@ -75,3 +75,8 @@
 # versionSub either specified in this file or in makehuman.py)
 #packageVersion = 1.0.0.alpha8.rc3
 
+[Win32]
+# packageName = makehuman-unstable
+# packageVersion = 20140503
+#distDir = c:\jenkins\workspace\makehuman-unstable-dist
+
