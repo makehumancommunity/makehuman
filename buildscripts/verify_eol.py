@@ -125,11 +125,17 @@ if __name__ == '__main__':
 
     path = args['path']
     fix = args.get('fix', False)
-    print "Files containing DOS line endings:"
     detected = check_dos_eol(path)
-    print "\n".join( detected )
+    if len(detected) > 0:
+        print "Files containing DOS line endings:"
+        print "\n".join( detected )
 
     if fix:
         print "\nFixing files..."
         fix_dos_eol(detected)
         print "All done"
+    else:
+        if len(detected) > 0:
+            sys.exit(1)
+        else:
+            sys.exit(0)

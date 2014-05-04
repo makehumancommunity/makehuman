@@ -42,7 +42,6 @@ import weakref
 import numpy as np
 import unique # Bugfix for numpy.unique on older numpy versions
 
-import matrix
 import material
 
 class FaceGroup(object):
@@ -71,11 +70,10 @@ class FaceGroup(object):
 
     def __init__(self, object, name, idx):
         self.object = object
-        self.parent = object
         self.name = name
         self.idx = idx
         self.color = None
-        self.colorID = self.black
+        self.colorID = self.black.copy()
 
     def __str__(self):
         """
@@ -85,7 +83,6 @@ class FaceGroup(object):
         **Parameters:** This method has no parameters.
 
         """
-
         return 'facegroup %s' % self.name
 
     def setColor(self, rgba):
@@ -96,7 +93,7 @@ class FaceGroup(object):
             return self.__object()
         else:
             return None
-        
+
     def setObject(self, value):
         if value is None:
             self.__object = None
@@ -106,17 +103,17 @@ class FaceGroup(object):
     
     object = property(getObject, setObject)
 
+    @property
+    def parent(self):
+        return self.object
+
 class Object3D(object):
     def __init__(self, objName, vertsPerPrimitive=4):
         self.clear()
 
         self.name = objName
         self.vertsPerPrimitive = vertsPerPrimitive
-        self._loc = np.zeros(3)
-        self.rot = np.zeros(3)
-        self.scale = np.ones(3)
         self._faceGroups = []
-        self._material = material.Material(objName+"_Material")  # Render material
         self._groups_rev = {}
         self.cameraMode = 0
         self._visibility = True
@@ -125,7 +122,6 @@ class Object3D(object):
         self.object3d = None
         self._priority = 0
         self.MAX_FACES = 8
-        self.lockRotation = False   # Set to true to make the rotation of this object independent of the camera rotation
 
         # Cache used for retrieving vertex colors multiplied with material diffuse color
         self._old_diff = None
@@ -133,104 +129,93 @@ class Object3D(object):
 
         self.__object = None
 
-    def getLoc(self):
-        return self._loc
+    def clone(self, scale=1.0, filterMaskedVerts=False):
+        """
+        Create a clone of this mesh, with adapted scale.
+        If filterVerts is True, all vertices that are not required (do not
+        belong to any visible face) are removed and vertex mapping is added to
+        cloned object (see filterMaskedVerts()). For a face mapping, the
+        facemask of the original mesh can be used.
+        """
+        other = type(self)(self.name, self.vertsPerPrimitive)
 
-    def setLoc(self, loc):
-        self._loc = loc
+        for prop in ['cameraMode', 'visibility', 'pickable', 
+                     'calculateTangents', 'priority', 'MAX_FACES']:
+            setattr(other, prop, getattr(self, prop))
 
-    loc = property(getLoc, setLoc)
+        for fg in self.faceGroups:
+            ofg = other.createFaceGroup(fg.name)
+            if fg.color is not None:
+                ofg.color = fg.color.copy()
+            else:
+                ofg.color = fg.color
 
-    def get_x(self):
-        return self.loc[0]
+        if filterMaskedVerts:
+            self.filterMaskedVerts(other, update=False)
+            if scale != 1:
+                other.coord = scale * other.coord
+        else:
+            other.setCoords(scale * self.coord)
+            other.setColor(self.color.copy())
+            other.setUVs(self.texco.copy())
+            other.setFaces(self.fvert.copy(), self.fuvs.copy(), self.group.copy())
+            other.changeFaceMask(self.face_mask.copy())
 
-    def set_x(self, x):
-        self.loc[0] = x
+        other.calcNormals()
+        other.updateIndexBuffer()
 
-    x = property(get_x, set_x)
+        return other
 
-    def get_y(self):
-        return self.loc[1]
+    def filterMaskedVerts(self, other, update=True):
+        """
+        Set the vertices, faces and vertex attributes of other object to the
+        vertices and faces of this mesh object, with the hidden faces and
+        vertices filtered out.
 
-    def set_y(self, y):
-        self.loc[1] = y
+        The other mesh contains a parent_map which maps vertex indices from
+        the other to its original mesh and inverse_parent_map which maps vertex
+        indexes from original to other (-1 if removed).
 
-    y = property(get_y, set_y)
+        other.parent is set to the original mesh.
+        """
+        if hasattr(self, 'parent') and self.parent:
+            other.parent = self.parent
+        else:
+            other.parent = self
 
-    def get_z(self):
-        return self.loc[2]
+        # Forward vertex mapping:
+        # parent_map[idx] = mIdx: other.coord[idx] -> self.coord[mIdx]
+        other.parent_map = np.unique(self.getVerticesForFaceMask(self.face_mask))
 
-    def set_z(self, z):
-        self.loc[2] = z
+        # Reverse vertex mapping:
+        # inverse_parent_map[idx] = mIdx: self.coord[idx] -> other.coord[mIdx]
+        other.inverse_parent_map = - np.ones(self.getVertexCount(), dtype=np.int32)
+        other.inverse_parent_map[other.parent_map] = np.arange(self.getVertexCount(), dtype=np.int32)
+        #other.inverse_parent_map = np.ma.masked_less(other.inverse_parent_map, 0)  # TODO might be useful
 
-    z = property(get_z, set_z)
+        other.setCoords(self.coord[other.parent_map])
+        other.setColor(self.color[other.parent_map])
 
-    def get_rx(self):
-        return self.rot[0]
+        # Filter out and remap masked faces
+        fvert = self.fvert[self.face_mask]
+        for i in xrange(self.vertsPerPrimitive):
+            fvert[:,i] = other.inverse_parent_map[fvert[:,i]]
 
-    def set_rx(self, rx):
-        self.rot[0] = rx
+        # Filter out and remap unused UVs
+        fuvs = self.fuvs[self.face_mask]
+        uv_idx = np.unique(fuvs.reshape(-1))
+        inverse_uv_idx = - np.ones(self.texco.shape[0], dtype=np.int32)
+        inverse_uv_idx[uv_idx] = np.arange(self.texco.shape[0], dtype=np.int32)
+        for i in xrange(self.vertsPerPrimitive):
+            fuvs[:,i] = inverse_uv_idx[fuvs[:,i]]
 
-    rx = property(get_rx, set_rx)
+        other.setUVs(self.texco[uv_idx])
 
-    def get_ry(self):
-        return self.rot[1]
+        other.setFaces(fvert, fuvs, self.group[self.face_mask])
 
-    def set_ry(self, ry):
-        self.rot[1] = ry
-
-    ry = property(get_ry, set_ry)
-
-    def get_rz(self):
-        return self.rot[2]
-
-    def set_rz(self, rz):
-        self.rot[2] = rz
-
-    rz = property(get_rz, set_rz)
-
-    def get_sx(self):
-        return self.scale[0]
-
-    def set_sx(self, sx):
-        self.scale[0] = sx
-
-    sx = property(get_sx, set_sx)
-
-    def get_sy(self):
-        return self.scale[1]
-
-    def set_sy(self, sy):
-        self.scale[1] = sy
-
-    sy = property(get_sy, set_sy)
-
-    def get_sz(self):
-        return self.scale[2]
-
-    def set_sz(self, sz):
-        self.scale[2] = sz
-
-    sz = property(get_sz, set_sz)
-
-    def getShaderChanged(self):
-        return self.material.shaderChanged
-
-    def setShaderChanged(self, shaderChanged):
-        self.material.shaderChanged = shaderChanged
-
-    shaderChanged = property(getShaderChanged, setShaderChanged)
-
-    @property
-    def transform(self):
-        m = matrix.translate(self.loc)
-        if any(x != 0 for x in self.rot):
-            m = m * matrix.rotx(self.rx)
-            m = m * matrix.roty(self.ry)
-            m = m * matrix.rotz(self.rz)
-        if any(x != 1 for x in self.scale):
-            m = m * matrix.scale(self.scale)
-        return m
+        if update:
+            other.calcNormals()
+            other.updateIndexBuffer()
 
     def getCenter(self):
         """
@@ -321,7 +306,7 @@ class Object3D(object):
         t1 = w2[:,1] - w1[:,1]
         t2 = w3[:,1] = w1[:,1]
 
-        # Prevent NANs because of borked up UV coordinates
+        # Prevent NANs because of borked up UV coordinates  # TODO perhaps remove this
         s1[np.argwhere(np.equal(s1, 0.0))] = 0.0000001
         s2[np.argwhere(np.equal(s2, 0.0))] = 0.0000001
         t1[np.argwhere(np.equal(t1, 0.0))] = 0.0000001
@@ -420,6 +405,8 @@ class Object3D(object):
 
         self.vmap = None        # Maps unwelded vertices back to original welded ones (idx = unwelded vertex idx)
         self.tmap = None        # Maps unwelded vertex texture (UV) coordinates back to original ones (idx = unwelded vertex idx)
+
+        self._inverse_vmap = None   # Cached inverse of vmap: maps original welded vert idx (coord) to one or multiple unwelded vert idxs (r_coord)
 
         # Unwelded vertex buffers used by OpenGL
         if hasattr(self, 'r_coord'): del self.r_coord
@@ -575,6 +562,23 @@ class Object3D(object):
             indices = np.s_[...]
         return self.fuvs[indices]
 
+    @property
+    def inverse_vmap(self):
+        """
+        The inverse of vmap: a mapping of original welded (relating to UVs) 
+        vertex (coord indices) to a set of unwelded vertices that represent the 
+        same coordinate (r_coord indices).
+        """
+        if self._inverse_vmap is None:
+            # TODO this loop is quite slow and could benefit from numpy optimization
+            originalToUnweldedMap = {}
+            for unweldedIdx, originalIdx in enumerate(self.vmap):
+                if originalIdx not in originalToUnweldedMap:
+                    originalToUnweldedMap[originalIdx] = []
+                originalToUnweldedMap[originalIdx].append(unweldedIdx)
+            self._inverse_vmap = originalToUnweldedMap
+        return self._inverse_vmap
+
     def _update_faces(self):
         map_ = np.argsort(self.fvert.flat)
         vi = self.fvert.flat[map_]
@@ -612,6 +616,7 @@ class Object3D(object):
 
         self.vmap = unwelded[:,0]
         self.tmap = unwelded[:,1]
+        self._inverse_vmap = None
         del unwelded
 
         self.r_coord = np.empty((nverts, 3), dtype=np.float32)
@@ -769,50 +774,6 @@ class Object3D(object):
             self._old_diff = diff
         return self._r_color_diff
 
-
-    def setLoc(self, locx, locy, locz):
-        """
-        This method is used to set the location of the object in the 3D coordinate space of the scene.
-
-        :param locx: The x coordinate of the object.
-        :type locx: float
-        :param locy: The y coordinate of the object.
-        :type locy: float
-        :param locz: The z coordinate of the object.
-        :type locz: float
-        """
-
-        self.loc[...] = (locx, locy, locz)
-
-    def setRot(self, rx, ry, rz):
-        """
-        This method sets the orientation of the object in the 3D coordinate space of the scene.
-
-        :param rx: Rotation around the x-axis.
-        :type rx: float
-        :param ry: Rotation around the y-axis.
-        :type ry: float
-        :param rz: Rotation around the z-axis.
-        :type rz: float
-        """
-
-        self.rot[...] = (rx, ry, rz)
-
-    def setScale(self, sx, sy, sz):
-        """
-        This method sets the scale of the object in the 3D coordinate space of
-        the scene, relative to the initially defined size of the object.
-
-        :param sx: Scale along the x-axis.
-        :type sx: float
-        :param sy: Scale along the x-axis.
-        :type sy: float
-        :param sz: Scale along the x-axis.
-        :type sz: float
-        """
-
-        self.scale[...] = (sx, sy, sz)
-
     @property
     def visibility(self):
         return self._visibility
@@ -839,129 +800,6 @@ class Object3D(object):
         """
 
         self.pickable = pickable
-
-    def setTexture(self, path):
-        """
-        This method is used to specify the path of a file on disk containing the object texture.
-
-        :param path: The path of a texture file.
-        :type path: str
-        :param cache: The texture cache to use.
-        :type cache: dict
-        """
-        self.material.diffuseTexture = path
-
-    def clearTexture(self):
-        """
-        This method is used to clear an object's texture.
-        """
-        self.material.diffuseTexture = None
-
-    @property
-    def texture(self):
-        return self.material.diffuseTexture
-
-    def hasTexture(self):
-        return self.texture is not None
-
-    def setShader(self, shader):
-        """
-        This method is used to specify the shader.
-        
-        :param shader: The path to a pair of shader files.
-        :type shader: string
-        """
-        self.material.setShader(shader)
-
-    @property
-    def shader(self):
-        return self.material.shader
-
-    @property
-    def shaderObj(self):
-        return self.material.shaderObj
-
-    def configureShading(self, diffuse=None, bump = None, normal=None, displacement=None, spec = None, vertexColors = None):
-        """
-        Configure shader options and set the necessary properties based on
-        the material configuration of this object.
-        This can be done without an actual shader being set for this object.
-        Call this method when changes are made to the material property.
-        """
-        self.material.configureShading(diffuse, bump, normal, displacement, spec, vertexColors)
-
-    def getMaterial(self):
-        return self._material
-
-    def setMaterial(self, material):
-        self._material.copyFrom(material)
-
-    material = property(getMaterial, setMaterial)
-
-    def setShaderParameter(self, name, value):
-        self.material.setShaderParameter(name, value)
-
-    @property
-    def shaderParameters(self):
-        return self.material.shaderParameters
-
-    @property
-    def shaderConfig(self):
-        return self.material.shaderConfig
-
-    @property
-    def shaderDefines(self):
-        return self.material.shaderDefines
-
-    def addShaderDefine(self, defineStr):
-        self.material.addShaderDefine(defineStr)
-
-    def removeShaderDefine(self, defineStr):
-        self.material.removeShaderDefine(defineStr)
-
-    def clearShaderDefines(self):
-        self.material.clearShaderDefines()
-
-    def setShadeless(self, shadeless):
-        """
-        This method is used to specify whether or not the object is affected by lights.
-        This is used for certain GUI controls to give them a more 2D type
-        appearance (predominantly the top bar of GUI controls).
-
-        NOTE enabling this option disables the use of the shader configured in the material.
-
-        :param shadeless: Whether or not the object is unaffected by lights.
-        :type shadeless: Boolean
-        """
-        self.material.shadeless = shadeless
-
-    def getShadeless(self):
-        return self.material.shadeless
-
-    shadeless = property(getShadeless, setShadeless)
-
-    def setCull(self, cull):
-        """
-        This method is used to specify whether or not the object is back-face culled.
-
-        :param cull: Whether and how to cull
-        :type cull: 0 => no culling, >0 => draw front faces, <0 => draw back faces
-        """
-
-        # Because we don't really need frontface culling, we simplify to only backface culling
-        if (isinstance(cull, bool) and cull) or cull > 0:
-            self.material.backfaceCull = True
-        else:
-            self.material.backfaceCull = False
-
-    def getCull(self):
-        # Because we don't really need frontface culling, we simplify to only backface culling
-        if self.material.backfaceCull:
-            return 1
-        else:
-            return 0
-
-    cull = property(getCull, setCull)
 
     def getPriority(self):
         """
@@ -1003,34 +841,11 @@ class Object3D(object):
 
     priority = property(getPriority, setPriority)
 
-    def setDepthless(self, depthless):
-        """
-        This method is used to specify whether or not the object occludes or is occluded
-        by other objects
-
-        :param depthless: Whether or not the object is occluded or occludes.
-        :type depthless: Boolean
-        """
-        self.material.depthless = depthless
-
-    def getDepthless(self):
-        return self.material.depthless
-
-    depthless = property(getDepthless, setDepthless)
-
-    def setSolid(self, solid):
-        """
-        This method is used to specify whether or not the object is drawn solid or wireframe.
-
-        :param solid: Whether or not the object is drawn solid or wireframe.
-        :type solid: Boolean
-        """
-        self.material.wireframe = not solid
-
-    def getSolid(self):
-        return not self.material.wireframe
-
-    solid = property(getSolid, setSolid)
+    @property
+    def material(self):
+        if not self.object and hasattr(self, 'parent'):
+            return self.parent.material
+        return self.object.material
             
     def setTransparentPrimitives(self, transparentPrimitives):
         """
@@ -1052,14 +867,6 @@ class Object3D(object):
             return self._transparentPrimitives
 
     transparentPrimitives = property(getTransparentPrimitives, setTransparentPrimitives)
-
-    def getAlphaToCoverage(self):
-        return self.material.alphaToCoverage
-
-    def setAlphaToCoverage(self, a2cEnabled):
-        self.material.alphaToCoverage = a2cEnabled
-
-    alphaToCoverage = property(getAlphaToCoverage, setAlphaToCoverage)
 
     def getFaceGroup(self, name):
         """
@@ -1122,8 +929,12 @@ class Object3D(object):
         return vert_mask, face_mask
 
     def getFaceMaskForVertices(self, verts):
+        """
+        Get mask that selects all faces that are connected to the specified
+        vertices.
+        """
         mask = np.zeros(len(self.fvert), dtype = bool)
-        valid = np.arange(self.MAX_FACES)[None,:] < self.nfaces[verts][:,None]
+        valid = np.arange(self.MAX_FACES)[None,:] < self.nfaces[verts][:,None]  # Mask that filters out unused slots for faces connected to a vert
         vface = self.vface[verts]
         faces = vface[valid]
         mask[faces] = True
@@ -1198,8 +1009,7 @@ class Object3D(object):
         return np.vstack((v0, v1))
 
     def __str__(self):
-        x, y, z = self.loc
-        return 'object3D named: %s, nverts: %s, nfaces: %s, at |%s,%s,%s|' % (self.name, self.getVertexCount(), self.getFaceCount(), x, y, z)
+        return 'object3D named: %s, nverts: %s, nfaces: %s' % (self.name, self.getVertexCount(), self.getFaceCount())
 
 def dot_v3(v3_arr1, v3_arr2):
     """

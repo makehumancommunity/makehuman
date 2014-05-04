@@ -39,8 +39,8 @@ Abstract
 bl_info = {
     "name": "Make Target",
     "author": "Thomas Larsson",
-    "version": (1, 32),
-    "blender": (2, 6, 9),
+    "version": (1, 33),
+    "blender": (2, 7, 0),
     "location": "View3D > Properties > Make Target",
     "description": "Make MakeHuman Target",
     "warning": "",
@@ -291,6 +291,8 @@ class McpPanel(bpy.types.Panel):
         layout = self.layout
         layout.operator("mh.saveas_mhp")
         layout.operator("mh.load_mhp")
+        layout.separator()
+        layout.operator("mh.write_matrices")
 
 #----------------------------------------------------------
 #   class ExportObj(bpy.types.Operator, ExportHelper):
