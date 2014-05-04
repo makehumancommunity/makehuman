@@ -19,11 +19,9 @@
     "macrodetails-proportions/BodyProportions": "Proportions of the human features, often subjectively referred to as qualities of beauty (min is unusual, center position is average and max is idealistic proportions).",
 
     "armslegs/l-foot-scale-decr|incr": "",
-    "armslegs/l-foot-trans-down|up": "",
     "armslegs/l-foot-trans-forward|backward": "",
     "armslegs/l-foot-trans-in|out": "",
     "armslegs/r-foot-scale-decr|incr": "",
-    "armslegs/r-foot-trans-down|up": "",
     "armslegs/r-foot-trans-forward|backward": "",
     "armslegs/r-foot-trans-in|out": "",
 
@@ -55,10 +53,8 @@
 
     "armslegs/l-lowerleg-scale-depth-decr|incr": "",
     "armslegs/l-lowerleg-scale-horiz-decr|incr": "",
-    "armslegs/l-lowerleg-scale-vert-decr|incr": "",
     "armslegs/r-lowerleg-scale-depth-decr|incr": "",
     "armslegs/r-lowerleg-scale-horiz-decr|incr": "",
-    "armslegs/r-lowerleg-scale-vert-decr|incr": "",
 
     "armslegs/l-upperleg-scale-depth-decr|incr": "",
     "armslegs/l-upperleg-scale-horiz-decr|incr": "",
