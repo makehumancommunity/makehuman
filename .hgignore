@@ -9,7 +9,7 @@ syntax: glob
 *.so
 *.bak
 *.orig
-.rej
+*.rej
 images.list
 makehuman/*_contents.txt
 makehuman/data/clothes
