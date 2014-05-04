@@ -1,0 +1,4 @@
+#!/bin/bash
+
+python /usr/share/makehuman/makehuman.py
+
