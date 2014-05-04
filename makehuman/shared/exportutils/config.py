@@ -116,6 +116,7 @@ class Config(object):
             name = self.goodName(pxy.name)
             proxies[name] = pxy
 
+        # TODO deprecated? is this going to be revived?
         if self.cage:
             import proxy
             human = G.app.selectedHuman

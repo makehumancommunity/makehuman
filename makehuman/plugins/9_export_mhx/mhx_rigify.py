@@ -74,7 +74,7 @@ Only works with MHX export.
         self.mergeShoulders = True
 
         # Options set by MHX exporter
-        self.useCustomShapes = False
+        self.useCustomShapes = "face"
         self.useConstraints = True
         self.useLocks = False
         self.useRotationLimits = False

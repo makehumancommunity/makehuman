@@ -388,11 +388,6 @@ def setRotation(pb, rot, frame, group):
 #   setRestPose(rig):
 #
 
-def setRestPose(rig):
-    unit = Matrix()
-    for pb in rig.pose.bones:
-        pb.matrix_basis = unit
-
 def selectAndSetRestPose(rig, scn):
     scn.objects.active = rig
     bpy.ops.object.mode_set(mode='POSE')

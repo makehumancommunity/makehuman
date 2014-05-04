@@ -581,8 +581,9 @@ class MHApplication(gui3d.Application, mh.Application):
         backGridMesh.minSubgridZoom = (1.0/spacing) * float(subgrids)/5
         self.backplaneGrid = gui3d.Object(backGridMesh)
         self.backplaneGrid.excludeFromProduction = True
+        self.backplaneGrid.placeAtFeet = True
+        self.backplaneGrid.setShadeless(1)
         #self.backplaneGrid.setPosition([0,offset,0])
-        backGridMesh.placeAtFeet = True
         self.addObject(self.backplaneGrid)
 
         # Ground grid
@@ -595,8 +596,9 @@ class MHApplication(gui3d.Application, mh.Application):
         groundGridMesh.minSubgridZoom = (1.0/spacing) * float(subgrids)/5
         self.groundplaneGrid = gui3d.Object(groundGridMesh)
         self.groundplaneGrid.excludeFromProduction = True
+        self.groundplaneGrid.placeAtFeet = True
+        self.groundplaneGrid.setShadeless(1)
         #self.groundplaneGrid.setPosition([0,offset,0])
-        groundGridMesh.placeAtFeet = True
         groundGridMesh.restrictVisibleAboveGround = True
         self.addObject(self.groundplaneGrid)
 
@@ -1057,7 +1059,7 @@ class MHApplication(gui3d.Application, mh.Application):
         if self.dialog is None:
             self.dialog = gui.Dialog(self.mainwin)
             self.dialog.helpIds.update(self.helpIds)
-        self.dialog.prompt(title, text, button1Label, button2Label, button1Action, button2Action, helpId, fmtArgs)
+        return self.dialog.prompt(title, text, button1Label, button2Label, button1Action, button2Action, helpId, fmtArgs)
 
     def setGlobalCamera(self):
         human = self.selectedHuman

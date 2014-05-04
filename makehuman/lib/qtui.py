@@ -479,12 +479,27 @@ class Frame(QtGui.QMainWindow):
         self.progressBar = qtgui.ProgressBar()
         self.bottom.addWidget(self.progressBar)
 
+    def changeEvent(self, event):
+        """QMainWindow method override that is called whenever a change
+        happens on the widget."""
+        if event.type() == QtCore.QEvent.WindowStateChange:
+            if 'normal geometry' in self.windowState:
+                self.normalStateGeometry = self.storeGeometry()
+        QtGui.QMainWindow.changeEvent(self, event)
+
     def resizeEvent(self, event):
-        """QMainWindow method override that is called upon resizing the window,
-        including after the maximize / restore or fullscreen actions."""
+        """QMainWindow method override that is called when
+        the widget is resized."""
         if 'normal geometry' in self.windowState:
             self.normalStateGeometry = self.storeGeometry()
         QtGui.QMainWindow.resizeEvent(self, event)
+
+    def moveEvent(self, event):
+        """QMainWindow method override that is called when
+        the widget is moved."""
+        if 'normal geometry' in self.windowState:
+            self.normalStateGeometry = self.storeGeometry()
+        QtGui.QMainWindow.moveEvent(self, event)
 
     def addPanels(self):
         left = TaskPanel()
@@ -518,20 +533,14 @@ class Frame(QtGui.QMainWindow):
             if child.isWidgetType():
                 self.refreshLayout(child)
 
-    def getWindowState(self):
-        """Return a set of window state strings that apply to the frame.
+    @staticmethod
+    def _asWindowStateSet(stateflags):
+        """Construct a set of window state strings
+        from a QWindowStates flags object.
 
         Multiple window states may apply to the same window, for example
         a window might be shown minimized, but set to be maximized when
         restored."""
-        stateflags = QtGui.QMainWindow.windowState(self)
-
-        # Use caching for faster generation on successive calls
-        if hasattr(self, '_windowStateFlagsCache') and \
-            stateflags == self._windowStateFlagsCache:
-            return self._windowStateCache.copy()
-        else:
-            self._windowStateFlagsCache = stateflags
 
         state = set()
         if stateflags & QtCore.Qt.WindowMaximized:
@@ -547,9 +556,11 @@ class Frame(QtGui.QMainWindow):
             state.add('normal geometry')
             if not stateflags & QtCore.Qt.WindowMinimized:
                 state.add('normal')
-
-        self._windowStateCache = state.copy()
         return state
+
+    def getWindowState(self):
+        """Return a set of window state strings that apply to the frame."""
+        return self._asWindowStateSet(QtGui.QMainWindow.windowState(self))
 
     def setWindowState(self, state):
         """Set the window state according to a window state set
@@ -573,7 +584,7 @@ class Frame(QtGui.QMainWindow):
         geometry = {'width': self.width(), 'height': self.height(),
             'x': self.pos().x(), 'y': self.pos().y()
             } if 'normal geometry' in self.windowState \
-            else self.normalStateGeometry
+            else self.normalStateGeometry.copy()
         geometry['state'] = list(self.windowState)
         return geometry
 

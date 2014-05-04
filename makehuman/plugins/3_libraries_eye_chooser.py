@@ -66,7 +66,7 @@ class EyesTaskView(proxychooser.ProxyChooserTaskView):
             # Load initial eyes
             self.selectProxy(mh.getSysDataPath("eyes/high-poly/high-poly.mhclo"))
             # Reset default material on eyes (in case it was changed)
-            self.getObjects()[0].mesh.material = self.getSelection()[0].material
+            self.getObjects()[0].material = self.getSelection()[0].material
             return
         super(EyesTaskView, self).onHumanChanged(event)
 

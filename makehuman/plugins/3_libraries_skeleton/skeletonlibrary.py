@@ -185,7 +185,14 @@ class SkeletonLibrary(gui3d.TaskView):
         #   Preset box
         #
 
-        self.presetChooser = self.addRightWidget(fc.IconListFileChooser(self.paths, 'json', 'thumb', name='Rig presets', notFoundImage = mh.getSysDataPath('notfound.thumb'), noneItem = True, doNotRecurse = True))
+        self.presetChooser = self.addRightWidget(fc.IconListFileChooser( \
+                                                    self.paths,
+                                                    'json',
+                                                    'thumb',
+                                                    name='Rig presets',
+                                                    notFoundImage = mh.getSysDataPath('notfound.thumb'), 
+                                                    noneItem = True, 
+                                                    doNotRecurse = True))
         self.presetChooser.setIconSize(50,50)
 
         @self.presetChooser.mhEvent
@@ -243,7 +250,7 @@ class SkeletonLibrary(gui3d.TaskView):
         self.oldPxyMats = dict()
         xray_mat = material.fromFile(mh.getSysDataPath('materials/xray.mhmat'))
         self.human.material = xray_mat
-        for pxy in self.human.getProxies():
+        for pxy in self.human.getProxies(includeHumanProxy=False):
             obj = pxy.object
             self.oldPxyMats[pxy.uuid] = obj.material.clone()
             obj.material = xray_mat
@@ -272,7 +279,7 @@ class SkeletonLibrary(gui3d.TaskView):
         if self.skelObj:
             self.skelObj.hide()
         self.human.material = self.oldHumanMat
-        for pxy in self.human.getProxies():
+        for pxy in self.human.getProxies(includeHumanProxy=False):
             if pxy.uuid in self.oldPxyMats:
                 pxy.object.material = self.oldPxyMats[pxy.uuid]
 
@@ -343,6 +350,8 @@ class SkeletonLibrary(gui3d.TaskView):
         self.skelMesh.priority = 100
         self.skelMesh.setPickable(False)
         self.skelObj = gui3d.app.addObject(gui3d.Object(self.skelMesh, self.human.getPosition()) )
+        self.skelObj.setShadeless(0)
+        self.skelObj.setSolid(0)
         self.skelObj.setRotation(self.human.getRotation())
 
         # Add the skeleton mesh to the human AnimatedMesh so it animates together with the skeleton
