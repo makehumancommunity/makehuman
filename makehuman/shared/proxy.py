@@ -513,8 +513,8 @@ def loadTextProxy(human, filepath, type="Clothes"):
         elif key == 'basemesh':
             proxy.basemesh = words[1]
 
-        elif key in ['objfile_layer', 'uvtex_layer']:
-            pass
+        elif key in ['objfile_layer', 'uvtex_layer', 'use_projection']:
+            log.warning('Deprecated parameter "%s" used in proxy file. Please remove.', key)
 
 
         elif status == doRefVerts:
