@@ -239,4 +239,3 @@ elif sys.platform == 'win32':
         base = os.path.basename(zipfilename)
         dest = os.path.join(dist_dir,base)
         os.rename(zipfilename,dest)
-
