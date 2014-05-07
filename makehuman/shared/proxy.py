@@ -105,7 +105,7 @@ class Proxy:
         self._obj_file = None
         self.vertexgroup_file = None    # TODO document
         self.vertexGroups = None
-        self.material_file = None
+        self._material_file = None
         self.maskLayer = -1     # TODO is this still used?
         self.textureLayer = 0
         self.objFileLayer = 0   # TODO what is this used for?
@@ -119,6 +119,15 @@ class Proxy:
         self.modifiers = []
         self.shapekeys = []
 
+    @property
+    def material_file(self):
+        folder = os.path.dirname(self.file) if self.file else None
+        return _getFilePath(self._material_file, folder)
+
+    @property
+    def obj_file(self):
+        folder = os.path.dirname(self.file) if self.file else None
+        return _getFilePath(self._obj_file, folder)
 
     def __repr__(self):
         return ("<Proxy %s %s %s %s>" % (self.name, self.type, self.file, self.uuid))
@@ -162,9 +171,9 @@ class Proxy:
         import files3d
         import guicommon
 
-        mesh = files3d.loadMesh(self._obj_file, maxFaces = self.max_pole)
+        mesh = files3d.loadMesh(self.obj_file, maxFaces = self.max_pole)
         if not mesh:
-            log.error("Failed to load %s", self._obj_file)
+            log.error("Failed to load %s", self.obj_file)
 
         mesh.priority = self.z_depth           # Set render order
         mesh.setCameraProjection(0)             # Set to model camera
@@ -425,8 +434,8 @@ def loadTextProxy(human, filepath, type="Clothes"):
 
         elif key == 'material':
             matFile = _getFileName(folder, words[1], ".mhmat")
-            proxy.material_file = matFile
-            proxy.material.fromFile(matFile)
+            proxy._material_file = matFile
+            proxy.material.fromFile(proxy.material_File)
 
         elif key == 'backface_culling':
             # TODO remove in future
@@ -565,6 +574,11 @@ def saveBinaryProxy(proxy, path):
     tagStr, tagIdx = _packStringList(proxy.tags)
     uvStr,uvIdx = _packStringList([ proxy.uvLayers[k] for k in sorted(proxy.uvLayers.keys()) ])
 
+    folder = os.path.dirname(path)
+
+    def _properPath(path):
+        return getpath.getJailedPath(path, folder)
+
     vars_ = dict(
         #proxyType = np.fromstring(proxy.type, dtype='S1'),     # TODO store proxy type?
         name = np.fromstring(proxy.name, dtype='S1'),
@@ -575,11 +589,11 @@ def saveBinaryProxy(proxy, path):
         num_refverts = np.asarray(proxy.num_refverts, dtype=np.int32),
         uvLayers_str = uvStr,
         uvLayers_idx = uvIdx,
-        obj_file = np.fromstring(proxy._obj_file, dtype='S1'),
+        obj_file = np.fromstring(_properPath(proxy.obj_file), dtype='S1'),
     )
 
     if proxy.material_file:
-        vars_["material_file"] = np.fromstring(proxy.material_file, dtype='S1')
+        vars_["material_file"] = np.fromstring(_properPath(proxy.material_file), dtype='S1')
 
     if np.any(proxy.deleteVerts):
         vars_["deleteVerts"] = proxy.deleteVerts
@@ -655,7 +669,7 @@ def loadBinaryProxy(path, human, type):
 
     proxy.material = material.Material(proxy.name)
     if 'material_file' in npzfile:
-        proxy.material_file = npzfile['material_file'].tostring()
+        proxy._material_file = npzfile['material_file'].tostring()
     if proxy.material_file:
         proxy.material.fromFile(proxy.material_file)
 
@@ -979,4 +993,32 @@ def _unpackStringList(text, index):
         strings.append(name)
 
     return strings
+
+def _getFilePath(filename, folder = None):
+    if not filename or not isinstance(filename, basestring):
+        return filename
+
+    # Ensure unix style path
+    filename.replace('\\', '/')
+
+    searchPaths = []
+
+    # Search within current folder
+    if folder:
+        searchPaths.append(folder)
+
+    from getpath import findFile, getPath, getSysDataPath, getSysPath, getDataPath
+    searchPaths.extend([getDataPath(), getSysDataPath(), getPath(), getSysPath()])
+
+    # Search in user / sys data, and user / sys root folders
+    path = findFile(filename, searchPaths, strict=True)
+    if path:
+        return os.path.abspath(path)
+
+    # Treat as absolute path or search relative to application path
+    if os.path.isfile(filename):
+        return os.path.abspath(filename)
+
+    # Nothing found
+    return os.path.normpath(filename)
 
