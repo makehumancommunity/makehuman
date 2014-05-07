@@ -103,12 +103,9 @@ class Proxy:
         self.material = material.Material(self.name)
 
         self._obj_file = None
-        self.vertexgroup_file = None    # TODO document
+        self._vertexgroup_file = None    # TODO document, is this still used?
         self.vertexGroups = None
         self._material_file = None
-        self.maskLayer = -1     # TODO is this still used?
-        self.textureLayer = 0
-        self.objFileLayer = 0   # TODO what is this used for?
 
         self.deleteGroups = []  # TODO is this still used?
         self.deleteVerts = np.zeros(len(human.meshData.coord), bool)
@@ -128,6 +125,11 @@ class Proxy:
     def obj_file(self):
         folder = os.path.dirname(self.file) if self.file else None
         return _getFilePath(self._obj_file, folder)
+
+    @property
+    def vertexgroup_file(self):
+        folder = os.path.dirname(self.file) if self.file else None
+        return _getFilePath(self._vertexgroup_file, folder)
 
     def __repr__(self):
         return ("<Proxy %s %s %s %s>" % (self.name, self.type, self.file, self.uuid))
@@ -490,13 +492,6 @@ def loadTextProxy(human, filepath, type="Clothes"):
         elif key == 'delete':
             proxy.deleteGroups.append(words[1])
 
-        elif key == 'mask_uv_layer':
-            if len(words) > 1:
-                proxy.maskLayer = int(words[1])
-        elif key == 'texture_uv_layer':
-            if len(words) > 1:
-                proxy.textureLayer = int(words[1])
-
         # TODO are these still used? otherwise we can issue deprecation warnings
         # Blender-only properties
         elif key == 'wire':
@@ -522,7 +517,7 @@ def loadTextProxy(human, filepath, type="Clothes"):
         elif key == 'basemesh':
             proxy.basemesh = words[1]
 
-        elif key in ['objfile_layer', 'uvtex_layer', 'use_projection']:
+        elif key in ['objfile_layer', 'uvtex_layer', 'use_projection', 'mask_uv_layer', 'texture_uv_layer']:
             log.warning('Deprecated parameter "%s" used in proxy file. Please remove.', key)
 
 
@@ -613,7 +608,7 @@ def saveBinaryProxy(proxy, path):
         vars_["weights"] = proxy.weights[:,0]
 
     if proxy.vertexgroup_file:
-        vars_['vertexgroup_file'] = np.fromstring(proxy.vertexgroup_file, dtype='S1')
+        vars_['vertexgroup_file'] = np.fromstring(_properPath(proxy.vertexgroup_file), dtype='S1')
 
     np.savez_compressed(fp, **vars_)
     fp.close()
@@ -676,14 +671,11 @@ def loadBinaryProxy(path, human, type):
     proxy._obj_file = npzfile['obj_file'].tostring()
 
     if 'vertexgroup_file' in npzfile:
-        proxy.vertexgroup_file = npzfile['vertexgroup_file'].tostring()
+        proxy._vertexgroup_file = npzfile['vertexgroup_file'].tostring()
         if proxy.vertexgroup_file:
             proxy.vertexGroups = io_json.loadJson(proxy.vertexgroup_file)
 
     # Just set the defaults for these, no idea if they are still relevant
-    proxy.maskLayer = -1
-    proxy.textureLayer = 0
-    proxy.objFileLayer = 0
     proxy.deleteGroups = []
     proxy.wire = False
     proxy.cage = False
