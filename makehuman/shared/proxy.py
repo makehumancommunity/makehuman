@@ -437,7 +437,7 @@ def loadTextProxy(human, filepath, type="Clothes"):
         elif key == 'material':
             matFile = _getFileName(folder, words[1], ".mhmat")
             proxy._material_file = matFile
-            proxy.material.fromFile(proxy.material_File)
+            proxy.material.fromFile(proxy.material_file)
 
         elif key == 'backface_culling':
             # TODO remove in future
