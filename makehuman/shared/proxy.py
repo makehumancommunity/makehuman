@@ -572,6 +572,7 @@ def saveBinaryProxy(proxy, path):
     folder = os.path.dirname(path)
 
     def _properPath(path):
+        print "Using path: %s" % getpath.getJailedPath(path, folder)
         return getpath.getJailedPath(path, folder)
 
     vars_ = dict(
