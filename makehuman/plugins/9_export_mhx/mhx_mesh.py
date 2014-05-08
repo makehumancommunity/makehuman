@@ -205,20 +205,15 @@ end Object
     #-------------------------------------------------------------------------------
 
     def writeFaceNumbers(self, fp):
-        from exportutils.collect import deleteGroup
-
         obj = self.human.meshData
         fmats = numpy.zeros(len(obj.coord), int)
 
         # TODO use facemask set on module3d instead (cant we reuse filterMesh from collect module?)
         deleteVerts = None
-        deleteGroups = []
 
         for fg in obj.faceGroups:
             fmask = obj.getFaceMaskForGroups([fg.name])
-            if deleteGroup(fg.name, deleteGroups):
-                fmats[fmask] = 3
-            elif fg.name == "helper-tights":
+            if fg.name == "helper-tights":
                 fmats[fmask] = 2
             elif fg.name in ["helper-hair", "joint-ground"]:
                 fmats[fmask] = 5
