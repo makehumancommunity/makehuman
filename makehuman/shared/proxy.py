@@ -107,7 +107,6 @@ class Proxy:
         self.vertexGroups = None
         self._material_file = None
 
-        self.deleteGroups = []  # TODO is this still used?
         self.deleteVerts = np.zeros(len(human.meshData.coord), bool)
 
         # TODO are these still used?
@@ -489,8 +488,6 @@ def loadTextProxy(human, filepath, type="Clothes"):
             if len(words) > 1:
                 proxy.scaleCorrect = float(words[1])
             proxy.uniformizeScale()
-        elif key == 'delete':
-            proxy.deleteGroups.append(words[1])
 
         # TODO are these still used? otherwise we can issue deprecation warnings
         # Blender-only properties
@@ -517,7 +514,7 @@ def loadTextProxy(human, filepath, type="Clothes"):
         elif key == 'basemesh':
             proxy.basemesh = words[1]
 
-        elif key in ['objfile_layer', 'uvtex_layer', 'use_projection', 'mask_uv_layer', 'texture_uv_layer']:
+        elif key in ['objfile_layer', 'uvtex_layer', 'use_projection', 'mask_uv_layer', 'texture_uv_layer', 'delete']:
             log.warning('Deprecated parameter "%s" used in proxy file. Please remove.', key)
 
 
@@ -677,7 +674,6 @@ def loadBinaryProxy(path, human, type):
             proxy.vertexGroups = io_json.loadJson(proxy.vertexgroup_file)
 
     # Just set the defaults for these, no idea if they are still relevant
-    proxy.deleteGroups = []
     proxy.wire = False
     proxy.cage = False
     proxy.modifiers = []
