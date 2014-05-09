@@ -567,7 +567,7 @@ def loadTextProxy(human, filepath, type="Clothes"):
 def saveBinaryProxy(proxy, path):
     fp = open(path, 'wb')
     tagStr, tagIdx = _packStringList(proxy.tags)
-    uvStr,uvIdx = _packStringList([ proxy.uvLayers[k] for k in sorted(proxy.uvLayers.keys()) ])
+    uvStr,uvIdx = _packStringList([ _properPath(proxy.uvLayers[k]) for k in sorted(proxy.uvLayers.keys()) ])
 
     folder = os.path.dirname(path)
 
