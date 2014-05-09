@@ -98,6 +98,7 @@ class DebugDump(object):
         self.write("BASEMESH VERSION: %s", os.environ['MH_MESH_VERSION'])
         self.write("IS BUILT (FROZEN): %s", os.environ['MH_FROZEN'])
         self.write("IS RELEASE VERSION: %s", os.environ['MH_RELEASE'])
+        self.write("WORKING DIRECTORY: %s", os.getcwd())
         self.write("HOME LOCATION: %s", self.home)
         version = re.sub(r"[\r\n]"," ", sys.version)
         self.write("SYS.VERSION: %s", version)
