@@ -214,9 +214,7 @@ class Image(object):
             qi = self.toQImage()
             qi = qi.scaled(image_qt.QtCore.QSize(width,height), 
                            transformMode=image_qt.QtCore.Qt.SmoothTransformation)
-            data = image_qt.load(qi)
-            data[:,:,:] = data[:,:,(2,1,0,3)]   # TODO still haven't figured out where components get swapped, but this hack appears to be necessary
-            return data
+            return image_qt.load(qi)
 
     def resized(self, width, height, filter=FILTER_NEAREST):
         """Get a resized copy of the Image."""

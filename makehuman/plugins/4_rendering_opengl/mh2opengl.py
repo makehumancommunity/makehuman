@@ -108,6 +108,8 @@ def Render(settings):
             renderprog(0.4, 0.99, "AntiAliasing")
             # Resize to 50% using bi-linear filtering
             img = img.resized(width/2, height/2, filter=image.FILTER_BILINEAR)
+            # TODO still haven't figured out where components get swapped, but this hack appears to be necessary
+            img.data[:,:,:] = img.data[:,:,(2,1,0,3)]
         renderprog.finish()
 
     if settings['lightmapSSS']:
