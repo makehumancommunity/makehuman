@@ -57,7 +57,6 @@ class Writer(mhx_writer.Writer):
 
         fp.write("\n# --------------- Shapekeys ----------------------------- #\n\n")
 
-        self.proxyShapes('Cage', 'T_Cage', fp, [])
         self.proxyShapes('Proxymeshes', 'T_Proxy', fp, targets)
         self.proxyShapes('Clothes', 'T_Clothes', fp, [])
         for ptype in proxy.SimpleProxyTypes:
@@ -106,18 +105,10 @@ class Writer(mhx_writer.Writer):
 
 
     def writeShapeKeysAndDrivers(self, fp, name, pxy, targets):
-        config = self.config
-        ptargets = []
-        if pxy:
-            obj = pxy.getSeedMesh()
-            for filepath in pxy.shapekeys:
-                shape = exportutils.shapekeys.getShape(filepath, obj)
-                fname = os.path.splitext(os.path.basename(filepath))[0]
-                ptargets.append((pxy.name+fname, shape))
-
-        if not targets and not ptargets:
+        if not targets:
             return
 
+        config = self.config
         fp.write(
             "ShapeKeys %s\n" % name +
             "  ShapeKey Basis Sym True\n" +
