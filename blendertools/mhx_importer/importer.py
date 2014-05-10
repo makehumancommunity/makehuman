@@ -739,52 +739,41 @@ def parseAnimDataFCurve(adata, rna, args, tokens):
             defaultKey(key, val, sub, fcu)
     return fcu
 
-"""
-        fcurve = con.driver_add("influence", 0)
-        driver = fcurve.driver
-        driver.type = 'AVERAGE'
-"""
+
 def parseDriver(adata, dataPath, index, rna, args, tokens):
+    # First get fcurve from datapath.
+    # Want to split with ., but bone names may contain . as well,
+    # e.g. pose.bones["toe.01.R"].rotation_euler
+    import re
+    literals = re.findall(r'\"(.+?)\"', dataPath)  # literals will be ['toe.01.R']
+    for lit in literals:
+        dataPath = dataPath.replace(lit, "$LITERAL$", 1)
+    words = dataPath.split('.')
+    litIdx = 0
+    for word in words[0:-1]:
+        if "$LITERAL$" in word:
+            word = word.replace("$LITERAL$", literals[litIdx])
+            litIdx += 1
+        words2 = word.split("[")
+        if len(words2) == 1:
+            rna = getattr(rna, word)
+        else:
+            attr = words2[0]
+            idx = mhxEval(words2[1][:-1])
+            rna = getattr(rna, attr)[idx]
+    fcu = rna.driver_add(words[-1])
 
-    if dataPath[-1] == ']':
-        words = dataPath.split(']')
-        expr = "rna." + words[0] + ']'
-        pwords = words[1].split('"')
-        prop = pwords[1]
-        bone = mhxEval(expr)
-        return None
+    if fcu is None:
+        raise MyError("Cannot parse driver:\n  %s" % dataPath)
 
-    else:
-        # This is not pretty, but it does not use eval
-        # Backwards compatible all the way to alpha 7
-        words = dataPath.split('"')
-        fcu = None
-
-        if words[0] == "pose.bones[":
-            pb = rna.pose.bones[words[1]]
-            if words[2] == "].constraints[":
-                cns = pb.constraints[words[3]]
-                if words[4] == "].influence":
-                    fcu = cns.driver_add("influence", index)
-            elif words[2] == "].rotation_quaternion":
-                fcu = pb.driver_add("rotation_quaternion", index)
-            elif words[2] == "].rotation_euler":
-                fcu = pb.driver_add("rotation_euler", index)
-
-        elif words[0] in ["hide", "hide_render"]:
-            return None
-
-        if fcu is None:
-            raise MyError("Cannot parse driver:\n  %s" % dataPath)
-
-        drv = fcu.driver
-        drv.type = args[0]
-        for (key, val, sub) in tokens:
-            if key == 'DriverVariable':
-                var = parseDriverVariable(drv, rna, val, sub)
-            else:
-                defaultKey(key, val, sub, drv)
-        return fcu
+    drv = fcu.driver
+    drv.type = args[0]
+    for (key, val, sub) in tokens:
+        if key == 'DriverVariable':
+            var = parseDriverVariable(drv, rna, val, sub)
+        else:
+            defaultKey(key, val, sub, drv)
+    return fcu
 
 
 def parseDriverVariable(drv, rna, args, tokens):
