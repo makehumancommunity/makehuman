@@ -114,3 +114,17 @@ def save(path, data):
     if not im.save(path, format):
         raise RuntimeError('error saving image %s' % path)
 
+def resized(img, width, height, filter=0):
+    """
+    Resize image using Qt image library. If filter > 0 bi-linear interpolation
+    will be used. Note that Qt does not support bi-cubic interpolation.
+    """
+    qi = img.toQImage()
+    if filter > 0:
+        transform = QtCore.Qt.SmoothTransformation
+    else:
+        transform = QtCore.Qt.FastTransformation
+    qi = qi.scaled(QtCore.QSize(width, height), 
+                   transformMode=transform)
+    return load(qi)
+
