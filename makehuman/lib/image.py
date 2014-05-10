@@ -211,10 +211,7 @@ class Image(object):
         else:
             # NOTE: bi-cubic filtering is not supported by Qt, use bi-linear
             import image_qt
-            qi = self.toQImage()
-            qi = qi.scaled(image_qt.QtCore.QSize(width,height), 
-                           transformMode=image_qt.QtCore.Qt.SmoothTransformation)
-            return image_qt.load(qi)
+            return image_qt.resized(self, width, height, filter=filter)
 
     def resized(self, width, height, filter=FILTER_NEAREST):
         """Get a resized copy of the Image."""
