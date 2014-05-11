@@ -951,7 +951,9 @@ def _unpackStringList(text, index):
     return strings
 
 def _getFilePath(filename, folder = None):
+    log.debug("_getFilePath(%s, %s)", filename, folder)
     if not filename or not isinstance(filename, basestring):
+        log.debug('_getFilePath: No valid filename specified')
         return filename
 
     # Ensure unix style path
@@ -965,16 +967,20 @@ def _getFilePath(filename, folder = None):
 
     from getpath import findFile, getPath, getSysDataPath, getSysPath, getDataPath
     searchPaths.extend([getDataPath(), getSysDataPath(), getPath(), getSysPath()])
+    log.debug("_getFilePath: search paths %s", str(searchPaths))
 
     # Search in user / sys data, and user / sys root folders
     path = findFile(filename, searchPaths, strict=True)
     if path:
+        log.debug('_getFilePath: found a file in searchpath: %s (%s)', path, os.path.abspath(path))
         return os.path.abspath(path)
 
     # Treat as absolute path or search relative to application path
     if os.path.isfile(filename):
+        log.debug('_getFilePath: no file found, treating as abs path: %s', os.path.abspath(filename))
         return os.path.abspath(filename)
 
     # Nothing found
+    log.debug('_getFilePath: nothing found, returning: %s', os.path.normpath(filename))
     return os.path.normpath(filename)
 
