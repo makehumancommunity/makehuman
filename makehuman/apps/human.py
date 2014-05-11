@@ -244,7 +244,7 @@ class Human(guicommon.Object):
         to be exported. This can replace exportutils.collect
         Result is a list of objects of class Human and Proxy.
         """
-        return [self] + self.getProxies()
+        return [self] + self.getProxies(includeHumanProxy=False)
 
     # Overriding hide and show to account for both human base and the hairs!
 
