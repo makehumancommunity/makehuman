@@ -1,0 +1,77 @@
+#!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
+
+"""
+**Project Name:**      MakeHuman
+
+**Product Home Page:** http://www.makehuman.org/
+
+**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
+
+**Authors:**           Glynn Clements
+
+**Copyright(c):**      MakeHuman Team 2001-2014
+
+**Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
+
+    This file is part of MakeHuman (www.makehuman.org).
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+**Coding Standards:**  See http://www.makehuman.org/node/165
+
+Abstract
+--------
+
+Common base class for all exporters.
+"""
+
+from core import G
+
+
+class Exporter(object):
+    """
+    Exporter GUI widget for use within ExportTaskView
+    """
+
+    def __init__(self):
+        self.group = "mesh"
+        self.fileExtension = ""
+        self.filter = 'All Files (*.*)'
+        self.orderPriority = 10.0   # Priority that determines order of exporter in gui. Highest priority is on top.
+
+    def build(self, options, taskview):
+        import gui
+
+        self.taskview       = taskview
+        self.feetOnGround   = options.addWidget(gui.CheckBox("Feet on ground", True))
+
+    def export(self, human, filename):
+        raise NotImplementedError()
+
+    def getConfig(self, update):
+        raise NotImplementedError("getConfig not implemented for Exporter")
+
+    def onShow(self, exportTaskView):
+        """
+        This method is called when this exporter is selected and shown in the
+        export GUI.
+        """
+        pass
+
+    def onHide(self, exportTaskView):
+        """
+        This method is called when this exporter is hidden from the export GUI.
+        """
+        pass
