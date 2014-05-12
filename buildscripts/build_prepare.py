@@ -45,7 +45,7 @@ Prepares an export folder ready to build packages from.
 HG_PATH = "hg"
 
 # Filter of files from source folder to exclude (glob syntax)
-EXCLUDES = ['.hgignore', '.hgeol', '*.target', '*.obj', '*.pyc', '*.mhclo', '*.proxy', '*.pyd', 'maketarget-standalone', 'plugins/4_rendering_mitsuba', 'plugins/4_rendering_povray', 'plugins/4_rendering_aqsis.py', 'plugins/0_modeling_5_editing.py', 'plugins/0_modeling_8_random.py', 'plugins/3_libraries_animation.py', 'compile_*.py', 'build_prepare.py', 'download_assets.py', '*~', '*.bak', 'setup.nsi', 'clean*.sh', 'makehuman.sh', 'clean*.bat', 'makehuman/docs', 'makehuman/icons/*psd', 'makehuman/icons/*bmp', 'makehuman/icons/*ico', 'makehuman/icons/*icns', 'makehuman/icons/*xcf', 'makehuman/icons/makehuman.svg', 'makehuman.rc', '*_contents.txt', 'buildscripts']
+EXCLUDES = ['.hgignore', '.hgeol', '*.target', '*.obj', '*.pyc', '*.mhclo', '*.proxy', '*.pyd', 'maketarget-standalone', 'plugins/4_rendering_mitsuba', 'plugins/4_rendering_povray', 'plugins/4_rendering_aqsis.py', 'plugins/0_modeling_5_editing.py', 'plugins/0_modeling_8_random.py', 'plugins/3_libraries_animation.py', 'compile_*.py', 'build_prepare.py', 'download_assets.py', '*~', '*.bak', 'setup.nsi', 'clean*.sh', 'makehuman.sh', 'clean*.bat', 'makehuman/docs', 'makehuman/icons/*psd', 'makehuman/icons/*bmp', 'makehuman/icons/*ico', 'makehuman/icons/*icns', 'makehuman/icons/*xcf', 'makehuman/icons/makehuman.svg', 'makehuman.rc', '*_contents.txt', 'buildscripts', '.build_prepare.out']
 # Same as above, but applies to release mode only
 EXCLUDES_RELEASE = ['testsuite']
 
@@ -295,6 +295,12 @@ class MHAppExporter(object):
         resultInfo.datas = [os.path.join(REARRANGE_ROOT_FOLDER, d) for d in DATAS]
         resultInfo.pathEx = [os.path.join(REARRANGE_ROOT_FOLDER, p) for p in PYTHON_PATH_EX]
         resultInfo.mainExecutable = os.path.join(REARRANGE_ROOT_FOLDER, MAIN_EXECUTABLE)
+
+        # Write export info to file for easy retrieving by external processes
+        f = open(self.sourceFile('.build_prepare.out'), 'wb')
+        f.write(str(resultInfo))
+        f.close()
+
         return resultInfo
 
     def sourceFile(self, path=""):
