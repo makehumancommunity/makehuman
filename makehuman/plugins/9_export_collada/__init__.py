@@ -104,11 +104,11 @@ class ExporterCollada(Exporter):
 
     def export(self, human, filename):
         from .mh2collada import exportCollada
-        self.taskview.exitPoseMode()
+        #self.taskview.exitPoseMode()
         cfg = self.getConfig()
         cfg.setHuman(human)
         exportCollada(filename("dae"), cfg)
-        self.taskview.enterPoseMode()
+        #self.taskview.enterPoseMode()
 
     def getConfig(self):
         cfg = DaeConfig()
