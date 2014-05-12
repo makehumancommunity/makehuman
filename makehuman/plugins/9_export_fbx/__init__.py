@@ -98,11 +98,11 @@ class ExporterFBX(Exporter):
 
     def export(self, human, filename):
         from . import mh2fbx
-        self.taskview.exitPoseMode()
+        #self.taskview.exitPoseMode()
         cfg = self.getConfig()
         cfg.setHuman(human)
         mh2fbx.exportFbx(filename("fbx"), cfg)
-        self.taskview.enterPoseMode()
+        #self.taskview.enterPoseMode()
 
     def getConfig(self):
         cfg = FbxConfig()

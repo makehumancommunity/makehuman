@@ -109,11 +109,6 @@ class Proxy:
 
         self.deleteVerts = np.zeros(len(human.meshData.coord), bool)
 
-        # TODO are these still used?
-        self.wire = False
-        self.cage = False
-        self.modifiers = []
-        self.shapekeys = []
 
     @property
     def material_file(self):
@@ -123,7 +118,7 @@ class Proxy:
     @property
     def obj_file(self):
         folder = os.path.dirname(self.file) if self.file else None
-        return _getFilePath(self._obj_file, folder)
+        return _getFilePath(self._obj_file, folder, ['npz', 'obj'])
 
     @property
     def vertexgroup_file(self):
@@ -143,7 +138,7 @@ class Proxy:
             if not self.human.proxy:
                 return None
             return self.human.getProxyMesh()
-        elif self.type in ["Cage", "Converter"]:
+        elif self.type in ["Converter"]:
             return None
         else:
             raise NameError("Unknown proxy type %s" % self.type)
@@ -489,32 +484,10 @@ def loadTextProxy(human, filepath, type="Clothes"):
                 proxy.scaleCorrect = float(words[1])
             proxy.uniformizeScale()
 
-        # TODO are these still used? otherwise we can issue deprecation warnings
-        # Blender-only properties
-        elif key == 'wire':
-            proxy.wire = True
-        elif key == 'cage':
-            proxy.cage = True
-        elif key == 'subsurf':
-            levels = int(words[1])
-            if len(words) > 2:
-                render = int(words[2])
-            else:
-                render = levels+1
-            proxy.modifiers.append( ['subsurf', levels, render] )
-        elif key == 'shrinkwrap':
-            offset = float(words[1])
-            proxy.modifiers.append( ['shrinkwrap', offset] )
-        elif key == 'solidify':
-            thickness = float(words[1])
-            offset = float(words[2])
-            proxy.modifiers.append( ['solidify', thickness, offset] )
-        elif key == 'shapekey':
-            proxy.shapekeys.append( _getFileName(folder, words[1], ".target") )
         elif key == 'basemesh':
             proxy.basemesh = words[1]
 
-        elif key in ['objfile_layer', 'uvtex_layer', 'use_projection', 'mask_uv_layer', 'texture_uv_layer', 'delete']:
+        elif key in ['shapekey', 'subsurf', 'shrinkwrap', 'solidify', 'objfile_layer', 'uvtex_layer', 'use_projection', 'mask_uv_layer', 'texture_uv_layer', 'delete']:
             log.warning('Deprecated parameter "%s" used in proxy file. Please remove.', key)
 
 
@@ -569,7 +542,6 @@ def saveBinaryProxy(proxy, path):
     folder = os.path.dirname(path)
 
     def _properPath(path):
-        print "Using path: %s" % getpath.getJailedPath(path, folder)
         return getpath.getJailedPath(path, folder)
 
     vars_ = dict(
@@ -672,12 +644,6 @@ def loadBinaryProxy(path, human, type):
         proxy._vertexgroup_file = npzfile['vertexgroup_file'].tostring()
         if proxy.vertexgroup_file:
             proxy.vertexGroups = io_json.loadJson(proxy.vertexgroup_file)
-
-    # Just set the defaults for these, no idea if they are still relevant
-    proxy.wire = False
-    proxy.cage = False
-    proxy.modifiers = []
-    proxy.shapekeys = []
 
 
     if proxy.z_depth == -1:
@@ -983,7 +949,20 @@ def _unpackStringList(text, index):
 
     return strings
 
-def _getFilePath(filename, folder = None):
+def _getFilePath(filename, folder = None, altExtensions=None):
+    if altExtensions is not None:
+        # Search for existing path with alternative file extension
+        for aExt in altExtensions:
+            if aExt.startswith('.'):
+                aExt = aExt[1:]
+            aFile = os.path.splitext(filename)[0]+'.'+aExt
+            aPath = _getFilePath(aFile, folder, altExtensions=None)
+            if os.path.isfile(aPath):
+                # Path found, return result with original extension
+                orgExt = os.path.splitext(filename)[1]
+                path = os.path.splitext(aPath)[0]+orgExt
+                return os.path.normpath(path)
+
     if not filename or not isinstance(filename, basestring):
         return filename
 
