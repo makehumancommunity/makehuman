@@ -59,7 +59,7 @@ def _parse_args():
     parser = argparse.ArgumentParser()
 
     # optional arguments
-    parser.add_argument('--token', '-t', metavar='t', default=None, type=int,
+    parser.add_argument('--token', '-t', metavar='n', default=None, type=int,
                    help='Only return this space delimited token from the variable (starting at 0)')
 
     # positional arguments
