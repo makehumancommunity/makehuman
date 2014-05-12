@@ -118,7 +118,7 @@ class Proxy:
     @property
     def obj_file(self):
         folder = os.path.dirname(self.file) if self.file else None
-        return _getFilePath(self._obj_file, folder)
+        return _getFilePath(self._obj_file, folder, ['npz', 'obj'])
 
     @property
     def vertexgroup_file(self):
@@ -950,8 +950,24 @@ def _unpackStringList(text, index):
 
     return strings
 
-def _getFilePath(filename, folder = None):
+def _getFilePath(filename, folder = None, altExtensions=None):
     log.debug("_getFilePath(%s, %s)", filename, folder)
+
+    if altExtensions is not None:
+        # Search for existing path with alternative file extension
+        for aExt in altExtensions:
+            log.debug("_getFilePath: try alternative extension %s", aExt)
+            if aExt.startswith('.'):
+                aExt = aExt[1:]
+            aFile = os.path.splitext(filename)[0]+'.'+aExt
+            aPath = _getFilePath(aFile, folder, altExtensions=None)
+            if os.path.isfile(aPath):
+                # Path found, return result with original extension
+                orgExt = os.path.splitext(filename)[1]
+                path = os.path.splitext(aPath)[0]+orgExt
+                log.debug("_getFilePath: found path for extension %s, %s", aExt, os.path.normpath(path))
+                return os.path.normpath(path)
+
     if not filename or not isinstance(filename, basestring):
         log.debug('_getFilePath: No valid filename specified')
         return filename
