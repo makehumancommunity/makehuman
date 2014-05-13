@@ -44,7 +44,16 @@ symbols=no
 # --enable=similarities". If you want to run only the classes checker, but have
 # no Warning level messages displayed, use"--disable=all --enable=classes
 # --disable=W"
-disable=line-too-long,missing-docstring,invalid-name,unused-import,too-many-lines,C0326,W0614,R0904,R0914,R0902,W0401
+#
+# C0326 - whitespace around commas
+#
+# R0902 - Too many instance attributes 
+# R0904 - Too many public methods
+# R0914 - Too many local variables
+#
+# W0614 - Unused import from wildcard import
+#
+disable=line-too-long,missing-docstring,invalid-name,too-many-lines,C0326,R0902,R0904,R0914,W0614
 
 
 [REPORTS]
