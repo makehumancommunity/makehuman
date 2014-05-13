@@ -63,7 +63,7 @@ def _parse_args():
                    help='Only return this space delimited token from the variable (starting at 0)')
 
     # positional arguments
-    parser.add_argument("filePath", default=None, nargs='?', help="Path to build_prepare.out file")
+    parser.add_argument("filePath", default=None, nargs='?', help="Path to .build_prepare.out file")
     parser.add_argument("variable", default=None, nargs='?', help="Name of the variable to retrieve")
 
     argOptions = vars(parser.parse_args())
