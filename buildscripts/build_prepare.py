@@ -295,6 +295,12 @@ class MHAppExporter(object):
         resultInfo.datas = [os.path.join(REARRANGE_ROOT_FOLDER, d) for d in DATAS]
         resultInfo.pathEx = [os.path.join(REARRANGE_ROOT_FOLDER, p) for p in PYTHON_PATH_EX]
         resultInfo.mainExecutable = os.path.join(REARRANGE_ROOT_FOLDER, MAIN_EXECUTABLE)
+
+        # Write export info to file for easy retrieving by external processes
+        f = open(self.sourceFile('.build_prepare.out'), 'wb')
+        f.write(str(resultInfo))
+        f.close()
+
         return resultInfo
 
     def sourceFile(self, path=""):
