@@ -21,7 +21,7 @@ Abstract
 --------
 
 Create a windows executable package for the MakeHuman application."
-""" 
+"""
 
 
 import sys
@@ -29,7 +29,6 @@ import subprocess
 import zipfile
 import os
 import shutil
-import re
 
 sys.path = sys.path + ['..']
 import build_prepare
@@ -39,15 +38,13 @@ package_explicit = False
 package_version = None
 dist_dir = None
 hgpath = "hg"
-hg_root_path = os.path.abspath( os.path.join("..","..") )
 
 def hgRootPath(subpath=""):
     """
     The source location, root folder of the hg repository.
     (we assume cwd is in buildscripts/win32 relative to hg root)
     """
-    global hg_root_path
-    return os.path.join(hg_root_path, subpath)
+    return os.path.join('..', '..', subpath)
 
 def exportPath(subpath=""):
     """
@@ -55,7 +52,11 @@ def exportPath(subpath=""):
     """
     global hgRootPath
     global package_name
-    return os.path.abspath(os.path.join(hgRootPath(), '..', package_name + '_export_win32', subpath))
+    global package_explicit
+    if package_explicit:
+        return os.path.join(hgRootPath(), '..', package_name + '_export_win32', subpath)
+    else:
+        return os.path.join(hgRootPath(), '..', 'mh_export_win32', subpath)
 
 def distPath(subpath=""):
     """
@@ -63,10 +64,6 @@ def distPath(subpath=""):
     data from export path is copied. This folder will eventually be packaged
     for distribution.
     """
-    global dist_dir
-
-    if not dist_dir is None:
-        return os.path.join(dist_dir, subpath)
     return os.path.join('dist', subpath)
 
 def parseConfig(configPath):
@@ -107,7 +104,9 @@ def configure(confpath):
       package_explicit = True
 
 configure("../build.conf")
-if not dist_dir is None and not os.path.exists(dist_dir):
+if not dist_dir is None:
+    if os.path.exists(dist_dir):
+        shutil.rmtree(dist_dir)
     os.makedirs(dist_dir)
 
 # Export source to export folder and run scripts
@@ -127,7 +126,8 @@ qtConf.close()
 exportInfo.datas.append(os.path.join(i.rootSubpath, 'qt.conf'))
 
 # Change to the export dir for building
-os.chdir(exportPath())
+#os.chdir(exportPath())
+
 
 VERSION = exportInfo.version
 HGREV = exportInfo.revision
@@ -138,7 +138,8 @@ if exportInfo.isRelease:
 else:
     VERSION_FN= str(HGREV) + '-' + NODEID
 
-appExecutable = exportPath( 'makehuman\makehuman.py' )
+
+appExecutable = exportPath( i.mainExecutable )
 
 a = Analysis([appExecutable] + i.getPluginFiles(),
              pathex= [ exportPath(p) for p in i.pathEx ],
@@ -221,7 +222,7 @@ elif sys.platform == 'win32':
         strip=None,
         upx=True,
         name='makehuman')
-    target_dir = hgRootPath('buildscripts\win32\dist\makehuman')
+    target_dir = distPath('makehuman')
     if package_explicit and not package_version is None and not package_name is None:
         label = package_name + "-" + package_version
     else:
@@ -233,5 +234,9 @@ elif sys.platform == 'win32':
         for file in files:
             fn = os.path.join(base, file)
             zip.write(fn, fn[rootlen:])
-
+    zip.close()
+    if not dist_dir is None:
+        base = os.path.basename(zipfilename)
+        dest = os.path.join(dist_dir,base)
+        os.rename(zipfilename,dest)
 
