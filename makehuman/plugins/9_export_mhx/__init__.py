@@ -134,11 +134,11 @@ class ExporterMHX(Exporter):
         return cfg
 
     def export(self, human, filename):
-        self.taskview.exitPoseMode()
+        #self.taskview.exitPoseMode()
         cfg = self.getConfig()
         cfg.setHuman(human)
         mhx_main.exportMhx(filename("mhx"), cfg)
-        self.taskview.enterPoseMode()
+        #self.taskview.enterPoseMode()
 
 
 def load(app):
