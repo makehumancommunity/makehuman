@@ -136,11 +136,15 @@ class Object3D(object):
         belong to any visible face) are removed and vertex mapping is added to
         cloned object (see filterMaskedVerts()). For a face mapping, the
         facemask of the original mesh can be used.
+
+        By default cloning a mesh links it to the object of its parent, remove
+        the link by setting other.object to None before attaching it to a new
+        object.
         """
         other = type(self)(self.name, self.vertsPerPrimitive)
 
         for prop in ['cameraMode', 'visibility', 'pickable', 
-                     'calculateTangents', 'priority', 'MAX_FACES']:
+                     'calculateTangents', 'priority', 'MAX_FACES', 'object']:
             setattr(other, prop, getattr(self, prop))
 
         for fg in self.faceGroups:
@@ -174,6 +178,12 @@ class Object3D(object):
 
         Forward vertex mapping (self -> self.parent):
         parent_map[idx] = mIdx: self.coord[idx] -> self.parent.coord[mIdx]
+
+        Will return a (n, self.MAX_FACES) array if this chain of meshes
+        contains a subdivided mesh.
+
+        Note that vertex maps only support one subdivision in a chain of mesh
+        to parent meshes.
         """
         if not hasattr(self, 'parent') or not self.parent:
             return None
@@ -190,7 +200,10 @@ class Object3D(object):
         else:
             # Combine mappings to topmost parent
             return pmap[mapping]
-        
+
+    @property
+    def parent_map_weights(self):
+        return np.ones(self.getVertexCount(), dtype=np.float32)
 
     @property
     def inverse_parent_map(self):
@@ -201,6 +214,12 @@ class Object3D(object):
 
         Reverse vertex mapping:
         inverse_parent_map[idx] = mIdx: self.parent.coord[idx] -> self.coord[mIdx]
+
+        Will return a (n, 1+self.MAX_FACES*2) array if this chain of meshes
+        contains a subdivided mesh.
+
+        Note that vertex maps only support one subdivision in a chain of mesh
+        to parent meshes.
         """
         # TODO will require nxn matrix if subdivided (catmull-clark module)
 
@@ -213,12 +232,16 @@ class Object3D(object):
             mapping = self._inverse_parent_map
 
         # Traverse to parent
-        pmap = self.parent.parent_map
+        pmap = self.parent.inverse_parent_map
         if pmap is None:
             return mapping
         else:
             # Combine mappings to topmost parent
-            result = - np.ones(pmap.shape, dtype=np.int32)
+            if len(mapping.shape) > 1:
+                shape = (len(pmap), mapping.shape[1])
+            else:
+                shape = len(pmap)
+            result = - np.ones(shape, dtype=np.int32)
             idx = np.where(pmap > -1)
             result[idx] = mapping[ pmap[idx] ]
             return result
@@ -665,6 +688,87 @@ class Object3D(object):
             import log
             log.error("Failed to index faces of mesh %s, you are probably loading a mesh with mixed nb of verts per face (do not mix tris and quads). Or your mesh has too many faces attached to one vertex (the maximum is %s-poles). In the second case, either increase MAX_FACES for this mesh, or improve the mesh topology. Original error message: (%s) %s", self.name, self.MAX_FACES, type(e), format(str(e)))
             raise RuntimeError('Incompatible mesh topology.')
+
+    def getWeights(self, parentWeights):
+        """
+        Map armature weights mapped to the root parent (original mesh) to this
+        child mesh. Returns parentWeights unaltered if this mesh has no parent.
+        If this is a proxy mesh, parentWeights should be the weights mapped 
+        through the proxy.getWeights() method first.
+        """
+        # TODO this would heavily benefit from numpy optimization
+
+        vmap = self.inverse_parent_map
+        vwmap = self.parent_map_weights
+
+        from collections import OrderedDict
+        weights = OrderedDict()
+        if not parentWeights:
+            return weights
+
+        # Zip vertex indices and weights
+        zippedWeights = {}
+        for (key, val) in parentWeights.items():
+            indxs, wghts = val
+            zippedWeights[key] = zip(indxs, wghts)
+        parentWeights = zippedWeights
+
+        def _fixVertexGroup(vgroup):
+            """
+            Merge duplicate weighings to the same vertex by reducing it to only
+            one entry with summed weights.
+            """
+            fixedVGroup = []
+            vgroup.sort()
+            pv = -1
+            while vgroup:
+                (pv0, wt0) = vgroup.pop()
+                if pv0 == pv:
+                    wt += wt0
+                else:
+                    if pv >= 0 and wt > 1e-4:
+                        fixedVGroup.append((pv, wt))
+                    (pv, wt) = (pv0, wt0)
+            if pv >= 0 and wt > 1e-4:
+                fixedVGroup.append((pv, wt))
+            return fixedVGroup
+
+        for key in parentWeights.keys():
+            vgroup = []
+            empty = True
+            for (v,wt) in parentWeights[key]:
+                mvs = vmap[v]
+                if isinstance(mvs, int):
+                    mvs = [mvs]
+                for mv in mvs:
+                    w = vwmap[mv]
+                    if mv > -1:
+                        vgroup.append((mv, w * wt))
+                        empty = False
+            if not empty:
+                vgroup = _fixVertexGroup(vgroup)
+                weights[key] = vgroup
+
+        # Unzip and normalize weights (and put them in np format)
+        # TODO it would be a good idea to impose a max limit on nb of weights per vertex here
+        boneWeights = {}
+        wtot = np.zeros(self.getVertexCount(), np.float32)
+        for vgroup in weights.values():
+            for vn,w in vgroup:
+                wtot[vn] += w
+
+        for bname,vgroup in weights.items():
+            weights = np.zeros(len(vgroup), np.float32)
+            verts = []
+            n = 0
+            for vn,w in vgroup:
+                verts.append(vn)
+                weights[n] = w/wtot[vn]
+                n += 1
+            boneWeights[bname] = (verts, weights)
+
+        return boneWeights
+
 
     def updateIndexBuffer(self):
         self.updateIndexBufferVerts()
