@@ -692,18 +692,21 @@ def loadRig(options, mesh):
     weights = skel.fromOptions(options, mesh)
     return skel, weights
 
-def getProxyWeights(proxy, humanWeights, mesh):
+def getProxyWeights(proxy, humanWeights):
+    # TODO duplicate of proxy.getWeights()
 
     # Zip vertex indices and weights
     rawWeights = {}
     for (key, val) in humanWeights.items():
         indxs, weights = val
         rawWeights[key] = zip(indxs, weights)
+
     vertexWeights = proxy.getWeights(rawWeights)
 
+    # TODO this normalization and unzipping is duplicated in module3d.getWeights()
     # Unzip and normalize weights (and put them in np format)
     boneWeights = {}
-    wtot = np.zeros(mesh.getVertexCount(), np.float32)
+    wtot = np.zeros(proxy.object.getSeedMesh().getVertexCount(), np.float32)
     for vgroup in vertexWeights.values():
         for vn,w in vgroup:
             wtot[vn] += w
