@@ -57,8 +57,7 @@ def exportOgreMesh(filepath, config):
 
     progress(0, 0.05, "Setting properties")  # TODO this leads to a disastrous amount of confusion among translators 
     human = config.human
-    feetOnGround = config.feetOnGround  # TODO this is probably not even worth an option, always feet on ground should be a good default
-    config.feetOnGround = False
+
     # TODO account for config.scale in skeleton
     config.setupTexFolder(filepath) # TODO unused
     filename = os.path.basename(filepath)
@@ -66,8 +65,6 @@ def exportOgreMesh(filepath, config):
 
     progress(0.05, 0.2, "Collecting Objects")
     meshes = human.getMeshes()
-
-    config.feetOnGround = feetOnGround
 
     progress(0.2, 0.95 - 0.35*bool(human.getSkeleton()))
     writeMeshFile(human, filepath, meshes, config)
@@ -107,7 +104,7 @@ def writeMeshFile(human, filepath, meshes, config):
             obj = mesh.mesh
 
         # Scale and filter out masked vertices/faces
-        obj = obj.clone(scale=1, filterMaskedVerts=True)  # here obj.parent is set to the original obj
+        obj = obj.clone(scale=config.scale, filterMaskedVerts=True)  # here obj.parent is set to the original obj
 
         numVerts = len(obj.r_coord)
 
@@ -140,7 +137,7 @@ def writeMeshFile(human, filepath, meshes, config):
         lines.append('                <vertexbuffer positions="true" normals="true">')
         coords = obj.r_coord.copy()
         if config.feetOnGround:
-            coords[:,1] += getFeetOnGroundOffset(human)
+            coords[:,1] += getFeetOnGroundOffset(config)
         # Note: Ogre3d uses a y-up coordinate system (just like MH)
         lines.extend(['''\
                     <vertex>
@@ -247,9 +244,9 @@ def writeSkeletonFile(human, filepath, config):
     lines.append('    <bones>')
     progress = Progress(len(skel.getBones()))
     for bIdx, bone in enumerate(skel.getBones()):
-        pos = bone.getRestOffset()
+        pos = config.scale * bone.getRestOffset()
         if config.feetOnGround and not bone.parent:
-            pos[1] += getFeetOnGroundOffset(human)
+            pos[1] += getFeetOnGroundOffset(config)
         lines.append('        <bone id="%s" name="%s">' % (bIdx, bone.name))
         lines.append('            <position x="%s" y="%s" z="%s" />' % (pos[0], pos[1], pos[2]))
         lines.append('            <rotation angle="0">')
@@ -384,5 +381,5 @@ def formatName(name):
         return _goodName(name)
 
 
-def getFeetOnGroundOffset(human):
-    return -human.getJointPosition('ground')[1]
+def getFeetOnGroundOffset(config):
+    return -config.scale * config.human.getJointPosition('ground')[1]
