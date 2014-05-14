@@ -64,7 +64,7 @@ def exportOgreMesh(filepath, config):
     name = formatName(os.path.splitext(filename)[0])
 
     progress(0.05, 0.2, "Collecting Objects")
-    meshes = human.getMeshes()
+    meshes = human.getObjects()
 
     progress(0.2, 0.95 - 0.35*bool(human.getSkeleton()))
     writeMeshFile(human, filepath, meshes, config)
@@ -94,14 +94,8 @@ def writeMeshFile(human, filepath, meshes, config):
 
         loopprog(0.0, 0.1, "Writing %s mesh.", mesh.name)
 
-        if isinstance(mesh, proxy.Proxy):
-            # Object is proxy
-            pxy = mesh
-            obj = pxy.object.mesh
-        else:
-            # Object is human mesh
-            pxy = mesh.proxy
-            obj = mesh.mesh
+        pxy = mesh.proxy
+        obj = mesh.mesh
 
         # Scale and filter out masked vertices/faces
         obj = obj.clone(scale=config.scale, filterMaskedVerts=True)  # here obj.parent is set to the original obj
@@ -208,13 +202,7 @@ def writeMeshFile(human, filepath, meshes, config):
     lines.append('    </submeshes>')
     lines.append('    <submeshnames>')
     for objIdx, mesh in enumerate(meshes):
-        # TODO this isinstance test everytime is a hassle, perhaps getMeshes() can return meshes in nicer form
-        if isinstance(mesh, proxy.Proxy):
-            # Object is proxy
-            obj = mesh.object.mesh
-        else:
-            # Object is human mesh
-            obj = mesh.mesh
+        obj = mesh.mesh
         lines.append('        <submeshname name="%s" index="%s" />' % (formatName(obj.name) if formatName(obj.name) != name else "human", objIdx))
     lines.append('    </submeshnames>')
 
@@ -290,12 +278,7 @@ def writeMaterialFile(human, filepath, meshes, config):
     lines = []
 
     for objIdx, mesh in enumerate(meshes):
-        if isinstance(mesh, proxy.Proxy):
-            # Object is proxy
-            obj = mesh.object.mesh
-        else:
-            # Object is human mesh
-            obj = mesh.mesh
+        obj = mesh.mesh
 
         mat = obj.material
         if objIdx > 0:
