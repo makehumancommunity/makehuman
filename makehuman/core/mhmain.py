@@ -704,7 +704,7 @@ class MHApplication(gui3d.Application, mh.Application):
                 mhmFile = self.args.get('mhmFile')
                 log.message("Loading MHM file %s (as specified by commandline argument)", mhmFile)
                 if os.path.isfile(mhmFile):
-                    self.files.load.loadMHM(mhmFile)
+                    self.loadHumanMHM(mhmFile)
                 else:
                     log.error("Failed to load MHM file. The MHM file specified as argument (%s) does not exist!", mhmFile)
             if self.args.get('runtests', False):
