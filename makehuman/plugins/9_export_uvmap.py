@@ -34,7 +34,7 @@
 Abstract
 --------
 
-TODO
+UV map texture exporter
 """
 
 import gui

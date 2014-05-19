@@ -129,7 +129,7 @@ class Object3D(object):
 
         self.__object = None
 
-    def clone(self, scale=1.0, filterMaskedVerts=False):
+    def clone(self, scale=1.0, filterMaskedVerts=False):    # TODO it's also possible to add offset to the parameters
         """
         Create a clone of this mesh, with adapted scale.
         If filterVerts is True, all vertices that are not required (do not
