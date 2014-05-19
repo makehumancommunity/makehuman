@@ -38,7 +38,6 @@ import log
 
 import proxy
 import exportutils
-import posemode
 
 from . import mhx_writer
 from . import posebone
