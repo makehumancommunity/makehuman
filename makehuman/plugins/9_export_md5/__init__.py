@@ -52,7 +52,7 @@ class MD5Config(Config):
         self.feetOnGround = True
 
     def selectedOptions(self, exporter):
-        self.smooth = self.subdivide = G.app.selectedHuman.isSubdivided()
+        self.smooth = self.subdivide = G.app.selectedHuman.isSubdivided()   # TODO remove this options from ALL exporter config objects
 
         return self
 
