@@ -81,8 +81,6 @@ def setupMeshes(name, human, config=None, amt=None, rawTargets=[], hidden=False,
         config = Config()
         config.setHuman(human)
 
-    config.setOffset(human)
-
     rmeshes = []
 
     # Can we use the meshes directly?
