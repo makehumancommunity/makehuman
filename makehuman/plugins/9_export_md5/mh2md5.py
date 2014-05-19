@@ -80,22 +80,21 @@ def exportMd5(filepath, config):
     progress = Progress.begin(logging=True, timing=True)
 
     human = config.human
-    obj = human.meshData
-    config.zUp = True
-    config.feetOnGround = True    # TODO this only works when exporting MHX mesh (a design error in exportutils)
-    config.scale = 1
     config.setupTexFolder(filepath)
     filename = os.path.basename(filepath)
     name = config.goodName(os.path.splitext(filename)[0])
 
+    # TODO this should probably be the only option
+    config.zUp = True
+    config.feetOnGround = True
+    # TODO do we need a custom scale to fit the ID engine?
+    config.scale = 1.0
+
     humanBBox = human.meshData.calcBBox()
 
-    progress(0, 0.2, "Collecting Objects")
-    rmeshes = exportutils.collect.setupMeshes(
-        name,
-        human,
-        config=config,
-        subdivide=config.subdivide)
+    objects = human.getObjects()
+    meshes = [obj.mesh.clone(1, True) for obj in objects]
+    # TODO set good names for meshes
 
     if human.getSkeleton():
         numJoints = human.getSkeleton().getBoneCount() +1 # Amount of joints + the hardcoded origin below
@@ -106,7 +105,7 @@ def exportMd5(filepath, config):
     f.write('MD5Version 10\n')
     f.write('commandline ""\n\n')
     f.write('numJoints %d\n' % numJoints)
-    f.write('numMeshes %d\n\n' % (len(rmeshes)))
+    f.write('numMeshes %d\n\n' % (len(meshes)))
 
     f.write('joints {\n')
     # Hardcoded root joint
@@ -121,28 +120,26 @@ def exportMd5(filepath, config):
     f.write('}\n\n')
 
     progress(0.3, 0.8, "Writing Objects")
-    loopprog = Progress(len(rmeshes))
-    for rmeshIdx, rmesh in enumerate(rmeshes):
-        # rmesh.type: None is human, "Proxymeshes" is human proxy, "Clothes" for clothing and "Hair" for hair
+    loopprog = Progress(len(meshes))
+    for meshIdx, mesh in enumerate(meshes):
         objprog = Progress()
-        objprog(0.0, 0.1, "Writing %s mesh." % rmesh.name)
+        objprog(0.0, 0.1, "Writing %s mesh." % mesh.name)
 
-        obj = rmesh.object
+        obj = mesh.object
 
-        obj.calcFaceNormals()
-        obj.calcVertexNormals()
-        obj.updateIndexBuffer()
+        # Make sure r_... members are initiated
+        mesh.updateIndexBuffer()
 
-        numVerts = len(obj.r_coord)
-        if obj.vertsPerPrimitive == 4:
+        numVerts = len(mesh.r_coord)
+        if mesh.vertsPerPrimitive == 4:
             # Quads
-            numFaces = len(obj.r_faces) * 2
+            numFaces = len(mesh.r_faces) * 2
         else:
             # Tris
-            numFaces = len(obj.r_faces)
+            numFaces = len(mesh.r_faces)
 
         f.write('mesh {\n')
-        mat = rmesh.material
+        mat = mesh.material
         if mat.diffuseTexture:
             tex = copyTexture(mat.diffuseTexture, human, config)
             f.write('\tshader "%s"\n' % tex)
@@ -152,30 +149,20 @@ def exportMd5(filepath, config):
         # Collect vertex weights
         if human.getSkeleton():
             objprog(0.1, 0.2, "Writing skeleton")
-            bodyWeights = human.getVertexWeights()
+            rawWeights = human.getVertexWeights()
 
-            if rmesh.type:
+            # Remap vertex weights to mesh
+            if obj.proxy:
                 # Determine vertex weights for proxy
-                weights = skeleton.getProxyWeights(rmesh.proxy, bodyWeights, obj)
+                import skeleton
+                parentWeights = skeleton.getProxyWeights(obj.proxy, rawWeights)
             else:
-                # Use vertex weights for human body
-                weights = bodyWeights
-                # Account for vertices that are filtered out
-                if rmesh.vertexMapping != None:
-                    filteredVIdxMap = rmesh.vertexMapping
-                    weights2 = {}
-                    for (boneName, (verts,ws)) in weights.items():
-                        verts2 = []
-                        ws2 = []
-                        for i, vIdx in enumerate(verts):
-                            if vIdx in filteredVIdxMap:
-                                verts2.append(filteredVIdxMap[vIdx])
-                                ws2.append(ws[i])
-                        weights2[boneName] = (verts2, ws2)
-                    weights = weights2
+                parentWeights = rawWeights
+            # Account for vertices that are filtered out
+            weights = mesh.getWeights(parentWeights)
 
-            # Remap vertex weights to the unwelded vertices of the object (obj.coord to obj.r_coord)
-            originalToUnweldedMap = obj.inverse_vmap
+            # Remap vertex weights to the unwelded vertices of the object (mesh.coord to mesh.r_coord)
+            originalToUnweldedMap = mesh.inverse_vmap
 
             # Build a weights list indexed per vertex
             jointIndexes = {}
@@ -203,12 +190,12 @@ def exportMd5(filepath, config):
         else:
             vertWeights = None
 
-        objprog(0.3, 0.7, "Writing vertices for %s." % rmesh.name)
+        objprog(0.3, 0.7, "Writing vertices for %s." % mesh.name)
         # Write vertices
         wCount = 0
         for vert in xrange(numVerts):
-            if obj.has_uv:
-                u, v = obj.r_texco[vert]
+            if mesh.has_uv:
+                u, v = mesh.r_texco[vert]
             else:
                 u, v = 0, 0
             if vertWeights == None:
@@ -219,11 +206,11 @@ def exportMd5(filepath, config):
             f.write('\tvert %d ( %f %f ) %d %d\n' % (vert, u, 1.0-v, wCount, numWeights))
             wCount = wCount + numWeights
 
-        objprog(0.7, 0.8, "Writing faces for %s." % rmesh.name)
+        objprog(0.7, 0.8, "Writing faces for %s." % mesh.name)
         # Write faces
         f.write('\n\tnumtris %d\n' % numFaces)
         fn = 0
-        for fv in obj.r_faces:
+        for fv in mesh.r_faces:
             # tri [triIndex] [vertIndex1] [vertIndex2] [vertIndex3]
             f.write('\ttri %d %d %d %d\n' % (fn, fv[2], fv[1], fv[0]))
             fn += 1
@@ -231,13 +218,13 @@ def exportMd5(filepath, config):
                 f.write('\ttri %d %d %d %d\n' % (fn, fv[0], fv[3], fv[2]))
                 fn += 1
 
-        objprog(0.8, 0.99, "Writing bone weights for %s." % rmesh.name)
+        objprog(0.8, 0.99, "Writing bone weights for %s." % mesh.name)
         # Write bone weighting
-        bwprog = Progress(len(obj.r_coord)).HighFrequency(200)
+        bwprog = Progress(len(mesh.r_coord)).HighFrequency(200)
         if human.getSkeleton():
             f.write('\n\tnumweights %d\n' % wCount)
             wCount = 0
-            for idx,co in enumerate(obj.r_coord):
+            for idx,co in enumerate(mesh.r_coord):
                 for (jointIdx, jointWght) in vertWeights[idx]:
                     # Get vertex position in bone space
                     if joints[jointIdx]:
@@ -262,7 +249,7 @@ def exportMd5(filepath, config):
         else:
             # No skeleton selected: Attach all vertices to the root with weight 1.0
             f.write('\n\tnumweights %d\n' % (numVerts))
-            for idx,co in enumerate(obj.r_coord):
+            for idx,co in enumerate(mesh.r_coord):
                 # weight [weightIndex] [jointIndex] [weightValue] ( [xPos] [yPos] [zPos] )
                 co = co.copy() * scale
 
@@ -382,6 +369,7 @@ def writeAnimation(filepath, human, humanBBox, config, animTrack):
         if config.feetOnGround and not bone.parent:
             pos[1] += (getFeetOnGroundOffset(human) * scale)
 
+        # TODO reuse bone.getRestMatrix() for this
         transformationMat = bone.matRestRelative.copy()
         if config.zUp:
             transformationMat = np.dot(ZYRotation, np.dot(transformationMat,la.inv(ZYRotation)))
