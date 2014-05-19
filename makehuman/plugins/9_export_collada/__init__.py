@@ -62,6 +62,43 @@ class DaeConfig(Config):
         self.localX = False
         self.localG = False
 
+    # TODO preferably these are used (perhaps as enum) instead of the bools above
+    # TODO move these to export Config super class
+    @property
+    def meshOrientation(self):
+        if self.yUpFaceZ:
+            return 'yUpFaceZ'
+        if self.yUpFaceX:
+            return 'yUpFaceX'
+        if self.zUpFaceNegY:
+            return 'zUpFaceNegY'
+        if self.zUpFaceX:
+            return 'zUpFaceX'
+        return 'yUpFaceZ'
+
+    @property
+    def localBoneAxis(self):
+        if self.localY:
+            return 'y'
+        if self.localX:
+            return 'x'
+        if self.localG:
+            return 'g'
+        return 'y'
+
+    @property
+    def upAxis(self):
+        if self.meshOrientation.startswith('yUp'):
+            return 1
+        elif self.meshOrientation.startswith('zUp'):
+            return 2
+
+    @property
+    def offsetVect(self):
+        result = [0.0, 0.0, 0.0]
+        result[self.upAxis] = self.offset
+        return result
+
     def getRigOptions(self):
         rigOptions = super(DaeConfig, self).getRigOptions()
         if rigOptions is None:
