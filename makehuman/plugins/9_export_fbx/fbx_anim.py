@@ -42,11 +42,11 @@ from .fbx_utils import *
 #   Object definitions
 #--------------------------------------------------------------------
 
-def countObjects(rmeshes, amt):
+def countObjects():
     return 2
 
 
-def writeObjectDefs(fp, rmeshes, amt):
+def writeObjectDefs(fp):
     fp.write(
 """
     ObjectType: "AnimationStack" {
@@ -83,7 +83,7 @@ def writeObjectDefs(fp, rmeshes, amt):
 #   Object properties
 #--------------------------------------------------------------------
 
-def writeObjectProps(fp, rmeshes, amt):
+def writeObjectProps(fp):
     sid,skey = getId("AnimStack::Take 001")
     lid,lkey = getId("AnimLayer::BaseLayer")
 
@@ -107,5 +107,5 @@ def writeObjectProps(fp, rmeshes, amt):
 #   Links
 #--------------------------------------------------------------------
 
-def writeLinks(fp, rmeshes, amt):
+def writeLinks(fp):
     ooLink(fp, 'AnimLayer::BaseLayer', 'AnimStack::Take 001')

@@ -46,8 +46,6 @@ class FbxConfig(Config):
     def __init__(self):
         Config.__init__(self)
 
-        from armature.options import ArmatureOptions
-
         self.useRelPaths     = False
         self.expressions = False    #exporter.expressions.selected
         self.useCustomTargets = False   #exporter.useCustomTargets.selected
@@ -65,21 +63,34 @@ class FbxConfig(Config):
         self.localX = False
         self.localG = False
 
-    def getRigOptions(self):
-        rigOptions = super(FbxConfig, self).getRigOptions()
-        if rigOptions is not None:
-            rigOptions.setExportOptions(
-                useExpressions = self.expressions,
-                useTPose = self.useTPose,
-                useLeftRight = False,
-            )
-        return rigOptions
+    # TODO preferably these are used (perhaps as enum) instead of the bools above
+    # TODO move these to export Config super class
+    @property
+    def meshOrientation(self):
+        if self.yUpFaceZ:
+            return 'yUpFaceZ'
+        if self.yUpFaceX:
+            return 'yUpFaceX'
+        if self.zUpFaceNegY:
+            return 'zUpFaceNegY'
+        if self.zUpFaceX:
+            return 'zUpFaceX'
+        return 'yUpFaceZ'
 
+    @property
+    def localBoneAxis(self):
+        if self.localY:
+            return 'y'
+        if self.localX:
+            return 'x'
+        if self.localG:
+            return 'g'
+        return 'y'
 
 
     def __repr__(self):
         return("<FbxConfig %s e %s>" % (
-            self.rigOptions.rigtype, self.expressions))
+            self.expressions,))
 
 
 class ExporterFBX(Exporter):

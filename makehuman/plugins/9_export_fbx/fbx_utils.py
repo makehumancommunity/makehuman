@@ -107,11 +107,11 @@ def getTextureName(filepath):
     return texfile.replace(".","_")
 
 
-def getRmeshName(rmesh, amt):
-    if amt and rmesh.name == "base.obj":
-        return amt.name
+def getMeshName(mesh, skel):
+    if skel and mesh.name == "base.obj":
+        return skel.name
     else:
-        return os.path.splitext(rmesh.name)[0]
+        return os.path.splitext(mesh.name)[0]
 
 #--------------------------------------------------------------------
 #   Write utils
