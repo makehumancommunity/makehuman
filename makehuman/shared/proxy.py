@@ -86,8 +86,6 @@ class Proxy:
         self.basemesh = makehuman.getBasemeshVersion()
         self.tags = []
 
-        self.num_refverts = None
-
         self.ref_vIdxs = None       # (Vidx1,Vidx2,Vidx3) list with references to human vertex indices, indexed by proxy vert
         self.weights = None         # (w1,w2,w3) list, with weights per human vertex (mapped by ref_vIdxs), indexed by proxy vert
         self.vertWeights = {}       # (proxy-vert, weight) list for each parent vert (reverse mapping of self.weights, indexed by human vertex)
@@ -200,14 +198,10 @@ class Proxy:
         Reconstruct reverse vertex (and weights) mapping
         """
         self.vertWeights = {}
-        if self.num_refverts == 3:
-            for pxy_vIdx in xrange(self.ref_vIdxs.shape[0]):
-                _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 0], pxy_vIdx, self.weights[pxy_vIdx, 0])
-                _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 1], pxy_vIdx, self.weights[pxy_vIdx, 1])
-                _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 2], pxy_vIdx, self.weights[pxy_vIdx, 2])
-        else:
-            for pxy_vIdx in xrange(self.ref_vIdxs.shape[0]):
-                _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 0], pxy_vIdx, 1.0)
+        for pxy_vIdx in xrange(self.ref_vIdxs.shape[0]):
+            _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 0], pxy_vIdx, self.weights[pxy_vIdx, 0])
+            _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 1], pxy_vIdx, self.weights[pxy_vIdx, 1])
+            _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 2], pxy_vIdx, self.weights[pxy_vIdx, 2])
 
 
     def getCoords(self):
@@ -496,10 +490,8 @@ def loadTextProxy(human, filepath, type="Clothes"):
             refVert = ProxyRefVert(human)
             refVerts.append(refVert)
             if len(words) == 1:
-                proxy.num_refverts = 1
                 refVert.fromSingle(words, vnum, proxy.vertWeights)
             else:
-                proxy.num_refverts = 3
                 refVert.fromTriple(words, vnum, proxy.vertWeights)
             vnum += 1
 
@@ -552,7 +544,6 @@ def saveBinaryProxy(proxy, path):
         basemesh = np.fromstring(proxy.basemesh, dtype='S1'),
         tags_str = tagStr,
         tags_idx = tagIdx,
-        num_refverts = np.asarray(proxy.num_refverts, dtype=np.int32),
         uvLayers_str = uvStr,
         uvLayers_idx = uvIdx,
         obj_file = np.fromstring(_properPath(proxy.obj_file), dtype='S1'),
@@ -570,13 +561,18 @@ def saveBinaryProxy(proxy, path):
     if proxy.max_pole:
         vars_["max_pole"] = np.asarray(proxy.max_pole, dtype=np.uint32),
 
-    if proxy.num_refverts == 3:
+    if proxy.weights[:,1:].any():
+        # 3 ref verts used in this proxy
+        num_refverts = 3
         vars_["ref_vIdxs"] = proxy.ref_vIdxs
         vars_["offsets"] = proxy.offsets
         vars_["weights"] = proxy.weights
     else:
+        # Proxy uses exact fitting exclusively: store npz file more compactly
+        num_refverts = 1
         vars_["ref_vIdxs"] = proxy.ref_vIdxs[:,0]
         vars_["weights"] = proxy.weights[:,0]
+    vars_['num_refverts'] = np.asarray(num_refverts, dtype=np.int32)
 
     if proxy.vertexgroup_file:
         vars_['vertexgroup_file'] = np.fromstring(_properPath(proxy.vertexgroup_file), dtype='S1')
@@ -607,9 +603,9 @@ def loadBinaryProxy(path, human, type):
     if 'max_pole' in npzfile:
         proxy.max_pole = int(npzfile['max_pole'])
 
-    proxy.num_refverts = int(npzfile['num_refverts'])
+    num_refverts = int(npzfile['num_refverts'])
 
-    if proxy.num_refverts == 3:
+    if num_refverts == 3:
         proxy.ref_vIdxs = npzfile['ref_vIdxs']
         proxy.offsets = npzfile['offsets']
         proxy.weights = npzfile['weights']
@@ -823,27 +819,21 @@ def transferVertexMaskToProxy(vertsMask, proxy):
     """
     # Convert basemesh vertex mask to local mask for proxy vertices
     proxyVertMask = np.ones(len(proxy.ref_vIdxs), dtype=bool)
-    if proxy.num_refverts == 3:
-        '''
-        for idx,hverts in enumerate(proxy.ref_vIdxs):
-            # Body verts to which proxy vertex with idx is mapped
-            (v1,v2,v3) = hverts
-            # Hide proxy vert if any of its referenced body verts are hidden (most agressive)
-            #proxyVertMask[idx] = vertsMask[v1] and vertsMask[v2] and vertsMask[v3]
-            # Alternative1: only hide if at least two referenced body verts are hidden (best result)
-            proxyVertMask[idx] = np.count_nonzero(vertsMask[[v1, v2, v3]]) > 1
-            # Alternative2: Only hide proxy vert if all of its referenced body verts are hidden (least agressive)
-            #proxyVertMask[idx] = vertsMask[v1] or vertsMask[v2] or vertsMask[v3]
-        '''
-        # Faster numpy implementation of the above:
-        unmasked_row_col = np.nonzero(vertsMask[proxy.ref_vIdxs])
-        unmasked_rows = unmasked_row_col[0]
-        unmasked_count = np.bincount(unmasked_rows) # count number of unmasked verts per row
-        # only hide/mask a vertex if at least two referenced body verts are hidden/masked
-        masked_idxs = np.nonzero(unmasked_count < 2)
-        proxyVertMask[masked_idxs] = False
-    else:
-        proxyVertMask[:] = vertsMask[proxy.ref_vIdxs[:,0]]
+
+    # Proxy verts that use exact mapping
+    exact_mask = ~np.any(proxy.weights[:,1:], axis=1)
+
+    # Faster numpy implementation of the above:
+    unmasked_row_col = np.nonzero(vertsMask[proxy.ref_vIdxs])
+    unmasked_rows = unmasked_row_col[0]
+    unmasked_count = np.bincount(unmasked_rows) # count number of unmasked verts per row
+    # only hide/mask a vertex if at least two referenced body verts are hidden/masked
+    masked_idxs = np.nonzero(unmasked_count < 2)
+    proxyVertMask[masked_idxs] = False
+
+    # Directly map exactly mapped proxy verts
+    proxyVertMask[exact_mask] = vertsMask[proxy.ref_vIdxs[exact_mask,0]]
+
     return proxyVertMask
 
 
