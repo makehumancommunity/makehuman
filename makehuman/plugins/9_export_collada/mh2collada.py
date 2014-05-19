@@ -80,6 +80,11 @@ def exportCollada(filepath, config):
     # Clone meshes with desired scale and hidden faces/vertices filtered out
     meshes = [obj.mesh.clone(config.scale, True) for obj in objects]
 
+    # Scale skeleton
+    skel = human.getSkeleton()
+    if skel:
+        skel = skel.scaled(config.scale)
+
     # TODO a shared method for properly naming meshes would be a good idea
     for mesh in meshes:
         if mesh.object.proxy:
@@ -125,13 +130,13 @@ def exportCollada(filepath, config):
         dae_materials.writeLibraryMaterials(fp, objects, config)
 
         progress(0.7, 0.75, "Exporting controllers")
-        dae_controller.writeLibraryControllers(fp, human, meshes, config)
+        dae_controller.writeLibraryControllers(fp, human, meshes, skel, config)
 
         progress(0.75, 0.9, "Exporting geometry")
         dae_geometry.writeLibraryGeometry(fp, meshes, config)
 
         progress(0.9, 0.99, "Exporting scene")
-        dae_node.writeLibraryVisualScenes(fp, human, meshes, config)
+        dae_node.writeLibraryVisualScenes(fp, meshes, skel, config)
 
         fp.write(
             '  <scene>\n' +

@@ -51,13 +51,13 @@ import transformations as tm
 #   library_controllers
 #----------------------------------------------------------------------
 
-def writeLibraryControllers(fp, human, meshes, config, shapes=None):
+def writeLibraryControllers(fp, human, meshes, skel, config, shapes=None):
     progress = Progress(len(meshes), None)
     fp.write('\n  <library_controllers>\n')
     for mIdx, mesh in enumerate(meshes):
         subprog = Progress() (0, 0.5)
-        if human.getSkeleton():
-            writeSkinController(fp, human, mesh, config)
+        if skel:
+            writeSkinController(fp, human, mesh, skel, config)
         subprog(0.5, 1)
         if shapes is not None:
             writeMorphController(fp, mesh, shapes[mIdx], config)
@@ -65,15 +65,13 @@ def writeLibraryControllers(fp, human, meshes, config, shapes=None):
     fp.write('  </library_controllers>\n')
 
 
-def writeSkinController(fp, human, mesh, config):
+def writeSkinController(fp, human, mesh, skel, config):
     """
     Write controller for skinning or rigging, in other words: the controller
     that ties an animation skeleton to the mesh.
     """
     progress = Progress()
     progress(0, 0.1)
-
-    skel = human.getSkeleton()
 
     nVerts = len(mesh.coord)
     nBones = len(skel.getBones())

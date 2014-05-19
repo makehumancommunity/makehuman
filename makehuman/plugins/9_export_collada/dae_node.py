@@ -53,9 +53,9 @@ _Identity = np.identity(4, float)
 #   library_visual_scenes
 #----------------------------------------------------------------------
 
-def writeLibraryVisualScenes(fp, human, meshes, config):
-    if human.getSkeleton():
-        writeSceneWithArmature(fp, meshes, human.getSkeleton(), config)
+def writeLibraryVisualScenes(fp, meshes, skel, config):
+    if skel:
+        writeSceneWithArmature(fp, meshes, skel, config)
     else:
         writeSceneWithoutArmature(fp, meshes, config)
 
