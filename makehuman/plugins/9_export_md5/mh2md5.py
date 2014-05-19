@@ -52,14 +52,11 @@ import codecs
 import numpy as np
 import numpy.linalg as la
 import transformations as tm
-import exportutils
 import skeleton
 import log
 from progress import Progress
 
 ZYRotation = np.array(((1,0,0,0),(0,0,-1,0),(0,1,0,0),(0,0,0,1)), dtype=np.float32)
-
-scale = 5  # Override scale setting to a sensible default for doom-style engines
 
 
 def exportMd5(filepath, config):
@@ -87,13 +84,12 @@ def exportMd5(filepath, config):
     # TODO this should probably be the only option
     config.zUp = True
     config.feetOnGround = True
-    # TODO do we need a custom scale to fit the ID engine?
-    config.scale = 1.0
+    config.scale = 5  # Override scale setting to a sensible default for doom-style engines
 
     humanBBox = human.meshData.calcBBox()
 
     objects = human.getObjects()
-    meshes = [obj.mesh.clone(1, True) for obj in objects]
+    meshes = [obj.mesh.clone(config.scale, True) for obj in objects]
     # TODO set good names for meshes
 
     if human.getSkeleton():
@@ -234,10 +230,10 @@ def exportMd5(filepath, config):
                         relPos = np.ones(4, dtype=np.float32)
                         relPos[:3] = co[:3]
                         relPos[:3] -= joints[jointIdx].getRestHeadPos()
-                        relPos[:3] *= scale
+                        relPos[:3] *= config.scale
                         #relPos = np.dot(relPos, invbonematrix)
                     else:
-                        relPos = co[:3] * scale
+                        relPos = co[:3] * config.scale
 
                     if config.zUp:
                         relPos[:3] = relPos[[0,2,1]] * [1,-1,1]
@@ -251,10 +247,10 @@ def exportMd5(filepath, config):
             f.write('\n\tnumweights %d\n' % (numVerts))
             for idx,co in enumerate(mesh.r_coord):
                 # weight [weightIndex] [jointIndex] [weightValue] ( [xPos] [yPos] [zPos] )
-                co = co.copy() * scale
+                co = co.copy()
 
                 if config.feetOnGround:
-                    co[1] += (getFeetOnGroundOffset(human) * scale)
+                    co += config.offset
 
                 if config.zUp:
                     co = co[[0,2,1]] * [1,-1,1]
@@ -291,10 +287,10 @@ def writeBone(f, bone, human, config):
         parentIndex = bone.parent.index + 1
     else:
         parentIndex = 0 # Refers to the hard-coded root joint
-    pos = bone.getRestHeadPos() * scale
+    pos = bone.getRestHeadPos() * config.scale
 
     if config.feetOnGround:
-        pos[1] += (getFeetOnGroundOffset(human) * scale)
+        pos += config.offset
 
     if config.zUp:
         #transformationMat = bone.matRestGlobal.copy()
@@ -348,13 +344,13 @@ def writeAnimation(filepath, human, humanBBox, config, animTrack):
     f.write('}\n\n')
 
     f.write('bounds {\n')
-    bounds = humanBBox
+    bounds = humanBBox.copy()
+    bounds = bounds * config.scale
     if config.feetOnGround:
-        bounds[:][1] += getFeetOnGroundOffset(human)
+        bounds[:][1] += config.offset
     if config.zUp:
         bounds[0] = bounds[0][[0,2,1]] * [1,-1,1]
         bounds[1] = bounds[1][[0,2,1]] * [1,-1,1]
-    bounds = bounds * scale
     # TODO use bounds calculated for every frame
     for frameIdx in xrange(animTrack.nFrames):
         #( vec3:boundMin ) ( vec3:boundMax )
@@ -365,9 +361,9 @@ def writeAnimation(filepath, human, humanBBox, config, animTrack):
     f.write('\t( %f %f %f ) ( %f %f %f )\n' % (0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
     bases = []
     for bone in skel.getBones():
-        pos = bone.getRestOffset() * scale
+        pos = bone.getRestOffset() * config.scale
         if config.feetOnGround and not bone.parent:
-            pos[1] += (getFeetOnGroundOffset(human) * scale)
+            pos[1] += config.offset
 
         # TODO reuse bone.getRestMatrix() for this
         transformationMat = bone.matRestRelative.copy()
@@ -392,7 +388,7 @@ def writeAnimation(filepath, human, humanBBox, config, animTrack):
         f.write('\t%f %f %f %f %f %f\n' % (0.0, 0.0, 0.0, 0.0, 0.0, 0.0))  # Transformation for origin joint
         for bIdx in xrange(numJoints-1):
             transformationMat = frame[bIdx].copy()
-            pos = transformationMat[:3,3] * scale
+            pos = transformationMat[:3,3] * config.scale
             transformationMat[:3,3] = [0.0, 0.0, 0.0]
 
             if config.zUp:
