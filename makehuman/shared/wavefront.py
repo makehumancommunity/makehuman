@@ -182,7 +182,7 @@ def writeObjFile(path, objects, writeMTL=True, config=None, filterMaskedFaces=Tr
     # Vertices
     for obj in filteredObjs:
         if config:
-            coord = config.scale * (obj.coord - config.offset)
+            coord = config.scale * obj.coord + config.offset
         else:
             coord = obj.coord
         fp.write("".join( ["v %.4f %.4f %.4f\n" % tuple(co) for co in coord] ))
