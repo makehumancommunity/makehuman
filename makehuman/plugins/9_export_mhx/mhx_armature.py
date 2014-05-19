@@ -162,7 +162,7 @@ class ExportArmature(Armature):
 
 
     def writeEditBones(self, fp):
-        offs = self.config.scale * self.config.offset
+        offs = -self.config.offset
 
         for bone in self.bones.values():
             fp.write("\n  Bone %s %s\n" % (bone.name, True))

@@ -139,7 +139,7 @@ def writeBone(fp, bone, config, extra='', indentLevel=0):
 
     padding = indentLevel*"  "
     fp.write('%s      <node %s %s type="JOINT" %s>\n' % (padding, extra, nameStr, idStr))
-    relmat = bone.getRelativeMatrix(config.meshOrientation, config.localBoneAxis, config.offsetVect)
+    relmat = bone.getRelativeMatrix(config.meshOrientation, config.localBoneAxis, config.offset)
     writeMatrix(fp, relmat, "transform", indentLevel*2+8)
     for childBone in bone.children:
         writeBone(fp, childBone, config, '', indentLevel+1)

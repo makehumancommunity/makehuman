@@ -138,7 +138,7 @@ def writeShapeGeometry(fp, name, sname, shape, config):
 '        Vertices: *%d   {\n' % (3*nVerts) +
 '            a: ')
 
-        target = config.scale * (shape.data - config.offset)
+        target = config.scale * shape.data + config.offset
         string = "".join( ["%.4f,%.4f,%.4f," % tuple(dr) for dr in target] )
         fp.write(string[:-1])
 
