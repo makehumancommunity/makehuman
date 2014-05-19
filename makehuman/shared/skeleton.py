@@ -388,6 +388,15 @@ class Bone(object):
         else:
             return restmat
 
+    def getBindMatrix(self, offsetVect=[0,0,0]):
+        #self.calcRestMatrix()
+        self.matRestGlobal
+        restmat = self.matRestGlobal.copy()
+        restmat[:3,3] += offsetVect
+
+        bindinv = np.transpose(restmat)
+        bindmat = la.inv(bindinv)
+        return bindmat,bindinv
 
     def __repr__(self):
         return ("  <Bone %s>" % self.name)
