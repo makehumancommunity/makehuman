@@ -79,7 +79,7 @@ def writeGeometry(fp, mesh, config, shapes=None):
     progress = Progress()
     progress(0)
 
-    coord = mesh.coord + config.offsetVect
+    coord = mesh.coord + config.offset
     coord = rotateCoord(coord, config)
     nVerts = len(coord)
 
@@ -187,7 +187,7 @@ def writeShapeKey(fp, name, shape, mesh, config):
 
     progress(0)
     target = mesh.coord.copy()
-    target[:,config.upAxis] -= config.offset
+    target[:] += config.offset
     target[shape.verts] += shape.data[np.s_[...]]
     target = rotateCoord(config.scale*target, config)
     nVerts = len(target)

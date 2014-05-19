@@ -73,7 +73,7 @@ class Writer(mhx_writer.Writer):
             self.writeProxyMaterial(fp, mat, pxy)
 
         pxyname = self.meshName(pxy)
-        coords = self.config.scale * (pxy.getCoords() - self.config.offset)
+        coords = self.config.scale * pxy.getCoords() + self.config.offset
 
         fp.write(
             "Mesh %s %s \n" % (pxyname, pxyname) +
