@@ -53,80 +53,82 @@ _Identity = np.identity(4, float)
 #   library_visual_scenes
 #----------------------------------------------------------------------
 
-def writeLibraryVisualScenes(fp, rmeshes, amt, config):
-    if amt:
-        writeSceneWithArmature(fp, rmeshes, amt, config)
+def writeLibraryVisualScenes(fp, human, meshes, config):
+    if human.getSkeleton():
+        writeSceneWithArmature(fp, meshes, human.getSkeleton(), config)
     else:
-        writeSceneWithoutArmature(fp, rmeshes, config)
+        writeSceneWithoutArmature(fp, meshes, config)
 
 
-def writeSceneWithoutArmature(fp, rmeshes, config):
+def writeSceneWithoutArmature(fp, meshes, config):
     fp.write(
         '\n  <library_visual_scenes>\n' +
         '    <visual_scene id="Scene" name="Scene">\n')
-    for rmesh in rmeshes:
-        writeMeshNode(fp, "        ", rmesh, config)
+    for mesh in meshes:
+        writeMeshNode(fp, mesh, config, 8)
     fp.write(
         '    </visual_scene>\n' +
         '  </library_visual_scenes>\n')
 
 
-def writeSceneWithArmature(fp, rmeshes, amt, config):
+def writeSceneWithArmature(fp, meshes, skel, config):
     fp.write(
         '\n  <library_visual_scenes>\n' +
         '    <visual_scene id="Scene" name="Scene">\n')
 
-    fp.write('      <node id="%s">\n' % amt.name)
-    writeMatrix(fp, _Identity, "transform", "        ")
-    for root in amt.hierarchy:
-        writeBone(fp, root, [0,0,0], 'layer="L1"', "  ", amt, config)
+    fp.write('      <node id="%s">\n' % skel.name)
+    writeMatrix(fp, _Identity, "transform", 8)
+    for rootBone in skel.roots:
+        writeBone(fp, rootBone, config, 'layer="L1"', 1)
     fp.write('      </node>\n')
 
-    for rmesh in rmeshes:
-        writeMeshArmatureNode(fp, "        ", rmesh, amt, config)
+    for mesh in meshes:
+        writeMeshArmatureNode(fp, mesh, skel, config)
 
     fp.write(
         '    </visual_scene>\n' +
         '  </library_visual_scenes>\n')
 
 
-def writeMeshArmatureNode(fp, pad, rmesh, amt, config):
-    fp.write('\n%s<node id="%sObject" name="%s_%s">\n' % (pad, rmesh.name, amt.name, rmesh.name))
-    writeMatrix(fp, _Identity, "transform", pad+"  ")
+def writeMeshArmatureNode(fp, mesh, skel, config):
+    padding = 8*" "
+    fp.write('\n%s<node id="%sObject" name="%s_%s">\n' % (padding, mesh.name, skel.name, mesh.name))
+    writeMatrix(fp, _Identity, "transform", 8+2)
     fp.write(
-        '%s  <instance_controller url="#%s-skin">\n' % (pad, rmesh.name) +
-        '%s    <skeleton>#%sSkeleton</skeleton>\n' % (pad, amt.roots[0].name))
-    writeBindMaterial(fp, pad, rmesh.material)
+        '%s  <instance_controller url="#%s-skin">\n' % (padding, mesh.name) +
+        '%s    <skeleton>#%sSkeleton</skeleton>\n' % (padding, skel.roots[0].name))
+    writeBindMaterial(fp, mesh.material, 8)
     fp.write(
-        '%s  </instance_controller>\n' % pad +
-        '%s</node>\n' % pad)
+        '%s  </instance_controller>\n' % padding +
+        '%s</node>\n' % padding)
 
 
-def writeMeshNode(fp, pad, rmesh, config):
-    fp.write('\n%s<node id="%sObject" name="%s">\n' % (pad, rmesh.name, rmesh.name))
-    writeMatrix(fp, _Identity, "transform", pad+"  ")
+def writeMeshNode(fp, mesh, config, padCount=0):
+    padding = padCount*' '
+    fp.write('\n%s<node id="%sObject" name="%s">\n' % (padding, mesh.name, mesh.name))
+    writeMatrix(fp, _Identity, "transform", padCount+2)
     fp.write(
-        '%s  <instance_geometry url="#%sMesh">\n' % (pad, rmesh.name))
-    writeBindMaterial(fp, pad, rmesh.material)
+        '%s  <instance_geometry url="#%sMesh">\n' % (padding, mesh.name))
+    writeBindMaterial(fp, mesh.material, padCount)
     fp.write(
-        '%s  </instance_geometry>\n' % pad +
-        '%s</node>\n' % pad)
+        '%s  </instance_geometry>\n' % padding +
+        '%s</node>\n' % padding)
 
 
-def writeBindMaterial(fp, pad, mat):
+def writeBindMaterial(fp, mat, padCount=0):
+    padding = padCount*' '
     matname = mat.name.replace(" ", "_")
     fp.write(
-        '%s    <bind_material>\n' % pad +
-        '%s      <technique_common>\n' % pad +
-        '%s        <instance_material symbol="%s" target="#%s">\n' % (pad, matname, matname) +
-        '%s          <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>\n' % pad +
-        '%s        </instance_material>\n' % pad +
-        '%s      </technique_common>\n' % pad +
-        '%s    </bind_material>\n' % pad)
+        '%s    <bind_material>\n' % padding +
+        '%s      <technique_common>\n' % padding +
+        '%s        <instance_material symbol="%s" target="#%s">\n' % (padding, matname, matname) +
+        '%s          <bind_vertex_input semantic="UVTex" input_semantic="TEXCOORD" input_set="0"/>\n' % padding +
+        '%s        </instance_material>\n' % padding +
+        '%s      </technique_common>\n' % padding +
+        '%s    </bind_material>\n' % padding)
 
 
-def writeBone(fp, hier, orig, extra, pad, amt, config):
-    (bone, children) = hier
+def writeBone(fp, bone, config, extra='', indentLevel=0):
     bname = goodBoneName(bone.name)
     if bone:
         nameStr = 'sid="%s"' % bname
@@ -135,19 +137,21 @@ def writeBone(fp, hier, orig, extra, pad, amt, config):
         nameStr = ''
         idStr = ''
 
-    fp.write('%s      <node %s %s type="JOINT" %s>\n' % (pad, extra, nameStr, idStr))
-    relmat = bone.getRelativeMatrix(config)
-    writeMatrix(fp, relmat, "transform", pad+"        ")
-    for child in children:
-        writeBone(fp, child, bone.head, '', pad+'  ', amt, config)
-    fp.write('%s      </node>\n' % pad)
+    padding = indentLevel*"  "
+    fp.write('%s      <node %s %s type="JOINT" %s>\n' % (padding, extra, nameStr, idStr))
+    relmat = bone.getRelativeMatrix(config.meshOrientation, config.localBoneAxis, config.offsetVect)
+    writeMatrix(fp, relmat, "transform", indentLevel*2+8)
+    for childBone in bone.children:
+        writeBone(fp, childBone, config, '', indentLevel+1)
+    fp.write('%s      </node>\n' % padding)
 
 
-def writeMatrix(fp, mat, sid, pad):
-    fp.write('%s<matrix sid="%s">\n' % (pad, sid))
+def writeMatrix(fp, mat, sid, padCount=0):
+    padding = padCount*' '
+    fp.write('%s<matrix sid="%s">\n' % (padding, sid))
     for i in range(4):
-        fp.write('%s  %.5f %.5f %.5f %.5f\n' % (pad, mat[i][0], mat[i][1], mat[i][2], mat[i][3]))
-    fp.write('%s</matrix>\n' % pad)
+        fp.write('%s  %.5f %.5f %.5f %.5f\n' % (padding, mat[i][0], mat[i][1], mat[i][2], mat[i][3]))
+    fp.write('%s</matrix>\n' % padding)
 
 
 # To avoid error message about Sax FWL Error in Blender
