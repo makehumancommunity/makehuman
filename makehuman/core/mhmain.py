@@ -202,7 +202,6 @@ class MHApplication(gui3d.Application, mh.Application):
                 'realtimeFitting': True,
                 'sliderImages': True,
                 'excludePlugins': [
-                    "0_modeling_8_random",
                     "7_data",
                     "7_example",
                     "7_material_editor",
