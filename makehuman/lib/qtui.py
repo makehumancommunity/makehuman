@@ -573,7 +573,7 @@ class Frame(QtGui.QMainWindow):
         geometry = {'width': self.width(), 'height': self.height(),
             'x': self.pos().x(), 'y': self.pos().y()
             } if 'normal geometry' in self.windowState \
-            else self.normalStateGeometry
+            else self.normalStateGeometry.copy()
         geometry['state'] = list(self.windowState)
         return geometry
 
