@@ -836,6 +836,7 @@ def _getFileName(folder, file, suffix):
         return os.path.join(folder, file+suffix)
 
 
+# TODO a bit unaptly named, should perhaps be called transferVertexMaskToProxy
 def transferFaceMaskToProxy(vertsMask, proxy):
     """
     Transfer a vertex mask defined on the parent mesh to a proxie using the
