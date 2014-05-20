@@ -47,6 +47,7 @@ import getpath
 from core import G
 import log
 from collections import OrderedDict
+import language
 
 class ModifierTaskView(gui3d.TaskView):
     def __init__(self, category, name, label=None, saveName=None, cameraView=None):
@@ -72,7 +73,7 @@ class ModifierTaskView(gui3d.TaskView):
     def addSlider(self, sliderCategory, slider):
         # Get category groupbox
         categoryName = sliderCategory.capitalize()
-        if categoryName not in [unicode(g.title()) for g in self.groupBoxes.values()]:
+        if categoryName not in self.groupBoxes:
             # Create box
             box = self.groupBox.addWidget(gui.GroupBox(categoryName))
             self.groupBoxes[categoryName] = box
