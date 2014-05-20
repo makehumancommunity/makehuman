@@ -88,7 +88,7 @@ def exportMd5(filepath, config):
 
     humanBBox = human.meshData.calcBBox()
 
-    objects = human.getObjects()
+    objects = human.getObjects(excludeZeroFaceObjs=True)
     meshes = [obj.mesh.clone(config.scale, True) for obj in objects]
     # TODO set good names for meshes
 

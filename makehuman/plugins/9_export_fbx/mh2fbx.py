@@ -71,7 +71,7 @@ def exportFbx(filepath, config):
     #rawTargets = exportutils.collect.readTargets(human, config)    # TODO no idea what to do with this
 
     # Collect objects, scale meshes and filter out hidden faces/verts, scale rig
-    objects = human.getObjects()
+    objects = human.getObjects(excludeZeroFaceObjs=True)
     meshes = [obj.mesh.clone(config.scale, True) for obj in objects]
     skel = human.getSkeleton()
     if skel:

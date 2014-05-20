@@ -64,7 +64,7 @@ def exportOgreMesh(filepath, config):
     name = formatName(os.path.splitext(filename)[0])
 
     progress(0.05, 0.2, "Collecting Objects")
-    objects = human.getObjects()
+    objects = human.getObjects(excludeZeroFaceObjs=True)
 
     progress(0.2, 0.95 - 0.35*bool(human.getSkeleton()))
     writeMeshFile(human, filepath, objects, config)
