@@ -238,12 +238,19 @@ class Human(guicommon.Object):
     def getProxyObjects(self):
         return [ pxy.object for pxy in self.getProxies(includeHumanProxy=False) ]
 
-    def getObjects(self):
+    def getObjects(self, excludeZeroFaceObjs=False):
         """
         All mesh objects that belong to this human, usually everything that has
         to be exported. This can replace exportutils.collect
+
+        If excludeZeroFaceObjs is set True, the result will not contain objects
+        for which the meshes have 0 visible faces (all faces are masked)
         """
-        return [self] + self.getProxyObjects()
+        result = [self] + self.getProxyObjects()
+        if excludeZeroFaceObjs:
+            result = [o for o in result if \
+                               o.mesh.getFaceCount(excludeMaskedFaces=True) > 0]
+        return result
 
     # Overriding hide and show to account for both human base and the hairs!
 
