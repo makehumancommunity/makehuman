@@ -191,12 +191,7 @@ def writeMeshFile(human, filepath, rmeshes, config):
                     weights = weights2
 
             # Remap vertex weights to the unwelded vertices of the object (obj.coord to obj.r_coord)
-            originalToUnweldedMap = {}
-            # TODO this loop is quite slow and could benefit from numpy optimization, this method could be reusable among exporters too
-            for unweldedIdx, originalIdx in enumerate(obj.vmap):
-                if originalIdx not in originalToUnweldedMap.keys():
-                    originalToUnweldedMap[originalIdx] = []
-                originalToUnweldedMap[originalIdx].append(unweldedIdx)
+            originalToUnweldedMap = obj.inverse_vmap
 
             lines.append('            <boneassignments>')
             boneNames = [ bone.name for bone in human.getSkeleton().getBones() ]
