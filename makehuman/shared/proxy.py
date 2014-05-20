@@ -86,8 +86,6 @@ class Proxy:
         self.basemesh = makehuman.getBasemeshVersion()
         self.tags = []
 
-        self.num_refverts = None
-
         self.ref_vIdxs = None       # (Vidx1,Vidx2,Vidx3) list with references to human vertex indices, indexed by proxy vert
         self.weights = None         # (w1,w2,w3) list, with weights per human vertex (mapped by ref_vIdxs), indexed by proxy vert
         self.vertWeights = {}       # (proxy-vert, weight) list for each parent vert (reverse mapping of self.weights, indexed by human vertex)
@@ -103,12 +101,13 @@ class Proxy:
         self.material = material.Material(self.name)
 
         self._obj_file = None
-        self.vertexgroup_file = None    # TODO document
+        self._vertexgroup_file = None    # TODO document, is this still used?
         self.vertexGroups = None
         self.material_file = None
         self.maskLayer = -1     # TODO is this still used?
         self.textureLayer = 0
         self.objFileLayer = 0   # TODO what is this used for?
+		self._material_file = None
 
         self.deleteGroups = []  # TODO is this still used?
         self.deleteVerts = np.zeros(len(human.meshData.coord), bool)
@@ -119,6 +118,20 @@ class Proxy:
         self.modifiers = []
         self.shapekeys = []
 
+    @property
+    def material_file(self):
+        folder = os.path.dirname(self.file) if self.file else None
+        return _getFilePath(self._material_file, folder)
+
+    @property
+    def obj_file(self):
+        folder = os.path.dirname(self.file) if self.file else None
+        return _getFilePath(self._obj_file, folder, ['npz', 'obj'])
+
+    @property
+    def vertexgroup_file(self):
+        folder = os.path.dirname(self.file) if self.file else None
+        return _getFilePath(self._vertexgroup_file, folder)
 
     def __repr__(self):
         return ("<Proxy %s %s %s %s>" % (self.name, self.type, self.file, self.uuid))
@@ -141,19 +154,6 @@ class Proxy:
 
     def getMesh(self):
         return self.object.mesh
-
-        for pxy in self.human.getProxies():
-            if self == pxy:
-                return pxy.object.mesh
-
-        if self.type == "Proxymeshes":
-            if not human.proxy:
-                return None
-            return human.mesh
-        elif self.type in ["Cage", "Converter"]:
-            return None
-        else:
-            raise NameError("Unknown proxy type %s" % self.type)
 
 
     def getActualTexture(self, human):
@@ -419,8 +419,8 @@ def loadTextProxy(human, filepath, type="Clothes"):
 
         elif key == 'material':
             matFile = _getFileName(folder, words[1], ".mhmat")
-            proxy.material_file = matFile
-            proxy.material.fromFile(matFile)
+            proxy._material_file = matFile
+            proxy.material.fromFile(proxy.material_file)
 
         elif key == 'backface_culling':
             # TODO remove in future
@@ -515,10 +515,8 @@ def loadTextProxy(human, filepath, type="Clothes"):
             refVert = ProxyRefVert(human)
             refVerts.append(refVert)
             if len(words) == 1:
-                proxy.num_refverts = 1
                 refVert.fromSingle(words, vnum, proxy.vertWeights)
             else:
-                proxy.num_refverts = 3
                 refVert.fromTriple(words, vnum, proxy.vertWeights)
             vnum += 1
 
@@ -621,9 +619,9 @@ def loadBinaryProxy(path, human, type):
     if 'max_pole' in npzfile:
         proxy.max_pole = int(npzfile['max_pole'])
 
-    proxy.num_refverts = int(npzfile['num_refverts'])
+    num_refverts = int(npzfile['num_refverts'])
 
-    if proxy.num_refverts == 3:
+    if num_refverts == 3:
         proxy.ref_vIdxs = npzfile['ref_vIdxs']
         proxy.offsets = npzfile['offsets']
         proxy.weights = npzfile['weights']
@@ -649,14 +647,14 @@ def loadBinaryProxy(path, human, type):
 
     proxy.material = material.Material(proxy.name)
     if 'material_file' in npzfile:
-        proxy.material_file = npzfile['material_file'].tostring()
+        proxy._material_file = npzfile['material_file'].tostring()
     if proxy.material_file:
         proxy.material.fromFile(proxy.material_file)
 
     proxy._obj_file = npzfile['obj_file'].tostring()
 
     if 'vertexgroup_file' in npzfile:
-        proxy.vertexgroup_file = npzfile['vertexgroup_file'].tostring()
+        proxy._vertexgroup_file = npzfile['vertexgroup_file'].tostring()
         if proxy.vertexgroup_file:
             proxy.vertexGroups = io_json.loadJson(proxy.vertexgroup_file)
 
