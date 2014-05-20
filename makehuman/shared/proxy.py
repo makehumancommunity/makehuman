@@ -278,6 +278,22 @@ class Proxy:
         if not rawWeights:
             return weights
 
+        def _fixVertexGroup(vgroup):
+            fixedVGroup = []
+            vgroup.sort()
+            pv = -1
+            while vgroup:
+                (pv0, wt0) = vgroup.pop()
+                if pv0 == pv:
+                    wt += wt0
+                else:
+                    if pv >= 0 and wt > 1e-4:
+                        fixedVGroup.append((pv, wt))
+                    (pv, wt) = (pv0, wt0)
+            if pv >= 0 and wt > 1e-4:
+                fixedVGroup.append((pv, wt))
+            return fixedVGroup
+
         for key in rawWeights.keys():
             vgroup = []
             empty = True
@@ -292,24 +308,9 @@ class Proxy:
                         vgroup.append((pv, pw))
                         empty = False
             if not empty:
-                weights[key] = self._fixVertexGroup(vgroup)
+                weights[key] = _fixVertexGroup(vgroup)
         return weights
 
-    def _fixVertexGroup(self, vgroup):
-        fixedVGroup = []
-        vgroup.sort()
-        pv = -1
-        while vgroup:
-            (pv0, wt0) = vgroup.pop()
-            if pv0 == pv:
-                wt += wt0
-            else:
-                if pv >= 0 and wt > 1e-4:
-                    fixedVGroup.append((pv, wt))
-                (pv, wt) = (pv0, wt0)
-        if pv >= 0 and wt > 1e-4:
-            fixedVGroup.append((pv, wt))
-        return fixedVGroup
 
 
     def getShapes(self, rawShapes, scale):
