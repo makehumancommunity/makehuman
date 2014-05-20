@@ -44,18 +44,21 @@ from .fbx_utils import *
 #   Object definitions
 #--------------------------------------------------------------------
 
-def countObjects(rmeshes, amt):
-    if amt:
-        nBones = len(amt.bones)
+def countObjects(skel):
+    """
+    Number of object required for exporting the specified skeleton.
+    """
+    if skel:
+        nBones = skel.getBoneCount()
         return (2*nBones + 1)
     else:
         return 0
 
 
-def writeObjectDefs(fp, rmeshes, amt):
-    nModels = len(rmeshes)
-    if amt:
-        nBones = len(amt.bones)
+def writeObjectDefs(fp, meshes, skel):
+    nModels = len(meshes)
+    if skel:
+        nBones = skel.getBoneCount()
         nModels += nBones + 1
 
     fp.write(
@@ -142,7 +145,7 @@ def writeObjectDefs(fp, rmeshes, amt):
     }
 """)
 
-    if amt:
+    if skel:
         fp.write(
 '    ObjectType: "NodeAttribute" {\n' +
 '       Count: %d' % (nBones) +
@@ -161,13 +164,13 @@ def writeObjectDefs(fp, rmeshes, amt):
 #   Object properties
 #--------------------------------------------------------------------
 
-def writeObjectProps(fp, rmeshes, amt, config):
-    if amt is None:
+def writeObjectProps(fp, skel, config):
+    if skel is None:
         return
-    for bone in amt.bones.values():
+    for bone in skel.getBones():
         writeNodeAttributeProp(fp, bone)
-    writeNodeProp(fp, amt, config)
-    for bone in amt.bones.values():
+    writeNodeProp(fp, skel, config)
+    for bone in skel.getBones():
         writeBoneProp(fp, bone, config)
 
 
@@ -183,8 +186,8 @@ def writeNodeAttributeProp(fp, bone):
 '    }\n')
 
 
-def writeNodeProp(fp, amt, config):
-    id,key = getId("Model::%s" % amt.name)
+def writeNodeProp(fp, skel, config):
+    id,key = getId("Model::%s" % skel.name)
     fp.write(
 '    Model: %d, "%s", "Null" {' % (id, key) +
 """
@@ -194,7 +197,7 @@ def writeNodeProp(fp, amt, config):
             P: "InheritType", "enum", "", "",1
             P: "ScalingMax", "Vector3D", "Vector", "",0,0,0
 """ +
-'            P: "MHName", "KString", "", "", "%s"' % amt.name +
+'            P: "MHName", "KString", "", "", "%s"' % skel.name +
 """
         }
         Shading: Y
@@ -216,7 +219,7 @@ def writeBoneProp(fp, bone, config):
             P: "DefaultAttributeIndex", "int", "Integer", "",0
 """)
 
-    mat = bone.getRelativeMatrix(config)
+    mat = bone.getRelativeMatrix(config.meshOrientation, config.localBoneAxis, config.offset)
     trans = mat[:3,3]
     e = tm.euler_from_matrix(mat, axes='sxyz')
     fp.write(
@@ -235,17 +238,18 @@ def writeBoneProp(fp, bone, config):
 #   Links
 #--------------------------------------------------------------------
 
-def writeLinks(fp, rmeshes, amt):
-    if amt is None:
+def writeLinks(fp, skel):
+    if skel is None:
         return
 
-    ooLink(fp, 'Model::%s' % amt.name, 'Model::RootNode')
+    ooLink(fp, 'Model::%s' % skel.name, 'Model::RootNode')
 
-    for bone in amt.bones.values():
+    for bone in skel.getBones():
         if bone.parent:
-            ooLink(fp, 'Model::%s' % bone.name, 'Model::%s' % bone.parent)
+            parentName = bone.parent.name if bone.parent else None
+            ooLink(fp, 'Model::%s' % bone.name, 'Model::%s' % parentName)
         else:
-            ooLink(fp, 'Model::%s' % bone.name, 'Model::%s' % amt.name)
+            ooLink(fp, 'Model::%s' % bone.name, 'Model::%s' % skel.name)
         ooLink(fp, 'NodeAttribute::%s' % bone.name, 'Model::%s' % bone.name)
 
 
