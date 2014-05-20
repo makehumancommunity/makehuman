@@ -75,6 +75,10 @@ class Config(object):
     def offset(self):
         return -self.scale * self.human.getJointPosition('ground')[1]
 
+    @property
+    def offsetVect(self):
+        return [0.0, self.offset, 0.0]
+
 
     @property
     def subdivide(self):
