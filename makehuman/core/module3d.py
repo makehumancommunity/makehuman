@@ -492,8 +492,10 @@ class Object3D(object):
 
         self.markCoords(None, True, True, True)
 
-    def getVertexCount(self):
+    def getVertexCount(self, excludeMaskedVerts=False):
         #return len(self.vface)
+        if excludeMaskedVerts:
+            return np.count_nonzero(self.getVertexMaskForFaceMask(self.getFaceMask()))
         return len(self.coord)
 
     def getCoords(self, indices = None):
@@ -607,7 +609,9 @@ class Object3D(object):
     def hasUVs(self):
         return self.has_uv
 
-    def getFaceCount(self):
+    def getFaceCount(self, excludeMaskedFaces=False):
+        if excludeMaskedFaces:
+            return np.count_nonzero(self.getFaceMask())
         return len(self.fvert)
 
     def getFaceVerts(self, indices = None):
