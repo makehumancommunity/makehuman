@@ -844,7 +844,7 @@ class Object3D(object):
     @property
     def material(self):
         if not self.object and hasattr(self, 'parent'):
-            return self.parent.object.material
+            return self.parent.material
         return self.object.material
             
     def setTransparentPrimitives(self, transparentPrimitives):
