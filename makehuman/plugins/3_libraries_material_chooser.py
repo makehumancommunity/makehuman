@@ -113,7 +113,7 @@ class MaterialTaskView(gui3d.TaskView):
             log.warning("Cannot set material for clothes with UUID %s, no such item", uuid)
             return False
         clo = human.clothesProxies[uuid].object
-        clo.mesh.material = material.fromFile(filename)
+        clo.material = material.fromFile(filename)
         return True
 
     def getClothesMaterial(self, uuid):
