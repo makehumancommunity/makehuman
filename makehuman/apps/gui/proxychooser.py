@@ -443,7 +443,6 @@ class ProxyChooserTaskView(gui3d.TaskView):
     def onHumanChanged(self, event):
         if event.change == 'reset':
             self.resetSelection()
-        # Ignore some types of events
         if event.change in ['targets', 'modifier']:
             for obj in self.getObjects():
                 if obj.isSubdivided():

@@ -183,7 +183,19 @@ class ProxyTaskView(proxychooser.ProxyChooserTaskView):
         return self.human.isProxied()
 
     def adaptAllProxies(self, **kwargs):
+        # Override super-class behaviour
         pass
+
+    def onHumanChanging(self, event):
+        # Override super-class behaviour
+        pass
+
+    def onHumanChanged(self, event):
+        # Override super-class behaviour
+        if event.change == 'reset':
+            self.resetSelection()
+        if event.change in ['targets', 'modifier']:
+            self.adaptAllProxies()
 
 
 # This method is called when the plugin is loaded into makehuman
