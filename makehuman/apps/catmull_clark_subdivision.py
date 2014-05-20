@@ -422,6 +422,12 @@ class SubdivisionObject(Object3D):
     def staticFaceMask(self):
         return self._staticFaceMask
 
+    def clone(self, scale=1.0, filterMaskedVerts=False):
+        # First clone the seed mesh
+        otherSeed = self.parent.clone(scale, filterMaskedVerts)
+        # Then generate a subdivision for it
+        return createSubdivisionObject(otherSeed)
+
 def createSubdivisionObject(object, staticFaceMask=None, progressCallback=None):
     obj = SubdivisionObject(object, staticFaceMask)
     obj.create(progressCallback)
