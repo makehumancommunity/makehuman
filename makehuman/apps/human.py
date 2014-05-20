@@ -238,13 +238,12 @@ class Human(guicommon.Object):
     def getProxyObjects(self):
         return [ pxy.object for pxy in self.getProxies(includeHumanProxy=False) ]
 
-    def getMeshes(self):
+    def getObjects(self):
         """
         All mesh objects that belong to this human, usually everything that has
         to be exported. This can replace exportutils.collect
-        Result is a list of objects of class Human and Proxy.
         """
-        return [self] + self.getProxies(includeHumanProxy=False)
+        return [self] + self.getProxyObjects()
 
     # Overriding hide and show to account for both human base and the hairs!
 
