@@ -406,12 +406,12 @@ class ProxyChooserTaskView(gui3d.TaskView):
         #self.filechooser.deselectAll()
         self.deselectAllProxies()
 
-    def adaptProxyToHuman(self, pxy, obj):
+    def adaptProxyToHuman(self, pxy, obj, updateSubdivided=True):
         mesh = obj.getSeedMesh()
         pxy.update(mesh)
         mesh.update()
         # Update subdivided mesh if smoothing is enabled
-        if obj.isSubdivided():
+        if updateSubdivided and obj.isSubdivided():
             obj.getSubdivisionMesh()
 
     def signalChange(self):
@@ -445,6 +445,11 @@ class ProxyChooserTaskView(gui3d.TaskView):
             self.resetSelection()
         # Ignore some types of events
         if event.change in ['targets', 'modifier']:
+            for obj in self.getObjects():
+                if obj.isSubdivided():
+                    obj.getSeedMesh().setVisibility(0)
+                    obj.getSubdivisionMesh(False).setVisibility(1)
+
             self.showObjects() # Make sure objects are shown again after onHumanChanging events
             #log.debug("Human changed, adapting all proxies (event: %s)", event)
             self.adaptAllProxies()
@@ -452,17 +457,21 @@ class ProxyChooserTaskView(gui3d.TaskView):
     def onHumanChanging(self, event):
         if event.change == 'modifier':
             if gui3d.app.settings.get('realtimeFitting', False):
-                self.adaptAllProxies()
+                self.adaptAllProxies(updateSubdivided=False)
+                for obj in self.getObjects():
+                    if obj.isSubdivided():
+                        obj.getSeedMesh().setVisibility(1)
+                        obj.getSubdivisionMesh(False).setVisibility(0)
             else:
                 self.hideObjects()
 
-    def adaptAllProxies(self):
+    def adaptAllProxies(self, updateSubdivided=True):
         proxyCount = len(self.getSelection())
         if proxyCount > 0:
             pass  #log.message("Adapting all %s proxies (%s).", self.proxyName, proxyCount)
         for pIdx, pxy in enumerate(self.getSelection()):
             obj = self.getObjects()[pIdx]
-            self.adaptProxyToHuman(pxy, obj)
+            self.adaptProxyToHuman(pxy, obj, updateSubdivided)
 
     def loadHandler(self, human, values):
         if values[0] == 'status':
