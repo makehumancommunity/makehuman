@@ -831,4 +831,3 @@ def transformBoneMatrix(mat, meshOrientation='yUpFaceZ', localBoneAxis='y', offs
 
     log.warning('invalid localBoneAxis parameter %s', localBoneAxis)
     return None
-

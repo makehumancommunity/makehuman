@@ -984,4 +984,3 @@ def _getFilePath(filename, folder = None, altExtensions=None):
 
     # Nothing found
     return os.path.normpath(filename)
-
