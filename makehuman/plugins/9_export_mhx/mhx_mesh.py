@@ -45,7 +45,7 @@ class Writer(mhx_writer.Writer):
 
         meshname = self.meshName()
         amt = self.armature
-        coords = config.scale * (mesh.coord - config.offset)
+        coords = config.scale * mesh.coord + config.offset
 
         fp.write(
             "\nMesh %s %s\n" % (meshname, meshname) +
@@ -84,7 +84,7 @@ class Writer(mhx_writer.Writer):
                 weights["Delete_" + proxy.name] = proxy.deleteVerts
         self.writeBoolWeights(fp, weights)
 
-        ox,oy,oz = config.scale*config.offset
+        ox,oy,oz = -config.offset
         fp.write(
             "end Mesh\n\n"+
             "Object %s MESH %s\n"  % (meshname, meshname) +
