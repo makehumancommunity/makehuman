@@ -55,7 +55,6 @@ class Config(object):
         self.feetOnGround       = False
         self.scale              = 1.0
         self.unit               = "dm"
-        self.offset             = np.array((0.0, 0.0, 0.0))
 
         self.useNormals         = False
         self.useRelPaths        = True
@@ -72,12 +71,9 @@ class Config(object):
         return self
 
 
-    def setOffset(self, human):
-        from armature.utils import calcJointPos
-        if self.feetOnGround:
-            self.offset = np.array(calcJointPos(human.meshData, 'ground'))
-        else:
-            self.offset = np.array((0,0,0), float)
+    @property
+    def offset(self):
+        return -self.scale * self.human.getJointPosition('ground')[1]
 
 
     @property
