@@ -145,16 +145,16 @@ References:  {
 """)
 
 
-def writeObjectDefs(fp, rmeshes, amt, config):
+def writeObjectDefs(fp, meshes, skel, config):
     count = (
-              fbx_skeleton.countObjects(rmeshes, amt) +
-              fbx_mesh.countObjects(rmeshes, amt) +
-              fbx_deformer.countObjects(rmeshes, amt) +
-              #fbx_anim.countObjects(rmeshes, amt) +
+              fbx_skeleton.countObjects(skel) +
+              fbx_mesh.countObjects(meshes) +
+              fbx_deformer.countObjects(meshes, skel) +
+              #fbx_anim.countObjects() +
               1
             )
     if config.useMaterials:
-        count += fbx_material.countObjects(rmeshes, amt)
+        count += fbx_material.countObjects(meshes)
 
     fp.write(
 """
@@ -173,7 +173,7 @@ Definitions:  {
 """)
 
 
-def writeObjectProps(fp, rmeshes, amt):
+def writeObjectProps(fp):
     fp.write(
 """
 ; Object properties
@@ -183,7 +183,7 @@ Objects:  {
 """)
 
 
-def writeLinks(fp, rmeshes, amt):
+def writeLinks(fp):
     fp.write(
 """
 ; Object connections

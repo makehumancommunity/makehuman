@@ -42,12 +42,16 @@ from .fbx_utils import *
 #   Object definitions
 #--------------------------------------------------------------------
 
-def getObjectNumbers(rmeshes):
-    nMaterials = len(rmeshes)
+def getObjectNumbers(meshes):
+    """
+    Number of materials, textures and images required by the materials of the
+    specified meshes, to be exported to FBX format.
+    """
+    nMaterials = len(meshes)
     nTextures = 0
     nImages = 0
-    for rmesh in rmeshes:
-        mat = rmesh.material
+    for mesh in meshes:
+        mat = mesh.material
         if mat.diffuseTexture:
             nTextures += 2
             nImages += 1
@@ -69,13 +73,17 @@ def getObjectNumbers(rmeshes):
     return nMaterials,nTextures,nImages
 
 
-def countObjects(rmeshes, amt):
-    nMaterials,nTextures,nImages = getObjectNumbers(rmeshes)
+def countObjects(meshes):
+    """
+    Number of objects to be declared for exporting the materials, including the
+    textures and images of the specified meshes.
+    """
+    nMaterials,nTextures,nImages = getObjectNumbers(meshes)
     return (nMaterials + nTextures + nImages)
 
 
-def writeObjectDefs(fp, rmeshes, amt):
-    nMaterials,nTextures,nImages = getObjectNumbers(rmeshes)
+def writeObjectDefs(fp, meshes):
+    nMaterials,nTextures,nImages = getObjectNumbers(meshes)
 
     fp.write(
 """
@@ -170,11 +178,10 @@ def writeObjectDefs(fp, rmeshes, amt):
 #   Object properties
 #--------------------------------------------------------------------
 
-def writeObjectProps(fp, rmeshes, amt, config):
-
-    for rmesh in rmeshes:
-        mat = rmesh.material
-        writeMaterial(fp, rmesh, amt)
+def writeObjectProps(fp, meshes, config):
+    for mesh in meshes:
+        mat = mesh.material
+        writeMaterial(fp, mesh)
         writeTexture(fp, mat.diffuseTexture, "DiffuseColor", config)
         writeTexture(fp, mat.specularMapTexture, "SpecularFactor", config)
         writeTexture(fp, mat.normalMapTexture, "Bump", config)
@@ -183,12 +190,11 @@ def writeObjectProps(fp, rmeshes, amt, config):
         writeTexture(fp, mat.displacementMapTexture, "DisplacementFactor", config)
 
 
-def writeMaterial(fp, rmesh, amt):
-    name = getRmeshName(rmesh, amt)
-    id,key = getId("Material::"+name)
+def writeMaterial(fp, mesh):
+    id,key = getId("Material::"+mesh.name)
     fp.write('    Material: %d, "%s", "" {' % (id, key))
 
-    mat = rmesh.material
+    mat = mesh.material
     fp.write(
 '        Version: 102\n' +
 '        ShadingModel: "phong"\n' +
@@ -254,13 +260,11 @@ def writeTexture(fp, filepath, channel, config):
 #   Links
 #--------------------------------------------------------------------
 
-def writeLinks(fp, rmeshes, amt):
+def writeLinks(fp, meshes):
+    for mesh in meshes:
+        ooLink(fp, 'Material::%s' % mesh.name, 'Model::%sMesh' % mesh.name)
 
-    for rmesh in rmeshes:
-        name = getRmeshName(rmesh, amt)
-        ooLink(fp, 'Material::%s' % name, 'Model::%sMesh' % name)
-
-        mat = rmesh.material
+        mat = mesh.material
         for filepath,channel in [
             (mat.diffuseTexture, "DiffuseColor"),
             (mat.diffuseTexture, "TransparencyFactor"),
@@ -271,6 +275,6 @@ def writeLinks(fp, rmeshes, amt):
             (mat.displacementMapTexture, "Displacement")]:
             if filepath:
                 texname = getTextureName(filepath)
-                opLink(fp, 'Texture::%s' % texname, 'Material::%s' % name, channel)
+                opLink(fp, 'Texture::%s' % texname, 'Material::%s' % mesh.name, channel)
                 ooLink(fp, 'Video::%s' % texname, 'Texture::%s' % texname)
 
