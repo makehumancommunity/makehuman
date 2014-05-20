@@ -92,7 +92,7 @@ def exportStlAscii(filepath, config, exportJoints = False):
     objprog = Progress(len(rmeshes))
     for rmesh in rmeshes:
         obj = rmesh.object
-        coord = config.scale*(obj.coord - config.offset)
+        coord = config.scale*obj.coord + config.offset
         fp.write("".join( [(
             'facet normal %f %f %f\n' % tuple(obj.fnorm[fn]) +
             '\touter loop\n' +
@@ -146,7 +146,7 @@ def exportStlBinary(filepath, config, exportJoints = False):
 
     progress(0.3, 0.99, "Writing Objects")
     objprog = Progress(len(rmeshes))
-    coord = config.scale * (obj.coord - config.offset)
+    coord = config.scale * obj.coord + config.offset
     for rmesh in rmeshes:
         obj = rmesh.object
         for fn,fv in enumerate(obj.fvert):

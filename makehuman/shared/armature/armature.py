@@ -398,7 +398,7 @@ _RotXY = np.dot(_RotNegX, _RotY)
 
 def subtractOffset(mat, config):
     mat = mat.copy()
-    mat[:3,3] -= config.scale*config.offset
+    mat[:3,3] += config.offset
     return mat
 
 
