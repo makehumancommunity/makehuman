@@ -57,7 +57,7 @@ def exportObj(filepath, config=None):
     name = config.goodName(os.path.splitext(filename)[0])
 
     progress(0, 0.3, "Collecting Objects")
-    objects = [m.object.mesh if isinstance(m, proxy.Proxy) else m.mesh for m in human.getMeshes()]
+    objects = human.getObjects()
 
     progress(0.3, 0.99, "Writing Objects")
     wavefront.writeObjFile(filepath, objects, True, config)
