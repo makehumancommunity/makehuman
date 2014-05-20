@@ -42,7 +42,6 @@ import weakref
 import numpy as np
 import unique # Bugfix for numpy.unique on older numpy versions
 
-import matrix
 import material
 
 class FaceGroup(object):
@@ -114,9 +113,6 @@ class Object3D(object):
 
         self.name = objName
         self.vertsPerPrimitive = vertsPerPrimitive
-        self._loc = np.zeros(3, dtype=np.float32)
-        self.rot = np.zeros(3, dtype=np.float32)
-        self.scale = np.ones(3, dtype=np.float32)
         self._faceGroups = []
         self._material = material.Material(objName+"_Material")  # Render material
         self._groups_rev = {}
@@ -127,7 +123,6 @@ class Object3D(object):
         self.object3d = None
         self._priority = 0
         self.MAX_FACES = 8
-        self.lockRotation = False   # Set to true to make the rotation of this object independent of the camera rotation
 
         # Cache used for retrieving vertex colors multiplied with material diffuse color
         self._old_diff = None
@@ -146,13 +141,8 @@ class Object3D(object):
         other = type(self)(self.name, self.vertsPerPrimitive)
 
         for prop in ['material', 'cameraMode', 'visibility', 'pickable', 
-                     'calculateTangents', 'priority', 'MAX_FACES', 
-                     'lockRotation']:
+                     'calculateTangents', 'priority', 'MAX_FACES']:
             setattr(other, prop, getattr(self, prop))
-
-        other.loc = self.loc.copy()
-        other.rot = self.rot.copy()
-        other.scale = self.scale.copy()
 
         for fg in self.faceGroups:
             ofg = other.createFaceGroup(fg.name)
@@ -189,7 +179,10 @@ class Object3D(object):
 
         other.parent is set to the original mesh.
         """
-        other.parent = self
+        if hasattr(self, 'parent') and self.parent:
+            other.parent = self.parent
+        else:
+            other.parent = self
 
         # Forward vertex mapping:
         # parent_map[idx] = mIdx: other.coord[idx] -> self.coord[mIdx]
@@ -225,86 +218,6 @@ class Object3D(object):
             other.calcNormals()
             other.updateIndexBuffer()
 
-    def getLoc(self):
-        return self._loc
-
-    def setLoc(self, loc):
-        self._loc = loc
-
-    loc = property(getLoc, setLoc)
-
-    def get_x(self):
-        return self.loc[0]
-
-    def set_x(self, x):
-        self.loc[0] = x
-
-    x = property(get_x, set_x)
-
-    def get_y(self):
-        return self.loc[1]
-
-    def set_y(self, y):
-        self.loc[1] = y
-
-    y = property(get_y, set_y)
-
-    def get_z(self):
-        return self.loc[2]
-
-    def set_z(self, z):
-        self.loc[2] = z
-
-    z = property(get_z, set_z)
-
-    def get_rx(self):
-        return self.rot[0]
-
-    def set_rx(self, rx):
-        self.rot[0] = rx
-
-    rx = property(get_rx, set_rx)
-
-    def get_ry(self):
-        return self.rot[1]
-
-    def set_ry(self, ry):
-        self.rot[1] = ry
-
-    ry = property(get_ry, set_ry)
-
-    def get_rz(self):
-        return self.rot[2]
-
-    def set_rz(self, rz):
-        self.rot[2] = rz
-
-    rz = property(get_rz, set_rz)
-
-    def get_sx(self):
-        return self.scale[0]
-
-    def set_sx(self, sx):
-        self.scale[0] = sx
-
-    sx = property(get_sx, set_sx)
-
-    def get_sy(self):
-        return self.scale[1]
-
-    def set_sy(self, sy):
-        self.scale[1] = sy
-
-    sy = property(get_sy, set_sy)
-
-    def get_sz(self):
-        return self.scale[2]
-
-    def set_sz(self, sz):
-        self.scale[2] = sz
-
-    sz = property(get_sz, set_sz)
-
     def getShaderChanged(self):
         return self.material.shaderChanged
 
@@ -312,17 +225,6 @@ class Object3D(object):
         self.material.shaderChanged = shaderChanged
 
     shaderChanged = property(getShaderChanged, setShaderChanged)
-
-    @property
-    def transform(self):
-        m = matrix.translate(self.loc)
-        if any(x != 0 for x in self.rot):
-            m = m * matrix.rotx(self.rx)
-            m = m * matrix.roty(self.ry)
-            m = m * matrix.rotz(self.rz)
-        if any(x != 1 for x in self.scale):
-            m = m * matrix.scale(self.scale)
-        return m
 
     def getCenter(self):
         """
@@ -413,7 +315,7 @@ class Object3D(object):
         t1 = w2[:,1] - w1[:,1]
         t2 = w3[:,1] = w1[:,1]
 
-        # Prevent NANs because of borked up UV coordinates
+        # Prevent NANs because of borked up UV coordinates  # TODO perhaps remove this
         s1[np.argwhere(np.equal(s1, 0.0))] = 0.0000001
         s2[np.argwhere(np.equal(s2, 0.0))] = 0.0000001
         t1[np.argwhere(np.equal(t1, 0.0))] = 0.0000001
@@ -880,50 +782,6 @@ class Object3D(object):
             self._r_color_diff[:] = diff * self.r_color
             self._old_diff = diff
         return self._r_color_diff
-
-
-    def setLoc(self, locx, locy, locz):
-        """
-        This method is used to set the location of the object in the 3D coordinate space of the scene.
-
-        :param locx: The x coordinate of the object.
-        :type locx: float
-        :param locy: The y coordinate of the object.
-        :type locy: float
-        :param locz: The z coordinate of the object.
-        :type locz: float
-        """
-
-        self.loc[...] = (locx, locy, locz)
-
-    def setRot(self, rx, ry, rz):
-        """
-        This method sets the orientation of the object in the 3D coordinate space of the scene.
-
-        :param rx: Rotation around the x-axis.
-        :type rx: float
-        :param ry: Rotation around the y-axis.
-        :type ry: float
-        :param rz: Rotation around the z-axis.
-        :type rz: float
-        """
-
-        self.rot[...] = (rx, ry, rz)
-
-    def setScale(self, sx, sy, sz):
-        """
-        This method sets the scale of the object in the 3D coordinate space of
-        the scene, relative to the initially defined size of the object.
-
-        :param sx: Scale along the x-axis.
-        :type sx: float
-        :param sy: Scale along the x-axis.
-        :type sy: float
-        :param sz: Scale along the x-axis.
-        :type sz: float
-        """
-
-        self.scale[...] = (sx, sy, sz)
 
     @property
     def visibility(self):

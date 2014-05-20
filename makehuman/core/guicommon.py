@@ -39,6 +39,9 @@ Common GUI elements extracted from gui3d to minimize coupling with gui backend.
 
 import events3d
 
+import numpy as np
+import matrix
+
 class Action(object):
     def __init__(self, name):
         self.name = name
@@ -68,9 +71,17 @@ class Object(events3d.EventHandler):
             raise RuntimeError('This mesh is already attached to an object')
 
         self.mesh = mesh
-        self.mesh.setLoc(*position)
         self.mesh.object = self
         self.mesh.setVisibility(visible)
+
+        self._loc = np.zeros(3, dtype=np.float32)
+        self._rot = np.zeros(3, dtype=np.float32)
+        self._scale = np.ones(3, dtype=np.float32)
+
+        self.setLoc(*position)
+
+        self.lockRotation = False   # Set to true to make the rotation of this object independent of the camera rotation
+        self.placeAtFeet = False    # Set to true to automatically set Y loc (position) to height of ground helper joint of the human
 
         self._view = None
 
@@ -85,6 +96,10 @@ class Object(events3d.EventHandler):
         self.__proxySubdivisionMesh = None
 
         self.setUVMap(mesh.material.uvMap)
+
+    # TODO
+    def clone(self):
+        pass
 
     def _attach(self):
 
@@ -149,15 +164,114 @@ class Object(events3d.EventHandler):
         else:
             self.mesh.setVisibility(0)
 
+    ##
+    # Orientation properties
+    ##
+
+    def getLoc(self):
+        result = np.zeros(3, dtype=np.float32)
+        result[:] = self._loc[:]
+        if self.placeAtFeet:
+            from core import G
+            human = G.app.selectedHuman
+            result[1] = human.getJointPosition('ground')[1]
+        return result
+
+    def setLoc(self, locx, locy, locz):
+        """
+        This method is used to set the location of the object in the 3D coordinate space of the scene.
+
+        :param locx: The x coordinate of the object.
+        :type locx: float
+        :param locy: The y coordinate of the object.
+        :type locy: float
+        :param locz: The z coordinate of the object.
+        :type locz: float
+        """
+        self._loc[...] = (locx, locy, locz)
+
+    loc = property(getLoc, setLoc)
+
+    def get_x(self):
+        return self.loc[0]
+
+    def set_x(self, x):
+        self._loc[0] = x
+
+    x = property(get_x, set_x)
+
+    def get_y(self):
+        return self.loc[1]
+
+    def set_y(self, y):
+        self._loc[1] = y
+
+    y = property(get_y, set_y)
+
+    def get_z(self):
+        return self.loc[2]
+
+    def set_z(self, z):
+        self._loc[2] = z
+
+    z = property(get_z, set_z)
+
+    def get_rx(self):
+        return self._rot[0]
+
+    def set_rx(self, rx):
+        self._rot[0] = rx
+
+    rx = property(get_rx, set_rx)
+
+    def get_ry(self):
+        return self._rot[1]
+
+    def set_ry(self, ry):
+        self._rot[1] = ry
+
+    ry = property(get_ry, set_ry)
+
+    def get_rz(self):
+        return self._rot[2]
+
+    def set_rz(self, rz):
+        self._rot[2] = rz
+
+    rz = property(get_rz, set_rz)
+
+    def get_sx(self):
+        return self._scale[0]
+
+    def set_sx(self, sx):
+        self._scale[0] = sx
+
+    sx = property(get_sx, set_sx)
+
+    def get_sy(self):
+        return self._scale[1]
+
+    def set_sy(self, sy):
+        self._scale[1] = sy
+
+    sy = property(get_sy, set_sy)
+
+    def get_sz(self):
+        return self._scale[2]
+
+    def set_sz(self, sz):
+        self._scale[2] = sz
+
+    sz = property(get_sz, set_sz)
+
     def getPosition(self):
-        return [self.mesh.x, self.mesh.y, self.mesh.z]
+        return [self.x, self.y, self.z]
 
     def setPosition(self, position):
-        for mesh in self._meshes():
-            mesh.setLoc(position[0], position[1], position[2])
+        self.setLoc(position[0], position[1], position[2])
 
     def getRotation(self):
-        return [self.mesh.rx, self.mesh.ry, self.mesh.rz]
+        return [self.rx, self.ry, self.rz]
 
     def setRotation(self, rotation):
         rotation[0] = rotation[0] % 360
@@ -167,14 +281,60 @@ class Object(events3d.EventHandler):
             log.warning('Setting a non-zero rotation around Z axis is not supported!')
             rotation[2] = 0.0
 
-        for mesh in self._meshes():
-            mesh.setRot(rotation[0], rotation[1], rotation[2])
+        self.setRot(rotation[0], rotation[1], rotation[2])
+
+    def setRot(self, rx, ry, rz):
+        """
+        This method sets the orientation of the object in the 3D coordinate space of the scene.
+
+        :param rx: Rotation around the x-axis.
+        :type rx: float
+        :param ry: Rotation around the y-axis.
+        :type ry: float
+        :param rz: Rotation around the z-axis.
+        :type rz: float
+        """
+        self._rot[...] = (rx, ry, rz)
+
+    def getRotation(self):
+        return self._rot
+
+    rot = property(getRotation, setRotation)
 
     def setScale(self, scale, scaleY=None, scaleZ=1):
+        """
+        This method sets the scale of the object in the 3D coordinate space of
+        the scene, relative to the initially defined size of the object.
+
+        :param scale: Scale along the x-axis, uniform scale if other params not
+                      specified.
+        :type scale: float
+        :param scaleY: Scale along the x-axis.
+        :type scaleY: float
+        :param scaleZ: Scale along the x-axis.
+        :type scaleZ: float
+        """
         if scaleY is None:
             scaleY = scale
-        for mesh in self._meshes():
-            mesh.setScale(scale, scaleY, scaleZ)
+            scaleZ = scale
+        self._scale[...] = (scale, scaleY, scaleZ)
+
+    def getScale(self):
+        return list(self._scale)
+
+    scale = property(getScale, setScale)
+
+    @property
+    def transform(self):
+        m = matrix.translate(self.loc)
+        if any(x != 0 for x in self.rot):
+            m = m * matrix.rotx(self.rx)
+            m = m * matrix.roty(self.ry)
+            m = m * matrix.rotz(self.rz)
+        if any(x != 1 for x in self.scale):
+            m = m * matrix.scale(self.scale)
+        return m
+
 
     def setTexture(self, texture):
         self.mesh.setTexture(texture)
@@ -425,6 +585,7 @@ class Object(events3d.EventHandler):
             # Re-generate the subdivided mesh with new UV coordinates
             self.setSubdivided(True)
 
+    # TODO store material in this object instead of in mesh
     def setMaterial(self, material):
         self.setUVMap(material.uvMap)
         self.mesh.setMaterial(material)

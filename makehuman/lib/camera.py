@@ -351,7 +351,7 @@ class Camera(events3d.EventHandler):
         return [x, y, z]
 
     def getModelMatrix(self, obj):
-        return obj.transform
+        return obj.object.transform
 
     def updateCamera(self):
         pass
@@ -509,7 +509,7 @@ class OrbitalCamera(Camera):
         m = np.matrix(np.identity(4))
         # First translate to camera center, then rotate around that center
         m = m * matrix.translate(self.center)   # Move mesh to original position again
-        if not obj.lockRotation:
+        if not obj.object.lockRotation:
             if self.verticalInclination != 0:
                 m = m * matrix.rotx(self.verticalInclination)
             if self.horizontalRotation != 0:
@@ -520,7 +520,7 @@ class OrbitalCamera(Camera):
         center = [-self.center[0], -self.center[1], -self.center[2]]
         m = m * matrix.translate(center)   # Move mesh to its rotation center to apply rotation
         if obj:
-            m = m * obj.transform   # Apply object transform first
+            m = m * obj.object.transform   # Apply object transform first
 
         return m
 
