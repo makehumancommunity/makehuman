@@ -65,7 +65,6 @@ Delta = [0,0.01,0]
 #
 
 def exportCollada(filepath, config):
-    from armature.armature import setupArmature
     progress = Progress()
 
     time1 = time.clock()
@@ -75,20 +74,18 @@ def exportCollada(filepath, config):
     name = config.goodName(os.path.splitext(filename)[0])
 
     progress(0, 0.5, "Preparing")
-    amt = setupArmature(name, human, config.rigOptions)
-    rawTargets = exportutils.collect.readTargets(human, config)
-    rmeshes = exportutils.collect.setupMeshes(
-        name,
-        human,
-        amt=amt,
-        config=config,
-        rawTargets = rawTargets)
+    #rawTargets = exportutils.collect.readTargets(human, config)    # TODO what is this used for?
 
-    #oldPoses = {}
-    #if config.useTPose and amt:
-    #    for rmesh in rmeshes:
-    #        oldPoses[rmesh.name] = rmesh.pose
-    #        rmesh.pose = amt.getTPose()
+    objects = human.getObjects()
+    # Clone meshes with desired scale and hidden faces/vertices filtered out
+    meshes = [obj.mesh.clone(config.scale, True) for obj in objects]
+
+    # TODO a shared method for properly naming meshes would be a good idea
+    for mesh in meshes:
+        if mesh.object.proxy:
+            mesh.name = mesh.object.proxy.name
+        mesh.name = os.path.splitext(mesh.name)[0]
+        mesh.name = name + '-' + config.goodName(mesh.name)
 
     try:
         progress(0.5, 0.55, "Exporting %s", filepath)
@@ -101,6 +98,7 @@ def exportCollada(filepath, config):
             log.error("Unable to open file for writing %s" % filepath)
 
         date = time.strftime(u"%a, %d %b %Y %H:%M:%S +0000".encode('utf-8'), time.localtime()).decode('utf-8')
+        # TODO revise to make this enum-like
         if config.yUpFaceZ or config.yUpFaceX:
             upvector = "Y_UP"
         else:
@@ -118,22 +116,22 @@ def exportCollada(filepath, config):
             '  </asset>\n')
 
         progress(0.55, 0.6, "Exporting images")
-        dae_materials.writeLibraryImages(fp, rmeshes, config)
+        dae_materials.writeLibraryImages(fp, objects, config)
 
         progress(0.6, 0.65, "Exporting effects")
-        dae_materials.writeLibraryEffects(fp, rmeshes, config)
+        dae_materials.writeLibraryEffects(fp, objects, config)
 
         progress(0.65, 0.7, "Exporting materials")
-        dae_materials.writeLibraryMaterials(fp, rmeshes, config)
+        dae_materials.writeLibraryMaterials(fp, objects, config)
 
         progress(0.7, 0.75, "Exporting controllers")
-        dae_controller.writeLibraryControllers(fp, rmeshes, amt, config)
+        dae_controller.writeLibraryControllers(fp, human, meshes, config)
 
         progress(0.75, 0.9, "Exporting geometry")
-        dae_geometry.writeLibraryGeometry(fp, rmeshes, config)
+        dae_geometry.writeLibraryGeometry(fp, meshes, config)
 
         progress(0.9, 0.99, "Exporting scene")
-        dae_node.writeLibraryVisualScenes(fp, rmeshes, amt, config)
+        dae_node.writeLibraryVisualScenes(fp, human, meshes, config)
 
         fp.write(
             '  <scene>\n' +
@@ -148,8 +146,4 @@ def exportCollada(filepath, config):
     finally:
         if fp:
             fp.close()
-
-        #if oldPoses:
-        #    for rmesh in rmeshes:
-        #        rmesh.pose = oldPoses[rmesh.name]
 
