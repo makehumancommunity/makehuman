@@ -127,15 +127,6 @@ def writeMatrix(fp, name, mat, pad=""):
             fp.write(',\n%s               ' % pad)
     fp.write('\n%s        }\n' % pad)
 
-
-def writeComma(fp, n, last):
-    if n == last:
-        fp.write('\n')
-    elif n%1024 == 1023:
-        fp.write(',\n            ')
-    else:
-        fp.write(',')
-
 #--------------------------------------------------------------------
 #   Links
 #--------------------------------------------------------------------
