@@ -51,58 +51,80 @@ import transformations as tm
 #   library_controllers
 #----------------------------------------------------------------------
 
-def writeLibraryControllers(fp, rmeshes, amt, config):
-    progress = Progress(len(rmeshes), None)
+def writeLibraryControllers(fp, human, meshes, config, shapes=None):
+    progress = Progress(len(meshes), None)
     fp.write('\n  <library_controllers>\n')
-    for rmesh in rmeshes:
+    for mIdx, mesh in enumerate(meshes):
         subprog = Progress() (0, 0.5)
-        if amt:
-            writeSkinController(fp, rmesh, amt, config)
+        if human.getSkeleton():
+            writeSkinController(fp, human, mesh, config)
         subprog(0.5, 1)
-        if rmesh.shapes:
-            writeMorphController(fp, rmesh, config)
+        if shapes is not None:
+            writeMorphController(fp, mesh, shapes[mIdx], config)
         progress.step()
     fp.write('  </library_controllers>\n')
 
 
-def writeSkinController(fp, rmesh, amt, config):
+def writeSkinController(fp, human, mesh, config):
+    """
+    Write controller for skinning or rigging, in other words: the controller
+    that ties an animation skeleton to the mesh.
+    """
     progress = Progress()
     progress(0, 0.1)
 
-    obj = rmesh.object
-    nVerts = len(obj.coord)
-    nBones = len(amt.bones)
+    skel = human.getSkeleton()
 
-    skinWeights = []
+    nVerts = len(mesh.coord)
+    nBones = len(skel.getBones())
+
+    rawWeights = human.getVertexWeights()
+
+    obj = mesh.object
+
+    # Remap vertex weights to mesh
+    if obj.proxy:
+        import skeleton
+        parentWeights = skeleton.getProxyWeights(obj.proxy, rawWeights)
+    else:
+        parentWeights = rawWeights
+    weights = mesh.getWeights(parentWeights)
+
+
     vertexWeights = [list() for _ in xrange(nVerts)]
+    skinWeights = []
     wn = 0
-    for bn,bname in enumerate(amt.bones):
+    boneNames = [ bone.name for bone in skel.getBones() ]
+    for bIdx, boneName in enumerate(boneNames):
         try:
-            wts = rmesh.weights[bname]
-        except KeyError:
-            wts = []
-        log.debug("W %d %s %s" % (bn,bname,wts))
+            (verts,ws) = weights[boneName]
+        except:
+            (verts,ws) = ([], [])
+        wts = zip(verts, ws)
         skinWeights += wts
         for (vn,_w) in wts:
-            vertexWeights[int(vn)].append((bn,wn))
+            vertexWeights[int(vn)].append((bIdx,wn))
             wn += 1
     nSkinWeights = len(skinWeights)
 
+
+    # Write rig transform matrix
     progress(0.1, 0.2)
     fp.write('\n' +
-        '    <controller id="%s-skin">\n' % rmesh.name +
-        '      <skin source="#%sMesh">\n' % rmesh.name +
+        '    <controller id="%s-skin">\n' % mesh.name +
+        '      <skin source="#%sMesh">\n' % mesh.name +
         '        <bind_shape_matrix>\n' +
         '          1 0 0 0\n' +
         '          0 1 0 0\n' +
         '          0 0 1 0\n' +
         '          0 0 0 1\n' +
         '        </bind_shape_matrix>\n' +
-        '        <source id="%s-skin-joints">\n' % rmesh.name +
-        '          <IDREF_array count="%d" id="%s-skin-joints-array">\n' % (nBones,rmesh.name) +
+        '        <source id="%s-skin-joints">\n' % mesh.name +
+        '          <IDREF_array count="%d" id="%s-skin-joints-array">\n' % (nBones,mesh.name) +
         '           ')
 
-    for bone in amt.bones.values():
+    # Write bones
+    for bone in skel.getBones():
         bname = goodBoneName(bone.name)
         fp.write(' %s' % bname)
 
@@ -110,32 +132,32 @@ def writeSkinController(fp, rmesh, amt, config):
     fp.write('\n' +
         '          </IDREF_array>\n' +
         '          <technique_common>\n' +
-        '            <accessor count="%d" source="#%s-skin-joints-array" stride="1">\n' % (nBones,rmesh.name) +
+        '            <accessor count="%d" source="#%s-skin-joints-array" stride="1">\n' % (nBones,mesh.name) +
         '              <param type="IDREF" name="JOINT"></param>\n' +
         '            </accessor>\n' +
         '          </technique_common>\n' +
         '        </source>\n' +
-        '        <source id="%s-skin-weights">\n' % rmesh.name +
-        '          <float_array count="%d" id="%s-skin-weights-array">\n' % (nSkinWeights,rmesh.name) +
+        '        <source id="%s-skin-weights">\n' % mesh.name +
+        '          <float_array count="%d" id="%s-skin-weights-array">\n' % (nSkinWeights,mesh.name) +
         '           ')
 
-    fp.write(''.join(' %s' % w[1] for w in skinWeights))
+    fp.write(' '.join('%s' % w[1] for w in skinWeights))
 
     fp.write('\n' +
         '          </float_array>\n' +
         '          <technique_common>\n' +
-        '            <accessor count="%d" source="#%s-skin-weights-array" stride="1">\n' % (nSkinWeights,rmesh.name) +
+        '            <accessor count="%d" source="#%s-skin-weights-array" stride="1">\n' % (nSkinWeights,mesh.name) +
         '              <param type="float" name="WEIGHT"></param>\n' +
         '            </accessor>\n' +
         '          </technique_common>\n' +
         '        </source>\n' +
-        '        <source id="%s-skin-poses">\n' % rmesh.name +
-        '          <float_array count="%d" id="%s-skin-poses-array">' % (16*nBones,rmesh.name))
+        '        <source id="%s-skin-poses">\n' % mesh.name +
+        '          <float_array count="%d" id="%s-skin-poses-array">' % (16*nBones,mesh.name))
 
     progress(0.4, 0.6)
-    for bone in amt.bones.values():
-        #mat = la.inv(bone.getRestOrTPoseMatrix(config))
-        mat = la.inv(bone.getRestMatrix(config))
+    for bone in skel.getBones():
+        #mat = la.inv(bone.getRestOrTPoseMatrix(config))    # TODO remove (this is a hack)
+        mat = la.inv(bone.getRestMatrix(config.meshOrientation, config.localBoneAxis, config.offsetVect))
         for i in range(4):
             fp.write('\n           ')
             for j in range(4):
@@ -146,22 +168,23 @@ def writeSkinController(fp, rmesh, amt, config):
     fp.write('\n' +
         '          </float_array>\n' +
         '          <technique_common>\n' +
-        '            <accessor count="%d" source="#%s-skin-poses-array" stride="16">\n' % (nBones,rmesh.name) +
+        '            <accessor count="%d" source="#%s-skin-poses-array" stride="16">\n' % (nBones,mesh.name) +
         '              <param type="float4x4"></param>\n' +
         '            </accessor>\n' +
         '          </technique_common>\n' +
         '        </source>\n' +
         '        <joints>\n' +
-        '          <input semantic="JOINT" source="#%s-skin-joints"/>\n' % rmesh.name +
-        '          <input semantic="INV_BIND_MATRIX" source="#%s-skin-poses"/>\n' % rmesh.name +
+        '          <input semantic="JOINT" source="#%s-skin-joints"/>\n' % mesh.name +
+        '          <input semantic="INV_BIND_MATRIX" source="#%s-skin-poses"/>\n' % mesh.name +
         '        </joints>\n' +
         '        <vertex_weights count="%d">\n' % nVerts +
-        '          <input offset="0" semantic="JOINT" source="#%s-skin-joints"/>\n' % rmesh.name +
-        '          <input offset="1" semantic="WEIGHT" source="#%s-skin-weights"/>\n' % rmesh.name +
+        '          <input offset="0" semantic="JOINT" source="#%s-skin-joints"/>\n' % mesh.name +
+        '          <input offset="1" semantic="WEIGHT" source="#%s-skin-weights"/>\n' % mesh.name +
         '          <vcount>\n' +
         '            ')
 
-    fp.write(''.join(['%d ' % len(wts) for wts in vertexWeights]))
+    # Write number of bones weighted per vertex
+    fp.write(' '.join(['%d' % len(wts) for wts in vertexWeights]))
 
     progress(0.8, 0.99)
     fp.write('\n' +
@@ -181,30 +204,30 @@ def writeSkinController(fp, rmesh, amt, config):
     progress(1)
 
 
-def writeMorphController(fp, rmesh, config):
+def writeMorphController(fp, mesh, shapes, config):
     progress = Progress()
     progress(0, 0.7)
-    nShapes = len(rmesh.shapes)
+    nShapes = len(shapes)
 
     fp.write(
-        '    <controller id="%sMorph" name="%sMorph">\n' % (rmesh.name, rmesh.name)+
+        '    <controller id="%sMorph" name="%sMorph">\n' % (mesh.name, mesh.name)+
         '      <morph source="#%sMesh" method="NORMALIZED">\n' % (rmesh.name) +
-        '    <source id="%sTargets">\n' % (rmesh.name) +
-        '          <IDREF_array id="%sTargets-array" count="%d">' % (rmesh.name, nShapes))
+        '    <source id="%sTargets">\n' % (mesh.name) +
+        '          <IDREF_array id="%sTargets-array" count="%d">' % (mesh.name, nShapes))
 
-    for key,_ in rmesh.shapes:
-        fp.write(" %sMeshMorph_%s" % (rmesh.name, key))
+    for key,_ in shapes:
+        fp.write(" %sMeshMorph_%s" % (mesh.name, key))
 
     fp.write(
         '        </IDREF_array>\n' +
         '          <technique_common>\n' +
-        '            <accessor source="#%sTargets-array" count="%d" stride="1">\n' % (rmesh.name, nShapes) +
+        '            <accessor source="#%sTargets-array" count="%d" stride="1">\n' % (mesh.name, nShapes) +
         '              <param name="IDREF" type="IDREF"/>\n' +
         '            </accessor>\n' +
         '          </technique_common>\n' +
         '        </source>\n' +
-        '        <source id="%sWeights">\n' % (rmesh.name) +
-        '          <float_array id="%sWeights-array" count="%d">' % (rmesh.name, nShapes))
+        '        <source id="%sWeights">\n' % (mesh.name) +
+        '          <float_array id="%sWeights-array" count="%d">' % (mesh.name, nShapes))
 
     progress(0.7, 0.99)
     fp.write(nShapes*" 0")
@@ -212,14 +235,14 @@ def writeMorphController(fp, rmesh, config):
     fp.write('\n' +
         '        </float_array>\n' +
         '          <technique_common>\n' +
-        '            <accessor source="#%sWeights-array" count="%d" stride="1">\n' % (rmesh.name, nShapes) +
+        '            <accessor source="#%sWeights-array" count="%d" stride="1">\n' % (mesh.name, nShapes) +
         '              <param name="MORPH_WEIGHT" type="float"/>\n' +
         '            </accessor>\n' +
         '          </technique_common>\n' +
         '        </source>\n' +
         '        <targets>\n' +
-        '          <input semantic="MORPH_TARGET" source="#%sTargets"/>\n' % (rmesh.name) +
-        '          <input semantic="MORPH_WEIGHT" source="#%sWeights"/>\n' % (rmesh.name) +
+        '          <input semantic="MORPH_TARGET" source="#%sTargets"/>\n' % (mesh.name) +
+        '          <input semantic="MORPH_WEIGHT" source="#%sWeights"/>\n' % (mesh.name) +
         '        </targets>\n' +
         '      </morph>\n' +
         '    </controller>\n')

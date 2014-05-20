@@ -347,6 +347,32 @@ class Bone(object):
         self.matPoseGlobal = None
         self.matPoseVerts = None
 
+    def getRestMatrix(self, meshOrientation='yUpFaceZ', localBoneAxis='y', offsetVect=[0,0,0]):
+        """
+        meshOrientation: What axis points up along the model, and which direction
+                         the model is facing.
+            allowed values: yUpFaceZ (0), yUpFaceX (1), zUpFaceNegY (2), zUpFaceX (3)
+
+        localBoneAxis: How to orient the local axes around the bone, which axis
+                       points along the length of the bone. Global (g )assumes the 
+                       same axes as the global coordinate space used for the model.
+            allowed values: y, x, g
+        """
+        #self.calcRestMatrix()  # TODO perhaps interesting method to replace the current
+        return transformBoneMatrix(self.matRestGlobal, meshOrientation, localBoneAxis, offsetVect)
+
+    def getRelativeMatrix(self, meshOrientation='yUpFaceZ', localBoneAxis='y', offsetVect=[0,0,0]):
+        restmat = self.getRestMatrix(meshOrientation, localBoneAxis, offsetVect)
+
+        # TODO this matrix is possibly the same as self.matRestRelative, but with optional adapted axes
+
+        if self.parent:
+            parmat = self.parent.getRestMatrix(meshOrientation, localBoneAxis, offsetVect)
+            return np.dot(la.inv(parmat), restmat)
+        else:
+            return restmat
+
+
     def __repr__(self):
         return ("  <Bone %s>" % self.name)
 
@@ -956,3 +982,62 @@ def getRestPoseCompensation(srcSkel, tgtSkel, boneMapping, excludedTgtBones = ["
 
         tgtSkel.update()   # Update skeleton after each modification of a bone
     return result
+
+
+_Identity = np.identity(4, float)
+_RotX = tm.rotation_matrix(math.pi/2, (1,0,0))
+_RotY = tm.rotation_matrix(math.pi/2, (0,1,0))
+_RotNegX = tm.rotation_matrix(-math.pi/2, (1,0,0))
+_RotZ = tm.rotation_matrix(math.pi/2, (0,0,1))
+_RotZUpFaceX = np.dot(_RotZ, _RotX)
+_RotXY = np.dot(_RotNegX, _RotY)
+
+def transformBoneMatrix(mat, meshOrientation='yUpFaceZ', localBoneAxis='y', offsetVect=[0,0,0]):
+    """
+    Transform orientation of bone matrix to fit the chosen coordinate system
+    and mesh orientation.
+
+    meshOrientation: What axis points up along the model, and which direction
+                     the model is facing.
+        allowed values: yUpFaceZ (0), yUpFaceX (1), zUpFaceNegY (2), zUpFaceX (3)
+
+    localBoneAxis: How to orient the local axes around the bone, which axis
+                   points along the length of the bone. Global (g )assumes the 
+                   same axes as the global coordinate space used for the model.
+        allowed values: y, x, g
+    """
+
+    # TODO this is not nice, but probably needs to be done before transforming the matrix
+    # TODO perhaps add offset as argument
+    mat = mat.copy()
+    mat[:3,3] += offsetVect
+
+    if meshOrientation == 0 or meshOrientation == 'yUpFaceZ':
+        rot = _Identity
+    elif meshOrientation == 1 or meshOrientation == 'yUpFaceX':
+        rot = _RotY
+    elif meshOrientation == 2 or meshOrientation == 'zUpFaceNegY':
+        rot = _RotX
+    elif meshOrientation == 3 or meshOrientation == 'zUpFaceX':
+        rot = _RotZUpFaceX
+    else:
+        log.warning('invalid meshOrientation parameter %s', meshOrientation)
+        return None
+
+    if localBoneAxis.lower() == 'y':
+        # Y along self, X bend
+        return np.dot(rot, mat)
+
+    elif localBoneAxis.lower() == 'x':
+        # X along self, Y bend
+        return np.dot(rot, np.dot(mat, _RotXY) )
+
+    elif localBoneAxis.lower() == 'g':
+        # Global coordinate system
+        tmat = np.identity(4, float)
+        tmat[:,3] = np.dot(rot, mat[:,3])
+        return tmat
+
+    log.warning('invalid localBoneAxis parameter %s', localBoneAxis)
+    return None
+
