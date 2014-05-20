@@ -1368,19 +1368,23 @@ def getFilePath(filename, folder = None):
     # Ensure unix style path
     filename.replace('\\', '/')
 
+    searchPaths = []
+
     # Search within current folder
     if folder:
-        path = os.path.join(folder, filename)
-        if os.path.isfile(path):
-            return os.path.abspath(path)
+        searchPaths.append(folder)
+
+    from getpath import findFile, getPath, getSysDataPath, getSysPath, getDataPath
+    searchPaths.extend([getDataPath(), getSysDataPath(), getPath(), getSysPath()])
+
+    # Search in user / sys data, and user / sys root folders
+    path = findFile(filename, searchPaths, strict=True)
+    if path:
+        return os.path.abspath(path)
+
     # Treat as absolute path or search relative to application path
     if os.path.isfile(filename):
         return os.path.abspath(filename)
-    # Search in user / sys data, and user / sys root folders
-    from getpath import findFile, getPath, getSysDataPath, getSysPath, getDataPath
-    path = findFile(filename, [getDataPath(), getSysDataPath(), getPath(), getSysPath()])
-    if os.path.isfile(path):
-        return os.path.abspath(path)
 
     # Nothing found
     return os.path.normpath(filename)
