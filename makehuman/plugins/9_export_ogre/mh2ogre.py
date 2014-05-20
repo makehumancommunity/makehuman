@@ -175,16 +175,18 @@ def writeMeshFile(human, filepath, meshes, config):
 
         # Skeleton bone assignments
         if human.getSkeleton():
+            # TODO getVertexWeights is the best name for this, use it consistently in proxy/module3d
             bodyWeights = human.getVertexWeights()
             if pxy:
                 # Determine vertex weights for proxy (map to unfiltered proxy mesh)
-                weights = skeleton.getProxyWeights(pxy, bodyWeights, obj.parent)
+                weights = skeleton.getProxyWeights(pxy, bodyWeights)
             else:
                 # Use vertex weights for human body
                 weights = bodyWeights
 
-            # Account for vertices that are filtered out
-            filteredVIdxMap = obj.inverse_parent_map
+            # Remap vertex weights to account for hidden vertices that are 
+            # filtered out, and remap to multiple vertices if mesh is subdivided
+            weights = obj.getWeights(weights)
 
             # Remap vertex weights to the unwelded vertices of the object (obj.coord to obj.r_coord)
             originalToUnweldedMap = obj.inverse_vmap
@@ -194,16 +196,13 @@ def writeMeshFile(human, filepath, meshes, config):
             for (boneName, (verts,ws)) in weights.items():
                 bIdx = boneNames.index(boneName)
                 for i, vIdx in enumerate(verts):
-                    if filteredVIdxMap[vIdx] >= 0:
-                        # Vertex for weight is included in the filtered mesh
-                        vIdx = filteredVIdxMap[vIdx]
-                        w = ws[i]
-                        try:
-                            lines.extend( ['                <vertexboneassignment vertexindex="%s" boneindex="%s" weight="%s" />' % (r_vIdx, bIdx, w)
-                                            for r_vIdx in originalToUnweldedMap[vIdx]] )
-                        except:
-                            # unused coord
-                            pass
+                    w = ws[i]
+                    try:
+                        lines.extend( ['                <vertexboneassignment vertexindex="%s" boneindex="%s" weight="%s" />' % (r_vIdx, bIdx, w)
+                                        for r_vIdx in originalToUnweldedMap[vIdx]] )
+                    except:
+                        # unused coord
+                        pass
             lines.append('            </boneassignments>')
 
         progress.step()
