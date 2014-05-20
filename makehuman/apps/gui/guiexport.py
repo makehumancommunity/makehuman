@@ -47,7 +47,7 @@ import log
 
 class ExportTaskView(gui3d.TaskView):
     def __init__(self, category):
-        super(ExportTaskView, self).__init__(self, category, 'Export')
+        super(ExportTaskView, self).__init__(category, 'Export')
 
         self.formats = []
         self.recentlyShown = None
@@ -210,14 +210,14 @@ class ExportTaskView(gui3d.TaskView):
             self.fileentry.text = ""
 
     def onShow(self, event):
-        super(ExportTaskView, self).onShow(self, event)
+        super(ExportTaskView, self).onShow(event)
 
         self.buildGui()
 
         self.fileentry.setFocus()
 
     def onHide(self, event):
-        super(ExportTaskView, self).onHide(self, event)
+        super(ExportTaskView, self).onHide(event)
 
         for exporter, radio, _ in self.formats:
             if radio.selected:
