@@ -371,15 +371,12 @@ class Object(events3d.EventHandler):
             import files3d
             self.proxy = proxy
 
-            self.__proxyMesh = proxy.object.mesh
-            proxy.object = self
+            self.__proxyMesh = proxy.object.mesh.clone()
+            self.__proxyMesh.object = self
 
             # Copy attributes from human mesh to proxy mesh
             for attr in ('visibility', 'pickable', 'cameraMode'):
                 setattr(self.__proxyMesh, attr, getattr(self.mesh, attr))
-
-            # Connect the proxy to this object directly
-            self.__proxyMesh.object = self.mesh.object
 
             self.proxy.update(self.__proxyMesh)
 
