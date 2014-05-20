@@ -77,7 +77,7 @@ class Config(object):
 
     @property
     def offsetVect(self):
-        return [0.0, self.offset, 0.0]
+        return np.asarray([0.0, self.offset, 0.0], dtype=np.float32)
 
 
     @property
