@@ -71,7 +71,6 @@ class ExporterOgre(Exporter):
     def build(self, options, taskview):
         self.taskview     = taskview
         self.feetOnGround = options.addWidget(gui.CheckBox("Feet on ground", True))
-        #self.scales       = self.addScales(options)  # TODO reintroduce scales?
 
     def getConfig(self):
         cfg = OgreConfig()
@@ -80,12 +79,6 @@ class ExporterOgre(Exporter):
         cfg.scale,cfg.unit    = self.taskview.getScale()
 
         return cfg
-
-    def onShow(self, exportTaskView):
-        exportTaskView.scaleBox.hide()
-
-    def onHide(self, exportTaskView):
-        exportTaskView.scaleBox.show()
 
 def load(app):
     app.addExporter(ExporterOgre())
