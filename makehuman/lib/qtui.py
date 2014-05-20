@@ -486,6 +486,20 @@ class Frame(QtGui.QMainWindow):
             self.normalStateGeometry = self.storeGeometry()
         QtGui.QMainWindow.resizeEvent(self, event)
 
+    def resizeEvent(self, event):
+        """QMainWindow method override that is called when
+        the widget is resized."""
+        if 'normal geometry' in self.windowState:
+            self.normalStateGeometry = self.storeGeometry()
+        QtGui.QMainWindow.resizeEvent(self, event)
+
+    def moveEvent(self, event):
+        """QMainWindow method override that is called when
+        the widget is moved."""
+        if 'normal geometry' in self.windowState:
+            self.normalStateGeometry = self.storeGeometry()
+        QtGui.QMainWindow.moveEvent(self, event)
+
     def addPanels(self):
         left = TaskPanel()
         right = TaskPanel()
