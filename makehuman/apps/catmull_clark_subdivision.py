@@ -53,9 +53,6 @@ class SubdivisionObject(Object3D):
         super(SubdivisionObject, self).__init__(name, 4)
 
         self.MAX_FACES = object.MAX_FACES
-        self.loc = object.loc.copy()
-        self.rot = object.rot.copy()
-        self.scale = object.scale.copy()
         self.cameraMode = object.cameraMode
         self.visibility = object.visibility
         self.pickable = object.pickable
@@ -64,7 +61,7 @@ class SubdivisionObject(Object3D):
         self.solid = object.solid
         self.transparentPrimitives = object.transparentPrimitives * 4
         self.object = object.object
-        self.parent = object
+        self.parent = object    # TODO avoid conflicts with clone()'s parent
         self.priority = object.priority
         self.cull = object.cull
 
@@ -88,6 +85,7 @@ class SubdivisionObject(Object3D):
 
         group_mask = np.ones(len(parent._faceGroups), dtype=bool)
 
+        # TODO copy over face mask from parent without this?
         for g in parent._faceGroups:
             fg = self.createFaceGroup(g.name)
             if ('joint' in fg.name or 'helper' in g.name):
@@ -129,8 +127,8 @@ class SubdivisionObject(Object3D):
         fuv = uv_rmap[parent.fuvs[self.face_map]]
         tedges = np.dstack((fuv,np.roll(fuv,-1,axis=1)))
 
-        self.cbase = nverts
-        self.ebase = nverts + nfaces
+        self.cbase = nverts            # Index of first subdivided vert
+        self.ebase = nverts + nfaces   # Edge base index 
 
         self.tcbase = ntexco
         self.tebase = ntexco + nfaces
@@ -286,6 +284,9 @@ class SubdivisionObject(Object3D):
 
         progress(19)
 
+        self.parent_map = self.vtx_map
+        self.inverse_parent_map = vtx_rmap
+
     def dump(self):
         for k in dir(self):
             v = getattr(self, k)
@@ -323,9 +324,9 @@ class SubdivisionObject(Object3D):
     def update_coords(self):
         parent = self.parent
 
-        bvert = self.coord[:self.cbase]
-        cvert = self.coord[self.cbase:self.ebase]
-        evert = self.coord[self.ebase:]
+        bvert = self.coord[:self.cbase]            # Base verts
+        cvert = self.coord[self.cbase:self.ebase]  # Subdivided verts
+        evert = self.coord[self.ebase:]            # Edge verts
 
         cvert[...] = np.sum(parent.coord[parent.fvert[self.face_map]], axis=1) / 4
 
