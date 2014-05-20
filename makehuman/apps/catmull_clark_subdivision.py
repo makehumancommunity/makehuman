@@ -339,7 +339,6 @@ class SubdivisionObject(Object3D):
                             self._inverse_parent_map[:, 1:1+parent.MAX_FACES],
                             offset=self.cbase)
 
-
         # Inverse map edge verts
         evert = self._parent_map[self.ebase:, :2]
         col_offset = 1 + parent.MAX_FACES
@@ -347,6 +346,12 @@ class SubdivisionObject(Object3D):
                             self._inverse_parent_map[:, col_offset:col_offset+parent.MAX_FACES],
                             offset=self.ebase)
 
+        # TODO defer calculation of mapping until it is requested
+
+    @property
+    def parent_map_weights(self):
+        # TODO populate in deferred form, make this a getter (and retrieve recursively)
+        return self._parent_map_weights
 
     def dump(self):
         for k in dir(self):
@@ -486,7 +491,12 @@ class SubdivisionObject(Object3D):
         # First clone the seed mesh
         otherSeed = self.parent.clone(scale, filterMaskedVerts)
         # Then generate a subdivision for it
-        return createSubdivisionObject(otherSeed)
+        if filterMaskedVerts:
+            # All masked vertices, static and dynamic are filtered out from parent
+            staticFaceMask = None
+        else:
+            staticFaceMask = self.staticFaceMask
+        return createSubdivisionObject(otherSeed, staticFaceMask)
 
 
 def _reverse_n_to_m_map(input, output, offset=0):
