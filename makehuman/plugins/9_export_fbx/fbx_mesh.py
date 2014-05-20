@@ -42,13 +42,16 @@ from .fbx_utils import *
 #   Object definitions
 #--------------------------------------------------------------------
 
-def countObjects(rmeshes, amt):
-    nMeshes = len(rmeshes)
+def countObjects(meshes):
+    """
+    Number of mesh objects required for exporting the specified meshes.
+    """
+    nMeshes = len(meshes)
     return (nMeshes + 1)
 
 
-def writeObjectDefs(fp, rmeshes, amt, nShapes):
-    nMeshes = len(rmeshes)
+def writeObjectDefs(fp, meshes, nShapes):
+    nMeshes = len(meshes)
 
     fp.write(
 '    ObjectType: "Geometry" {\n' +
@@ -71,82 +74,62 @@ def writeObjectDefs(fp, rmeshes, amt, nShapes):
 #   Object properties
 #--------------------------------------------------------------------
 
-def writeObjectProps(fp, rmeshes, amt, config):
-    for rmesh in rmeshes:
-        name = getRmeshName(rmesh, amt)
-        obj = rmesh.object
-        writeGeometryProp(fp, name, obj, config)
-        writeMeshProp(fp, name, obj)
+def writeObjectProps(fp, meshes, config):
+    for mesh in meshes:
+        writeGeometryProp(fp, mesh, config)
+        writeMeshProp(fp, mesh)
 
 
-def writeGeometryProp(fp, name, obj, config):
-    id,key = getId("Geometry::%s" % name)
-    nVerts = len(obj.coord)
-    nFaces = len(obj.fvert)
+def writeGeometryProp(fp, mesh, config):
+    id,key = getId("Geometry::%s" % mesh.name)
+    nVerts = len(mesh.coord)
+    nFaces = len(mesh.fvert)
+
+    coord = mesh.coord + config.offset
+    vertString = ",".join( ["%.4f,%.4f,%.4f" % tuple(co) for co in coord] )
+    indexString = ",".join( ['%d,%d,%d,%d' % (fv[0],fv[1],fv[2],-1-fv[3]) for fv in mesh.fvert] )
 
     fp.write(
-'    Geometry: %d, "%s", "Mesh" {\n' % (id, key) +
-'        Properties70:  {\n' +
-'            P: "MHName", "KString", "", "", "%sMesh"\n' % name +
-'        }\n' +
-'        Vertices: *%d {\n' % (3*nVerts) +
-'            a: ')
-
-    coord = config.scale*(obj.coord - config.offset)
-    string = "".join( ["%.4f,%.4f,%.4f," % tuple(co) for co in coord] )
-    fp.write(string[:-1])
-
-    fp.write('\n' +
-'        } \n' +
-'        PolygonVertexIndex: *%d {\n' % (4*nFaces) +
-'            a: ')
-
-    string = "".join( ['%d,%d,%d,%d,' % (fv[0],fv[1],fv[2],-1-fv[3]) for fv in obj.fvert] )
-    fp.write(string[:-1])
-    fp.write('\n' +
-'        } \n')
+        '    Geometry: %d, "%s", "Mesh" {\n' % (id, key) +
+        '        Properties70:  {\n' +
+        '            P: "MHName", "KString", "", "", "%sMesh"\n' % mesh.name +
+        '        }\n' +
+        '        Vertices: *%d {\n' % (3*nVerts) +
+        '            a: %s\n' % vertString +
+        '        } \n' +
+        '        PolygonVertexIndex: *%d {\n' % (4*nFaces) +
+        '            a: %s\n' % indexString +
+        '        } \n')
 
     # Must use normals for shapekeys
-    obj.calcNormals()
-    nNormals = len(obj.vnorm)
+    nNormals = len(mesh.vnorm)
+    normalString = ",".join( ["%.4f,%.4f,%.4f" % tuple(no) for no in mesh.vnorm] )
+    normalIndexString = ",".join( ['%d,%d,%d,%d' % (fv[0],fv[1],fv[2],fv[3]) for fv in mesh.fvert] )
+
     fp.write(
-"""
-        GeometryVersion: 124
-        LayerElementNormal: 0 {
-            Version: 101
-"""
-'            Name: "%s_Normal"' % obj.name +
-"""
-            MappingInformationType: "ByPolygonVertex"
-            ReferenceInformationType: "IndexToDirect"
-""" +
-'            Normals: *%d {\n' % (3*nNormals) +
-'                a: ')
-
-    string = "".join( ["%.4f,%.4f,%.4f," % tuple(no) for no in obj.vnorm] )
-    fp.write(string[:-1])
-
-    fp.write('\n' +
-'            }\n' +
-'            NormalsIndex: *%d {\n' % (4*len(obj.fvert)) +
-'                a: ')
-
-    string = "".join( ['%d,%d,%d,%d,' % (fv[0],fv[1],fv[2],fv[3]) for fv in obj.fvert] )
-    fp.write(string[:-1])
-
-    fp.write('\n' +
-'            } \n')
+        '        GeometryVersion: 124\n' +
+        '        LayerElementNormal: 0 {\n' +
+        '            Version: 101\n' +
+        '            Name: "%s_Normal"' % mesh.name +
+        '            MappingInformationType: "ByPolygonVertex"\n' +
+        '            ReferenceInformationType: "IndexToDirect"\n' +
+        '            Normals: *%d {\n' % (3*nNormals) +
+        '                a: %s\n' % normalString +
+        '            }\n' +
+        '            NormalsIndex: *%d {\n' % (4*len(mesh.fvert)) +
+        '                a: %s\n' % normalIndexString +
+        '            } \n')
 
     fp.write('        } \n')
 
-    writeUvs2(fp, obj)
+    writeUvs2(fp, mesh)
 
     fp.write(
 """
         LayerElementMaterial: 0 {
             Version: 101
 """ +
-'            Name: "%s_Material"' % obj.name +
+'            Name: "%s_Material"' % mesh.name +
 """
             MappingInformationType: "AllSame"
             ReferenceInformationType: "IndexToDirect"
@@ -159,7 +142,7 @@ def writeGeometryProp(fp, name, obj, config):
             ReferenceInformationType: "IndexToDirect"
             BlendMode: "Translucent"
 """ +
-'            Name: "%s_Texture"' % obj.name +
+'            Name: "%s_Texture"' % mesh.name +
 """
             Version: 101
             TextureAlpha: 1.0
@@ -195,62 +178,48 @@ def writeGeometryProp(fp, name, obj, config):
 #   First method leads to crash in AD FBX converter
 #--------------------------------------------------------------------
 
-def writeUvs1(fp, obj):
-    nUvVerts = len(obj.texco)
-    nUvFaces = len(obj.fuvs)
+def writeUvs1(fp, mesh):
+    nUvVerts = len(mesh.texco)
+    nUvFaces = len(mesh.fuvs)
+
+    uvString = ",".join( ["%.4f,%.4f" % tuple(uv) for uv in mesh.texco] )
+    indexString = ",".join( ['%d,%d,%d,%d' % tuple(fuv) for fuv in mesh.fuvs] )
 
     fp.write(
         '        LayerElementUV: 0 {\n' +
         '            Version: 101\n' +
-        '            Name: "%s_UV"\n' % obj.name +
+        '            Name: "%s_UV"\n' % mesh.name +
         '            MappingInformationType: "ByPolygonVertex"\n' +
         '            ReferenceInformationType: "IndexToDirect"\n' +
         '            UV: *%d {\n' % (2*nUvVerts) +
-        '                a: ')
-
-    string = "".join( ["%.4f,%.4f," % tuple(uv) for uv in obj.texco] )
-    fp.write(string[:-1])
-
-    fp.write('\n' +
+        '                a: %s\n' % uvString +
         '            } \n'
         '            UVIndex: *%d {\n' % (4*nUvFaces) +
-        '                a: ')
-
-    string = "".join( ['%d,%d,%d,%d,' % tuple(fuv) for fuv in obj.fuvs] )
-    fp.write(string[:-1])
-
-    fp.write('\n' +
+        '                a: %s\n' % indexString +
         '            }\n' +
         '        }\n')
 
 
-def writeUvs2(fp, obj):
-    nUvVerts = len(obj.texco)
-    nUvFaces = len(obj.fuvs)
+def writeUvs2(fp, mesh):
+    nUvVerts = len(mesh.texco)
+    nUvFaces = len(mesh.fuvs)
+
+    uvString = ""
+    for fuv in mesh.fuvs:
+        uvString += "".join( ['%.4f,%.4f,' % (tuple(mesh.texco[vt])) for vt in fuv] )
+    indexString = ",".join( ['%d,%d,%d,%d' % (4*n,4*n+1,4*n+2,4*n+3) for n in range(nUvFaces)] )
 
     fp.write(
         '        LayerElementUV: 0 {\n' +
         '            Version: 101\n' +
-        '            Name: "%s_UV"\n' % obj.name +
+        '            Name: "%s_UV"\n' % mesh.name +
         '            MappingInformationType: "ByPolygonVertex"\n' +
         '            ReferenceInformationType: "IndexToDirect"\n' +
         '            UV: *%d {\n' % (8*nUvFaces) +
-        '                a: ')
-
-    string = ""
-    for fuv in obj.fuvs:
-        string += "".join( ['%.4f,%.4f,' % (tuple(obj.texco[vt])) for vt in fuv] )
-    fp.write(string[:-1])
-
-    fp.write('\n' +
+        '                a: %s\n' % uvString[:-1] +
         '            } \n'
         '            UVIndex: *%d {\n' % (4*nUvFaces) +
-        '                a: ')
-
-    string = "".join( ['%d,%d,%d,%d,' % (4*n,4*n+1,4*n+2,4*n+3) for n in range(nUvFaces)] )
-    fp.write(string[:-1])
-
-    fp.write('\n' +
+        '                a: %s\n' % indexString +
         '            }\n' +
         '        }\n')
 
@@ -259,8 +228,8 @@ def writeUvs2(fp, obj):
 #
 #--------------------------------------------------------------------
 
-def writeMeshProp(fp, name, obj):
-    id,key = getId("Model::%sMesh" % name)
+def writeMeshProp(fp, mesh):
+    id,key = getId("Model::%sMesh" % mesh.name)
     fp.write(
 '    Model: %d, "%s", "Mesh" {' % (id, key) +
 """
@@ -271,7 +240,7 @@ def writeMeshProp(fp, name, obj):
             P: "ScalingMax", "Vector3D", "Vector", "",0,0,0
             P: "DefaultAttributeIndex", "int", "Integer", "",0
 """ +
-'            P: "MHName", "KString", "", "", "%s"' % name +
+'            P: "MHName", "KString", "", "", "%s"' % mesh.name +
 """
         }
         Shading: Y
@@ -283,12 +252,11 @@ def writeMeshProp(fp, name, obj):
 #   Links
 #--------------------------------------------------------------------
 
-def writeLinks(fp, rmeshes, amt):
-    for rmesh in rmeshes:
-        name = getRmeshName(rmesh, amt)
-        ooLink(fp, 'Model::%sMesh' % name, 'Model::RootNode')
-        #if amt:
-        #    ooLink(fp, 'Model::%sMesh' % name, 'Model::%s' % amt.name)
-        ooLink(fp, 'Geometry::%s' % name, 'Model::%sMesh' % name)
+def writeLinks(fp, meshes):
+    for mesh in meshes:
+        ooLink(fp, 'Model::%sMesh' % mesh.name, 'Model::RootNode')
+        #if skel:
+        #    ooLink(fp, 'Model::%sMesh' % name, 'Model::%s' % skel.name)
+        ooLink(fp, 'Geometry::%s' % mesh.name, 'Model::%sMesh' % mesh.name)
 
 

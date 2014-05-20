@@ -42,17 +42,17 @@ import os
 import mh
 import gui
 import gui3d
-import guipose
 import log
 
 
-class ExportTaskView(guipose.PoseModeTaskView):
+class ExportTaskView(gui3d.TaskView):
     def __init__(self, category):
-        guipose.PoseModeTaskView.__init__(self, category, 'Export')
+        super(ExportTaskView, self).__init__(category, 'Export')
 
         self.formats = []
         self.recentlyShown = None
         self._requiresUpdate = True
+        self.showOverwriteWarning = False
 
         self.fileentry = self.addTopWidget(gui.FileEntryView('Export', mode='save'))
         self.fileentry.directory = mh.getPath('exports')
@@ -60,8 +60,6 @@ class ExportTaskView(guipose.PoseModeTaskView):
 
         self.exportBodyGroup = []
         self.exportHairGroup = []
-
-        self.posefile = None
 
         # Mesh Formats
         self.formatBox = self.addLeftWidget(gui.GroupBox('Mesh Format'))
@@ -100,21 +98,22 @@ class ExportTaskView(guipose.PoseModeTaskView):
                     log.warning("expected extension '.%s' but got '%s'", targetExt, ext)
                 return os.path.join(dir, name + '.' + targetExt)
 
-            found = False
-            for exporter, radio, options in self.formats:
-                if radio.selected:
-                    exporter.export(gui3d.app.selectedHuman, filename)
-                    found = True
-                    break
-
-            if not found:
+            for exporter in [f[0] for f in self.formats if f[1].selected]:
+                if self.showOverwriteWarning and \
+                    event.source in ('button', 'return') and \
+                    os.path.exists(os.path.join(dir, name + '.' + exporter.fileExtension)):
+                    if not gui3d.app.prompt("File exists", "The file already exists. Overwrite?", "Yes", "No"):
+                        break;
+                exporter.export(gui3d.app.selectedHuman, filename)
+                gui3d.app.status(u'The mesh has been exported to %s.', dir)
+                self.showOverwriteWarning = False
+                break
+            else:
                 log.error("Unknown export format selected!")
-                return
 
-            gui3d.app.prompt('Info', u'The mesh has been exported to %s.', 'OK', helpId='exportHelp', fmtArgs = dir)
-
-            mh.changeCategory('Modelling')
-
+        @self.fileentry.mhEvent
+        def onChange(text):
+            self.showOverwriteWarning = True
 
     _scales = {
         "decimeter": 1.0,
@@ -213,14 +212,14 @@ class ExportTaskView(guipose.PoseModeTaskView):
             self.fileentry.text = ""
 
     def onShow(self, event):
-        guipose.PoseModeTaskView.onShow(self, event)
+        super(ExportTaskView, self).onShow(event)
 
         self.buildGui()
 
         self.fileentry.setFocus()
 
     def onHide(self, event):
-        guipose.PoseModeTaskView.onHide(self, event)
+        super(ExportTaskView, self).onHide(event)
 
         for exporter, radio, _ in self.formats:
             if radio.selected:

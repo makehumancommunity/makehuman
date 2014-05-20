@@ -86,7 +86,7 @@ class SettingsTaskView(gui3d.TaskView):
         self.realtimeNormalUpdates = sliderBox.addWidget(gui.CheckBox("Update normals real-time",
             gui3d.app.settings.get('realtimeNormalUpdates', True)))
         self.realtimeFitting = sliderBox.addWidget(gui.CheckBox("Fit objects real-time",
-            gui3d.app.settings.get('realtimeFitting', False)))
+            gui3d.app.settings.get('realtimeFitting', True)))
         self.cameraAutoZoom = sliderBox.addWidget(gui.CheckBox("Auto-zoom camera",
             gui3d.app.settings.get('cameraAutoZoom', False)))
         self.sliderImages = sliderBox.addWidget(gui.CheckBox("Slider images",

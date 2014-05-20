@@ -40,6 +40,7 @@ import math
 import numpy as np
 import numpy.linalg as la
 import transformations as tm
+import log
 
 from .fbx_utils import *
 
@@ -47,33 +48,43 @@ from .fbx_utils import *
 #   Object definitions
 #--------------------------------------------------------------------
 
-def getObjectCounts(rmeshes):
+def getObjectCounts(meshes):
+    """
+    Count the total number of vertex groups and shapes required for all
+    specified meshes.
+    """
     nVertexGroups = 0
-    for rmesh in rmeshes:
-        for weights in rmesh.weights:
+    for mesh in meshes:
+        for weights in mesh.vertexWeights:
             if weights:
                 nVertexGroups += 1
 
     nShapes = 0
-    for rmesh in rmeshes:
-        for key,shape in rmesh.shapes:
-            if shape:
-                nShapes += 1
+    for mesh in meshes:
+        if hasattr(mesh, 'shapes') and mesh.shapes is not None:
+            for key,shape in mesh.shapes:
+                if shape:
+                    nShapes += 1
 
     return nVertexGroups, nShapes
 
-def countObjects(rmeshes, amt):
-    nVertexGroups, nShapes = getObjectCounts(rmeshes)
-    if amt:
+def countObjects(meshes, skel):
+    """
+    Count the total number of vertex groups and shapes combined, as required
+    for all specified meshes. If no skeleton rig is attached to the mesh, no
+    vertex groups for bone weights are required.
+    """
+    nVertexGroups, nShapes = getObjectCounts(meshes)
+    if skel:
         return (nVertexGroups + 1 + 2*nShapes)
     else:
         return 2*nShapes
 
 
-def writeObjectDefs(fp, rmeshes, amt):
-    nVertexGroups, nShapes = getObjectCounts(rmeshes)
+def writeObjectDefs(fp, meshes, skel):
+    nVertexGroups, nShapes = getObjectCounts(meshes)
 
-    if amt:
+    if skel:
         fp.write(
 '    ObjectType: "Deformer" {\n' +
 '       Count: %d' % (nVertexGroups + 1 + 2*nShapes) +
@@ -98,76 +109,74 @@ def writeObjectDefs(fp, rmeshes, amt):
 #   Object properties
 #--------------------------------------------------------------------
 
-def writeObjectProps(fp, rmeshes, amt, config):
-    if amt:
-        writeBindPose(fp, rmeshes, amt, config)
+def writeObjectProps(fp, meshes, skel, config):
+    if skel:
+        writeBindPose(fp, meshes, skel, config)
 
-        for rmesh in rmeshes:
-            name = getRmeshName(rmesh, amt)
-            writeDeformer(fp, name)
-            for bone in amt.bones.values():
+        for mesh in meshes:
+            writeDeformer(fp, mesh.name)
+            for bone in skel.getBones():
                 try:
-                    weights = rmesh.weights[bone.name]
+                    weights = mesh.vertexWeights[bone.name]
                 except KeyError:
                     continue
-                writeSubDeformer(fp, name, bone, weights, config)
+                writeSubDeformer(fp, mesh.name, bone, weights, config)
 
-    for rmesh in rmeshes:
-        name = getRmeshName(rmesh, amt)
-        if rmesh.shapes:
-            for sname,shape in rmesh.shapes:
-                writeShapeGeometry(fp, name, sname, shape, config)
-                writeShapeDeformer(fp, name, sname)
-                writeShapeSubDeformer(fp, name, sname, shape)
+    for mesh in meshes:
+        if hasattr(mesh, 'shapes') and mesh.shapes is not None:
+            for sname,shape in mesh.shapes:
+                writeShapeGeometry(fp, mesh.name, sname, shape, config)
+                writeShapeDeformer(fp, mesh.name, sname)
+                writeShapeSubDeformer(fp, mesh.name, sname)
 
 
 def writeShapeGeometry(fp, name, sname, shape, config):
         id,key = getId("Geometry::%s_%sShape" % (name, sname))
         nVerts = len(shape.verts)
         fp.write(
-'    Geometry: %d, "%s", "Shape" {\n' % (id, key) +
-'        version: 100\n' +
-'        Indexes: *%d   {\n' % nVerts +
-'            a: ')
+            '    Geometry: %d, "%s", "Shape" {\n' % (id, key) +
+            '        version: 100\n' +
+            '        Indexes: *%d   {\n' % nVerts +
+            '            a: ')
 
         string = "".join( ['%d,' % vn for vn in shape.verts] )
         fp.write(string[:-1])
 
         fp.write('\n' +
-'        }\n' +
-'        Vertices: *%d   {\n' % (3*nVerts) +
-'            a: ')
+            '        }\n' +
+            '        Vertices: *%d   {\n' % (3*nVerts) +
+            '            a: ')
 
-        target = config.scale * (shape.data - config.offset)
+        target = config.scale * shape.data + config.offset
         string = "".join( ["%.4f,%.4f,%.4f," % tuple(dr) for dr in target] )
         fp.write(string[:-1])
 
         # Must use normals for shapekeys
         fp.write('\n' +
-'        }\n' +
-'        Normals: *%d {\n' % (3*nVerts) +
-'            a: ')
+            '        }\n' +
+            '        Normals: *%d {\n' % (3*nVerts) +
+            '            a: ')
 
         string = nVerts * "0,0,0,"
         fp.write(string[:-1])
 
         fp.write('\n' +
-'        }\n' +
-'    }\n')
+            '        }\n' +
+            '    }\n')
 
 
 def writeShapeDeformer(fp, name, sname):
     id,key = getId("Deformer::%s_%sShape" % (name, sname))
     fp.write(
-'    Deformer: %d, "%s", "BlendShape" {\n' % (id, key) +
-'        Version: 100\n' +
-'    }\n')
+        '    Deformer: %d, "%s", "BlendShape" {\n' % (id, key) +
+        '        Version: 100\n' +
+        '    }\n')
 
 
 def writeShapeSubDeformer(fp, name, sname, shape):
     sid,skey = getId("SubDeformer::%s_%sShape" % (name, sname))
     fp.write(
-'    Deformer: %d, "%s", "BlendShapeChannel" {' % (sid, skey) +
+        '    Deformer: %d, "%s", "BlendShapeChannel" {' % (sid, skey) +
 """
         version: 100
         deformpercent: 0.0
@@ -196,60 +205,51 @@ def writeDeformer(fp, name):
 
 
 def writeSubDeformer(fp, name, bone, weights, config):
-    nVertexWeights = len(weights)
     id,key = getId("SubDeformer::%s_%s" % (bone.name, name))
 
-    fp.write(
-'    Deformer: %d, "%s", "Cluster" {\n' % (id, key) +
-'        Version: 100\n' +
-'        UserData: "", ""\n' +
-'        Indexes: *%d {\n' % nVertexWeights +
-'            a: ')
-
-    last = nVertexWeights - 1
-    for n,data in enumerate(weights):
-        vn,w = data
-        fp.write(str(vn))
-        writeComma(fp, n, last)
+    nVertexWeights = len(weights[0])
+    indexString = ','.join(["%d" % vn for vn in weights[0]])
+    weightString = ','.join(["%4f" % w for w in weights[1]])
 
     fp.write(
-'        } \n' +
-'        Weights: *%d {\n' % nVertexWeights +
-'            a: ')
+        '    Deformer: %d, "%s", "Cluster" {\n' % (id, key) +
+        '        Version: 100\n' +
+        '        UserData: "", ""\n' +
+        '        Indexes: *%d {\n' % nVertexWeights +
+        '            a: %s\n' % indexString +
+        '        } \n' +
+        '        Weights: *%d {\n' % nVertexWeights +
+        '            a: %s\n' % weightString +
+        '        }\n')
 
-    for n,data in enumerate(weights):
-        vn,w = data
-        fp.write(str(w))
-        writeComma(fp, n, last)
-
-    bindmat,bindinv = bone.getBindMatrix(config)
-    fp.write('        }\n')
+    bindmat,bindinv = bone.getBindMatrix(config.offset)
     writeMatrix(fp, 'Transform', bindmat)
     writeMatrix(fp, 'TransformLink', bindinv)
     fp.write('    }\n')
 
 
-def writeBindPose(fp, rmeshes, amt, config):
-    id,key = getId("Pose::" + amt.name)
-    nBones = len(amt.bones)
-    nMeshes = len(rmeshes)
+def writeBindPose(fp, meshes, skel, config):
+    id,key = getId("Pose::" + skel.name)
+    nBones = skel.getBoneCount()
+    nMeshes = len(meshes)
 
     fp.write(
-'    Pose: %d, "%s", "BindPose" {\n' % (id, key)+
-'        Type: "BindPose"\n' +
-'        Version: 100\n' +
-'        NbPoseNodes: %d\n' % (1+nMeshes+nBones))
+        '    Pose: %d, "%s", "BindPose" {\n' % (id, key)+
+        '        Type: "BindPose"\n' +
+        '        Version: 100\n' +
+        '        NbPoseNodes: %d\n' % (1+nMeshes+nBones))
 
     startLinking()
-    amtbindmat = amt.getBindMatrix(config)
-    poseNode(fp, "Model::%s" % amt.name, amtbindmat)
 
-    for rmesh in rmeshes:
-        name = getRmeshName(rmesh, amt)
-        poseNode(fp, "Model::%sMesh" % name, amtbindmat)
+    # Skeleton bind matrix
+    skelbindmat = tm.rotation_matrix(math.pi/2, (1,0,0))
+    poseNode(fp, "Model::%s" % skel.name, skelbindmat)
 
-    for bone in amt.bones.values():
-        bindmat,_ = bone.getBindMatrix(config)
+    for mesh in meshes:
+        poseNode(fp, "Model::%sMesh" % mesh.name, skelbindmat)
+
+    for bone in skel.getBones():
+        bindmat,_ = bone.getBindMatrix(config.offset)
         poseNode(fp, "Model::%s" % bone.name, bindmat)
 
     stopLinking()
@@ -269,30 +269,27 @@ def poseNode(fp, key, matrix):
 #   Links
 #--------------------------------------------------------------------
 
-def writeLinks(fp, rmeshes, amt):
+def writeLinks(fp, meshes, skel):
 
-    if amt:
-        for rmesh in rmeshes:
-            name = getRmeshName(rmesh, amt)
-
-            ooLink(fp, 'Deformer::%s' % name, 'Geometry::%s' % name)
-            for bone in amt.bones.values():
-                subdef = 'SubDeformer::%s_%s' % (bone.name, name)
+    if skel:
+        for mesh in meshes:
+            ooLink(fp, 'Deformer::%s' % mesh.name, 'Geometry::%s' % mesh.name)
+            for bone in skel.getBones():
+                subdef = 'SubDeformer::%s_%s' % (bone.name, mesh.name)
                 try:
                     getId(subdef)
                 except NameError:
                     continue
-                ooLink(fp, subdef, 'Deformer::%s' % name)
+                ooLink(fp, subdef, 'Deformer::%s' % mesh.name)
                 ooLink(fp, 'Model::%s' % bone.name, subdef)
 
-    for rmesh in rmeshes:
-        if rmesh.shapes:
-            name = getRmeshName(rmesh, amt)
-            for sname, shape in rmesh.shapes:
-                deform = "Deformer::%s_%sShape" % (name, sname)
-                subdef = "SubDeformer::%s_%sShape" % (name, sname)
-                ooLink(fp, "Geometry::%s_%sShape" % (name, sname), subdef)
+    for mesh in meshes:
+        if hasattr(mesh, 'shapes') and mesh.shapes is not None:
+            for sname, shape in mesh.shapes:
+                deform = "Deformer::%s_%sShape" % (mesh.name, sname)
+                subdef = "SubDeformer::%s_%sShape" % (mesh.name, sname)
+                ooLink(fp, "Geometry::%s_%sShape" % (mesh.name, sname), subdef)
                 ooLink(fp, subdef, deform)
-                ooLink(fp, deform, "Geometry::%s" % name)
+                ooLink(fp, deform, "Geometry::%s" % mesh.name)
 
 

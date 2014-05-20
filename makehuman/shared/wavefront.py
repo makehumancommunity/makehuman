@@ -154,7 +154,7 @@ def loadObjFile(path, obj = None):
     return obj
 
 
-def writeObjFile(path, objects, writeMTL = True, config = None):
+def writeObjFile(path, objects, writeMTL=True, config=None, filterMaskedFaces=True):
     if not isinstance(objects, list):
         objects = [objects]
 
@@ -162,6 +162,7 @@ def writeObjFile(path, objects, writeMTL = True, config = None):
         fp = path
     else:
         fp = open(path, 'w', encoding="utf-8")
+
 
     fp.write(
         "# MakeHuman exported OBJ\n" +
@@ -171,55 +172,74 @@ def writeObjFile(path, objects, writeMTL = True, config = None):
         mtlfile = path.replace(".obj",".mtl")
         fp.write("mtllib %s\n" % os.path.basename(mtlfile))
 
+    meshes = [obj.mesh for obj in objects]
+
+    scale = config.scale if config is not None else 1.0
+
+    # Scale and filter out masked faces and unused verts
+    if filterMaskedFaces:
+        meshes = [m.clone(scale=scale, filterMaskedVerts=True) for m in meshes]
+    else:
+        # Unfiltered
+        meshes = [m.clone(scale=scale, filterMaskedVerts=False) for m in meshes]
+
+    if config and config.feetOnGround:
+        offset = config.offset
+    else:
+        offset = [0,0,0]
+
     # Vertices
-    for obj in objects:
-        if config:
-            coord = config.scale * (obj.coord - config.offset)
-        else:
-            coord = obj.coord
-        fp.write("".join( ["v %.4f %.4f %.4f\n" % tuple(co) for co in coord] ))
+    for mesh in meshes:
+        fp.write("".join( ["v %.4f %.4f %.4f\n" % tuple(co + offset) for co in mesh.coord] ))
 
     # Vertex normals
-    if config == None or config.useNormals:
-        for obj in objects:
-            obj.calcNormals()
-            fp.write("".join( ["vn %.4f %.4f %.4f\n" % tuple(no) for no in obj.vnorm] ))
+    if config is None or config.useNormals:
+        for mesh in meshes:
+            fp.write("".join( ["vn %.4f %.4f %.4f\n" % tuple(no) for no in mesh.vnorm] ))
 
     # UV vertices
-    for obj in objects:
-        if obj.has_uv:
-            fp.write("".join( ["vt %.4f %.4f\n" % tuple(uv) for uv in obj.texco] ))
+    for mesh in meshes:
+        if mesh.has_uv:
+            fp.write("".join( ["vt %.4f %.4f\n" % tuple(uv) for uv in mesh.texco] ))
 
     # Faces
     nVerts = 1
     nTexVerts = 1
-    for obj in objects:
-        fp.write("usemtl %s\n" % obj.material.name)
-        fp.write("g %s\n" % obj.name)
+    for mesh in meshes:
+        fp.write("usemtl %s\n" % mesh.material.name)
+        fp.write("g %s\n" % mesh.name)
 
-        if config == None or config.useNormals:
-            if obj.has_uv:
-                for fn,fv in enumerate(obj.fvert):
-                    fuv = obj.fuvs[fn]
+        if config is None or config.useNormals:
+            if mesh.has_uv:
+                for fn,fv in enumerate(mesh.fvert):
+                    if not mesh.face_mask[fn]:
+                        continue
+                    fuv = mesh.fuvs[fn]
                     line = [" %d/%d/%d" % (fv[n]+nVerts, fuv[n]+nTexVerts, fv[n]+nVerts) for n in range(4)]
                     fp.write("f" + "".join(line) + "\n")
             else:
-                for fn,fv in enumerate(obj.fvert):
+                for fn,fv in enumerate(mesh.fvert):
+                    if not mesh.face_mask[fn]:
+                        continue
                     line = [" %d//%d" % (fv[n]+nVerts, fv[n]+nVerts) for n in range(4)]
                     fp.write("f" + "".join(line) + "\n")
         else:
-            if obj.has_uv:
-                for fn,fv in enumerate(obj.fvert):
-                    fuv = obj.fuvs[fn]
+            if mesh.has_uv:
+                for fn,fv in enumerate(mesh.fvert):
+                    if not mesh.face_mask[fn]:
+                        continue
+                    fuv = mesh.fuvs[fn]
                     line = [" %d/%d" % (fv[n]+nVerts, fuv[n]+nTexVerts) for n in range(4)]
                     fp.write("f" + "".join(line) + "\n")
             else:
-                for fv in obj.fvert:
+                for fn,fv in enumerate(mesh.fvert):
+                    if not mesh.face_mask[fn]:
+                        continue
                     line = [" %d" % (fv[n]+nVerts) for n in range(4)]
                     fp.write("f" + "".join(line) + "\n")
 
-        nVerts += len(obj.coord)
-        nTexVerts += len(obj.texco)
+        nVerts += len(mesh.coord)
+        nTexVerts += len(mesh.texco)
 
     fp.close()
 
@@ -228,8 +248,8 @@ def writeObjFile(path, objects, writeMTL = True, config = None):
         fp.write(
             '# MakeHuman exported MTL\n' +
             '# www.makehuman.org\n\n')
-        for obj in objects:
-            writeMaterial(fp, obj.material, config)
+        for mesh in meshes:
+            writeMaterial(fp, mesh.material, config)
         fp.close()
 
 
@@ -271,7 +291,7 @@ def writeTexture(fp, key, filepath, pathConfig = None):
         return
 
     if pathConfig:
-        newpath = pathConfig.copyTextureToNewLocation(filepath)
+        newpath = pathConfig.copyTextureToNewLocation(filepath) # TODO use shared code for exporting texture files
         fp.write("%s %s\n" % (key, newpath))
     else:
         fp.write("%s %s\n" % (key, filepath))

@@ -141,6 +141,22 @@ class Skeleton(object):
 
         return boneWeights
 
+    def scaled(self, scale):
+        """
+        Create a scaled clone of this skeleton
+        """
+        result = type(self)(self.name)
+
+        for bone in self.getBones():
+            scaledHead = scale * bone.getRestHeadPos()
+            scaledTail = scale * bone.getRestTailPos()
+            parentName = bone.parent.name if bone.parent else None
+            result.addBone(bone.name, parentName, scaledHead, scaledTail, bone.roll)
+
+        result.build()
+
+        return result
+
     def addBone(self, name, parentName, head, tail, roll=0):
         if name in self.bones.keys():
             raise RuntimeError("The skeleton %s already contains a bone named %s." % (self.__repr__(), name))
@@ -346,6 +362,41 @@ class Bone(object):
         self.matPose = None
         self.matPoseGlobal = None
         self.matPoseVerts = None
+
+    def getRestMatrix(self, meshOrientation='yUpFaceZ', localBoneAxis='y', offsetVect=[0,0,0]):
+        """
+        meshOrientation: What axis points up along the model, and which direction
+                         the model is facing.
+            allowed values: yUpFaceZ (0), yUpFaceX (1), zUpFaceNegY (2), zUpFaceX (3)
+
+        localBoneAxis: How to orient the local axes around the bone, which axis
+                       points along the length of the bone. Global (g )assumes the 
+                       same axes as the global coordinate space used for the model.
+            allowed values: y, x, g
+        """
+        #self.calcRestMatrix()  # TODO perhaps interesting method to replace the current
+        return transformBoneMatrix(self.matRestGlobal, meshOrientation, localBoneAxis, offsetVect)
+
+    def getRelativeMatrix(self, meshOrientation='yUpFaceZ', localBoneAxis='y', offsetVect=[0,0,0]):
+        restmat = self.getRestMatrix(meshOrientation, localBoneAxis, offsetVect)
+
+        # TODO this matrix is possibly the same as self.matRestRelative, but with optional adapted axes
+
+        if self.parent:
+            parmat = self.parent.getRestMatrix(meshOrientation, localBoneAxis, offsetVect)
+            return np.dot(la.inv(parmat), restmat)
+        else:
+            return restmat
+
+    def getBindMatrix(self, offsetVect=[0,0,0]):
+        #self.calcRestMatrix()
+        self.matRestGlobal
+        restmat = self.matRestGlobal.copy()
+        restmat[:3,3] += offsetVect
+
+        bindinv = np.transpose(restmat)
+        bindmat = la.inv(bindinv)
+        return bindmat,bindinv
 
     def __repr__(self):
         return ("  <Bone %s>" % self.name)
@@ -692,18 +743,21 @@ def loadRig(options, mesh):
     weights = skel.fromOptions(options, mesh)
     return skel, weights
 
-def getProxyWeights(proxy, humanWeights, mesh):
+def getProxyWeights(proxy, humanWeights):
+    # TODO duplicate of proxy.getWeights()
 
     # Zip vertex indices and weights
     rawWeights = {}
     for (key, val) in humanWeights.items():
         indxs, weights = val
         rawWeights[key] = zip(indxs, weights)
+
     vertexWeights = proxy.getWeights(rawWeights)
 
+    # TODO this normalization and unzipping is duplicated in module3d.getWeights()
     # Unzip and normalize weights (and put them in np format)
     boneWeights = {}
-    wtot = np.zeros(mesh.getVertexCount(), np.float32)
+    wtot = np.zeros(proxy.object.getSeedMesh().getVertexCount(), np.float32)
     for vgroup in vertexWeights.values():
         for vn,w in vgroup:
             wtot[vn] += w
@@ -720,236 +774,61 @@ def getProxyWeights(proxy, humanWeights, mesh):
 
     return boneWeights
 
-# TODO code replication is not nice...
-def loadTargetMapping(rigName, skel):
+
+_Identity = np.identity(4, float)
+_RotX = tm.rotation_matrix(math.pi/2, (1,0,0))
+_RotY = tm.rotation_matrix(math.pi/2, (0,1,0))
+_RotNegX = tm.rotation_matrix(-math.pi/2, (1,0,0))
+_RotZ = tm.rotation_matrix(math.pi/2, (0,0,1))
+_RotZUpFaceX = np.dot(_RotZ, _RotX)
+_RotXY = np.dot(_RotNegX, _RotY)
+
+def transformBoneMatrix(mat, meshOrientation='yUpFaceZ', localBoneAxis='y', offsetVect=[0,0,0]):
     """
-    Returns mapping of skeleton bones to reference rig bone names.
-    Return format is a breadth-first ordered list with for each bone in the
-    skeleton respectively a reference bone name. Entries can be None if no
-    mapping to a bone exists.
-    This reference rig to skeleton mapping assumes both rigs have the same rest
-    pose.
+    Transform orientation of bone matrix to fit the chosen coordinate system
+    and mesh orientation.
+
+    meshOrientation: What axis points up along the model, and which direction
+                     the model is facing.
+        allowed values: yUpFaceZ (0), yUpFaceX (1), zUpFaceNegY (2), zUpFaceX (3)
+
+    localBoneAxis: How to orient the local axes around the bone, which axis
+                   points along the length of the bone. Global (g )assumes the 
+                   same axes as the global coordinate space used for the model.
+        allowed values: y, x, g
     """
-    import os
 
-    path = os.path.join("tools/blender26x/mh_mocap_tool/target_rigs/", "%s.trg" % rigName)
-    if not os.path.isfile(path):
-        raise RuntimeError("File %s with skeleton rig mapping does not exist.", path)
+    # TODO this is not nice, but probably needs to be done before transforming the matrix
+    # TODO perhaps add offset as argument
+    mat = mat.copy()
+    mat[:3,3] += offsetVect
 
-    fp = open(path, "rU", encoding="utf-8")
-    status = 0
-    bones = []
-    renames = {}
-    ikbones = []
-    for line in fp:
-        words = line.split()
-        if len(words) > 0:
-            key = words[0].lower()
-            if key[0] == "#":
-                continue
-            elif key == "name:":
-                name = words[1]
-            elif key == "bones:":
-                status = 1
-            elif key == "ikbones:":
-                status = 2
-            elif key == "renames:":
-                status = 3
-            elif len(words) != 2:
-                log.debug("Ignored illegal line", line)
-            elif status == 1:
-                bones.append( (words[0], nameOrNone(words[1])) )
-            elif status == 2:
-                ikbones.append( (words[0], nameOrNone(words[1])) )
-            elif status == 3:
-                renames[words[0]] = nameOrNone(words[1])
-    fp.close()
-    #return (name, bones,renames,ikbones)
-
-    boneMap = {}
-    for (skelBone, refBone) in bones:
-        boneMap[skelBone] = refBone
-    return boneMap
-
-def loadTargetJointsMapping(rigName, skel):
-    boneMap = loadTargetMapping(rigName, skel)
-    # TODO add compensation rotation (retarget to target rig)
-    return [boneMap[bone.name] if bone.name in boneMap.keys() else None  for bone in skel.getBones()]
-
-def nameOrNone(string):
-    return string if string != "None" else None
-
-def loadSourceMapping(srcName):
-    import os
-
-    path = os.path.join("tools/blender26x/mh_mocap_tool/source_rigs/", "%s.src" % srcName)
-    if not os.path.isfile(path):
-        raise RuntimeError("File %s with skeleton source rig mapping does not exist.", path)
-
-    log.message("Read source file %s", path)
-    sourceMapping = {}
-    fp = open(path, "rU", encoding="utf-8")
-    status = 0
-    for line in fp:
-        words = line.split()
-        if len(words) > 0:
-            key = words[0].lower()
-            if key[0] == "#":
-                continue
-            elif key == "name:":
-                name = words[1]
-            elif key == "armature:":
-                status = 1
-            elif len(words) < 3:
-                log.warning("Ignored illegal line %s", line)
-            elif status == 1:
-                for n in range(1,len(words)-2):
-                    key += "_" + words[n]
-                srcBone = nameOrNone(words[-2])
-                if srcBone:
-                    sourceMapping[srcBone] = (canonicalSrcName(key), float(words[-1]))
-    fp.close()
-    return sourceMapping
-
-def canonicalSrcName(string):
-    return string.lower().replace(' ','_').replace('-','_')
-
-def __getRotation(bone, sourceMapping, targetMapping):
-    """
-    Hack to fix the fact that .src definition files ignore the rotation of the
-    parent bones, requiring each bone to be rotated completely indepentent from
-    its parent. This is not the case here.
-    """
-    if bone:
-        if targetMapping:
-            if bone.name in targetMapping:
-                refBone = targetMapping[bone.name]
-            else:
-                refBone = None
-        else:
-            refBone = bone.name
-        if refBone and refBone in sourceMapping:
-            _, rot = sourceMapping[refBone]
-            return rot
-    return 0.0
-
-def getRetargetMapping(sourceRig, targetRig, skel):
-    sourceMapping = None
-    targetMapping = None
-    result = []
-
-    # Load source to reference rig mapping
-    if sourceRig:
-        sourceMapping = loadSourceMapping(sourceRig)
-
-    # Remap from reference rig to target rig
-    if targetRig and targetRig != "soft1" and targetRig != "rigid" and targetRig != "mhx":
-        targetMapping = loadTargetMapping(targetRig, skel)
-
-    # Combine source and target mappings
-    if sourceMapping and targetMapping:
-        for bone in skel.getBones():
-            if bone.name in targetMapping:
-                refBone = targetMapping[bone.name]
-                if refBone and refBone in sourceMapping:
-                    srcBone, rotate = sourceMapping[refBone]
-                    rotate = rotate - __getRotation(bone.parent, sourceMapping, targetMapping)
-                    result.append( (srcBone, rotate) )
-                else:
-                    result.append( (refBone, 0.0) )
-            else:
-                result.append( (None, 0.0) )
-    # Only remap from reference rig to custom rig
-    elif targetMapping:
-        for bone in skel.getBones():
-            if bone.name in targetMapping:
-                result.append( (targetMapping[bone.name], 0.0) )
-            else:
-                result.append( (None, 0.0) )
-    # Only remap source rig to reference rig
-    elif sourceMapping:
-        for bone in skel.getBones():
-            if bone.name in sourceMapping:
-                srcBone, rot = sourceMapping[bone.name]
-                rot = rot - __getRotation(bone.parent, sourceMapping, None)
-                result.append( (srcBone, rot) )
-            else:
-                result.append( (None, 0.0) )
-    # No remapping, return trivial 1-1 mapping
+    if meshOrientation == 0 or meshOrientation == 'yUpFaceZ':
+        rot = _Identity
+    elif meshOrientation == 1 or meshOrientation == 'yUpFaceX':
+        rot = _RotY
+    elif meshOrientation == 2 or meshOrientation == 'zUpFaceNegY':
+        rot = _RotX
+    elif meshOrientation == 3 or meshOrientation == 'zUpFaceX':
+        rot = _RotZUpFaceX
     else:
-        return [(bone.name, 0.0) for bone in skel.getBones()]
+        log.warning('invalid meshOrientation parameter %s', meshOrientation)
+        return None
 
-    return result
+    if localBoneAxis.lower() == 'y':
+        # Y along self, X bend
+        return np.dot(rot, mat)
 
-def getRestPoseCompensation(srcSkel, tgtSkel, boneMapping, excludedTgtBones = ["Root", "Hips", "Spine1", "Spine2", "Spine3"]):
-    """
-    Determine compensation orientations for all bones of a target skeleton
-    to be able to map motion from the specified source skeleton to the target
-    skeleton, if their rest poses (or bone angles in rest pose) differ.
-    The result will be the given boneMapping, as a list of tuples with a
-    compensation transformation matrix as second item in each tuple.
-    This matrix should be multiplied with each frame for the intended bone, so
-    that the animation on srcSkel can be transferred to tgtSkel.
-    ExcludedTgtBones is a list of target bone names that should be excluded
-    from the process (not compensated for). Usually this is done with the spine
-    bones (you could consider removing "Hips" from the list, though).
-    The target skeleton will be set to its rest pose.
-    """
-    result = []
+    elif localBoneAxis.lower() == 'x':
+        # X along self, Y bend
+        return np.dot(rot, np.dot(mat, _RotXY) )
 
-    # Determine pose to place target rig in the same rest pose as src rig
-    #import animation
-    #pose = animation.emptyPose(tgtSkel.getBoneCount())
+    elif localBoneAxis.lower() == 'g':
+        # Global coordinate system
+        tmat = np.identity(4, float)
+        tmat[:,3] = np.dot(rot, mat[:,3])
+        return tmat
 
-    tgtSkel.setToRestPose()
+    log.warning('invalid localBoneAxis parameter %s', localBoneAxis)
+    return None
 
-    for bIdx, tgtBone in enumerate(tgtSkel.getBones()):
-        boneMap = boneMapping[bIdx]
-        if isinstance(boneMap, tuple):
-            srcName, _ = boneMap
-        else:
-            srcName = boneMap
-
-        result.append( (srcName, np.mat(np.identity(4))) )
-
-        if not srcName:
-            continue
-        srcBone = srcSkel.getBone(srcName)
-        srcGlobalOrient = srcBone.matRestGlobal.copy()
-        srcGlobalOrient[:3,3] = 0.0  # No translation, only rotation
-        tgtGlobalOrient = np.mat(tgtBone.matPoseGlobal.copy()) # Depends on pose compensation of parent bones
-        tgtGlobalOrient[:3,3] = 0.0
-
-        if srcBone.length == 0:
-            # Safeguard because this always leads to wrong pointing target bones
-            # I have no idea why, but for some reason the skeleton created from the BVH
-            # has some zero-sized bones (this is probably a bug)
-            log.message("skipping zero-length (source) bone %s", srcBone.name)
-            continue
-
-        if tgtBone.length == 0:
-            log.message("skipping zero-length (target) bone %s", tgtBone.name)
-            continue
-
-        # Never compensate for spine bones, as this ususally deforms the mesh heavily
-        if tgtBone.name in excludedTgtBones:
-            log.message("Skipping non-compensated bone %s", tgtBone.name)
-            continue
-
-        log.message("compensating %s", tgtBone.name)
-        log.debug(str(srcGlobalOrient))
-        log.debug(str(tgtGlobalOrient))
-
-        diff = np.mat(la.inv(tgtGlobalOrient)) * srcGlobalOrient
-        # Rotation only
-        diff[:3,3] = 0.0
-        diffPose = tgtGlobalOrient * diff * np.mat(la.inv(tgtGlobalOrient))
-        log.debug(str(diffPose))
-
-        result[bIdx] = (srcName, diffPose)
-
-        # Set pose that orients target bone in the same orientation as the source bone in rest
-        tgtBone.matPose = np.mat(la.inv(tgtBone.matRestGlobal)) * diffPose * np.mat(tgtBone.matRestGlobal)
-
-        tgtSkel.update()   # Update skeleton after each modification of a bone
-    return result

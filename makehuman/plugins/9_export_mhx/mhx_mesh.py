@@ -45,7 +45,7 @@ class Writer(mhx_writer.Writer):
 
         meshname = self.meshName()
         amt = self.armature
-        coords = config.scale * (mesh.coord - config.offset)
+        coords = config.scale * mesh.coord + config.offset
 
         fp.write(
             "\nMesh %s %s\n" % (meshname, meshname) +
@@ -84,7 +84,7 @@ class Writer(mhx_writer.Writer):
                 weights["Delete_" + proxy.name] = proxy.deleteVerts
         self.writeBoolWeights(fp, weights)
 
-        ox,oy,oz = config.scale*config.offset
+        ox,oy,oz = -config.offset
         fp.write(
             "end Mesh\n\n"+
             "Object %s MESH %s\n"  % (meshname, meshname) +
@@ -143,82 +143,34 @@ class Writer(mhx_writer.Writer):
 end Object
 """)
 
-
     #-------------------------------------------------------------------------------
     #   Armature modifier.
     #-------------------------------------------------------------------------------
 
     def writeArmatureModifier(self, fp, proxy):
-        amt = self.armature
-        config = self.config
-
-        if (config.cage and
-            not (proxy and proxy.cage)):
-
-            fp.write(
-"""
-  #if toggle&T_Cage
-    Modifier MeshDeform MESH_DEFORM
-      invert_vertex_group False ;
-""" +
-"  object Refer Object %sCageMesh ;" % self.name +
-"""
-      precision 6 ;
-      use_dynamic_bind True ;
-    end Modifier
-    Modifier Armature ARMATURE
-      invert_vertex_group False ;
-""" +
-"  object Refer Object %s ;" % self.name +
-"""
-      use_bone_envelopes False ;
-      use_multi_modifier True ;
-      use_vertex_groups True ;
-      vertex_group 'Cage' ;
-    end Modifier
-  #else
-    Modifier Armature ARMATURE
-""" +
-"  object Refer Object %s ;" % self.name +
-"""
-      use_bone_envelopes False ;
-      use_vertex_groups True ;
-    end Modifier
-  #endif
-""")
-
-        else:
-
-            fp.write(
-"""
-    Modifier Armature ARMATURE
-""" +
-"  object Refer Object %s ;" % self.name +
-"""
-      use_bone_envelopes False ;
-      use_vertex_groups True ;
-    end Modifier
-""")
+        fp.write("\n" +
+            "    Modifier Armature ARMATURE\n" +
+            "      object Refer Object %s ;" % self.name +
+            "      use_bone_envelopes False ;\n" +
+            "      use_vertex_groups True ;\n" +
+            "    end Modifier\n")
 
     #-------------------------------------------------------------------------------
     #   Face numbers
     #-------------------------------------------------------------------------------
 
     def writeFaceNumbers(self, fp):
-        from exportutils.collect import deleteGroup
-
         obj = self.human.meshData
         fmats = numpy.zeros(len(obj.coord), int)
 
         # TODO use facemask set on module3d instead (cant we reuse filterMesh from collect module?)
+        # No, mhx exports mask modifiers rather than destructively deletes the mesh.
+        # This allows the user to turn clothes with associated masks on and off in Blender.
         deleteVerts = None
-        deleteGroups = []
 
         for fg in obj.faceGroups:
             fmask = obj.getFaceMaskForGroups([fg.name])
-            if deleteGroup(fg.name, deleteGroups):
-                fmats[fmask] = 3
-            elif fg.name == "helper-tights":
+            if fg.name == "helper-tights":
                 fmats[fmask] = 2
             elif fg.name in ["helper-hair", "joint-ground"]:
                 fmats[fmask] = 5

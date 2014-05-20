@@ -107,11 +107,11 @@ def getTextureName(filepath):
     return texfile.replace(".","_")
 
 
-def getRmeshName(rmesh, amt):
-    if amt and rmesh.name == "base.obj":
-        return amt.name
+def getMeshName(mesh, skel):
+    if skel and mesh.name == "base.obj":
+        return skel.name
     else:
-        return os.path.splitext(rmesh.name)[0]
+        return os.path.splitext(mesh.name)[0]
 
 #--------------------------------------------------------------------
 #   Write utils
@@ -126,15 +126,6 @@ def writeMatrix(fp, name, mat, pad=""):
         if i < 3:
             fp.write(',\n%s               ' % pad)
     fp.write('\n%s        }\n' % pad)
-
-
-def writeComma(fp, n, last):
-    if n == last:
-        fp.write('\n')
-    elif n%1024 == 1023:
-        fp.write(',\n            ')
-    else:
-        fp.write(',')
 
 #--------------------------------------------------------------------
 #   Links

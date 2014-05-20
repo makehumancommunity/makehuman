@@ -202,14 +202,6 @@ class MHApplication(gui3d.Application, mh.Application):
                 'realtimeFitting': True,
                 'sliderImages': True,
                 'excludePlugins': [
-                    "0_modeling_5_editing",
-                    "0_modeling_8_random",
-                    "2_posing_expression",
-                    "3_libraries_animation",
-                    "3_libraries_posing",
-                    "4_rendering_mitsuba",
-                    "4_rendering_povray",
-                    "5_settings_censor",
                     "7_data",
                     "7_example",
                     "7_material_editor",
@@ -218,7 +210,6 @@ class MHApplication(gui3d.Application, mh.Application):
                     "7_scripting",
                     "7_shell",
                     "7_targets",
-                    "4_rendering_aqsis"
                 ],
                 'rtl': False,
                 'invertMouseWheel': False,
@@ -581,8 +572,9 @@ class MHApplication(gui3d.Application, mh.Application):
         backGridMesh.minSubgridZoom = (1.0/spacing) * float(subgrids)/5
         self.backplaneGrid = gui3d.Object(backGridMesh)
         self.backplaneGrid.excludeFromProduction = True
+        self.backplaneGrid.placeAtFeet = True
+        self.backplaneGrid.setShadeless(1)
         #self.backplaneGrid.setPosition([0,offset,0])
-        backGridMesh.placeAtFeet = True
         self.addObject(self.backplaneGrid)
 
         # Ground grid
@@ -595,8 +587,9 @@ class MHApplication(gui3d.Application, mh.Application):
         groundGridMesh.minSubgridZoom = (1.0/spacing) * float(subgrids)/5
         self.groundplaneGrid = gui3d.Object(groundGridMesh)
         self.groundplaneGrid.excludeFromProduction = True
+        self.groundplaneGrid.placeAtFeet = True
+        self.groundplaneGrid.setShadeless(1)
         #self.groundplaneGrid.setPosition([0,offset,0])
-        groundGridMesh.placeAtFeet = True
         groundGridMesh.restrictVisibleAboveGround = True
         self.addObject(self.groundplaneGrid)
 
@@ -702,7 +695,7 @@ class MHApplication(gui3d.Application, mh.Application):
                 mhmFile = self.args.get('mhmFile')
                 log.message("Loading MHM file %s (as specified by commandline argument)", mhmFile)
                 if os.path.isfile(mhmFile):
-                    self.files.load.loadMHM(mhmFile)
+                    self.loadHumanMHM(mhmFile)
                 else:
                     log.error("Failed to load MHM file. The MHM file specified as argument (%s) does not exist!", mhmFile)
             if self.args.get('runtests', False):
@@ -1057,7 +1050,7 @@ class MHApplication(gui3d.Application, mh.Application):
         if self.dialog is None:
             self.dialog = gui.Dialog(self.mainwin)
             self.dialog.helpIds.update(self.helpIds)
-        self.dialog.prompt(title, text, button1Label, button2Label, button1Action, button2Action, helpId, fmtArgs)
+        return self.dialog.prompt(title, text, button1Label, button2Label, button1Action, button2Action, helpId, fmtArgs)
 
     def setGlobalCamera(self):
         human = self.selectedHuman
