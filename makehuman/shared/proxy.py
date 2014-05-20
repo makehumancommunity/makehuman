@@ -182,12 +182,12 @@ class Proxy:
         mesh.priority = self.z_depth           # Set render order
         mesh.setCameraProjection(0)             # Set to model camera
 
-        # TODO perhaps other properties should be copied from human to object, such as subdivision state. For other hints, and duplicate code, see guicommon Object.setProxy()
-
         obj = self.object = guicommon.Object(mesh, human.getPosition())
+        obj.proxy = self
         obj.material = self.material
         obj.setRotation(human.getRotation())
         obj.setSolid(human.solid)    # Set to wireframe if human is in wireframe
+        # TODO perhaps other properties should be copied from human to object, such as subdivision state. For other hints, and duplicate code, see guicommon Object.setProxy()
 
         # TODO why return both obj and mesh if you can access the mesh easily through obj.mesh?
         return mesh,obj
