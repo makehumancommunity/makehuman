@@ -183,9 +183,14 @@ def writeObjFile(path, objects, writeMTL=True, config=None, filterMaskedFaces=Tr
         # Unfiltered
         meshes = [m.clone(scale=scale, filterMaskedVerts=False) for m in meshes]
 
+    if config and config.feetOnGround:
+        offset = config.offset
+    else:
+        offset = [0,0,0]
+
     # Vertices
     for mesh in meshes:
-        fp.write("".join( ["v %.4f %.4f %.4f\n" % tuple(co) for co in mesh.coord] ))
+        fp.write("".join( ["v %.4f %.4f %.4f\n" % tuple(co + offset) for co in mesh.coord] ))
 
     # Vertex normals
     if config is None or config.useNormals:
