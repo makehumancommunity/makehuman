@@ -141,6 +141,22 @@ class Skeleton(object):
 
         return boneWeights
 
+    def scaled(self, scale):
+        """
+        Create a scaled clone of this skeleton
+        """
+        result = type(self)(self.name)
+
+        for bone in self.getBones():
+            scaledHead = scale * bone.getRestHeadPos()
+            scaledTail = scale * bone.getRestTailPos()
+            parentName = bone.parent.name if bone.parent else None
+            result.addBone(bone.name, parentName, scaledHead, scaledTail, bone.roll)
+
+        result.build()
+
+        return result
+
     def addBone(self, name, parentName, head, tail, roll=0):
         if name in self.bones.keys():
             raise RuntimeError("The skeleton %s already contains a bone named %s." % (self.__repr__(), name))
