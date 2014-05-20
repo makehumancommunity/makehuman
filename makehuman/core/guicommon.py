@@ -517,7 +517,10 @@ class Object(events3d.EventHandler):
     def changeVertexMask(self, vertsMask):
         """
         Apply a face mask to the meshes (original seed mesh, subdivided mesh
-        and proxied meshes).
+        and proxied meshes) specified by a vertex mask.
+        The vertex mask is a list of booleans, one for each vertex, where True
+        means not masked (visible), and False means masked (hidden).
+        A face is masked if all of the vertices that define it are masked.
         """
         if vertsMask is None:
             # Undo face mask set by vertex mask
@@ -560,7 +563,7 @@ class Object(events3d.EventHandler):
         if self.__proxyMesh:
             import proxy
             # Transfer face mask to proxy
-            proxyVertMask = proxy.transferFaceMaskToProxy(vertsMask, self.proxy)
+            proxyVertMask = proxy.transferVertexMaskToProxy(vertsMask, self.proxy)
             proxyFaceMask = self.__proxyMesh.getFaceMaskForVertices(np.argwhere(proxyVertMask)[...,0])
 
             self.__proxyMesh.changeFaceMask(proxyFaceMask)

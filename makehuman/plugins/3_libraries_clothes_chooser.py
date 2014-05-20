@@ -131,7 +131,7 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
             obj = pxy.object
 
             # Remap vertices from basemesh to proxy verts
-            proxyVertMask = proxy.transferFaceMaskToProxy(vertsMask, pxy)
+            proxyVertMask = proxy.transferVertexMaskToProxy(vertsMask, pxy)
 
             # Apply accumulated mask from previous clothes layers on this clothing piece
             obj.changeVertexMask(proxyVertMask)
