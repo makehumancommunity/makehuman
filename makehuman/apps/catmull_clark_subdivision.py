@@ -48,7 +48,14 @@ from module3d import Object3D
 import log
 
 class SubdivisionObject(Object3D):
-    def __init__(self, object):
+    def __init__(self, object, staticFaceMask=None):
+        """
+        If staticFaceMask is specified (which is a face mask valid on object), 
+        the masked faces and their vertices are not included as geometry in
+        this subdivision object (higher performance).
+        After building a subdivision object, a (dynamic) face mask can still be
+        set on the faces of the subdiv mesh.
+        """
         name = object.name + '.sub'
         super(SubdivisionObject, self).__init__(name, 4)
 
@@ -60,6 +67,10 @@ class SubdivisionObject(Object3D):
         self.object = object.object
         self.parent = object    # TODO avoid conflicts with clone()'s parent
         self.priority = object.priority
+        if staticFaceMask is None:
+            self._staticFaceMask = np.ones(object.getFaceCount(), dtype=bool)
+        else:
+            self._staticFaceMask = staticFaceMask
 
     def create(self, progressCallback):
         log.debug('Applying Catmull-Clark subdivision on %s.', self.parent.name)
@@ -79,17 +90,12 @@ class SubdivisionObject(Object3D):
         ntexco = len(parent.texco)
         nfaces = len(parent.fvert)
 
-        group_mask = np.ones(len(parent._faceGroups), dtype=bool)
-
-        # TODO copy over face mask from parent without this?
         for g in parent._faceGroups:
             fg = self.createFaceGroup(g.name)
-            if ('joint' in fg.name or 'helper' in g.name):
-                group_mask[fg.idx] = False
 
         progress(1)
 
-        face_mask = group_mask[parent.group]
+        face_mask = self.staticFaceMask
         self.face_map = np.argwhere(face_mask)[...,0]
         self.face_rmap = np.zeros(nfaces, dtype=int) - 1
         nfaces = len(self.face_map)
@@ -412,8 +418,12 @@ class SubdivisionObject(Object3D):
         else:
             super(SubdivisionObject, self).changeFaceMask(mask)
 
-def createSubdivisionObject(object, progressCallback=None):
-    obj = SubdivisionObject(object)
+    @property
+    def staticFaceMask(self):
+        return self._staticFaceMask
+
+def createSubdivisionObject(object, staticFaceMask=None, progressCallback=None):
+    obj = SubdivisionObject(object, staticFaceMask)
     obj.create(progressCallback)
     # obj.dump()
     return obj
