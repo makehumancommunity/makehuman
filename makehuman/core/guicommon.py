@@ -410,7 +410,7 @@ class Object(events3d.EventHandler):
 
         if self.isProxied():
             if not self.__proxySubdivisionMesh:
-                self.__proxySubdivisionMesh = cks.createSubdivisionObject(self.__proxyMesh, self.staticFaceMask, progressCallback)
+                self.__proxySubdivisionMesh = cks.createSubdivisionObject(self.__proxyMesh, None, progressCallback)
                 if self.__seedMesh.object3d:
                     self.attachMesh(self.__proxySubdivisionMesh)
             elif update:
