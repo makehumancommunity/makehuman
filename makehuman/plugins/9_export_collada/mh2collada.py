@@ -76,7 +76,7 @@ def exportCollada(filepath, config):
     progress(0, 0.5, "Preparing")
     #rawTargets = exportutils.collect.readTargets(human, config)    # TODO what is this used for?
 
-    objects = human.getObjects()
+    objects = human.getObjects(excludeZeroFaceObjs=True)
     # Clone meshes with desired scale and hidden faces/vertices filtered out
     meshes = [obj.mesh.clone(config.scale, True) for obj in objects]
 
