@@ -111,14 +111,10 @@ class RichMesh(object):
     def getMaterial(self):
         if self.type == 'Proxymeshes':
             return G.app.selectedHuman.material
-        elif self.object:
-            return self.object.material
         else:
             return self._material
 
     def setMaterial(self, material):
-        if self.object:
-            self.object.material == material
         self._material = material
 
     material = property(getMaterial, setMaterial)
@@ -138,7 +134,7 @@ class RichMesh(object):
         obj.updateIndexBuffer()
         self.setVertexGroups(weights)
         self.shapes = shapes
-        self._material = obj.material = material
+        self._material = material
         return self
 
 
