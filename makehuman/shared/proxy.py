@@ -840,10 +840,14 @@ def transferFaceMaskToProxy(vertsMask, proxy):
     """
     Transfer a vertex mask defined on the parent mesh to a proxie using the
     proxy mapping to this parent mesh.
+    A vertex mask defines for each vertex if it should be hidden, only faces
+    that have all vertices hidden will be hidden.
+    True in vertex mask means: show vertex, false means hide (masked)
     """
     # Convert basemesh vertex mask to local mask for proxy vertices
     proxyVertMask = np.ones(len(proxy.ref_vIdxs), dtype=bool)
     if proxy.num_refverts == 3:
+        '''
         for idx,hverts in enumerate(proxy.ref_vIdxs):
             # Body verts to which proxy vertex with idx is mapped
             (v1,v2,v3) = hverts
@@ -853,6 +857,14 @@ def transferFaceMaskToProxy(vertsMask, proxy):
             proxyVertMask[idx] = np.count_nonzero(vertsMask[[v1, v2, v3]]) > 1
             # Alternative2: Only hide proxy vert if all of its referenced body verts are hidden (least agressive)
             #proxyVertMask[idx] = vertsMask[v1] or vertsMask[v2] or vertsMask[v3]
+        '''
+        # Faster numpy implementation of the above:
+        unmasked_row_col = np.nonzero(vertsMask[proxy.ref_vIdxs])
+        unmasked_rows = unmasked_row_col[0]
+        unmasked_count = np.bincount(unmasked_rows)
+        # only hide/mask a vertex if at least two referenced body verts are hidden/masked
+        masked_idxs = np.nonzero(unmasked_count < 2)
+        proxyVertMask[masked_idxs] = False
     else:
         proxyVertMask[:] = vertsMask[proxy.ref_vIdxs[:,0]]
     return proxyVertMask
