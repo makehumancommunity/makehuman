@@ -73,11 +73,8 @@ class Config(object):
 
     @property
     def offset(self):
-        return -self.scale * self.human.getJointPosition('ground')[1]
-
-    @property
-    def offsetVect(self):
-        return np.asarray([0.0, self.offset, 0.0], dtype=np.float32)
+        yOffset = -self.scale * self.human.getJointPosition('ground')[1]
+        return np.asarray([0.0, yOffset, 0.0], dtype=np.float32)
 
 
     @property
