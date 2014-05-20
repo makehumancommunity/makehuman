@@ -78,9 +78,7 @@ class RectangleMesh(module3d.Object3D):
         self.setUVs(uv)
         self.setFaces(fv, fuv, fg.idx)
 
-        self.setTexture(texture)
         self.setCameraProjection(1)
-        self.setShadeless(1)
         self.updateIndexBuffer()
 
     def _getVerts(self, width, height):
@@ -177,7 +175,6 @@ class FrameMesh(module3d.Object3D):
         self.setFaces(f, f, fg.idx)
         
         self.setCameraProjection(1)
-        self.setShadeless(1)
         self.updateIndexBuffer()
 
     def move(self, dx, dy):
@@ -250,9 +247,7 @@ class Cube(module3d.Object3D):
         self.setUVs(uv)
         self.setFaces(f, fg.idx)
 
-        self.setTexture(texture)
         self.setCameraProjection(0)
-        self.setShadeless(0)
         self.updateIndexBuffer()
         
     def resize(self, width, height, depth):
@@ -351,7 +346,6 @@ class GridMesh(module3d.Object3D):
         self.updateIndexBuffer()
 
         self.setCameraProjection(1 if static else 0)
-        self.setShadeless(1)
 
         self.restrictVisibleToCamera = False    # Set to True to only show the grid when the camera is set to a defined parallel view (front, left, top, ...)
         self.restrictVisibleAboveGround = False # Set to true to make the grid invisible when camera inclination is below 0
