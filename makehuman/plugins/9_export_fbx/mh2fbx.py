@@ -43,7 +43,6 @@ import codecs
 
 from core import G
 import exportutils
-import posemode
 import log
 
 from . import fbx_utils
@@ -57,9 +56,6 @@ from . import fbx_anim
 
 def exportFbx(filepath, config):
     from armature.armature import setupArmature
-
-    #posemode.exitPoseMode()
-    #posemode.enterPoseMode()
 
     G.app.progress(0, text="Preparing")
 
@@ -121,7 +117,6 @@ def exportFbx(filepath, config):
     fp.close()
 
     G.app.progress(1)
-    #posemode.exitPoseMode()
     log.message("%s written" % filepath)
 
 

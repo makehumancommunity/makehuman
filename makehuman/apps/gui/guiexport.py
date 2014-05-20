@@ -42,13 +42,12 @@ import os
 import mh
 import gui
 import gui3d
-import guipose
 import log
 
 
-class ExportTaskView(guipose.PoseModeTaskView):
+class ExportTaskView(gui3d.TaskView):
     def __init__(self, category):
-        guipose.PoseModeTaskView.__init__(self, category, 'Export')
+        super(ExportTaskView, self).__init__(self, category, 'Export')
 
         self.formats = []
         self.recentlyShown = None
@@ -60,8 +59,6 @@ class ExportTaskView(guipose.PoseModeTaskView):
 
         self.exportBodyGroup = []
         self.exportHairGroup = []
-
-        self.posefile = None
 
         # Mesh Formats
         self.formatBox = self.addLeftWidget(gui.GroupBox('Mesh Format'))
@@ -213,14 +210,14 @@ class ExportTaskView(guipose.PoseModeTaskView):
             self.fileentry.text = ""
 
     def onShow(self, event):
-        guipose.PoseModeTaskView.onShow(self, event)
+        super(ExportTaskView, self).onShow(self, event)
 
         self.buildGui()
 
         self.fileentry.setFocus()
 
     def onHide(self, event):
-        guipose.PoseModeTaskView.onHide(self, event)
+        super(ExportTaskView, self).onHide(self, event)
 
         for exporter, radio, _ in self.formats:
             if radio.selected:

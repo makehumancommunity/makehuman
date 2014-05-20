@@ -39,12 +39,14 @@ for task views that implement renderers and rendering related tasks.
 """
 
 from core import G
-from guipose import PoseModeTaskView
+import gui3d
 
 
-class RenderTaskView(PoseModeTaskView):
+# TODO does this module still have much use?
+
+class RenderTaskView(gui3d.TaskView):
     def __init__(self, category, name, label=None):
-        PoseModeTaskView.__init__(self, category, name, label)
+        super(RenderTaskView, self).__init__(self, category, name, label)
 
         self.oldShader = None
         self.taskViewShader = None
@@ -54,7 +56,7 @@ class RenderTaskView(PoseModeTaskView):
     # selected, so that the actual scene lighting is simulated.
 
     def onShow(self, event):
-        PoseModeTaskView.onShow(self, event)
+        super(RenderTaskView, self).onShow(self, event)
         import getpath
 
         human = G.app.selectedHuman
@@ -65,7 +67,7 @@ class RenderTaskView(PoseModeTaskView):
         human = G.app.selectedHuman
         human.material.shader = self.oldShader
 
-        PoseModeTaskView.onHide(self, event)
+        super(RenderTaskView, self).onHide(self, event)
 
     # renderingWidth, renderingHeight: properties for getting/setting
     # the rendering width and height stored in the settings.
