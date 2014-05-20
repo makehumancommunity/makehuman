@@ -34,7 +34,7 @@
 Abstract
 --------
 
-TODO
+Lightmap texture exporter
 """
 
 import gui
