@@ -93,11 +93,13 @@ class DaeConfig(Config):
         elif self.meshOrientation.startswith('zUp'):
             return 2
 
+    '''
     @property
     def offsetVect(self):
         result = [0.0, 0.0, 0.0]
         result[self.upAxis] = self.offset
         return result
+    '''
 
     def getRigOptions(self):
         rigOptions = super(DaeConfig, self).getRigOptions()
