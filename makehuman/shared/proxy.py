@@ -836,10 +836,9 @@ def _getFileName(folder, file, suffix):
         return os.path.join(folder, file+suffix)
 
 
-# TODO a bit unaptly named, should perhaps be called transferVertexMaskToProxy
-def transferFaceMaskToProxy(vertsMask, proxy):
+def transferVertexMaskToProxy(vertsMask, proxy):
     """
-    Transfer a vertex mask defined on the parent mesh to a proxie using the
+    Transfer a vertex mask defined on the parent mesh to a proxy using the
     proxy mapping to this parent mesh.
     A vertex mask defines for each vertex if it should be hidden, only faces
     that have all vertices hidden will be hidden.
