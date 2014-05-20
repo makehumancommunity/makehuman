@@ -343,6 +343,8 @@ class SkeletonLibrary(gui3d.TaskView):
         self.skelMesh.priority = 100
         self.skelMesh.setPickable(False)
         self.skelObj = gui3d.app.addObject(gui3d.Object(self.skelMesh, self.human.getPosition()) )
+        self.skelObj.setShadeless(0)
+        self.skelObj.setSolid(0)
         self.skelObj.setRotation(self.human.getRotation())
 
         # Add the skeleton mesh to the human AnimatedMesh so it animates together with the skeleton

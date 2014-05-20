@@ -55,6 +55,8 @@ class Object3D(object):
         self._shaderPath = None
         self._shaderObj = None
 
+        self.shader_mtime = -1
+
     @property
     def name(self):
         return self.parent.name
@@ -101,11 +103,11 @@ class Object3D(object):
 
     @property
     def shadeless(self):
-        return self.parent.shadeless
+        return self.object.shadeless
 
     @property
     def depthless(self):
-        return self.parent.depthless
+        return self.object.depthless
 
     @property
     def vertsPerPrimitive(self):
@@ -113,7 +115,7 @@ class Object3D(object):
 
     @property
     def shaderParameters(self):
-        return self.parent.shaderParameters
+        return self.object.shaderParameters
 
     @property
     def visibility(self):
@@ -141,7 +143,7 @@ class Object3D(object):
 
     @property
     def solid(self):
-        return self.parent.solid
+        return self.object.solid
 
     @property
     def translation(self):
@@ -161,7 +163,7 @@ class Object3D(object):
 
     @property
     def alphaToCoverage(self):
-        return self.parent.alphaToCoverage
+        return self.object.alphaToCoverage
 
     @property
     def transform(self):
@@ -207,28 +209,41 @@ class Object3D(object):
     def sz(self):
         return self.object.sz
 
+
+    def getShaderChanged(self):
+        return self.shader_mtime != self.material.shaderChanged
+
+    def setShaderChanged(self, shaderChanged):
+        if not shaderChanged:
+            self.shader_mtime = self.material.shaderChanged
+        else:
+            self.shader_mtime = -1
+
+    shaderChanged = property(getShaderChanged, setShaderChanged)
+
+
     @property
     def shaderObj(self):
         import shader
         if not shader.Shader.supported():
             return None
-        if self._shaderPath != self.parent.shader:
+        if self._shaderPath != self.object.shader:
             self._shaderObj = None
         if self._shaderObj is False:
             return None
 
-        if self._shaderObj is None or self.parent.shaderChanged:
-            self._shaderPath = self.parent.shader
+        if self._shaderObj is None or self.shaderChanged:
+            self._shaderPath = self.object.shader
             if self._shaderPath is None:
                 self._shaderObj = None
             else:
                 try:
-                    self._shaderObj = self.parent.shaderObj
+                    self._shaderObj = self.object.shaderObj
                 except (Exception, RuntimeError), e:
                     self._shaderObj = False
                     log.error(e, exc_info=True)
                     log.warning("Failed to initialize shader (%s), falling back to fixed function shading.", self._shaderPath)
-            self.parent.shaderChanged = False
+            self.shaderChanged = False
         if self._shaderObj is False:
             return None
         return self._shaderObj
@@ -245,19 +260,19 @@ class Object3D(object):
 
     @property
     def useVertexColors(self):
-        return self.parent.shaderConfig['vertexColors']
+        return self.object.shaderConfig['vertexColors']
 
     @property
     def isTextured(self):
-        return self.parent.shaderConfig['diffuse']
+        return self.object.shaderConfig['diffuse']
 
     @property
     def material(self):
-        return self.parent.material
+        return self.object.material
 
     @property
     def cull(self):
-        return self.parent.cull
+        return self.object.cull
 
     def clrid(self, idx):
         return self.parent._faceGroups[idx].colorID
@@ -302,7 +317,7 @@ class Object3D(object):
 
     @property
     def texture(self):
-        return self.parent.texture
+        return self.object.texture
 
     @classmethod
     def attach(cls, mesh):

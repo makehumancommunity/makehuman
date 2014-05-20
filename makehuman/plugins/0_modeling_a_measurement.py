@@ -101,14 +101,14 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
         self.measureMesh.setUVs(np.zeros((1, 2), dtype=np.float32))
         self.measureMesh.setFaces(np.arange(count).reshape((-1,2)))
 
-        self.measureMesh.setShadeless(True)
-        self.measureMesh.setDepthless(True)
         self.measureMesh.setColor([255, 255, 255, 255])
         self.measureMesh.setPickable(0)
         self.measureMesh.updateIndexBuffer()
         self.measureMesh.priority = 50
 
         self.measureObject = self.addObject(guicommon.Object(self.measureMesh))
+        self.measureObject.setShadeless(True)
+        self.measureObject.setDepthless(True)
 
     def showGroup(self, name):
         self.groupBoxes[name].radio.setSelected(True)
