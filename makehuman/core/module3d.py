@@ -93,7 +93,7 @@ class FaceGroup(object):
             return self.__object()
         else:
             return None
-        
+
     def setObject(self, value):
         if value is None:
             self.__object = None
@@ -114,7 +114,6 @@ class Object3D(object):
         self.name = objName
         self.vertsPerPrimitive = vertsPerPrimitive
         self._faceGroups = []
-        self._material = material.Material(objName+"_Material")  # Render material
         self._groups_rev = {}
         self.cameraMode = 0
         self._visibility = True
@@ -140,7 +139,7 @@ class Object3D(object):
         """
         other = type(self)(self.name, self.vertsPerPrimitive)
 
-        for prop in ['material', 'cameraMode', 'visibility', 'pickable', 
+        for prop in ['cameraMode', 'visibility', 'pickable', 
                      'calculateTangents', 'priority', 'MAX_FACES']:
             setattr(other, prop, getattr(self, prop))
 
@@ -217,14 +216,6 @@ class Object3D(object):
         if update:
             other.calcNormals()
             other.updateIndexBuffer()
-
-    def getShaderChanged(self):
-        return self.material.shaderChanged
-
-    def setShaderChanged(self, shaderChanged):
-        self.material.shaderChanged = shaderChanged
-
-    shaderChanged = property(getShaderChanged, setShaderChanged)
 
     def getCenter(self):
         """
@@ -810,129 +801,6 @@ class Object3D(object):
 
         self.pickable = pickable
 
-    def setTexture(self, path):
-        """
-        This method is used to specify the path of a file on disk containing the object texture.
-
-        :param path: The path of a texture file.
-        :type path: str
-        :param cache: The texture cache to use.
-        :type cache: dict
-        """
-        self.material.diffuseTexture = path
-
-    def clearTexture(self):
-        """
-        This method is used to clear an object's texture.
-        """
-        self.material.diffuseTexture = None
-
-    @property
-    def texture(self):
-        return self.material.diffuseTexture
-
-    def hasTexture(self):
-        return self.texture is not None
-
-    def setShader(self, shader):
-        """
-        This method is used to specify the shader.
-        
-        :param shader: The path to a pair of shader files.
-        :type shader: string
-        """
-        self.material.setShader(shader)
-
-    @property
-    def shader(self):
-        return self.material.shader
-
-    @property
-    def shaderObj(self):
-        return self.material.shaderObj
-
-    def configureShading(self, diffuse=None, bump = None, normal=None, displacement=None, spec = None, vertexColors = None):
-        """
-        Configure shader options and set the necessary properties based on
-        the material configuration of this object.
-        This can be done without an actual shader being set for this object.
-        Call this method when changes are made to the material property.
-        """
-        self.material.configureShading(diffuse, bump, normal, displacement, spec, vertexColors)
-
-    def getMaterial(self):
-        return self._material
-
-    def setMaterial(self, material):
-        self._material.copyFrom(material)
-
-    material = property(getMaterial, setMaterial)
-
-    def setShaderParameter(self, name, value):
-        self.material.setShaderParameter(name, value)
-
-    @property
-    def shaderParameters(self):
-        return self.material.shaderParameters
-
-    @property
-    def shaderConfig(self):
-        return self.material.shaderConfig
-
-    @property
-    def shaderDefines(self):
-        return self.material.shaderDefines
-
-    def addShaderDefine(self, defineStr):
-        self.material.addShaderDefine(defineStr)
-
-    def removeShaderDefine(self, defineStr):
-        self.material.removeShaderDefine(defineStr)
-
-    def clearShaderDefines(self):
-        self.material.clearShaderDefines()
-
-    def setShadeless(self, shadeless):
-        """
-        This method is used to specify whether or not the object is affected by lights.
-        This is used for certain GUI controls to give them a more 2D type
-        appearance (predominantly the top bar of GUI controls).
-
-        NOTE enabling this option disables the use of the shader configured in the material.
-
-        :param shadeless: Whether or not the object is unaffected by lights.
-        :type shadeless: Boolean
-        """
-        self.material.shadeless = shadeless
-
-    def getShadeless(self):
-        return self.material.shadeless
-
-    shadeless = property(getShadeless, setShadeless)
-
-    def setCull(self, cull):
-        """
-        This method is used to specify whether or not the object is back-face culled.
-
-        :param cull: Whether and how to cull
-        :type cull: 0 => no culling, >0 => draw front faces, <0 => draw back faces
-        """
-
-        # Because we don't really need frontface culling, we simplify to only backface culling
-        if (isinstance(cull, bool) and cull) or cull > 0:
-            self.material.backfaceCull = True
-        else:
-            self.material.backfaceCull = False
-
-    def getCull(self):
-        # Because we don't really need frontface culling, we simplify to only backface culling
-        if self.material.backfaceCull:
-            return 1
-        else:
-            return 0
-
-    cull = property(getCull, setCull)
-
     def getPriority(self):
         """
         The rendering priority of this object.
@@ -973,34 +841,9 @@ class Object3D(object):
 
     priority = property(getPriority, setPriority)
 
-    def setDepthless(self, depthless):
-        """
-        This method is used to specify whether or not the object occludes or is occluded
-        by other objects
-
-        :param depthless: Whether or not the object is occluded or occludes.
-        :type depthless: Boolean
-        """
-        self.material.depthless = depthless
-
-    def getDepthless(self):
-        return self.material.depthless
-
-    depthless = property(getDepthless, setDepthless)
-
-    def setSolid(self, solid):
-        """
-        This method is used to specify whether or not the object is drawn solid or wireframe.
-
-        :param solid: Whether or not the object is drawn solid or wireframe.
-        :type solid: Boolean
-        """
-        self.material.wireframe = not solid
-
-    def getSolid(self):
-        return not self.material.wireframe
-
-    solid = property(getSolid, setSolid)
+    @property
+    def material(self):
+        return self.object.material
             
     def setTransparentPrimitives(self, transparentPrimitives):
         """
@@ -1022,14 +865,6 @@ class Object3D(object):
             return self._transparentPrimitives
 
     transparentPrimitives = property(getTransparentPrimitives, setTransparentPrimitives)
-
-    def getAlphaToCoverage(self):
-        return self.material.alphaToCoverage
-
-    def setAlphaToCoverage(self, a2cEnabled):
-        self.material.alphaToCoverage = a2cEnabled
-
-    alphaToCoverage = property(getAlphaToCoverage, setAlphaToCoverage)
 
     def getFaceGroup(self, name):
         """
@@ -1092,8 +927,12 @@ class Object3D(object):
         return vert_mask, face_mask
 
     def getFaceMaskForVertices(self, verts):
+        """
+        Get mask that selects all faces that are connected to the specified
+        vertices.
+        """
         mask = np.zeros(len(self.fvert), dtype = bool)
-        valid = np.arange(self.MAX_FACES)[None,:] < self.nfaces[verts][:,None]
+        valid = np.arange(self.MAX_FACES)[None,:] < self.nfaces[verts][:,None]  # Mask that filters out unused slots for faces connected to a vert
         vface = self.vface[verts]
         faces = vface[valid]
         mask[faces] = True

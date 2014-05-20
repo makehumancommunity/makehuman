@@ -989,6 +989,16 @@ class Material(object):
     def shaderObj(self):
         return self.getShaderObj()
 
+    def getShaderChanged(self):
+        return self._shaderChanged
+
+    def setShaderChanged(self, changed=True):
+        if changed:
+            import time
+            self._shaderChanged = time.time()
+
+    shaderChanged = property(getShaderChanged, setShaderChanged)
+
     @property
     def shaderUniforms(self, includeGLReserved = True):
         shaderObj = self.shaderObj
