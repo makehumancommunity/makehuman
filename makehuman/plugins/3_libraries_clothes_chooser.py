@@ -109,22 +109,18 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
 
         human = self.human
         if not enableFaceHiding:
-            human.meshData.changeFaceMask(self.originalHumanMask)
-            human.meshData.updateIndexBufferFaces()
+            human.changeVertexMask(None)
+
             proxies = self.getSelection()
             if self.human.genitalsProxy:
                 proxies.append(self.human.genitalsProxy)
-            if human.proxy:
-                proxies.append(human.proxy)
             for pxy in proxies:
                 obj = pxy.object
-                faceMask = np.ones(obj.mesh.getFaceCount(), dtype=bool)
-                obj.mesh.changeFaceMask(faceMask)
-                obj.mesh.updateIndexBufferFaces()
+                obj.changeVertexMask(None)
             return
 
+
         vertsMask = np.ones(human.meshData.getVertexCount(), dtype=bool)
-        log.debug("masked verts %s", np.count_nonzero(~vertsMask))
 
         stackedProxies = [human.clothesProxies[uuid] for uuid in reversed(self.getClothesByRenderOrder())]
         # Mask genitals too
@@ -134,15 +130,11 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
         for pxy in stackedProxies:
             obj = pxy.object
 
+            # Remap vertices from basemesh to proxy verts
             proxyVertMask = proxy.transferFaceMaskToProxy(vertsMask, pxy)
 
-            proxyKeepVerts = np.argwhere(proxyVertMask)[...,0]
-            proxyFaceMask = obj.mesh.getFaceMaskForVertices(proxyKeepVerts)
-
             # Apply accumulated mask from previous clothes layers on this clothing piece
-            obj.mesh.changeFaceMask(proxyFaceMask)
-            obj.mesh.updateIndexBufferFaces()
-            log.debug("%s faces masked for %s", np.count_nonzero(~proxyFaceMask), pxy.name)
+            obj.changeVertexMask(proxyVertMask)
 
             if pxy.deleteVerts != None and len(pxy.deleteVerts > 0):
                 log.debug("Loaded %s deleted verts (%s faces) from %s", np.count_nonzero(pxy.deleteVerts), len(human.meshData.getFacesForVertices(np.argwhere(pxy.deleteVerts)[...,0])),pxy.name)
@@ -150,28 +142,8 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
                 # Modify accumulated (basemesh) verts mask
                 verts = np.argwhere(pxy.deleteVerts)[...,0]
                 vertsMask[verts] = False
-            log.debug("masked verts %s", np.count_nonzero(~vertsMask))
 
-        basemeshMask = human.meshData.getFaceMaskForVertices(np.argwhere(vertsMask)[...,0])
-        human.meshData.changeFaceMask(np.logical_and(basemeshMask, self.originalHumanMask))
-        human.meshData.updateIndexBufferFaces()
-
-        # Transfer face mask to human proxy if set
-        if human.isProxied():
-            pxy = human.proxy
-            obj = pxy.object
-
-            proxyVertMask = proxy.transferFaceMaskToProxy(vertsMask, pxy)
-            proxyFaceMask = obj.mesh.getFaceMaskForVertices(np.argwhere(proxyVertMask)[...,0])
-
-            obj.mesh.changeFaceMask(proxyFaceMask)
-            obj.mesh.updateIndexBufferFaces()
-
-        # Transfer face mask to subdivided mesh if it is set
-        if human.isSubdivided():
-            human.updateSubdivisionMesh(rebuildIndexBuffer=True, progressCallback=gui3d.app.progress)
-
-        log.debug("%s faces masked for basemesh", np.count_nonzero(~basemeshMask))
+        human.changeVertexMask(vertsMask)
 
     def onShow(self, event):
         super(ClothesTaskView, self).onShow(event)
