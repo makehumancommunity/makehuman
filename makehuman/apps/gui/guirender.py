@@ -46,7 +46,7 @@ import gui3d
 
 class RenderTaskView(gui3d.TaskView):
     def __init__(self, category, name, label=None):
-        super(RenderTaskView, self).__init__(self, category, name, label)
+        super(RenderTaskView, self).__init__(category, name, label)
 
         self.oldShader = None
         self.taskViewShader = None
@@ -56,7 +56,7 @@ class RenderTaskView(gui3d.TaskView):
     # selected, so that the actual scene lighting is simulated.
 
     def onShow(self, event):
-        super(RenderTaskView, self).onShow(self, event)
+        super(RenderTaskView, self).onShow(event)
         import getpath
 
         human = G.app.selectedHuman
@@ -67,7 +67,7 @@ class RenderTaskView(gui3d.TaskView):
         human = G.app.selectedHuman
         human.material.shader = self.oldShader
 
-        super(RenderTaskView, self).onHide(self, event)
+        super(RenderTaskView, self).onHide(event)
 
     # renderingWidth, renderingHeight: properties for getting/setting
     # the rendering width and height stored in the settings.
