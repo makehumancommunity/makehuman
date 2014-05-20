@@ -451,8 +451,9 @@ class Object3D(object):
         if hasattr(self, 'grpix'): del self.grpix
 
         self.vmap = None        # Maps unwelded vertices back to original welded ones (idx = unwelded vertex idx)
-                                # TODO it would be very useful to have a reverse mapping of vmap too, for example for mapping rig weights (see eg. Ogre exporter)
         self.tmap = None        # Maps unwelded vertex texture (UV) coordinates back to original ones (idx = unwelded vertex idx)
+
+        self._inverse_vmap = None   # Cached inverse of vmap: maps original welded vert idx (coord) to one or multiple unwelded vert idxs (r_coord)
 
         # Unwelded vertex buffers used by OpenGL
         if hasattr(self, 'r_coord'): del self.r_coord
@@ -608,6 +609,23 @@ class Object3D(object):
             indices = np.s_[...]
         return self.fuvs[indices]
 
+    @property
+    def inverse_vmap(self):
+        """
+        The inverse of vmap: a mapping of original welded (relating to UVs) 
+        vertex (coord indices) to a set of unwelded vertices that represent the 
+        same coordinate (r_coord indices).
+        """
+        if self._inverse_vmap is None:
+            # TODO this loop is quite slow and could benefit from numpy optimization
+            originalToUnweldedMap = {}
+            for unweldedIdx, originalIdx in enumerate(self.vmap):
+                if originalIdx not in originalToUnweldedMap:
+                    originalToUnweldedMap[originalIdx] = []
+                originalToUnweldedMap[originalIdx].append(unweldedIdx)
+            self._inverse_vmap = originalToUnweldedMap
+        return self._inverse_vmap
+
     def _update_faces(self):
         map_ = np.argsort(self.fvert.flat)
         vi = self.fvert.flat[map_]
@@ -645,6 +663,7 @@ class Object3D(object):
 
         self.vmap = unwelded[:,0]
         self.tmap = unwelded[:,1]
+        self._inverse_vmap = None
         del unwelded
 
         self.r_coord = np.empty((nverts, 3), dtype=np.float32)
