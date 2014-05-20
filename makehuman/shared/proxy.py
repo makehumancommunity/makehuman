@@ -107,7 +107,6 @@ class Proxy:
         self.maskLayer = -1     # TODO is this still used?
         self.textureLayer = 0
         self.objFileLayer = 0   # TODO what is this used for?
-		self._material_file = None
 
         self.deleteGroups = []  # TODO is this still used?
         self.deleteVerts = np.zeros(len(human.meshData.coord), bool)
@@ -120,18 +119,15 @@ class Proxy:
 
     @property
     def material_file(self):
-        folder = os.path.dirname(self.file) if self.file else None
-        return _getFilePath(self._material_file, folder)
+        return self._material_file
 
     @property
     def obj_file(self):
-        folder = os.path.dirname(self.file) if self.file else None
-        return _getFilePath(self._obj_file, folder, ['npz', 'obj'])
+        return self._obj_file
 
     @property
     def vertexgroup_file(self):
-        folder = os.path.dirname(self.file) if self.file else None
-        return _getFilePath(self._vertexgroup_file, folder)
+        return self._vertexgroup_file
 
     def __repr__(self):
         return ("<Proxy %s %s %s %s>" % (self.name, self.type, self.file, self.uuid))

@@ -73,8 +73,11 @@ class Config(object):
 
     @property
     def offset(self):
-        yOffset = -self.scale * self.human.getJointPosition('ground')[1]
-        return np.asarray([0.0, yOffset, 0.0], dtype=np.float32)
+        if self.feetOnGround:
+            yOffset = -self.scale * self.human.getJointPosition('ground')[1]
+            return np.asarray([0.0, yOffset, 0.0], dtype=np.float32)
+        else:
+            return np.zeros(3, dtype=np.float32)
 
 
     @property
