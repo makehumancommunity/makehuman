@@ -166,6 +166,63 @@ class Object3D(object):
 
         return other
 
+    @property
+    def parent_map(self):
+        """
+        Maps vertex indices from this mesh to its original parent mesh 
+        (self.parent). This happens recursively to the topmost parent.
+
+        Forward vertex mapping (self -> self.parent):
+        parent_map[idx] = mIdx: self.coord[idx] -> self.parent.coord[mIdx]
+        """
+        if not hasattr(self, 'parent') or not self.parent:
+            return None
+
+        if not hasattr(self, '_parent_map'):
+            mapping = np.arange(self.getVertexCount(), dtype=np.uint32)
+        else:
+            mapping = self._parent_map
+
+        # Traverse to parent
+        pmap = self.parent.parent_map
+        if pmap is None:
+            return mapping
+        else:
+            # Combine mappings to topmost parent
+            return pmap[mapping]
+        
+
+    @property
+    def inverse_parent_map(self):
+        """
+        Maps vertex indices from original parent mesh (self.parent) to 
+        this mesh (-1 if vertex is removed in this mesh).
+        This happens recursively to the topmost parent.
+
+        Reverse vertex mapping:
+        inverse_parent_map[idx] = mIdx: self.parent.coord[idx] -> self.coord[mIdx]
+        """
+        # TODO will require nxn matrix if subdivided (catmull-clark module)
+
+        if not hasattr(self, 'parent') or not self.parent:
+            return None
+
+        if not hasattr(self, '_inverse_parent_map'):
+            mapping = np.arange(self.parent.getVertexCount(), dtype=np.int32)
+        else:
+            mapping = self._inverse_parent_map
+
+        # Traverse to parent
+        pmap = self.parent.parent_map
+        if pmap is None:
+            return mapping
+        else:
+            # Combine mappings to topmost parent
+            result = - np.ones(pmap.shape, dtype=np.int32)
+            idx = np.where(pmap > -1)
+            result[idx] = mapping[ pmap[idx] ]
+            return result
+
     def filterMaskedVerts(self, other, update=True):
         """
         Set the vertices, faces and vertex attributes of other object to the
@@ -178,20 +235,21 @@ class Object3D(object):
 
         other.parent is set to the original mesh.
         """
+        # TODO or build a chain of parents?
         if hasattr(self, 'parent') and self.parent:
             other.parent = self.parent
         else:
             other.parent = self
 
         # Forward vertex mapping:
-        # parent_map[idx] = mIdx: other.coord[idx] -> self.coord[mIdx]
-        other.parent_map = np.unique(self.getVerticesForFaceMask(self.face_mask))
+        # _parent_map[idx] = mIdx: other.coord[idx] -> self.coord[mIdx]
+        other._parent_map = np.unique(self.getVerticesForFaceMask(self.face_mask))
 
         # Reverse vertex mapping:
-        # inverse_parent_map[idx] = mIdx: self.coord[idx] -> other.coord[mIdx]
-        other.inverse_parent_map = - np.ones(self.getVertexCount(), dtype=np.int32)
-        other.inverse_parent_map[other.parent_map] = np.arange(self.getVertexCount(), dtype=np.int32)
-        #other.inverse_parent_map = np.ma.masked_less(other.inverse_parent_map, 0)  # TODO might be useful
+        # _inverse_parent_map[idx] = mIdx: self.coord[idx] -> other.coord[mIdx]
+        other._inverse_parent_map = - np.ones(self.getVertexCount(), dtype=np.int32)
+        other._inverse_parent_map[other.parent_map] = np.arange(self.getVertexCount(), dtype=np.int32)
+        #other._inverse_parent_map = np.ma.masked_less(other._inverse_parent_map, 0)  # TODO might be useful
 
         other.setCoords(self.coord[other.parent_map])
         other.setColor(self.color[other.parent_map])
@@ -199,7 +257,7 @@ class Object3D(object):
         # Filter out and remap masked faces
         fvert = self.fvert[self.face_mask]
         for i in xrange(self.vertsPerPrimitive):
-            fvert[:,i] = other.inverse_parent_map[fvert[:,i]]
+            fvert[:,i] = other._inverse_parent_map[fvert[:,i]]
 
         # Filter out and remap unused UVs
         fuvs = self.fuvs[self.face_mask]
@@ -580,16 +638,24 @@ class Object3D(object):
         return self._inverse_vmap
 
     def _update_faces(self):
+        # Construct vface: arrange face indices for same v_idx in different columns
+        # Every row in the vface matrix contains a variable number of valid columns
+        # (the number of valid columns for each row is stored in the nfaces array)
         map_ = np.argsort(self.fvert.flat)
         vi = self.fvert.flat[map_]
+        # Map v_idx entries to row numbers of fvert (face_idx)
         fi = np.mgrid[:self.fvert.shape[0],:self.fvert.shape[1]][0].flat[map_].astype(np.uint32)
         del map_
         ix, first = np.unique(vi, return_index=True)
-        n = first[1:] - first[:-1]
-        n = np.hstack((n, np.array([len(vi) - first[-1]])))
+        n = first[1:] - first[:-1]    # entry-skip count, or the number of occurences of every idx
+        n_last = len(vi) - first[-1]  # Number of occurences of last idx
+        n = np.hstack((n, np.array([n_last])))  # Append last to complete n
+
+        # Store number of valid columns per line in vface
         self.nfaces[ix] = n.astype(np.uint8)
         try:
             for i in xrange(len(ix)):
+                # Unfortunately these type of slices require a python loop
                 self.vface[ix[i],:n[i]] = fi[first[i]:][:n[i]]
         except Exception as e:
             import log
