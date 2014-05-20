@@ -110,6 +110,7 @@ class SubdivisionObject(Object3D):
         vtx_rmap = np.zeros(nverts, dtype=int) - 1
         nverts = len(self.vtx_map)
         vtx_rmap[self.vtx_map] = np.arange(nverts)
+        self.vtx_rmap = vtx_rmap
 
         progress(3)
 
@@ -124,7 +125,7 @@ class SubdivisionObject(Object3D):
         progress(4)
 
         fvert = vtx_rmap[parent.fvert[self.face_map]]
-        vedges = np.dstack((fvert,np.roll(fvert,-1,axis=1)))
+        vedges = np.dstack((fvert,np.roll(fvert,-1,axis=1)))  # All 4 edges belonging to each face
 
         fuv = uv_rmap[parent.fuvs[self.face_map]]
         tedges = np.dstack((fuv,np.roll(fuv,-1,axis=1)))
@@ -206,9 +207,14 @@ class SubdivisionObject(Object3D):
 
         progress(8)
 
+        # self.evert[i,0] contains the two vertices that define the edge which
+        # is divided in half by edge vertex with index i
+        # self.evert[i,1] contains the two center vertices in the faces
+        # that border on the edge [i,0]
         self.evert = np.asarray(vedgelist, dtype = np.uint32)
         self.etexc = np.asarray(tedgelist, dtype = np.uint32)
 
+        # TODO document
         self.vedge = np.zeros((nverts, self.MAX_FACES), dtype=np.uint32)
         self.nedges = np.zeros(nverts, dtype=np.uint8)
 
@@ -286,8 +292,61 @@ class SubdivisionObject(Object3D):
 
         progress(19)
 
-        self.parent_map = self.vtx_map
-        self.inverse_parent_map = vtx_rmap
+
+        # VERTEX MAPPING _parent_map: (subdiv -> parent)
+        # [[v0 -1 -1 -1]                (1 reference vert,  weight == 1)
+        #  [v1 -1 -1 -1]
+        #  ...
+        #  [vn -1 -1 -1]
+        #  [c0  c  c  c]  index: cbase  (4 reference verts, weight == 1/4)
+        #  [c1  c  c  c]
+        #  ...
+        #  [cn  c  c  c]
+        #  [e0  e -1 -1]  index: ebase  (2 reference verts, weight == 1/2)
+        #  [e1  e -1 -1]
+        #  ...
+        #  [en  e -1 -1]]  with n == self.getVertexCount()
+
+        self._parent_map = - np.ones((self.getVertexCount(), 4), dtype=np.int32)
+        # Map base verts onto themselves
+        self._parent_map[:self.cbase, 0] = self.vtx_map[:]
+        # Face-center verts are mapped to the 4 base verts connected to the face
+        self._parent_map[self.cbase:self.ebase, :4] = self.vtx_map[parent.fvert[self.face_map]]
+        # Edge-center verts are mapped to the 2 base verts that are endpoints of the edge
+        self._parent_map[self.ebase:, :2] = self.evert[:,0,:]
+
+        self._parent_map_weights = np.zeros(self._parent_map.shape[0], dtype=np.float32)
+        self._parent_map_weights[:self.cbase] = 1.0
+        self._parent_map_weights[self.cbase:self.ebase] = 1.0/4
+        self._parent_map_weights[self.ebase:] = 1.0/2
+
+
+        # VERTEX MAPPING _inverse_parent_map: (parent -> subdiv)
+        # [[v0 c0 c1 c2 ... cM e0 e1 e2 ... eM]   with M == parent.MAX_FACES
+        #  [v1 c0 c1 c2 ... cM e0 e1 e2 ... eM]
+        #  ...
+        #  [vn c0 c1 c2 ... cM e0 e1 e2 ... eM]]  with n == parent.getVertexCount()
+        #
+        # Invalid columns have index value -1
+
+        self._inverse_parent_map = - np.ones((self.parent.getVertexCount(), 1+2*parent.MAX_FACES), dtype=np.int32)
+        # Inverse map base verts
+        self._inverse_parent_map[:, 0] = self.vtx_rmap[:]
+
+        # Inverse map center verts
+        cvert = self._parent_map[self.cbase:self.ebase, :4]
+        _reverse_n_to_m_map(cvert,
+                            self._inverse_parent_map[:, 1:1+parent.MAX_FACES],
+                            offset=self.cbase)
+
+
+        # Inverse map edge verts
+        evert = self._parent_map[self.ebase:, :2]
+        col_offset = 1 + parent.MAX_FACES
+        _reverse_n_to_m_map(evert,
+                            self._inverse_parent_map[:, col_offset:col_offset+parent.MAX_FACES],
+                            offset=self.ebase)
+
 
     def dump(self):
         for k in dir(self):
@@ -347,9 +406,9 @@ class SubdivisionObject(Object3D):
 
         pcoord = parent.coord[self.vtx_map]
 
-        iva = self.evert[:,0,0]
+        iva = self.evert[:,0,0]  # References to base verts
         ivb = self.evert[:,0,1]
-        ic1 = self.evert[:,1,0]
+        ic1 = self.evert[:,1,0]  # References to center verts
         ic2 = self.evert[:,1,1]
 
         va = pcoord[iva]
@@ -364,6 +423,7 @@ class SubdivisionObject(Object3D):
 
         inedge = (ic1 == ic2)
 
+        # Calculate edge vert coordinates: average two e verts when at edge, else average over 4
         evert[...] = np.where(inedge[:,None], mvert / 2, (mvert + vc) / 4)
         del ic1, ic2, vc
 
@@ -427,6 +487,22 @@ class SubdivisionObject(Object3D):
         otherSeed = self.parent.clone(scale, filterMaskedVerts)
         # Then generate a subdivision for it
         return createSubdivisionObject(otherSeed)
+
+
+def _reverse_n_to_m_map(input, output, offset=0):
+    # Using same algorithm as module3d._update_faces to construct inverse 
+    # mapping with variable number of valid columns
+    map_ = np.argsort(input.flat)
+    vi = input.flat[map_]
+    fi = np.mgrid[:input.shape[0],:input.shape[1]][0].flat[map_].astype(np.uint32)
+    del map_
+    ix, first = np.unique(vi, return_index=True)
+    n = first[1:] - first[:-1]
+    n_last = len(vi) - first[-1]
+    n = np.hstack((n, np.array([n_last])))
+    for i in xrange(len(ix)):
+        output[ix[i], :n[i]] = offset + fi[first[i]:][:n[i]]
+
 
 def createSubdivisionObject(object, staticFaceMask=None, progressCallback=None):
     obj = SubdivisionObject(object, staticFaceMask)
