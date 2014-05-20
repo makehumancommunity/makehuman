@@ -40,6 +40,7 @@ import math
 import numpy as np
 import numpy.linalg as la
 import transformations as tm
+import log
 
 from .fbx_utils import *
 
@@ -69,7 +70,7 @@ def getObjectCounts(meshes):
 
 def countObjects(meshes, skel):
     """
-    Count the total number of vertex groups and shapes combined, as required 
+    Count the total number of vertex groups and shapes combined, as required
     for all specified meshes. If no skeleton rig is attached to the mesh, no
     vertex groups for bone weights are required.
     """
@@ -133,18 +134,18 @@ def writeShapeGeometry(fp, name, sname, shape, config):
         id,key = getId("Geometry::%s_%sShape" % (name, sname))
         nVerts = len(shape.verts)
         fp.write(
-'    Geometry: %d, "%s", "Shape" {\n' % (id, key) +
-'        version: 100\n' +
-'        Indexes: *%d   {\n' % nVerts +
-'            a: ')
+            '    Geometry: %d, "%s", "Shape" {\n' % (id, key) +
+            '        version: 100\n' +
+            '        Indexes: *%d   {\n' % nVerts +
+            '            a: ')
 
         string = "".join( ['%d,' % vn for vn in shape.verts] )
         fp.write(string[:-1])
 
         fp.write('\n' +
-'        }\n' +
-'        Vertices: *%d   {\n' % (3*nVerts) +
-'            a: ')
+            '        }\n' +
+            '        Vertices: *%d   {\n' % (3*nVerts) +
+            '            a: ')
 
         target = config.scale * shape.data + config.offset
         string = "".join( ["%.4f,%.4f,%.4f," % tuple(dr) for dr in target] )
@@ -152,30 +153,30 @@ def writeShapeGeometry(fp, name, sname, shape, config):
 
         # Must use normals for shapekeys
         fp.write('\n' +
-'        }\n' +
-'        Normals: *%d {\n' % (3*nVerts) +
-'            a: ')
+            '        }\n' +
+            '        Normals: *%d {\n' % (3*nVerts) +
+            '            a: ')
 
         string = nVerts * "0,0,0,"
         fp.write(string[:-1])
 
         fp.write('\n' +
-'        }\n' +
-'    }\n')
+            '        }\n' +
+            '    }\n')
 
 
 def writeShapeDeformer(fp, name, sname):
     id,key = getId("Deformer::%s_%sShape" % (name, sname))
     fp.write(
-'    Deformer: %d, "%s", "BlendShape" {\n' % (id, key) +
-'        Version: 100\n' +
-'    }\n')
+        '    Deformer: %d, "%s", "BlendShape" {\n' % (id, key) +
+        '        Version: 100\n' +
+        '    }\n')
 
 
 def writeShapeSubDeformer(fp, name, sname, shape):
     sid,skey = getId("SubDeformer::%s_%sShape" % (name, sname))
     fp.write(
-'    Deformer: %d, "%s", "BlendShapeChannel" {' % (sid, skey) +
+        '    Deformer: %d, "%s", "BlendShapeChannel" {' % (sid, skey) +
 """
         version: 100
         deformpercent: 0.0
@@ -204,36 +205,24 @@ def writeDeformer(fp, name):
 
 
 def writeSubDeformer(fp, name, bone, weights, config):
-    nVertexWeights = len(weights)
     id,key = getId("SubDeformer::%s_%s" % (bone.name, name))
 
-    fp.write(
-'    Deformer: %d, "%s", "Cluster" {\n' % (id, key) +
-'        Version: 100\n' +
-'        UserData: "", ""\n' +
-'        Indexes: *%d {\n' % nVertexWeights +
-'            a: ')
-
-    weights = zip(weights[0], weights[1])
-
-    last = nVertexWeights - 1
-    for n,data in enumerate(weights):
-        vn,w = data
-        fp.write(str(vn))
-        writeComma(fp, n, last)
+    nVertexWeights = len(weights[0])
+    indexString = ','.join(["%d" % vn for vn in weights[0]])
+    weightString = ','.join(["%4f" % w for w in weights[1]])
 
     fp.write(
-'        } \n' +
-'        Weights: *%d {\n' % nVertexWeights +
-'            a: ')
-
-    for n,data in enumerate(weights):
-        vn,w = data
-        fp.write(str(w))
-        writeComma(fp, n, last)
+        '    Deformer: %d, "%s", "Cluster" {\n' % (id, key) +
+        '        Version: 100\n' +
+        '        UserData: "", ""\n' +
+        '        Indexes: *%d {\n' % nVertexWeights +
+        '            a: %s\n' % indexString +
+        '        } \n' +
+        '        Weights: *%d {\n' % nVertexWeights +
+        '            a: %s\n' % weightString +
+        '        }\n')
 
     bindmat,bindinv = bone.getBindMatrix(config.offset)
-    fp.write('        }\n')
     writeMatrix(fp, 'Transform', bindmat)
     writeMatrix(fp, 'TransformLink', bindinv)
     fp.write('    }\n')
@@ -245,10 +234,10 @@ def writeBindPose(fp, meshes, skel, config):
     nMeshes = len(meshes)
 
     fp.write(
-'    Pose: %d, "%s", "BindPose" {\n' % (id, key)+
-'        Type: "BindPose"\n' +
-'        Version: 100\n' +
-'        NbPoseNodes: %d\n' % (1+nMeshes+nBones))
+        '    Pose: %d, "%s", "BindPose" {\n' % (id, key)+
+        '        Type: "BindPose"\n' +
+        '        Version: 100\n' +
+        '        NbPoseNodes: %d\n' % (1+nMeshes+nBones))
 
     startLinking()
 
