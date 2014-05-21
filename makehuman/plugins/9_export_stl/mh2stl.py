@@ -53,9 +53,11 @@ import exportutils
 import numpy as np
 from progress import Progress
 
+# TODO perhaps add scale option
+
 def exportStlAscii(filepath, config, exportJoints = False):
     """
-    This function exports MakeHuman mesh and skeleton data to stereolithography ascii format.
+    This function exports MakeHuman mesh to stereolithography ascii format.
 
     Parameters
     ----------
@@ -71,17 +73,12 @@ def exportStlAscii(filepath, config, exportJoints = False):
     progress = Progress(0, None)
 
     human = config.human
-    obj = human.meshData
     config.setupTexFolder(filepath)
     filename = os.path.basename(filepath)
     name = config.goodName(os.path.splitext(filename)[0])
 
-    progress(0, 0.3, "Collecting Objects")
-    rmeshes = exportutils.collect.setupMeshes(
-        name,
-        human,
-        config=config,
-        subdivide=config.subdivide)
+    objects = human.getObjects(True)
+    meshes = [o.mesh.clone(1,True) for o in objects]
 
     from codecs import open
     fp = open(filepath, 'w', encoding="utf-8")
@@ -89,26 +86,25 @@ def exportStlAscii(filepath, config, exportJoints = False):
     fp.write('solid %s\n' % solid)
 
     progress(0.3, 0.99, "Writing Objects")
-    objprog = Progress(len(rmeshes))
-    for rmesh in rmeshes:
-        obj = rmesh.object
-        coord = config.scale*obj.coord + config.offset
+    objprog = Progress(len(meshes))
+    for mesh in meshes:
+        coord = config.scale*mesh.coord + config.offset
         fp.write("".join( [(
-            'facet normal %f %f %f\n' % tuple(obj.fnorm[fn]) +
+            'facet normal %f %f %f\n' % tuple(mesh.fnorm[fn]) +
             '\touter loop\n' +
             '\t\tvertex %f %f %f\n' % tuple(coord[fv[0]]) +
             '\t\tvertex %f %f %f\n' % tuple(coord[fv[1]]) +
             '\t\tvertex %f %f %f\n' % tuple(coord[fv[2]]) +
             '\tendloop\n' +
             '\tendfacet\n' +
-            'facet normal %f %f %f\n' % tuple(obj.fnorm[fn]) +
+            'facet normal %f %f %f\n' % tuple(mesh.fnorm[fn]) +
             '\touter loop\n' +
             '\t\tvertex %f %f %f\n' % tuple(coord[fv[2]]) +
             '\t\tvertex %f %f %f\n' % tuple(coord[fv[3]]) +
             '\t\tvertex %f %f %f\n' % tuple(coord[fv[0]]) +
             '\tendloop\n' +
             '\tendfacet\n'
-            ) for fn,fv in enumerate(obj.fvert)] ))
+            ) for fn,fv in enumerate(mesh.fvert)] ))
         objprog.step()
 
     fp.write('endsolid %s\n' % solid)
@@ -127,17 +123,12 @@ def exportStlBinary(filepath, config, exportJoints = False):
     progress = Progress(0, None)
 
     human = config.human
-    obj = human.meshData
     config.setupTexFolder(filepath)
     filename = os.path.basename(filepath)
     name = config.goodName(os.path.splitext(filename)[0])
 
-    progress(0, 0.3, "Collecting Objects")
-    rmeshes = exportutils.collect.setupMeshes(
-        name,
-        human,
-        config=config,
-        subdivide=config.subdivide)
+    objects = human.getObjects(True)
+    meshes = [o.mesh.clone(1,True) for o in objects]
 
     fp = open(filepath, 'wb')
     fp.write('\x00' * 80)
@@ -145,12 +136,11 @@ def exportStlBinary(filepath, config, exportJoints = False):
     count = 0
 
     progress(0.3, 0.99, "Writing Objects")
-    objprog = Progress(len(rmeshes))
-    coord = config.scale * obj.coord + config.offset
-    for rmesh in rmeshes:
-        obj = rmesh.object
-        for fn,fv in enumerate(obj.fvert):
-            fno = obj.fnorm[fn]
+    objprog = Progress(len(meshes))
+    for mesh in meshes:
+        coord = config.scale * mesh.coord + config.offset
+        for fn,fv in enumerate(mesh.fvert):
+            fno = mesh.fnorm[fn]
             co = coord[fv]
 
             fp.write(struct.pack('<fff', fno[0], fno[1], fno[2]))
