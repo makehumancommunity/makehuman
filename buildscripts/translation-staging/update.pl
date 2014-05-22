@@ -45,13 +45,17 @@ while($inlin = <FILES>)
   print HTML "<!DOCTYPE html>\n<html lang=\"$code\">\n<head>\n";
   print HTML "<meta charset=\"utf-8\">\n";
   print HTML "<title>$fn</title>\n";
+  print HTML "<style>\n";
+  print HTML ".orig { display: block; width: 100%; background-color: #FFFFAA; margin: 5px; }\n";
+  print HTML ".trans { display: block; width: 100%; background-color: #BBBBFF; margin: 5px; margin-bottom: 20px; }\n";
+  print HTML "</style>\n";
   print HTML "</head>\n<body>\n";
   
   while($line = <LANG>)
   {
     if($line =~ m/\"([^"]+)\".*:.*\"([^"]+)\"/)
     {
-      print HTML "<!-- $1 -->\n<p>$2</p>\n\n"; 
+      print HTML "<p class=\"orig\" lang=\"en\">$1</p>\n<p class=\"trans\" lang=\"$code\">$2</p>\n\n"; 
     }
   }
   close(HTML);
