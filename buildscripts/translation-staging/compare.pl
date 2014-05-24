@@ -98,9 +98,13 @@ close(FILES);
 
 @langs = sort(keys(%langMiss));
 
+print "<br /><h1>About untranslated strings</h1>\n";
+print "<p>The following lists are untranslated strings per language. A string is considered untranslated if it is exactly the same as in the ";
+print "english source file. The algorithm cannot separate this from strings which are in fact the same in both languages, so some are bogus.</p><br />\n";
+
 foreach $lang (@langs)
 {
-  print "<br /><h1>$lang</h1>\n<ul>\n";
+  print "<br /><h1>Untranslated string in $lang</h1>\n<ul>\n";
   my(@m) = sort(@{$langMiss{$lang}});
   foreach $l (@m)
   {
