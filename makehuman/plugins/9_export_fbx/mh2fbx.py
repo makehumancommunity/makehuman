@@ -76,10 +76,19 @@ def exportFbx(filepath, config):
     skel = human.getSkeleton()
     if skel:
         skel = skel.scaled(config.scale)
+        useAnim = config.useFaceRig
+    else:
+        useAnim = False
 
     # Set mesh names
     for mesh in meshes:
         mesh.name = fbx_utils.getMeshName(mesh, skel)
+
+    if useAnim:
+        from armature.armature import loadAction
+        action,_ = loadAction()
+    else:
+        action = None
 
     G.app.progress(0.5, text="Exporting %s" % filepath)
 
@@ -111,13 +120,14 @@ def exportFbx(filepath, config):
     # TODO if "shapes" need to be exported, attach them to meshes in a similar way
 
     nVertexGroups, nShapes = fbx_deformer.getObjectCounts(meshes)
-    fbx_header.writeObjectDefs(fp, meshes, skel, config)
+    fbx_header.writeObjectDefs(fp, meshes, skel, action, config)
     fbx_skeleton.writeObjectDefs(fp, meshes, skel)
     fbx_mesh.writeObjectDefs(fp, meshes, nShapes)
     fbx_deformer.writeObjectDefs(fp, meshes, skel)
     if config.useMaterials:
         fbx_material.writeObjectDefs(fp, meshes)
-    #fbx_anim.writeObjectDefs(fp)
+    if useAnim:
+        fbx_anim.writeObjectDefs(fp, action)
     fp.write('}\n\n')
 
     fbx_header.writeObjectProps(fp)
@@ -127,7 +137,8 @@ def exportFbx(filepath, config):
     fbx_deformer.writeObjectProps(fp, meshes, skel, config)
     if config.useMaterials:
         fbx_material.writeObjectProps(fp, meshes, config)
-    #fbx_anim.writeObjectProps(fp)
+    if useAnim:
+        fbx_anim.writeObjectProps(fp, action, skel, config)
     fp.write('}\n\n')
 
     fbx_utils.startLinking()
@@ -138,10 +149,11 @@ def exportFbx(filepath, config):
     fbx_deformer.writeLinks(fp, meshes, skel)
     if config.useMaterials:
         fbx_material.writeLinks(fp, meshes)
-    #fbx_anim.writeLinks(fp)
+    if useAnim:
+        fbx_anim.writeLinks(fp, action)
     fp.write('}\n\n')
 
-    fbx_header.writeTakes(fp)
+    fbx_anim.writeTakes(fp, action)
     fp.close()
 
     G.app.progress(1)

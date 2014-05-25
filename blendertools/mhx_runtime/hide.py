@@ -66,7 +66,7 @@ class VIEW3D_OT_MhxAddHidersButton(bpy.types.Operator):
         initRnaProperties(rig)
         for ob in meshes:
             addHideDriver(ob, rig)
-        rig.MhxHideDrivers = True
+        rig.MhxVisibilityDrivers = True
         return{'FINISHED'}
 
 
@@ -115,7 +115,7 @@ class VIEW3D_OT_MhxRemoveHidersButton(bpy.types.Operator):
         for ob in meshes:
             removeHideDrivers(ob, rig)
         if context.object == rig:
-            rig.MhxHideDrivers = False
+            rig.MhxVisibilityDrivers = False
         return{'FINISHED'}
 
 

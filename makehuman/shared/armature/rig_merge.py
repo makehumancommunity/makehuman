@@ -37,6 +37,9 @@ Abstract
 Bone mergers
 """
 
+from .flags import *
+from . import rig_makehuman
+
 PalmMergers = {
     "hand.L" : ("palm_index.L", "palm_middle.L", "palm_ring.L", "palm_pinky.L", "thumb.01.L"),
     "hand.R" : ("palm_index.R", "palm_middle.R", "palm_ring.R", "palm_pinky.R", "thumb.01.R"),
@@ -49,8 +52,32 @@ FingerMergers = {
     "f_ring.01.R" : ("f_middle.01.R", "f_middle.02.R", "f_middle.03.R", "f_ring.01.R", "f_ring.02.R", "f_ring.03.R", "f_pinky.01.R", "f_pinky.02.R", "f_pinky.03.R"),
 }
 
-HeadMergers = {
+OldHeadMergers = {
     "head" : ("head", "uplid.L", "uplid.R", "lolid.L", "lolid.R", "tongue_base", "tongue_mid", "tongue_tip"),
+}
+
+NewHeadMergers = {}
+hlist = NewHeadMergers["head"] = ["head"]
+#hlist.append("jaw")
+for bname,data in rig_makehuman.Armature.items():
+    if data[3] & L_FACE and bname[0:8] != "platysma":
+        hlist.append(bname)
+
+
+NeckMergers = {}
+nlist = NeckMergers["neck"] = ["neck"]
+for bname in rig_makehuman.Armature.keys():
+    if bname[0:8] == "platysma":
+        nlist.append(bname)
+
+
+TwistMergers = {
+    "upper_arm.L" : ["upper_arm.L", "upperarm01.L", "upperarm02.L"],
+    "forearm.L" :   ["forearm.L", "lowerarm01.L", "lowerarm02.L"],
+    "shin.L" :      ["shin.L", "lowerleg01.L", "lowerleg02.L"],
+    "upper_arm.R" : ["upper_arm.R", "upperarm01.R", "upperarm02.R"],
+    "forearm.R" :   ["forearm.R", "lowerarm01.R", "lowerarm02.R"],
+    "shin.R" :      ["shin.R", "lowerleg01.R", "lowerleg02.R"],
 }
 
 SpineMergers = {
@@ -59,8 +86,26 @@ SpineMergers = {
 }
 
 ShoulderMergers = {
-    "clavicle.L" : ("clavicle.L", "deltoid.L"),
-    "clavicle.R" : ("clavicle.R", "deltoid.R"),
+    "clavicle.L" : ("shoulder.L", "clavicle.L", "deltoid.L", "scapula.L"),
+    "clavicle.R" : ("clavicle.R", "shoulder.R", "deltoid.R", "scapula.R"),
 }
+
+NewFeetMergers = {}
+for suffix in [".L", ".R"]:
+    foot = "foot"+suffix
+    NewFeetMergers[foot] = [foot, "heel"+suffix]
+    for n in range(1,6):
+        NewFeetMergers[foot].append("metatarsal%d%s" % (n,suffix))
+
+NewToeMergers = {}
+for suffix in [".L", ".R"]:
+    toe = "toe"+suffix
+    NewToeMergers[toe] = [toe]
+    for k in range(1,3):
+        NewToeMergers[toe].append("toe1-%d%s" % (k, suffix))
+    for n in range(2,6):
+        for k in range(1,4):
+            NewToeMergers[toe].append("toe%d-%d%s" % (n, k, suffix))
+
 
 

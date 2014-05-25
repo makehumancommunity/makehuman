@@ -76,6 +76,8 @@ HeadsTails = {
 
     # Head
 
+    'eye_parent.L' :    ('l-eye', 'l-eye-end'),
+    'eye_parent.R' :    ('r-eye', 'r-eye-end'),
     'eyes' :            ('eyes', ('eyes', (0,0,1))),
     'gaze' :            ('gaze', ('gaze', (0,0,1))),
     'gaze_parent' :     ('head', 'head-2'),
