@@ -40,7 +40,7 @@ Armature options
 
 import os
 import log
-import io_json
+import json
 from getpath import getSysDataPath
 
 class ArmatureOptions(object):
@@ -54,12 +54,14 @@ class ArmatureOptions(object):
         self.scale = 1.0
         self.boneMap = None
 
+        self.useMakeHumanRig = False
+        self.useRigify = False
+        self.useMhxCompat = False
         self.useMasterBone = False
         self.useHeadControl = False
         self.useReverseHip = False
         self.useMuscles = False
         self.useTerminators = False
-        self.useFaceRig = False
         self.useLocks = False
         self.useRotationLimits = False
         self.addConnectingBones = False
@@ -70,6 +72,10 @@ class ArmatureOptions(object):
         self.mergeFingers = False
         self.mergePalms = False
         self.mergeHead = False
+        self.mergeNeck = False
+        self.mergeFeet = False
+        self.mergeToes = False
+        self.mergeTwist = False
         self.merge = None
         self.terminals = {}
 
@@ -100,25 +106,28 @@ class ArmatureOptions(object):
         self.clothesRig = False
 
     def setExportOptions(self,
+            useFaceRig = True,
             useCustomShapes = None,
             useConstraints = False,
             useBoneGroups = False,
             useCorrectives = False,
             useRotationLimits = False,
+            addConnectingBones = False,
             useLocks = False,
-            useFaceRig = False,
             useExpressions = False,
             useTPose = False,
             useIkHair = False,
             useLeftRight = False,
             ):
+        self.mergeHead = not useFaceRig
+        self.mergeNeck = not useFaceRig
         self.useCustomShapes = useCustomShapes
         self.useConstraints = useConstraints
         self.useBoneGroups = useBoneGroups
         self.useCorrectives = useCorrectives
         self.useRotationLimits = useRotationLimits
+        self.addConnectingBones = addConnectingBones
         self.useLocks = useLocks
-        self.useFaceRig = useFaceRig
         self.useExpressions = useExpressions
         self.useTPose = useTPose
         self.useIkHair = useIkHair
@@ -133,13 +142,13 @@ class ArmatureOptions(object):
             "   scale : %s\n" % self.scale +
             "   boneMap : %s\n" % self.boneMap +
             "   useMuscles : %s\n" % self.useMuscles +
-            "   useFaceRig : %s\n" % self.useFaceRig +
             "   addConnectingBones : %s\n" % self.addConnectingBones +
-            "   mergeSpine : %s\n" % self.mergeSpine +
+            "   mergeHead : %s\n" % self.mergeHead +
+            "   mergeNeck : %s\n" % self.mergeNeck +
             "   mergeShoulders : %s\n" % self.mergeShoulders +
             "   mergeFingers : %s\n" % self.mergeFingers +
-            "   mergePalms : %s\n" % self.mergePalms +
-            "   mergeHead : %s\n" % self.mergeHead +
+            "   mergeFeet : %s\n" % self.mergeFeet +
+            "   mergeToes : %s\n" % self.mergeToes +
             "   useSplitBones : %s\n" % self.useSplitBones +
             "   useSplitNames : %s\n" % self.useSplitNames +
             "   useDeformBones : %s\n" % self.useDeformBones +
@@ -148,7 +157,8 @@ class ArmatureOptions(object):
             "   useIkArms : %s\n" % self.useIkArms +
             "   useIkLegs : %s\n" % self.useIkLegs +
             "   useFingers : %s\n" % self.useFingers +
-            "   useMasterBone : %s\n" % self.useMasterBone +
+            "   useMakeHumanRig : %s\n" % self.useMakeHumanRig +
+            "   useMhxCompat : %s\n" % self.useMhxCompat +
             "   useLocks : %s\n" % self.useLocks +
             "   useRotationLimits : %s\n" % self.useRotationLimits +
             "   merge : %s\n" % self.merge +
@@ -160,7 +170,6 @@ class ArmatureOptions(object):
             return
 
         self.useMuscles = selector.useMuscles.selected
-        self.useFaceRig = selector.useFaceRig.selected
         self.useReverseHip = selector.useReverseHip.selected
         #self.useCorrectives = selector.useCorrectives.selected
         self.addConnectingBones = selector.addConnectingBones.selected
@@ -182,37 +191,27 @@ class ArmatureOptions(object):
         self.useMasterBone = selector.useMasterBone.selected
 
 
-    def reset(self, selector, useMuscles=False, useFaceRig=False):
+    def reset(self, selector, useMuscles=False):
         self._setDefaults()
         self.useMuscles = useMuscles
-        self.useFaceRig = useFaceRig
         if selector is not None:
             selector.fromOptions(self)
 
 
     def loadPreset(self, filepath, selector):
-        struct = io_json.loadJson(filepath)
+        struct = json.load(open(filepath, 'rU'))
         self._setDefaults()
         try:
             self.rigtype = struct["name"]
         except KeyError:
             pass
-        try:
-            self.description = struct["description"]
-        except KeyError:
-            pass
-        try:
-            self.merge = struct["merge"]
-        except KeyError:
-            pass
-        try:
-            self.terminals = struct["terminals"]
-        except KeyError:
-            pass
-        try:
-            self.useTerminators = struct["use_terminators"]
-        except KeyError:
-            pass
+
+        for key in ["description", "merge", "terminals", "use_terminators"]:
+            try:
+                setattr(self, key, struct[key])
+            except KeyError:
+                pass
+
         try:
             settings = struct["settings"]
         except KeyError:
@@ -221,7 +220,7 @@ class ArmatureOptions(object):
             if hasattr(self, key):
                 setattr(self, key, value)
             else:
-                log.warning("Unknown property defined in armature options file %s" % filename)
+                log.warning("Unknown property defined in armature options file %s" % filepath)
 
         if selector is not None:
             selector.fromOptions(self)
@@ -241,7 +240,6 @@ class ArmatureSelector:
 
         import gui
         self.useMuscles = box.addWidget(gui.CheckBox("Muscle bones (MHX only)"))
-        self.useFaceRig = box.addWidget(gui.CheckBox("Face rig (MHX only)"))
         self.useReverseHip = box.addWidget(gui.CheckBox("Reverse hips"))
         self.addConnectingBones = box.addWidget(gui.CheckBox("Connecting bones"))
 
@@ -263,7 +261,6 @@ class ArmatureSelector:
 
     def fromOptions(self, options):
         self.useMuscles.setSelected(options.useMuscles)
-        self.useFaceRig.setSelected(options.useFaceRig)
         self.useReverseHip.setSelected(options.useReverseHip)
         self.addConnectingBones.setSelected(options.addConnectingBones)
 
@@ -304,7 +301,7 @@ class Locale:
             return
         if filepath:
             self.filepath = filepath
-        struct = io_json.loadJson(self.filepath)
+        struct = json.load(open(self.filepath, 'rU'))
         #self.language = struct["language"]
         self.bones = struct["bones"]
 

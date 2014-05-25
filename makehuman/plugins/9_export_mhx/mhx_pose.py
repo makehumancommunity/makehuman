@@ -128,7 +128,7 @@ class Writer(mhx_writer.Writer):
             visemeList = exportutils.shapekeys.readExpressionMhm(getpath.getSysDataPath("visemes"))
             self.writeExpressions(fp, visemeList, "Viseme")
 
-        if config.useAdvancedMHX:
+        if config.useLegacyMHX:
             fp.write("  AnimationData None (toggle&T_Symm==0)\n")
             self.writeShapeKeyDrivers(fp, name, proxy)
             fp.write("  end AnimationData\n\n")
