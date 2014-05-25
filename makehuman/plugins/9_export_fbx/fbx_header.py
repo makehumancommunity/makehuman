@@ -145,16 +145,18 @@ References:  {
 """)
 
 
-def writeObjectDefs(fp, meshes, skel, config):
+def writeObjectDefs(fp, meshes, skel, action, config):
     count = (
               fbx_skeleton.countObjects(skel) +
               fbx_mesh.countObjects(meshes) +
               fbx_deformer.countObjects(meshes, skel) +
-              #fbx_anim.countObjects() +
               1
             )
     if config.useMaterials:
         count += fbx_material.countObjects(meshes)
+
+    if action:
+        count += fbx_anim.countObjects(action)
 
     fp.write(
 """
@@ -190,16 +192,4 @@ def writeLinks(fp):
 ;------------------------------------------------------------------
 
 Connections:  {
-""")
-
-
-def writeTakes(fp):
-    fp.write(
-"""
-;Takes section
-;----------------------------------------------------
-
-Takes:  {
-    Current: ""
-}
 """)

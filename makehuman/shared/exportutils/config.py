@@ -195,10 +195,13 @@ class Config(object):
         Retrieve custom rig options of the rig set on the human.
         """
         if not hasattr(self.human, "getSkeleton"):
+            log.debug("GRO no attr")
             return None
         skel = self.human.getSkeleton()
         if skel:
+            log.debug("GRO %s" % skel.options)
             return skel.options
         else:
+            log.debug("GRO no skel")
             return None
 

@@ -40,8 +40,8 @@ Alternatively, run the script in the script editor (Alt-P), and access from UI p
 bl_info = {
     "name": "MakeWalk",
     "author": "Thomas Larsson",
-    "version": (0, 943),
-    "blender": (2, 6, 9),
+    "version": (0, 944),
+    "blender": (2, 7, 0),
     "location": "View3D > Tools > MakeWalk",
     "description": "Mocap tool for MakeHuman character",
     "warning": "",
@@ -102,7 +102,7 @@ def inset(layout):
 
 class MainPanel(bpy.types.Panel):
     bl_category = "MakeWalk"
-    bl_label = "MakeWalk v %d.%d: Main" % bl_info["version"]
+    bl_label = "MakeWalk v %d.%d: Main" % tuple(bl_info["version"])
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
 

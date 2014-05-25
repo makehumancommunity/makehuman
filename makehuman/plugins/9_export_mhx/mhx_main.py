@@ -23,7 +23,7 @@ MakeHuman to MHX (MakeHuman eXchange format) exporter. MHX files can be loaded i
 """
 
 MAJOR_VERSION = 1
-MINOR_VERSION = 16
+MINOR_VERSION = 18
 
 import module3d
 from core import G
@@ -118,6 +118,7 @@ class Writer(mhx_writer.Writer):
 
         G.app.progress(0.1, text="Exporting armature")
         amt.writeArmature(fp, MINOR_VERSION, self)
+        amt.writeAction(fp)
 
         G.app.progress(0.15, text="Exporting materials")
         fp.write("\nNoScale False ;\n\n")

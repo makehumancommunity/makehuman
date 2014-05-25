@@ -54,6 +54,7 @@ from . import dae_materials
 from . import dae_controller
 from . import dae_geometry
 from . import dae_node
+from . import dae_animation
 
 #
 #    Size of end bones = 1 mm
@@ -131,6 +132,9 @@ def exportCollada(filepath, config):
 
         progress(0.7, 0.75, "Exporting controllers")
         dae_controller.writeLibraryControllers(fp, human, meshes, skel, config)
+
+        progress(0.75, 0.8, "Exporting animations")
+        dae_animation.writeLibraryAnimations(fp, human, config)
 
         progress(0.75, 0.9, "Exporting geometry")
         dae_geometry.writeLibraryGeometry(fp, meshes, config)
