@@ -87,6 +87,7 @@ class Proxy:
         self.tags = []
 
         self.ref_vIdxs = None       # (Vidx1,Vidx2,Vidx3) list with references to human vertex indices, indexed by proxy vert
+        self.ref_wvIdxs = None      # as ref_vIdxs, but used for weighting if there is a weighting_verts table
         self.weights = None         # (w1,w2,w3) list, with weights per human vertex (mapped by ref_vIdxs), indexed by proxy vert
         self.vertWeights = {}       # (proxy-vert, weight) list for each parent vert (reverse mapping of self.weights, indexed by human vertex)
         self.offsets = None         # (x,y,z) list of vertex offsets, indexed by proxy vert
@@ -183,7 +184,7 @@ class Proxy:
         return mesh,obj
 
 
-    def _finalize(self, refVerts):
+    def _finalize(self, refVerts, wrefVerts):
         """
         Final step in parsing/loading a proxy file. Initializes numpy structures
         for performance improvement.
@@ -191,6 +192,10 @@ class Proxy:
         self.weights = np.asarray([v._weights for v in refVerts], dtype=np.float32)
         self.ref_vIdxs = np.asarray([v._verts for v in refVerts], dtype=np.uint32)
         self.offsets = np.asarray([v._offset for v in refVerts], dtype=np.float32)
+        if wrefVerts is None:
+            self.ref_wvIdxs = self.ref_vIdxs
+        else:
+            self.ref_wvIdxs = np.asarray([v._verts for v in wrefVerts], dtype=np.uint32)
 
 
     def _reloadReverseMapping(self):
@@ -198,10 +203,10 @@ class Proxy:
         Reconstruct reverse vertex (and weights) mapping
         """
         self.vertWeights = {}
-        for pxy_vIdx in xrange(self.ref_vIdxs.shape[0]):
-            _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 0], pxy_vIdx, self.weights[pxy_vIdx, 0])
-            _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 1], pxy_vIdx, self.weights[pxy_vIdx, 1])
-            _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 2], pxy_vIdx, self.weights[pxy_vIdx, 2])
+        for pxy_vIdx in xrange(self.ref_wvIdxs.shape[0]):
+            _addProxyVertWeight(self.vertWeights, self.ref_wvIdxs[pxy_vIdx, 0], pxy_vIdx, self.weights[pxy_vIdx, 0])
+            _addProxyVertWeight(self.vertWeights, self.ref_wvIdxs[pxy_vIdx, 1], pxy_vIdx, self.weights[pxy_vIdx, 1])
+            _addProxyVertWeight(self.vertWeights, self.ref_wvIdxs[pxy_vIdx, 2], pxy_vIdx, self.weights[pxy_vIdx, 2])
 
 
     def getCoords(self):
@@ -336,6 +341,7 @@ class Proxy:
 doRefVerts = 1
 doWeights = 2
 doDeleteVerts = 3
+doWeightingVerts = 4
 
 def loadProxy(human, path, type="Clothes"):
     try:
@@ -377,9 +383,9 @@ def loadTextProxy(human, filepath, type="Clothes"):
     folder = os.path.realpath(os.path.expanduser(os.path.dirname(filepath)))
     proxy = Proxy(filepath, type, human)
     refVerts = []
+    wrefVerts = []
 
     status = 0
-    vnum = 0
     for line in fp:
         words = line.split()
 
@@ -407,6 +413,11 @@ def loadTextProxy(human, filepath, type="Clothes"):
 
         elif key == 'verts':
             status = doRefVerts
+            vnum = 0
+        elif key == 'weighting_verts':
+            status = doWeightingVerts
+            proxy.vertWeights = {}       # Throw away old list
+            wvnum = 0
         elif key == 'weights':
             status = doWeights
             if proxy.weights == None:
@@ -495,6 +506,15 @@ def loadTextProxy(human, filepath, type="Clothes"):
                 refVert.fromTriple(words, vnum, proxy.vertWeights)
             vnum += 1
 
+        elif status == doWeightingVerts:
+            refVert = ProxyRefVert(human)
+            wrefVerts.append(refVert)
+            if len(words) == 1:
+                refVert.fromSingle(words, wvnum, proxy.vertWeights)
+            else:
+                refVert.fromTriple(words, wvnum, proxy.vertWeights)
+            wvnum += 1
+
         elif status == doWeights:
             v = int(words[0])
             w = float(words[1])
@@ -522,7 +542,7 @@ def loadTextProxy(human, filepath, type="Clothes"):
         log.warning('Proxy file %s does not specify a Z depth. Using 50.', filepath)
         proxy.z_depth = 50
 
-    proxy._finalize(refVerts)
+    proxy._finalize(refVerts, wrefVerts)
 
     return proxy
 
@@ -565,12 +585,14 @@ def saveBinaryProxy(proxy, path):
         # 3 ref verts used in this proxy
         num_refverts = 3
         vars_["ref_vIdxs"] = proxy.ref_vIdxs
+        vars_["ref_wvIdxs"] = proxy.ref_wvIdxs
         vars_["offsets"] = proxy.offsets
         vars_["weights"] = proxy.weights
     else:
         # Proxy uses exact fitting exclusively: store npz file more compactly
         num_refverts = 1
         vars_["ref_vIdxs"] = proxy.ref_vIdxs[:,0]
+        vars_["ref_wvIdxs"] = proxy.ref_wvIdxs[:,0]
         vars_["weights"] = proxy.weights[:,0]
     vars_['num_refverts'] = np.asarray(num_refverts, dtype=np.int32)
 
@@ -607,12 +629,15 @@ def loadBinaryProxy(path, human, type):
 
     if num_refverts == 3:
         proxy.ref_vIdxs = npzfile['ref_vIdxs']
+        proxy.ref_wvIdxs = npzfile['ref_wvIdxs']
         proxy.offsets = npzfile['offsets']
         proxy.weights = npzfile['weights']
     else:
         num_refs = npzfile['ref_vIdxs'].shape[0]
         proxy.ref_vIdxs = np.zeros((num_refs,3), dtype=np.uint32)
         proxy.ref_vIdxs[:,0] = npzfile['ref_vIdxs']
+        proxy.ref_wvIdxs = np.zeros((num_refs,3), dtype=np.uint32)
+        proxy.ref_wvIdxs[:,0] = npzfile['ref_wvIdxs']
         proxy.offsets = np.zeros((num_refs,3), dtype=np.float32)
         proxy.weights = np.zeros((num_refs,3), dtype=np.float32)
         proxy.weights[:,0] = npzfile['weights']
