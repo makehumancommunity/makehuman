@@ -1,0 +1,37 @@
+#
+# ACCAD 
+#	www.accad.Accad.edu/research/mocap/mocap_data.htm
+#
+#	bone	 	MHX bone	twist
+
+Name:	ACCAD
+
+Armature:
+	hips		hips	
+	tospine		spine	
+	spine		spine-1	
+	spine1		chest	 
+	neck		neck	 
+	head		head	 
+
+	leftshoulder	clavicle.L
+	leftarm		upper_arm.L	 
+	leftforearm	forearm.L	
+	lefthand	hand.L	 
+
+	rightshoulder	clavicle.R
+	rightarm	upper_arm.R	 
+	rightforearm	forearm.R	
+	righthand	hand.R	
+
+	leftupleg	thigh.L	 
+	leftleg		shin.L	 
+	leftfoot	foot.L	 
+	lefttoebase	toe.L	
+
+	rightupleg	thigh.R	
+	rightleg	shin.R	 
+	rightfoot	foot.R	 
+	righttoebase	toe.R	
+
+
