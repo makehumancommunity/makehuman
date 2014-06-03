@@ -1879,6 +1879,7 @@ def init():
                  ('Foot', 'Foot', 'Foot'),
                  ('Eye', 'Eye', 'Eye'),
                  ('Genital', 'Genital', 'Genital'),
+                 ('Teeth', 'Teeth', 'Teeth'),
                  ('Body', 'Body', 'Body'),
                  ('Custom', 'Custom', 'Custom'),
                  ],
