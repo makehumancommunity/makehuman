@@ -226,14 +226,6 @@ def loadHuman(context):
 
 
 #
-#
-#
-
-theShapeKeys = [
-    #'Breathe',
-    ]
-
-#
 #    findClothes(context, hum, clo):
 #
 
@@ -243,9 +235,19 @@ def findClothes(context, hum, clo):
     """
 
     scn = context.scene
+    humanVerts,humanGroup,pExactIndex = findVertexGroups(hum, clo)
+    if scn.MCUseRigidFit:
+        bestVerts,vfaces = findRigidFit(scn, humanVerts, humanGroup, pExactIndex, hum, clo)
+        useMid = False
+    else:
+        bestVerts,vfaces = findBestVerts(scn, humanVerts, humanGroup, pExactIndex, hum, clo)
+        useMid = True
+    bestFaces = findBestFaces(scn, bestVerts, vfaces, hum, clo, useMid)
+    return bestFaces
 
+
+def findVertexGroups(hum, clo):
     # Associate groups
-
     humanVerts = {}
     humanGroup = {}
     pExactIndex = None
@@ -261,41 +263,72 @@ def findClothes(context, hum, clo):
             if pgrp.name == "Exact":
                 pExactIndex = pgrp.index
 
+    return humanVerts,humanGroup,pExactIndex
+
+
+def getVGroupIndices(pv, clo, humanGroup, pExactIndex):
+    # Check that there is a single clothes vertex group, except perhaps
+    # for the Exact group.
+    forceExact = False
+    if len(pv.groups) == 0:
+        pindex = -1
+    elif len(pv.groups) == 1:
+        pindex = pv.groups[0].group
+        if pindex == pExactIndex:
+            pindex = -1
+    elif len(pv.groups) == 2:
+        pindex = pv.groups[0].group
+        pindex1 = pv.groups[1].group
+        if pindex == pExactIndex:
+            forceExact = True
+            pindex = pindex1
+        elif pindex1 == pExactIndex:
+            forceExact = True
+    else:
+        pindex = -1
+
+    if pindex < 0:
+        selectVerts([pv], clo)
+        raise MHError("Clothes %s vert %d not member of any group" % (clo.name, pv.index))
+
+    # Check that human group exists
+    try:
+        bindex = humanGroup[pindex].index
+    except KeyError:
+        gname = clo.vertex_groups[pindex].name
+        raise MHError("Did not find vertex group %s in hum.data mesh" % gname)
+
+    return pindex, bindex, forceExact
+
+
+def findRigidFit(scn, humanVerts, humanGroup, pExactIndex, hum, clo):
+    vfaces = {}
+    for idx,verts in humanVerts.items():
+        if len(verts) != 3:
+            raise MHError("Human vertex group \"%s\"\nmust contain exactly three vertices" % humanGroup[idx].name)
+        v0,v1,v2 = verts
+        t = [v0.index, v1.index, v2.index]
+        vfaces[v0.index] = [t]
+        vfaces[v1.index] = [t]
+        vfaces[v2.index] = [t]
+
+    bestVerts = []
+    for pv in clo.data.vertices:
+        pindex,bindex,_forceExact = getVGroupIndices(pv, clo, humanGroup, pExactIndex)
+        bv = humanVerts[pindex][0]
+        vec = pv.co - bv.co
+        mverts = [(bv, vec.length)]
+        bestVerts.append((pv, bindex, False, mverts, []))
+
+    return bestVerts, vfaces
+
+
+def findBestVerts(scn, humanVerts, humanGroup, pExactIndex, hum, clo):
     # Associate verts
 
     bestVerts = []
     for pv in clo.data.vertices:
-
-        # Check that there is a single clothes vertex group, except perhaps
-        # for the Exact group.
-        forceExact = False
-        if len(pv.groups) == 0:
-            pindex = -1
-        elif len(pv.groups) == 1:
-            pindex = pv.groups[0].group
-            if pindex == pExactIndex:
-                pindex = -1
-        elif len(pv.groups) == 2:
-            pindex = pv.groups[0].group
-            pindex1 = pv.groups[1].group
-            if pindex == pExactIndex:
-                forceExact = True
-                pindex = pindex1
-            elif pindex1 == pExactIndex:
-                forceExact = True
-        else:
-            pindex = -1
-
-        if pindex < 0:
-            selectVerts([pv], clo)
-            raise MHError("Clothes %s vert %d not member of any group" % (clo.name, pv.index))
-
-        # Check that human group exists
-        try:
-            bindex = humanGroup[pindex].index
-        except KeyError:
-            gname = clo.vertex_groups[pindex].name
-            raise MHError("Did not find vertex group %s in hum.data mesh" % gname)
+        pindex,bindex,forceExact = getVGroupIndices(pv, clo, humanGroup, pExactIndex)
 
         # Find a small number of human verts closest to the clothes vert
         mverts = []
@@ -376,6 +409,10 @@ def findClothes(context, hum, clo):
             vfaces[v1].append(t)
             vfaces[v2].append(t)
 
+    return bestVerts, vfaces
+
+
+def findBestFaces(scn, bestVerts, vfaces, hum, clo, useMid):
     print("Finding weights")
     for (pv, bindex, exact, mverts, fcs) in bestVerts:
         if exact:
@@ -386,7 +423,7 @@ def findClothes(context, hum, clo):
                     v0 = hum.data.vertices[f[0]]
                     v1 = hum.data.vertices[f[1]]
                     v2 = hum.data.vertices[f[2]]
-                    if (bindex >= 0) and (pv.co[0] < 0.01) and (pv.co[0] > -0.01):
+                    if useMid and (bindex >= 0) and (pv.co[0] < 0.01) and (pv.co[0] > -0.01):
                         wts = midWeights(pv, bindex, v0, v1, v2, hum, clo)
                     else:
                         wts = cornerWeights(pv, v0, v1, v2, hum, clo)
@@ -412,7 +449,7 @@ def findClothes(context, hum, clo):
                 minmax = w
                 bWts = wts
                 bVerts = fverts
-        if minmax < scn.MCThreshold:
+        if False and minmax < scn.MCThreshold:
             badVerts.append(pv.index)
             pv.select = True
             (mv, mdist) = mverts[0]
@@ -520,7 +557,7 @@ def cornerWeights(pv, v0, v1, v2, hum, clo):
 #
 
 def midWeights(pv, bindex, v0, v1, v2, hum, clo):
-    #print("Mid", pv.index, bindex)
+    print("Mid", pv.index, bindex)
     pv.select = True
     if isInGroup(v0, bindex):
         v0.select = True
@@ -536,14 +573,16 @@ def midWeights(pv, bindex, v0, v1, v2, hum, clo):
         v1.select = True
         v2.select = True
         return (w0, w1, w2)
-    #print("  Failed mid")
+    print("  Failed mid")
     return cornerWeights(pv, v0, v1, v2, hum, clo)
+
 
 def isInGroup(v, bindex):
     for g in v.groups:
         if g.group == bindex:
             return True
     return False
+
 
 def midWeight(pv, r0, r1):
     u01 = r1-r0
@@ -797,10 +836,6 @@ def writeStuff(fp, clo, context, matfile):
             fp.write("subsurf %d %d\n" % (mod.levels, mod.render_levels))
         elif mod.type == 'SOLIDIFY':
             fp.write("solidify %.3f %.3f\n" % (mod.thickness, mod.offset))
-
-    for skey in theShapeKeys:
-        if getattr(scn, "MC" + skey):
-            fp.write("shapekey %s\n" % skey)
 
     if matfile:
         fp.write("material %s\n" % matfile)
@@ -1689,13 +1724,6 @@ def init():
     if not maketarget.maketarget.MTIsInited:
         maketarget.maketarget.init()
 
-    for skey in theShapeKeys:
-        prop = BoolProperty(
-            name = skey,
-            description = "Shapekey %s affects clothes" % skey,
-            default = False)
-        setattr(bpy.types.Scene, 'MC%s' % skey, prop)
-
     bpy.types.Scene.MCBodyType = EnumProperty(
         items = [('None', 'Base Mesh', 'None'),
                  ('caucasian-male-young', 'Average Male', 'caucasian-male-young'),
@@ -1720,6 +1748,12 @@ def init():
     bpy.types.Scene.MCUseBoundaryMirror = BoolProperty(
         name="Mirror Bounding Box",
         description="Mirror the bounding box for Left/Right vertex groups",
+        default=False)
+
+
+    bpy.types.Scene.MCUseRigidFit = BoolProperty(
+        name="Rigid Fit",
+        description="Fit all verts in each vertex group to exactly three human verts",
         default=False)
 
 
