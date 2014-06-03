@@ -88,7 +88,7 @@ def importBaseMhclo(context, filepath=None):
 #   Simple obj importer which reads only verts, faces, and texture verts
 #----------------------------------------------------------
 
-def importObj(filepath, context):
+def importObj(filepath, context, addBasisKey=True):
     global BMeshAware
     scn = context.scene
     obname = utils.nameFromPath(filepath)
@@ -162,7 +162,8 @@ def importObj(filepath, context):
     scn.objects.link(ob)
     ob.select = True
     scn.objects.active = ob
-    ob.shape_key_add(name="Basis")
+    if addBasisKey:
+        ob.shape_key_add(name="Basis")
     bpy.ops.object.shade_smooth()
     return ob
 

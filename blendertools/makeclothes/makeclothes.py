@@ -46,7 +46,7 @@ from bpy.props import *
 from mathutils import Vector
 
 from maketarget.utils import getMHBlenderDirectory
-from .error import MHError, addWarning
+from .error import MHError, handleMHError, addWarning
 from . import mc
 from . import materials
 
@@ -1697,6 +1697,54 @@ def saveDefaultSettings(context):
                 fp.write("%s str %s\n" % (prop, value))
     fp.close()
     return
+
+#
+#   Test clothese
+#
+
+def testMhcloFile(context, filepath):
+    from maketarget.proxy import CProxy
+    from maketarget.import_obj import importObj
+
+    hum = context.object
+    if not isOkHuman(hum):
+        raise MHError("%s is not a human mesh" % hum.name)
+
+    pxy = CProxy()
+    pxy.read(filepath)
+    clo = importObj(pxy.obj_file, context, addBasisKey=False)
+    pxy.update(hum.data.vertices, clo.data.vertices)
+
+
+class VIEW3D_OT_TestClothesButton(bpy.types.Operator):
+    bl_idname = "mhclo.test_clothes"
+    bl_label = "Test Clothes"
+    bl_description = "Load a mhclo file to object"
+    bl_options = {'UNDO'}
+
+    filename_ext = ".mhclo"
+    filter_glob = StringProperty(default="*.mhclo", options={'HIDDEN'})
+    filepath = bpy.props.StringProperty(
+        name="File Path",
+        description="File path used for mhclo file",
+        maxlen= 1024, default= "")
+
+    @classmethod
+    def poll(self, context):
+        return context.object
+
+    def execute(self, context):
+        try:
+            testMhcloFile(context, self.properties.filepath)
+        except MHError:
+            handleMHError(context)
+        print("%s loaded" % self.properties.filepath)
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
 
 #
 #   BMesh
