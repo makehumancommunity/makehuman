@@ -138,6 +138,8 @@ class MakeClothesPanel(bpy.types.Panel):
         layout.prop(scn, "MCUseRigidFit")
         layout.operator("mhclo.make_clothes")
         layout.separator()
+        layout.operator("mhclo.test_clothes")
+        layout.separator()
 
         layout.prop(scn, "MCShowSelect")
         if scn.MCShowSelect:
