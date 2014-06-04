@@ -629,15 +629,21 @@ def loadBinaryProxy(path, human, type):
 
     if num_refverts == 3:
         proxy.ref_vIdxs = npzfile['ref_vIdxs']
-        proxy.ref_wvIdxs = npzfile['ref_wvIdxs']
+        try:
+            proxy.ref_wvIdxs = npzfile['ref_wvIdxs']
+        except KeyError:
+            proxy.ref_wvIdxs = proxy.ref_vIdxs
         proxy.offsets = npzfile['offsets']
         proxy.weights = npzfile['weights']
     else:
         num_refs = npzfile['ref_vIdxs'].shape[0]
         proxy.ref_vIdxs = np.zeros((num_refs,3), dtype=np.uint32)
         proxy.ref_vIdxs[:,0] = npzfile['ref_vIdxs']
-        proxy.ref_wvIdxs = np.zeros((num_refs,3), dtype=np.uint32)
-        proxy.ref_wvIdxs[:,0] = npzfile['ref_wvIdxs']
+        try:
+            proxy.ref_wvIdxs = np.zeros((num_refs,3), dtype=np.uint32)
+            proxy.ref_wvIdxs[:,0] = npzfile['ref_wvIdxs']
+        except KeyError:
+            proxy.ref_wvIdxs = proxy.ref_vIdxs
         proxy.offsets = np.zeros((num_refs,3), dtype=np.float32)
         proxy.weights = np.zeros((num_refs,3), dtype=np.float32)
         proxy.weights[:,0] = npzfile['weights']
