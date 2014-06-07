@@ -741,7 +741,7 @@ class Object3D(object):
             empty = True
             for (v,wt) in parentWeights[key]:
                 mvs = vmap[v]
-                if isinstance(mvs, (int, numpy.int32)):
+                if isinstance(mvs, (int, np.int32)):
                     mvs = [mvs]
                 for mv in mvs:
                     w = vwmap[mv]
