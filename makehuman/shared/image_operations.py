@@ -39,7 +39,7 @@ Various image processing operations.
 """
 
 import numpy
-from image import Image
+from image import Image, FILTER_NEAREST, FILTER_BILINEAR, FILTER_BICUBIC
 from progress import Progress
 
 
@@ -256,13 +256,8 @@ def getChannel(img, channel):
 Image conversions
 '''
 
-def resized(img, width, height):
-    sw, sh = img.size
-    if width is sw and height is sh:
-        return Image(img)
-    xmap = numpy.floor((numpy.arange(width) + 0.5) * sw / float(width)).astype(int)
-    ymap = numpy.floor((numpy.arange(height) + 0.5) * sh / float(height)).astype(int)
-    return Image(data = img.data[ymap,:][:,xmap])
+def resized(img, width, height, filter=FILTER_NEAREST):
+    return img.resized(width, height, filter)
 
 def removeAlpha(img):
     return img.convert(img.components - 1 + img.components % 2)

@@ -46,7 +46,7 @@ from bpy.props import *
 from mathutils import Vector
 
 from maketarget.utils import getMHBlenderDirectory
-from .error import MHError, addWarning
+from .error import MHError, handleMHError, addWarning
 from . import mc
 from . import materials
 
@@ -226,71 +226,140 @@ def loadHuman(context):
 
 
 #
-#
-#
-
-theShapeKeys = [
-    #'Breathe',
-    ]
-
-#
-#    findClothes(context, hum, clo, log):
+#    findClothes(context, hum, clo):
 #
 
-def findClothes(context, hum, clo, log):
-    base = hum.data
-    proxy = clo.data
+def findClothes(context, hum, clo):
+    """
+    This is where the association between clothes and human verts is made.
+    """
+
     scn = context.scene
+    humanVerts,humanGroup,pExactIndex = findVertexGroups(hum, clo)
+    if scn.MCUseRigidFit:
+        bestVerts,vfaces = findRigidFit(scn, humanVerts, humanGroup, pExactIndex, hum, clo)
+        useMid = False
+    else:
+        bestVerts,vfaces = findBestVerts(scn, humanVerts, humanGroup, pExactIndex, hum, clo)
+        useMid = True
+    bestFaces = findBestFaces(scn, bestVerts, vfaces, hum, clo, useMid)
+    return bestFaces
+
+
+def findVertexGroups(hum, clo):
+    # Associate groups
+    humanVerts = {}
+    humanGroup = {}
+    pExactIndex = None
+    for pgrp in clo.vertex_groups:
+        for bgrp in hum.vertex_groups:
+            if pgrp.name == bgrp.name:
+                humanGroup[pgrp.index] = bgrp
+                bverts = humanVerts[pgrp.index] = []
+                for bv in hum.data.vertices:
+                    for bg in bv.groups:
+                        if bg.group == bgrp.index:
+                            bverts.append(bv)
+            if pgrp.name == "Exact":
+                pExactIndex = pgrp.index
+
+    return humanVerts,humanGroup,pExactIndex
+
+
+def getVGroupIndices(pv, clo, humanGroup, pExactIndex):
+    # Check that there is a single clothes vertex group, except perhaps
+    # for the Exact group.
+    forceExact = False
+    if len(pv.groups) == 0:
+        pindex = -1
+    elif len(pv.groups) == 1:
+        pindex = pv.groups[0].group
+        if pindex == pExactIndex:
+            pindex = -1
+    elif len(pv.groups) == 2:
+        pindex = pv.groups[0].group
+        pindex1 = pv.groups[1].group
+        if pindex == pExactIndex:
+            forceExact = True
+            pindex = pindex1
+        elif pindex1 == pExactIndex:
+            forceExact = True
+    else:
+        pindex = -1
+
+    if pindex < 0:
+        selectVerts([pv], clo)
+        raise MHError("Clothes %s vert %d not member of any group" % (clo.name, pv.index))
+
+    # Check that human group exists
+    try:
+        bindex = humanGroup[pindex].index
+    except KeyError:
+        gname = clo.vertex_groups[pindex].name
+        raise MHError("Did not find vertex group %s in hum.data mesh" % gname)
+
+    return pindex, bindex, forceExact
+
+
+def findRigidFit(scn, humanVerts, humanGroup, pExactIndex, hum, clo):
+    vfaces = {}
+    for idx,verts in humanVerts.items():
+        if len(verts) != 3:
+            raise MHError("Human vertex group \"%s\"\nmust contain exactly three vertices" % humanGroup[idx].name)
+        v0,v1,v2 = verts
+        t = [v0.index, v1.index, v2.index]
+        vfaces[v0.index] = [t]
+        vfaces[v1.index] = [t]
+        vfaces[v2.index] = [t]
 
     bestVerts = []
-    for pv in proxy.vertices:
-        try:
-            pindex = pv.groups[0].group
-        except:
-            pindex = -1
-        if pindex < 0:
-            selectVerts([pv], clo)
-            raise MHError("Clothes %s vert %d not member of any group" % (clo.name, pv.index))
+    for pv in clo.data.vertices:
+        pindex,bindex,_forceExact = getVGroupIndices(pv, clo, humanGroup, pExactIndex)
+        bv = humanVerts[pindex][0]
+        vec = pv.co - bv.co
+        mverts = [(bv, vec.length)]
+        bestVerts.append((pv, bindex, False, mverts, []))
 
-        gname = clo.vertex_groups[pindex].name
-        bindex = None
-        for bvg in hum.vertex_groups:
-            if bvg.name == gname:
-                bindex = bvg.index
-        if bindex == None:
-            raise MHError("Did not find vertex group %s in base mesh" % gname)
+    return bestVerts, vfaces
 
+
+def findBestVerts(scn, humanVerts, humanGroup, pExactIndex, hum, clo):
+    # Associate verts
+
+    bestVerts = []
+    for pv in clo.data.vertices:
+        pindex,bindex,forceExact = getVGroupIndices(pv, clo, humanGroup, pExactIndex)
+
+        # Find a small number of human verts closest to the clothes vert
         mverts = []
         for n in range(scn.MCListLength):
             mverts.append((None, 1e6))
 
         exact = False
-        for bv in base.vertices:
+        for bv in humanVerts[pindex]:
             if exact:
                 break
-            for grp in bv.groups:
-                if grp.group == bindex:
-                    vec = pv.co - bv.co
-                    n = 0
-                    for (mv,mdist) in mverts:
-                        if vec.length < Epsilon:
-                            mverts[0] = (bv, -1)
-                            exact = True
-                            break
-                        if vec.length < mdist:
-                            for k in range(n+1, scn.MCListLength):
-                                j = scn.MCListLength-k+n
-                                mverts[j] = mverts[j-1]
-                            mverts[n] = (bv, vec.length)
-                            break
-                        n += 1
+
+            vec = pv.co - bv.co
+            n = 0
+            for (mv,mdist) in mverts:
+                if vec.length < Epsilon:
+                    mverts[0] = (bv, -1)
+                    exact = True
+                    break
+                if vec.length < mdist:
+                    for k in range(n+1, scn.MCListLength):
+                        j = scn.MCListLength-k+n
+                        mverts[j] = mverts[j-1]
+                    mverts[n] = (bv, vec.length)
+                    break
+                n += 1
 
         (mv, mindist) = mverts[0]
+        gname = humanGroup[pindex].name
         if mv:
-            if pv.index % 10 == 0:
+            if pv.index % 100 == 0:
                 print(pv.index, mv.index, mindist, gname, pindex, bindex)
-            if log:
-                log.write("%d %d %.5f %s %d %d\n" % (pv.index, mv.index, mindist, gname, pindex, bindex))
         else:
             msg = (
             "Failed to find vert %d in group %s.\n" % (pv.index, gname) +
@@ -310,13 +379,16 @@ def findClothes(context, hum, clo, log):
 
         if gname[0:3] != "Mid" and gname[-2:] != "_M":
             bindex = -1
+        if forceExact:
+            exact = True
+            mverts = [mverts[0]]
         bestVerts.append((pv, bindex, exact, mverts, []))
 
     print("Setting up face table")
     vfaces = {}
-    for v in base.vertices:
+    for v in hum.data.vertices:
         vfaces[v.index] = []
-    baseFaces = getFaces(base)
+    baseFaces = getFaces(hum.data)
     for f in baseFaces:
         v0 = f.vertices[0]
         v1 = f.vertices[1]
@@ -337,6 +409,10 @@ def findClothes(context, hum, clo, log):
             vfaces[v1].append(t)
             vfaces[v2].append(t)
 
+    return bestVerts, vfaces
+
+
+def findBestFaces(scn, bestVerts, vfaces, hum, clo, useMid):
     print("Finding weights")
     for (pv, bindex, exact, mverts, fcs) in bestVerts:
         if exact:
@@ -344,10 +420,10 @@ def findClothes(context, hum, clo, log):
         for (bv,mdist) in mverts:
             if bv:
                 for f in vfaces[bv.index]:
-                    v0 = base.vertices[f[0]]
-                    v1 = base.vertices[f[1]]
-                    v2 = base.vertices[f[2]]
-                    if (bindex >= 0) and (pv.co[0] < 0.01) and (pv.co[0] > -0.01):
+                    v0 = hum.data.vertices[f[0]]
+                    v1 = hum.data.vertices[f[1]]
+                    v2 = hum.data.vertices[f[2]]
+                    if useMid and (bindex >= 0) and (pv.co[0] < 0.01) and (pv.co[0] > -0.01):
                         wts = midWeights(pv, bindex, v0, v1, v2, hum, clo)
                     else:
                         wts = cornerWeights(pv, v0, v1, v2, hum, clo)
@@ -373,16 +449,16 @@ def findClothes(context, hum, clo, log):
                 minmax = w
                 bWts = wts
                 bVerts = fverts
-        if minmax < scn.MCThreshold:
+        if False and minmax < scn.MCThreshold:
             badVerts.append(pv.index)
             pv.select = True
             (mv, mdist) = mverts[0]
             bVerts = [mv.index,0,1]
             bWts = (1,0,0)
 
-        v0 = base.vertices[bVerts[0]]
-        v1 = base.vertices[bVerts[1]]
-        v2 = base.vertices[bVerts[2]]
+        v0 = hum.data.vertices[bVerts[0]]
+        v1 = hum.data.vertices[bVerts[1]]
+        v2 = hum.data.vertices[bVerts[2]]
 
         est = bWts[0]*v0.co + bWts[1]*v1.co + bWts[2]*v2.co
         diff = pv.co - est
@@ -481,7 +557,7 @@ def cornerWeights(pv, v0, v1, v2, hum, clo):
 #
 
 def midWeights(pv, bindex, v0, v1, v2, hum, clo):
-    #print("Mid", pv.index, bindex)
+    print("Mid", pv.index, bindex)
     pv.select = True
     if isInGroup(v0, bindex):
         v0.select = True
@@ -497,14 +573,16 @@ def midWeights(pv, bindex, v0, v1, v2, hum, clo):
         v1.select = True
         v2.select = True
         return (w0, w1, w2)
-    #print("  Failed mid")
+    print("  Failed mid")
     return cornerWeights(pv, v0, v1, v2, hum, clo)
+
 
 def isInGroup(v, bindex):
     for g in v.groups:
         if g.group == bindex:
             return True
     return False
+
 
 def midWeight(pv, r0, r1):
     u01 = r1-r0
@@ -555,12 +633,27 @@ def writeClothes(context, hum, clo, data, matfile):
     writeClothesHeader(fp, scn)
     fp.write("name %s\n" % clo.name.replace(" ","_"))
     fp.write("obj_file %s.obj\n" % mc.goodName(clo.name))
+
     vnums = getBodyPartVerts(scn)
-    printScale(fp, hum, scn, 'x_scale', 0, vnums[0])
-    printScale(fp, hum, scn, 'z_scale', 1, vnums[1])
-    printScale(fp, hum, scn, 'y_scale', 2, vnums[2])
-    if scn.MCScaleUniform:
-        fp.write("uniform_scale %.4f\n" % scn.MCScaleCorrect)
+    hverts = hum.data.vertices
+    if scn.MCUseShearing:
+        if scn.MCUseBoundaryMirror:
+            rvnums = {}
+            for idx,pair in enumerate(vnums):
+                vn1, vn2 = pair
+                rvnums[idx] = (mirrorVert(vn1), mirrorVert(vn2))
+            vn = vnums[0][0]
+            if hverts[vn].co[0] > 0:
+                lvnums = vnums
+            else:
+                lvnums = rvnums
+                rvnums = vnums
+            writeShear(fp, "l_shear_%s %d %d %.4f %.4f\n", lvnums, hverts, False)
+            writeShear(fp, "r_shear_%s %d %d %.4f %.4f\n", rvnums, hverts, False)
+        else:
+            writeShear(fp, "shear_%s %d %d %.4f %.4f\n", vnums, hverts, False)
+    else:
+        writeShear(fp, "%s_scale %d %d %.4f\n", vnums, hverts, True)
 
     writeStuff(fp, clo, context, matfile)
 
@@ -574,14 +667,45 @@ def writeClothes(context, hum, clo, data, matfile):
         if exact:
             (bv, dist) = verts[0]
             fp.write("%5d\n" % bv.index)
-        else:
+        elif len(verts) == 3:
             fp.write("%5d %5d %5d %.5f %.5f %.5f %.5f %.5f %.5f\n" % (
                 verts[0], verts[1], verts[2], wts[0], wts[1], wts[2], diff[0], diff[2], -diff[1]))
+        elif len(verts) == 8:   # Rigid fit
+            fp.write("%5d %5d %5d %5d %5d %5d %5d %5d %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f\n" % tuple(verts+wts))
+        else:
+            halt
+
     fp.write('\n')
     printDeleteVerts(fp, hum)
     printMhcloUvLayers(fp, clo, scn, True)
     fp.close()
     print("%s done" % outfile)
+
+
+def writeShear(fp, string, vnums, hverts, useDistance):
+    yzswitch = [("x",1), ("z",-1), ("y",1)]
+    for idx in range(3):
+        cname,sign = yzswitch[idx]
+        n1,n2 = vnums[idx]
+        if n1 >=0 and n2 >= 0:
+            x1 = hverts[n1].co[idx]
+            x2 = hverts[n2].co[idx]
+            if useDistance:
+                fp.write(string % (cname, n1, n2, abs(x1-x2)))
+            else:
+                fp.write(string % (cname, n1, n2, sign*x1, sign*x2))
+
+
+def mirrorVert(vn):
+    from maketarget.symmetry_map import Left2Right, Right2Left
+    try:
+        return Left2Right[vn]
+    except KeyError:
+        pass
+    try:
+        return Right2Left[vn]
+    except KeyError:
+        return vn
 
 
 def printMhcloUvLayers(fp, clo, scn, hasObj, offset=0):
@@ -713,10 +837,6 @@ def writeStuff(fp, clo, context, matfile):
         elif mod.type == 'SOLIDIFY':
             fp.write("solidify %.3f %.3f\n" % (mod.thickness, mod.offset))
 
-    for skey in theShapeKeys:
-        if getattr(scn, "MC" + skey):
-            fp.write("shapekey %s\n" % skey)
-
     if matfile:
         fp.write("material %s\n" % matfile)
 
@@ -809,15 +929,6 @@ def writeColor(fp, string1, string2, color, intensity):
         "%s %.4f %.4f %.4f\n" % (string1, color[0], color[1], color[2]) +
         "%s %.4g\n" % (string2, intensity))
 
-
-def printScale(fp, hum, scn, name, index, vnums):
-    verts = hum.data.vertices
-    n1,n2 = vnums
-    if n1 >=0 and n2 >= 0:
-        x1 = verts[n1].co[index]
-        x2 = verts[n2].co[index]
-        fp.write("%s %d %d %.4f\n" % (name, n1, n2, abs(x1-x2)/scn.MCScaleCorrect))
-    return
 
 #
 #   setupTexVerts(ob):
@@ -987,21 +1098,13 @@ def makeClothes(context, doFindClothes):
     autoVertexGroupsIfNecessary(clo)
     checkSingleVertexGroups(clo, scn)
     saveClosest({})
-    if scn.MCLogging:
-        logfile = '%s/clothes.log' % scn.MhClothesDir
-        log = mc.openOutputFile(logfile)
-    else:
-        log = None
     matfile = materials.writeMaterial(clo, scn.MhClothesDir)
     if doFindClothes:
-        data = findClothes(context, hum, clo, log)
+        data = findClothes(context, hum, clo)
         storeData(clo, hum, data)
     else:
         (hum, data) = restoreData(context)
     writeClothes(context, hum, clo, data, matfile)
-    if log:
-        log.close()
-    return
 
 
 def checkNoTriangles(scn, ob):
@@ -1088,11 +1191,11 @@ def checkObjectOK(ob, context, isClothing):
         try:
             ob.data.uv_layers[scn.MCTextureLayer]
         except:
-            word = "no texture layers"
+            word = "no UV maps"
             err = True
 
         if len(ob.data.uv_textures) > 1:
-            word = "%d texture layers. Must be exactly one." % len(ob.data.uv_textures)
+            word = "%d UV maps. Must be exactly one." % len(ob.data.uv_textures)
             err = True
 
         if len(ob.data.materials) >= 2:
@@ -1126,12 +1229,16 @@ def checkSingleVertexGroups(clo, scn):
             #print("Key", g.group, g.weight)
             n += 1
         if n != 1:
-            v.select = True
             for g in v.groups:
                 for vg in clo.vertex_groups:
                     if vg.index == g.group:
-                        print("  ", vg.name)
-            raise MHError("Vertex %d in %s belongs to %d groups. Must be exactly one" % (v.index, clo.name, n))
+                        if vg.name == "Exact":
+                            n -= 1
+                        else:
+                            print("  ", vg.name)
+            if n != 1:
+                v.select = True
+                raise MHError("Vertex %d in %s belongs to %d groups. Must be exactly one" % (v.index, clo.name, n))
     return
 
 
@@ -1592,6 +1699,54 @@ def saveDefaultSettings(context):
     return
 
 #
+#   Test clothese
+#
+
+def testMhcloFile(context, filepath):
+    from maketarget.proxy import CProxy
+    from maketarget.import_obj import importObj
+
+    hum = context.object
+    if not isOkHuman(hum):
+        raise MHError("%s is not a human mesh" % hum.name)
+
+    pxy = CProxy()
+    pxy.read(filepath)
+    clo = importObj(pxy.obj_file, context, addBasisKey=False)
+    pxy.update(hum.data.vertices, clo.data.vertices)
+
+
+class VIEW3D_OT_TestClothesButton(bpy.types.Operator):
+    bl_idname = "mhclo.test_clothes"
+    bl_label = "Test Clothes"
+    bl_description = "Load a mhclo file to object"
+    bl_options = {'UNDO'}
+
+    filename_ext = ".mhclo"
+    filter_glob = StringProperty(default="*.mhclo", options={'HIDDEN'})
+    filepath = bpy.props.StringProperty(
+        name="File Path",
+        description="File path used for mhclo file",
+        maxlen= 1024, default= "")
+
+    @classmethod
+    def poll(self, context):
+        return context.object
+
+    def execute(self, context):
+        try:
+            testMhcloFile(context, self.properties.filepath)
+        except MHError:
+            handleMHError(context)
+        print("%s loaded" % self.properties.filepath)
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
+
+#
 #   BMesh
 #
 
@@ -1617,13 +1772,6 @@ def init():
     if not maketarget.maketarget.MTIsInited:
         maketarget.maketarget.init()
 
-    for skey in theShapeKeys:
-        prop = BoolProperty(
-            name = skey,
-            description = "Shapekey %s affects clothes" % skey,
-            default = False)
-        setattr(bpy.types.Scene, 'MC%s' % skey, prop)
-
     bpy.types.Scene.MCBodyType = EnumProperty(
         items = [('None', 'Base Mesh', 'None'),
                  ('caucasian-male-young', 'Average Male', 'caucasian-male-young'),
@@ -1640,10 +1788,22 @@ def init():
         description = "Body Type To Load",
     default='None')
 
-    bpy.types.Scene.MCMaterials = BoolProperty(
-        name="Materials",
-        description="Use materials",
+    bpy.types.Scene.MCUseShearing = BoolProperty(
+        name="Use Shearing",
+        description="Allow bounding box to be sheared",
         default=False)
+
+    bpy.types.Scene.MCUseBoundaryMirror = BoolProperty(
+        name="Mirror Bounding Box",
+        description="Mirror the bounding box for Left/Right vertex groups",
+        default=False)
+
+
+    bpy.types.Scene.MCUseRigidFit = BoolProperty(
+        name="Rigid Fit",
+        description="Fit all verts in each vertex group to exactly three human verts",
+        default=False)
+
 
     bpy.types.Scene.MCMaskLayer = IntProperty(
         name="Mask UV layer",
@@ -1719,6 +1879,7 @@ def init():
                  ('Foot', 'Foot', 'Foot'),
                  ('Eye', 'Eye', 'Eye'),
                  ('Genital', 'Genital', 'Genital'),
+                 ('Teeth', 'Teeth', 'Teeth'),
                  ('Body', 'Body', 'Body'),
                  ('Custom', 'Custom', 'Custom'),
                  ],

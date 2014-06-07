@@ -113,12 +113,6 @@ class Writer(mhx_writer.Writer):
         amt = self.armature
         config = self.config
 
-        if not config.cage:
-            fp.write(
-                "#if toggle&T_Cage\n" +
-                "  error 'This MHX file does not contain a cage. Unselect the Cage import option.' ;\n" +
-                "#endif\n")
-
         fp.write("NoScale True ;\n")
         amt.writeGizmos(fp)
 
@@ -128,9 +122,6 @@ class Writer(mhx_writer.Writer):
         G.app.progress(0.15, text="Exporting materials")
         fp.write("\nNoScale False ;\n\n")
         self.matWriter.writeMaterials(fp)
-
-        if config.cage:
-            self.proxyWriter.writeProxyType('Cage', 'T_Cage', 4, fp, 0.2, 0.25)
 
         G.app.progress(0.25, text="Exporting main mesh")
         self.meshWriter.writeMesh(fp, self.human.getSeedMesh())
@@ -156,7 +147,6 @@ class Writer(mhx_writer.Writer):
             "    ob %s ;\n" % amt.name +
             "    ob %s ;\n" % self.meshName())
 
-        self.groupProxy('Cage', 'T_Cage', fp)
         self.groupProxy('Proxymeshes', 'T_Proxy', fp)
         self.groupProxy('Clothes', 'T_Clothes', fp)
         self.groupProxy('Hair', 'T_Clothes', fp)
