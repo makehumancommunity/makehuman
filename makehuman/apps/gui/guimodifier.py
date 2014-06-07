@@ -55,6 +55,10 @@ class ModifierTaskView(gui3d.TaskView):
             label = name.capitalize()
         if saveName is None:
             saveName = name
+        # JH: Hack to get around issue #396 for 1.0.1 release. For 1.1 translation strings should be updated.
+        if label == "Arms and legs":
+            label = "Arms and Legs"
+
         super(ModifierTaskView, self).__init__(category, name, label=label)
 
         self.saveName = saveName
