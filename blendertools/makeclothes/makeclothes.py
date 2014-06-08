@@ -235,27 +235,21 @@ def findClothes(context, hum, clo):
     """
 
     scn = context.scene
-    humanVerts,humanGroup,pExactIndex = findVertexGroups(hum, clo)
-    if scn.MCUseRigidFit:
-        bestVerts,vfaces = findRigidFit(scn, humanVerts, humanGroup, pExactIndex, hum, clo)
-        useMid = False
-    else:
-        bestVerts,vfaces = findBestVerts(scn, humanVerts, humanGroup, pExactIndex, hum, clo)
-        useMid = True
-    bestFaces = findBestFaces(scn, bestVerts, vfaces, hum, clo, useMid)
+    humanGroup,pExactIndex = findVertexGroups(hum, clo)
+    bestVerts,vfaces = findBestVerts(scn, humanGroup, pExactIndex, hum, clo)
+    bestFaces = findBestFaces(scn, bestVerts, vfaces, hum, clo)
     return bestFaces
 
 
 def findVertexGroups(hum, clo):
     # Associate groups
-    humanVerts = {}
     humanGroup = {}
     pExactIndex = None
     for pgrp in clo.vertex_groups:
         for bgrp in hum.vertex_groups:
             if pgrp.name == bgrp.name:
-                humanGroup[pgrp.index] = bgrp
-                bverts = humanVerts[pgrp.index] = []
+                bverts = []
+                humanGroup[pgrp.index] = (bgrp, bverts)
                 for bv in hum.data.vertices:
                     for bg in bv.groups:
                         if bg.group == bgrp.index:
@@ -263,7 +257,7 @@ def findVertexGroups(hum, clo):
             if pgrp.name == "Exact":
                 pExactIndex = pgrp.index
 
-    return humanVerts,humanGroup,pExactIndex
+    return humanGroup,pExactIndex
 
 
 def getVGroupIndices(pv, clo, humanGroup, pExactIndex):
@@ -293,7 +287,8 @@ def getVGroupIndices(pv, clo, humanGroup, pExactIndex):
 
     # Check that human group exists
     try:
-        bindex = humanGroup[pindex].index
+        bg,_bverts = humanGroup[pindex]
+        bindex = bg.index
     except KeyError:
         gname = clo.vertex_groups[pindex].name
         raise MHError("Did not find vertex group %s in hum.data mesh" % gname)
@@ -301,34 +296,34 @@ def getVGroupIndices(pv, clo, humanGroup, pExactIndex):
     return pindex, bindex, forceExact
 
 
-def findRigidFit(scn, humanVerts, humanGroup, pExactIndex, hum, clo):
-    vfaces = {}
-    for idx,verts in humanVerts.items():
-        if len(verts) != 3:
-            raise MHError("Human vertex group \"%s\"\nmust contain exactly three vertices" % humanGroup[idx].name)
-        v0,v1,v2 = verts
-        t = [v0.index, v1.index, v2.index]
-        vfaces[v0.index] = [t]
-        vfaces[v1.index] = [t]
-        vfaces[v2.index] = [t]
-
-    bestVerts = []
-    for pv in clo.data.vertices:
-        pindex,bindex,_forceExact = getVGroupIndices(pv, clo, humanGroup, pExactIndex)
-        bv = humanVerts[pindex][0]
-        vec = pv.co - bv.co
-        mverts = [(bv, vec.length)]
-        bestVerts.append((pv, bindex, False, mverts, []))
-
-    return bestVerts, vfaces
+def isRigidVGroup(vgrp):
+    return (len(vgrp.name) > 0 and vgrp.name[0] == '*')
 
 
-def findBestVerts(scn, humanVerts, humanGroup, pExactIndex, hum, clo):
+class BestVert:
+    def __init__(self, pv, bindex, exact, mverts, faces, useMid):
+        self.pv = pv
+        self.bindex = bindex
+        self.exact = exact
+        self.mverts = mverts
+        self.faces = faces
+        self.useMid = useMid
+
+
+def findBestVerts(scn, humanGroup, pExactIndex, hum, clo):
     # Associate verts
 
     bestVerts = []
     for pv in clo.data.vertices:
         pindex,bindex,forceExact = getVGroupIndices(pv, clo, humanGroup, pExactIndex)
+        bg,bverts = humanGroup[pindex]
+
+        if isRigidVGroup(bg):
+            bv = bverts[0]
+            vec = pv.co - bv.co
+            mverts = [(bv, vec.length)]
+            bestVerts.append(BestVert(pv, bindex, False, mverts, [], False))
+            continue
 
         # Find a small number of human verts closest to the clothes vert
         mverts = []
@@ -336,7 +331,7 @@ def findBestVerts(scn, humanVerts, humanGroup, pExactIndex, hum, clo):
             mverts.append((None, 1e6))
 
         exact = False
-        for bv in humanVerts[pindex]:
+        for bv in bverts:
             if exact:
                 break
 
@@ -356,7 +351,8 @@ def findBestVerts(scn, humanVerts, humanGroup, pExactIndex, hum, clo):
                 n += 1
 
         (mv, mindist) = mverts[0]
-        gname = humanGroup[pindex].name
+        bg,_bverts = humanGroup[pindex]
+        gname = bg.name
         if mv:
             if pv.index % 100 == 0:
                 print(pv.index, mv.index, mindist, gname, pindex, bindex)
@@ -382,52 +378,62 @@ def findBestVerts(scn, humanVerts, humanGroup, pExactIndex, hum, clo):
         if forceExact:
             exact = True
             mverts = [mverts[0]]
-        bestVerts.append((pv, bindex, exact, mverts, []))
+        bestVerts.append(BestVert(pv, bindex, exact, mverts, [], True))
 
     print("Setting up face table")
+
     vfaces = {}
-    for v in hum.data.vertices:
-        vfaces[v.index] = []
+    rigid = {}
+    for vn in range(len(hum.data.vertices)):
+        vfaces[vn] = []
+        rigid[vn] = False
+
+    #
+    for idx in humanGroup.keys():
+        bg,bverts = humanGroup[idx]
+        if isRigidVGroup(bg):
+            print("RIGID", bg.name)
+            if len(bverts) != 3:
+                raise MHError("Human vertex group \"%s\"\nmust contain exactly three vertices" % humanGroup[idx].name)
+            v0,v1,v2 = bverts
+            vn0,vn1,vn2 = v0.index, v1.index, v2.index
+            t = (vn0,vn1,vn2)
+            vfaces[vn0] = vfaces[vn1] = vfaces[vn2] = [t]
+            rigid[vn0] = rigid[vn1] = rigid[vn2] = True
+
     baseFaces = getFaces(hum.data)
     for f in baseFaces:
-        v0 = f.vertices[0]
-        v1 = f.vertices[1]
-        v2 = f.vertices[2]
-        if len(f.vertices) == 4:
-            v3 = f.vertices[3]
-            t0 = [v0,v1,v2]
-            t1 = [v1,v2,v3]
-            t2 = [v2,v3,v0]
-            t3 = [v3,v0,v1]
-            vfaces[v0].extend( [t0,t2,t3] )
-            vfaces[v1].extend( [t0,t1,t3] )
-            vfaces[v2].extend( [t0,t1,t2] )
-            vfaces[v3].extend( [t1,t2,t3] )
-        else:
-            t = [v0,v1,v2]
-            vfaces[v0].append(t)
-            vfaces[v1].append(t)
-            vfaces[v2].append(t)
+        vn0,vn1,vn2,vn3 = f.vertices
+        if not (rigid[vn0] and rigid[vn1] and rigid[vn2] and rigid[vn3]):
+            t0 = [vn0,vn1,vn2]
+            t1 = [vn1,vn2,vn3]
+            t2 = [vn2,vn3,vn0]
+            t3 = [vn3,vn0,vn1]
+            vfaces[vn0].extend( [t0,t2,t3] )
+            vfaces[vn1].extend( [t0,t1,t3] )
+            vfaces[vn2].extend( [t0,t1,t2] )
+            vfaces[vn3].extend( [t1,t2,t3] )
 
     return bestVerts, vfaces
 
 
-def findBestFaces(scn, bestVerts, vfaces, hum, clo, useMid):
+def findBestFaces(scn, bestVerts, vfaces, hum, clo):
     print("Finding weights")
-    for (pv, bindex, exact, mverts, fcs) in bestVerts:
-        if exact:
+    for bestVert in bestVerts:
+        pv = bestVert.pv
+        if bestVert.exact:
             continue
-        for (bv,mdist) in mverts:
+        for (bv,mdist) in bestVert.mverts:
             if bv:
                 for f in vfaces[bv.index]:
                     v0 = hum.data.vertices[f[0]]
                     v1 = hum.data.vertices[f[1]]
                     v2 = hum.data.vertices[f[2]]
-                    if useMid and (bindex >= 0) and (pv.co[0] < 0.01) and (pv.co[0] > -0.01):
-                        wts = midWeights(pv, bindex, v0, v1, v2, hum, clo)
+                    if bestVert.useMid and (bestVert.bindex >= 0) and (pv.co[0] < 0.01) and (pv.co[0] > -0.01):
+                        wts = midWeights(pv, bestVert.bindex, v0, v1, v2, hum, clo)
                     else:
                         wts = cornerWeights(pv, v0, v1, v2, hum, clo)
-                    fcs.append((f, wts))
+                    bestVert.faces.append((f, wts))
 
     print("Finding best weights")
     alwaysOutside = False
@@ -436,14 +442,15 @@ def findBestFaces(scn, bestVerts, vfaces, hum, clo, useMid):
 
     bestFaces = []
     badVerts = []
-    for (pv, bindex, exact, mverts, fcs) in bestVerts:
+    for bestVert in bestVerts:
+        pv = bestVert.pv
         #print(pv.index)
         pv.select = False
-        if exact:
-            bestFaces.append((pv, True, mverts, 0, 0))
+        if bestVert.exact:
+            bestFaces.append((pv, True, bestVert.mverts, 0, 0))
             continue
         minmax = -1e6
-        for (fverts, wts) in fcs:
+        for (fverts, wts) in bestVert.faces:
             w = minWeight(wts)
             if w > minmax:
                 minmax = w
@@ -452,7 +459,7 @@ def findBestFaces(scn, bestVerts, vfaces, hum, clo, useMid):
         if False and minmax < scn.MCThreshold:
             badVerts.append(pv.index)
             pv.select = True
-            (mv, mdist) = mverts[0]
+            (mv, mdist) = bestVert.mverts[0]
             bVerts = [mv.index,0,1]
             bWts = (1,0,0)
 
@@ -1024,7 +1031,7 @@ def storeData(clo, hum, data):
             fp.write("%d %d %d\n" % (pv.index, exact, bv.index))
         else:
             fp.write("%d %d\n" % (pv.index, exact))
-            fp.write("%s\n" % verts)
+            fp.write("%s\n" % list(verts))
             fp.write("(%s,%s,%s)\n" % wts)
             fp.write("(%s,%s,%s)\n" % (diff[0],diff[1],diff[2]))
     fp.close()
@@ -1796,12 +1803,6 @@ def init():
     bpy.types.Scene.MCUseBoundaryMirror = BoolProperty(
         name="Mirror Bounding Box",
         description="Mirror the bounding box for Left/Right vertex groups",
-        default=False)
-
-
-    bpy.types.Scene.MCUseRigidFit = BoolProperty(
-        name="Rigid Fit",
-        description="Fit all verts in each vertex group to exactly three human verts",
         default=False)
 
 
