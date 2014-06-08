@@ -353,15 +353,6 @@ class SubdivisionObject(Object3D):
         # TODO populate in deferred form, make this a getter (and retrieve recursively)
         return self._parent_map_weights
 
-    def dump(self):
-        for k in dir(self):
-            v = getattr(self, k)
-            if isinstance(v, type(self.fvert)):
-                fmt = '%.6f' if v.dtype in (np.float32, float) else '%d'
-                if len(v.shape) > 2:
-                    v = v.reshape((-1,v.shape[-1]))
-                np.savetxt('dump/%s.txt' % k, v, fmt=fmt)
-
     def update_uvs(self):
         parent = self.parent
 
@@ -517,7 +508,6 @@ def _reverse_n_to_m_map(input, output, offset=0):
 def createSubdivisionObject(object, staticFaceMask=None, progressCallback=None):
     obj = SubdivisionObject(object, staticFaceMask)
     obj.create(progressCallback)
-    # obj.dump()
     return obj
 
 def updateSubdivisionObject(object, progressCallback=None):

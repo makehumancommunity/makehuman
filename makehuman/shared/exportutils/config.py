@@ -58,7 +58,6 @@ class Config(object):
 
         self.useNormals         = False
         self.useRelPaths        = True
-        self.cage               = False
         self.texFolder          = None
         self.customPrefix       = ""
         self.human              = None
@@ -100,7 +99,7 @@ class Config(object):
         """
         Get the proxy list from the current state of the set human object.
         Proxy list will contain all proxy items such as proxy mesh and clothes,
-        hair, eyes, genitals and cages.
+        hair, eyes, and genitals.
         """
         if not self.human:
             return {}
@@ -114,14 +113,6 @@ class Config(object):
         if self.human.proxy:
             pxy = self.human.proxy
             name = self.goodName(pxy.name)
-            proxies[name] = pxy
-
-        if self.cage:
-            import proxy
-            human = G.app.selectedHuman
-            filepath = getSysDataPath("cages/cage/cage.mhclo")
-            pxy = proxy.loadProxy(human, filepath, type="Cage")
-            pxy.update(human.meshData)
             proxies[name] = pxy
 
         return proxies

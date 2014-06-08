@@ -144,6 +144,9 @@ class ProxyChooserTaskView(gui3d.TaskView):
 
         self.filechooser.setIconSize(50,50)
         self.filechooser.enableAutoRefresh(False)
+        if not isinstance(self.getFileExtension(), basestring) and \
+           len(self.getFileExtension()) > 1:
+            self.filechooser.mutexExtensions = True
         #self.addLeftWidget(self.filechooser.createSortBox())
 
         if self.tagFilter:
@@ -174,7 +177,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
         """
         The file extension for proxy files of this type.
         """
-        return 'mhclo'
+        return ['mhpxy', 'mhclo']
 
     def getNotFoundIcon(self):
         """

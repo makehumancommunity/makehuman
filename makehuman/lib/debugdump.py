@@ -100,6 +100,7 @@ class DebugDump(object):
         self.write("IS RELEASE VERSION: %s", os.environ['MH_RELEASE'])
         self.write("WORKING DIRECTORY: %s", os.getcwd())
         self.write("HOME LOCATION: %s", self.home)
+        self.write("PYTHON PATH: %s", sys.path)
         version = re.sub(r"[\r\n]"," ", sys.version)
         self.write("SYS.VERSION: %s", version)
         self.write("SYS.PLATFORM: %s", sys.platform)
