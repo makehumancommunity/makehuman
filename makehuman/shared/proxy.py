@@ -414,7 +414,7 @@ def loadTextProxy(human, filepath, type="Clothes"):
         elif key == 'verts':
             status = doRefVerts
             vnum = 0
-        elif key == 'weighting_verts':
+        elif key in ['weighting_verts', 'weighting-verts']:
             status = doWeightingVerts
             proxy.vertWeights = {}       # Throw away old list
             wvnum = 0

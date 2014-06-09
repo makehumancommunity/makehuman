@@ -404,7 +404,7 @@ def findBestVerts(scn, humanGroup, pExactIndex, hum, clo):
     baseFaces = getFaces(hum.data)
     for f in baseFaces:
         vn0,vn1,vn2,vn3 = f.vertices
-        if not (rigid[vn0] and rigid[vn1] and rigid[vn2] and rigid[vn3]):
+        if not (rigid[vn0] or rigid[vn1] or rigid[vn2] or rigid[vn3]):
             t0 = [vn0,vn1,vn2]
             t1 = [vn1,vn2,vn3]
             t2 = [vn2,vn3,vn0]
