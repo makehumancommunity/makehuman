@@ -632,7 +632,7 @@ def loadBinaryProxy(path, human, type):
         try:
             proxy.ref_wvIdxs = npzfile['ref_wvIdxs']
         except KeyError:
-            proxy.ref_wvIdxs = proxy.ref_vIdxs
+            proxy.ref_wvIdxs = None
         proxy.offsets = npzfile['offsets']
         proxy.weights = npzfile['weights']
     else:
@@ -643,10 +643,13 @@ def loadBinaryProxy(path, human, type):
             proxy.ref_wvIdxs = np.zeros((num_refs,3), dtype=np.uint32)
             proxy.ref_wvIdxs[:,0] = npzfile['ref_wvIdxs']
         except KeyError:
-            proxy.ref_wvIdxs = proxy.ref_vIdxs
+            proxy.ref_wvIdxs = None
         proxy.offsets = np.zeros((num_refs,3), dtype=np.float32)
         proxy.weights = np.zeros((num_refs,3), dtype=np.float32)
         proxy.weights[:,0] = npzfile['weights']
+
+    if proxy.ref_wvIdxs is None:
+        proxy.ref_wvIdxs = proxy.ref_vIdxs
 
     if "deleteVerts" in npzfile:
         proxy.deleteVerts = npzfile['deleteVerts']
