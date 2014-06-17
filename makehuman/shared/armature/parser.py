@@ -493,6 +493,31 @@ class Parser:
         return
 
 
+    def updateJoints(self):
+        """
+        Update setup of joint positions after human mesh was changed,
+        without rebuilding the entire armature.
+        """
+        amt = self.armature
+
+        self.setupJoints(self.human)
+        self.setupNormals()
+        self.setupPlaneJoints()
+
+        for bone in amt.bones.values():
+            head,tail = self.headsTails[bone.name]
+            bone.setBone(self.findLocation(head), self.findLocation(tail))
+
+        for bone in amt.bones.values():
+            if isinstance(bone.roll, str):
+                bone.roll = amt.bones[bone.roll].roll
+            elif isinstance(bone.roll, Bone):
+                bone.roll = bone.roll.roll
+            elif isinstance(bone.roll, tuple):
+                bname,angle = bone.roll
+                bone.roll = amt.bones[bname].roll + angle
+
+
     def setupNormals(self):
         for plane,joints in self.planes.items():
             j1,j2,j3 = joints
