@@ -57,8 +57,6 @@ import skeleton
 
 
 def exportFbx(filepath, config):
-    from armature.armature import setupArmature
-
     G.app.progress(0, text="Preparing")
 
     human = config.human
