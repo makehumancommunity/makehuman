@@ -32,7 +32,7 @@ MHX (MakeHuman eXchange format) importer for Blender 2.6x.
 bl_info = {
     'name': 'MakeHuman: MHX Runtime (.mhx)',
     'author': 'Thomas Larsson',
-    'version': (1,17,1),
+    'version': (1,1,0),
     "blender": (2, 70, 0),
     "location": "View3D > Properties > MHX Runtime",
     'description': 'Runtime support for characters imported with the MakeHuman eXchange format (.mhx)',
