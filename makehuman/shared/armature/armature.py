@@ -104,6 +104,10 @@ class Armature:
         self.rename(self.options.locale)
 
 
+    def updateJoints(self):
+        self.parser.updateJoints()
+
+
     def rescale(self, scale):
         # OK to overwrite bones, because they are not used elsewhere
         for bone in self.bones.values():
