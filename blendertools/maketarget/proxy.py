@@ -94,7 +94,7 @@ class CProxy:
         return
 
     def __repr__(self):
-        return ("<CProxy %s %d\n  %s\n  x %s  y %s  z %s>" %
+        return ("<CProxy %s  %d\n  %s\n  sx %s  sy %s  sz %s>" %
             (self.name, self.firstVert, self.obj_file, self.xScale, self.yScale, self.zScale))
 
 
@@ -145,14 +145,39 @@ class CProxy:
 
         status = 0
         doVerts = 1
+        doDeleteVerts = 2
+        doWeightingVerts = 3
+
         vn = 0
         scales = Vector((1.0, 1.0, 1.0))
+        status = 0
         for line in tmpl:
             words= line.split()
             if len(words) == 0:
+                continue
+            key = words[0]
+            if key[0] == '#':
                 pass
-            elif words[0] == '#':
-                pass
+            elif key == 'verts':
+                if len(words) > 1:
+                    self.firstVert = int(words[1])
+                status = doVerts
+            elif key == 'delete_verts':
+                status = doDeleteVerts
+            elif key == 'weighting_verts':
+                status = doWeightingVerts
+            elif key == 'name':
+                self.name = words[1]
+            elif key == 'r_scale':
+                self.xScale = self.yScale = self.zScale = scaleInfo(words)
+            elif key == 'x_scale':
+                self.xScale = scaleInfo(words)
+            elif key == 'y_scale':
+                self.yScale = scaleInfo(words)
+            elif key == 'z_scale':
+                self.zScale = scaleInfo(words)
+            elif key == 'obj_file':
+                self.obj_file = os.path.join(folder, words[1])
 
             elif status == doVerts:
                 if len(words) == 1:
@@ -170,28 +195,19 @@ class CProxy:
                     d2 = float(words[8])
                     self.refVerts[vn] = CRefVert(vn).fromTriple((v0,v1,v2), (w0,w1,w2), (d0,-d2,d1))
                 vn += 1
-            else:
-                key = words[0]
-                status = 0
-                if key == 'verts':
-                    if len(words) > 1:
-                        self.firstVert = int(words[1])
-                    status = doVerts
-                elif key == 'name':
-                    self.name = words[1]
-                elif key == 'r_scale':
-                    self.xScale = self.yScale = self.zScale = scaleInfo(words)
-                elif key == 'x_scale':
-                    self.xScale = scaleInfo(words)
-                elif key == 'y_scale':
-                    self.yScale = scaleInfo(words)
-                elif key == 'z_scale':
-                    self.zScale = scaleInfo(words)
-                elif key == 'obj_file':
-                    self.obj_file = os.path.join(folder, words[1])
-                else:
-                    pass
 
+            elif status == doDeleteVerts:
+                pass
+            elif status == doWeightingVerts:
+                pass
+            else:
+                print("OTH", key, status)
+                try:
+                    n = int(key)
+                except:
+                    n = -1
+                if n >= 0:
+                    halt
 
 def scaleInfo(words):
     v1 = int(words[1])

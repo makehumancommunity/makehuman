@@ -604,7 +604,7 @@ class Application(events3d.EventHandler):
         if picked and hasattr(picked, 'view') and not picked.view:
             picked = None
 
-        if picked:
+        if picked and picked[1]:
             group = picked[0]
             object = picked[1].object or self
         else:

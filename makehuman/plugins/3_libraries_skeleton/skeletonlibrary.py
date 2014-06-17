@@ -256,7 +256,7 @@ class SkeletonLibrary(gui3d.TaskView):
             self.human.setSkeleton(None)
             if self.skelObj:
                 # Remove old skeleton mesh
-                gui3d.app.removeObject(self.skelObj)
+                self.removeObject(self.skelObj)
                 self.skelObj = None
                 self.skelMesh = None
             self.boneCountLbl.setTextFormat("Bones: %s", "")
@@ -294,7 +294,7 @@ class SkeletonLibrary(gui3d.TaskView):
     def drawSkeleton(self, skel):
         if self.skelObj:
             # Remove old skeleton mesh
-            gui3d.app.removeObject(self.skelObj)
+            self.removeObject(self.skelObj)
             self.skelObj = None
             self.skelMesh = None
             self.selectedBone = None
@@ -304,7 +304,7 @@ class SkeletonLibrary(gui3d.TaskView):
         self.skelMesh = skeleton_drawing.meshFromSkeleton(skel, "Prism")
         self.skelMesh.priority = 100
         self.skelMesh.setPickable(False)
-        self.skelObj = gui3d.app.addObject(gui3d.Object(self.skelMesh, self.human.getPosition()) )
+        self.skelObj = self.addObject(gui3d.Object(self.skelMesh, self.human.getPosition()) )
         self.skelObj.setShadeless(0)
         self.skelObj.setSolid(0)
         self.skelObj.setRotation(self.human.getRotation())
