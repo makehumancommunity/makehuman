@@ -1,0 +1,53 @@
+{
+  "Measure": {
+    "saveName": "measure",
+    "showMacroStats": true,
+    "modifiers": {
+      "Neck": [
+          {"mod": "measure/measure-neckcirc-decrease|increase", "label": "Neck circum"},
+          {"mod": "measure/measure-neckheight-decrease|increase", "label": "Neck height"}
+        ],
+
+      "Upper arm": [
+          {"mod": "measure/measure-upperarm-decrease|increase", "label": "Upper arm circum"},
+          {"mod": "measure/measure-upperarmlenght-decrease|increase", "label": "Upperarm length"}
+        ],
+
+      "Lower arm": [
+          {"mod": "measure/measure-lowerarmlenght-decrease|increase", "label": "Lowerarm length"},
+          {"mod": "measure/measure-wrist-decrease|increase", "label": "Wrist circum"}
+        ],
+
+      "Torso": [
+          {"mod": "measure/measure-frontchest-decrease|increase", "label": "Front chest dist"},
+          {"mod": "measure/measure-bust-decrease|increase", "label": "Bust circum"},
+          {"mod": "measure/measure-underbust-decrease|increase", "label": "Underbust circum"},
+          {"mod": "measure/measure-waist-decrease|increase", "label": "Waist circum"},
+          {"mod": "measure/measure-napetowaist-decrease|increase", "label": "Nape to waist"},
+          {"mod": "measure/measure-waisttohip-decrease|increase", "label": "Waist to hip"},
+          {"mod": "measure/measure-shoulder-decrease|increase", "label": "Shoulder dist"}
+        ],
+
+      "Hips": [
+          {"mod": "measure/measure-hips-decrease|increase", "label": "Hips circum"}
+        ],
+
+      "Upper leg": [
+          {"mod": "measure/measure-upperlegheight-decrease|increase", "label": "Upperleg height"},
+          {"mod": "measure/measure-thighcirc-decrease|increase", "label": "Thigh circ."}
+        ],
+
+      "Lower leg": [
+          {"mod": "measure/measure-lowerlegheight-decrease|increase", "label": "Lowerleg height"},
+          {"mod": "measure/measure-calf-decrease|increase", "label": "Calf circum"}
+        ],
+
+      "Ankle": [
+          {"mod": "measure/measure-ankle-decrease|increase", "label": "Ankle circum"}
+        ]
+
+    }
+  }
+
+}
+
