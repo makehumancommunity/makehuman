@@ -98,7 +98,7 @@ class Skeleton(object):
         from armature.armature import setupArmature
         from core import G
 
-        amt = setupArmature("python", G.app.selectedHuman, options)
+        self._amt = amt = setupArmature("python", G.app.selectedHuman, options)
         for bone in amt.bones.values():
             self.addBone(bone.name, bone.parent, bone.head, bone.tail, bone.roll)
 
@@ -171,8 +171,26 @@ class Skeleton(object):
             bone.build()
 
     def update(self):
+        """
+        Update skeleton pose matrices after setting a new pose.
+        """
         for bone in self.getBones():
             bone.update()
+
+    def updateJoints(self, humanMesh):
+        """
+        Update skeleton rest matrices to new joint positions after modifying
+        human.
+        """
+        self._amt.updateJoints()
+        for amtBone in self._amt.bones.values():
+            bone = self.getBone(amtBone.name)
+            bone.headPos[:] = amtBone.head
+            bone.tailPos[:] = amtBone.tail
+            bone.roll = amtBone.roll
+
+        for bone in self.getBones():
+            bone.build()
 
     def getBoneCount(self):
         return len(self.getBones())

@@ -46,10 +46,17 @@ import events3d
 from getpath import getSysDataPath, canonicalPath
 import log
 import material
+import animation
 
 from makehuman import getBasemeshVersion, getShortVersion, getVersionStr, getVersion
 
-class Human(guicommon.Object):
+
+# TODO emit event when skeleton changed, posed or unposed
+# TODO reimplement setPosed() with event emission, same for setSkeleton
+# TODO add getVertexWeights method
+# TODO reimplement setSkeleton ? -> for vertexWEights, or handle this automatically in animatedMesh?
+
+class Human(guicommon.Object, animation.AnimatedMesh):
 
     def __init__(self, mesh):
 
@@ -72,6 +79,7 @@ class Human(guicommon.Object):
         self._hairProxy = None
         self._eyesProxy = None
         self._genitalsProxy = None
+        # TODO add accessors for other proxies as well
         self.eyebrowsProxy = None
         self.eyelashesProxy = None
         self.teethProxy = None
@@ -98,9 +106,12 @@ class Human(guicommon.Object):
 
         self.blockEthnicUpdates = False                 # When set to True, changes to race are not normalized automatically
 
+        animation.AnimatedMesh.__init__(self, skel=None, mesh=self.meshData, vertexToBoneMapping=None)
+
 
     # TODO introduce better system for managing proxies, nothing done for clothes yet
     def setHairProxy(self, proxy):
+        self._swapProxies(self._hairProxy, proxy)
         self._hairProxy = proxy
         event = events3d.HumanEvent(self, 'proxyChange')
         event.proxy = 'hair'
@@ -111,6 +122,7 @@ class Human(guicommon.Object):
     hairProxy = property(getHairProxy, setHairProxy)
 
     def setEyesProxy(self, proxy):
+        self._swapProxies(self._eyesProxy, proxy)
         self._eyesProxy = proxy
         event = events3d.HumanEvent(self, 'proxyChange')
         event.proxy = 'eyes'
@@ -121,6 +133,7 @@ class Human(guicommon.Object):
     eyesProxy = property(getEyesProxy, setEyesProxy)
 
     def setGenitalsProxy(self, proxy):
+        self._swapProxies(self._genitalsProxy, proxy)
         self._genitalsProxy = proxy
         event = events3d.HumanEvent(self, 'proxyChange')
         event.proxy = 'genitals'
@@ -129,6 +142,16 @@ class Human(guicommon.Object):
         return self._genitalsProxy
 
     genitalsProxy = property(getGenitalsProxy, setGenitalsProxy)
+
+    def _swapProxies(self, oldPxy, newPxy):
+        """
+        Update bound meshes for animation when proxies are changed
+        """
+        if oldPxy:
+            self.removeMesh(oldPxy.object.mesh.name)
+        if newPxy:
+            # Add new mesh and vertex weight assignments
+            self._updateMeshVertexWeights(newPxy.object.mesh)
 
     def maskFaces(self):
         """
@@ -960,7 +983,17 @@ class Human(guicommon.Object):
         #self.traceStack(all=True)
         #self.traceBuffer(all=True, vertsToList=0)
 
+        # Update skeleton joint positions
+        if self.getSkeleton():
+            log.debug("Updating skeleton joint positions")
+            self.getSkeleton().updateJoints(self.meshData)
+
         self.callEvent('onChanged', events3d.HumanEvent(self, 'targets'))
+
+        # Restore posed mode, and shadow copy of vertex positions 
+        # (We do this after onChanged event so that proxies are already updated)
+        if self.getSkeleton():
+            self.refreshStaticMeshes()
 
     def getPartNameForGroupName(self, groupName):
         # TODO is this still used anywhere
@@ -1076,6 +1109,55 @@ class Human(guicommon.Object):
             raise RuntimeError("Human does not contain a joint helper with name %s" % ("joint-"+jointName))
         verts = self.meshData.getCoords(self.meshData.getVerticesForGroups([fg.name]))
         return verts.mean(axis=0)
+
+    def setSkeleton(self, skel, vertexWeights=None):
+        self.callEvent('onChanging', events3d.HumanEvent(self, 'skeleton'))
+        animation.AnimatedMesh.setSkeleton(self, skel)
+        self.updateVertexWeights(vertexWeights)
+        self.callEvent('onChanged', events3d.HumanEvent(self, 'skeleton'))
+
+    def updateVertexWeights(self, vertexWeights):
+        for mName in self.getMeshes():  # Meshes are ubsubdivided
+            # We assume the basemesh is the first mesh bound to the skeleton
+            if vertexWeights is None or mName == self.meshData.name: # TODO perhaps this identity by name is not strong enough, or enforce unique names in AnimatedMesh
+                animation.AnimatedMesh.updateVertexWeights(self, mName, vertexWeights)
+            else:
+                self._updateMeshVertexWeights(self.getMesh(mName))
+        self.refreshPose()
+
+    def _updateMeshVertexWeights(self, mesh):
+        if not self.getSkeleton():
+            return
+
+        obj = mesh.object
+        bodyVertexWeights = self.getVertexWeights()
+
+        if obj.proxy:
+            # Determine vertex weights for proxy (map to unfiltered proxy mesh)
+            weights = self.getSkeleton().getProxyWeights(obj.proxy, bodyVertexWeights)
+        else:
+            # Use vertex weights for human body
+            weights = bodyVertexWeights
+
+        if not self.containsMesh():
+            animation.AnimatedMesh.addMesh(self, mesh, weights)
+        else:
+            animation.AnimatedMesh.updateVertexWeights(self, mesh.name, weights)
+
+
+    def getVertexWeights(self):
+        if not self.getSkeleton():
+            return None
+
+        _, bodyWeights = self.getMesh(self.meshData.name)   # TODO perhaps rename to getAnimatedMesh or getBoundMesh
+        return bodyWeights
+
+    def setPosed(self, posed):
+        event = events3d.HumanEvent(self, 'poseState')
+        event.state = posed
+        self.callEvent('onChanging', event)
+        animated.AnimatedMesh.setPosed(self, posed)
+        self.callEvent('onChanged', event)
 
     def load(self, filename, update=True, progressCallback=None):
         from codecs import open
