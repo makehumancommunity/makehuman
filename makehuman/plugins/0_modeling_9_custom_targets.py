@@ -157,7 +157,7 @@ class CustomTargetsTaskView(gui3d.TaskView):
         if self.sliders:
             gui3d.app.statusPersist('')
         else:
-            gui3d.app.statusPersist('No custom targets found. To add a custom target, place the file in %s',
+            gui3d.app.statusPersist(['No custom targets found. To add a custom target, place the file in',' %s'],
                                     self.targetsPath)
 
     def createTargetControls(self, box, targetFile):
