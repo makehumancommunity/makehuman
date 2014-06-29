@@ -69,15 +69,32 @@ class Language(object):
         if self.languageStrings and '__options__' in self.languageStrings:
             self.rtl = self.languageStrings['__options__'].get('rtl', False)
             
-    def getLanguageString(self, string):
+    def getLanguageString(self, string, appendData=None, appendFormat=None):
         if not string:
             return string
         if string == "%%s":
             return string
+        if isinstance(string,list):
+            if len(string) == 2:
+                appendData = string[1];
+                string = string[0];
+            else:
+                if len(string) == 3:
+                    appendFormat = string[2]
+                    appendData = string[1]
+                    string = string[0]
+
         if self.languageStrings is None:
-            return string
-        result = self.languageStrings.get(string)
+            result = string
+        else:
+            result = self.languageStrings.get(string)
+
         if result is not None:
+            if appendData is not None:
+                if appendFormat is not None:
+                    result = result + (appendFormat % appendData)
+                else:
+                    result = result + appendData
             return result
         self.missingStrings.add(string)
         return string
@@ -91,7 +108,10 @@ class Language(object):
             os.makedirs(pathdir)
         with open(path, 'wb') as f:
             for string in self.missingStrings:
-                f.write('"%s": "",\n' % string.replace('\n', '\\n').encode('utf8'))
+                if self.language == "master":
+                    f.write('"%s": "%s",\n' % (string.replace('\n', '\\n').encode('utf8'), string.replace('\n', '\\n').encode('utf8')))
+                else:
+                    f.write('"%s": "",\n' % string.replace('\n', '\\n').encode('utf8'))
 
 
 class OrderedSet(collections.MutableSet):

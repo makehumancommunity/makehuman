@@ -979,8 +979,8 @@ class MHApplication(gui3d.Application, mh.Application):
         """
         return language.getLanguages()
 
-    def getLanguageString(self, string):
-        return language.language.getLanguageString(string)
+    def getLanguageString(self, string, appendData=None, appendFormat=None):
+        return language.language.getLanguageString(string,appendData,appendFormat)
 
     def dumpMissingStrings(self):
         language.language.dumpMissingStrings()
