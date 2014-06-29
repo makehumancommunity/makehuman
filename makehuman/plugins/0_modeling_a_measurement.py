@@ -47,6 +47,7 @@ import log
 import getpath
 from core import G
 import guimodifier
+import language
 
 class MeasureTaskView(guimodifier.ModifierTaskView):
 
@@ -210,10 +211,11 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
         else:
             height = '%.2f in' % (height * 0.393700787)
 
-        self.height.setTextFormat('Height: %s', height)
-        self.chest.setTextFormat('Chest: %s', self.getMeasure('measure/measure-bust-decrease|increase'))
-        self.waist.setTextFormat('Waist: %s', self.getMeasure('measure/measure-waist-decrease|increase'))
-        self.hips.setTextFormat('Hips: %s', self.getMeasure('measure/measure-hips-decrease|increase'))
+        lang = language.language
+        self.height.setTextFormat(lang.getLanguageString('Height') + ': %s', height)
+        self.chest.setTextFormat(lang.getLanguageString('Chest') + ': %s', self.getMeasure('measure/measure-bust-decrease|increase'))
+        self.waist.setTextFormat(lang.getLanguageString('Waist') + ': %s', self.getMeasure('measure/measure-waist-decrease|increase'))
+        self.hips.setTextFormat(lang.getLanguageString('Hips') + ': %s', self.getMeasure('measure/measure-hips-decrease|increase'))
 
     def syncBraSizes(self):
         # TODO unused
