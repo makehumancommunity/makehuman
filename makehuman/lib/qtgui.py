@@ -49,7 +49,7 @@ import language
 from getpath import getSysDataPath, getPath, isSubPath, pathToUnicode
 
 
-def getLanguageString(text):
+def getLanguageString(text, appendData=None, appendFormat=None):
     """Function to get the translation of a text according to the selected
     language.
 
@@ -58,7 +58,7 @@ def getLanguageString(text):
     """
     if not text:
         return text
-    return language.language.getLanguageString(text)
+    return language.language.getLanguageString(text,appendData,appendFormat)
 
 
 class Widget(events3d.EventHandler):
@@ -1428,11 +1428,25 @@ class StatusBar(QtGui.QStatusBar, Widget):
         self.duration = 2000
 
     def showMessage(self, text, *args):
-        text = getLanguageString(text) % args
+        if isinstance(text,list):
+            out = ""
+            for part in text:
+                out = out + getLanguageString(part)
+            text = out
+        else:
+            text = getLanguageString(text)
+        text = text % args
         super(StatusBar, self).showMessage(text, self.duration)
 
     def setMessage(self, text, *args):
-        text = getLanguageString(text) % args
+        if isinstance(text,list):
+            out = ""
+            for part in text:
+                out = out + getLanguageString(part)
+            text = out
+        else:
+            text = getLanguageString(text)
+        text = text % args
         self._perm.setText(text)
 
 class VScrollLayout(QtGui.QLayout):
