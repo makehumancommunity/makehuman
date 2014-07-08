@@ -115,9 +115,9 @@ current_Progress_ = None
 
 
 class Progress(object):
-    def __init__(self, steps = 0, progressCallback = True, logging = False, timing = False):
+    def __init__(self, steps=0, progressCallback=True, logging=False, timing=False):
         global current_Progress_
-        
+
         self.progress = 0.0
         self.nextprog = None
         self.steps = steps
@@ -148,10 +148,9 @@ class Progress(object):
             # To completely disable updating when this is a
             # master Progress, pass None as progressCallback.
 
-
-    # Internal method that is responsible for the
-    # actual progress bar updating.
-    def update(self, prog = None, desc = None, *args):
+    def update(self, prog=None, desc=None, *args):
+        '''Internal method that is responsible for the
+        actual progress bar updating.'''
 
         if self.steps:
             prog = float(self.stepsdone) / float(self.steps)
@@ -180,21 +179,21 @@ class Progress(object):
 
             if self.logging:
                 import log
-                log.debug("Progress %.2f%%: %s", prog, desc)
-                
-            if not self.progressCallback is None:
+                log.debug("Progress %.2f%%: %s", prog, desc)  # TODO: Format desc with args
+
+            if self.progressCallback is not None:
                 self.progressCallback(prog, desc, *args)
 
-        if prog >= 0.999999: # Not using 1.0 for precision safety.
+        if prog >= 0.999999:  # Not using 1.0 for precision safety.
             self.finish()
-            
+
         if self.parent:
             self.parent.childupdate(prog, desc, *args)
 
-
-    # Internal method that a child Progress calls for doing a
-    # progress update by communicating with its parent.
     def childupdate(self, prog, desc, *args):
+        '''Internal method that a child Progress calls for doing a
+        progress update by communicating with its parent.'''
+
         if self.steps:
             prog = (self.stepsdone + prog) / float(self.steps)
         elif not self.nextprog is None:
@@ -204,11 +203,11 @@ class Progress(object):
 
         self.update(prog, desc, *args)
 
-
-    # Method to be called when a subroutine has finished,
-    # either explicitly (by the user), or implicitly
-    # (automatically when progress reaches 1.0).
     def finish(self):
+        '''Method to be called when a subroutine has finished,
+        either explicitly (by the user), or implicitly
+        (automatically when progress reaches 1.0).'''
+
         global current_Progress_
 
         if self.parent is None and self.logging and self.timing:
@@ -217,14 +216,14 @@ class Progress(object):
 
         current_Progress_ = self.parent
 
+    def __call__(self, progress, end=None, desc=False, *args):
+        '''Basic method for progress updating.
+        It overloads the () operator of the constructed object.
+        Pass None to the description to allow the child update status.'''
 
-    # Basic method for progress updating.
-    # It overloads the () operator of the constructed object.
-    # Pass None to the description to allow the child update status.
-    def __call__(self, progress, end = None, desc = False, *args):
         global current_Progress_
         current_Progress_ = self
-        
+
         if not (desc is False):
             self.description = desc
             self.args = args
@@ -232,22 +231,22 @@ class Progress(object):
         self.progress = progress
         self.nextprog = end
         self.update()
-        
+
         return self
 
+    def step(self, desc=False, *args):
+        '''Method useful for smaller tasks that take a number
+        of roughly equivalent steps to complete.
+        You can use this in a non-stepped Progress to just
+        update the description on the status bar.'''
 
-    # Method useful for smaller tasks that take a number
-    # of roughly equivalent steps to complete.
-    # You can use this in a non-stepped Progress to just
-    # update the description on the status bar.
-    def step(self, desc = False, *args):
         global current_Progress_
         current_Progress_ = self
 
         if not (desc is False):
             self.description = desc
             self.args = args
-        
+
         if self.steps:
             self.stepsdone += 1
 
@@ -255,27 +254,24 @@ class Progress(object):
 
         return self
 
-
-    # Class method for directly creating a master Progress object.
-    # Resets all progress to zero. Use this for starting a greater MH task.
     @classmethod
-    def begin(cls, steps = 0, progressCallback = True, logging = False, timing = False):
+    def begin(cls, steps=0, progressCallback=True, logging=False, timing=False):
+        '''Class method for directly creating a master Progress object.
+        Resets all progress to zero. Use this for starting a greater MH task.'''
 
         global current_Progress_
         current_Progress_ = None
 
         return cls(steps, progressCallback, logging, timing)
 
-
     ## Specialized methods follow ##
 
-
-    # Method that prepares the Progress object to run in a hispeed loop
-    # with high number of repetitions, which needs to progress the bar
-    # while looping without adding callback overhead.
-    # WARNING: ALWAYS test the overhead. Don't use this
-    # in extremely fast loops or it might slow them down.
     def HighFrequency(self, interval):
+        '''Method that prepares the Progress object to run in a hispeed loop
+        with high number of repetitions, which needs to progress the bar
+        while looping without adding callback overhead.
+        WARNING: ALWAYS test the overhead. Don't use this
+        in extremely fast loops or it might slow them down.'''
 
         # Loop number interval between progress updates.
         self.HFI = interval
@@ -286,12 +282,11 @@ class Progress(object):
 
         return self
 
-
-    # Replacement method to be called in a hispeed loop instead of step().
-    # It is replaced internally on HighFrequency() (call step() to use it).
     def HFstep(self):
+        '''Replacement method to be called in a hispeed loop instead of step().
+        It is replaced internally on HighFrequency() (call step() to use it).'''
 
         if self.stepsdone % self.HFI > 0 and self.stepsdone < self.steps - 1:
-            self.stepsdone +=1
+            self.stepsdone += 1
         else:
             self.dostep()
