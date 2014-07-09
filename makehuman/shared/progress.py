@@ -152,10 +152,11 @@ class Progress(object):
         '''Internal method that is responsible for the
         actual progress bar updating.'''
 
-        if self.steps:
-            prog = float(self.stepsdone) / float(self.steps)
         if prog is None:
-            prog = self.progress
+            if self.steps:
+                prog = float(self.stepsdone) / float(self.steps)
+            else:
+                prog = self.progress
 
         if not desc:
             if self.description:
@@ -196,7 +197,7 @@ class Progress(object):
 
         if self.steps:
             prog = (self.stepsdone + prog) / float(self.steps)
-        elif not self.nextprog is None:
+        elif self.nextprog is not None:
             prog = self.progress + prog * (self.nextprog - self.progress)
         else:
             prog = self.progress
@@ -219,7 +220,7 @@ class Progress(object):
     def __call__(self, progress, end=None, desc=False, *args):
         '''Basic method for progress updating.
         It overloads the () operator of the constructed object.
-        Pass None to the description to allow the child update status.'''
+        Pass None to the description to disable it.'''
 
         global current_Progress_
         current_Progress_ = self
