@@ -158,13 +158,9 @@ class Progress(object):
             else:
                 prog = self.progress
 
-        if not desc:
-            if self.description:
-                desc = self.description
-                args = self.args
-            else:
-                desc = ""
-                args = []
+        if desc is None and self.description:
+            desc = self.description
+            args = self.args
 
         if self.parent is None:
             if self.timing:
@@ -183,7 +179,8 @@ class Progress(object):
                 log.debug("Progress %.2f%%: %s", prog, desc)  # TODO: Format desc with args
 
             if self.progressCallback is not None:
-                self.progressCallback(prog, desc, *args)
+                desc_str = "" if desc is None else desc
+                self.progressCallback(prog, desc_str, *args)
 
         if prog >= 0.999999:  # Not using 1.0 for precision safety.
             self.finish()
@@ -220,7 +217,8 @@ class Progress(object):
     def __call__(self, progress, end=None, desc=False, *args):
         '''Basic method for progress updating.
         It overloads the () operator of the constructed object.
-        Pass None to the description to disable it.'''
+        Pass None to desc to disable the description; the parent
+        will update it instead in that case.'''
 
         global current_Progress_
         current_Progress_ = self
