@@ -9,6 +9,11 @@ $hglangdir="../../makehuman/data/languages";
 
 # --- END CONFIGURATION ---
 
+$langsubs{"CN"} = "china";
+$langsubs{"KR"} = "korea";
+$langsubs{"BR"} = "brazil";
+$langsubs{"RO"} = "romania";
+$langsubs{"SE"} = "sweden";
 
 use Locale::Language;
 
@@ -33,7 +38,24 @@ while($inlin = <FILES>)
   $lang = $1;
   $lang =~ m/([a-z][a-z]).*/;
   $code = $1;
+
+  $langsub = "generic";
+
+  if($lang =~ m/([a-z][a-z])_([A-Z][A-Z]).*/)
+  {
+    $langsub = $2;
+    if($langsubs{$langsub})
+    {
+      $langsub = $langsubs{$langsub};
+    }
+    else
+    {
+      $langsub = "unknown";
+    }
+  }
+
   $fn = lc(code2language($code)) || $lang;
+  $fn = $fn . "_" . $langsub;
   system "cp $inlin lang/$fn.json";
   if(-e "$hglangdir/$fn.json")
   {
@@ -106,6 +128,9 @@ while($inlin = <PIPE>)
 close(PIPE);
 print LINKS "</table>\n";
 print LINKS "<br /><br />";
+
+system "perl ../compare.pl ../english.json ../lang >> index.html";
+
 print LINKS "</body></html>\n";
 
 if($upload)
@@ -121,4 +146,5 @@ if($upload)
 {
   system "scp ../html/lang.zip $upload";
 }
+
 
