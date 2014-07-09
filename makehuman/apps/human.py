@@ -41,7 +41,7 @@ import numpy as np
 import algos3d
 import guicommon
 from core import G
-import os
+from progress import Progress
 import events3d
 from getpath import getSysDataPath, canonicalPath
 import log
@@ -914,48 +914,39 @@ class Human(guicommon.Object):
         progressCallback parameter is left to None. Set it to False to disable
         progress reporting.
         """
-        if progressCallback is None:
-            progressCallback = G.app.progress
+        progress = Progress(0, None if progressCallback == False else
+            True if progressCallback is None else progressCallback)  # TODO Make this pretty
 
-        if progressCallback:
-            progressCallback(0.0)
+        progress(0.0, 0.5)
 
-        # First call progressCalback (which often processes events) before resetting mesh
+        # First call progress callback (which often processes events) before resetting mesh
         # so that mesh is not drawn in its reset state
         algos3d.resetObj(self.meshData)
 
-        progressVal = 0.0
-        progressIncr = 0.5 / (len(self.targetsDetailStack) + 1)
-
+        itprog = Progress(len(self.targetsDetailStack))
         for (targetPath, morphFactor) in self.targetsDetailStack.iteritems():
             algos3d.loadTranslationTarget(self.meshData, targetPath, morphFactor, None, 0, 0)
-
-            progressVal += progressIncr
-            if progressCallback:
-                progressCallback(progressVal)
-
+            itprog.step()
 
         # Update all verts
         self.getSeedMesh().update()
         self.updateProxyMesh()
         if self.isSubdivided():
+            progress(0.5, 0.7)
             self.updateSubdivisionMesh()
-            if progressCallback:
-                progressCallback(0.7)
+            progress(0.7, 0.8)
             self.mesh.calcNormals()
-            if progressCallback:
-                progressCallback(0.8)
+            progress(0.8, 0.99)
             if update:
                 self.mesh.update()
         else:
+            progress(0.5, 0.8)
             self.meshData.calcNormals(1, 1)
-            if progressCallback:
-                progressCallback(0.8)
+            progress(0.8, 0.99)
             if update:
                 self.meshData.update()
 
-        if progressCallback:
-            progressCallback(1.0)
+        progress(1.0)
 
         #self.traceStack(all=True)
         #self.traceBuffer(all=True, vertsToList=0)
@@ -1130,7 +1121,6 @@ class Human(guicommon.Object):
 
     def save(self, filename, tags):
         from codecs import open
-        from progress import Progress
         progress = Progress(len(G.app.saveHandlers))
         event = events3d.HumanEvent(self, 'save')
         event.path = filename
