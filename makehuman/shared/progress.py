@@ -130,6 +130,8 @@ class Progress(object):
 
         self.logging = logging
         self.timing = timing
+        self.timing_request = False
+        self.logging_request = False
 
         # Push self in the global Progress object stack.
         self.parent = current_Progress_
@@ -148,6 +150,12 @@ class Progress(object):
             # To completely disable updating when this is a
             # master Progress, pass None as progressCallback.
 
+        # If this Progress works with steps and uses timing,
+        # do an initial update to init the counter, as the
+        # user won't update before executing the first step.
+        if self.steps and self.timing:
+            self.update()
+
     def update(self, prog=None, desc=None, *args):
         '''Internal method that is responsible for the
         actual progress bar updating.'''
@@ -163,24 +171,28 @@ class Progress(object):
             args = self.args
 
         if self.parent is None:
-            if self.timing:
+            desc_str = "" if desc is None else desc
+
+            if self.timing or self.timing_request:
                 import time
                 t = time.time()
                 if self.time:
                     deltaT = (t - self.time)
                     self.totalTime += deltaT
-                    if self.logging:
+                    if self.logging or self.logging_request:
                         import log
                         log.debug("  took %.4f seconds", deltaT)
                 self.time = t
 
-            if self.logging:
+            if self.logging or self.logging_request:
                 import log
-                log.debug("Progress %.2f%%: %s", prog, desc)  # TODO: Format desc with args
+                log.debug("Progress %.2f%%: %s", prog, desc_str)  # TODO: Format desc with args
 
             if self.progressCallback is not None:
-                desc_str = "" if desc is None else desc
                 self.progressCallback(prog, desc_str, *args)
+        else:
+            self.parent.timing_request = self.timing or self.timing_request
+            self.parent.logging_request = self.logging or self.logging_request
 
         if prog >= 0.999999:  # Not using 1.0 for precision safety.
             self.finish()
