@@ -411,7 +411,7 @@ class Object(events3d.EventHandler):
                 if self.__seedMesh.object3d:
                     self.attachMesh(self.__proxySubdivisionMesh)
             elif update:
-                cks.updateSubdivisionObject(self.__proxySubdivisionMesh, progressCallback)
+                cks.updateSubdivisionObject(self.__proxySubdivisionMesh)
 
             return self.__proxySubdivisionMesh
         else:
@@ -420,7 +420,7 @@ class Object(events3d.EventHandler):
                 if self.__seedMesh.object3d:
                     self.attachMesh(self.__subdivisionMesh)
             elif update:
-                cks.updateSubdivisionObject(self.__subdivisionMesh, progressCallback)
+                cks.updateSubdivisionObject(self.__subdivisionMesh)
 
             return self.__subdivisionMesh
 
