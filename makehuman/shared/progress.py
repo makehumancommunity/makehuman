@@ -107,6 +107,18 @@ def FooBarBaz():
 
     progress(1.0, None, "Foobar bazzed.")
 
+
+-----
+
+- Weighted steps
+
+Progress constructor can accept an iterable as the steps parameter.
+In that case, the weighted step mode is activated, and steps with
+greater weight in the iterable affect larger area of the progress bar.
+
+Example:
+progress = Progress([7, 3, 6, 6])
+
 """
 
 
@@ -124,6 +136,14 @@ class Progress(object):
         self.stepsdone = 0
         self.description = None
         self.args = []
+
+        # Weighted steps feature
+        if hasattr(self.steps, '__iter__'):
+            from collections import deque
+            self.stepweights = deque(self.steps)
+            self.steps = sum(self.steps)
+        else:
+            self.stepweights = None
 
         self.time = None
         self.totalTime = 0.0
@@ -155,6 +175,14 @@ class Progress(object):
         # user won't update before executing the first step.
         if self.steps and self.timing:
             self.update()
+
+    def stepWeight(self):
+        '''Internal method that returns the weight of
+        the next step.'''
+        if self.stepweights is None:
+            return 1
+        else:
+            return self.stepweights.popleft()
 
     def update(self, prog=None, desc=None, *args):
         '''Internal method that is responsible for the
@@ -259,7 +287,7 @@ class Progress(object):
             self.args = args
 
         if self.steps:
-            self.stepsdone += 1
+            self.stepsdone += self.stepWeight()
 
         self.update()
 
