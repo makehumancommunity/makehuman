@@ -133,7 +133,7 @@ class BackgroundChooser(gui3d.TaskView):
         mesh = geometry3d.RectangleMesh(20, 20, centered=True)
         self.backgroundImage = gui3d.app.addObject(gui3d.Object(mesh, [0, 0, 1], visible=False))
         self.backgroundImage.mesh.setCameraProjection(0)
-        self.backgroundImage.mesh.lockRotation = True;
+        self.backgroundImage.lockRotation = True
         self.opacity = 40
         mesh.setColor([255, 255, 255, self.opacity*2.55])
         mesh.setPickable(False)
