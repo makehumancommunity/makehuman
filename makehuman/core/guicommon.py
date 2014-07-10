@@ -440,10 +440,10 @@ class Object(events3d.EventHandler):
         updated.
 
         """
-        Progress(0, progressCallback)(0.0, 1.0)  # CLEANUP: TO BE CONTINUED
-
         if flag == self.isSubdivided():
             return False
+
+        progress = Progress(0, progressCallback)(0.0, 1.0)
 
         if flag:
             self.mesh.setVisibility(0)
@@ -459,6 +459,8 @@ class Object(events3d.EventHandler):
                 self.mesh.calcNormals()
                 self.mesh.update()
             self.mesh.setVisibility(1)
+
+        progress.finish()
         return True
 
     def updateSubdivisionMesh(self, rebuildIndexBuffer=False, progressCallback=None):
