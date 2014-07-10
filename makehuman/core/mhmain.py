@@ -568,12 +568,12 @@ class MHApplication(gui3d.Application, mh.Application):
         backGridMesh = geometry3d.GridMesh(gridSize, gridSize, spacing, offset = -10, plane = 0, subgrids = subgrids)
         backGridMesh.setMainColor(self.gridColor)
         backGridMesh.setSubColor(self.gridSubColor)
-        backGridMesh.lockRotation = True
         backGridMesh.restrictVisibleToCamera = True
         backGridMesh.minSubgridZoom = (1.0/spacing) * float(subgrids)/5
         self.backplaneGrid = gui3d.Object(backGridMesh)
         self.backplaneGrid.excludeFromProduction = True
         self.backplaneGrid.placeAtFeet = True
+        self.backplaneGrid.lockRotation = True
         self.backplaneGrid.setShadeless(1)
         #self.backplaneGrid.setPosition([0,offset,0])
         self.addObject(self.backplaneGrid)
