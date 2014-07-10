@@ -904,18 +904,17 @@ class Human(guicommon.Object):
         """
         return set( [t[0] for m in self.modifiers for t in m.targets] )
 
-    def applyAllTargets(self, progressCallback=None, update=True):
+    def applyAllTargets(self, progressCallback=True, update=True):
         """
         This method applies all targets, in function of age and sex
 
         **Parameters:** None.
 
         progressCallback will automatically be set to G.app.progress if the
-        progressCallback parameter is left to None. Set it to False to disable
+        progressCallback parameter is left to True. Set it to None to disable
         progress reporting.
         """
-        progress = Progress(0, None if progressCallback == False else
-            True if progressCallback is None else progressCallback)  # TODO Make this pretty
+        progress = Progress(0, progressCallback)
 
         progress(0.0, 0.5)
 
@@ -1068,7 +1067,7 @@ class Human(guicommon.Object):
         verts = self.meshData.getCoords(self.meshData.getVerticesForGroups([fg.name]))
         return verts.mean(axis=0)
 
-    def load(self, filename, update=True, progressCallback=None):
+    def load(self, filename, update=True, progressCallback=True):
         from codecs import open
         log.message("Loading human from MHM file %s.", filename)
         event = events3d.HumanEvent(self, 'load')
