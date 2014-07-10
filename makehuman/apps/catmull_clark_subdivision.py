@@ -510,7 +510,7 @@ def createSubdivisionObject(object, staticFaceMask=None, progressCallback=None):
     obj.create(progressCallback)
     return obj
 
-def updateSubdivisionObject(object, progressCallback=None):
+def updateSubdivisionObject(object):
     object.update()
     object.calcNormals()
     object.sync_all()
