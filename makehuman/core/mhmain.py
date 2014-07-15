@@ -45,7 +45,7 @@ import contextlib
 
 from core import G
 import mh
-import events3d
+from progress import Progress
 import files3d
 import gui3d
 import geometry3d
@@ -129,14 +129,14 @@ class SymmetryAction(gui3d.Action):
             self.human.applySymmetryRight()
         else:
             self.human.applySymmetryLeft()
-        self.human.applyAllTargets(G.app.progress)
+        self.human.applyAllTargets()
         mh.redraw()
         return True
 
     def undo(self):
         for (modifierName, value) in self.before:
             self.human.getModifier(modifierName).setValue(value)
-        self.human.applyAllTargets(G.app.progress)
+        self.human.applyAllTargets()
         mh.redraw()
         return True
 
@@ -304,7 +304,7 @@ class MHApplication(gui3d.Application, mh.Application):
         return G.args
 
     def loadHumanMHM(self, filename):
-        self.selectedHuman.load(filename, True, self.progress)
+        self.selectedHuman.load(filename, True)
         self.clearUndoRedo()
         # Reset mesh is never forced to wireframe
         self.actions.wireframe.setChecked(False)
@@ -606,7 +606,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def loadFinish(self):
         #self.selectedHuman.callEvent('onChanged', events3d.HumanEvent(self.selectedHuman, 'reset'))
-        self.selectedHuman.applyAllTargets(gui3d.app.progress)
+        self.selectedHuman.applyAllTargets()
 
         self.prompt('Warning', 'MakeHuman is a character creation suite. It is designed for making anatomically correct humans.\nParts of this program may contain nudity.\nDo you want to proceed?', 'Yes', 'No', None, self.stop, 'nudityWarning')
         # self.splash.hide()
@@ -1271,8 +1271,10 @@ class MHApplication(gui3d.Application, mh.Application):
         self.redraw()
 
     def toggleSubdivision(self):
-        self.selectedHuman.setSubdivided(self.actions.smooth.isChecked(), True, self.progress)
+        progress = Progress()(0.0, 1.0)
+        self.selectedHuman.setSubdivided(self.actions.smooth.isChecked(), True)
         self.redraw()
+        progress(1)
 
     def symmetryRight(self):
         human = self.selectedHuman
@@ -1317,7 +1319,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def _resetHuman(self):
         self.selectedHuman.resetMeshValues()
-        self.selectedHuman.applyAllTargets(self.progress)
+        self.selectedHuman.applyAllTargets()
         self.clearUndoRedo()
         # Reset mesh is never forced to wireframe
         self.actions.wireframe.setChecked(False)
