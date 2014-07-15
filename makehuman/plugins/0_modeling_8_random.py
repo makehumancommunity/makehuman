@@ -39,7 +39,6 @@ TODO
 
 import random
 import gui3d
-import events3d
 import gui
 from core import G
 
@@ -66,7 +65,7 @@ class RandomizeAction(gui3d.Action):
                 self.human.getModifier(mName).setValue(val)
             except:
                 pass
-        self.human.applyAllTargets(G.app.progress)
+        self.human.applyAllTargets()
         self.human.symmetryModeEnabled = _tmp
 
 class RandomTaskView(gui3d.TaskView):

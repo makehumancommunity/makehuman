@@ -433,7 +433,7 @@ class Object(events3d.EventHandler):
         """
         return self.mesh == self.__subdivisionMesh or self.mesh == self.__proxySubdivisionMesh
 
-    def setSubdivided(self, flag, update=True, progressCallback=None):
+    def setSubdivided(self, flag, update=True):
         """
         Set whether this mesh is to be subdivided (or smoothed).
         When set to true, the subdivision mesh is automatically created or
@@ -442,8 +442,6 @@ class Object(events3d.EventHandler):
         """
         if flag == self.isSubdivided():
             return False
-
-        progress = Progress(0, progressCallback)(0.0, 1.0)
 
         if flag:
             self.mesh.setVisibility(0)
@@ -460,15 +458,14 @@ class Object(events3d.EventHandler):
                 self.mesh.update()
             self.mesh.setVisibility(1)
 
-        progress.finish()
         return True
 
-    def updateSubdivisionMesh(self, rebuildIndexBuffer=False, progressCallback=None):
+    def updateSubdivisionMesh(self, rebuildIndexBuffer=False):
         if rebuildIndexBuffer:
             # Purge old subdivision mesh and recalculate entirely
             self.setSubdivided(False)
             self.__subdivisionMesh = self.__proxySubdivisionMesh = None
-            self.setSubdivided(True, progressCallback=progressCallback)
+            self.setSubdivided(True)
         else:
             self.getSubdivisionMesh(True)
 

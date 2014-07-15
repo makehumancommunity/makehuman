@@ -546,7 +546,7 @@ class Scripting():
     def loadModel(self,name,path = mh.getPath('models')):
         log.message("SCRIPT: loadModel(" + name + "," + path + ")")
         filename = os.path.join(path,name + ".mhm")
-        self.human.load(filename, True, gui3d.app.progress)
+        self.human.load(filename, True)
 
     def saveObj(self, name, path = mh.getPath('exports')):
         log.message("SCRIPT: saveObj(" + name + "," + path + ")")
