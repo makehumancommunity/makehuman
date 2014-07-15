@@ -163,9 +163,9 @@ def getHgRoot(subpath=''):
     return os.path.realpath(os.path.join(cwd, '..', subpath))
 
 def get_revision_hg_info():
-    # Return local revision number of hg tip
+    # Return local revision number of hg parent
     hgRoot = getHgRoot()
-    output = subprocess.Popen(["hg","-q","tip","--template","{rev}:{node|short}"], stdout=subprocess.PIPE, stderr=sys.stderr, cwd=hgRoot).communicate()[0]
+    output = subprocess.Popen(["hg","-q","parent","--template","{rev}:{node|short}"], stdout=subprocess.PIPE, stderr=sys.stderr, cwd=hgRoot).communicate()[0]
     output = output.strip().split(':')
     rev = output[0].strip().replace('+', '')
     revid = output[1].strip().replace('+', '')
@@ -193,9 +193,9 @@ def get_revision_hglib():
     # The following only works if python-hglib is installed.
     import hglib
     hgclient = hglib.open(getHgRoot())
-    tip = hgclient.tip()
+    parent = hgclient.parents()[0]
     branch = hgclient.branch()
-    return (tip.rev.replace('+',''), tip.node[:12], branch)
+    return (parent.rev.replace('+',''), parent.node[:12], branch)
 
 def get_revision_file():
     # Default fallback to use if we can't figure out HG revision in any other
