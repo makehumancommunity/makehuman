@@ -193,9 +193,9 @@ def get_revision_hglib():
     # The following only works if python-hglib is installed.
     import hglib
     hgclient = hglib.open(getHgRoot())
-    tip = hgclient.tip()
+    parent = hgclient.parents()[0]
     branch = hgclient.branch()
-    return (tip.rev.replace('+',''), tip.node[:12], branch)
+    return (parent.rev.replace('+',''), parent.node[:12], branch)
 
 def get_revision_file():
     # Default fallback to use if we can't figure out HG revision in any other
