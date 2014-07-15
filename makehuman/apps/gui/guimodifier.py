@@ -183,7 +183,7 @@ class ModifierTaskView(gui3d.TaskView):
             units = 'in'
             height *= 0.393700787
 
-        self.setStatus('Gender: %s, Age: %d, Muscle: %.2f%%, Weight: %.2f%%, Height: %.2f %s', gender, age, muscle, weight, height, units)
+        self.setStatus([ ['Gender',': %s '], ['Age',': %d '], ['Muscle',': %.2f%% '], ['Weight',': %.2f%% '], ['Height',': %.2f %s'] ], gender, age, muscle, weight, height, units)
 
     def setStatus(self, format, *args):
         G.app.statusPersist(format, *args)

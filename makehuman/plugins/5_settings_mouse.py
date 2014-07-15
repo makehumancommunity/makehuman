@@ -64,7 +64,7 @@ class MouseActionsTaskView(gui3d.TaskView):
 
         speedBox = self.addLeftWidget(gui.SliderBox('3D Viewport Speed'))
         self.normal = speedBox.addWidget(gui.Slider(gui3d.app.settings.get('lowspeed', 1), 1, 10,
-            "Normal speed: %d"))
+            ["Normal speed",": %d"]))
 
         self.mouseBox = self.addLeftWidget(gui.GroupBox('Camera'))
 

@@ -49,6 +49,13 @@ from core import G
 import log
 from PyQt4 import QtCore, QtGui
 
+MAX_COMPLETIONS = -1
+
+class ShellTextEdit(gui.TextEdit):
+    def tabPressed(self):
+        self.callEvent('onTabPressed', self)
+        return True
+
 class ShellTaskView(gui3d.TaskView):
     def __init__(self, category):
         super(ShellTaskView, self).__init__(category, 'Shell')
@@ -69,7 +76,7 @@ class ShellTaskView(gui3d.TaskView):
             QtGui.QSizePolicy.Expanding)
         self.layout.addWidget(self.text, 0, 0, 1, 2)
 
-        self.line = gui.TextEdit()
+        self.line = ShellTextEdit()
         self.line.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.layout.addWidget(self.line, 1, 0, 1, 1)
         self.globals = {'G': G}
@@ -84,6 +91,48 @@ class ShellTaskView(gui3d.TaskView):
             self.histitem = None
             self.line.setText('')
 
+        @self.line.mhEvent
+        def onTabPressed(edit):
+            def _longest_common_substring(s1, s2):
+                """
+                This is simply the O(n) left-aligned version
+                """
+                limit = min(len(s1), len(s2))
+                i = 0
+                while i < limit and s1[i] == s2[i]:
+                    i += 1
+                return s1[:i]
+
+            def _largest_common(strings):
+                strings = list(strings)
+                try:
+                    strings.remove('...')
+                except:
+                    pass
+
+                if len(strings) == 0:
+                    return ""
+                elif len(strings) == 1:
+                    return strings[0]
+                else:
+                    result = strings[0]
+                    for s in strings[1:]:
+                        result = _longest_common_substring(result, s)
+                    return result
+
+            line = edit.getText()
+            suggestions = self.getSuggestions(line)
+
+            if len(suggestions) == 0:
+                return
+            if len(suggestions) > 1:
+                self.write('\n'.join(suggestions)+"\n")
+                scrollbar = self.text.verticalScrollBar()
+                scrollbar.setSliderPosition(scrollbar.maximum())
+                edit.setText(_largest_common(suggestions))
+            elif len(suggestions) == 1:
+                edit.setText(suggestions[0])
+
         @self.clear.mhEvent
         def onClicked(event):
             self.clearText()
@@ -95,6 +144,29 @@ class ShellTaskView(gui3d.TaskView):
         @self.line.mhEvent
         def onDownArrow(_dummy):
             self.downArrow()
+
+    def getSuggestions(self, line):
+        from rlcompleter import Completer
+        def _inRange(i):
+            if MAX_COMPLETIONS <= 0:
+                # No limit
+                return True
+            else:
+                return i <= MAX_COMPLETIONS
+        result = []
+        completer = Completer(self.globals)
+        i = 0
+        suggestion = True
+        while suggestion and _inRange(i):
+            suggestion = completer.complete(line, i)
+            if suggestion:
+                if i == MAX_COMPLETIONS and MAX_COMPLETIONS != 0:
+                    result.append('...')
+                else:
+                    if suggestion not in result:
+                        result.append(suggestion)
+            i += 1
+        return result
 
     def execute(self, text):
         stdout = sys.stdout

@@ -42,6 +42,7 @@ import events3d
 import numpy as np
 import matrix
 import material
+from progress import Progress
 
 class Action(object):
     def __init__(self, name):
@@ -390,7 +391,7 @@ class Object(events3d.EventHandler):
 
         self.setSubdivided(isSubdivided)
 
-    def getSubdivisionMesh(self, update=True, progressCallback=None):
+    def getSubdivisionMesh(self, update=True):
         """
         Create or update the Catmull-Clark subdivided (or smoothed) mesh for
         this mesh.
@@ -407,20 +408,20 @@ class Object(events3d.EventHandler):
 
         if self.isProxied():
             if not self.__proxySubdivisionMesh:
-                self.__proxySubdivisionMesh = cks.createSubdivisionObject(self.__proxyMesh, None, progressCallback)
+                self.__proxySubdivisionMesh = cks.createSubdivisionObject(self.__proxyMesh, None)
                 if self.__seedMesh.object3d:
                     self.attachMesh(self.__proxySubdivisionMesh)
             elif update:
-                cks.updateSubdivisionObject(self.__proxySubdivisionMesh, progressCallback)
+                cks.updateSubdivisionObject(self.__proxySubdivisionMesh)
 
             return self.__proxySubdivisionMesh
         else:
             if not self.__subdivisionMesh:
-                self.__subdivisionMesh = cks.createSubdivisionObject(self.__seedMesh, self.staticFaceMask, progressCallback)
+                self.__subdivisionMesh = cks.createSubdivisionObject(self.__seedMesh, self.staticFaceMask)
                 if self.__seedMesh.object3d:
                     self.attachMesh(self.__subdivisionMesh)
             elif update:
-                cks.updateSubdivisionObject(self.__subdivisionMesh, progressCallback)
+                cks.updateSubdivisionObject(self.__subdivisionMesh)
 
             return self.__subdivisionMesh
 
@@ -442,10 +443,12 @@ class Object(events3d.EventHandler):
         if flag == self.isSubdivided():
             return False
 
+        progress = Progress(0, progressCallback)(0.0, 1.0)
+
         if flag:
             self.mesh.setVisibility(0)
             originalMesh = self.mesh
-            self.mesh = self.getSubdivisionMesh(update, progressCallback)
+            self.mesh = self.getSubdivisionMesh(update)
             self.mesh.setVisibility(1)
         else:
             originalMesh = self.__seedMesh if self.mesh == self.__subdivisionMesh else self.__proxyMesh
@@ -456,6 +459,8 @@ class Object(events3d.EventHandler):
                 self.mesh.calcNormals()
                 self.mesh.update()
             self.mesh.setVisibility(1)
+
+        progress.finish()
         return True
 
     def updateSubdivisionMesh(self, rebuildIndexBuffer=False, progressCallback=None):

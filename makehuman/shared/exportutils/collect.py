@@ -69,7 +69,7 @@ def readTargets(human, config):
 
 
 def setupMeshes(name, human, config=None, amt=None, rawTargets=[], hidden=False, subdivide = False, progressCallback=None):
-
+    # Notice: is this used anywhere?
     def progress(prog):
         if progressCallback == None:
             pass
@@ -101,16 +101,15 @@ def setupMeshes(name, human, config=None, amt=None, rawTargets=[], hidden=False,
     if amt:
         richMesh.setVertexGroups(amt.vertexWeights)
 
-    deleteGroups = []
     deleteVerts = None  # Don't load deleteVerts from proxies directly, we use the facemask set in the gui module3d
-    _,deleteVerts = setupProxies('Clothes', None, human, rmeshes, richMesh, config, useCurrentMeshes, deleteGroups, deleteVerts)
+    _,deleteVerts = setupProxies('Clothes', None, human, rmeshes, richMesh, config, useCurrentMeshes, deleteVerts)
     for ptype in proxy.SimpleProxyTypes:
-        _,deleteVerts = setupProxies(ptype, None, human, rmeshes, richMesh, config, useCurrentMeshes, deleteGroups, deleteVerts)
-    foundProxy,deleteVerts = setupProxies('Proxymeshes', name, human, rmeshes, richMesh, config, useCurrentMeshes, deleteGroups, deleteVerts)
+        _,deleteVerts = setupProxies(ptype, None, human, rmeshes, richMesh, config, useCurrentMeshes, deleteVerts)
+    foundProxy,deleteVerts = setupProxies('Proxymeshes', name, human, rmeshes, richMesh, config, useCurrentMeshes, deleteVerts)
     progress(0.06*(3-2*subdivide))
     if not foundProxy:
         if not useCurrentMeshes:
-            richMesh = filterMesh(richMesh, deleteGroups, deleteVerts, not hidden)
+            richMesh = filterMesh(richMesh, deleteVerts, not hidden)
         rmeshes = [richMesh] + rmeshes
 
     if config.scale != 1.0:
@@ -141,11 +140,11 @@ def setupMeshes(name, human, config=None, amt=None, rawTargets=[], hidden=False,
     return rmeshes
 
 #
-#    setupProxies(typename, name, human, rmeshes, richMesh, config, useCurrentMeshes, deleteGroups, deleteVerts):
+#    setupProxies(typename, name, human, rmeshes, richMesh, config, useCurrentMeshes, deleteVerts):
 #
 
-def setupProxies(typename, name, human, rmeshes, richMesh, config, useCurrentMeshes, deleteGroups, deleteVerts):
-    # TODO document that this method does not only return values, it also modifies some of the passed parameters (deleteGroups and rmeshes, deleteVerts is modified only if it is not None)
+def setupProxies(typename, name, human, rmeshes, richMesh, config, useCurrentMeshes, deleteVerts):
+    # TODO document that this method does not only return values, it also modifies some of the passed parameters (rmeshes, deleteVerts is modified only if it is not None)
     import re
 
     foundProxy = False
@@ -153,7 +152,6 @@ def setupProxies(typename, name, human, rmeshes, richMesh, config, useCurrentMes
         if pxy.type == typename:
             foundProxy = True
             if not useCurrentMeshes:
-                deleteGroups += pxy.deleteGroups
                 if deleteVerts != None:
                     deleteVerts = deleteVerts | pxy.deleteVerts
             rmesh = getRichMesh(None, pxy, useCurrentMeshes, richMesh.weights, richMesh.shapes, richMesh.armature)
@@ -167,7 +165,7 @@ def setupProxies(typename, name, human, rmeshes, richMesh, config, useCurrentMes
 #
 #
 
-def filterMesh(richMesh, deleteGroups, deleteVerts, useFaceMask = False):
+def filterMesh(richMesh, deleteVerts, useFaceMask = False):
     """
     Filter out vertices and faces from the mesh that are not desired for exporting.
     """
@@ -188,8 +186,7 @@ def filterMesh(richMesh, deleteGroups, deleteVerts, useFaceMask = False):
     killGroups = []
     for fg in obj.faceGroups:
         if (("joint" in fg.name) or
-           ("helper" in fg.name) or
-           deleteGroup(fg.name, deleteGroups)):
+           ("helper" in fg.name)):
             killGroups.append(fg.name)
 
     faceMask = obj.getFaceMaskForGroups(killGroups)
@@ -274,21 +271,4 @@ def deleteGroup(name, groups):
         if part in name:
             return True
     return False
-
-def getpath(path):
-    if isinstance(path, tuple):
-        (folder, file) = path
-        path = os.path.join(folder, file)
-    if path:
-        return os.path.realpath(os.path.expanduser(path))
-    else:
-        return None
-
-def copy(frompath, topath):
-    frompath = getpath(frompath)
-    if frompath:
-        try:
-            shutil.copy(frompath, topath)
-        except (IOError, os.error), why:
-            log.error("Can't copy %s" % str(why))
 

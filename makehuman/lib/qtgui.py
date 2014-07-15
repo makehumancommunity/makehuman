@@ -49,7 +49,7 @@ import language
 from getpath import getSysDataPath, getPath, isSubPath, pathToUnicode
 
 
-def getLanguageString(text):
+def getLanguageString(text, appendData=None, appendFormat=None):
     """Function to get the translation of a text according to the selected
     language.
 
@@ -58,7 +58,7 @@ def getLanguageString(text):
     """
     if not text:
         return text
-    return language.language.getLanguageString(text)
+    return language.language.getLanguageString(text,appendData,appendFormat)
 
 
 class Widget(events3d.EventHandler):
@@ -893,11 +893,28 @@ class TextEdit(QtGui.QLineEdit, Widget):
         elif key == QtCore.Qt.Key_Down:
             self._key_down()
             event.accept()
+        elif key == QtCore.Qt.Key_Tab and self.tabPressed():
+            event.accept()
         else:
             mod = int(event.modifiers())
             if mod > 0:
                 self.callEvent('onModifier', (mod, key))
             super(TextEdit, self).keyPressEvent(event)
+
+    def event(self, event):
+        if event.type() == QtCore.QEvent.KeyPress and \
+           event.key() == QtCore.Qt.Key_Tab and \
+           self.tabPressed():
+                return True
+
+        return super(TextEdit, self).event(event)
+
+    def tabPressed(self):
+        """
+        Override and return True to override custom behaviour when TAB key
+        is pressed
+        """
+        return False  # Continue default event handling
 
     def _key_up(self):
         self.callEvent('onUpArrow', None)
@@ -1150,10 +1167,14 @@ class Dialog(QtGui.QDialog):
 
         which = self.exec_()
 
-        if which == QtGui.QDialog.Accepted and button1Action:
-            button1Action()
-        elif which == QtGui.QDialog.Rejected and button2Action:
-            button2Action()
+        if which == QtGui.QDialog.Accepted:
+            if button1Action:
+                button1Action()
+            return True
+        elif which == QtGui.QDialog.Rejected:
+            if button2Action:
+                button2Action()
+            return False
 
         if helpId and self.check.isChecked():
             self.helpIds.add(helpId)
@@ -1233,6 +1254,9 @@ class FileEntryView(QtGui.QWidget, Widget):
         self.connect(self.edit, QtCore.SIGNAL(' returnPressed()'),
             lambda: self._confirm('return'))
 
+        self.connect(self.edit, QtCore.SIGNAL('textEdited(QString)'),
+            lambda s: self.callEvent('onChange', unicode(s)))
+
         self.connect(self.confirm, QtCore.SIGNAL('clicked(bool)'),
             lambda _: self._confirm('button'))
 
@@ -1295,7 +1319,7 @@ class FileEntryView(QtGui.QWidget, Widget):
             self.directory = path
         else:
             self.directory = os.path.dirname(path)
-            self.text = os.path.basename(self.path)
+            self.text = os.path.basename(path)
 
     path = property(getPath, setPath)
 
@@ -1337,6 +1361,7 @@ class FileEntryView(QtGui.QWidget, Widget):
         """Handler for the event of the widget being given focus. It passes
         the focus directly to the line edit."""
         self.edit.setFocus()
+
 
 class SplashScreen(QtGui.QSplashScreen):
     def __init__(self, image, version=""):
@@ -1403,11 +1428,25 @@ class StatusBar(QtGui.QStatusBar, Widget):
         self.duration = 2000
 
     def showMessage(self, text, *args):
-        text = getLanguageString(text) % args
+        if isinstance(text,list):
+            out = ""
+            for part in text:
+                out = out + getLanguageString(part)
+            text = out
+        else:
+            text = getLanguageString(text)
+        text = text % args
         super(StatusBar, self).showMessage(text, self.duration)
 
     def setMessage(self, text, *args):
-        text = getLanguageString(text) % args
+        if isinstance(text,list):
+            out = ""
+            for part in text:
+                out = out + getLanguageString(part)
+            text = out
+        else:
+            text = getLanguageString(text)
+        text = text % args
         self._perm.setText(text)
 
 class VScrollLayout(QtGui.QLayout):
