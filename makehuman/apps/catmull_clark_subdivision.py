@@ -79,6 +79,8 @@ class SubdivisionObject(Object3D):
         # Progress bar will be updated only through the parent Progress.
         progress = Progress(20, None, logging=True, timing=True)
 
+        progress.firststep()
+
         parent = self.parent
         nverts = len(parent.coord)
         ntexco = len(parent.texco)
