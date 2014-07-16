@@ -184,12 +184,6 @@ class Progress(object):
             # To completely disable updating when this is a
             # master Progress, pass None as progressCallback.
 
-        # If this Progress works with steps and uses timing,
-        # do an initial update to init the counter, as the
-        # user won't update before executing the first step.
-        if self.steps and self.timing:
-            self.update()
-
     def stepWeight(self):
         '''Internal method that returns the weight of
         the next step.'''
@@ -313,6 +307,22 @@ class Progress(object):
 
         if self.steps:
             self.stepsdone += self.stepWeight()
+
+        self.update()
+
+        return self
+
+    def firststep(self, desc=False, *args):
+        '''Method to be called from Progress routines that work in
+        discrete steps, to update the initial description and
+        initialize the timing.'''
+
+        global current_Progress_
+        current_Progress_ = self
+
+        if not (desc is False):
+            self.description = desc
+            self.args = args
 
         self.update()
 
