@@ -198,7 +198,7 @@ class Progress(object):
         else:
             return self.stepweights.popleft()
 
-    def update(self, prog=None, desc=None, *args):
+    def update(self, prog=None, desc=None, args=[], is_childupdate=False):
         '''Internal method that is responsible for the
         actual progress bar updating.'''
 
@@ -214,7 +214,7 @@ class Progress(object):
 
         desc_str = "" if desc is None else desc
 
-        if self.timing:
+        if self.timing and not is_childupdate:
             import time
             t = time.time()
             if self.time:
@@ -225,7 +225,7 @@ class Progress(object):
                         self.LoggingRequest("  took %.4f seconds", deltaT))
             self.time = t
 
-        if self.logging:
+        if self.logging and not is_childupdate:
             self.logging_requests.append(
                 self.LoggingRequest("Progress %.2f%%: %s", prog, desc_str))  # TODO: Format desc with args
 
@@ -241,7 +241,7 @@ class Progress(object):
             self.finish()
 
         if self.parent:
-            self.parent.childupdate(prog, desc, *args)
+            self.parent.childupdate(prog, desc, args)
 
     def propagateRequests(self):
         '''Internal method that recursively passes the logging
@@ -253,7 +253,7 @@ class Progress(object):
             self.logging_requests = []
             self.parent.propagateRequests()
 
-    def childupdate(self, prog, desc, *args):
+    def childupdate(self, prog, desc, args=[]):
         '''Internal method that a child Progress calls for doing a
         progress update by communicating with its parent.'''
 
@@ -264,7 +264,7 @@ class Progress(object):
         else:
             prog = self.progress
 
-        self.update(prog, desc, *args)
+        self.update(prog, desc, args, is_childupdate=True)
 
     def finish(self):
         '''Method to be called when a subroutine has finished,
