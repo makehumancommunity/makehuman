@@ -127,6 +127,21 @@ current_Progress_ = None
 
 
 class Progress(object):
+
+    class LoggingRequest(object):
+        def __init__(self, text, *args):
+            self.text = text
+            self.args = args
+            self.level = 0
+
+        def propagate(self):
+            self.level += 1
+
+        def execute(self):
+            import log
+            text = self.level * '-' + self.text
+            log.debug(text, *self.args)
+
     def __init__(self, steps=0, progressCallback=True, logging=False, timing=False):
         global current_Progress_
 
@@ -150,8 +165,7 @@ class Progress(object):
 
         self.logging = logging
         self.timing = timing
-        self.timing_request = False
-        self.logging_request = False
+        self.logging_requests = []
 
         # Push self in the global Progress object stack.
         self.parent = current_Progress_
@@ -198,35 +212,46 @@ class Progress(object):
             desc = self.description
             args = self.args
 
+        desc_str = "" if desc is None else desc
+
+        if self.timing:
+            import time
+            t = time.time()
+            if self.time:
+                deltaT = (t - self.time)
+                self.totalTime += deltaT
+                if self.logging:
+                    self.logging_requests.append(
+                        self.LoggingRequest("  took %.4f seconds", deltaT))
+            self.time = t
+
+        if self.logging:
+            self.logging_requests.append(
+                self.LoggingRequest("Progress %.2f%%: %s", prog, desc_str))  # TODO: Format desc with args
+
+        self.propagateRequests()
+
         if self.parent is None:
-            desc_str = "" if desc is None else desc
-
-            if self.timing or self.timing_request:
-                import time
-                t = time.time()
-                if self.time:
-                    deltaT = (t - self.time)
-                    self.totalTime += deltaT
-                    if self.logging or self.logging_request:
-                        import log
-                        log.debug("  took %.4f seconds", deltaT)
-                self.time = t
-
-            if self.logging or self.logging_request:
-                import log
-                log.debug("Progress %.2f%%: %s", prog, desc_str)  # TODO: Format desc with args
-
+            for r in self.logging_requests: r.execute()
+            self.logging_requests = []
             if self.progressCallback is not None:
                 self.progressCallback(prog, desc_str, *args)
-        else:
-            self.parent.timing_request = self.timing or self.timing_request
-            self.parent.logging_request = self.logging or self.logging_request
 
         if prog >= 0.999999:  # Not using 1.0 for precision safety.
             self.finish()
 
         if self.parent:
             self.parent.childupdate(prog, desc, *args)
+
+    def propagateRequests(self):
+        '''Internal method that recursively passes the logging
+        requests to the master Progress.'''
+
+        if self.parent is not None:
+            for r in self.logging_requests: r.propagate()
+            self.parent.logging_requests.extend(self.logging_requests)
+            self.logging_requests = []
+            self.parent.propagateRequests()
 
     def childupdate(self, prog, desc, *args):
         '''Internal method that a child Progress calls for doing a
