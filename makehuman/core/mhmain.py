@@ -312,15 +312,12 @@ class MHApplication(gui3d.Application, mh.Application):
     # TO THINK: Maybe move guiload's saveMHM here as saveHumanMHM?
 
     def loadHuman(self):
-        self.progress(0.1)
 
         # Set a lower than default MAX_FACES value because we know the human has a good topology (will make it a little faster)
         # (we do not lower the global limit because that would limit the selection of meshes that MH would accept too much)
         self.selectedHuman = self.addObject(human.Human(files3d.loadMesh(mh.getSysDataPath("3dobjs/base.obj"), maxFaces = 5)))
 
     def loadScene(self):
-
-        self.progress(0.18)
 
         userSceneDir = mh.getDataPath("scenes")
         if not os.path.exists(userSceneDir):
@@ -331,8 +328,6 @@ class MHApplication(gui3d.Application, mh.Application):
         self.setScene( Scene(findFile("scenes/default.mhscene")) )
 
     def loadMainGui(self):
-
-        self.progress(0.2)
 
         @self.selectedHuman.mhEvent
         def onMouseDown(event):
@@ -446,34 +441,25 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def loadPlugins(self):
 
-        self.progress(0.4)
-
         # Load plugins not starting with _
-        self.pluginsToLoad = glob.glob(mh.getSysPath(os.path.join("plugins/",'[!_]*.py')))
+        pluginsToLoad = glob.glob(mh.getSysPath(os.path.join("plugins/",'[!_]*.py')))
 
         # Load plugin packages (folders with a file called __init__.py)
         for fname in os.listdir(mh.getSysPath("plugins/")):
             if fname[0] != "_":
                 folder = os.path.join("plugins", fname)
                 if os.path.isdir(folder) and ("__init__.py" in os.listdir(folder)):
-                    self.pluginsToLoad.append(folder)
+                    pluginsToLoad.append(folder)
 
-        self.pluginsToLoad.sort()
-        self.pluginsToLoad.reverse()
+        pluginsToLoad.sort()
 
-        while self.pluginsToLoad:
-            self.loadNextPlugin()
+        fprog = Progress(len(pluginsToLoad))
+        for path in pluginsToLoad:
+            self.loadPlugin(path)
+            fprog.step()
 
-    def loadNextPlugin(self):
+    def loadPlugin(self, path):
 
-        alreadyLoaded = len(self.modules)
-        stillToLoad = len(self.pluginsToLoad)
-        self.progress(0.4 + (float(alreadyLoaded) / float(alreadyLoaded + stillToLoad)) * 0.4)
-
-        if not stillToLoad:
-            return
-
-        path = self.pluginsToLoad.pop()
         try:
             name, ext = os.path.splitext(os.path.basename(path))
             if name not in self.settings['excludePlugins']:
@@ -531,19 +517,22 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def loadGui(self):
 
-        self.progress(0.9)
+        progress = Progress(4)
 
         category = self.getCategory('Settings')
         category.addTask(PluginsTaskView(category))
+        progress.step()
 
         mh.refreshLayout()
+        progress.step()
 
         self.switchCategory("Modelling")
+        progress.step()
 
         # Create viewport grid
         self.loadGrid()
+        progress.step()
 
-        self.progress(1.0)
         # self.progressBar.hide()
 
     def loadGrid(self):
@@ -636,33 +625,43 @@ class MHApplication(gui3d.Application, mh.Application):
 
         #self.splash.setFormat('<br><br><b><font size="10" color="#ffffff">%s</font></b>')
 
+        progress = Progress(8, logging=True, timing=True)
+
         log.message('Loading human')
         self.loadHuman()
+        progress.step()
 
         log.message('Loading scene')
         self.loadScene()
+        progress.step()
 
         log.message('Loading main GUI')
         self.loadMainGui()
+        progress.step()
 
         log.message('Loading plugins')
         self.loadPlugins()
+        progress.step()
 
         log.message('Loading GUI')
         self.loadGui()
+        progress.step()
 
         log.message('Loading theme')
         try:
             self.setTheme(self.settings.get('guiTheme', 'makehuman'))
         except:
             self.setTheme("default")
+        progress.step()
 
         log.message('Applying targets')
         self.loadFinish()
+        progress.step()
 
         if self.settings.get('preloadTargets', False):
             log.message('Loading macro targets')
             self.loadMacroTargets()
+        progress.step()
 
         log.message('Loading done')
 
