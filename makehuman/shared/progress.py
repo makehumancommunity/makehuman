@@ -119,6 +119,30 @@ greater weight in the iterable affect larger area of the progress bar.
 Example:
 progress = Progress([7, 3, 6, 6])
 
+- Logging
+
+With the logging=True option, Progress will log.debug its progress and
+description for every change in its progress. (This does not include
+sub-Progresses that have logging disabled.) A number of dashes is added
+at the beginning of the log message representing the level of nesting
+of the current procedure, to help distinguish between the messages logged
+from the parent and the child Progress.
+
+If messaging is enabled too, on a description change, Progress will log.debug
+only its progress, and will let messaging to log.message the description
+afterwards.
+
+- Timing
+
+If logging is enabled, with the timing=True option, Progress will measure
+and log.debug the time each step took to complete, as well as the total time
+needed for the whole procedure.
+
+- Messaging
+
+With the messaging=True option, Progress will log.message its description
+every time it changes.
+ 
 """
 
 
@@ -147,15 +171,18 @@ class Progress(object):
             text = self.level * '-' + self.text
             self.logger(text, *self.args)
 
-    def __init__(self, steps=0, progressCallback=True, logging=False, timing=False):
+    def __init__(self, steps=0, progressCallback=True,
+            logging=False, timing=False, messaging=False):
         global current_Progress_
 
         self.progress = 0.0
         self.nextprog = None
         self.steps = steps
         self.stepsdone = 0
-        self.description = None
+        self._description = None
         self.args = []
+
+        self.description_changed = False
 
         # Weighted steps feature
         if hasattr(self.steps, '__iter__'):
@@ -170,6 +197,7 @@ class Progress(object):
 
         self.logging = logging
         self.timing = timing
+        self.messaging = messaging
         self.logging_requests = []
 
         # Push self in the global Progress object stack.
@@ -188,6 +216,15 @@ class Progress(object):
                 self.progressCallback = progressCallback
             # To completely disable updating when this is a
             # master Progress, pass None as progressCallback.
+
+    def getDescription(self):
+        return self._description
+
+    def setDescription(self, desc):
+        self._description = desc
+        self.description_changed = True
+
+    description = property(getDescription, setDescription)
 
     def stepWeight(self):
         '''Internal method that returns the weight of
@@ -213,20 +250,31 @@ class Progress(object):
 
         desc_str = "" if desc is None else desc
 
-        if self.timing and not is_childupdate:
-            import time
-            t = time.time()
-            if self.time:
-                deltaT = (t - self.time)
-                self.totalTime += deltaT
-                if self.logging:
-                    self.logging_requests.append(
-                        self.LoggingRequest("  took %.4f seconds", deltaT))
-            self.time = t
+        if not is_childupdate:
+            if self.timing:
+                import time
+                t = time.time()
+                if self.time:
+                    deltaT = (t - self.time)
+                    self.totalTime += deltaT
+                    if self.logging:
+                        self.logging_requests.append(
+                            self.LoggingRequest("  took %.4f seconds", deltaT))
+                self.time = t
 
-        if self.logging and not is_childupdate:
-            self.logging_requests.append(
-                self.LoggingRequest("Progress %.2f%%: %s", prog, desc_str))  # TODO: Format desc with args
+            if self.logging:
+                if self.messaging and self.description_changed:
+                    self.logging_requests.append(self.LoggingRequest(
+                        "Progress %.2f%%", prog))
+                else:  # TODO: Format desc with args
+                    self.logging_requests.append(self.LoggingRequest(
+                        "Progress %.2f%%: %s", prog, desc_str))
+
+            if self.messaging and self.description_changed:
+                self.logging_requests.append(self.LoggingRequest(
+                    desc_str, *args).withLogger('message'))
+
+            self.description_changed = False
 
         self.propagateRequests()
 
