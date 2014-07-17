@@ -33,7 +33,7 @@ bl_info = {
     'name': 'Import: MakeHuman Exchange (.mhx)',
     'author': 'Thomas Larsson',
     'version': (1,1,0),
-    "blender": (2, 70, 0),
+    "blender": (2, 71, 0),
     'location': "File > Import > MakeHuman (.mhx)",
     'description': 'Import files in the MakeHuman eXchange format (.mhx)',
     'warning': '',

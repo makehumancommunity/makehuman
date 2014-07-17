@@ -40,7 +40,7 @@ class ErrorOperator(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
     def invoke(self, context, event):
-        global theErrorLines
+        global theErrorLines, theMessage
         maxlen = 0
         for line in theErrorLines:
             if len(line) > maxlen:
@@ -52,23 +52,27 @@ class ErrorOperator(bpy.types.Operator):
         return wm.invoke_props_dialog(self, width=width, height=height)
 
     def draw(self, context):
-        global theErrorLines
+        global theErrorLines, theMessage
         for line in theErrorLines:
             self.layout.label(line)
+
 
 def MyError(message):
     global theMessage, theErrorLines, theErrorStatus
     theMessage = message
     theErrorLines = message.split('\n')
     theErrorStatus = True
+    print(theMessage)
     bpy.ops.mhx.error('INVOKE_DEFAULT')
     raise MhxError(theMessage)
+
 
 class MhxError(Exception):
     def __init__(self, value):
         self.value = value
     def __str__(self):
         return repr(self.value)
+
 
 class SuccessOperator(bpy.types.Operator):
     bl_idname = "mhx.success"
