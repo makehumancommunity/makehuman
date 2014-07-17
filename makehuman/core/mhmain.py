@@ -625,45 +625,37 @@ class MHApplication(gui3d.Application, mh.Application):
 
         #self.splash.setFormat('<br><br><b><font size="10" color="#ffffff">%s</font></b>')
 
-        progress = Progress(8, logging=True, timing=True)
+        progress = Progress(8, messaging=True)
 
-        log.message('Loading human')
+        progress.firststep('Loading human')
         self.loadHuman()
-        progress.step()
 
-        log.message('Loading scene')
+        progress.step('Loading scene')
         self.loadScene()
-        progress.step()
 
-        log.message('Loading main GUI')
+        progress.step('Loading main GUI')
         self.loadMainGui()
-        progress.step()
 
-        log.message('Loading plugins')
+        progress.step('Loading plugins')
         self.loadPlugins()
-        progress.step()
 
-        log.message('Loading GUI')
+        progress.step('Loading GUI')
         self.loadGui()
-        progress.step()
 
-        log.message('Loading theme')
+        progress.step('Loading theme')
         try:
             self.setTheme(self.settings.get('guiTheme', 'makehuman'))
         except:
             self.setTheme("default")
-        progress.step()
 
-        log.message('Applying targets')
+        progress.step('Applying targets')
         self.loadFinish()
-        progress.step()
-
+        
+        progress.step('Loading macro targets')
         if self.settings.get('preloadTargets', False):
-            log.message('Loading macro targets')
             self.loadMacroTargets()
-        progress.step()
 
-        log.message('Loading done')
+        progress.step('Loading done')
 
         log.message('')
 
