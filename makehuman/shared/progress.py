@@ -133,14 +133,19 @@ class Progress(object):
             self.text = text
             self.args = args
             self.level = 0
+            self.withLogger('debug')
+
+        def withLogger(self, loggerstr):
+            import log
+            self.logger = getattr(log, loggerstr)
+            return self
 
         def propagate(self):
             self.level += 1
 
         def execute(self):
-            import log
             text = self.level * '-' + self.text
-            log.debug(text, *self.args)
+            self.logger(text, *self.args)
 
     def __init__(self, steps=0, progressCallback=True, logging=False, timing=False):
         global current_Progress_
