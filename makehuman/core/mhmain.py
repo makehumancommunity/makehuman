@@ -625,7 +625,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         #self.splash.setFormat('<br><br><b><font size="10" color="#ffffff">%s</font></b>')
 
-        progress = Progress(8, messaging=True)
+        progress = Progress([36, 6, 15, 333, 40, 154, 257, 5], messaging=True)
 
         progress.firststep('Loading human')
         self.loadHuman()
