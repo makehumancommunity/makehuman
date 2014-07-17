@@ -226,13 +226,15 @@ class Progress(object):
 
     description = property(getDescription, setDescription)
 
-    def stepWeight(self):
+    def stepWeight(self, pop=False):
         '''Internal method that returns the weight of
         the next step.'''
         if self.stepweights is None:
             return 1
-        else:
+        elif pop:
             return self.stepweights.popleft()
+        else:
+            return self.stepweights[0]
 
     def update(self, prog=None, desc=None, args=[], is_childupdate=False):
         '''Internal method that is responsible for the
@@ -305,7 +307,7 @@ class Progress(object):
         progress update by communicating with its parent.'''
 
         if self.steps:
-            prog = (self.stepsdone + prog) / float(self.steps)
+            prog = (self.stepsdone + prog * self.stepWeight()) / float(self.steps)
         elif self.nextprog is not None:
             prog = self.progress + prog * (self.nextprog - self.progress)
         else:
@@ -359,7 +361,7 @@ class Progress(object):
             self.args = args
 
         if self.steps:
-            self.stepsdone += self.stepWeight()
+            self.stepsdone += self.stepWeight(pop=True)
 
         self.update()
 
