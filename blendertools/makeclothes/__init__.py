@@ -41,7 +41,7 @@ bl_info = {
     "name": "Make Clothes",
     "author": "Thomas Larsson",
     "version": (1,0,1),
-    "blender": (2,7,0),
+    "blender": (2,7,1),
     "location": "View3D > Properties > Make MH clothes",
     "description": "Make clothes and UVs for MakeHuman characters",
     "warning": "",
