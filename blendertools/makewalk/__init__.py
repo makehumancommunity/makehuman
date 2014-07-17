@@ -41,7 +41,7 @@ bl_info = {
     "name": "MakeWalk",
     "author": "Thomas Larsson",
     "version": (1,0,1),
-    "blender": (2,7,0),
+    "blender": (2,7,1),
     "location": "View3D > Tools > MakeWalk",
     "description": "Mocap tool for MakeHuman character",
     "warning": "",
