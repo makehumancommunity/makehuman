@@ -1262,10 +1262,8 @@ class MHApplication(gui3d.Application, mh.Application):
         self.redraw()
 
     def toggleSubdivision(self):
-        progress = Progress()(0.0, 1.0)
         self.selectedHuman.setSubdivided(self.actions.smooth.isChecked(), True)
         self.redraw()
-        progress(1)
 
     def symmetryRight(self):
         human = self.selectedHuman

@@ -296,13 +296,19 @@ class Human(guicommon.Object):
             if obj:
                 obj.setSolid(*args, **kwargs)
 
-    def setSubdivided(self, *args, **kwargs):
-        if not guicommon.Object.setSubdivided(self, *args, **kwargs):
-            return
-        for obj in self.getProxyObjects():
-            if obj:
-                obj.setSubdivided(*args, **kwargs)
-        self.callEvent('onChanged', events3d.HumanEvent(self, 'smooth'))
+    def setSubdivided(self, flag, *args, **kwargs):
+        if flag != self.isSubdivided():
+            proxies = [obj for obj in self.getProxyObjects() if obj]
+            progress = Progress(len(proxies) + 1)  # TODO: Maybe weight per vertex count?
+
+            guicommon.Object.setSubdivided(self, flag, *args, **kwargs)
+            progress.step()
+
+            for obj in proxies:
+                obj.setSubdivided(flag, *args, **kwargs)
+                progress.step()
+
+            self.callEvent('onChanged', events3d.HumanEvent(self, 'smooth'))
 
     def setGender(self, gender, updateModifier = True):
         """
