@@ -42,7 +42,6 @@ import events3d
 import numpy as np
 import matrix
 import material
-from progress import Progress
 
 class Action(object):
     def __init__(self, name):
