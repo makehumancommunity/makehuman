@@ -186,9 +186,9 @@ class Progress(object):
 
         # Weighted steps feature
         if hasattr(self.steps, '__iter__'):
-            from collections import deque
-            self.stepweights = deque(self.steps)
-            self.steps = sum(self.steps)
+            ssum = float(sum(self.steps))
+            self.stepweights = [s / ssum for s in self.steps]
+            self.steps = len(self.steps)
         else:
             self.stepweights = None
 
@@ -226,25 +226,25 @@ class Progress(object):
 
     description = property(getDescription, setDescription)
 
-    def stepWeight(self, pop=False):
+    def stepWeight(self):
         '''Internal method that returns the weight of
         the next step.'''
-        if self.stepweights is None:
-            return 1
-        elif pop:
-            return self.stepweights.popleft()
+        if self.steps == 0:
+            if self.nextprog is None:
+                return 0
+            else:
+                return self.nextprog - self.progress
+        elif self.stepweights is None:
+            return 1.0 / float(self.steps)
         else:
-            return self.stepweights[0]
+            return self.stepweights[self.stepsdone]
 
     def update(self, prog=None, desc=None, args=[], is_childupdate=False):
         '''Internal method that is responsible for the
         actual progress bar updating.'''
 
         if prog is None:
-            if self.steps:
-                prog = float(self.stepsdone) / float(self.steps)
-            else:
-                prog = self.progress
+            prog = self.progress
 
         if desc is None and self.description:
             desc = self.description
@@ -306,12 +306,7 @@ class Progress(object):
         '''Internal method that a child Progress calls for doing a
         progress update by communicating with its parent.'''
 
-        if self.steps:
-            prog = (self.stepsdone + prog * self.stepWeight()) / float(self.steps)
-        elif self.nextprog is not None:
-            prog = self.progress + prog * (self.nextprog - self.progress)
-        else:
-            prog = self.progress
+        prog = self.progress + prog * self.stepWeight()
 
         self.update(prog, desc, args, is_childupdate=True)
 
@@ -361,7 +356,9 @@ class Progress(object):
             self.args = args
 
         if self.steps:
-            self.stepsdone += self.stepWeight(pop=True)
+            self.progress += self.stepWeight()
+            self.stepsdone += 1
+            if self.stepsdone == self.steps: self.progress = 1.0
 
         self.update()
 
@@ -384,14 +381,16 @@ class Progress(object):
         return self
 
     @classmethod
-    def begin(cls, steps=0, progressCallback=True, logging=False, timing=False):
+    def begin(cls, *args, **kwargs):
         '''Class method for directly creating a master Progress object.
-        Resets all progress to zero. Use this for starting a greater MH task.'''
+        Resets all progress to zero. Use this for starting a greater MH task.
+        The arguments are forwarded to the Progress constructor.
+        '''
 
         global current_Progress_
         current_Progress_ = None
 
-        return cls(steps, progressCallback, logging, timing)
+        return cls(*args, **kwargs)
 
     ## Specialized methods follow ##
 
