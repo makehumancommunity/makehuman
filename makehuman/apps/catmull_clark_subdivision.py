@@ -41,7 +41,6 @@ TODO
 
 __docformat__ = 'restructuredtext'
 
-import time
 import numpy as np
 
 from module3d import Object3D
@@ -77,7 +76,9 @@ class SubdivisionObject(Object3D):
         log.debug('Applying Catmull-Clark subdivision on %s.', self.parent.name)
 
         # Progress bar will be updated only through the parent Progress.
-        progress = Progress(20, None, logging=True, timing=True)
+        progress = Progress([0, 0, 16, 0, 15, 63, 0, 0, 0, 93,
+            16, 0, 0, 343, 141, 15, 109, 328, 31, 281],
+            None, logging=True, timing=True)
 
         progress.firststep()
 
