@@ -286,7 +286,9 @@ class Progress(object):
             if self.progressCallback is not None:
                 self.progressCallback(prog, desc_str, *args)
 
-        if prog >= 0.999999:  # Not using 1.0 for precision safety.
+        if self.steps and self.stepsdone == self.steps or \
+            self.steps == 0 and self.progress >= 0.999999:
+            # Not using 1.0 for precision safety.
             self.finish()
 
         if self.parent:
