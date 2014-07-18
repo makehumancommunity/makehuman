@@ -267,10 +267,10 @@ class Progress(object):
             if self.logging:
                 if self.messaging and self.description_changed:
                     self.logging_requests.append(self.LoggingRequest(
-                        "Progress %.2f%%", prog))
+                        self.getProgressString()))
                 else:  # TODO: Format desc with args
                     self.logging_requests.append(self.LoggingRequest(
-                        "Progress %.2f%%: %s", prog, desc_str))
+                        "%s: %s", self.getProgressString(), desc_str))
 
             if self.messaging and self.description_changed:
                 self.logging_requests.append(self.LoggingRequest(
@@ -309,6 +309,12 @@ class Progress(object):
         prog = self.progress + prog * self.stepWeight()
 
         self.update(prog, desc, args, is_childupdate=True)
+
+    def getProgressString(self):
+        if self.steps:
+            return "Step %i/%i" % (self.stepsdone, self.steps)
+        else:
+            return "Progress %.2f%%" % self.progress
 
     def finish(self):
         '''Method to be called when a subroutine has finished,
