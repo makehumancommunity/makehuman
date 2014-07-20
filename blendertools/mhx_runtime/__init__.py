@@ -214,7 +214,7 @@ class MhxVisibilityPanel(bpy.types.Panel):
         ob = context.object
         layout = self.layout
         layout.operator("mhx.show_all_clothes")
-        layout.operator("mhx.hide_unselected_clothes")
+        layout.operator("mhx.hide_all_clothes")
         props = list(ob.keys())
         props.sort()
         for prop in props:
