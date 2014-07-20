@@ -436,10 +436,15 @@ class BackgroundChooser(gui3d.TaskView):
         if values[0] == "background":
             if len(values) >= 7:
                 side = values[1]
-                img_filename = getpath.findFile(values[2], self.backgroundsFolders, strict=True)
-                aspect = float(values[3])
-                trans = (float(values[4]), float(values[5]))
-                scale = float(values[6])
+                img_filename = values[2]
+                i = 0
+                while img_filename and not any( [img_filename.lower().endswith(ex) for ex in self.extensions] ) and (len(values) - (i+2)) >= 5:
+                    i += 1
+                    img_filename = img_filename + ' ' + values[2+i]
+                img_filename = getpath.findFile(img_filename, self.backgroundsFolders, strict=True)
+                aspect = float(values[3+i])
+                trans = (float(values[4+i]), float(values[5+i]))
+                scale = float(values[6+i])
                 self.filenames[side] = (img_filename, aspect)
                 self.transformations[side] = [trans, scale]
             elif len(values) >= 3 and values[1] == 'enabled':
