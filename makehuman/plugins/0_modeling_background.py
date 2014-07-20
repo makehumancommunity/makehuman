@@ -168,12 +168,21 @@ class BackgroundChooser(gui3d.TaskView):
             @obj.mhEvent
             def onMouseDragged(event):
                 if event.button in [mh.Buttons.LEFT_MASK, mh.Buttons.MIDDLE_MASK]:
-                    dx = float(event.dx)/30.0
-                    dy = float(-event.dy)/30.0
+                    if mh.getKeyModifiers() & (mh.Modifiers.SHIFT):
+                        delta = 150.0
+                    else:
+                        delta = 30.0
+
+                    dx = float(event.dx)/delta
+                    dy = float(-event.dy)/delta
                     self.moveBackground(dx, dy)
                 elif event.button == mh.Buttons.RIGHT_MASK:
+                    if mh.getKeyModifiers() & (mh.Modifiers.SHIFT):
+                        delta = 500.0
+                    else:
+                        delta = 100.0
                     scale = self.getBackgroundScale()
-                    scale += float(event.dy)/100.0
+                    scale += float(event.dy)/delta
 
                     self.setBackgroundScale(scale)
 
