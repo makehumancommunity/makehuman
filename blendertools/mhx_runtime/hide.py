@@ -130,23 +130,20 @@ def removeHideDrivers(clo, rig):
 #    Hide and show clothes
 #------------------------------------------------------------------------
 
-class VIEW3D_OT_HideUnselectedClothesButton(bpy.types.Operator):
-    bl_idname = "mhx.hide_unselected_clothes"
-    bl_label = "Hide Unselected Clothes"
-    bl_description = "Hide all of the character's unselected objects."
+class VIEW3D_OT_HideAllClothesButton(bpy.types.Operator):
+    bl_idname = "mhx.hide_all_clothes"
+    bl_label = "Hide All Clothes"
+    bl_description = "Hide all of the character's objects."
     bl_options = {'UNDO'}
 
     def execute(self, context):
         rig,_meshes = getRigMeshes(context)
-        for ob in rig.children:
-            if ob.type == 'MESH' and not ob.select:
-                prop = "Mhh%s" % ob.name
-                try:
-                    rig[prop]
-                    rig[prop] = False
-                except KeyError:
-                    pass
-        updateScene(context)
+        if rig:
+            for prop in rig.keys():
+                if prop[0:3] == "Mhh":
+                    cloname = prop.rsplit(":",1)[1]
+                    rig[prop] = (cloname == "Body")
+            updateScene(context)
         return{'FINISHED'}
 
 
@@ -158,9 +155,10 @@ class VIEW3D_OT_ShowAllClothesButton(bpy.types.Operator):
 
     def execute(self, context):
         rig,_meshes = getRigMeshes(context)
-        for key in rig.keys():
-            if key[0:3] == "Mhh":
-                rig[key] = True
-        updateScene(context)
+        if rig:
+            for key in rig.keys():
+                if key[0:3] == "Mhh":
+                    rig[key] = True
+            updateScene(context)
         return{'FINISHED'}
 
