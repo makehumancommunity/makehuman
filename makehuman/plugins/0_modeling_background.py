@@ -277,7 +277,7 @@ class BackgroundChooser(gui3d.TaskView):
         else:
             self.filenames[side] = None
 
-        self.transformations[side] = [(0.0, 0.0), 1.0]
+        #self.transformations[side] = [(0.0, 0.0), 1.0]
 
         if side == self.getCurrentSide():
             # Reload current texture
