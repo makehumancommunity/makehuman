@@ -299,7 +299,8 @@ class Human(guicommon.Object):
     def setSubdivided(self, flag, *args, **kwargs):
         if flag != self.isSubdivided():
             proxies = [obj for obj in self.getProxyObjects() if obj]
-            progress = Progress(len(proxies) + 1)  # TODO: Maybe weight per vertex count?
+            progress = Progress([len(self.mesh.coord)] +
+                                [len(obj.mesh.coord) for obj in proxies])
 
             guicommon.Object.setSubdivided(self, flag, *args, **kwargs)
             progress.step()
