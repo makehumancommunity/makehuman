@@ -53,6 +53,7 @@ import language
 import texture
 import transformations as tm
 import math
+import getpath
 
 # TODO store position and scale in action
 class BackgroundAction(gui3d.Action):
@@ -351,7 +352,6 @@ class BackgroundChooser(gui3d.TaskView):
         currentBg = self.filenames[self.getSelectedSideCheckbox()]
         if currentBg:
             currentBg = currentBg[0]
-        print 'setting %s' % currentBg
         self.filechooser.selectItem(currentBg)
 
     def onHide(self, event):
@@ -364,6 +364,7 @@ class BackgroundChooser(gui3d.TaskView):
         if event.change == 'reset':
             for side in self.sides.keys():
                 self.filenames[side] = None
+                self.transformations[side] = [(0.0, 0.0), 1.0]
             self.setBackgroundEnabled(False)
 
     @property
@@ -430,6 +431,32 @@ class BackgroundChooser(gui3d.TaskView):
         side = self.getCurrentSide()
         self.backgroundImage.mesh.setPosition(x, y)
         self.transformations[side][0] = (float(x), float(y))
+
+    def loadHandler(self, human, values):
+        if values[0] == "background":
+            if len(values) >= 7:
+                side = values[1]
+                img_filename = getpath.findFile(values[2], self.backgroundsFolders, strict=True)
+                aspect = float(values[3])
+                trans = (float(values[4]), float(values[5]))
+                scale = float(values[6])
+                self.filenames[side] = (img_filename, aspect)
+                self.transformations[side] = [trans, scale]
+            elif len(values) >= 3 and values[1] == 'enabled':
+                enabled = values[2].lower() in ['true', 'yes']
+                self.setBackgroundEnabled(enabled)
+            else:
+                log.error("Unknown background option: %s", (' '.join( values[1:]) ))
+
+    def saveHandler(self, human, file):
+        for side in self.sides.keys():
+            side_data = self.filenames.get(side)
+            if side_data is not None:
+                (filename, aspect) = side_data
+                (trans, scale) = self.transformations[side]
+                filename = getpath.getJailedPath(filename, self.backgroundsFolders, jailLimits=self.backgroundsFolders)
+                file.write('background %s %s %s %s %s %s\n' % (side, filename, aspect, trans[0], trans[1], scale))
+        file.write('background enabled %s\n' % self.isBackgroundEnabled() )
 
 class TextureProjectionView(gui3d.TaskView) :
 
@@ -585,6 +612,9 @@ def load(app):
     bgSettings = TextureProjectionView(category, bgChooser)
     bgSettings.sortOrder = 1.5
     #category.addTask(bgSettings)
+
+    gui3d.app.addLoadHandler('background', bgChooser.loadHandler)
+    gui3d.app.addSaveHandler(bgChooser.saveHandler)
 
 # This method is called when the plugin is unloaded from makehuman
 # At the moment this is not used, but in the future it will remove the added GUI elements
