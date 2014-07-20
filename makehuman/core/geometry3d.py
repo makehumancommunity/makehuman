@@ -129,14 +129,14 @@ class RectangleMesh(module3d.Object3D):
             return verts.copy()
 
     def move(self, dx, dy):
-        coords = self._originalVerts(self.coord) + (dx, dy, 0)
+        coords = self._originalVerts(self.coord) + np.asarray((dx, dy, 0), dtype=np.float32)
         self.coord = self._rotatedVerts(coords)
         self.markCoords(coor=True)
         self.update()
 
     def setPosition(self, x, y):
         width, height = self.getSize()
-        v = self._getVerts(width, height, True) + (x, y, 0)
+        v = self._getVerts(width, height, True) + np.asarray((x, y, 0), dtype=np.float32)
         self.changeCoords(self._rotatedVerts(v))
         self.update()
 
