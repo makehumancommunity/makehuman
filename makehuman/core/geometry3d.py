@@ -39,6 +39,7 @@ This module contains classes for commonly used geometry
 
 import module3d
 import numpy as np
+import transformations as tm
 
 class RectangleMesh(module3d.Object3D):
 
@@ -55,11 +56,16 @@ class RectangleMesh(module3d.Object3D):
     :type texture: str
     """
             
-    def __init__(self, width, height, centered = False, texture=None):
+    def __init__(self, width, height, centered = False, texture=None, rotation=None):
 
         module3d.Object3D.__init__(self, 'rectangle_%s' % texture)
 
         self.centered = centered
+        self.coord_rotation = rotation
+        if rotation is None:
+            self.inv_coord_rotation = None
+        else:
+            self.inv_coord_rotation = tm.inverse_matrix(rotation)
         
         # create group
         fg = self.createFaceGroup('rectangle')
@@ -81,7 +87,7 @@ class RectangleMesh(module3d.Object3D):
         self.setCameraProjection(1)
         self.updateIndexBuffer()
 
-    def _getVerts(self, width, height):
+    def _getVerts(self, width, height, no_rotation=False):
         if self.centered:
             v = [
                 (-width/2, -height/2, 0.0),
@@ -96,18 +102,42 @@ class RectangleMesh(module3d.Object3D):
                 (width, height, 0.0),
                 (0.0, height, 0.0)
                 ]
-        return v
+        v = np.asarray(v, dtype=np.float32)
+        if no_rotation:
+            return v
+        else:
+            return self._rotatedVerts(v)
+
+    def _originalVerts(self, verts):
+        if self.inv_coord_rotation is not None:
+            v = np.zeros((4,4), dtype=np.float32)
+            v[:,:3] = verts[:,:]
+            for idx, vert in enumerate(v):
+                v[idx,:] = self.inv_coord_rotation.dot( vert )[:]
+            return v[:,:3]
+        else:
+            return verts.copy()
+
+    def _rotatedVerts(self, verts):
+        if self.coord_rotation is not None:
+            v = np.zeros((4,4), dtype=np.float32)
+            v[:,:3] = verts[:,:]
+            for idx, vert in enumerate(v):
+                v[idx,:] = self.coord_rotation.dot( vert )[:]
+            return v[:,:3]
+        else:
+            return verts.copy()
 
     def move(self, dx, dy):
-        self.coord += (dx, dy, 0)
+        coords = self._originalVerts(self.coord) + (dx, dy, 0)
+        self.coord = self._rotatedVerts(coords)
         self.markCoords(coor=True)
         self.update()
 
     def setPosition(self, x, y):
         width, height = self.getSize()
-        v = np.asarray(self._getVerts(width, height), dtype=np.float32)
-        v += (x, y, 0)
-        self.changeCoords(v)
+        v = self._getVerts(width, height, True) + (x, y, 0)
+        self.changeCoords(self._rotatedVerts(v))
         self.update()
 
     def resetPosition(self):
@@ -118,18 +148,29 @@ class RectangleMesh(module3d.Object3D):
 
     def resize(self, width, height):
         dx, dy = self.getOffset()
-        v = np.asarray(self._getVerts(width, height), dtype=np.float32)
+        v = self._getVerts(width, height, True)
         v[:, 0] += dx
         v[:, 1] += dy
-        self.changeCoords(v)
+        self.changeCoords(self._rotatedVerts(v))
         self.update()
 
+    def _bbox(self, ignore_rotation=True):
+        if ignore_rotation:
+            coord = self._originalVerts(self.coord)
+            if len(coord) == 0:
+                return np.zeros((2,3), dtype = np.float32)
+            v0 = np.amin(coord, axis=0)
+            v1 = np.amax(coord, axis=0)
+            return np.vstack((v0, v1))
+        else:
+            return self.calcBBox()
+
     def getSize(self):
-        ((x0,y0,z0),(x1,y1,z1)) = self.calcBBox()
+        ((x0,y0,z0),(x1,y1,z1)) = self._bbox(True)
         return (x1 - x0, y0 - y1)
 
     def getOffset(self):
-        ((x0,y0,z0),(x1,y1,z1)) = self.calcBBox()
+        ((x0,y0,z0),(x1,y1,z1)) = self._bbox(True)
         if self.centered:
             w, h = (x1 - x0, y0 - y1)
             dx = x0+w/2
