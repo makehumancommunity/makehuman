@@ -1209,6 +1209,10 @@ class FileEntryView(QtGui.QWidget, Widget):
         super(FileEntryView, self).__init__()
         Widget.__init__(self)
 
+        # Declare data
+
+        self._directory = ""
+
         # Define controls
 
         self.browse = BrowseButton()
@@ -1223,9 +1227,22 @@ class FileEntryView(QtGui.QWidget, Widget):
         # Register events
 
         @self.browse.mhEvent
+        def beforeBrowse(event):
+            """
+            Before the browse dialog is shown, make sure to set
+            its path properly.
+            """
+            if self.mode == 'dir':
+                self.browse.path = self.directory
+            else:
+                self.browse.path = self.path
+
+        @self.browse.mhEvent
         def onClicked(path):
-            """When the browse button is used, update the path in
-            the line edit and confirm the entry."""
+            """
+            When the browse button is used, update the path in
+            the line edit and confirm the entry.
+            """
             if path:
                 self.path = path
                 self._confirm('browse')
@@ -1266,14 +1283,14 @@ class FileEntryView(QtGui.QWidget, Widget):
 
     def getDirectory(self):
         """Get the FileEntryView's current directory."""
-        return self.browse.path
+        return self._directory
 
     def setDirectory(self, directory):
         """Set the directory that the widget will use for saving or
         opening the filename, and as an initial path for browsing in
         the dialog. If the mode is 'dir', the given path is written
         in the line edit."""
-        self.browse.path = directory
+        self._directory = directory
         if self.mode == 'dir':
             self.text = self.directory
 
@@ -1727,17 +1744,24 @@ class BrowseButton(Button):
     filter = property(getFilter, setFilter)
 
     def _clicked(self, state):
+        self.callEvent('beforeBrowse', None)
+
         path = self.getExistingPath(self.path)
-        if self._mode == 'open':
+        if self.mode == 'save' and path != self.path:
+            # Don't discard filename when saving
+            path = os.path.join(path, os.path.basename(self.path))
+
+        if self.mode == 'open':
             path = str(QtGui.QFileDialog.getOpenFileName(G.app.mainwin, directory=path, filter=self.filter))
-        elif self._mode == 'save':
+        elif self.mode == 'save':
             path = str(QtGui.QFileDialog.getSaveFileName(G.app.mainwin, directory=path, filter=self.filter))
-        elif self._mode == 'dir':
+        elif self.mode == 'dir':
             path = str(QtGui.QFileDialog.getExistingDirectory(G.app.mainwin, directory=path))
 
         if path:
             self.path = path
         self.callEvent('onClicked', pathToUnicode(path))
+
 
 class ColorPickButton(Button):
     """
