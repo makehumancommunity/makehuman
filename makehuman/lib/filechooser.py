@@ -456,9 +456,7 @@ class FileChooserBase(QtGui.QWidget, gui.Widget):
     def clearList(self):
         for i in xrange(self.children.count()):
             child = self.children.itemAt(0)
-            self.children.removeItem(child)
-            child.widget().hide()
-            child.widget().destroy()
+            self._removeListItem(child)
 
     def refresh(self, keepSelections=True):
         self.clearList()
@@ -483,6 +481,11 @@ class FileChooserBase(QtGui.QWidget, gui.Widget):
             if self.loadHandler.matchesItem(listItem, item):
                 return listItem
         return None
+
+    def _removeListItem(self, listItem):
+        self.children.removeItem(listItem)
+        listItem.widget().hide()
+        listItem.widget().destroy()
 
     def addTags(self, item, tags):
         tags = [t.lower() for t in tags]
@@ -510,6 +513,11 @@ class FileChooserBase(QtGui.QWidget, gui.Widget):
         if self.tagFilter:
             self.tagFilter.addTags(tags)
         return None
+
+    def removeItem(self, file):
+        listItem = self._getListItem(file)
+        if listItem is not None:
+            self._removeListItem(listItem)
 
     def onShow(self, event):
         if self._autoRefresh:
