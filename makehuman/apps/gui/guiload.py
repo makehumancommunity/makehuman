@@ -55,35 +55,31 @@ class HumanFileSort(fc.FileSort):
         return list(super(HumanFileSort, self).fields())
         # TODO
         #return list(super(HumanFileSort, self).fields()) + ["gender", "age", "muscle", "weight"]
-        
+
     def sortGender(self, filenames):
-        
+
         self.updateMeta(filenames)
-        decorated = [(self.meta[filename]['gender'], i, filename) for i, filename in enumerate(filenames)]
-        decorated.sort()
-        return [filename for gender, i, filename in decorated]
+        decorated = self._getDecorated(lambda filename: self.meta[filename]['gender'], filenames)
+        return self._decoratedSort(decorated)
         
     def sortAge(self, filenames):
-        
+
         self.updateMeta(filenames)
-        decorated = [(self.meta[filename]['age'], i, filename) for i, filename in enumerate(filenames)]
-        decorated.sort()
-        return [filename for age, i, filename in decorated]
+        decorated = self._getDecorated(lambda filename: self.meta[filename]['age'], filenames)
+        return self._decoratedSort(decorated)
 
     def sortMuscle(self, filenames):
-        
+
         self.updateMeta(filenames)
-        decorated = [(self.meta[filename]['muscle'], i, filename) for i, filename in enumerate(filenames)]
-        decorated.sort()
-        return [filename for muscle, i, filename in decorated]
+        decorated = self._getDecorated(lambda filename: self.meta[filename]['muscle'], filenames)
+        return self._decoratedSort(decorated)
        
     def sortWeight(self, filenames):
-        
+
         self.updateMeta(filenames)
-        decorated = [(self.meta[filename]['weight'], i, filename) for i, filename in enumerate(filenames)]
-        decorated.sort()
-        return [filename for weight, i, filename in decorated]
-        
+        decorated = self._getDecorated(lambda filename: self.meta[filename]['weight'], filenames)
+        return self._decoratedSort(decorated)
+
     def updateMeta(self, filenames):
         
         for filename in filenames:

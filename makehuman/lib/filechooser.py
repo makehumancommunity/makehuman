@@ -199,22 +199,27 @@ class FileSort(object):
         return method(filenames)
 
     def sortName(self, filenames):
-        decorated = [(os.path.basename(filename), i, filename) for i, filename in enumerate(filenames)]
+        decorated = self._getDecorated(os.path.basename, filenames)
         return self._decoratedSort(decorated)
 
     def sortModified(self, filenames):
-        decorated = [(os.path.getmtime(filename), i, filename) for i, filename in enumerate(filenames)]
+        decorated = self._getDecorated(os.path.getmtime, filenames)
         return self._decoratedSort(decorated)
 
     def sortCreated(self, filenames):
-        decorated = [(os.path.getctime(filename), i, filename) for i, filename in enumerate(filenames)]
+        decorated = self._getDecorated(os.path.getctime, filenames)
         return self._decoratedSort(decorated)
 
     def sortSize(self, filenames):
-        decorated = [(os.path.getsize(filename), i, filename) for i, filename in enumerate(filenames)]
+        decorated = self._getDecorated(os.path.getsize, filenames)
         return self._decoratedSort(decorated)
 
-    def _decoratedSort(self, toSort):
+    @staticmethod
+    def _getDecorated(sortKeyFn, filenames):
+        return [(sortKeyFn(filename), i, filename) for i, filename in enumerate(filenames)]
+
+    @staticmethod
+    def _decoratedSort(toSort):
         toSort.sort()
         return [filename for sortKey, i, filename in toSort]
 
