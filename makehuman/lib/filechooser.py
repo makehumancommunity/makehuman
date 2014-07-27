@@ -46,6 +46,7 @@ from PyQt4 import QtCore, QtGui
 import qtgui as gui
 import mh
 import getpath
+from sorter import Sorter
 
 class ThumbnailCache(object):
     aspect_mode = QtCore.Qt.KeepAspectRatioByExpanding
@@ -178,50 +179,22 @@ class FlowLayout(QtGui.QLayout):
             return QtCore.QSize(0, 0)
         return self._children[0].sizeHint()
 
-class FileSort(object):
+
+class FileSort(Sorter):
     """
-    The default file sorting class. Can sort files on name, creation and modification date and size.
+    The default file sorting class. Can sort files on name,
+    creation and modification date and size.
     """
+
     def __init__(self):
-        pass
+        super(FileSort, self).__init__()
 
-    def fields(self):
-        """
-        Returns the names of the fields on which this FileSort can sort. For each field it is assumed that the method called sortField exists.
+        self.methods = [
+            ("name", os.path.basename),
+            ("created", os.path.getctime),
+            ("modified", os.path.getmtime),
+            ("size", os.path.getsize)]
 
-        :return: The names of the fields on which this FileSort can sort.
-        :rtype: list or tuple
-        """
-        return ("name", "created", "modified", "size")
-
-    def sort(self, by, filenames):
-        method = getattr(self, "sort%s" % by.capitalize())
-        return method(filenames)
-
-    def sortName(self, filenames):
-        decorated = self._getDecorated(os.path.basename, filenames)
-        return self._decoratedSort(decorated)
-
-    def sortModified(self, filenames):
-        decorated = self._getDecorated(os.path.getmtime, filenames)
-        return self._decoratedSort(decorated)
-
-    def sortCreated(self, filenames):
-        decorated = self._getDecorated(os.path.getctime, filenames)
-        return self._decoratedSort(decorated)
-
-    def sortSize(self, filenames):
-        decorated = self._getDecorated(os.path.getsize, filenames)
-        return self._decoratedSort(decorated)
-
-    @staticmethod
-    def _getDecorated(sortKeyFn, filenames):
-        return [(sortKeyFn(filename), i, filename) for i, filename in enumerate(filenames)]
-
-    @staticmethod
-    def _decoratedSort(toSort):
-        toSort.sort()
-        return [filename for sortKey, i, filename in toSort]
 
 class FileSortRadioButton(gui.RadioButton):
     def __init__(self, chooser, group, selected, field):

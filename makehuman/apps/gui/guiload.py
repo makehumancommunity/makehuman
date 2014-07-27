@@ -44,44 +44,30 @@ import gui3d
 import filechooser as fc
 import qtgui as gui
 
+
 class HumanFileSort(fc.FileSort):
-    
+
     def __init__(self):
-        
+
         super(HumanFileSort, self).__init__()
         self.meta = {}
-    
-    def fields(self):
-        return list(super(HumanFileSort, self).fields())
+
+        '''
         # TODO
-        #return list(super(HumanFileSort, self).fields()) + ["gender", "age", "muscle", "weight"]
+        self.methods.extend([
+            ("gender", lambda filename: self.meta[filename]["gender"]),
+            ("age", lambda filename: self.meta[filename]["age"]),
+            ("muscle", lambda filename: self.meta[filename]["muscle"]),
+            ("weight", lambda filename: self.meta[filename]["weight"])])
+        '''
 
-    def sortGender(self, filenames):
-
-        self.updateMeta(filenames)
-        decorated = self._getDecorated(lambda filename: self.meta[filename]['gender'], filenames)
-        return self._decoratedSort(decorated)
-        
-    def sortAge(self, filenames):
-
-        self.updateMeta(filenames)
-        decorated = self._getDecorated(lambda filename: self.meta[filename]['age'], filenames)
-        return self._decoratedSort(decorated)
-
-    def sortMuscle(self, filenames):
-
-        self.updateMeta(filenames)
-        decorated = self._getDecorated(lambda filename: self.meta[filename]['muscle'], filenames)
-        return self._decoratedSort(decorated)
-       
-    def sortWeight(self, filenames):
-
-        self.updateMeta(filenames)
-        decorated = self._getDecorated(lambda filename: self.meta[filename]['weight'], filenames)
-        return self._decoratedSort(decorated)
+    def sort(self, by, filenames):
+        if by in self.meta.keys():
+            self.updateMeta(filenames)
+        return super(HumanFileSort, self).sort(by, filenames)
 
     def updateMeta(self, filenames):
-        
+
         for filename in filenames:
             if filename in self.meta:
                 if self.meta[filename]['modified'] < os.path.getmtime(filename):
@@ -104,6 +90,7 @@ class HumanFileSort(fc.FileSort):
         f.close()
         
         return meta
+
 
 class LoadTaskView(gui3d.TaskView):
 
