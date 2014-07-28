@@ -41,7 +41,6 @@ count or geometry adapted to special cases.
 """
 
 import gui3d
-import mh
 import proxychooser
 import filechooser as fc
 import os
@@ -54,14 +53,13 @@ class ProxyFileSort(fc.FileSort):
         super(ProxyFileSort, self).__init__()
         self.meta = {}
 
-    def fields(self):
-        return list(super(ProxyFileSort, self).fields()) + ["faces"]
+        self.methods.extend([
+            ("faces", lambda filename: self.meta[filename]["faces"])])
 
-    def sortFaces(self, filenames):
-        self.updateMeta(filenames)
-        decorated = [(self.meta[filename]['faces'], i, filename) for i, filename in enumerate(filenames)]
-        decorated.sort()
-        return [filename for gender, i, filename in decorated]
+    def sort(self, by, filenames):
+        if by in self.meta.keys():
+            self.updateMeta(filenames)
+        return super(ProxyFileSort, self).sort(by, filenames)
 
     def updateMeta(self, filenames):
         for filename in filenames:
