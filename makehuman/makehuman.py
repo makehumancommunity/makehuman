@@ -163,9 +163,9 @@ def getHgRoot(subpath=''):
     return os.path.realpath(os.path.join(cwd, '..', subpath))
 
 def get_revision_hg_info():
-    # Return local revision number of hg tip
+    # Return local revision number of hg parent
     hgRoot = getHgRoot()
-    output = subprocess.Popen(["hg","-q","tip","--template","{rev}:{node|short}"], stdout=subprocess.PIPE, stderr=sys.stderr, cwd=hgRoot).communicate()[0]
+    output = subprocess.Popen(["hg","-q","parent","--template","{rev}:{node|short}"], stdout=subprocess.PIPE, stderr=sys.stderr, cwd=hgRoot).communicate()[0]
     output = output.strip().split(':')
     rev = output[0].strip().replace('+', '')
     revid = output[1].strip().replace('+', '')
@@ -175,8 +175,45 @@ def get_revision_hg_info():
         branch = None
     return (rev, revid, branch)
 
-def get_revision_entries(folder=None):
-    # First fallback: try to parse the files in .hg manually
+def get_revision_dirstate_parent(folder=None):
+    # First fallback: try to parse the dirstate file in .hg manually
+    import binascii
+
+    dirstatefile = open(getHgRoot('.hg/dirstate'), 'rb')
+    st = dirstatefile.read(40)
+    dirstatefile.close()
+    l = len(st)
+    if l == 40:
+        nodeid = binascii.hexlify(st)[:20]
+        nodeid_short = nodeid[:12]
+    elif l > 0 and l < 40:
+        raise RuntimeError('Hg working directory state appears damaged!')
+
+    # Build mapping of nodeid to local revision number
+    node_rev_map = dict()
+    revlogfile = open(getHgRoot('.hg/store/00changelog.i'), 'rb')
+    st = revlogfile.read(32)
+
+    rev_idx = 0
+    while st:
+        st = revlogfile.read(10)
+        if st:
+            _nodeid = binascii.hexlify(st)
+            node_rev_map[_nodeid] = rev_idx
+
+        rev_idx += 1
+        st = revlogfile.read(54)
+
+    revlogfile.close()
+    if nodeid not in node_rev_map:
+        raise RuntimeError("Failed to lookup local revision number for node %s" % nodeid)
+    rev = node_rev_map[nodeid]
+    return (str(rev), nodeid_short)
+
+
+def get_revision_cache_tip(folder=None):
+    # Second fallback: try to parse the cache file in .hg manually
+    # Retrieves revision of tip, which might not actually be the working dir parent revision
     cachefile = open(getHgRoot('.hg/cache/tags'), 'r')
     for line in iter(cachefile):
         if line == "\n":
@@ -193,9 +230,9 @@ def get_revision_hglib():
     # The following only works if python-hglib is installed.
     import hglib
     hgclient = hglib.open(getHgRoot())
-    tip = hgclient.tip()
+    parent = hgclient.parents()[0]
     branch = hgclient.branch()
-    return (tip.rev.replace('+',''), tip.node[:12], branch)
+    return (parent.rev.replace('+',''), parent.node[:12], branch)
 
 def get_revision_file():
     # Default fallback to use if we can't figure out HG revision in any other
@@ -232,13 +269,22 @@ def get_hg_revision_1():
         print >> sys.stderr,  u"NOTICE: Failed to get hg version number using hglib: " + format(unicode(e)) + u" (This is just a head's up, not a critical error)"
 
     try:
-        hgrev = get_revision_entries()
+        hgrev = get_revision_dirstate_parent()
+        os.environ['HGREVISION_SOURCE'] = ".hg dirstate file"
+        os.environ['HGREVISION'] = str(hgrev[0])
+        os.environ['HGNODEID'] = str(hgrev[1])
+        return hgrev
+    except Exception as e:
+        print >> sys.stderr,  u"NOTICE: Failed to get hg parent version from dirstate file: " + format(unicode(e)) + u" (This is just a head's up, not a critical error)"
+
+    try:
+        hgrev = get_revision_cache_tip()
         os.environ['HGREVISION_SOURCE'] = ".hg cache file"
         os.environ['HGREVISION'] = str(hgrev[0])
         os.environ['HGNODEID'] = str(hgrev[1])
         return hgrev
     except Exception as e:
-        print >> sys.stderr,  u"NOTICE: Failed to get hg version from file: " + format(unicode(e)) + u" (This is just a head's up, not a critical error)"
+        print >> sys.stderr,  u"NOTICE: Failed to get hg tip version from cache file: " + format(unicode(e)) + u" (This is just a head's up, not a critical error)"
 
     #TODO Disabled this fallback for now, it's possible to do this using the hg keyword extension, but not recommended and this metric was never really reliable (it only caused more confusion)
     '''

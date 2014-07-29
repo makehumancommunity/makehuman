@@ -69,7 +69,7 @@ def readTargets(human, config):
 
 
 def setupMeshes(name, human, config=None, amt=None, rawTargets=[], hidden=False, subdivide = False, progressCallback=None):
-
+    # Notice: is this used anywhere?
     def progress(prog):
         if progressCallback == None:
             pass

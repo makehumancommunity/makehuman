@@ -390,7 +390,7 @@ class Object(events3d.EventHandler):
 
         self.setSubdivided(isSubdivided)
 
-    def getSubdivisionMesh(self, update=True, progressCallback=None):
+    def getSubdivisionMesh(self, update=True):
         """
         Create or update the Catmull-Clark subdivided (or smoothed) mesh for
         this mesh.
@@ -407,20 +407,20 @@ class Object(events3d.EventHandler):
 
         if self.isProxied():
             if not self.__proxySubdivisionMesh:
-                self.__proxySubdivisionMesh = cks.createSubdivisionObject(self.__proxyMesh, None, progressCallback)
+                self.__proxySubdivisionMesh = cks.createSubdivisionObject(self.__proxyMesh, None)
                 if self.__seedMesh.object3d:
                     self.attachMesh(self.__proxySubdivisionMesh)
             elif update:
-                cks.updateSubdivisionObject(self.__proxySubdivisionMesh, progressCallback)
+                cks.updateSubdivisionObject(self.__proxySubdivisionMesh)
 
             return self.__proxySubdivisionMesh
         else:
             if not self.__subdivisionMesh:
-                self.__subdivisionMesh = cks.createSubdivisionObject(self.__seedMesh, self.staticFaceMask, progressCallback)
+                self.__subdivisionMesh = cks.createSubdivisionObject(self.__seedMesh, self.staticFaceMask)
                 if self.__seedMesh.object3d:
                     self.attachMesh(self.__subdivisionMesh)
             elif update:
-                cks.updateSubdivisionObject(self.__subdivisionMesh, progressCallback)
+                cks.updateSubdivisionObject(self.__subdivisionMesh)
 
             return self.__subdivisionMesh
 
@@ -432,7 +432,7 @@ class Object(events3d.EventHandler):
         """
         return self.mesh == self.__subdivisionMesh or self.mesh == self.__proxySubdivisionMesh
 
-    def setSubdivided(self, flag, update=True, progressCallback=None):
+    def setSubdivided(self, flag, update=True):
         """
         Set whether this mesh is to be subdivided (or smoothed).
         When set to true, the subdivision mesh is automatically created or
@@ -445,7 +445,7 @@ class Object(events3d.EventHandler):
         if flag:
             self.mesh.setVisibility(0)
             originalMesh = self.mesh
-            self.mesh = self.getSubdivisionMesh(update, progressCallback)
+            self.mesh = self.getSubdivisionMesh(update)
             self.mesh.setVisibility(1)
         else:
             originalMesh = self.__seedMesh if self.mesh == self.__subdivisionMesh else self.__proxyMesh
@@ -456,14 +456,15 @@ class Object(events3d.EventHandler):
                 self.mesh.calcNormals()
                 self.mesh.update()
             self.mesh.setVisibility(1)
+
         return True
 
-    def updateSubdivisionMesh(self, rebuildIndexBuffer=False, progressCallback=None):
+    def updateSubdivisionMesh(self, rebuildIndexBuffer=False):
         if rebuildIndexBuffer:
             # Purge old subdivision mesh and recalculate entirely
             self.setSubdivided(False)
             self.__subdivisionMesh = self.__proxySubdivisionMesh = None
-            self.setSubdivided(True, progressCallback=progressCallback)
+            self.setSubdivided(True)
         else:
             self.getSubdivisionMesh(True)
 

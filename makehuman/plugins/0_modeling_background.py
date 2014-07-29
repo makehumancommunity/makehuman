@@ -51,6 +51,9 @@ import filechooser as fc
 import log
 import language
 import texture
+import transformations as tm
+import math
+import getpath
 
 # TODO store position and scale in action
 class BackgroundAction(gui3d.Action):
@@ -118,8 +121,8 @@ class BackgroundChooser(gui3d.TaskView):
 
         self.sides = { 'front': [0,0,0],
                        'back': [0,180,0],
-                       'left': [0,90,0],
-                       'right': [0,-90,0],
+                       'left': [0,-90,0],
+                       'right': [0,90,0],
                        'top': [90,0,0],
                        'bottom': [-90,0,0],
                        'other': None }
@@ -130,16 +133,59 @@ class BackgroundChooser(gui3d.TaskView):
             self.filenames[side] = None
             self.transformations[side] = [(0.0, 0.0), 1.0]
 
-        mesh = geometry3d.RectangleMesh(20, 20, centered=True)
-        self.backgroundImage = gui3d.app.addObject(gui3d.Object(mesh, [0, 0, 1], visible=False))
-        self.backgroundImage.mesh.setCameraProjection(0)
-        self.backgroundImage.mesh.lockRotation = True;
+        self.planeMeshes = dict()
+
         self.opacity = 40
-        mesh.setColor([255, 255, 255, self.opacity*2.55])
-        mesh.setPickable(False)
-        self.backgroundImage.setShadeless(True)
-        self.backgroundImage.setDepthless(True)
-        mesh.priority = -90
+
+        for viewName, rot in self.sides.items():
+            if rot is not None:
+                rv = [0, 0, 0]
+                angle = 0.0
+                for r_idx, r in enumerate(rot):
+                    if r != 0:
+                        rv[r_idx] = 1
+                        angle = math.radians(r)
+                if angle == 0:
+                    m = None
+                else:
+                    m = tm.rotation_matrix(-angle, rv)
+            else:
+                m = None
+
+            mesh = geometry3d.RectangleMesh(20, 20, centered=True, rotation=m)
+            obj = gui3d.app.addObject(gui3d.Object(mesh, [0, 0, 0], visible=False))
+            obj.setShadeless(True)
+            obj.setDepthless(True)
+            #obj.placeAtFeet = True
+            mesh.setCameraProjection(0)
+            mesh.setColor([255, 255, 255, self.opacity*2.55])
+            mesh.setPickable(False)
+            mesh.priority = -90
+            self.planeMeshes[viewName] = obj
+
+            if viewName == 'other':
+                obj.lockRotation = True
+
+            @obj.mhEvent
+            def onMouseDragged(event):
+                if event.button in [mh.Buttons.LEFT_MASK, mh.Buttons.MIDDLE_MASK]:
+                    if mh.getKeyModifiers() & (mh.Modifiers.SHIFT):
+                        delta = 150.0
+                    else:
+                        delta = 30.0
+
+                    dx = float(event.dx)/delta
+                    dy = float(-event.dy)/delta
+                    self.moveBackground(dx, dy)
+                elif event.button == mh.Buttons.RIGHT_MASK:
+                    if mh.getKeyModifiers() & (mh.Modifiers.SHIFT):
+                        delta = 500.0
+                    else:
+                        delta = 100.0
+                    scale = self.getBackgroundScale()
+                    scale += float(event.dy)/delta
+
+                    self.setBackgroundScale(scale)
 
         # Add icon to action toolbar
         self.backgroundImageToggle = gui.Action('background', 'Background', self.toggleBackground, toggle=True)
@@ -167,17 +213,19 @@ class BackgroundChooser(gui3d.TaskView):
                     gui3d.app.axisView(side)
                 self.refreshFileChooser()
 
-        self.opacitySlider = self.bgSettingsBox.addWidget(gui.Slider(value=self.opacity, min=0,max=100, label = "Opacity: %d%%"))
+        self.opacitySlider = self.bgSettingsBox.addWidget(gui.Slider(value=self.opacity, min=0,max=100, label = ["Opacity",": %d%%"]))
         self.dragButton = self.bgSettingsBox.addWidget(gui.CheckBox('Move && Resize'))
         self.foregroundTggl = self.bgSettingsBox.addWidget(gui.CheckBox("Show in foreground"))
 
         @self.opacitySlider.mhEvent
         def onChanging(value):
-            self.backgroundImage.mesh.setColor([255, 255, 255, 2.55*value])
+            for obj in self.planeMeshes.values():
+                obj.mesh.setColor([255, 255, 255, 2.55*value])
         @self.opacitySlider.mhEvent
         def onChange(value):
             self.opacity = value
-            self.backgroundImage.mesh.setColor([255, 255, 255, 2.55*value])
+            for obj in self.planeMeshes.values():
+                obj.mesh.setColor([255, 255, 255, 2.55*value])
         @self.foregroundTggl.mhEvent
         def onClicked(value):
             self.setShowBgInFront(self.foregroundTggl.selected)
@@ -198,21 +246,11 @@ class BackgroundChooser(gui3d.TaskView):
 
             mh.redraw()
 
-        @self.backgroundImage.mhEvent
-        def onMouseDragged(event):
-            if event.button in [mh.Buttons.LEFT_MASK, mh.Buttons.MIDDLE_MASK]:
-                dx = float(event.dx)/30.0
-                dy = float(-event.dy)/30.0
-                self.moveBackground(dx, dy)
-            elif event.button == mh.Buttons.RIGHT_MASK:
-                scale = self.getBackgroundScale()
-                scale += float(event.dy)/100.0
-
-                self.setBackgroundScale(scale)
 
         @self.dragButton.mhEvent
         def onClicked(event):
-            self.backgroundImage.mesh.setPickable(self.dragButton.selected)
+            for obj in self.planeMeshes.values():
+                obj.mesh.setPickable(self.dragButton.selected)
             gui3d.app.selectedHuman.mesh.setPickable(not self.dragButton.selected)
             mh.redraw()
 
@@ -240,7 +278,7 @@ class BackgroundChooser(gui3d.TaskView):
         else:
             self.filenames[side] = None
 
-        self.transformations[side] = [(0.0, 0.0), 1.0]
+        #self.transformations[side] = [(0.0, 0.0), 1.0]
 
         if side == self.getCurrentSide():
             # Reload current texture
@@ -271,13 +309,15 @@ class BackgroundChooser(gui3d.TaskView):
 
     def setShowBgInFront(self, enabled):
         if enabled:
-            self.backgroundImage.mesh.priority = 100
+            priority = 100
         else:
-            self.backgroundImage.mesh.priority = -90
+            priority = -90
+        for obj in self.planeMeshes.values():
+            obj.mesh.priority = priority
         mh.redraw()
 
     def isShowBgInFront(self):
-        return self.backgroundImage.mesh.priority == 100
+        return self.planeMeshes['front'].mesh.priority == 100
 
     def isBackgroundSet(self):
         for bgFile in self.filenames.values():
@@ -296,7 +336,7 @@ class BackgroundChooser(gui3d.TaskView):
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
-        text = language.language.getLanguageString(u'Images which are placed in %s will show up here.') % self.backgroundsFolder
+        text = language.language.getLanguageString([u'If you want backgrounds to show up here, place the images in',u' %s']) % self.backgroundsFolder
         gui3d.app.prompt('Info', text, 'OK', helpId='backgroundHelp')
         gui3d.app.statusPersist(text)
         self.opacitySlider.setValue(self.opacity)
@@ -312,11 +352,9 @@ class BackgroundChooser(gui3d.TaskView):
         currentBg = self.filenames[self.getSelectedSideCheckbox()]
         if currentBg:
             currentBg = currentBg[0]
-        print 'setting %s' % currentBg
         self.filechooser.selectItem(currentBg)
 
     def onHide(self, event):
-
         self.backgroundImage.mesh.setPickable(False)
         self.human.mesh.setPickable(True)
         gui3d.app.statusPersist('')
@@ -326,11 +364,18 @@ class BackgroundChooser(gui3d.TaskView):
         if event.change == 'reset':
             for side in self.sides.keys():
                 self.filenames[side] = None
+                self.transformations[side] = [(0.0, 0.0), 1.0]
             self.setBackgroundEnabled(False)
 
+    @property
+    def backgroundImage(self):
+        return self.planeMeshes[ self.getCurrentSide() ]
+
     def setBackgroundImage(self, side):
+        for obj in self.planeMeshes.values():
+            obj.hide()
+
         if not side:
-            self.backgroundImage.hide()
             return
 
         if self.filenames.get(side):
@@ -387,6 +432,37 @@ class BackgroundChooser(gui3d.TaskView):
         self.backgroundImage.mesh.setPosition(x, y)
         self.transformations[side][0] = (float(x), float(y))
 
+    def loadHandler(self, human, values):
+        if values[0] == "background":
+            if len(values) >= 7:
+                side = values[1]
+                img_filename = values[2]
+                i = 0
+                while img_filename and not any( [img_filename.lower().endswith(ex) for ex in self.extensions] ) and (len(values) - (i+2)) >= 5:
+                    i += 1
+                    img_filename = img_filename + ' ' + values[2+i]
+                img_filename = getpath.findFile(img_filename, self.backgroundsFolders, strict=True)
+                aspect = float(values[3+i])
+                trans = (float(values[4+i]), float(values[5+i]))
+                scale = float(values[6+i])
+                self.filenames[side] = (img_filename, aspect)
+                self.transformations[side] = [trans, scale]
+            elif len(values) >= 3 and values[1] == 'enabled':
+                enabled = values[2].lower() in ['true', 'yes']
+                self.setBackgroundEnabled(enabled)
+            else:
+                log.error("Unknown background option: %s", (' '.join( values[1:]) ))
+
+    def saveHandler(self, human, file):
+        for side in self.sides.keys():
+            side_data = self.filenames.get(side)
+            if side_data is not None:
+                (filename, aspect) = side_data
+                (trans, scale) = self.transformations[side]
+                filename = getpath.getJailedPath(filename, self.backgroundsFolders, jailLimits=self.backgroundsFolders)
+                file.write('background %s %s %s %s %s %s\n' % (side, filename, aspect, trans[0], trans[1], scale))
+        file.write('background enabled %s\n' % self.isBackgroundEnabled() )
+
 class TextureProjectionView(gui3d.TaskView) :
 
     def __init__(self, category, backgroundChooserView):
@@ -433,8 +509,10 @@ class TextureProjectionView(gui3d.TaskView) :
         def onClicked(event):
             gui3d.app.selectedHuman.setShadeless(1 if self.shadelessButton.selected else 0)
 
-    def onShow(self, event):
+    def backgroundImage(self):
+        return self.backgroundChooserView.backgroundImage
 
+    def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
         self.human.setShadeless(1 if self.shadelessButton.selected else 0)
 
@@ -539,6 +617,9 @@ def load(app):
     bgSettings = TextureProjectionView(category, bgChooser)
     bgSettings.sortOrder = 1.5
     #category.addTask(bgSettings)
+
+    gui3d.app.addLoadHandler('background', bgChooser.loadHandler)
+    gui3d.app.addSaveHandler(bgChooser.saveHandler)
 
 # This method is called when the plugin is unloaded from makehuman
 # At the moment this is not used, but in the future it will remove the added GUI elements

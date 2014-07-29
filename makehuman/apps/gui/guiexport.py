@@ -105,7 +105,7 @@ class ExportTaskView(gui3d.TaskView):
                     if not gui3d.app.prompt("File exists", "The file already exists. Overwrite?", "Yes", "No"):
                         break;
                 exporter.export(gui3d.app.selectedHuman, filename)
-                gui3d.app.status(u'The mesh has been exported to %s.', dir)
+                gui3d.app.status([u'The mesh has been exported to',u' %s.'], dir)
                 self.showOverwriteWarning = False
                 break
             else:
