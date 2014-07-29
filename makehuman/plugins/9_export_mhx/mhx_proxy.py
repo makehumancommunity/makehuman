@@ -55,7 +55,7 @@ class Writer(mhx_writer.Writer):
         t = t0
         for proxy in self.proxies.values():
             if proxy.type == type:
-                G.app.progress(t, "Exporting %s", proxy.name)
+                G.app.progress(t, ["Exporting"," %s"], proxy.name)
                 self.writeProxy(fp, proxy, layer)
                 t += dt
 

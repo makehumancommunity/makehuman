@@ -49,7 +49,7 @@ my(%english) = &parseLang($sourceFile);
 open(FILES,"find $langDir -name \"*.json\" | sort |") || die "Could not enumerate json files\n\n";
 
 print "<br /><br />\n";
-print "<h1>Overview</h1>\n";
+print "<h1>Overview of translation status</h1>\n";
 print "<table border=\"1\">\n<tr><td><b>Language</b></td><td><b>Missing</b></td><td><b>Untranslated</b></td></tr>\n";
 
 my(%langMiss);
@@ -104,7 +104,7 @@ print "english source file. The algorithm cannot separate this from strings whic
 
 foreach $lang (@langs)
 {
-  print "<br /><h1>Untranslated string in $lang</h1>\n<ul>\n";
+  print "<br /><h1>Untranslated strings in $lang</h1>\n<ul>\n";
   my(@m) = sort(@{$langMiss{$lang}});
   foreach $l (@m)
   {
