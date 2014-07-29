@@ -45,7 +45,7 @@ import contextlib
 
 from core import G
 import mh
-import events3d
+from progress import Progress
 import files3d
 import gui3d
 import geometry3d
@@ -129,14 +129,14 @@ class SymmetryAction(gui3d.Action):
             self.human.applySymmetryRight()
         else:
             self.human.applySymmetryLeft()
-        self.human.applyAllTargets(G.app.progress)
+        self.human.applyAllTargets()
         mh.redraw()
         return True
 
     def undo(self):
         for (modifierName, value) in self.before:
             self.human.getModifier(modifierName).setValue(value)
-        self.human.applyAllTargets(G.app.progress)
+        self.human.applyAllTargets()
         mh.redraw()
         return True
 
@@ -304,7 +304,7 @@ class MHApplication(gui3d.Application, mh.Application):
         return G.args
 
     def loadHumanMHM(self, filename):
-        self.selectedHuman.load(filename, True, self.progress)
+        self.selectedHuman.load(filename, True)
         self.clearUndoRedo()
         # Reset mesh is never forced to wireframe
         self.actions.wireframe.setChecked(False)
@@ -312,15 +312,12 @@ class MHApplication(gui3d.Application, mh.Application):
     # TO THINK: Maybe move guiload's saveMHM here as saveHumanMHM?
 
     def loadHuman(self):
-        self.progress(0.1)
 
         # Set a lower than default MAX_FACES value because we know the human has a good topology (will make it a little faster)
         # (we do not lower the global limit because that would limit the selection of meshes that MH would accept too much)
         self.selectedHuman = self.addObject(human.Human(files3d.loadMesh(mh.getSysDataPath("3dobjs/base.obj"), maxFaces = 5)))
 
     def loadScene(self):
-
-        self.progress(0.18)
 
         userSceneDir = mh.getDataPath("scenes")
         if not os.path.exists(userSceneDir):
@@ -331,8 +328,6 @@ class MHApplication(gui3d.Application, mh.Application):
         self.setScene( Scene(findFile("scenes/default.mhscene")) )
 
     def loadMainGui(self):
-
-        self.progress(0.2)
 
         @self.selectedHuman.mhEvent
         def onMouseDown(event):
@@ -446,34 +441,25 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def loadPlugins(self):
 
-        self.progress(0.4)
-
         # Load plugins not starting with _
-        self.pluginsToLoad = glob.glob(mh.getSysPath(os.path.join("plugins/",'[!_]*.py')))
+        pluginsToLoad = glob.glob(mh.getSysPath(os.path.join("plugins/",'[!_]*.py')))
 
         # Load plugin packages (folders with a file called __init__.py)
         for fname in os.listdir(mh.getSysPath("plugins/")):
             if fname[0] != "_":
                 folder = os.path.join("plugins", fname)
                 if os.path.isdir(folder) and ("__init__.py" in os.listdir(folder)):
-                    self.pluginsToLoad.append(folder)
+                    pluginsToLoad.append(folder)
 
-        self.pluginsToLoad.sort()
-        self.pluginsToLoad.reverse()
+        pluginsToLoad.sort()
 
-        while self.pluginsToLoad:
-            self.loadNextPlugin()
+        fprog = Progress(len(pluginsToLoad))
+        for path in pluginsToLoad:
+            self.loadPlugin(path)
+            fprog.step()
 
-    def loadNextPlugin(self):
+    def loadPlugin(self, path):
 
-        alreadyLoaded = len(self.modules)
-        stillToLoad = len(self.pluginsToLoad)
-        self.progress(0.4 + (float(alreadyLoaded) / float(alreadyLoaded + stillToLoad)) * 0.4)
-
-        if not stillToLoad:
-            return
-
-        path = self.pluginsToLoad.pop()
         try:
             name, ext = os.path.splitext(os.path.basename(path))
             if name not in self.settings['excludePlugins']:
@@ -531,19 +517,22 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def loadGui(self):
 
-        self.progress(0.9)
+        progress = Progress(4)
 
         category = self.getCategory('Settings')
         category.addTask(PluginsTaskView(category))
+        progress.step()
 
         mh.refreshLayout()
+        progress.step()
 
         self.switchCategory("Modelling")
+        progress.step()
 
         # Create viewport grid
         self.loadGrid()
+        progress.step()
 
-        self.progress(1.0)
         # self.progressBar.hide()
 
     def loadGrid(self):
@@ -567,12 +556,12 @@ class MHApplication(gui3d.Application, mh.Application):
         backGridMesh = geometry3d.GridMesh(gridSize, gridSize, spacing, offset = -10, plane = 0, subgrids = subgrids)
         backGridMesh.setMainColor(self.gridColor)
         backGridMesh.setSubColor(self.gridSubColor)
-        backGridMesh.lockRotation = True
         backGridMesh.restrictVisibleToCamera = True
         backGridMesh.minSubgridZoom = (1.0/spacing) * float(subgrids)/5
         self.backplaneGrid = gui3d.Object(backGridMesh)
         self.backplaneGrid.excludeFromProduction = True
         self.backplaneGrid.placeAtFeet = True
+        self.backplaneGrid.lockRotation = True
         self.backplaneGrid.setShadeless(1)
         #self.backplaneGrid.setPosition([0,offset,0])
         self.addObject(self.backplaneGrid)
@@ -606,7 +595,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def loadFinish(self):
         #self.selectedHuman.callEvent('onChanged', events3d.HumanEvent(self.selectedHuman, 'reset'))
-        self.selectedHuman.applyAllTargets(gui3d.app.progress)
+        self.selectedHuman.applyAllTargets()
 
         self.prompt('Warning', 'MakeHuman is a character creation suite. It is designed for making anatomically correct humans.\nParts of this program may contain nudity.\nDo you want to proceed?', 'Yes', 'No', None, self.stop, 'nudityWarning')
         # self.splash.hide()
@@ -636,35 +625,37 @@ class MHApplication(gui3d.Application, mh.Application):
 
         #self.splash.setFormat('<br><br><b><font size="10" color="#ffffff">%s</font></b>')
 
-        log.message('Loading human')
+        progress = Progress([36, 6, 15, 333, 40, 154, 257, 5], messaging=True)
+
+        progress.firststep('Loading human')
         self.loadHuman()
 
-        log.message('Loading scene')
+        progress.step('Loading scene')
         self.loadScene()
 
-        log.message('Loading main GUI')
+        progress.step('Loading main GUI')
         self.loadMainGui()
 
-        log.message('Loading plugins')
+        progress.step('Loading plugins')
         self.loadPlugins()
 
-        log.message('Loading GUI')
+        progress.step('Loading GUI')
         self.loadGui()
 
-        log.message('Loading theme')
+        progress.step('Loading theme')
         try:
             self.setTheme(self.settings.get('guiTheme', 'makehuman'))
         except:
             self.setTheme("default")
 
-        log.message('Applying targets')
+        progress.step('Applying targets')
         self.loadFinish()
-
+        
+        progress.step('Loading macro targets')
         if self.settings.get('preloadTargets', False):
-            log.message('Loading macro targets')
             self.loadMacroTargets()
 
-        log.message('Loading done')
+        progress.step('Loading done')
 
         log.message('')
 
@@ -979,8 +970,8 @@ class MHApplication(gui3d.Application, mh.Application):
         """
         return language.getLanguages()
 
-    def getLanguageString(self, string):
-        return language.language.getLanguageString(string)
+    def getLanguageString(self, string, appendData=None, appendFormat=None):
+        return language.language.getLanguageString(string,appendData,appendFormat)
 
     def dumpMissingStrings(self):
         language.language.dumpMissingStrings()
@@ -1271,7 +1262,7 @@ class MHApplication(gui3d.Application, mh.Application):
         self.redraw()
 
     def toggleSubdivision(self):
-        self.selectedHuman.setSubdivided(self.actions.smooth.isChecked(), True, self.progress)
+        self.selectedHuman.setSubdivided(self.actions.smooth.isChecked(), True)
         self.redraw()
 
     def symmetryRight(self):
@@ -1317,7 +1308,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def _resetHuman(self):
         self.selectedHuman.resetMeshValues()
-        self.selectedHuman.applyAllTargets(self.progress)
+        self.selectedHuman.applyAllTargets()
         self.clearUndoRedo()
         # Reset mesh is never forced to wireframe
         self.actions.wireframe.setChecked(False)

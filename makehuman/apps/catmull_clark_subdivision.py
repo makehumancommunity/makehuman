@@ -41,10 +41,10 @@ TODO
 
 __docformat__ = 'restructuredtext'
 
-import time
 import numpy as np
 
 from module3d import Object3D
+from progress import Progress
 import log
 
 class SubdivisionObject(Object3D):
@@ -72,19 +72,16 @@ class SubdivisionObject(Object3D):
         else:
             self._staticFaceMask = staticFaceMask
 
-    def create(self, progressCallback):
+    def create(self):
         log.debug('Applying Catmull-Clark subdivision on %s.', self.parent.name)
-        total = 19
-        now = [time.time()]
-        def progress(x):
-            last = now[0]
-            now[0] = time.time()
-            log.debug('Step %d: %f seconds processed', x, now[0] - last)
-            if progressCallback:
-                progressCallback(float(x)/total)
 
-        progress(0)
-        
+        # Progress bar will be updated only through the parent Progress.
+        progress = Progress([0, 0, 16, 0, 15, 63, 0, 0, 0, 93,
+            16, 0, 0, 343, 141, 15, 109, 328, 31, 281],
+            None, logging=True, timing=True)
+
+        progress.firststep()
+
         parent = self.parent
         nverts = len(parent.coord)
         ntexco = len(parent.texco)
@@ -93,7 +90,7 @@ class SubdivisionObject(Object3D):
         for g in parent._faceGroups:
             fg = self.createFaceGroup(g.name)
 
-        progress(1)
+        progress.step()
 
         face_mask = self.staticFaceMask
         self.face_map = np.argwhere(face_mask)[...,0]
@@ -101,7 +98,7 @@ class SubdivisionObject(Object3D):
         nfaces = len(self.face_map)
         self.face_rmap[self.face_map] = np.arange(nfaces)
 
-        progress(2)
+        progress.step()
 
         verts = parent.fvert[face_mask]
         vert_mask = np.zeros(nverts, dtype = bool)
@@ -112,7 +109,7 @@ class SubdivisionObject(Object3D):
         vtx_rmap[self.vtx_map] = np.arange(nverts)
         self.vtx_rmap = vtx_rmap
 
-        progress(3)
+        progress.step()
 
         uvs = parent.fuvs[face_mask]
         uv_mask = np.zeros(ntexco, dtype = bool)
@@ -122,7 +119,7 @@ class SubdivisionObject(Object3D):
         ntexco = len(self.uv_map)
         uv_rmap[self.uv_map] = np.arange(ntexco)
 
-        progress(4)
+        progress.step()
 
         fvert = vtx_rmap[parent.fvert[self.face_map]]
         vedges = np.dstack((fvert,np.roll(fvert,-1,axis=1)))  # All 4 edges belonging to each face
@@ -136,7 +133,7 @@ class SubdivisionObject(Object3D):
         self.tcbase = ntexco
         self.tebase = ntexco + nfaces
 
-        progress(5)
+        progress.step()
 
         vedges = vedges.astype(np.uint64)
         va = np.min(vedges, axis=-1)
@@ -168,7 +165,7 @@ class SubdivisionObject(Object3D):
         tedgelist = tedgelist.astype(np.uint32)
         ftedges2 = ftedges2.reshape(tedges[...,0].shape)
 
-        progress(6)
+        progress.step()
 
         nfaces = len(self.face_map)
 
@@ -193,7 +190,7 @@ class SubdivisionObject(Object3D):
         self.group[...] = parent.group[self.face_map][:,None]
         self.face_mask[...] = parent.face_mask[self.face_map][:,None]
 
-        progress(7)
+        progress.step()
 
         fvedges2 = np.asarray(fvedges2, dtype=np.uint32) + self.ebase
 
@@ -205,7 +202,7 @@ class SubdivisionObject(Object3D):
         self.fuvs[:,:,1] = ftedges2
         self.fuvs[:,:,3] = np.roll(ftedges2,1,axis=-1)
 
-        progress(8)
+        progress.step()
 
         # self.evert[i,0] contains the two vertices that define the edge which
         # is divided in half by edge vertex with index i
@@ -218,7 +215,7 @@ class SubdivisionObject(Object3D):
         self.vedge = np.zeros((nverts, self.MAX_FACES), dtype=np.uint32)
         self.nedges = np.zeros(nverts, dtype=np.uint8)
 
-        progress(9)
+        progress.step()
 
         map_ = np.argsort(self.evert[:,0,:].flat)
         vi = self.evert[:,0,:].flat[map_]
@@ -232,7 +229,7 @@ class SubdivisionObject(Object3D):
             self.vedge[ix[i],:n[i]] = ei[first[i]:][:n[i]]
         del vi, ei, ix, n, first
 
-        progress(10)
+        progress.step()
 
         nverts = self.ebase + len(vedgelist)
 
@@ -248,7 +245,7 @@ class SubdivisionObject(Object3D):
         self.utang = False
         self.ucolr = False
 
-        progress(11)
+        progress.step()
 
         ntexco = self.tebase + len(tedgelist)
 
@@ -256,7 +253,7 @@ class SubdivisionObject(Object3D):
 
         self.utexc = False
 
-        progress(12)
+        progress.step()
 
         nfaces *= 4
 
@@ -266,31 +263,31 @@ class SubdivisionObject(Object3D):
         self.face_mask = self.face_mask.reshape(nfaces)
         self.fnorm = np.zeros((nfaces,3))
 
-        progress(13)
+        progress.step()
 
         self._update_faces()
 
-        progress(14)
+        progress.step()
 
         self.updateIndexBuffer()
 
-        progress(15)
+        progress.step()
 
         self.update_uvs()
 
-        progress(16)
+        progress.step()
 
         self.update_coords()
 
-        progress(17)
+        progress.step()
 
         self.calcNormals()
 
-        progress(18)
+        progress.step()
 
         self.sync_all()
 
-        progress(19)
+        progress.step()
 
 
         # VERTEX MAPPING _parent_map: (subdiv -> parent)
@@ -347,6 +344,8 @@ class SubdivisionObject(Object3D):
                             offset=self.ebase)
 
         # TODO defer calculation of mapping until it is requested
+
+        progress.step()
 
     @property
     def parent_map_weights(self):
@@ -505,12 +504,12 @@ def _reverse_n_to_m_map(input, output, offset=0):
         output[ix[i], :n[i]] = offset + fi[first[i]:][:n[i]]
 
 
-def createSubdivisionObject(object, staticFaceMask=None, progressCallback=None):
+def createSubdivisionObject(object, staticFaceMask=None):
     obj = SubdivisionObject(object, staticFaceMask)
-    obj.create(progressCallback)
+    obj.create()
     return obj
 
-def updateSubdivisionObject(object, progressCallback=None):
+def updateSubdivisionObject(object):
     object.update()
     object.calcNormals()
     object.sync_all()

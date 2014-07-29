@@ -128,7 +128,7 @@ class ModifierAction(guicommon.Action):
             else:
                 opposite.setValue( self.modifier.getValue() )
 
-        self.human.applyAllTargets(G.app.progress)
+        self.human.applyAllTargets()
         self.postAction()
         return True
 
@@ -145,7 +145,7 @@ class ModifierAction(guicommon.Action):
                 opposite = self.human.getModifier( self.modifier.getSymmetricOpposite() )
                 opposite.setValue( self.modifier.getValue() )
 
-        self.human.applyAllTargets(G.app.progress)
+        self.human.applyAllTargets()
         self.postAction()
         return True
 
