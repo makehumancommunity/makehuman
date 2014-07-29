@@ -1,0 +1,26 @@
+# Material definition for XrayMaterial
+
+name XrayMaterial
+ambientColor 0.1 0.1 0.1
+diffuseColor 1.0 1.0 1.0
+specularColor 0.3 0.3 0.3
+shininess 0.1
+emissiveColor 0.0 0.0 0.0
+opacity 0.1
+translucency 0.0
+
+transparent True
+backfaceCull True
+shadeless False
+wireframe False
+depthless False
+
+shader data/shaders/glsl/xray
+
+shaderConfig diffuse False
+shaderConfig transparency False
+shaderConfig normal False
+shaderConfig bump False
+shaderConfig spec False
+shaderConfig vertexColors False
+shaderConfig displacement False
