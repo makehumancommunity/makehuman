@@ -993,10 +993,11 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         # Restore posed mode, and shadow copy of vertex positions 
         # (We do this after onChanged event so that proxies are already updated)
         if self.getSkeleton():
-            self.refreshStaticMeshes()
+            self.refreshStaticMeshes()  # TODO document: an external plugin that modifies the rest pose verts outside of an onHumanChang(ing/ed) event should explicitly call this method on the human
+        # TODO for static poses we can do better and recalculate normals at this point (after having posed the mesh), for animation this will be too slow, though.
 
     def getPartNameForGroupName(self, groupName):
-        # TODO is this still used anywhere
+        # TODO is this still used anywhere?
         for k in self.bodyZones:
             if k in groupName:
                 return k
@@ -1117,12 +1118,12 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         self.callEvent('onChanged', events3d.HumanEvent(self, 'skeleton'))
 
     def updateVertexWeights(self, vertexWeights):
-        for mName in self.getMeshes():  # Meshes are ubsubdivided
+        for mName in self.getBoundMeshes():  # Meshes are unsubdivided
             # We assume the basemesh is the first mesh bound to the skeleton
             if vertexWeights is None or mName == self.meshData.name: # TODO perhaps this identity by name is not strong enough, or enforce unique names in AnimatedMesh
                 animation.AnimatedMesh.updateVertexWeights(self, mName, vertexWeights)
             else:
-                self._updateMeshVertexWeights(self.getMesh(mName))
+                self._updateMeshVertexWeights(self.getBoundMesh(mName))
         self.refreshPose()
 
     def _updateMeshVertexWeights(self, mesh):
@@ -1149,7 +1150,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         if not self.getSkeleton():
             return None
 
-        _, bodyWeights = self.getMesh(self.meshData.name)   # TODO perhaps rename to getAnimatedMesh or getBoundMesh
+        _, bodyWeights = self.getBoundMesh(self.meshData.name)
         return bodyWeights
 
     def setPosed(self, posed):

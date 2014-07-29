@@ -281,12 +281,12 @@ class AnimatedMesh(object):
         self.__meshes.append(mesh)
 
     def updateVertexWeights(self, meshName, vertexToBoneMapping):
-        rIdx = self._getMeshIndex(meshName)
+        rIdx = self._getBoundMeshIndex(meshName)
         self.__vertexToBoneMaps[rIdx] = vertexToBoneMapping
 
     def removeMesh(self, name):
         try:
-            rIdx = self._getMeshIndex(name)
+            rIdx = self._getBoundMeshIndex(name)
 
             # First restore rest coords of mesh, then remove it
             try:
@@ -299,22 +299,22 @@ class AnimatedMesh(object):
         except:
             pass
 
-    def containsMesh(self, mesh):
-        mesh2, _ = self.getMesh(mesh.name)
+    def containsBoundMesh(self, mesh):
+        mesh2, _ = self.getBoundMesh(mesh.name)
         return mesh2 == mesh
 
-    def getMesh(self, name):
+    def getBoundMesh(self, name):
         try:
-            rIdx = self._getMeshIndex(name)
+            rIdx = self._getBoundMeshIndex(name)
         except:
             return None, None
 
         return self.__meshes[rIdx], self.__vertexToBoneMaps[rIdx]
 
-    def getMeshes(self):
+    def getBoundMeshes(self):
         return [mesh.name for mesh in self.__meshes]
 
-    def _getMeshIndex(self, meshName):
+    def _getBoundMeshIndex(self, meshName):
         for idx, mesh in enumerate(self.__meshes):
             if mesh.name == meshName:
                 return idx
