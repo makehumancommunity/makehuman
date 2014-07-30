@@ -1134,13 +1134,19 @@ class Human(guicommon.Object):
         event.path = filename
         self.callEvent('onChanging', event)
 
-        f = open(filename, "w", encoding="utf-8")
+        f = open(filename, "r+", encoding="utf-8")
         f.write('# Written by MakeHuman %s\n' % getVersionStr())
         f.write('version %s\n' % getShortVersion())
         f.write('tags %s\n' % tags)
 
         for handler in G.app.saveHandlers:
+            t = f.tell()
             handler(self, f)
+            # Ensure that handlers write lines ending with newline character
+            if f.tell() != t:
+                f.seek(f.tell()-1)
+                if f.read() != '\n':
+                    f.write('\n')
             progress.step()
 
         f.write('subdivide %s' % self.isSubdivided())
