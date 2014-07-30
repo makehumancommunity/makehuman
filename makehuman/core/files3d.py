@@ -112,7 +112,7 @@ def saveBinaryMesh(obj, path):
     if obj.has_uv:
         vars_['fuvs']  = obj.fuvs
 
-    np.savez(path, **vars_)
+    np.savez_compressed(path, **vars_)
 
 def loadBinaryMesh(obj, path):
     log.debug("Loading binary mesh %s.", path)

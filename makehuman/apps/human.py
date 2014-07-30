@@ -41,7 +41,7 @@ import numpy as np
 import algos3d
 import guicommon
 from core import G
-import os
+from progress import Progress
 import events3d
 from getpath import getSysDataPath, canonicalPath
 import log
@@ -296,13 +296,20 @@ class Human(guicommon.Object):
             if obj:
                 obj.setSolid(*args, **kwargs)
 
-    def setSubdivided(self, *args, **kwargs):
-        if not guicommon.Object.setSubdivided(self, *args, **kwargs):
-            return
-        for obj in self.getProxyObjects():
-            if obj:
-                obj.setSubdivided(*args, **kwargs)
-        self.callEvent('onChanged', events3d.HumanEvent(self, 'smooth'))
+    def setSubdivided(self, flag, *args, **kwargs):
+        if flag != self.isSubdivided():
+            proxies = [obj for obj in self.getProxyObjects() if obj]
+            progress = Progress([len(self.mesh.coord)] +
+                                [len(obj.mesh.coord) for obj in proxies])
+
+            guicommon.Object.setSubdivided(self, flag, *args, **kwargs)
+            progress.step()
+
+            for obj in proxies:
+                obj.setSubdivided(flag, *args, **kwargs)
+                progress.step()
+
+            self.callEvent('onChanged', events3d.HumanEvent(self, 'smooth'))
 
     def setGender(self, gender, updateModifier = True):
         """
@@ -904,58 +911,44 @@ class Human(guicommon.Object):
         """
         return set( [t[0] for m in self.modifiers for t in m.targets] )
 
-    def applyAllTargets(self, progressCallback=None, update=True):
+    def applyAllTargets(self, update=True):
         """
         This method applies all targets, in function of age and sex
 
         **Parameters:** None.
-
-        progressCallback will automatically be set to G.app.progress if the
-        progressCallback parameter is left to None. Set it to False to disable
-        progress reporting.
         """
-        if progressCallback is None:
-            progressCallback = G.app.progress
+        progress = Progress()
 
-        if progressCallback:
-            progressCallback(0.0)
+        progress(0.0, 0.5)
 
-        # First call progressCalback (which often processes events) before resetting mesh
+        # First call progress callback (which often processes events) before resetting mesh
         # so that mesh is not drawn in its reset state
         algos3d.resetObj(self.meshData)
 
-        progressVal = 0.0
-        progressIncr = 0.5 / (len(self.targetsDetailStack) + 1)
-
+        itprog = Progress(len(self.targetsDetailStack))
         for (targetPath, morphFactor) in self.targetsDetailStack.iteritems():
             algos3d.loadTranslationTarget(self.meshData, targetPath, morphFactor, None, 0, 0)
-
-            progressVal += progressIncr
-            if progressCallback:
-                progressCallback(progressVal)
-
+            itprog.step()
 
         # Update all verts
         self.getSeedMesh().update()
         self.updateProxyMesh()
         if self.isSubdivided():
+            progress(0.5, 0.7)
             self.updateSubdivisionMesh()
-            if progressCallback:
-                progressCallback(0.7)
+            progress(0.7, 0.8)
             self.mesh.calcNormals()
-            if progressCallback:
-                progressCallback(0.8)
+            progress(0.8, 0.99)
             if update:
                 self.mesh.update()
         else:
+            progress(0.5, 0.8)
             self.meshData.calcNormals(1, 1)
-            if progressCallback:
-                progressCallback(0.8)
+            progress(0.8, 0.99)
             if update:
                 self.meshData.update()
 
-        if progressCallback:
-            progressCallback(1.0)
+        progress(1.0)
 
         #self.traceStack(all=True)
         #self.traceBuffer(all=True, vertsToList=0)
@@ -1077,9 +1070,10 @@ class Human(guicommon.Object):
         verts = self.meshData.getCoords(self.meshData.getVerticesForGroups([fg.name]))
         return verts.mean(axis=0)
 
-    def load(self, filename, update=True, progressCallback=None):
+    def load(self, filename, update=True):
         from codecs import open
         log.message("Loading human from MHM file %s.", filename)
+        progress = Progress()(0.0, 0.8)
         event = events3d.HumanEvent(self, 'load')
         event.path = filename
         self.callEvent('onChanging', event)
@@ -1089,13 +1083,14 @@ class Human(guicommon.Object):
 
         subdivide = False
 
-        # TODO perhaps create progress indicator that depends on line count of mhm file?
         f = open(filename, 'rU', encoding="utf-8")
 
         for lh in G.app.loadHandlers.values():
             lh(self, ['status', 'started'])
 
-        for data in f.readlines():
+        lines = f.readlines()
+        fprog = Progress(len(lines))
+        for data in lines:
             lineData = data.split()
 
             if len(lineData) > 0 and not lineData[0] == '#':
@@ -1110,6 +1105,7 @@ class Human(guicommon.Object):
                     G.app.loadHandlers[lineData[0]](self, lineData)
                 else:
                     log.debug('Could not load %s', lineData)
+            fprog.step()
 
         log.debug("Finalizing MHM loading.")
         for lh in set(G.app.loadHandlers.values()):
@@ -1122,31 +1118,38 @@ class Human(guicommon.Object):
         self.callEvent('onChanged', event)
 
         if update:
-            self.applyAllTargets(progressCallback)
+            progress(0.8, 0.9)
+            self.applyAllTargets()
 
+        progress(0.9, 0.99)
         self.setSubdivided(subdivide)
 
+        progress(1.0)
         log.message("Done loading MHM file.")
 
     def save(self, filename, tags):
         from codecs import open
-        from progress import Progress
         progress = Progress(len(G.app.saveHandlers))
         event = events3d.HumanEvent(self, 'save')
         event.path = filename
         self.callEvent('onChanging', event)
 
-        f = open(filename, "w", encoding="utf-8")
+        f = open(filename, "r+", encoding="utf-8")
         f.write('# Written by MakeHuman %s\n' % getVersionStr())
         f.write('version %s\n' % getShortVersion())
         f.write('tags %s\n' % tags)
 
         for handler in G.app.saveHandlers:
+            t = f.tell()
             handler(self, f)
+            # Ensure that handlers write lines ending with newline character
+            if f.tell() != t:
+                f.seek(f.tell()-1)
+                if f.read() != '\n':
+                    f.write('\n')
             progress.step()
 
         f.write('subdivide %s' % self.isSubdivided())
 
         f.close()
-        progress(1)
         self.callEvent('onChanged', event)

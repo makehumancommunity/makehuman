@@ -213,7 +213,7 @@ class BackgroundChooser(gui3d.TaskView):
                     gui3d.app.axisView(side)
                 self.refreshFileChooser()
 
-        self.opacitySlider = self.bgSettingsBox.addWidget(gui.Slider(value=self.opacity, min=0,max=100, label = "Opacity: %d%%"))
+        self.opacitySlider = self.bgSettingsBox.addWidget(gui.Slider(value=self.opacity, min=0,max=100, label = ["Opacity",": %d%%"]))
         self.dragButton = self.bgSettingsBox.addWidget(gui.CheckBox('Move && Resize'))
         self.foregroundTggl = self.bgSettingsBox.addWidget(gui.CheckBox("Show in foreground"))
 
@@ -336,7 +336,7 @@ class BackgroundChooser(gui3d.TaskView):
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
-        text = language.language.getLanguageString(u'Images which are placed in %s will show up here.') % self.backgroundsFolder
+        text = language.language.getLanguageString([u'If you want backgrounds to show up here, place the images in',u' %s']) % self.backgroundsFolder
         gui3d.app.prompt('Info', text, 'OK', helpId='backgroundHelp')
         gui3d.app.statusPersist(text)
         self.opacitySlider.setValue(self.opacity)

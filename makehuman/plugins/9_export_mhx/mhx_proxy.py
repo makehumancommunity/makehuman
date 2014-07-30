@@ -55,7 +55,7 @@ class Writer(mhx_writer.Writer):
         t = t0
         for proxy in self.proxies.values():
             if proxy.type == type:
-                G.app.progress(t, "Exporting %s", proxy.name)
+                G.app.progress(t, ["Exporting"," %s"], proxy.name)
                 self.writeProxy(fp, proxy, layer)
                 t += dt
 
@@ -116,8 +116,6 @@ class Writer(mhx_writer.Writer):
             "  parent Refer Object %s ;\n" % self.name +
             "  hide False ;\n" +
             "  hide_render False ;\n")
-        if pxy.wire:
-            fp.write("  draw_type 'WIRE' ;\n")
 
         # Proxy layers
 
@@ -130,7 +128,6 @@ class Writer(mhx_writer.Writer):
         fp.write(";\n\n")
 
         self.meshWriter.writeArmatureModifier(fp, pxy)
-        self.writeProxyModifiers(fp, pxy)
 
         fp.write(
 """
@@ -154,33 +151,6 @@ class Writer(mhx_writer.Writer):
     #-------------------------------------------------------------------------------
     #
     #-------------------------------------------------------------------------------
-
-    def writeProxyModifiers(self, fp, pxy):
-        for mod in pxy.modifiers:
-            if mod[0] == 'subsurf':
-                fp.write(
-                    "    Modifier SubSurf SUBSURF\n" +
-                    "      levels %d ;\n" % mod[1] +
-                    "      render_levels %d ;\n" % mod[2] +
-                    "    end Modifier\n")
-            elif mod[0] == 'shrinkwrap':
-                offset = mod[1]
-                fp.write(
-                    "    Modifier ShrinkWrap SHRINKWRAP\n" +
-                    "      target Refer Object %s ;\n" % self.meshName() +
-                    "      offset %.4f ;\n" % offset +
-                    "      use_keep_above_surface True ;\n" +
-                    "    end Modifier\n")
-            elif mod[0] == 'solidify':
-                thickness = mod[1]
-                offset = mod[2]
-                fp.write(
-                    "    Modifier Solidify SOLIDIFY\n" +
-                    "      thickness %.4f ;\n" % thickness +
-                    "      offset %.4f ;\n" % offset +
-                    "    end Modifier\n")
-        return
-
 
     def writeProxyMaterial(self, fp, mat, pxy):
         if mat.diffuseTexture:
