@@ -245,6 +245,36 @@ class Sorter(object):
         toSort.sort()
         return [object for _, _, object in toSort]
 
+    def insert(self, by, object, objects):
+        """
+        Method to insert an object in a sorted list.
+        It is accomplished using binary search.
+        Source: http://hg.python.org/cpython/file/2.7/Lib/bisect.py
+
+        :param by: Name of the field by which the list of objects
+            is sorted.
+        :type by: str
+
+        :param object: Object to insert in the list.
+        :type object: any
+
+        :param objects: List of objects to insert the object into.
+        :type objects: list
+
+        :return: The given list with the object inserted
+        :rtype: list
+        """
+
+        lo = 0
+        hi = len(objects)
+        keyFn = self.methods[by]
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if keyFn(objects[mid]) < keyFn(object): lo = mid + 1
+            else: hi = mid
+        objects.insert(lo, object)
+        return objects
+
     def __getattr__(self, attr):
         """
         The getattr method of the Sorter is overriden to convert
