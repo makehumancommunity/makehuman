@@ -43,7 +43,6 @@ count or geometry adapted to special cases.
 import gui3d
 import proxychooser
 import filechooser as fc
-import os
 import proxy
 
 
@@ -51,26 +50,11 @@ class ProxyFileSort(fc.FileSort):
 
     def __init__(self):
         super(ProxyFileSort, self).__init__()
-        self.meta = {}
-
-        self.methods.extend([
-            ("faces", lambda filename: self.meta[filename]["faces"])])
-
-    def sort(self, by, filenames):
-        self.updateMeta(filenames)
-        return super(ProxyFileSort, self).sort(by, filenames)
-
-    def updateMeta(self, filenames):
-        for filename in filenames:
-            if filename in self.meta:
-                if self.meta[filename]['modified'] < os.path.getmtime(filename):
-                    self.meta[filename] = self.getMeta(filename)
-            else:
-                self.meta[filename] = self.getMeta(filename)
+        self.metaFields = ["faces"]
 
     def getMeta(self, filename):
         meta = {}
-        meta['modified'] = os.path.getmtime(filename)
+
         faces = 0
         try:
             from codecs import open

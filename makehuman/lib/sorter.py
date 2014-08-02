@@ -71,7 +71,6 @@ class Sorter(object):
 
             self.clear()
 
-        @property
         def fields(self):
             """
             Return the fields for which there is an ordering method
@@ -85,6 +84,15 @@ class Sorter(object):
             """
 
             return self._fields
+
+        def __contains__(self, field):
+            """
+            Return whether a field exists in this container.
+
+            :rtype: bool
+            """
+
+            return field in self._methods
 
         def __getitem__(self, field):
             """
@@ -118,7 +126,7 @@ class Sorter(object):
             """
 
             self._methods = dict(methods)
-            self._fields = zip(*methods)[0]
+            self._fields = list(zip(*methods)[0])
 
         def extend(self, methods):
             """
@@ -130,7 +138,7 @@ class Sorter(object):
             """
 
             self._methods.update(methods)
-            self._fields.extend(zip(*methods)[0])
+            self._fields.extend(list(zip(*methods)[0]))
 
     def __init__(self):
         """
@@ -140,7 +148,6 @@ class Sorter(object):
 
         self._methods = self.Methods()
 
-    # TODO: Make property
     def fields(self):
         """
         Returns the names of the fields which this Sorter can sort.
@@ -149,7 +156,7 @@ class Sorter(object):
         :rtype: list of strings
         """
 
-        return self.methods.fields
+        return self.methods.fields()
 
     def getMethods(self):
         """
@@ -174,6 +181,15 @@ class Sorter(object):
 
     methods = property(getMethods, setMethods)
 
+    def getMethod(self, field):
+        """
+        Get an ordering method for the given field.
+
+        :rtype: function
+        """
+
+        return self.methods[field]
+
     def sort(self, by, objects):
         """
         Main sorting function.
@@ -197,7 +213,7 @@ class Sorter(object):
         :rtype: list
         """
 
-        decorated = self._getDecorated(self.methods[by], objects)
+        decorated = self._getDecorated(self.getMethod(by), objects)
         return self._decoratedSort(decorated)
 
     @staticmethod
@@ -267,7 +283,7 @@ class Sorter(object):
 
         lo = 0
         hi = len(objects)
-        keyFn = self.methods[by]
+        keyFn = self.getMethod(by)
         while lo < hi:
             mid = (lo + hi) // 2
             if keyFn(objects[mid]) < keyFn(object): lo = mid + 1
