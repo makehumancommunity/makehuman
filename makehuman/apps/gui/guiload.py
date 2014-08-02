@@ -37,8 +37,6 @@ Abstract
 This module implements the 'Files > Load' tab 
 """
 
-import os
-
 import mh
 import gui3d
 import filechooser as fc
@@ -48,46 +46,25 @@ import qtgui as gui
 class HumanFileSort(fc.FileSort):
 
     def __init__(self):
-
         super(HumanFileSort, self).__init__()
-        self.meta = {}
 
         '''
         # TODO
-        self.methods.extend([
-            ("gender", lambda filename: self.meta[filename]["gender"]),
-            ("age", lambda filename: self.meta[filename]["age"]),
-            ("muscle", lambda filename: self.meta[filename]["muscle"]),
-            ("weight", lambda filename: self.meta[filename]["weight"])])
+        self.metaFields = ["gender", "age", "muscle", "weight"]
         '''
 
-    def sort(self, by, filenames):
-        self.updateMeta(filenames)
-        return super(HumanFileSort, self).sort(by, filenames)
-
-    def updateMeta(self, filenames):
-
-        for filename in filenames:
-            if filename in self.meta:
-                if self.meta[filename]['modified'] < os.path.getmtime(filename):
-                    self.meta[filename] = self.getMeta(filename)
-            else:
-                self.meta[filename] = self.getMeta(filename)
-                
     def getMeta(self, filename):
-        
         meta = {}
-                
-        meta['modified'] = os.path.getmtime(filename)
+
         from codecs import open
         f = open(filename, 'rU', encoding="utf-8")
         for line in f:
             lineData = line.split()
             field = lineData[0]
-            if field in ["gender", "age", "muscle", "weight"]:
+            if field in self.metaFields:
                 meta[field] = float(lineData[1])
         f.close()
-        
+
         return meta
 
 
