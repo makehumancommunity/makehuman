@@ -57,8 +57,7 @@ class ProxyFileSort(fc.FileSort):
             ("faces", lambda filename: self.meta[filename]["faces"])])
 
     def sort(self, by, filenames):
-        if by in self.meta.keys():
-            self.updateMeta(filenames)
+        self.updateMeta(filenames)
         return super(ProxyFileSort, self).sort(by, filenames)
 
     def updateMeta(self, filenames):
