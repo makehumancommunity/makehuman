@@ -62,8 +62,7 @@ class HumanFileSort(fc.FileSort):
         '''
 
     def sort(self, by, filenames):
-        if by in self.meta.keys():
-            self.updateMeta(filenames)
+        self.updateMeta(filenames)
         return super(HumanFileSort, self).sort(by, filenames)
 
     def updateMeta(self, filenames):
