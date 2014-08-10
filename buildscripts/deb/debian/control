@@ -1,0 +1,33 @@
+Section: graphics
+Priority: optional
+Homepage: http://www.makehuman.org
+Package: PKGNAME
+Version: VERSION
+Maintainer: Joel Palmius <joepal1976@hotmail.com>
+Depends: python2.7,python-qt4,python-opengl,python-numpy,python-qt4-gl
+Suggests: blender
+Provides: makehuman
+Replaces: REPLACES
+Architecture: all
+Installed-Size: SIZE
+Description: Free, open source tool for creating realistic 3D human characters.
+ MakeHuman is a free, open source software which allows the creation of 
+ realistic 3D human characters fast and in a simplified manner, through the 
+ manipulation of controls for different human attributes.
+ .
+ Users are able to model human characters by manipulating the controls to modify 
+ various human characteristics such as gender, age, height, weight and ethnicity 
+ as well as low level details of things such as the eye's shape, mouth's shape 
+ or finger's length. Via a 'point and click' approach, users can preview and 
+ load poses, animation cycles, facial expressions, hair, shoes and clothes onto 
+ characters from the MakeHuman™ Library. The human characters created can be 
+ saved in the custom MakeHuman format (.mhm), rendered and exported in various 
+ formats such as Collada (.dae), Filbox (.fbx), MD5, Blender exchange (.mhx), 
+ Wavefront .obj, Stereolithography (.stl).
+ .
+ The output characters are licensed under the CC0 license, one of the most 
+ liberal license for output content. This means that artists are given the 
+ freedom to use their creations for both commercial and non-commercial 
+ purposes. The copyright © 2001-2013 is retained by the MakeHuman™ Team 
+ (makehuman.org) which grants you permission to use released code under the GNU 
+ Affero General Public License 3.0 (AGPL).
