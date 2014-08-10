@@ -72,7 +72,7 @@ class VIEW3D_OT_MhxAddHidersButton(bpy.types.Operator):
 
 def getMaskModifier(clo, rig):
     try:
-        cloname = clo.name.split("_",1)[1]
+        cloname = clo.name.split(":",1)[1]
     except IndexError:
         return None
     for ob in rig.children:
@@ -81,10 +81,8 @@ def getMaskModifier(clo, rig):
                 try:
                     modname = mod.vertex_group.split("_",1)[1]
                 except IndexError:
-                    continue
-                print(modname, cloname)
+                    modname = None
                 if modname == cloname:
-                    print("HIT")
                     return mod
     return None
 
@@ -128,5 +126,39 @@ def removeHideDrivers(clo, rig):
         mod.driver_remove("show_viewport")
         mod.driver_remove("show_render")
 
+#------------------------------------------------------------------------
+#    Hide and show clothes
+#------------------------------------------------------------------------
 
+class VIEW3D_OT_HideAllClothesButton(bpy.types.Operator):
+    bl_idname = "mhx.hide_all_clothes"
+    bl_label = "Hide All Clothes"
+    bl_description = "Hide all of the character's objects."
+    bl_options = {'UNDO'}
+
+    def execute(self, context):
+        rig,_meshes = getRigMeshes(context)
+        if rig:
+            for prop in rig.keys():
+                if prop[0:3] == "Mhh":
+                    cloname = prop.rsplit(":",1)[1]
+                    rig[prop] = (cloname == "Body")
+            updateScene(context)
+        return{'FINISHED'}
+
+
+class VIEW3D_OT_ShowAllClothesButton(bpy.types.Operator):
+    bl_idname = "mhx.show_all_clothes"
+    bl_label = "Show All Clothes"
+    bl_description = "Show all of the character's objects,"
+    bl_options = {'UNDO'}
+
+    def execute(self, context):
+        rig,_meshes = getRigMeshes(context)
+        if rig:
+            for key in rig.keys():
+                if key[0:3] == "Mhh":
+                    rig[key] = True
+            updateScene(context)
+        return{'FINISHED'}
 
