@@ -40,7 +40,7 @@ Alternatively, run the script in the script editor (Alt-P), and access from UI p
 bl_info = {
     "name": "MakeWalk",
     "author": "Thomas Larsson",
-    "version": (1,0,1),
+    "version": (1,1,0),
     "blender": (2,7,1),
     "location": "View3D > Tools > MakeWalk",
     "description": "Mocap tool for MakeHuman character",
