@@ -61,12 +61,20 @@ class VIEW3D_OT_MhxAddHidersButton(bpy.types.Operator):
     bl_description = "Control visibility with rig property. For file linking."
     bl_options = {'UNDO'}
 
+    @classmethod
+    def poll(self, context):
+        rig = context.object
+        return (rig and
+                not rig.MhxVisibilityDrivers
+               )
+
     def execute(self, context):
         rig,meshes = getRigMeshes(context)
         initRnaProperties(rig)
         for ob in meshes:
             addHideDriver(ob, rig)
-        rig.MhxHideDrivers = True
+            ob.MhxVisibilityDrivers = True
+        rig.MhxVisibilityDrivers = True
         return{'FINISHED'}
 
 
@@ -81,8 +89,9 @@ def getMaskModifier(clo, rig):
                 try:
                     modname = mod.vertex_group.split("_",1)[1]
                 except IndexError:
-                    modname = None
+                    continue
                 if modname == cloname:
+                    print("HIT", modname, cloname)
                     return mod
     return None
 
@@ -108,12 +117,18 @@ class VIEW3D_OT_MhxRemoveHidersButton(bpy.types.Operator):
     bl_description = "Remove ability to control visibility from rig property"
     bl_options = {'UNDO'}
 
+    @classmethod
+    def poll(self, context):
+        rig = context.object
+        return (rig and rig.MhxVisibilityDrivers)
+
     def execute(self, context):
         rig,meshes = getRigMeshes(context)
         for ob in meshes:
             removeHideDrivers(ob, rig)
+            ob.MhxVisibilityDrivers = False
         if context.object == rig:
-            rig.MhxHideDrivers = False
+            rig.MhxVisibilityDrivers = False
         return{'FINISHED'}
 
 
@@ -126,39 +141,5 @@ def removeHideDrivers(clo, rig):
         mod.driver_remove("show_viewport")
         mod.driver_remove("show_render")
 
-#------------------------------------------------------------------------
-#    Hide and show clothes
-#------------------------------------------------------------------------
 
-class VIEW3D_OT_HideAllClothesButton(bpy.types.Operator):
-    bl_idname = "mhx.hide_all_clothes"
-    bl_label = "Hide All Clothes"
-    bl_description = "Hide all of the character's objects."
-    bl_options = {'UNDO'}
-
-    def execute(self, context):
-        rig,_meshes = getRigMeshes(context)
-        if rig:
-            for prop in rig.keys():
-                if prop[0:3] == "Mhh":
-                    cloname = prop.rsplit(":",1)[1]
-                    rig[prop] = (cloname == "Body")
-            updateScene(context)
-        return{'FINISHED'}
-
-
-class VIEW3D_OT_ShowAllClothesButton(bpy.types.Operator):
-    bl_idname = "mhx.show_all_clothes"
-    bl_label = "Show All Clothes"
-    bl_description = "Show all of the character's objects,"
-    bl_options = {'UNDO'}
-
-    def execute(self, context):
-        rig,_meshes = getRigMeshes(context)
-        if rig:
-            for key in rig.keys():
-                if key[0:3] == "Mhh":
-                    rig[key] = True
-            updateScene(context)
-        return{'FINISHED'}
 
