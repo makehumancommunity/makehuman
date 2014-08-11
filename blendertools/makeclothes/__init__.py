@@ -40,7 +40,7 @@ Utility for making clothes to MH characters.
 bl_info = {
     "name": "Make Clothes",
     "author": "Thomas Larsson",
-    "version": (1,0,1),
+    "version": (1,1,0),
     "blender": (2,7,1),
     "location": "View3D > Properties > Make MH clothes",
     "description": "Make clothes and UVs for MakeHuman characters",
@@ -484,6 +484,10 @@ class OBJECT_OT_ExamineBoundaryButton(bpy.types.Operator):
     bl_label = "Examine Boundary"
     bl_options = {'UNDO'}
 
+    @classmethod
+    def poll(self, context):
+        return context.object and context.object.MhHuman
+
     def execute(self, context):
         setObjectMode(context)
         try:
@@ -520,6 +524,10 @@ class VIEW3D_OT_SelectHumanPartButton(bpy.types.Operator):
 
     btype = StringProperty()
     htype = StringProperty()
+
+    @classmethod
+    def poll(self, context):
+        return context.object and context.object.MhHuman
 
     def execute(self, context):
         setObjectMode(context)
