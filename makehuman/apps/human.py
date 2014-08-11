@@ -1134,6 +1134,7 @@ class Human(guicommon.Object):
         event.path = filename
         self.callEvent('onChanging', event)
 
+        open(filename, 'a') # Make sure the file exists
         f = open(filename, "r+", encoding="utf-8")
         f.write('# Written by MakeHuman %s\n' % getVersionStr())
         f.write('version %s\n' % getShortVersion())
