@@ -434,15 +434,47 @@ def ensureInited(context):
         initInterface(context)
     return
 
-#
-#    loadDefaults(context):
-#
+#----------------------------------------------------------
+#   Get path to My Documents
+#----------------------------------------------------------
+
+def getMyDocuments():
+    import sys
+    if sys.platform == 'win32':
+        import winreg
+        try:
+            k = winreg.HKEY_CURRENT_USER
+            for x in ['Software', 'Microsoft', 'Windows', 'CurrentVersion', 'Explorer', 'Shell Folders']:
+                k = winreg.OpenKey(k, x)
+
+            name, type = winreg.QueryValueEx(k, 'Personal')
+
+            if type == 1:
+                print("Found My Documents folder: %s" % name)
+                return name
+        except Exception as e:
+            print("Did not find path to My Documents folder")
+
+    return os.path.expanduser("~")
+
+
+def getMHDirectory():
+    return os.path.join(getMyDocuments(), "makehuman", "v1")
+
+
+def getMHBlenderDirectory():
+    return os.path.join(getMyDocuments(), "makehuman", "blendertools")
+
 
 def settingsFile():
-    outdir = os.path.expanduser("~/settings/")
+    outdir = os.path.join(getMHBlenderDirectory(), "settings")
     if not os.path.isdir(outdir):
         os.makedirs(outdir)
     return os.path.join(outdir, "mocap.defaults")
+
+#----------------------------------------------------------
+#   Load and save defaults
+#----------------------------------------------------------
 
 def loadDefaults(context):
     if not context.scene:
