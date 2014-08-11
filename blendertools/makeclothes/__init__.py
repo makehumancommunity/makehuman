@@ -484,6 +484,10 @@ class OBJECT_OT_ExamineBoundaryButton(bpy.types.Operator):
     bl_label = "Examine Boundary"
     bl_options = {'UNDO'}
 
+    @classmethod
+    def poll(self, context):
+        return context.object and context.object.MhHuman
+
     def execute(self, context):
         setObjectMode(context)
         try:
@@ -520,6 +524,10 @@ class VIEW3D_OT_SelectHumanPartButton(bpy.types.Operator):
 
     btype = StringProperty()
     htype = StringProperty()
+
+    @classmethod
+    def poll(self, context):
+        return context.object and context.object.MhHuman
 
     def execute(self, context):
         setObjectMode(context)

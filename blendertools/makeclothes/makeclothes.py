@@ -1950,7 +1950,7 @@ def init():
 
     bpy.types.Scene.MCShowSettings = BoolProperty(name = "Show Settings", default=False)
     bpy.types.Scene.MCShowUtils = BoolProperty(name = "Show Utilities", default=False)
-    bpy.types.Scene.MCShowSelect = BoolProperty(name = "Show Selection", default=False)
+    bpy.types.Scene.MCShowSelect = BoolProperty(name = "Show Selection (Human Only)", default=False)
     bpy.types.Scene.MCShowMaterials = BoolProperty(name = "Show Materials", default=False)
     bpy.types.Scene.MCShowAdvanced = BoolProperty(name = "Show Advanced", default=False)
     bpy.types.Scene.MCShowUVProject = BoolProperty(name = "Show UV Projection", default=False)
