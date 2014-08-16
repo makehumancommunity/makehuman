@@ -8,6 +8,7 @@
     	"useMhxCompat" : true,
         "mergeFeet" : true,
         "mergeToes" : true,
+        "mergeNeck" : false,
 
         "useMasterBone" : true,
         "useHeadControl" : true,
