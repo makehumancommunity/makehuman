@@ -44,6 +44,7 @@ from collections import OrderedDict
 import numpy as np
 import numpy.linalg as la
 import transformations as tm
+import getpath
 
 import makehuman
 from .flags import *
@@ -168,7 +169,7 @@ class Armature:
         if self._tposes:
             return self._tposes
         else:
-            self._tposes = readMhpFile("data/mhx/tpose.mhp")
+            self._tposes = readMhpFile(getpath.getSysDataPath("mhx/tpose.mhp"))
             return self._tposes
 
 
@@ -190,7 +191,7 @@ def loadAction():
     import json, collections
     poseNames = []
     poses = {}
-    for filepath in ["data/poseunits/face-poseunits.json"]:
+    for filepath in [getpath.getSysDataPath("poseunits/face-poseunits.json")]:
         struct = json.load(open(filepath, 'rU'), object_pairs_hook=collections.OrderedDict)
         addDict(struct["poses"], poses)
 

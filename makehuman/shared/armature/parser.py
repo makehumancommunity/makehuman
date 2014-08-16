@@ -338,9 +338,9 @@ class Parser:
                 boneInfo[bone.name] = bone
 
         if options.useCustomShapes:
-            addDict(json.load(open("data/mhx/gizmos-face.json", 'rU')), self.gizmos)
+            addDict(json.load(open(getpath.getSysDataPath("mhx/gizmos-face.json"), 'rU')), self.gizmos)
             if options.useCustomShapes == "all":
-                addDict(json.load(open("data/mhx/gizmos.json", 'rU')), self.gizmos)
+                addDict(json.load(open(getpath.getSysDataPath("mhx/gizmos.json"), 'rU')), self.gizmos)
 
         vgroups = self.readVertexGroupFiles(self.vertexGroupFiles)
         if options.useMakeHumanRig and options.useMhxCompat:
