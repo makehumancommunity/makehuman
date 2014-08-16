@@ -1116,7 +1116,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             if vertexWeights is None or mName == self.meshData.name: # TODO perhaps this identity by name is not strong enough, or enforce unique names in AnimatedMesh
                 animation.AnimatedMesh.updateVertexWeights(self, mName, vertexWeights)
             else:
-                self._updateMeshVertexWeights(self.getBoundMesh(mName))
+                self._updateMeshVertexWeights(self.getBoundMesh(mName)[0])
         self.refreshPose()
 
     def _updateMeshVertexWeights(self, mesh):
@@ -1124,6 +1124,12 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             return
 
         obj = mesh.object
+
+        if not obj:
+            log.debug("Removing detached mesh %s from animated mesh" % mesh.name)
+            self.removeBoundMesh(mesh.name)
+            return
+
         bodyVertexWeights = self.getVertexWeights()
 
         if obj.proxy:
@@ -1133,8 +1139,8 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             # Use vertex weights for human body
             weights = bodyVertexWeights
 
-        if not self.containsMesh():
-            animation.AnimatedMesh.addMesh(self, mesh, weights)
+        if not self.containsBoundMesh(mesh):
+            animation.AnimatedMesh.addBoundMesh(self, mesh, weights)
         else:
             animation.AnimatedMesh.updateVertexWeights(self, mesh.name, weights)
 
@@ -1150,7 +1156,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         event = events3d.HumanEvent(self, 'poseState')
         event.state = posed
         self.callEvent('onChanging', event)
-        animated.AnimatedMesh.setPosed(self, posed)
+        animation.AnimatedMesh.setPosed(self, posed)
         self.callEvent('onChanged', event)
 
     def load(self, filename, update=True):

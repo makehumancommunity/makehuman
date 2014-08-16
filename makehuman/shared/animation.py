@@ -223,7 +223,7 @@ class AnimatedMesh(object):
         self.__meshes = []
         self.__vertexToBoneMaps = []
         self.__originalMeshCoords = []
-        self.addMesh(mesh, vertexToBoneMapping)
+        self.addBoundMesh(mesh, vertexToBoneMapping)
 
         self._posed = True
         self.__animations = {}
@@ -267,15 +267,23 @@ class AnimatedMesh(object):
         else:
             self.__currentAnim = self.__animations[name]
 
+    def getActiveAnimation(self):
+        if self.__currentAnim is None:
+            return None
+        else:
+            return self.__currentAnim.name
+
     def setAnimateInPlace(self, enable):
         self.__inPlace = enable
 
     def getSkeleton(self):
         return self.__skeleton
 
-    def addMesh(self, mesh, vertexToBoneMapping):
+    def addBoundMesh(self, mesh, vertexToBoneMapping):
         # allows multiple meshes (also to allow to animate one model consisting of multiple meshes)
-        originalMeshCoords = mesh.coord[:,:3]
+        originalMeshCoords = np.zeros((mesh.getVertexCount(),4), np.float32)
+        originalMeshCoords[:,3] = 1
+        originalMeshCoords[:,:3] = mesh.coord[:,:3]
         self.__originalMeshCoords.append(originalMeshCoords)
         self.__vertexToBoneMaps.append(vertexToBoneMapping)
         self.__meshes.append(mesh)
@@ -284,7 +292,7 @@ class AnimatedMesh(object):
         rIdx = self._getBoundMeshIndex(meshName)
         self.__vertexToBoneMaps[rIdx] = vertexToBoneMapping
 
-    def removeMesh(self, name):
+    def removeBoundMesh(self, name):
         try:
             rIdx = self._getBoundMeshIndex(name)
 
@@ -366,6 +374,8 @@ class AnimatedMesh(object):
 
     def _pose(self):
         if self.isPosed() and self.__currentAnim:
+            if not self.getSkeleton():
+                return
             poseState = self.__currentAnim.getAtTime(self.__playTime)
             if self.__inPlace:
                 poseState = poseState.copy()
