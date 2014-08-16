@@ -221,9 +221,6 @@ class SkeletonLibrary(gui3d.TaskView):
             self.oldPxyMats[pxy.uuid] = obj.material.clone()
             obj.material = xray_mat
 
-        if self.skelObj:
-            self.skelObj.show()
-
         # Make sure skeleton is updated if human has changed
         if self.human.getSkeleton():
             self.drawSkeleton(self.human.getSkeleton())
@@ -233,8 +230,6 @@ class SkeletonLibrary(gui3d.TaskView):
     def onHide(self, event):
         gui3d.TaskView.onHide(self, event)
 
-        if self.skelObj:
-            self.skelObj.hide()
         self.human.material = self.oldHumanMat
         for pxy in self.human.getProxies(includeHumanProxy=False):
             if pxy.uuid in self.oldPxyMats:
@@ -257,6 +252,7 @@ class SkeletonLibrary(gui3d.TaskView):
             if self.skelObj:
                 # Remove old skeleton mesh
                 self.removeObject(self.skelObj)
+                self.human.removeBoundMesh(self.skelObj.name)
                 self.skelObj = None
                 self.skelMesh = None
             self.boneCountLbl.setTextFormat(["Bones",": %s"], "")
@@ -275,12 +271,6 @@ class SkeletonLibrary(gui3d.TaskView):
 
         #self.filechooser.selectItem(options)
 
-        # Created an AnimatedMesh object to manage the skeletal animation on the
-        # human mesh and optionally additional meshes.
-        # The animation manager object is accessible by other plugins via
-        # gui3d.app.currentHuman.animated.
-        self.human.animated = animation.AnimatedMesh(self.human.getSkeleton(), self.human.meshData, boneWeights)
-
         # (Re-)draw the skeleton
         skel = self.human.getSkeleton()
         self.drawSkeleton(skel)
@@ -295,6 +285,7 @@ class SkeletonLibrary(gui3d.TaskView):
         if self.skelObj:
             # Remove old skeleton mesh
             self.removeObject(self.skelObj)
+            self.human.removeBoundMesh(self.skelObj.name)
             self.skelObj = None
             self.skelMesh = None
             self.selectedBone = None
@@ -313,7 +304,7 @@ class SkeletonLibrary(gui3d.TaskView):
         # The skeleton mesh is supposed to be constructed from the skeleton in rest and receives
         # rigid vertex-bone weights (for each vertex exactly one weight of 1 to one bone)
         mapping = skeleton_drawing.getVertBoneMapping(skel, self.skelMesh)
-        self.human.animated.addMesh(self.skelMesh, mapping)
+        self.human.addBoundMesh(self.skelMesh, mapping)
 
         # Store a reference to the skeleton mesh object for other plugins
         self.human.getSkeleton().object = self.skelObj
@@ -442,10 +433,6 @@ class SkeletonLibrary(gui3d.TaskView):
             else:
                 self.rigPresetFileSelected(skelFile, True)
             return
-
-        # Make sure no skeleton is drawn
-        if self.skelObj:
-            self.skelObj.hide()
 
     def saveHandler(self, human, file):
         if human.getSkeleton():
