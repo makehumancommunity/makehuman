@@ -65,18 +65,20 @@ for bname,data in rig_makehuman.Armature.items():
 
 
 NeckMergers = {}
-nlist = NeckMergers["neck"] = ["neck"]
+nlist = NeckMergers["neck"] = ["neck", "neck2"]
 for bname in rig_makehuman.Armature.keys():
     if bname[0:8] == "platysma":
         nlist.append(bname)
 
 
 TwistMergers = {
-    "upper_arm.L" : ["upper_arm.L", "upperarm01.L", "upperarm02.L"],
+    "upper_arm.L" : ["upper_arm.L", "shoulder02.L", "upperarm02.L"],
     "forearm.L" :   ["forearm.L", "lowerarm01.L", "lowerarm02.L"],
+    "thigh.L" :     ["thigh.L", "upperleg01.L", "upperleg02.L"],
     "shin.L" :      ["shin.L", "lowerleg01.L", "lowerleg02.L"],
-    "upper_arm.R" : ["upper_arm.R", "upperarm01.R", "upperarm02.R"],
+    "upper_arm.R" : ["upper_arm.R", "shoulder02.R", "upperarm02.R"],
     "forearm.R" :   ["forearm.R", "lowerarm01.R", "lowerarm02.R"],
+    "thigh.R" :     ["thigh.R", "upperleg01.R", "upperleg02.R"],
     "shin.R" :      ["shin.R", "lowerleg01.R", "lowerleg02.R"],
 }
 
@@ -86,8 +88,8 @@ SpineMergers = {
 }
 
 ShoulderMergers = {
-    "clavicle.L" : ("shoulder.L", "clavicle.L", "deltoid.L", "scapula.L"),
-    "clavicle.R" : ("clavicle.R", "shoulder.R", "deltoid.R", "scapula.R"),
+    "clavicle.L" : ("clavicle.L", "deltoid.L"),
+    "clavicle.R" : ("clavicle.R", "deltoid.R"),
 }
 
 NewFeetMergers = {}
