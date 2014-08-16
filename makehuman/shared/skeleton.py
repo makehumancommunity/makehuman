@@ -98,7 +98,7 @@ class Skeleton(object):
         from armature.armature import setupArmature
         from core import G
 
-        amt = setupArmature("python", G.app.selectedHuman, options)
+        self._amt = amt = setupArmature("python", G.app.selectedHuman, options)
         for bone in amt.bones.values():
             self.addBone(bone.name, bone.parent, bone.head, bone.tail, bone.roll)
 
@@ -171,8 +171,26 @@ class Skeleton(object):
             bone.build()
 
     def update(self):
+        """
+        Update skeleton pose matrices after setting a new pose.
+        """
         for bone in self.getBones():
             bone.update()
+
+    def updateJoints(self, humanMesh):
+        """
+        Update skeleton rest matrices to new joint positions after modifying
+        human.
+        """
+        self._amt.updateJoints()
+        for amtBone in self._amt.bones.values():
+            bone = self.getBone(amtBone.name)
+            bone.headPos[:] = amtBone.head
+            bone.tailPos[:] = amtBone.tail
+            bone.roll = amtBone.roll
+
+        for bone in self.getBones():
+            bone.build()
 
     def getBoneCount(self):
         return len(self.getBones())
@@ -228,13 +246,21 @@ class Skeleton(object):
         Update (pose) assigned mesh using linear blend skinning.
         """
         nVerts = len(meshCoords)
-        coords = np.zeros((nVerts,4), float)
+        coords = np.zeros((nVerts,3), float)
+        if meshCoords.shape[1] != 4:
+            meshCoords_ = np.ones((nVerts, 4), float)   # TODO also allow skinning vectors (normals)? 
+            meshCoords_[:,:3] = meshCoords
+            meshCoords = meshCoords_
+            log.debug("Unoptimized data structure passed to skinMesh, this will incur performance penalty when used for animation.")
         for bname, mapping in vertBoneMapping.items():
-            bone = self.getBone(bname)
-            verts,weights = mapping
-            vec = np.dot(bone.matPoseVerts, meshCoords[verts].transpose())
-            wvec = weights*vec
-            coords[verts] += wvec.transpose()
+            try:
+                bone = self.getBone(bname)
+                verts,weights = mapping
+                vec = np.dot(bone.matPoseVerts, meshCoords[verts].transpose())
+                wvec = weights*vec
+                coords[verts] += wvec.transpose()[:,:3]
+            except:
+                log.warning("Could not skin bone %s: no such bone in skeleton" % bname)
 
         return coords
 

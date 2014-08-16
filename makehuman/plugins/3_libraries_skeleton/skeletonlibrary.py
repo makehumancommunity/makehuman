@@ -75,33 +75,6 @@ class SkeletonAction(gui3d.Action):
         return True
 
 
-def _getSkeleton(self):
-    # TODO this is a very tedious way op keeping the skeleton updated, better just to performantly update the skeleton joints after a slider is released
-
-    #log.debug("Get skeleton %s %s" % (self, self._skeleton))
-    if not self._skeleton:
-        return None
-    if self._skeleton.dirty:
-        log.debug("Rebuilding skeleton.")
-        # Rebuild skeleton (when human has changed)
-        # Loads new skeleton, creates new skeleton mesh and new animatedMesh object (with up-to-date rest coords)
-        self._skeleton._library.chooseSkeleton(self._skeleton.options)
-        # TODO have a more efficient way of adapting skeleton to new joint positions without re-reading rig files
-        # TODO Also, currently a tiny change in joints positions causes a new animatedMesh to be constructed, requiring all BVH motions to be reloaded (which is not necessary if the rig structure does not change). It should be enough to re-sync the rest coordinates in the animatedMesh and move the coord positions of the skeleton mesh.
-        self._skeleton.dirty = False
-    return self._skeleton
-
-
-def _getVertexWeights(self):
-    if not self.getSkeleton():
-        return None
-    if not self.animated:
-        return None
-
-    _, bodyWeights = self.animated.getMesh("base.obj")
-    return bodyWeights
-
-
 #------------------------------------------------------------------------------------------
 #   class SkeletonLibrary
 #------------------------------------------------------------------------------------------
@@ -122,13 +95,6 @@ class SkeletonLibrary(gui3d.TaskView):
         self.extension = "rig"
 
         self.human = gui3d.app.selectedHuman
-        self.human._skeleton = None
-        self.human.animated = None
-        # Attach getter to human to access the skeleton, that takes care of deferred
-        # updating when the skeleton should change
-        import types
-        self.human.getSkeleton = types.MethodType(_getSkeleton, self.human, self.human.__class__)
-        self.human.getVertexWeights = types.MethodType(_getVertexWeights, self.human, self.human.__class__)
 
         self.selectedRig = None
         self.selectedBone = None
@@ -255,24 +221,20 @@ class SkeletonLibrary(gui3d.TaskView):
             self.oldPxyMats[pxy.uuid] = obj.material.clone()
             obj.material = xray_mat
 
-        #if not self.jointsObj:
-        #    self.drawJointHelpers()
+        if self.skelObj:
+            self.skelObj.show()
 
-        #self.filechooser.refresh()
-
-        # Make sure skeleton is updated when human has changed
-        self.human.getSkeleton()
-
-        # Re-draw joints positions if human has changed
-        if self.humanChanged:
-            #self.drawJointHelpers()
-            self.humanChanged = False
-        mh.redraw()
+        # Make sure skeleton is updated if human has changed
+        if self.human.getSkeleton():
+            self.drawSkeleton(self.human.getSkeleton())
+            mh.redraw()
 
 
     def onHide(self, event):
         gui3d.TaskView.onHide(self, event)
 
+        if self.skelObj:
+            self.skelObj.hide()
         self.human.material = self.oldHumanMat
         for pxy in self.human.getProxies(includeHumanProxy=False):
             if pxy.uuid in self.oldPxyMats:
@@ -291,8 +253,7 @@ class SkeletonLibrary(gui3d.TaskView):
 
         if not options:
             # Unload current skeleton
-            self.human._skeleton = None
-            self.human.animated = None
+            self.human.setSkeleton(None)
             if self.skelObj:
                 # Remove old skeleton mesh
                 self.removeObject(self.skelObj)
@@ -306,12 +267,11 @@ class SkeletonLibrary(gui3d.TaskView):
             return
 
         # Load skeleton definition from options
-        self.human._skeleton, boneWeights = skeleton.loadRig(options, self.human.meshData)
+        skel, boneWeights = skeleton.loadRig(options, self.human.meshData)
+        self.human.setSkeleton(skel, boneWeights)
 
         # Store a reference to the currently loaded rig
-        self.human._skeleton.options = options
-        self.human._skeleton.dirty = False   # Flag used for deferred updating
-        self.human._skeleton._library = self  # Temporary member, used for rebuilding skeleton
+        self.human.getSkeleton().options = options
 
         #self.filechooser.selectItem(options)
 
@@ -356,7 +316,7 @@ class SkeletonLibrary(gui3d.TaskView):
         self.human.animated.addMesh(self.skelMesh, mapping)
 
         # Store a reference to the skeleton mesh object for other plugins
-        self.human._skeleton.object = self.skelObj
+        self.human.getSkeleton().object = self.skelObj
         mh.redraw()
 
 
@@ -452,12 +412,6 @@ class SkeletonLibrary(gui3d.TaskView):
             if gui3d.app.currentTask == self:
                 # Refresh onShow status
                 self.onShow(event)
-        if event.change == 'targets':
-            # Set flag to do a deferred skeleton update in the future
-            if human._skeleton:
-                human._skeleton.dirty = True
-            self.humanChanged = True    # Used for updating joints
-
 
     def onHumanChanging(self, event):
         if event.change == 'reset':

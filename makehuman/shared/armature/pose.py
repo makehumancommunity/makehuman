@@ -72,7 +72,6 @@ class Pose:
         amt.parser = Parser(amt, human)
         debugCoords("Pose1")
         amt.setup()
-        log.debug("Head %s" % amt.bones["head"].head)
         amt.normalizeVertexWeights(human)
         self.matrixGlobal = tm.identity_matrix()
 
@@ -211,7 +210,7 @@ class Pose:
         for pxy in human.getProxies():
             obj = pxy.object
             mesh = pxy.getSeedMesh()
-            proxy.update(mesh)
+            pxy.update(mesh)
             mesh.update()
             if obj.isSubdivided():
                 obj.getSubdivisionMesh()
@@ -604,6 +603,10 @@ class PoseBone:
         else:
             self.matrixGlobal = np.dot(self.bone.matrixRelative, self.matrixPose)
 
+        log.debug("\nU: %s" % self.name)
+        log.debug(self.matrixPose)
+        log.debug(self.matrixGlobal)
+
 
     def updateConstraints(self):
         for cns in self.constraints:
@@ -726,7 +729,8 @@ class PoseBone:
 
 def createPoseRig(human):
     options = ArmatureOptions()
-    options.useMuscles = True
+    options.rigtype = "MakeHuman"
+    options.useMakeHumanRig = True
     options.addConnectingBones = True
     amt = Pose(human, options)
     return amt

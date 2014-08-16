@@ -44,6 +44,7 @@ from collections import OrderedDict
 import numpy as np
 import numpy.linalg as la
 import transformations as tm
+import getpath
 
 import makehuman
 from .flags import *
@@ -103,6 +104,9 @@ class Armature:
         self.origin = self.parser.origin
         self.rename(self.options.locale)
 
+    def updateJoints(self):
+        self.parser.updateJoints()
+
 
     def rescale(self, scale):
         # OK to overwrite bones, because they are not used elsewhere
@@ -119,7 +123,6 @@ class Armature:
 
         newbones = OrderedDict()
         for bone in self.bones.values():
-            bname = bone.name
             bone.rename(locale, newbones)
 
         self.bones = newbones
@@ -166,7 +169,7 @@ class Armature:
         if self._tposes:
             return self._tposes
         else:
-            self._tposes = readMhpFile("data/mhx/tpose.mhp")
+            self._tposes = readMhpFile(getpath.getSysDataPath("mhx/tpose.mhp"))
             return self._tposes
 
 
@@ -179,6 +182,32 @@ class Armature:
             pose[bone.name] = np.dot(tpose, la.inv(bone.matrixRest))
         return pose
 
+#-------------------------------------------------------------------------------
+#   Load action from json file. Used by exporters.
+#   Rotations only.
+#-------------------------------------------------------------------------------
+
+def loadAction():
+    import json, collections
+    poseNames = []
+    poses = {}
+    for filepath in [getpath.getSysDataPath("poseunits/face-poseunits.json")]:
+        struct = json.load(open(filepath, 'rU'), object_pairs_hook=collections.OrderedDict)
+        addDict(struct["poses"], poses)
+
+    frame = 0
+    nframes = 2*len(poses.keys())
+    act = {}
+    for pname,pose in poses.items():
+        for bname,quat in pose.items():
+            try:
+                bact = act[bname]
+            except KeyError:
+                bact = act[bname] = nframes*[[1,0,0,0]]
+            bact[frame] = quat
+        frame += 2
+
+    return act, poseNames
 
 #-------------------------------------------------------------------------------
 #   Loader for the modern mhp format that uses matrices only

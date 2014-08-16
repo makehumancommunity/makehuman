@@ -58,12 +58,14 @@ class RigifyBone:
         self.original = False
         self.extra = (eb.name in ["spine-1"])
 
-        if eb.layers[10]:   # Face
+        if eb.layers[10]:   # Old Face
             self.layer = 0
+        elif eb.layers[8]:  # New face
+            self.layer = 1
         elif eb.layers[9]:  # Tweak
-            self.layer = 2
+            self.layer = 1
         else:
-            self.layer = 1  # Muscle
+            self.layer = 29  # Muscle
 
     def __repr__(self):
         return ("<RigifyBone %s %s %s>" % (self.name, self.realname, self.realname1))
@@ -175,7 +177,9 @@ def rigifyMhx(context):
     bpy.ops.object.mode_set(mode='EDIT')
     for bone in bones.values():
         if not bone.original:
-            if bone.deform:
+            if bone.layer == 1:
+                bone.realname = bone.name
+            elif bone.deform:
                 bone.realname = "DEF-" + bone.name
             else:
                 bone.realname = "MCH-" + bone.name
@@ -214,8 +218,14 @@ def rigifyMhx(context):
     for key in rig.keys():
         gen[key] = rig[key]
 
-    # Copy MHX bone drivers
+    # Copy MHX bone drivers and actions
     if rig.animation_data:
+        if rig.animation_data.action:
+            gen.keyframe_insert(data_path="location", frame=1)
+            act = gen.animation_data.action
+            gen.animation_data.action = rig.animation_data.action
+            #del act
+
         for fcu1 in rig.animation_data.drivers:
             rna,channel = fcu1.data_path.rsplit(".", 1)
             pb = mhxEval("gen.%s" % rna)
@@ -265,6 +275,7 @@ def rigifyMhx(context):
     scn.objects.unlink(rig)
     del rig
     gen.name = name
+    gen.data.layers[1] = False    # Face components
     bpy.ops.object.mode_set(mode='POSE')
     print("MHX rig %s successfully rigified" % name)
     return gen
