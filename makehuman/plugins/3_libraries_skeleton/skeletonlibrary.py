@@ -450,7 +450,7 @@ class SkeletonLibrary(gui3d.TaskView):
     def saveHandler(self, human, file):
         if human.getSkeleton():
             rigFile = getpath.getRelativePath(self.selectedRig, self.paths)
-            file.write('skeleton %s ' % rigFile)
+            file.write('skeleton %s\n' % rigFile)
 
 
 
