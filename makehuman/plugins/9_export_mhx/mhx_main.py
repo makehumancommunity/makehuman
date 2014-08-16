@@ -72,15 +72,16 @@ def exportMhx(filepath, config):
         "# MakeHuman exported MHX\n" +
         "# www.makeinfo.human.org\n" +
         "MHX %d %d" % (MAJOR_VERSION, MINOR_VERSION))
-    for key,value in amt.objectProps:
-        fp.write(' %s:_%s' % (key.replace(" ","_"), value.replace('"','')))
+    if amt:
+        for key,value in amt.objectProps:
+            fp.write(' %s:_%s' % (key.replace(" ","_"), value.replace('"','')))
     fp.write(
         " ;\n"  +
         "#if Blender24\n" +
         "  error 'This file can only be read with Blender 2.5' ;\n" +
         "#endif\n")
 
-    if config.scale != 1.0:
+    if amt and config.scale != 1.0:
         amt.rescale(config.scale)
     proxies = config.getProxies()
     writer = Writer(name, human, amt, config, proxies)
@@ -114,11 +115,11 @@ class Writer(mhx_writer.Writer):
         config = self.config
 
         fp.write("NoScale True ;\n")
-        amt.writeGizmos(fp)
-
-        G.app.progress(0.1, text="Exporting armature")
-        amt.writeArmature(fp, MINOR_VERSION, self)
-        amt.writeAction(fp)
+        if amt:
+            amt.writeGizmos(fp)
+            G.app.progress(0.1, text="Exporting armature")
+            amt.writeArmature(fp, MINOR_VERSION, self)
+            amt.writeAction(fp)
 
         G.app.progress(0.15, text="Exporting materials")
         fp.write("\nNoScale False ;\n\n")
@@ -135,18 +136,25 @@ class Writer(mhx_writer.Writer):
         self.poseWriter.writePose(fp)
 
         self.writeGroups(fp)
-        amt.writeFinal(fp)
+        if amt:
+            amt.writeFinal(fp)
 
 
     def writeGroups(self, fp):
         amt = self.armature
+        if amt:
+            fp.write("PostProcess %s %s 0000003f 00080000 %s 0000c000 ;\n" % (self.meshName(), amt.name, amt.visibleLayers))
+        else:
+            fp.write("PostProcess %s %s 0000003f 00080000 00000000 0000c000 ;\n" % (self.meshName(), self.name))
+
         fp.write(
             "# ---------------- Groups -------------------------------- #\n\n" +
-            "PostProcess %s %s 0000003f 00080000 %s 0000c000 ;\n" % (self.meshName(), amt.name, amt.visibleLayers) +
-            "Group %s\n"  % amt.name +
+            "Group %s\n"  % self.name +
             "  Objects\n" +
-            "    ob %s ;\n" % amt.name +
             "    ob %s ;\n" % self.meshName())
+
+        if amt:
+            fp.write("    ob %s ;\n" % amt.name)
 
         self.groupProxy('Proxymeshes', 'T_Proxy', fp)
         self.groupProxy('Clothes', 'T_Clothes', fp)

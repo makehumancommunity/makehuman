@@ -107,18 +107,19 @@ class Writer(mhx_writer.Writer):
             "bodyProportions:%.4f_" % self.human.getBodyProportions()
         )
 
+        if amt:
+            fp.write(
+                "  parent Refer Object %s ;\n" % amt.name +
+                "  parent_type 'OBJECT' ;\n" +
+                "  color Array 1.0 1.0 1.0 1.0  ;\n" +
+                "  lock_location Array 1 1 1 ;\n" +
+                "  lock_rotation Array 1 1 1 ;\n" +
+                "  lock_scale Array 1 1 1  ;\n")
+
         fp.write(
-            "  parent Refer Object %s ;" % self.name +
-"""
-  parent_type 'OBJECT' ;
-  color Array 1.0 1.0 1.0 1.0  ;
-  select True ;
-  lock_location Array 1 1 1 ;
-  lock_rotation Array 1 1 1 ;
-  lock_scale Array 1 1 1  ;
-  Property MhxMesh True ;
-  Property MhHuman True ;
-""" +
+            "  select True ;\n" +
+            "  Property MhxMesh True ;\n" +
+            "  Property MhHuman True ;\n" +
             "  Property MhxScale theScale*%.4f ;\n" % scale +
             "  Property MhxModel \"%s\" ;\n" % model)
 
@@ -148,12 +149,13 @@ end Object
     #-------------------------------------------------------------------------------
 
     def writeArmatureModifier(self, fp, proxy):
-        fp.write("\n" +
-            "    Modifier Armature ARMATURE\n" +
-            "      object Refer Object %s ;" % self.name +
-            "      use_bone_envelopes False ;\n" +
-            "      use_vertex_groups True ;\n" +
-            "    end Modifier\n")
+        if self.armature:
+            fp.write("\n" +
+                "    Modifier Armature ARMATURE\n" +
+                "      object Refer Object %s ;" % self.name +
+                "      use_bone_envelopes False ;\n" +
+                "      use_vertex_groups True ;\n" +
+                "    end Modifier\n")
 
     #-------------------------------------------------------------------------------
     #   Face numbers
@@ -213,6 +215,8 @@ end Object
 
     def writeVertexGroups(self, fp, proxy):
         amt = self.armature
+        if amt is None:
+            return
 
         if False and proxy and proxy.weights:
             self.writeRigWeights(fp, proxy.weights)

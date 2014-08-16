@@ -100,7 +100,7 @@ class ExportArmature(Armature):
                 self.activeBoneLayers |= L_LLEGIK|L_RLEGIK
         elif options.useMakeHumanRig and not options.useMhxCompat:
             self.useLayers = True
-            layers = L_MAIN|L_FACE
+            layers = L_MAIN|L_FACE|L_HEAD
             self.activeBoneLayers = layers
         else:
             self.useLayers = False
