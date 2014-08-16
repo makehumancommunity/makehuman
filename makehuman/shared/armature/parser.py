@@ -32,7 +32,7 @@
 **Coding Standards:**  See http://www.makehuman.org/node/165
 
 Abstract
---------
+-------
 
 Parser for armature
 """
@@ -560,6 +560,14 @@ class Parser:
                 loc1 = obj.coord[int(v1)]
                 loc2 = obj.coord[int(v2)]
                 self.locations[key] = (k1*loc1 + k2*loc2)
+            elif type == 'so':
+                base, left, right, offset = data
+                bloc = self.locations[base]
+                lloc = self.locations[left]
+                rloc = self.locations[right]
+                vec = rloc-lloc
+                offset = np.array(offset) * math.sqrt(np.dot(vec,vec))
+                self.locations[key] = bloc + offset
             elif type == 'f':
                 (raw, head, tail, offs) = data
                 rloc = self.locations[raw]
@@ -587,6 +595,7 @@ class Parser:
                 r1 = np.array([float(x), float(y), float(z)])
                 self.locations[key] = np.cross(r, r1)
             elif type == 'l':
+                log.debug("%s %s" % (key, data))
                 ((k1, joint1), (k2, joint2)) = data
                 self.locations[key] = k1*self.locations[joint1] + k2*self.locations[joint2]
             elif type == 'o':

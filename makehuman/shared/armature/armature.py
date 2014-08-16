@@ -103,7 +103,6 @@ class Armature:
         self.origin = self.parser.origin
         self.rename(self.options.locale)
 
-
     def updateJoints(self):
         self.parser.updateJoints()
 
