@@ -148,7 +148,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         Update bound meshes for animation when proxies are changed
         """
         if oldPxy:
-            self.removeMesh(oldPxy.object.mesh.name)
+            self.removeBoundMesh(oldPxy.object.mesh.name)
         if newPxy:
             # Add new mesh and vertex weight assignments
             self._updateMeshVertexWeights(newPxy.object.mesh)
