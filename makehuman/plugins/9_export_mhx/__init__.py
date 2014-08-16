@@ -48,6 +48,7 @@ class MhxConfig(Config):
         Config.__init__(self)
         self.scale,self.unit =      (1, "decimeter")
         self.useRelPaths =          True
+        self.useNoRig =             False
         self.useStandardRig =       True
         self.useNewMHX =            False
         self.useLegacyMHX =         False
@@ -92,6 +93,9 @@ class MhxConfig(Config):
                 useFaceRig = self.useFaceRig,
             )
 
+        elif self.useNoRig:
+            rigOptions = None
+
         else:
             rigOptions = super(MhxConfig, self).getRigOptions()
             if rigOptions is None:
@@ -124,6 +128,7 @@ class ExporterMHX(Exporter):
         #self.useCustomTargets = options.addWidget(gui.CheckBox("Custom targets", False))
 
         rigs = []
+        self.useNoRig = options.addWidget(gui.RadioButton(rigs, "No rig", False))
         self.useStandardRig = options.addWidget(gui.RadioButton(rigs, "Standard rig", True))
         self.useNewMHX = options.addWidget(gui.RadioButton(rigs, "MHX rig", False))
         self.useNewRigify = options.addWidget(gui.RadioButton(rigs, "Rigify rig", False))
@@ -140,6 +145,7 @@ class ExporterMHX(Exporter):
         cfg.useFaceRig = self.useFaceRig.selected
         cfg.feetOnGround = self.feetOnGround.selected
         cfg.useRotationLimits = self.useRotationLimits.selected
+        cfg.useNoRig = self.useNoRig.selected
         cfg.useStandardRig = self.useStandardRig.selected
         cfg.useNewMHX = self.useNewMHX.selected
         cfg.useNewRigify = self.useNewRigify.selected

@@ -140,7 +140,6 @@ class RigifyParser(Parser):
 
         if amt.options.useMakeHumanRig:
             self.splitBones = {
-                "thigh" :       (2, "shin", False, True),
                 "thumb.01" :    (2, "thumb.02", True, True),
                 "f_index.01" :  (2, "f_index.02", True, True),
                 "f_middle.01" : (2, "f_middle.02", True, True),
@@ -179,17 +178,21 @@ class RigifyParser(Parser):
 
         if options.useMakeHumanRig:
             renames = {
-                "upperarm01.L" : "DEF-upper_arm.01.L",
+                "shoulder02.L" : "DEF-upper_arm.01.L",
                 "upperarm02.L" : "DEF-upper_arm.02.L",
                 "lowerarm01.L" : "DEF-forearm.01.L",
                 "lowerarm02.L" : "DEF-forearm.02.L",
+                "upperleg01.L" : "DEF-thigh.01.L",
+                "upperleg02.L" : "DEF-thigh.02.L",
                 "lowerleg01.L" : "DEF-shin.01.L",
                 "lowerleg02.L" : "DEF-shin.02.L",
 
-                "upperarm01.R" : "DEF-upper_arm.01.R",
+                "shoulder02.R" : "DEF-upper_arm.01.R",
                 "upperarm02.R" : "DEF-upper_arm.02.R",
                 "lowerarm01.R" : "DEF-forearm.01.R",
                 "lowerarm02.R" : "DEF-forearm.02.R",
+                "upperleg01.R" : "DEF-thigh.01.R",
+                "upperleg02.R" : "DEF-thigh.02.R",
                 "lowerleg01.R" : "DEF-shin.01.R",
                 "lowerleg02.R" : "DEF-shin.02.R",
             }

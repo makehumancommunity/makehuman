@@ -51,7 +51,6 @@ class Writer(mhx_writer.Writer):
 
 
     def writePose(self, fp):
-        amt = self.armature
         config = self.config
         targets = exportutils.collect.readTargets(self.human, config)
 
@@ -64,11 +63,15 @@ class Writer(mhx_writer.Writer):
 
         self.writeShapeKeysAndDrivers(fp, "%s" % self.meshName(), None, targets)
 
-        fp.write("Pose %s\n" % self.name)
-        amt.writeControlPoses(fp, config)
-        fp.write("  ik_solver 'LEGACY' ;\nend Pose\n")
-        amt.writeDrivers(fp)
-        fp.write("CorrectRig %s ;\n\n" % self.name)
+        amt = self.armature
+        if amt:
+            fp.write("Pose %s\n" % self.name)
+            amt.writeControlPoses(fp, config)
+            fp.write(
+                "  ik_solver 'LEGACY' ;\n" +
+                "end Pose\n")
+            amt.writeDrivers(fp)
+            fp.write("CorrectRig %s ;\n\n" % self.name)
 
     # *** material-drivers
 
@@ -141,7 +144,7 @@ class Writer(mhx_writer.Writer):
         isHuman = ((not pxy) or pxy.type == 'Proxymeshes')
         amt = self.armature
 
-        if isHuman:
+        if amt and isHuman:
             for path,name in self.customTargetFiles:
                 mhx_drivers.writeShapePropDrivers(fp, amt, [name], pxy, "Mhc", callback)
 
