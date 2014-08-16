@@ -1105,8 +1105,13 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         return verts.mean(axis=0)
 
     def setSkeleton(self, skel, vertexWeights=None):
+        prev_skel = self.getSkeleton()
+
         self.callEvent('onChanging', events3d.HumanEvent(self, 'skeleton'))
         animation.AnimatedMesh.setSkeleton(self, skel)
+        if prev_skel is None:
+            # Make sure that shadow vertices are copied
+            self.refreshStaticMeshes()
         self.updateVertexWeights(vertexWeights)
         self.callEvent('onChanged', events3d.HumanEvent(self, 'skeleton'))
 
