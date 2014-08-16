@@ -54,7 +54,6 @@ import numpy.linalg as la
 import transformations as tm
 import matrix
 
-from codecs import open
 import log
 
 D = pi/180
@@ -309,36 +308,6 @@ class Skeleton(object):
         for idx, name in enumerate(boneNames):
             result[name] = idx
         return result
-
-    def loadPoseFromMhpFile(self, filepath):
-        """
-        Load a MHP pose file that contains a static pose. Posing data is defined
-        with quaternions to indicate rotation angles.
-        Sets current pose to
-        """
-        log.message("Mhp %s", filepath)
-        fp = open(filepath, "rU", encoding="utf-8")
-
-        boneMap = self.getBoneToIdxMapping()
-        nBones = len(boneMap.keys())
-        poseMats = np.zeros((nBones,4,4),dtype=np.float32)
-        poseMats[:] = np.identity(4, dtype=np.float32)
-
-        for line in fp:
-            words = line.split()
-            if len(words) < 5:
-                continue
-            elif words[1] in ["quat", "gquat"]:
-                boneIdx = boneMap[words[0]]
-                quat = float(words[2]),float(words[3]),float(words[4]),float(words[5])
-                mat = tm.quaternion_matrix(quat)
-                if words[1] == "gquat":
-                    bone = self.bones[boneIdx]
-                    mat = np.dot(la.inv(bone.matRestRelative), mat)
-                poseMats[boneIdx] = mat[:3,:3]
-
-        fp.close()
-        self.setPose(poseMats)
 
     def compare(self, other):
         pass

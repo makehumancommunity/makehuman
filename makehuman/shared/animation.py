@@ -434,3 +434,46 @@ def emptyPose(nBones=1):
     Create an empty animation containing one frame. 
     """
     return emptyTrack(1, nBones)
+
+def loadPoseFromMhpFile(filepath, skel):
+    """
+    Load a MHP pose file that contains a static pose. Posing data is defined
+    with quaternions to indicate rotation angles.
+    Creates a single frame animation track (a pose).
+    """
+    import log
+    import os
+    from codecs import open
+
+    log.message("Loading MHP file %s", filepath)
+    fp = open(filepath, "rU", encoding="utf-8")
+    valid_file = False
+
+    boneMap = skel.getBoneToIdxMapping()
+    nBones = len(boneMap.keys())
+    poseMats = np.zeros((nBones,4,4),dtype=np.float32)
+    poseMats[:] = np.identity(4, dtype=np.float32)
+
+    for line in fp:
+        words = line.split()
+        if len(words) < 5:
+            continue
+        elif words[1] in ["quat", "gquat"]:
+            valid_file = True
+            boneIdx = boneMap[words[0]]
+            quat = float(words[2]),float(words[3]),float(words[4]),float(words[5])
+            mat = tm.quaternion_matrix(quat)
+            if words[1] == "gquat":
+                bone = skel.bones[boneIdx]
+                mat = np.dot(la.inv(bone.matRestRelative), mat)
+            poseMats[boneIdx] = mat[:3,:3]
+
+    if not valid_file:
+        log.error("Loading of MHP file %s failed, probably a bad file." % filepath)
+
+    fp.close()
+
+    name = os.path.splitext(os.path.basename(filepath))[0]
+    result = Pose(name, poseMats)
+
+    return result
