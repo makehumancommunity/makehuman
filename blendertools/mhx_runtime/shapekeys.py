@@ -70,6 +70,14 @@ class VIEW3D_OT_AddShapekeyDriverButton(bpy.types.Operator):
     bl_description = "Control shapekeys with rig properties. For file linking."
     bl_options = {'UNDO'}
 
+    @classmethod
+    def poll(self, context):
+        rig = context.object
+        return (rig and
+                rig.type == 'ARMATURE' and
+                not rig.MhxShapekeyDrivers
+               )
+
     def execute(self, context):
         rig,meshes = getRigMeshes(context)
         initRnaProperties(rig)
@@ -97,6 +105,11 @@ class VIEW3D_OT_MhxRemoveShapekeyDriverButton(bpy.types.Operator):
     bl_label = "Remove Shapekey Drivers"
     bl_description = "Remove ability to control shapekeys from rig property"
     bl_options = {'UNDO'}
+
+    @classmethod
+    def poll(self, context):
+        rig = context.object
+        return (rig and rig.MhxShapekeyDrivers)
 
     def execute(self, context):
         rig,meshes = getRigMeshes(context)

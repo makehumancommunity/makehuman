@@ -275,7 +275,7 @@ def rigifyMhx(context):
     scn.objects.unlink(rig)
     del rig
     gen.name = name
-    gen.data.layers[1] = True    # Face
+    gen.data.layers[1] = False    # Face components
     bpy.ops.object.mode_set(mode='POSE')
     print("MHX rig %s successfully rigified" % name)
     return gen

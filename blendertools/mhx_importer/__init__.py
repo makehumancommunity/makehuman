@@ -105,7 +105,7 @@ def register():
     bpy.types.Object.MhAlpha8 = BoolProperty(default=False)
     bpy.types.Object.MhxRig = StringProperty(default="")
     bpy.types.Object.MhxRigify = BoolProperty(default=False)
-    bpy.types.Object.MhxShapekeyDrivers = BoolProperty(default=True)
+    bpy.types.Object.MhxShapekeyDrivers = BoolProperty(default=False)
     bpy.utils.register_module(__name__)
     bpy.types.INFO_MT_file_import.append(menu_func)
 

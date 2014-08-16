@@ -61,18 +61,26 @@ class VIEW3D_OT_MhxAddHidersButton(bpy.types.Operator):
     bl_description = "Control visibility with rig property. For file linking."
     bl_options = {'UNDO'}
 
+    @classmethod
+    def poll(self, context):
+        rig = context.object
+        return (rig and
+                not rig.MhxVisibilityDrivers
+               )
+
     def execute(self, context):
         rig,meshes = getRigMeshes(context)
         initRnaProperties(rig)
         for ob in meshes:
             addHideDriver(ob, rig)
+            ob.MhxVisibilityDrivers = True
         rig.MhxVisibilityDrivers = True
         return{'FINISHED'}
 
 
 def getMaskModifier(clo, rig):
     try:
-        cloname = clo.name.split("_",1)[1]
+        cloname = clo.name.split(":",1)[1]
     except IndexError:
         return None
     for ob in rig.children:
@@ -82,9 +90,8 @@ def getMaskModifier(clo, rig):
                     modname = mod.vertex_group.split("_",1)[1]
                 except IndexError:
                     continue
-                print(modname, cloname)
                 if modname == cloname:
-                    print("HIT")
+                    print("HIT", modname, cloname)
                     return mod
     return None
 
@@ -110,10 +117,16 @@ class VIEW3D_OT_MhxRemoveHidersButton(bpy.types.Operator):
     bl_description = "Remove ability to control visibility from rig property"
     bl_options = {'UNDO'}
 
+    @classmethod
+    def poll(self, context):
+        rig = context.object
+        return (rig and rig.MhxVisibilityDrivers)
+
     def execute(self, context):
         rig,meshes = getRigMeshes(context)
         for ob in meshes:
             removeHideDrivers(ob, rig)
+            ob.MhxVisibilityDrivers = False
         if context.object == rig:
             rig.MhxVisibilityDrivers = False
         return{'FINISHED'}
