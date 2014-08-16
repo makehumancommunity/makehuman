@@ -1244,9 +1244,15 @@ def checkSingleVertexGroups(clo, scn):
                         else:
                             print("  ", vg.name)
             if n != 1:
+                vn = v.index
+                scn.objects.active = clo
+                bpy.ops.object.mode_set(mode='EDIT')
+                bpy.ops.mesh.select_all(action='DESELECT')
+                bpy.ops.object.mode_set(mode='OBJECT')
+                v = clo.data.vertices[vn]
                 v.select = True
-                raise MHError("Vertex %d in %s belongs to %d groups. Must be exactly one" % (v.index, clo.name, n))
-    return
+                bpy.ops.object.mode_set(mode='EDIT')
+                raise MHError("Vertex %d in %s belongs to %d groups. Must be exactly one" % (vn, clo.name, n))
 
 
 def writeFaces(clo, fp):
@@ -1256,7 +1262,7 @@ def writeFaces(clo, fp):
         for v in f.vertices:
             fp.write(" %d" % (v+1))
         fp.write("\n")
-    return
+
 
 def writeVertexGroups(clo, fp):
     for vg in clo.vertex_groups:
@@ -1265,7 +1271,6 @@ def writeVertexGroups(clo, fp):
             for g in v.groups:
                 if g.group == vg.index and g.weight > 1e-4:
                     fp.write(" %d %.4g \n" % (v.index, g.weight))
-    return
 
 #
 #    writePrio(data, prio, pad, fp):
@@ -1950,7 +1955,7 @@ def init():
 
     bpy.types.Scene.MCShowSettings = BoolProperty(name = "Show Settings", default=False)
     bpy.types.Scene.MCShowUtils = BoolProperty(name = "Show Utilities", default=False)
-    bpy.types.Scene.MCShowSelect = BoolProperty(name = "Show Selection", default=False)
+    bpy.types.Scene.MCShowSelect = BoolProperty(name = "Show Selection (Human Only)", default=False)
     bpy.types.Scene.MCShowMaterials = BoolProperty(name = "Show Materials", default=False)
     bpy.types.Scene.MCShowAdvanced = BoolProperty(name = "Show Advanced", default=False)
     bpy.types.Scene.MCShowUVProject = BoolProperty(name = "Show UV Projection", default=False)

@@ -45,20 +45,24 @@ if "bpy" in locals():
     print("Reloading MakeHuman runtime v %d.%d.%d" % bl_info["version"])
     import imp
     imp.reload(utils)
+    imp.reload(error)
     imp.reload(layers)
     imp.reload(fkik)
     imp.reload(drivers)
     imp.reload(bone_drivers)
+    imp.reload(faceshift)
     imp.reload(hide)
     imp.reload(shapekeys)
     imp.reload(merge)
 else:
     print("Loading MakeHuman runtime v %d.%d.%d" % bl_info["version"])
     from . import utils
+    from . import error
     from . import layers
     from . import fkik
     from . import drivers
     from . import bone_drivers
+    from . import faceshift
     from . import hide
     from . import shapekeys
     from . import merge
@@ -92,14 +96,17 @@ class MhxSetupPanel(bpy.types.Panel):
         layout.separator()
         layout.operator("mhx.add_hide_drivers")
         layout.operator("mhx.remove_hide_drivers")
-        layout.operator("mhx.prettify_visibility")
 
         layout.separator()
         layout.operator("mhx.add_facerig_drivers")
+        layout.operator("mhx.remove_facerig_drivers")
+        layout.operator("mhx.load_faceshift_bvh")
 
         layout.separator()
         layout.operator("mhx.add_shapekey_drivers")
         layout.operator("mhx.remove_shapekey_drivers")
+
+
 
 #------------------------------------------------------------------------
 #    Mhx Labels Panel
@@ -108,7 +115,7 @@ class MhxSetupPanel(bpy.types.Panel):
 from .layers import MhxLayers, OtherLayers
 
 class MhxLabelsPanel(bpy.types.Panel):
-    bl_label = "MHX Labels"
+    bl_label = "Labels"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
     bl_category = "MHX Runtime"
@@ -151,7 +158,7 @@ class MhxLabelsPanel(bpy.types.Panel):
 #------------------------------------------------------------------------
 
 class MhxFKIKPanel(bpy.types.Panel):
-    bl_label = "MHX FK/IK Switch"
+    bl_label = "FK/IK Switch"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
     bl_category = "MHX Runtime"
@@ -251,6 +258,7 @@ class VisibilityPanel(bpy.types.Panel):
     def draw(self, context):
         ob = context.object
         layout = self.layout
+        layout.operator("mhx.prettify_visibility")
         props = list(ob.keys())
         props.sort()
         for prop in props:
@@ -277,31 +285,14 @@ class FaceComponentsPanel(bpy.types.Panel):
         return (context.object and context.object.MhxFaceRigDrivers)
 
     def draw(self, context):
-        drawDriverPanel(self, context, "Mfa", bone_drivers.getFacePoses())
-
-
-from .drivers import getArmature
-
-def drawDriverPanel(self, context, prefix, struct):
-    rig = getArmature(context.object)
-    if rig:
-        layout = self.layout
-        layout.operator("mhx.reset_props").prefix = prefix
-
-        for pname in struct["poses"]:
-            prop = prefix+pname
-            row = layout.split(0.8)
-            row.prop(rig, '["%s"]' % prop, text=pname)
-            op = row.operator("mhx.pin_prop", icon='UNPINNED')
-            op.key = prop
-            op.prefix = prefix
+        drawPropPanel(self, context.object, "Mfa")
 
 #------------------------------------------------------------------------
 #   Shapekey panel
 #------------------------------------------------------------------------
 
 class MhxShapekeyPanel(bpy.types.Panel):
-    bl_label = "MHX Shapekeys"
+    bl_label = "Shapekeys"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
     bl_category = "MHX Runtime"
@@ -312,7 +303,26 @@ class MhxShapekeyPanel(bpy.types.Panel):
         return (context.object and context.object.MhxShapekeyDrivers)
 
     def draw(self, context):
-        drawDriverPanel(self, context, "Mhs")
+        drawPropPanel(self, context.object, "Mhs")
+
+#------------------------------------------------------------------------
+#   Common drawing code for property panels
+#------------------------------------------------------------------------
+
+def drawPropPanel(self, ob, prefix):
+    from .drivers import getArmature
+    rig = getArmature(ob)
+    if rig:
+        layout = self.layout
+        layout.operator("mhx.reset_props").prefix = prefix
+        for prop in rig.keys():
+            if prop[0:3] != prefix:
+                continue
+            row = layout.split(0.8)
+            row.prop(rig, '["%s"]' % prop, text=prop[3:])
+            op = row.operator("mhx.pin_prop", icon='UNPINNED')
+            op.key = prop
+            op.prefix = prefix
 
 #------------------------------------------------------------------------
 #   Init
