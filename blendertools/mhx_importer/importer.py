@@ -355,12 +355,13 @@ def readMhxFile(filePath):
     # Parse:
     # Take the list of tokens and create stuff
 
-    scn = clearScene()
     print( "Parsing" )
     parse(tokens)
 
     if theArmature:
+        scn = bpy.context.scene
         scn.objects.active = theArmature
+        print(scn, bpy.context.object, scn.objects.active)
         bpy.ops.object.mode_set(mode='OBJECT')
         bpy.ops.object.select_all(action='DESELECT')
         theArmature.select = True
@@ -451,8 +452,13 @@ def printMHXVersionInfo(versionStr, performVersionCheck = False):
 
 
 def parse(tokens):
-    global MHX249, ifResult, One, version, theArmature
+    global MHX249, ifResult, One, version, theArmature, theLayers
     versionInfoStr = ""
+
+    scn = bpy.context.scene
+    theLayers = list(scn.layers)
+    theLayers[19] = False
+    scn.layers = len(scn.layers)*[True]
 
     for (key, val, sub) in tokens:
         data = None
@@ -536,6 +542,7 @@ def parse(tokens):
         else:
             data = parseDefaultType(key, val, sub)
 
+    scn.layers = theLayers
 
 #
 #    parseDefaultType(typ, args, tokens):
@@ -1039,6 +1046,8 @@ def parseImage(args, tokens):
 #
 
 def parseObject(args, tokens, versionInfoStr=""):
+    global theLayers
+
     if verbosity > 2:
         print( "Parsing object %s" % args )
     name = args[0]
@@ -1078,6 +1087,12 @@ def parseObject(args, tokens, versionInfoStr=""):
             parseParticleSystem(ob, val, sub)
         elif key == 'FieldSettings':
             parseDefault(ob.field, sub, {}, [])
+        elif key == 'layers':
+            if val[-1] == '1':
+                ob.layers = 19*[False] + [True]
+            else:
+                ob.layers = theLayers
+            print(ob.name, list(ob.layers))
         else:
             defaultKey(key, val, sub, ob, ['type', 'data'])
 
@@ -2202,41 +2217,30 @@ def invalid(condition):
 
 
 #
-#    clearScene(context):
-#
-
-def clearScene():
-    scn = bpy.context.scene
-    for n in range(len(scn.layers)):
-        scn.layers[n] = True
-    return scn
-
-#
 #    hideLayers(args):
 #    args = sceneLayers sceneHideLayers boneLayers boneHideLayers or nothing
 #
 
 def hideLayers(args):
+    global theLayers
+
     if len(args) > 1:
         sceneLayers = int(args[2], 16)
-        sceneHideLayers = int(args[3], 16)
+        #sceneHideLayers = int(args[3], 16)
+        sceneHideLayers = 0x8000
+        hidelayers = [19]
         boneLayers = int(args[4], 16)
         # boneHideLayers = int(args[5], 16)
         boneHideLayers = 0
     else:
         sceneLayers = 0x00ff
         sceneHideLayers = 0
+        hidelayers = []
         boneLayers = 0
         boneHideLayers = 0
 
     scn = bpy.context.scene
     mask = 1
-    hidelayers = []
-    for n in range(20):
-        scn.layers[n] = True if sceneLayers & mask else False
-        if sceneHideLayers & mask:
-            hidelayers.append(n)
-        mask = mask << 1
 
     for ob in scn.objects:
         for n in hidelayers:

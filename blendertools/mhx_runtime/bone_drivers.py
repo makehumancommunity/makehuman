@@ -201,7 +201,8 @@ class VIEW3D_OT_AddFaceRigDriverButton(bpy.types.Operator):
     def poll(self, context):
         rig = context.object
         return (rig and
-                rig.type == 'ARMATURE'
+                rig.type == 'ARMATURE' and
+                not rig.MhxFaceRigDrivers
                )
 
     def execute(self, context):
@@ -211,3 +212,35 @@ class VIEW3D_OT_AddFaceRigDriverButton(bpy.types.Operator):
         rig.MhxFaceRigDrivers = True
         return{'FINISHED'}
 
+
+def removeBoneDrivers(rig, prefix, struct):
+    bnames = {}
+    for pose,bones in struct["poses"].items():
+        prop = prefix+pose
+        del rig[prop]
+        for bname in bones.keys():
+            bnames[bname] = True
+    print(bnames)
+    for bname in bnames:
+        pb = rig.pose.bones[bname]
+        print(pb)
+        pb.driver_remove("rotation_quaternion")
+
+
+class VIEW3D_OT_RemoveFaceRigDriverButton(bpy.types.Operator):
+    bl_idname = "mhx.remove_facerig_drivers"
+    bl_label = "Remove Facerig Drivers"
+    bl_description = "Control face rig with rig properties."
+    bl_options = {'UNDO'}
+
+    @classmethod
+    def poll(self, context):
+        rig = context.object
+        return (rig and rig.MhxFaceRigDrivers)
+
+    def execute(self, context):
+        global _FacePoses
+        rig = context.object
+        removeBoneDrivers(rig, "Mfa", getFacePoses())
+        rig.MhxFaceRigDrivers = False
+        return{'FINISHED'}
