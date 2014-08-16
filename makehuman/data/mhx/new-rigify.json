@@ -10,6 +10,7 @@
     	"useMhxCompat" : true,
         "mergeFeet" : true,
         "mergeToes" : true,
+        "mergeNeck" : true,
 
         "useSplitNames" : true,
         "useDeformNames" : true
