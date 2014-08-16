@@ -120,7 +120,6 @@ class ArmatureOptions(object):
             useLeftRight = False,
             ):
         self.mergeHead = not useFaceRig
-        self.mergeNeck = not useFaceRig
         self.useCustomShapes = useCustomShapes
         self.useConstraints = useConstraints
         self.useBoneGroups = useBoneGroups
@@ -220,7 +219,7 @@ class ArmatureOptions(object):
             if hasattr(self, key):
                 setattr(self, key, value)
             else:
-                log.warning('Unknown property "%s" defined in armature options file %s' % (key, filepath))
+                log.warning("Unknown property defined in armature options file %s" % filepath)
 
         if selector is not None:
             selector.fromOptions(self)
