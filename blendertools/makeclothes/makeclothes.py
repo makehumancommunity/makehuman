@@ -680,7 +680,7 @@ def writeClothes(context, hum, clo, data, matfile):
         elif len(verts) == 8:   # Rigid fit
             fp.write("%5d %5d %5d %5d %5d %5d %5d %5d %.5f %.5f %.5f %.5f %.5f %.5f %.5f %.5f\n" % tuple(verts+wts))
         else:
-            halt
+            raise RuntimeError("Bug: Wrong number of verts %s" % verts)
 
     fp.write('\n')
     printDeleteVerts(fp, hum)
@@ -1546,8 +1546,7 @@ def getHumanVerts(me, type, htype):
         verts = getHelperVerts(me, 'All')
         addBodyVerts(me, verts)
     else:
-        print(type, htype)
-        halt
+        raise RuntimeError("Bug getHumanVerts %s %s" % (type, htype))
     return verts
 
 

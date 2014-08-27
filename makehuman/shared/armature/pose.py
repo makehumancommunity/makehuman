@@ -134,7 +134,7 @@ class Pose:
         for pb in self.posebones.values():
             pb.matrixPose = tm.identity_matrix()
         if update:
-            halt
+            raise RuntimeError("Pose: clear")
             self.update()
             self.removeModifier()
 
@@ -448,7 +448,7 @@ class PoseBone:
             log.debug("%s", self.bone.matrixRest)
             log.debug("%s", self.matrixPose)
             log.debug("%s", self.matrixGlobal)
-            halt
+            raise RuntimeError("Build posebone")
 
         #if self.name == "head":
         #    log.debug("Build matrices:\n%s\n%s" % (self.bone.matrixRest, self.matrixVerts))

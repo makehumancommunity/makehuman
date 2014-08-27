@@ -191,7 +191,7 @@ class Parser:
         options = amt.options
 
         if amt.done:
-            halt
+            raise RuntimeError("Armature %s already done" % amt)
         amt.done = True
 
         self.addBones(rig_bones.Armature, boneInfo)

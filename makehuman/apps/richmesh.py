@@ -237,8 +237,7 @@ class FakeTarget:
         self.verts = np.array(verts, int)
         self.data = np.array(data, float)
         if len(verts) != len(data):
-            log.debug("FakeTarget %s %s %s" % (name, verts, data))
-            halt
+            raise RuntimeError("FakeTarget %s %s %s" % (name, verts, data))
 
     def __repr__(self):
         return ("<FakeTarget %s %d %d>" % (self.name, len(self.verts), len(self.data)))
