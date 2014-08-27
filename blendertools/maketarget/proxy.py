@@ -207,7 +207,8 @@ class CProxy:
                 except:
                     n = -1
                 if n >= 0:
-                    halt
+                    raise RuntimeError("proxy.read %s %s" % (key, status))
+
 
 def scaleInfo(words):
     v1 = int(words[1])

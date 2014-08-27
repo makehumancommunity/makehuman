@@ -495,8 +495,6 @@ def loadStatueMinusPose(context):
                     print("\nGrp %d %f %f" % (g.group, g.weight, relMats[g.group].determinant()))
                     print("Rel", relMats[g.group])
 
-                #halt
-
     #scn.objects.unlink(statue)
     scn.objects.unlink(posed)
 
@@ -1234,7 +1232,7 @@ def snapWaist(context):
 
     nVerts = len(settings.skirtWaist)
     if len(settings.tightsWaist) != nVerts:
-        halt
+        raise RuntimeError("snapWaist: %d %d" % (len(settings.tightsWaist), nVerts))
     bpy.ops.object.mode_set(mode='OBJECT')
     skey = ob.data.shape_keys.key_blocks[-1]
     verts = skey.data

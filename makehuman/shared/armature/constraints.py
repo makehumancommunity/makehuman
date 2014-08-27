@@ -276,7 +276,7 @@ class CCopyLocConstraint(CConstraint):
             mat = target.matrixGlobal
             bone.matrixGlobal[:3,3] += self.influence*(mat[:3,3] - bone.matrixGlobal[:3,3])
         else:
-            halt
+            raise RuntimeError("CopyLoc constraint not in world space %s" % bone.name)
             mat = target.matrixPose
             bone.matrixPose[:3,3] += self.influence*(mat[:3,3] - bone.matrixPose[:3,3])
             bone.updateBone()
@@ -304,7 +304,7 @@ class CCopyScaleConstraint(CConstraint):
             mat = target.matrixGlobal
             bone.matrixGlobal[3,:3] += self.influence*(mat[3,:3] - bone.matrixGlobal[3,:3])
         else:
-            halt
+            raise RuntimeError("CopyScale constraint not in world space %s" % bone.name)
             mat = target.matrixPose
             if self.usex:
                 bone.matrixPose[3,0] += self.influence*(mat[3,0] - bone.matrixPose[3,0])
@@ -479,10 +479,10 @@ class CTransformConstraint(CConstraint):
     def update(self, amt, bone):
         target = amt.bones[self.subtar]
         if self.ownsp == 'WORLD':
-            halt
+            raise RuntimeError("Transform constraint in world space %s" % bone.name)
         else:
             if self.map_from != 'ROTATION' or self.map_to != 'ROTATION':
-                halt
+                raise RuntimeError("Only map to and from ROTATION: %s %s" % (self.map_from, self.map_to))
             brad = tm.euler_from_matrix(target.matrixPose, axes='sxyz')
             arad = []
             for n in range(3):
