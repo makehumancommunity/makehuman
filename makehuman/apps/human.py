@@ -1129,6 +1129,7 @@ class Human(guicommon.Object):
 
     def save(self, filename, tags):
         from codecs import open
+        import os
         progress = Progress(len(G.app.saveHandlers))
         event = events3d.HumanEvent(self, 'save')
         event.path = filename
@@ -1145,9 +1146,13 @@ class Human(guicommon.Object):
             handler(self, f)
             # Ensure that handlers write lines ending with newline character
             if f.tell() != t:
-                f.seek(f.tell()-1)
-                if f.read() != '\n':
+                f.seek(-1, 2)
+                lastchar = f.read()
+                f.seek(0, 2)
+                if lastchar != '\n':
                     f.write('\n')
+                f.flush()
+                os.fsync(f.fileno())
             progress.step()
 
         f.write('subdivide %s' % self.isSubdivided())
