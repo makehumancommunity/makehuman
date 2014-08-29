@@ -37,77 +37,36 @@ Abstract
 This module implements the 'Files > Load' tab 
 """
 
-import os
-
 import mh
 import gui3d
 import filechooser as fc
 import qtgui as gui
 
-class HumanFileSort(fc.FileSort):
-    
-    def __init__(self):
-        
-        super(HumanFileSort, self).__init__()
-        self.meta = {}
-    
-    def fields(self):
-        return list(super(HumanFileSort, self).fields())
-        # TODO
-        #return list(super(HumanFileSort, self).fields()) + ["gender", "age", "muscle", "weight"]
-        
-    def sortGender(self, filenames):
-        
-        self.updateMeta(filenames)
-        decorated = [(self.meta[filename]['gender'], i, filename) for i, filename in enumerate(filenames)]
-        decorated.sort()
-        return [filename for gender, i, filename in decorated]
-        
-    def sortAge(self, filenames):
-        
-        self.updateMeta(filenames)
-        decorated = [(self.meta[filename]['age'], i, filename) for i, filename in enumerate(filenames)]
-        decorated.sort()
-        return [filename for age, i, filename in decorated]
 
-    def sortMuscle(self, filenames):
-        
-        self.updateMeta(filenames)
-        decorated = [(self.meta[filename]['muscle'], i, filename) for i, filename in enumerate(filenames)]
-        decorated.sort()
-        return [filename for muscle, i, filename in decorated]
-       
-    def sortWeight(self, filenames):
-        
-        self.updateMeta(filenames)
-        decorated = [(self.meta[filename]['weight'], i, filename) for i, filename in enumerate(filenames)]
-        decorated.sort()
-        return [filename for weight, i, filename in decorated]
-        
-    def updateMeta(self, filenames):
-        
-        for filename in filenames:
-            if filename in self.meta:
-                if self.meta[filename]['modified'] < os.path.getmtime(filename):
-                    self.meta[filename] = self.getMeta(filename)
-            else:
-                self.meta[filename] = self.getMeta(filename)
-                
+class HumanFileSort(fc.FileSort):
+
+    def __init__(self):
+        super(HumanFileSort, self).__init__()
+
+        '''
+        # TODO
+        self.metaFields = ["gender", "age", "muscle", "weight"]
+        '''
+
     def getMeta(self, filename):
-        
         meta = {}
-                
-        meta['modified'] = os.path.getmtime(filename)
+
         from codecs import open
         f = open(filename, 'rU', encoding="utf-8")
         for line in f:
             lineData = line.split()
             field = lineData[0]
-            if field in ["gender", "age", "muscle", "weight"]:
+            if field in self.metaFields:
                 meta[field] = float(lineData[1])
         f.close()
-        
+
         return meta
+
 
 class LoadTaskView(gui3d.TaskView):
 

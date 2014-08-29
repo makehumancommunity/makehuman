@@ -56,13 +56,19 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
 
         #self.taggedClothes = {}
 
-        self.originalHumanMask = self.human.meshData.getFaceMask().copy()
-        self.faceHidingTggl = self.optionsBox.addWidget(gui.CheckBox("Hide faces under clothes"))
+        self.faceHidingTggl = self.optionsBox.addWidget(FaceHideCheckbox("Hide faces under clothes"))
         @self.faceHidingTggl.mhEvent
         def onClicked(event):
             self.updateFaceMasks(self.faceHidingTggl.selected)
+        @self.faceHidingTggl.mhEvent
+        def onMouseEntered(event):
+            self.visualizeFaceMasks(True)
+        @self.faceHidingTggl.mhEvent
+        def onMouseExited(event):
+            self.visualizeFaceMasks(False)
         self.faceHidingTggl.setSelected(True)
 
+        self.oldPxyMats = {}
         self.blockFaceMasking = False
 
     def createFileChooser(self):
@@ -150,6 +156,10 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
         if gui3d.app.settings.get('cameraAutoZoom', True):
             gui3d.app.setGlobalCamera()
 
+    def onHide(self, event):
+        super(ClothesTaskView, self).onHide(event)
+        self.visualizeFaceMasks(False)
+
     def loadHandler(self, human, values):
         if values[0] == 'status':
             if values[1] == 'started':
@@ -180,11 +190,32 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
 
     def saveHandler(self, human, file):
         super(ClothesTaskView, self).saveHandler(human, file)
-        file.write('clothesHideFaces %s\n' % self.faceHidingTggl.selected)
+        file.write('clothesHideFaces %s\n' % str(self.faceHidingTggl.selected))
 
     def registerLoadSaveHandlers(self):
         super(ClothesTaskView, self).registerLoadSaveHandlers()
         gui3d.app.addLoadHandler('clothesHideFaces', self.loadHandler)
+
+    def visualizeFaceMasks(self, enabled):
+        import material
+        import getpath
+        if enabled:
+            self.oldPxyMats = dict()
+            xray_mat = material.fromFile(getpath.getSysDataPath('materials/xray.mhmat'))
+            for pxy in self.human.getProxies(includeHumanProxy=False):
+                self.oldPxyMats[pxy.uuid] = pxy.object.material.clone()
+                pxy.object.material = xray_mat
+        else:
+            for pxy in self.human.getProxies(includeHumanProxy=False):
+                if pxy.uuid in self.oldPxyMats:
+                    pxy.object.material = self.oldPxyMats[pxy.uuid]
+
+class FaceHideCheckbox(gui.CheckBox):
+    def enterEvent(self, event):
+        self.callEvent("onMouseEntered", None)
+
+    def leaveEvent(self, event):
+        self.callEvent("onMouseExited", None)
 
 
 # This method is called when the plugin is loaded into makehuman

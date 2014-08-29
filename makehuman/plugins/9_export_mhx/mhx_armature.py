@@ -432,7 +432,7 @@ end AnimationData
                 '  Property %s %.6f %s ;\n' % (key, val, string) +
                 '  PropKeys %s "min":%.6f,"max":%.6f, ;\n' % (key, min, max))
         else:
-            halt
+            raise RuntimeError("Cannot define prop")
 
 
     def writeArmature(self, fp, version, env):

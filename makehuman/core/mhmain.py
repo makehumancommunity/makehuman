@@ -45,7 +45,7 @@ import contextlib
 
 from core import G
 import mh
-import events3d
+from progress import Progress
 import files3d
 import gui3d
 import geometry3d
@@ -129,14 +129,14 @@ class SymmetryAction(gui3d.Action):
             self.human.applySymmetryRight()
         else:
             self.human.applySymmetryLeft()
-        self.human.applyAllTargets(G.app.progress)
+        self.human.applyAllTargets()
         mh.redraw()
         return True
 
     def undo(self):
         for (modifierName, value) in self.before:
             self.human.getModifier(modifierName).setValue(value)
-        self.human.applyAllTargets(G.app.progress)
+        self.human.applyAllTargets()
         mh.redraw()
         return True
 
@@ -202,7 +202,6 @@ class MHApplication(gui3d.Application, mh.Application):
                 'realtimeFitting': True,
                 'sliderImages': True,
                 'excludePlugins': [
-                    "0_modeling_8_random",
                     "7_data",
                     "7_example",
                     "7_material_editor",
@@ -305,7 +304,7 @@ class MHApplication(gui3d.Application, mh.Application):
         return G.args
 
     def loadHumanMHM(self, filename):
-        self.selectedHuman.load(filename, True, self.progress)
+        self.selectedHuman.load(filename, True)
         self.clearUndoRedo()
         # Reset mesh is never forced to wireframe
         self.actions.wireframe.setChecked(False)
@@ -313,15 +312,12 @@ class MHApplication(gui3d.Application, mh.Application):
     # TO THINK: Maybe move guiload's saveMHM here as saveHumanMHM?
 
     def loadHuman(self):
-        self.progress(0.1)
 
         # Set a lower than default MAX_FACES value because we know the human has a good topology (will make it a little faster)
         # (we do not lower the global limit because that would limit the selection of meshes that MH would accept too much)
         self.selectedHuman = self.addObject(human.Human(files3d.loadMesh(mh.getSysDataPath("3dobjs/base.obj"), maxFaces = 5)))
 
     def loadScene(self):
-
-        self.progress(0.18)
 
         userSceneDir = mh.getDataPath("scenes")
         if not os.path.exists(userSceneDir):
@@ -332,8 +328,6 @@ class MHApplication(gui3d.Application, mh.Application):
         self.setScene( Scene(findFile("scenes/default.mhscene")) )
 
     def loadMainGui(self):
-
-        self.progress(0.2)
 
         @self.selectedHuman.mhEvent
         def onMouseDown(event):
@@ -447,34 +441,25 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def loadPlugins(self):
 
-        self.progress(0.4)
-
         # Load plugins not starting with _
-        self.pluginsToLoad = glob.glob(mh.getSysPath(os.path.join("plugins/",'[!_]*.py')))
+        pluginsToLoad = glob.glob(mh.getSysPath(os.path.join("plugins/",'[!_]*.py')))
 
         # Load plugin packages (folders with a file called __init__.py)
         for fname in os.listdir(mh.getSysPath("plugins/")):
             if fname[0] != "_":
                 folder = os.path.join("plugins", fname)
                 if os.path.isdir(folder) and ("__init__.py" in os.listdir(folder)):
-                    self.pluginsToLoad.append(folder)
+                    pluginsToLoad.append(folder)
 
-        self.pluginsToLoad.sort()
-        self.pluginsToLoad.reverse()
+        pluginsToLoad.sort()
 
-        while self.pluginsToLoad:
-            self.loadNextPlugin()
+        fprog = Progress(len(pluginsToLoad))
+        for path in pluginsToLoad:
+            self.loadPlugin(path)
+            fprog.step()
 
-    def loadNextPlugin(self):
+    def loadPlugin(self, path):
 
-        alreadyLoaded = len(self.modules)
-        stillToLoad = len(self.pluginsToLoad)
-        self.progress(0.4 + (float(alreadyLoaded) / float(alreadyLoaded + stillToLoad)) * 0.4)
-
-        if not stillToLoad:
-            return
-
-        path = self.pluginsToLoad.pop()
         try:
             name, ext = os.path.splitext(os.path.basename(path))
             if name not in self.settings['excludePlugins']:
@@ -532,19 +517,22 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def loadGui(self):
 
-        self.progress(0.9)
+        progress = Progress(4)
 
         category = self.getCategory('Settings')
         category.addTask(PluginsTaskView(category))
+        progress.step()
 
         mh.refreshLayout()
+        progress.step()
 
         self.switchCategory("Modelling")
+        progress.step()
 
         # Create viewport grid
         self.loadGrid()
+        progress.step()
 
-        self.progress(1.0)
         # self.progressBar.hide()
 
     def loadGrid(self):
@@ -607,7 +595,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def loadFinish(self):
         #self.selectedHuman.callEvent('onChanged', events3d.HumanEvent(self.selectedHuman, 'reset'))
-        self.selectedHuman.applyAllTargets(gui3d.app.progress)
+        self.selectedHuman.applyAllTargets()
 
         self.prompt('Warning', 'MakeHuman is a character creation suite. It is designed for making anatomically correct humans.\nParts of this program may contain nudity.\nDo you want to proceed?', 'Yes', 'No', None, self.stop, 'nudityWarning')
         # self.splash.hide()
@@ -637,35 +625,37 @@ class MHApplication(gui3d.Application, mh.Application):
 
         #self.splash.setFormat('<br><br><b><font size="10" color="#ffffff">%s</font></b>')
 
-        log.message('Loading human')
+        progress = Progress([36, 6, 15, 333, 40, 154, 257, 5], messaging=True)
+
+        progress.firststep('Loading human')
         self.loadHuman()
 
-        log.message('Loading scene')
+        progress.step('Loading scene')
         self.loadScene()
 
-        log.message('Loading main GUI')
+        progress.step('Loading main GUI')
         self.loadMainGui()
 
-        log.message('Loading plugins')
+        progress.step('Loading plugins')
         self.loadPlugins()
 
-        log.message('Loading GUI')
+        progress.step('Loading GUI')
         self.loadGui()
 
-        log.message('Loading theme')
+        progress.step('Loading theme')
         try:
             self.setTheme(self.settings.get('guiTheme', 'makehuman'))
         except:
             self.setTheme("default")
 
-        log.message('Applying targets')
+        progress.step('Applying targets')
         self.loadFinish()
-
+        
+        progress.step('Loading macro targets')
         if self.settings.get('preloadTargets', False):
-            log.message('Loading macro targets')
             self.loadMacroTargets()
 
-        log.message('Loading done')
+        progress.step('Loading done')
 
         log.message('')
 
@@ -695,6 +685,9 @@ class MHApplication(gui3d.Application, mh.Application):
             if self.args.get('mhmFile', None):
                 mhmFile = self.args.get('mhmFile')
                 log.message("Loading MHM file %s (as specified by commandline argument)", mhmFile)
+                if not os.path.isfile(mhmFile):
+                    import getpath
+                    mhmFile = getpath.findFile(mhmFile, mh.getPath("models"))
                 if os.path.isfile(mhmFile):
                     self.loadHumanMHM(mhmFile)
                 else:
@@ -980,8 +973,8 @@ class MHApplication(gui3d.Application, mh.Application):
         """
         return language.getLanguages()
 
-    def getLanguageString(self, string):
-        return language.language.getLanguageString(string)
+    def getLanguageString(self, string, appendData=None, appendFormat=None):
+        return language.language.getLanguageString(string,appendData,appendFormat)
 
     def dumpMissingStrings(self):
         language.language.dumpMissingStrings()
@@ -1051,7 +1044,7 @@ class MHApplication(gui3d.Application, mh.Application):
         if self.dialog is None:
             self.dialog = gui.Dialog(self.mainwin)
             self.dialog.helpIds.update(self.helpIds)
-        self.dialog.prompt(title, text, button1Label, button2Label, button1Action, button2Action, helpId, fmtArgs)
+        return self.dialog.prompt(title, text, button1Label, button2Label, button1Action, button2Action, helpId, fmtArgs)
 
     def setGlobalCamera(self):
         human = self.selectedHuman
@@ -1272,7 +1265,7 @@ class MHApplication(gui3d.Application, mh.Application):
         self.redraw()
 
     def toggleSubdivision(self):
-        self.selectedHuman.setSubdivided(self.actions.smooth.isChecked(), True, self.progress)
+        self.selectedHuman.setSubdivided(self.actions.smooth.isChecked(), True)
         self.redraw()
 
     def symmetryRight(self):
@@ -1318,7 +1311,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def _resetHuman(self):
         self.selectedHuman.resetMeshValues()
-        self.selectedHuman.applyAllTargets(self.progress)
+        self.selectedHuman.applyAllTargets()
         self.clearUndoRedo()
         # Reset mesh is never forced to wireframe
         self.actions.wireframe.setChecked(False)
@@ -1469,72 +1462,72 @@ class MHApplication(gui3d.Application, mh.Application):
         # Global actions (eg. keyboard shortcuts)
         toolbar = None
 
-        self.actions.rendering = action('rendering', 'Rendering',     self.goToRendering)
-        self.actions.modelling = action('modelling', 'Modelling',     self.goToModelling)
-        self.actions.exit      = action('exit'     , 'Exit',          self.promptAndExit)
+        self.actions.rendering = action('rendering', self.getLanguageString('Rendering'),     self.goToRendering)
+        self.actions.modelling = action('modelling', self.getLanguageString('Modelling'),     self.goToModelling)
+        self.actions.exit      = action('exit'     , self.getLanguageString('Exit'),          self.promptAndExit)
 
-        self.actions.rotateU   = action('rotateU',   'Rotate Up',     self.rotateUp)
-        self.actions.rotateD   = action('rotateD',   'Rotate Down',   self.rotateDown)
-        self.actions.rotateR   = action('rotateR',   'Rotate Right',  self.rotateRight)
-        self.actions.rotateL   = action('rotateL',   'Rotate Left',   self.rotateLeft)
-        self.actions.panU      = action('panU',      'Pan Up',        self.panUp)
-        self.actions.panD      = action('panD',      'Pan Down',      self.panDown)
-        self.actions.panR      = action('panR',      'Pan Right',     self.panRight)
-        self.actions.panL      = action('panL',      'Pan Left',      self.panLeft)
-        self.actions.zoomIn    = action('zoomIn',    'Zoom In',       self.zoomIn)
-        self.actions.zoomOut   = action('zoomOut',   'Zoom Out',      self.zoomOut)
+        self.actions.rotateU   = action('rotateU',   self.getLanguageString('Rotate Up'),     self.rotateUp)
+        self.actions.rotateD   = action('rotateD',   self.getLanguageString('Rotate Down'),   self.rotateDown)
+        self.actions.rotateR   = action('rotateR',   self.getLanguageString('Rotate Right'),  self.rotateRight)
+        self.actions.rotateL   = action('rotateL',   self.getLanguageString('Rotate Left'),   self.rotateLeft)
+        self.actions.panU      = action('panU',      self.getLanguageString('Pan Up'),        self.panUp)
+        self.actions.panD      = action('panD',      self.getLanguageString('Pan Down'),      self.panDown)
+        self.actions.panR      = action('panR',      self.getLanguageString('Pan Right'),     self.panRight)
+        self.actions.panL      = action('panL',      self.getLanguageString('Pan Left'),      self.panLeft)
+        self.actions.zoomIn    = action('zoomIn',    self.getLanguageString('Zoom In'),       self.zoomIn)
+        self.actions.zoomOut   = action('zoomOut',   self.getLanguageString('Zoom Out'),      self.zoomOut)
 
-        self.actions.profiling = action('profiling', 'Profiling',     self.toggleProfiling, toggle=True)
+        self.actions.profiling = action('profiling', self.getLanguageString('Profiling'),     self.toggleProfiling, toggle=True)
 
 
         # 1 - File toolbar
         toolbar = self.file_toolbar = mh.addToolBar("File")
 
-        self.actions.load      = action('load',      'Load',          self.goToLoad)
-        self.actions.save      = action('save',      'Save',          self.doSave)
-        self.actions.export    = action('export',    'Export',        self.goToExport)
+        self.actions.load      = action('load',      self.getLanguageString('Load'),          self.goToLoad)
+        self.actions.save      = action('save',      self.getLanguageString('Save'),          self.doSave)
+        self.actions.export    = action('export',    self.getLanguageString('Export'),        self.goToExport)
 
 
         # 2 - Edit toolbar
         toolbar = self.edit_toolbar = mh.addToolBar("Edit")
 
-        self.actions.undo      = action('undo',      'Undo',          self.undo)
-        self.actions.redo      = action('redo',      'Redo',          self.redo)
-        self.actions.reset     = action('reset',     'Reset',         self.resetHuman)
+        self.actions.undo      = action('undo',      self.getLanguageString('Undo'),          self.undo)
+        self.actions.redo      = action('redo',      self.getLanguageString('Redo'),          self.redo)
+        self.actions.reset     = action('reset',     self.getLanguageString('Reset'),         self.resetHuman)
 
 
         # 3 - View toolbar
         toolbar = self.view_toolbar = mh.addToolBar("View")
 
-        self.actions.smooth    = action('smooth',    'Smooth',        self.toggleSubdivision, toggle=True)
-        self.actions.wireframe = action('wireframe', 'Wireframe',     self.toggleSolid, toggle=True)
+        self.actions.smooth    = action('smooth',    self.getLanguageString('Smooth'),        self.toggleSubdivision, toggle=True)
+        self.actions.wireframe = action('wireframe', self.getLanguageString('Wireframe'),     self.toggleSolid, toggle=True)
 
 
         # 4 - Symmetry toolbar
         toolbar = self.sym_toolbar = mh.addToolBar("Symmetry")
 
-        self.actions.symmetryR = action('symm1', 'Symmmetry R>L',     self.symmetryLeft)
-        self.actions.symmetryL = action('symm2', 'Symmmetry L>R',     self.symmetryRight)
-        self.actions.symmetry  = action('symm',  'Symmmetry',         self.symmetry, toggle=True)
+        self.actions.symmetryR = action('symm1', self.getLanguageString('Symmmetry R>L'),     self.symmetryLeft)
+        self.actions.symmetryL = action('symm2', self.getLanguageString('Symmmetry L>R'),     self.symmetryRight)
+        self.actions.symmetry  = action('symm',  self.getLanguageString('Symmmetry'),         self.symmetry, toggle=True)
 
 
         # 5 - Camera toolbar
         toolbar = self.camera_toolbar = mh.addToolBar("Camera")
 
-        self.actions.front     = action('front',     'Front view',    self.frontView)
-        self.actions.back      = action('back',      'Back view',     self.backView)
-        self.actions.right     = action('right',     'Right view',    self.rightView)
-        self.actions.left      = action('left',      'Left view',     self.leftView)
-        self.actions.top       = action('top',       'Top view',      self.topView)
-        self.actions.bottom    = action('bottom',    'Bottom view',   self.bottomView)
-        self.actions.resetCam  = action('resetCam',  'Reset camera',  self.resetView)
+        self.actions.front     = action('front',     self.getLanguageString('Front view'),    self.frontView)
+        self.actions.back      = action('back',      self.getLanguageString('Back view'),     self.backView)
+        self.actions.right     = action('right',     self.getLanguageString('Right view'),    self.rightView)
+        self.actions.left      = action('left',      self.getLanguageString('Left view'),     self.leftView)
+        self.actions.top       = action('top',       self.getLanguageString('Top view'),      self.topView)
+        self.actions.bottom    = action('bottom',    self.getLanguageString('Bottom view'),   self.bottomView)
+        self.actions.resetCam  = action('resetCam',  self.getLanguageString('Reset camera'),  self.resetView)
 
 
         # 6 - Other toolbar
         toolbar = self.other_toolbar = mh.addToolBar("Other")
 
-        self.actions.grab      = action('grab',      'Grab screen',   self.grabScreen)
-        self.actions.help      = action('help',      'Help',          self.goToHelp)
+        self.actions.grab      = action('grab',      self.getLanguageString('Grab screen'),   self.grabScreen)
+        self.actions.help      = action('help',      self.getLanguageString('Help'),          self.goToHelp)
 
 
     def createShortcuts(self):

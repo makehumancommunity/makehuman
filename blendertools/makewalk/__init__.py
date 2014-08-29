@@ -23,7 +23,7 @@
 # Product Home Page:   http://www.makehuman.org/
 # Code Home Page:      https://bitbucket.org/MakeHuman/makehuman/
 # Authors:             Thomas Larsson
-# Script copyright (C) MakeHuman Team 2001-2014
+# Script copyright (C) MakeHuman Team 2001-2013
 # Coding Standards:    See http://www.makehuman.org/node/165
 
 """
@@ -40,8 +40,8 @@ Alternatively, run the script in the script editor (Alt-P), and access from UI p
 bl_info = {
     "name": "MakeWalk",
     "author": "Thomas Larsson",
-    "version": (0, 943),
-    "blender": (2, 6, 9),
+    "version": (1,1,0),
+    "blender": (2,7,1),
     "location": "View3D > Tools > MakeWalk",
     "description": "Mocap tool for MakeHuman character",
     "warning": "",
@@ -50,7 +50,7 @@ bl_info = {
 
 # To support reload properly, try to access a package var, if it's there, reload everything
 if "bpy" in locals():
-    print("Reloading MakeWalk v %d.%d" % bl_info["version"])
+    print("Reloading MakeWalk")
     import imp
     imp.reload(utils)
     imp.reload(io_json)
@@ -68,7 +68,7 @@ if "bpy" in locals():
     imp.reload(edit)
     imp.reload(floor)
 else:
-    print("Loading MakeWalk v %d.%d" % bl_info["version"])
+    print("Loading MakeWalk")
     import bpy, os
     from bpy_extras.io_utils import ImportHelper
     from bpy.props import *
@@ -101,7 +101,8 @@ def inset(layout):
 #
 
 class MainPanel(bpy.types.Panel):
-    bl_label = "MakeWalk v %d.%d: Main" % bl_info["version"]
+    bl_category = "MakeWalk"
+    bl_label = "MakeWalk v %d.%d.%d: Main" % bl_info["version"]
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
 
@@ -141,6 +142,7 @@ class MainPanel(bpy.types.Panel):
 #
 
 class OptionsPanel(bpy.types.Panel):
+    bl_category = "MakeWalk"
     bl_label = "MakeWalk: Options"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
@@ -160,7 +162,6 @@ class OptionsPanel(bpy.types.Panel):
         layout.prop(scn, "McpBvhScale")
         layout.prop(scn, "McpUseLimits")
         layout.prop(scn, "McpClearLocks")
-        layout.prop(scn, "McpMakeHumanTPose")
         layout.prop(scn, 'McpAutoSourceRig')
         layout.prop(scn, 'McpAutoTargetRig')
         layout.prop(scn, "McpIgnoreHiddenLayers")
@@ -193,6 +194,7 @@ class OptionsPanel(bpy.types.Panel):
 #
 
 class EditPanel(bpy.types.Panel):
+    bl_category = "MakeWalk"
     bl_label = "MakeWalk: Edit Actions"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
@@ -333,6 +335,7 @@ class EditPanel(bpy.types.Panel):
 #
 
 class MhxSourceBonesPanel(bpy.types.Panel):
+    bl_category = "MakeWalk"
     bl_label = "MakeWalk: Source armature"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
@@ -378,6 +381,7 @@ class MhxSourceBonesPanel(bpy.types.Panel):
 #
 
 class MhxTargetBonesPanel(bpy.types.Panel):
+    bl_category = "MakeWalk"
     bl_label = "MakeWalk: Target armature"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
@@ -404,13 +408,10 @@ class MhxTargetBonesPanel(bpy.types.Panel):
         layout.prop(scn, "McpIgnoreHiddenLayers")
         layout.prop(rig, "MhReverseHip")
         layout.operator("mcp.get_target_rig")
-
-        layout.separator()
-        layout.operator("mcp.set_t_pose")
-
         layout.separator()
         layout.prop(scn, "McpSaveTargetTPose")
         layout.operator("mcp.save_target_file")
+
         layout.separator()
 
         if scn.McpTargetRig:
@@ -450,6 +451,7 @@ class MhxTargetBonesPanel(bpy.types.Panel):
 #
 
 class UtilityPanel(bpy.types.Panel):
+    bl_category = "MakeWalk"
     bl_label = "MakeWalk: Utilities"
     bl_space_type = "VIEW_3D"
     bl_region_type = "TOOLS"
@@ -465,36 +467,41 @@ class UtilityPanel(bpy.types.Panel):
         scn = context.scene
         rig = context.object
 
-        layout.label("Default Settings")
-        #layout.operator("mcp.init_interface")
-        layout.operator("mcp.save_defaults")
-        layout.operator("mcp.load_defaults")
+        layout.prop(scn, "McpShowDefaultSettings")
+        if scn.McpShowDefaultSettings:
+            ins = inset(layout)
+            ins.operator("mcp.save_defaults")
+            ins.operator("mcp.load_defaults")
 
         layout.separator()
-        layout.label("Manage Actions")
-        layout.prop_menu_enum(context.scene, "McpActions")
-        layout.prop(scn, 'McpFilterActions')
-        layout.operator("mcp.update_action_list")
-        layout.operator("mcp.set_current_action").prop = 'McpActions'
-        #layout.prop(scn, "McpReallyDelete")
-        layout.operator("mcp.delete")
-        layout.operator("mcp.delete_hash")
+        layout.prop(scn, "McpShowActions")
+        if scn.McpShowActions:
+            ins = inset(layout)
+            ins.prop_menu_enum(context.scene, "McpActions")
+            ins.prop(scn, 'McpFilterActions')
+            ins.operator("mcp.update_action_list")
+            ins.operator("mcp.set_current_action").prop = 'McpActions'
+            ins.operator("mcp.delete")
+            ins.operator("mcp.delete_hash")
+
+        layout.separator()
+        layout.prop(scn, "McpShowPosing")
+        if scn.McpShowPosing:
+            ins = inset(layout)
+            if not rig.McpTPoseDefined:
+                ins.prop(scn, "McpMakeHumanTPose")
+            ins.operator("mcp.set_t_pose")
+            ins.separator()
+            ins.operator("mcp.define_t_pose")
+            ins.operator("mcp.undefine_t_pose")
+            ins.separator()
+            ins.operator("mcp.load_pose")
+            ins.operator("mcp.save_pose")
+            ins.separator()
+            ins.operator("mcp.rest_current_pose")
 
         layout.separator()
         layout.operator("mcp.clear_temp_props")
-
-        layout.separator()
-        layout.label("T-pose")
-        layout.operator("mcp.set_t_pose")
-        layout.operator("mcp.clear_t_pose")
-        layout.operator("mcp.load_t_pose")
-        layout.operator("mcp.save_t_pose")
-
-        layout.separator()
-        layout.label("Rest Pose")
-        layout.operator("mcp.rest_current_pose")
-        #layout.operator("mcp.rest_t_pose")
-        #layout.operator("mcp.rest_default_pose")
 
         return
         layout.operator("mcp.copy_angles_fk_ik")
@@ -520,5 +527,4 @@ def unregister():
 if __name__ == "__main__":
     register()
 
-print("MakeWalk loaded")
 

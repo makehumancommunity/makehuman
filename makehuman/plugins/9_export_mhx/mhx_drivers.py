@@ -357,9 +357,5 @@ def useThisShape(name, proxy):
         return True
     if proxy.type == 'Proxymeshes':
         return True
-    if name in proxy.shapekeys:
-        return True
-    if name[:-2] in proxy.shapekeys:
-        return True
     return False
 
