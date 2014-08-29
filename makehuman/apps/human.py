@@ -1129,30 +1129,39 @@ class Human(guicommon.Object):
 
     def save(self, filename, tags):
         from codecs import open
-        import os
         progress = Progress(len(G.app.saveHandlers))
         event = events3d.HumanEvent(self, 'save')
         event.path = filename
         self.callEvent('onChanging', event)
 
-        open(filename, 'a') # Make sure the file exists
-        f = open(filename, "r+", encoding="utf-8")
+        f = open(filename, "w", encoding="utf-8")
         f.write('# Written by MakeHuman %s\n' % getVersionStr())
         f.write('version %s\n' % getShortVersion())
         f.write('tags %s\n' % tags)
 
+        class SaveWriter(object):
+            def __init__(self, file_obj):
+                self.f = file_obj
+
+            def write(self, text):
+                # Ensure that handlers write lines ending with newline character
+                if not text.endswith("\n"):
+                    text = text+"\n"
+                self.f.write(text)
+
+            def writelines(self, text):
+                # Ensure that handlers write lines ending with newline character
+                if not text.endswith("\n"):
+                    text = text+"\n"
+                self.f.writelines(text)
+
+            def __getattr__(self, attr):
+                return self.f.__getattribute__(attr)
+
+        f = SaveWriter(f)
+
         for handler in G.app.saveHandlers:
-            t = f.tell()
             handler(self, f)
-            # Ensure that handlers write lines ending with newline character
-            if f.tell() != t:
-                f.seek(-1, 2)
-                lastchar = f.read()
-                f.seek(0, 2)
-                if lastchar != '\n':
-                    f.write('\n')
-                f.flush()
-                os.fsync(f.fileno())
             progress.step()
 
         f.write('subdivide %s' % self.isSubdivided())
