@@ -39,6 +39,7 @@ Data handlers for skeletal animation.
 
 import math
 import numpy as np
+import numpy.linalg as la
 
 
 INTERPOLATION = {
@@ -456,17 +457,26 @@ def loadPoseFromMhpFile(filepath, skel):
 
     for line in fp:
         words = line.split()
-        if len(words) < 5:
+        if words[0].startswith('#'):
+            # comment
             continue
-        elif words[1] in ["quat", "gquat"]:
-            valid_file = True
-            boneIdx = boneMap[words[0]]
-            quat = float(words[2]),float(words[3]),float(words[4]),float(words[5])
-            mat = tm.quaternion_matrix(quat)
-            if words[1] == "gquat":
-                bone = skel.bones[boneIdx]
-                mat = np.dot(la.inv(bone.matRestRelative), mat)
-            poseMats[boneIdx] = mat[:3,:3]
+        if len(words) < 10:
+            log.warning("Too short line in mhp file: %s" % " ".join(words))
+            continue
+        elif words[1] == "matrix":
+            bname = words[0]
+            boneIdx = boneMap[bname]
+            rows = []
+            n = 2
+            for i in range(4):
+                rows.append((float(words[n]), float(words[n+1]), float(words[n+2]), float(words[n+3])))
+                n += 4
+            mat = np.array(rows)
+            bone = skel.bones[bname]
+            mat = np.dot(la.inv(bone.matRestRelative), mat)
+            poseMats[boneIdx] = mat
+        else:
+            log.warning("Unknown keyword in mhp file: %s" % words[1])
 
     if not valid_file:
         log.error("Loading of MHP file %s failed, probably a bad file." % filepath)
