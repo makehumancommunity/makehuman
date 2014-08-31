@@ -455,9 +455,10 @@ def loadPoseFromMhpFile(filepath, skel):
     poseMats = np.zeros((nBones,4,4),dtype=np.float32)
     poseMats[:] = np.identity(4, dtype=np.float32)
 
+    mats = dict()
     for line in fp:
         words = line.split()
-        if words[0].startswith('#'):
+        if len(words) > 0 and words[0].startswith('#'):
             # comment
             continue
         if len(words) < 10:
@@ -469,17 +470,42 @@ def loadPoseFromMhpFile(filepath, skel):
             rows = []
             n = 2
             for i in range(4):
-                rows.append((float(words[n]), float(words[n+1]), float(words[n+2]), float(words[n+3])))
+                rows.append([float(words[n]), float(words[n+1]), float(words[n+2]), float(words[n+3])])
                 n += 4
-            mat = np.array(rows)
-            bone = skel.bones[bname]
-            mat = np.dot(la.inv(bone.matRestRelative), mat)
-            poseMats[boneIdx] = mat
+            # Invert Z rotation (for some reason this is required to make MHP orientations work)
+            rows[0][1] = -rows[0][1]
+            rows[1][0] = -rows[1][0]
+            # Invert X rotation
+            #rows[1][2] = -rows[1][2]
+            #rows[2][1] = -rows[2][1]
+            # Invert Y rotation
+            rows[0][2] = -rows[0][2]
+            rows[2][0] = -rows[2][0]
+
+            mats[boneIdx] = np.array(rows)
         else:
             log.warning("Unknown keyword in mhp file: %s" % words[1])
 
     if not valid_file:
         log.error("Loading of MHP file %s failed, probably a bad file." % filepath)
+
+    '''
+    # Apply pose to bones in breadth-first order (parent to child bone)
+    for boneIdx in sorted(mats.keys()):
+        bone = skel.boneslist[boneIdx]
+        mat = mats[boneIdx]
+        if bone.parent:
+            mat = np.dot(poseMats[bone.parent.index], np.dot(bone.matRestRelative, mat))
+        else:
+            mat = np.dot(self.matRestGlobal, mat)
+        poseMats[boneIdx] = mat
+
+    for boneIdx in sorted(mats.keys()):
+        bone = skel.boneslist[boneIdx]
+        poseMats[boneIdx] = np.dot(poseMats[boneIdx], la.inv(bone.matRestGlobal))
+    '''
+    for boneIdx in sorted(mats.keys()):
+        poseMats[boneIdx] = mats[boneIdx]
 
     fp.close()
 
