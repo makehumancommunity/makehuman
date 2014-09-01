@@ -66,6 +66,7 @@ class BVH():
         self.frames = []
 
         self.convertFromZUp = False     # Set to true to convert the coordinates from a Z-is-up coordinate system. Most motion capture data uses Y-is-up, though.
+        self.allowTranslation = "onlyroot"  # Joints to accept translation animation data for
 
     def addRootJoint(self, name):
         self.rootJoint = self.__addJoint(name)
@@ -632,7 +633,14 @@ class BVHJoint():
 
         # Add translations to pose matrices
         # Allow partial transformation channels too
-        if rXs != None or rYs != None or rZs != None:
+        allowTranslation = self.skeleton.allowTranslation
+        if allowTranslation == "all":
+            poseTranslate = True
+        elif allowTranslation == "onlyroot":
+            poseTranslate = (self.parent is None)
+        else:
+            poseTranslate = False
+        if poseTranslate and (rXs != None or rYs != None or rZs != None):
             if rXs == None:
                 rXs = np.zeros(nFrames, dtype=np.float32)
             if rYs == None:
@@ -662,9 +670,14 @@ class BVHJoint():
         return not self.hasChildren()
 
 
-def load(filename, convertFromZUp = False):
+def load(filename, convertFromZUp = False, allowTranslation="onlyroot"):
+    """
+    allowTranslation    determine which should receive translation animation 
+                        (allowed values: "onlyroot", "all", "none")
+    """
     result = BVH()
     result.convertFromZUp = convertFromZUp
+    result.allowTranslation = allowTranslation
     result.fromFile(filename)
     return result
 
