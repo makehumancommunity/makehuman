@@ -90,6 +90,14 @@ def isMhxRig(rig):
         return False
 
 
+def isMhOfficialRig(rig):
+    try:
+        rig.pose.bones['risorius03.R']
+        return True
+    except KeyError:
+        return False
+
+
 def isMhx7Rig(rig):
     try:
         rig.pose.bones['FootRev_L']
@@ -108,7 +116,8 @@ def isRigify(rig):
 
 def isMakeHumanRig(rig):
     try:
-        return rig["MhAlpha8"]
+        rig["MhAlpha8"]
+        return True
     except KeyError:
         return False
 

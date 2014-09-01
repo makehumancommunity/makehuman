@@ -46,7 +46,7 @@ import log
 from collections import OrderedDict
 
 import material
-import io_json
+import json
 
 
 #
@@ -432,7 +432,7 @@ def loadTextProxy(human, filepath, type="Clothes"):
 
         elif key == 'vertexgroup_file':
             proxy.vertexgroup_file = _getFileName(folder, words[1], ".json")
-            proxy.vertexGroups = io_json.loadJson(proxy.vertexgroup_file)
+            proxy.vertexGroups = json.load(open(proxy.vertexgroup_file, "rU"))
 
         elif key == 'material':
             matFile = _getFileName(folder, words[1], ".mhmat")
@@ -674,7 +674,7 @@ def loadBinaryProxy(path, human, type):
     if 'vertexgroup_file' in npzfile:
         proxy._vertexgroup_file = npzfile['vertexgroup_file'].tostring()
         if proxy.vertexgroup_file:
-            proxy.vertexGroups = io_json.loadJson(proxy.vertexgroup_file)
+            proxy.vertexGroups = json.load(open(proxy.vertexgroup_file, "rU"))
 
 
     if proxy.z_depth == -1:

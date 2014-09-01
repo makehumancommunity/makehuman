@@ -54,7 +54,6 @@ import numpy.linalg as la
 import transformations as tm
 import matrix
 
-from codecs import open
 import log
 
 D = pi/180
@@ -98,7 +97,7 @@ class Skeleton(object):
         from armature.armature import setupArmature
         from core import G
 
-        amt = setupArmature("python", G.app.selectedHuman, options)
+        self._amt = amt = setupArmature("python", G.app.selectedHuman, options)
         for bone in amt.bones.values():
             self.addBone(bone.name, bone.parent, bone.head, bone.tail, bone.roll)
 
@@ -171,8 +170,26 @@ class Skeleton(object):
             bone.build()
 
     def update(self):
+        """
+        Update skeleton pose matrices after setting a new pose.
+        """
         for bone in self.getBones():
             bone.update()
+
+    def updateJoints(self, humanMesh):
+        """
+        Update skeleton rest matrices to new joint positions after modifying
+        human.
+        """
+        self._amt.updateJoints()
+        for amtBone in self._amt.bones.values():
+            bone = self.getBone(amtBone.name)
+            bone.headPos[:] = amtBone.head
+            bone.tailPos[:] = amtBone.tail
+            bone.roll = amtBone.roll
+
+        for bone in self.getBones():
+            bone.build()
 
     def getBoneCount(self):
         return len(self.getBones())
@@ -228,13 +245,21 @@ class Skeleton(object):
         Update (pose) assigned mesh using linear blend skinning.
         """
         nVerts = len(meshCoords)
-        coords = np.zeros((nVerts,4), float)
+        coords = np.zeros((nVerts,3), float)
+        if meshCoords.shape[1] != 4:
+            meshCoords_ = np.ones((nVerts, 4), float)   # TODO also allow skinning vectors (normals)? 
+            meshCoords_[:,:3] = meshCoords
+            meshCoords = meshCoords_
+            log.debug("Unoptimized data structure passed to skinMesh, this will incur performance penalty when used for animation.")
         for bname, mapping in vertBoneMapping.items():
-            bone = self.getBone(bname)
-            verts,weights = mapping
-            vec = np.dot(bone.matPoseVerts, meshCoords[verts].transpose())
-            wvec = weights*vec
-            coords[verts] += wvec.transpose()
+            try:
+                bone = self.getBone(bname)
+                verts,weights = mapping
+                vec = np.dot(bone.matPoseVerts, meshCoords[verts].transpose())
+                wvec = weights*vec
+                coords[verts] += wvec.transpose()[:,:3]
+            except:
+                log.warning("Could not skin bone %s: no such bone in skeleton" % bname)
 
         return coords
 
@@ -283,36 +308,6 @@ class Skeleton(object):
         for idx, name in enumerate(boneNames):
             result[name] = idx
         return result
-
-    def loadPoseFromMhpFile(self, filepath):
-        """
-        Load a MHP pose file that contains a static pose. Posing data is defined
-        with quaternions to indicate rotation angles.
-        Sets current pose to
-        """
-        log.message("Mhp %s", filepath)
-        fp = open(filepath, "rU", encoding="utf-8")
-
-        boneMap = self.getBoneToIdxMapping()
-        nBones = len(boneMap.keys())
-        poseMats = np.zeros((nBones,4,4),dtype=np.float32)
-        poseMats[:] = np.identity(4, dtype=np.float32)
-
-        for line in fp:
-            words = line.split()
-            if len(words) < 5:
-                continue
-            elif words[1] in ["quat", "gquat"]:
-                boneIdx = boneMap[words[0]]
-                quat = float(words[2]),float(words[3]),float(words[4]),float(words[5])
-                mat = tm.quaternion_matrix(quat)
-                if words[1] == "gquat":
-                    bone = self.bones[boneIdx]
-                    mat = np.dot(la.inv(bone.matRestRelative), mat)
-                poseMats[boneIdx] = mat[:3,:3]
-
-        fp.close()
-        self.setPose(poseMats)
 
     def compare(self, other):
         pass

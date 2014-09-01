@@ -1,0 +1,12 @@
+{
+    "name" : "MakeHuman",
+
+    "description" :
+        "The official MakeHuman rig",
+
+    "settings" : {
+    	"useMakeHumanRig" : true
+    }
+}
+
+
