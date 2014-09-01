@@ -36,32 +36,31 @@
 Abstract
 --------
 
-Functions for processing .mhstx files
-and manipulating subtextures as Image objects.
+Subtexture class definition.
+Functions for combining and manipulating subtextures.
 """
 
-import os
 import inifile
 import image
 from codecs import open
 
-def combine(image, mhstx):
-    img = image.Image(image)
-    f = open(mhstx, 'rU', encoding="utf-8")
-    try:
-        subTextures = inifile.parseINI(f.read(), [("(","["), (")","]")])
-    except:
-        log.warning("subtextures.combine(%s)", mhstx, exc_info=True)
-        f.close()
+
+class Subtexture(object):
+    """
+    A Subtexture is a texture that can be
+    combined with a larger texture by overlapping it.
+    It is useful for modifying small areas of large textures
+    without replacing the whole texture.
+    """
+
+    def __init__(self, source, position):
+        super(Subtexture, self).__init__()
+        self.source = image.Image(source)
+        self.position = position
+
+    def overlap(img):
+        img = image.Image(img)
+        img.blit(self.source, *self.position)
         return img
-    f.close()
-    
-    texdir = os.path.dirname(mhstx)
-    for subTexture in subTextures:
-        path = os.path.join(texdir, subTexture['txt'])
-        subImg = image.Image(path)
-        x, y = subTexture['dst']
-        img.blit(subImg, x, y)
 
-    return img
-
+    # [("(","["), (")","]")]
