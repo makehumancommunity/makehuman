@@ -32,7 +32,7 @@
 **Coding Standards:**  See http://www.makehuman.org/node/165
 
 Abstract
---------
+-------
 
 Parser for armature
 """
@@ -126,6 +126,7 @@ class Parser:
             rig_bones.Planes,
             rig_face.Planes,
         ])
+
         self.planeJoints = rig_control.PlaneJoints
 
         self.headsTails = mergeDicts([

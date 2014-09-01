@@ -40,20 +40,7 @@ TODO
 from export import Exporter
 from exportutils.config import Config
 
-# Access to submodules for derived mhx exporters.
-# The idea is that I can use a custom mhx exporter
-# for experimentation, without affecting official
-# MH code. This is somewhat tricky because
-# import 9_export_mhx
-# yields a syntax error.
 from . import mhx_main
-from . import mhx_mesh
-from . import mhx_materials
-from . import mhx_armature
-from . import mhx_pose
-from . import mhx_proxy
-from . import mhx_writer
-from . import mhx_rigify
 
 class MhxConfig(Config):
 
@@ -61,27 +48,41 @@ class MhxConfig(Config):
         Config.__init__(self)
         self.scale,self.unit =      (1, "decimeter")
         self.useRelPaths =          True
-        self.useAdvancedMHX =       False
-        self.useRigify =            False
+        self.useNoRig =             False
+        self.useStandardRig =       True
+        self.useNewMHX =            False
+        self.useLegacyMHX =         False
+        self.useNewRigify =         False
+        self.useLegacyRigify =      False
         self.useRotationLimits =    False
 
         self.feetOnGround =         True
-        self.useFaceRig =           False
+        self.useFaceRig =           True
         self.expressions =          False
         self.useCustomTargets =     False
 
     def getRigOptions(self):
-        if self.useRigify:
-            from .mhx_rigify import RigifyOptions
-            return RigifyOptions(self)
+        from armature.options import ArmatureOptions
 
-        rigOptions = super(MhxConfig, self).getRigOptions()
-        if rigOptions is None:
-            # No rig is selected from skeleton library, use custom MHX rig
-            from armature.options import ArmatureOptions
-            self.useAdvancedMHX = True  # TODO this is ugly, a getter modifying the state of the object, probably should set rigOptions.useAdvancedMHX
+        if self.useLegacyRigify or self.useNewRigify:
             rigOptions = ArmatureOptions()
-            rigOptions.loadPreset("data/mhx/advanced.json", None)
+            if self.useLegacyRigify:
+                rigOptions.loadPreset("data/mhx/legacy-rigify.json", None)
+            else:
+                rigOptions.loadPreset("data/mhx/new-rigify.json", None)
+
+            rigOptions.setExportOptions(
+                useCustomShapes = "face",
+                useConstraints = True,
+                useFaceRig = self.useFaceRig,
+            )
+
+        elif self.useLegacyMHX or self.useNewMHX:
+            rigOptions = ArmatureOptions()
+            if self.useLegacyMHX:
+                rigOptions.loadPreset("data/mhx/legacy-mhx.json", None)
+            else:
+                rigOptions.loadPreset("data/mhx/new-mhx.json", None)
 
             rigOptions.setExportOptions(
                 useCustomShapes = "all",
@@ -89,13 +90,25 @@ class MhxConfig(Config):
                 useBoneGroups = True,
                 useLocks = True,
                 useRotationLimits = self.useRotationLimits,
-                useCorrectives = False,
                 useFaceRig = self.useFaceRig,
-                useExpressions = self.expressions,
-                useLeftRight = False,
+            )
+
+        elif self.useNoRig:
+            rigOptions = None
+
+        else:
+            rigOptions = super(MhxConfig, self).getRigOptions()
+            if rigOptions is None:
+                # No rig is selected from skeleton library, use standard MakeHuman rig
+                rigOptions = ArmatureOptions()
+                rigOptions.loadPreset("data/rigs/makehuman.json", None)
+
+            rigOptions.setExportOptions(
+                useFaceRig = self.useFaceRig,
             )
 
         return rigOptions
+
 
 class ExporterMHX(Exporter):
     def __init__(self):
@@ -108,12 +121,19 @@ class ExporterMHX(Exporter):
     def build(self, options, taskview):
         import gui
         self.taskview       = taskview
+        self.useFaceRig   = options.addWidget(gui.CheckBox("Face rig", True))
         self.feetOnGround   = options.addWidget(gui.CheckBox("Feet on ground", True))
         self.useRotationLimits   = options.addWidget(gui.CheckBox("Rotation limits", False))
-        #self.useFaceRig     = options.addWidget(gui.CheckBox("Face rig", True))
         #self.expressions    = options.addWidget(gui.CheckBox("Expressions", False))
         #self.useCustomTargets = options.addWidget(gui.CheckBox("Custom targets", False))
-        self.useRigify      = options.addWidget(gui.CheckBox("Export for Rigify", False))
+
+        rigs = []
+        self.useNoRig = options.addWidget(gui.RadioButton(rigs, "No rig", False))
+        self.useStandardRig = options.addWidget(gui.RadioButton(rigs, "Standard rig", True))
+        self.useNewMHX = options.addWidget(gui.RadioButton(rigs, "MHX rig", False))
+        self.useNewRigify = options.addWidget(gui.RadioButton(rigs, "Rigify rig", False))
+        #self.useLegacyMHX = options.addWidget(gui.RadioButton(rigs, "Legacy MHX rig", False))
+        #self.useLegacyRigify = options.addWidget(gui.RadioButton(rigs, "Legacy Rigify rig", False))
 
     def getConfig(self):
         """
@@ -122,14 +142,15 @@ class ExporterMHX(Exporter):
         cfg = MhxConfig()
         cfg.scale, cfg.unit = self.taskview.getScale()
 
+        cfg.useFaceRig = self.useFaceRig.selected
         cfg.feetOnGround = self.feetOnGround.selected
-
-        #cfg.useFaceRig = self.useFaceRig.selected
-        #cfg.expressions = self.expressions.selected
-        #cfg.useCustomTargets = self.useCustomTargets.selected
-
-        cfg.useRigify = self.useRigify.selected
         cfg.useRotationLimits = self.useRotationLimits.selected
+        cfg.useNoRig = self.useNoRig.selected
+        cfg.useStandardRig = self.useStandardRig.selected
+        cfg.useNewMHX = self.useNewMHX.selected
+        cfg.useNewRigify = self.useNewRigify.selected
+        #cfg.useLegacyMHX = self.useLegacyMHX.selected
+        #cfg.useLegacyRigify = self.useLegacyRigify.selected
 
         return cfg
 

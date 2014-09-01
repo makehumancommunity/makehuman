@@ -5,11 +5,17 @@
         "A minimal rig intended for games.",
 
     "settings" : {
+    	"useMakeHumanRig" : true,
+    	"useMhxCompat" : true,
         "mergeSpine" : true,
         "mergeShoulders" : true,
         "mergeFingers" : true,
         "mergePalms" : true,
-        "mergeHead" : true
+        "mergeHead" : true,
+        "mergeNeck" : true,
+        "mergeTwist" : true,
+        "mergeFeet" : true,
+        "mergeToes" : true
     }
 }
 

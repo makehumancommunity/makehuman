@@ -63,7 +63,7 @@ def setupArmature(name, human, config):
         return None
     else:
         log.message("Setup MHX rig %s" % name)
-        if isinstance(options, mhx_rigify.RigifyOptions):
+        if options.useRigify:
             amt = mhx_rigify.RigifyArmature(name, options, config)
             amt.parser = mhx_rigify.RigifyParser(amt, human)
         else:
@@ -83,21 +83,31 @@ class ExportArmature(Armature):
         Armature.__init__(self, name, options)
         self.scale = options.scale
         self.config = config
+        self.useLayers = False
+        self.action = None
 
-        layers = L_MAIN|L_UPSPNFK|L_LARMFK|L_RARMFK|L_LLEGFK|L_RLEGFK|L_HEAD
-        if options.useFingers:
-            layers |= L_LHANDIK|L_RHANDIK
+        if options.useMasterBone:
+            self.useLayers = True
+            layers = L_MAIN|L_UPSPNFK|L_LARMFK|L_RARMFK|L_LLEGFK|L_RLEGFK|L_HEAD
+            if options.useFingers:
+                layers |= L_LHANDIK|L_RHANDIK
+            else:
+                layers |= L_LHANDFK|L_RHANDFK|L_LPALM|L_RPALM|L_TWEAK
+            self.activeBoneLayers = layers
+            if options.useIkArms:
+                self.activeBoneLayers |= L_LARMIK|L_RARMIK
+            if options.useIkLegs:
+                self.activeBoneLayers |= L_LLEGIK|L_RLEGIK
+        elif options.useMakeHumanRig and not options.useMhxCompat:
+            self.useLayers = True
+            layers = L_MAIN|L_FACE|L_HEAD
+            self.activeBoneLayers = layers
         else:
-            layers |= L_LHANDFK|L_RHANDFK|L_LPALM|L_RPALM|L_TWEAK
-        if options.useFaceRig:
-            layers |= L_PANEL
-        self.visibleLayers = "%08x" % layers
+            self.useLayers = False
+            layers = L_MAIN
+            self.activeBoneLayers = layers
 
-        self.activeBoneLayers = layers
-        if options.useIkArms:
-            self.activeBoneLayers |= L_LARMIK|L_RARMIK
-        if options.useIkLegs:
-            self.activeBoneLayers |= L_LLEGIK|L_RLEGIK
+        self.visibleLayers = "%08x" % layers
 
         self.objectProps += [("MhxRig", '"%s"' % options.rigtype.replace(" ","_"))]
         self.customProps = []
@@ -202,15 +212,18 @@ class ExportArmature(Armature):
                 fp.write("    use_inherit_scale True ; \n")
             else:
                 fp.write("    use_inherit_scale False ; \n")
-            fp.write("    layers Array ")
 
-            bit = 1
-            for n in range(32):
-                if bone.layers & bit:
-                    fp.write("1 ")
-                else:
-                    fp.write("0 ")
-                bit = bit << 1
+            if self.useLayers:
+                fp.write("    layers Array ")
+                bit = 1
+                for n in range(32):
+                    if bone.layers & bit:
+                        fp.write("1 ")
+                    else:
+                        fp.write("0 ")
+                    bit = bit << 1
+            else:
+                fp.write("    layers Array 1 %s" % (31*"0 "))
 
             fp.write(" ; \n" +
                 "    use_local_location %s ; \n" % bone.lloc +
@@ -284,18 +297,41 @@ end AnimationData
 """)
 
 
-    def writeActions(self, fp):
-        #rig_arm.WriteActions(fp)
-        #rig_leg.WriteActions(fp)
-        #rig_finger.WriteActions(fp)
+    def writeAction(self, fp):
         return
+        fp.write("Action %s:Action True \n" % self.name)
+        for bname,points in self.action.items():
+            self.writeBoneAnimation(bname, points, fp)
+        fp.write("end Action\n\n")
+
+
+    def writeBoneAnimation(self, bname, points, fp):
+        datapath = 'pose.bones["%s"].rotation_quaternion' % (bname)
+        for idx in range(len(points[0])):
+            string = (
+                "  FCurve %s %d\n" % (datapath, idx) +
+                "".join([("    kp %d %g ;\n" % (t+1, p[idx])) for t,p in enumerate(points)]) +
+                "  end FCurve\n"
+                )
+            fp.write(string)
 
 
     def writeProperties(self, fp, env):
+        options = self.options
         for (key, val) in self.objectProps:
             fp.write("  Property %s %s ;\n" % (key, val))
 
-        if not self.config.useAdvancedMHX:
+        if False and options.useMakeHumanRig and not options.mergeHead:
+            from armature.armature import loadAction
+            self.action, pnames = loadAction()
+            # There is a limit on the size of string properties in Blender
+            n = 0
+            while pnames:
+                fp.write('  Property MhxFaceShapeNames%d "%s" ;\n' % (n, ":".join(pnames[0:10])))
+                pnames = pnames[10:]
+                n += 1
+
+        if not (self.config.useLegacyMHX or self.config.useNewMHX):
             return
 
         '''

@@ -2,9 +2,18 @@
     "name" : "Basic",
 
     "description" :
-        "A basic rig. Use this for weighting.",
+        "A basic rig.",
 
     "settings" : {
+    	"useMakeHumanRig" : true,
+    	"useMhxCompat" : true,
+        "mergePalms" : true,
+        "mergeUpperHead" : true,
+        "mergeJaw" : true,
+        "mergeNeck" : true,
+        "mergeTwist" : true,
+        "mergeFeet" : true,
+        "mergeToes" : true
     }
 }
 
