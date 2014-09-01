@@ -190,7 +190,7 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
 
     def saveHandler(self, human, file):
         super(ClothesTaskView, self).saveHandler(human, file)
-        file.write('clothesHideFaces %s\n' % self.faceHidingTggl.selected)
+        file.write('clothesHideFaces %s\n' % str(self.faceHidingTggl.selected))
 
     def registerLoadSaveHandlers(self):
         super(ClothesTaskView, self).registerLoadSaveHandlers()

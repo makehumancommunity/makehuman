@@ -455,9 +455,7 @@ def getSingleUvLoc(vn, table):
         try:
             return buvs[0]*wts[0] + buvs[1]*wts[1] + buvs[2]*wts[2]
         except:
-            for n in range(3):
-                print(buvs[n], wts[n])
-            halt
+            raise RuntimeError("Bug getSingleUvLoc: %s" % [(buvs[n], wts[n]) for n in range(3)])
 
 
 def getUvLoc(vn, f, uvface):
@@ -554,7 +552,7 @@ def autoSeams(context):
             pf.select = True
             for pe in edges:
                 pe.use_seam = not pe.use_seam
-            halt
+            raise RuntimeError("Bug: Three seams")
 
 def otherEnd(e, v, ob):
     v1 = ob.data.vertices[e.vertices[0]]
@@ -571,7 +569,7 @@ def findEdge(verts, vertEdges):
     print(verts)
     print(vertEdges[vn1])
     print(vertEdges[vn2])
-    halt
+    raise RuntimeError("Cannot find edge")
 
 
 def markEdges(pv0, pv1, pob, pVertEdges, taken, depth):

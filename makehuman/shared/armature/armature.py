@@ -294,7 +294,7 @@ class Bone:
             self.lockRotation = (1,1,1)
         self.setFlags(flags)
         if self.roll == None:
-            halt
+            raise RuntimeError("Bone %s fromInfo %s" % (self, info))
 
 
     def setFlags(self, flags):

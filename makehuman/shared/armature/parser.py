@@ -41,7 +41,7 @@ import os
 import math
 import log
 from collections import OrderedDict
-import json
+import io_json
 from getpath import getSysDataPath
 
 import numpy as np
@@ -55,9 +55,7 @@ from .armature import Bone
 from . import rig_joints
 from . import rig_bones
 from . import rig_muscle
-from . import rig_head
-from . import rig_makehuman
-from . import rig_mhx_compat
+from . import rig_face
 from . import rig_control
 from . import rig_merge
 
@@ -100,71 +98,47 @@ class Parser:
         if options.useDeformBones or options.useDeformNames:
             self.deformPrefix = "DEF-"
 
-        if options.useMakeHumanRig:
-            self.vertexGroupFiles = ["makehuman"]
+        if options.useFaceRig:
+            self.vertexGroupFiles = ["face"]
         else:
             self.vertexGroupFiles = ["head"]
 
-        if options.useMakeHumanRig:
-            self.vertexGroupFiles += ["mh_tights", "mh_skirt", "mh_hair"]
-            pass
-        elif options.useMuscles:
+        if options.useMuscles:
             self.vertexGroupFiles += ["muscles", "hand", "joints", "tights_muscles", "skirt_muscles", "genitalia_muscles"]
         else:
             self.vertexGroupFiles += ["bones", "hand", "joints", "tights", "skirt", "genitalia"]
 
-        if options.useMakeHumanRig:
-            pass
-        elif options.useMuscles:
+        if options.useMuscles:
             self.vertexGroupFiles += ["hair_muscles"]
         else:
             self.vertexGroupFiles += ["hair"]
 
-        if options.useMakeHumanRig:
-            self.joints = (
-                rig_joints.Joints +
-                rig_bones.Joints +
-                rig_head.Joints +
-                rig_makehuman.Joints +
-                rig_control.Joints
-            )
-        else:
-            self.joints = (
-                rig_joints.Joints +
-                rig_bones.Joints +
-                rig_head.Joints +
-                rig_control.Joints
-            )
-            if options.useMuscles:
-                self.joints += rig_muscle.Joints
+        self.joints = (
+            rig_joints.Joints +
+            rig_bones.Joints +
+            rig_face.Joints +
+            rig_control.Joints
+        )
+        if options.useMuscles:
+            self.joints += rig_muscle.Joints
 
         self.planes = mergeDicts([
             rig_bones.Planes,
-            rig_head.Planes,
+            rig_face.Planes,
         ])
 
         self.planeJoints = rig_control.PlaneJoints
 
-        if options.useMakeHumanRig:
-            self.headsTails = mergeDicts([
-                rig_makehuman.HeadsTails,
-            ])
-            if options.useMhxCompat:
-                self.headsTails = renameKeys(self.headsTails, rig_mhx_compat.Renames)
-                addDict(rig_mhx_compat.HeadsTails, self.headsTails)
-            if options.useMasterBone:
-                addDict(rig_control.HeadsTails, self.headsTails)
-            if options.useIkLegs:
-                addDict(rig_control.RevFootHeadsTails, self.headsTails)
-        else:
-            self.headsTails = mergeDicts([
-                rig_bones.HeadsTails,
-                rig_head.HeadsTails,
-                rig_control.HeadsTails,
-                rig_control.RevFootHeadsTails,
-            ])
-            if options.useMuscles:
-                addDict(rig_muscle.HeadsTails, self.headsTails)
+        self.headsTails = mergeDicts([
+            rig_bones.HeadsTails,
+            rig_face.HeadsTails,
+            rig_control.HeadsTails,
+            rig_control.RevFootHeadsTails,
+        ])
+        if options.useMuscles:
+            addDict(rig_muscle.HeadsTails, self.headsTails)
+        if options.useFaceRig:
+            addDict(rig_face.FaceRigHeadsTails, self.headsTails)
 
         for bname in options.terminals.keys():
             parent,offset = options.terminals[bname]
@@ -172,29 +146,33 @@ class Parser:
             self.headsTails[bname] = (tail, (tail,offset))
 
         if options.useConstraints:
-            if options.useMakeHumanRig:
-                self.setConstraints(rig_mhx_compat.Constraints)
-            else:
-                self.setConstraints(rig_bones.Constraints)
-                self.setConstraints(rig_head.Constraints)
-                if options.useMuscles:
-                    self.setConstraints(rig_muscle.Constraints)
+            self.setConstraints(rig_bones.Constraints)
+            self.setConstraints(rig_face.Constraints)
+            if options.useMuscles:
+                self.setConstraints(rig_muscle.Constraints)
+            if options.useFaceRig:
+                self.setConstraints(rig_face.FaceRigConstraints)
 
         if options.useLocks:
             addDict(rig_bones.RotationLimits, self.rotationLimits)
-            addDict(rig_head.RotationLimits, self.rotationLimits)
-            addDict(rig_head.LocationLimits, self.locationLimits)
+            addDict(rig_face.RotationLimits, self.rotationLimits)
+            addDict(rig_face.LocationLimits, self.locationLimits)
             addDict(rig_control.RotationLimits, self.rotationLimits)
             if options.useMuscles:
                 addDict(rig_muscle.RotationLimits, self.rotationLimits)
+            if options.useFaceRig:
+                addDict(rig_face.FaceRigLocationLimits, self.locationLimits)
+                addDict(rig_face.FaceRigRotationLimits, self.rotationLimits)
 
         if options.useCustomShapes:
-            addDict(rig_head.CustomShapes, self.customShapes)
+            addDict(rig_face.CustomShapes, self.customShapes)
             if options.useCustomShapes == "all":
                 addDict(rig_bones.CustomShapes, self.customShapes)
                 addDict(rig_control.CustomShapes, self.customShapes)
                 if options.useMuscles:
                     addDict(rig_muscle.CustomShapes, self.customShapes)
+            if options.useFaceRig:
+                addDict(rig_face.FaceRigCustomShapes, self.customShapes)
 
         if options.useFingers and options.useConstraints:
             self.setConstraints(rig_control.FingerConstraints)
@@ -214,20 +192,13 @@ class Parser:
         options = amt.options
 
         if amt.done:
-            raise RuntimeError("Bug createBones")
+            raise RuntimeError("Armature %s already done" % amt)
         amt.done = True
 
-        if options.useMakeHumanRig:
-            if options.useMhxCompat:
-                self.addBones(renameArmature(rig_makehuman.Armature, rig_mhx_compat.Renames), boneInfo)
-                self.addBones(rig_mhx_compat.Armature, boneInfo)
-            else:
-                self.addBones(rig_makehuman.Armature, boneInfo)
-        else:
-            self.addBones(rig_bones.Armature, boneInfo)
-            if options.useTerminators:
-                self.addBones(rig_bones.TerminatorArmature, boneInfo)
-            self.addBones(rig_head.Armature, boneInfo)
+        self.addBones(rig_bones.Armature, boneInfo)
+        if options.useTerminators:
+            self.addBones(rig_bones.TerminatorArmature, boneInfo)
+        self.addBones(rig_face.Armature, boneInfo)
 
         for bname in options.terminals.keys():
             pname,_offset = options.terminals[bname]
@@ -258,6 +229,9 @@ class Parser:
         if options.useMuscles:
             self.addBones(rig_muscle.Armature, boneInfo)
 
+        if options.useFaceRig:
+            self.addBones(rig_face.FaceRigArmature, boneInfo)
+
         if options.useHeadControl:
             self.addBones(rig_control.HeadArmature, boneInfo)
             if options.useConstraints:
@@ -265,10 +239,7 @@ class Parser:
                 self.propDrivers += rig_control.HeadPropDrivers
 
         if options.useSockets and options.useConstraints:
-            if options.useMakeHumanRig:
-                self.changeParents(rig_mhx_compat.SocketParents, boneInfo)
-            else:
-                self.changeParents(rig_control.SocketParents, boneInfo)
+            self.changeParents(rig_control.SocketParents, boneInfo)
             self.addBones(rig_control.SocketArmature, boneInfo)
             self.setConstraints(rig_control.SocketConstraints)
             self.lrPropDrivers += rig_control.SocketPropLRDrivers
@@ -338,44 +309,31 @@ class Parser:
                 boneInfo[bone.name] = bone
 
         if options.useCustomShapes:
-            addDict(json.load(open(getpath.getSysDataPath("mhx/gizmos-face.json"), 'rU')), self.gizmos)
+            addDict(io_json.loadJson("data/mhx/gizmos-face.json"), self.gizmos)
             if options.useCustomShapes == "all":
-                addDict(json.load(open(getpath.getSysDataPath("mhx/gizmos.json"), 'rU')), self.gizmos)
+                addDict(io_json.loadJson("data/mhx/gizmos.json"), self.gizmos)
 
         vgroups = self.readVertexGroupFiles(self.vertexGroupFiles)
-        if options.useMakeHumanRig and options.useMhxCompat:
-            vgroups = renameKeys(vgroups, rig_mhx_compat.Renames)
-            addDict(rig_mhx_compat.VertexWeights, vgroups)
         addDict(vgroups, amt.vertexWeights)
 
-        if options.mergeSpine:
-            self.mergeBones(rig_merge.SpineMergers, boneInfo)
-        if options.mergeShoulders:
-            self.mergeBones(rig_merge.ShoulderMergers, boneInfo)
-        if options.mergeFingers:
-            self.mergeBones(rig_merge.FingerMergers, boneInfo)
-        if options.mergePalms:
-            self.mergeBones(rig_merge.PalmMergers, boneInfo)
-        if options.mergeHead:
-            if options.useMakeHumanRig:
-                self.mergeBones(rig_merge.NewHeadMergers, boneInfo)
-            else:
-                self.mergeBones(rig_merge.OldHeadMergers, boneInfo)
-        if options.mergeNeck:
-            self.mergeBones(rig_merge.NeckMergers, boneInfo)
-        if options.mergeTwist:
-            self.mergeBones(rig_merge.TwistMergers, boneInfo)
-        if options.mergeFeet:
-            self.mergeBones(rig_merge.NewFeetMergers, boneInfo)
-        if options.mergeToes:
-            self.mergeBones(rig_merge.NewToeMergers, boneInfo)
         if options.merge:
             self.mergeBones(options.merge, boneInfo)
+        else:
+            if options.mergeSpine:
+                self.mergeBones(rig_merge.SpineMergers, boneInfo)
+            if options.mergeShoulders:
+                self.mergeBones(rig_merge.ShoulderMergers, boneInfo)
+            if options.mergeFingers:
+                self.mergeBones(rig_merge.FingerMergers, boneInfo)
+            if options.mergePalms:
+                self.mergeBones(rig_merge.PalmMergers, boneInfo)
+            if options.mergeHead:
+                self.mergeBones(rig_merge.HeadMergers, boneInfo)
 
         if options.useDeformNames or options.useDeformBones:
             generic = mergeDicts([
                 rig_bones.Armature,
-                rig_head.Armature,
+                rig_face.Armature,
             ])
             if options.useDeformBones:
                 self.addDeformBones(generic, boneInfo)
@@ -387,13 +345,15 @@ class Parser:
                 if options.useCustomShapes == "all":
                     if options.useMuscles:
                         addDict(rig_muscle.CustomShapes, custom)
-            self.addDeformVertexGroups(custom, boneInfo)
+                if options.useFaceRig:
+                    addDict(rig_face.FaceRigCustomShapes, custom)
+            self.addDeformVertexGroups(vgroups, custom)
             #self.renameDeformVertexGroups(rig_muscle.Armature)
 
         if options.useSplitBones or options.useSplitNames:
             if options.useSplitBones:
                 self.addSplitBones(boneInfo)
-            self.addSplitVertexGroups()
+            self.addSplitVertexGroups(vgroups)
 
         if options.useLeftRight:
             leftright = self.readVertexGroupFiles(["leftright"])
@@ -493,31 +453,6 @@ class Parser:
         return
 
 
-    def updateJoints(self):
-        """
-        Update setup of joint positions after human mesh was changed,
-        without rebuilding the entire armature.
-        """
-        amt = self.armature
-
-        self.setupJoints(self.human)
-        self.setupNormals()
-        self.setupPlaneJoints()
-
-        for bone in amt.bones.values():
-            head,tail = self.headsTails[bone.name]
-            bone.setBone(self.findLocation(head), self.findLocation(tail))
-
-        for bone in amt.bones.values():
-            if isinstance(bone.roll, str):
-                bone.roll = amt.bones[bone.roll].roll
-            elif isinstance(bone.roll, Bone):
-                bone.roll = bone.roll.roll
-            elif isinstance(bone.roll, tuple):
-                bname,angle = bone.roll
-                bone.roll = amt.bones[bname].roll + angle
-
-
     def setupNormals(self):
         for plane,joints in self.planes.items():
             j1,j2,j3 = joints
@@ -560,14 +495,6 @@ class Parser:
                 loc1 = obj.coord[int(v1)]
                 loc2 = obj.coord[int(v2)]
                 self.locations[key] = (k1*loc1 + k2*loc2)
-            elif type == 'so':
-                base, left, right, offset = data
-                bloc = self.locations[base]
-                lloc = self.locations[left]
-                rloc = self.locations[right]
-                vec = rloc-lloc
-                offset = np.array(offset) * math.sqrt(np.dot(vec,vec))
-                self.locations[key] = bloc + offset
             elif type == 'f':
                 (raw, head, tail, offs) = data
                 rloc = self.locations[raw]
@@ -595,7 +522,6 @@ class Parser:
                 r1 = np.array([float(x), float(y), float(z)])
                 self.locations[key] = np.cross(r, r1)
             elif type == 'l':
-                log.debug("%s %s" % (key, data))
                 ((k1, joint1), (k2, joint2)) = data
                 self.locations[key] = k1*self.locations[joint1] + k2*self.locations[joint2]
             elif type == 'o':
@@ -926,37 +852,25 @@ class Parser:
             del self.constraints[bname]
 
 
-    def addDeformVertexGroups(self, custom, boneInfo):
+    def addDeformVertexGroups(self, vgroups, custom):
         amt = self.armature
         options = amt.options
         useSplit = (options.useSplitBones or options.useSplitNames)
-        add = []
-        subtract = []
-        for bname,vgroup in amt.vertexWeights.items():
+        for bname,vgroup in vgroups.items():
             base = splitBoneName(bname)[0]
-            try:
-                bone = boneInfo[bname]
-            except KeyError:
-                bone = None
             if useSplit and base in self.splitBones.keys():
                 pass
             elif bname in custom.keys():
                 pass
-            elif bone is None:
-                log.message("Vertex group without bone: %s" % bname)
-            elif bone.layers & (L_FACE|L_TWEAK):
+            elif bname[0:4] == "hair":
                 pass
             else:
-                add.append((self.deformPrefix+bname, vgroup))
-                subtract.append(bname)
-
-        for bname,vgroup in add:
-            amt.vertexWeights[bname] = vgroup
-        for bname in subtract:
-            try:
-                del amt.vertexWeights[bname]
-            except KeyError:
-                pass
+                defName = self.deformPrefix+bname
+                amt.vertexWeights[defName] = vgroup
+                try:
+                    del amt.vertexWeights[bname]
+                except:
+                    pass
 
 
     def renameDeformVertexGroups(self, muscles, custom):
@@ -981,7 +895,7 @@ class Parser:
                 fname = file
             filepath = os.path.join(folder, "vgrp_"+fname+".json")
             log.message("Loading %s" % filepath)
-            vglist = json.load(open(filepath, 'rU'), object_pairs_hook=OrderedDict)
+            vglist = io_json.loadJson(filepath)
             for key,data in vglist:
                 try:
                     vgroups[key] += data
@@ -991,19 +905,16 @@ class Parser:
         return vgroups
 
 
-    def addSplitVertexGroups(self):
+    def addSplitVertexGroups(self, vgroups):
         amt = self.armature
-        subtract = []
-        for bname,vgroup in amt.vertexWeights.items():
+        for bname,vgroup in vgroups.items():
             base = splitBoneName(bname)[0]
             if base in self.splitBones.keys():
                 self.splitVertexGroup(bname, vgroup)
-                subtract.append(bname)
-        for bname in subtract:
-            try:
-                del amt.vertexWeights[bname]
-            except KeyError:
-                log.message("No VG %s" % bname)
+                try:
+                    del amt.vertexWeights[bname]
+                except KeyError:
+                    log.message("No VG %s" % bname)
 
 
     def splitVertexGroup(self, bname, vgroup):
@@ -1064,32 +975,18 @@ class Parser:
 
 
     def mergeBones(self, mergers, boneInfo):
-        log.debug("Merge %s" % mergers.values())
         amt = self.armature
         for bname, merged in mergers.items():
-            bone = boneInfo[bname]
-            bone.deform = True
-
-            try:
-                vgroup = amt.vertexWeights[bname]
-            except KeyError:
-                vgroup = []
-
+            if len(merged) == 2:
+                head,tail = self.headsTails[bname]
+                _,tail2 = self.headsTails[merged[1]]
+                self.headsTails[bname] = head,tail2
+            vgroup = amt.vertexWeights[bname]
             for mbone in merged:
                 if mbone != bname:
-                    try:
-                        vgroup += amt.vertexWeights[mbone]
-                        del amt.vertexWeights[mbone]
-                    except KeyError:
-                        log.debug("Warning: Missing weight: %s" % mbone)
-                        pass
-                    try:
-                        del boneInfo[mbone]
-                    except KeyError:
-                        bnames = list(boneInfo.keys())
-                        bnames.sort()
-                        string = "\n  ".join(bnames)
-                        raise RuntimeError("Bug mergeBones: %s does not exist\n  %s" % (mbone, string))
+                    vgroup += amt.vertexWeights[mbone]
+                    del amt.vertexWeights[mbone]
+                    del boneInfo[mbone]
                     for child in boneInfo.values():
                         if child.parent == mbone:
                             child.parent = bname
@@ -1174,40 +1071,4 @@ class Parser:
         for bname,clist in constraints.items():
             for cns in clist:
                 self.addConstraint(bname, cns)
-
-
-
-def renameKeys(struct, renames):
-    nstruct = OrderedDict()
-    for key,val in struct.items():
-        try:
-            nkey = renames[key][0]
-        except KeyError:
-            nkey = key
-        nstruct[nkey] = val
-    return nstruct
-
-
-def renameArmature(struct, renames):
-    nstruct = {}
-    for key,val in struct.items():
-        roll,parent,flags,layers = val
-        try:
-            data = renames[key]
-        except KeyError:
-            if layers & L_MAIN:
-                data = (key,L_DEF)
-            else:
-                data = (key,layers)
-        nkey = data[0]
-        nlayers = data[1]
-        if len(data) > 2:
-            nparent = data[2]
-        else:
-            try:
-                nparent = renames[parent][0]
-            except KeyError:
-                nparent = parent
-        nstruct[nkey] = roll,nparent,flags,nlayers
-    return nstruct
 
