@@ -45,24 +45,24 @@ if "bpy" in locals():
     print("Reloading MakeHuman runtime v %d.%d.%d" % bl_info["version"])
     import imp
     imp.reload(utils)
-    imp.reload(error)
+    #imp.reload(error)
     imp.reload(layers)
     imp.reload(fkik)
     imp.reload(drivers)
-    imp.reload(bone_drivers)
-    imp.reload(faceshift)
+    #imp.reload(bone_drivers)
+    #imp.reload(faceshift)
     imp.reload(hide)
     imp.reload(shapekeys)
     imp.reload(merge)
 else:
     print("Loading MakeHuman runtime v %d.%d.%d" % bl_info["version"])
     from . import utils
-    from . import error
+    #from . import error
     from . import layers
     from . import fkik
     from . import drivers
-    from . import bone_drivers
-    from . import faceshift
+    #from . import bone_drivers
+    #from . import faceshift
     from . import hide
     from . import shapekeys
     from . import merge
@@ -97,10 +97,10 @@ class MhxSetupPanel(bpy.types.Panel):
         layout.operator("mhx.add_hide_drivers")
         layout.operator("mhx.remove_hide_drivers")
 
-        layout.separator()
-        layout.operator("mhx.add_facerig_drivers")
-        layout.operator("mhx.remove_facerig_drivers")
-        layout.operator("mhx.load_faceshift_bvh")
+        #layout.separator()
+        #layout.operator("mhx.add_facerig_drivers")
+        #layout.operator("mhx.remove_facerig_drivers")
+        #layout.operator("mhx.load_faceshift_bvh")
 
         layout.separator()
         layout.operator("mhx.add_shapekey_drivers")
@@ -269,6 +269,7 @@ class VisibilityPanel(bpy.types.Panel):
                     path = '["%s"]' % prop
                 layout.prop(ob, path, text=prop[3:])
 
+'''
 #------------------------------------------------------------------------
 #   Facerig panel
 #------------------------------------------------------------------------
@@ -323,7 +324,7 @@ def drawPropPanel(self, ob, prefix):
             op = row.operator("mhx.pin_prop", icon='UNPINNED')
             op.key = prop
             op.prefix = prefix
-
+'''
 #------------------------------------------------------------------------
 #   Init
 #------------------------------------------------------------------------
