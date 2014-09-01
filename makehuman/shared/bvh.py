@@ -574,9 +574,6 @@ class BVH():
         """
         Scale the skeleton stored in this BVH data.
         """
-        oldZup = self.convertFromZUp
-        self.convertFromZUp = False     # Avoid converting again
-
         for joint in self.getJoints():
             # Rescale joint offset and recalculate positions and rest matrices
             self.__calcPosition(joint, scaleFactor * joint.offset)
@@ -591,8 +588,6 @@ class BVH():
 
             # Recalculate pose matrices
             joint.calculateFrames()
-
-        self.convertFromZUp = oldZup
 
 
 class BVHJoint():
