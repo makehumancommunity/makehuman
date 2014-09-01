@@ -47,6 +47,9 @@ import bvh
 import os
 from core import G
 
+import skeleton_drawing
+import material
+
 class PoseLibraryTaskView(gui3d.TaskView):
 
     def __init__(self, category):
@@ -65,19 +68,27 @@ class PoseLibraryTaskView(gui3d.TaskView):
 
         box = self.addLeftWidget(gui.GroupBox('Pose'))
 
+        self.skelObj = None
+
     def loadPose(self, filepath):
         if not self.human.getSkeleton():
             log.error("No skeleton selected, cannot load pose")
             return
 
+        self.drawSkeleton(self.human.getSkeleton())
+
         if os.path.splitext(filepath)[1].lower() == '.mhp':
             anim = self.loadMhp(filepath)
         elif os.path.splitext(filepath)[1].lower() == '.bvh':
-            anim = self.loadBvh(filepath)
+            # TODO SCALE!!!
+            # TODO investigate why bones are offset (should take only rotations from BVH)
+            anim = self.loadBvh(filepath, convertFromZUp=True) # TODO figure this out
         else:
             log.error("Cannot load pose file %s: File type unknown." % filepath)
             return
 
+        self.human.setPosed(False)
+        self.human.resetToRestPose()
         self.human.addAnimation(anim)
         self.human.setActiveAnimation(anim.name)
         self.human.setToFrame(0)
@@ -86,16 +97,75 @@ class PoseLibraryTaskView(gui3d.TaskView):
     def loadMhp(self, filepath):
         return animation.loadPoseFromMhpFile(filepath, self.human.getSkeleton())
 
-    def loadBvh(self, filepath):
-        bvh_file = bvh.load(filepath)
+    def loadBvh(self, filepath, convertFromZUp=False):
+        bvh_file = bvh.load(filepath, convertFromZUp)
         jointNames = [bone.name for bone in self.human.getSkeleton().getBones()]
         return bvh_file.createAnimationTrack(jointNames)
 
     def onShow(self, event):
         self.filechooser.refresh()
 
+        # Disable smoothing in skeleton library
+        self.oldSmoothValue = self.human.isSubdivided()
+        self.human.setSubdivided(False)
+
+        self.oldHumanMat = self.human.material.clone()
+        self.oldPxyMats = dict()
+        xray_mat = material.fromFile(mh.getSysDataPath('materials/xray.mhmat'))
+        self.human.material = xray_mat
+        for pxy in self.human.getProxies(includeHumanProxy=False):
+            obj = pxy.object
+            self.oldPxyMats[pxy.uuid] = obj.material.clone()
+            obj.material = xray_mat
+
+        # Make sure skeleton is updated if human has changed
+        if self.human.getSkeleton():
+            self.drawSkeleton(self.human.getSkeleton())
+            mh.redraw()
+
+
     def onHide(self, event):
         gui3d.app.statusPersist('')
+
+        self.human.material = self.oldHumanMat
+        for pxy in self.human.getProxies(includeHumanProxy=False):
+            if pxy.uuid in self.oldPxyMats:
+                pxy.object.material = self.oldPxyMats[pxy.uuid]
+
+        # Reset smooth setting
+        self.human.setSubdivided(self.oldSmoothValue)
+        mh.redraw()
+
+
+    def drawSkeleton(self, skel):
+        if self.skelObj:
+            # Remove old skeleton mesh
+            self.removeObject(self.skelObj)
+            self.human.removeBoundMesh(self.skelObj.name)
+            self.skelObj = None
+            self.skelMesh = None
+            self.selectedBone = None
+
+        # Create a mesh from the skeleton in rest pose
+        skel.setToRestPose() # Make sure skeleton is in rest pose when constructing the skeleton mesh
+        self.skelMesh = skeleton_drawing.meshFromSkeleton(skel, "Prism")
+        self.skelMesh.priority = 100
+        self.skelMesh.setPickable(False)
+        self.skelObj = self.addObject(gui3d.Object(self.skelMesh, self.human.getPosition()) )
+        self.skelObj.setShadeless(0)
+        self.skelObj.setSolid(0)
+        self.skelObj.setRotation(self.human.getRotation())
+
+        # Add the skeleton mesh to the human AnimatedMesh so it animates together with the skeleton
+        # The skeleton mesh is supposed to be constructed from the skeleton in rest and receives
+        # rigid vertex-bone weights (for each vertex exactly one weight of 1 to one bone)
+        mapping = skeleton_drawing.getVertBoneMapping(skel, self.skelMesh)
+        self.human.addBoundMesh(self.skelMesh, mapping)
+
+        # Store a reference to the skeleton mesh object for other plugins
+        self.human.getSkeleton().object = self.skelObj
+        mh.redraw()
+
 
 category = None
 taskview = None
