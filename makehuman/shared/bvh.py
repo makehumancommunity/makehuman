@@ -56,7 +56,8 @@ class BVH():
     A BVH skeleton. We assume a single root joint.
     This skeleton allows access to both joints and bones.
     """
-    def __init__(self):
+    def __init__(self, name="Untitled"):
+        self.name = name
         self.joints = {}    # Lookup dict to find joints by name
         self.bvhJoints = [] # List of joints in the order in which they were defined in the BVH file (important for MOTION data parsing)
         self.jointslist = []    # Cached breadth-first list of all joints
@@ -246,6 +247,8 @@ class BVH():
         Loads both the skeleton hierarchy and the animation track from the 
         specified BVH file.
         """
+        import os
+        self.name = os.path.splitext(os.path.basename(filepath))[0]
         if self.convertFromZUp == "auto":
             autoAxis = True
             self.convertFromZUp = False
