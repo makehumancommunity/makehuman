@@ -45,7 +45,6 @@ from getpath import getPath, getSysDataPath, canonicalPath, localPath
 import os
 
 import algos3d
-import meshstat
 import humanmodifier
 import targets
 import log
