@@ -341,8 +341,7 @@ def fixConstraint(cns1, cns2, gen, bones):
             cns2.subtarget = bone.realname
             cns2.head_tail = cns1.head_tail
         elif not bone.realname1:
-            print(bone)
-            halt
+            raise RuntimeError("Cannot fix STRETCH_TO constraint for bone %s" % (bone))
         elif cns1.head_tail < 0.5:
             cns2.subtarget = bone.realname1
             cns2.head_tail = 2*cns1.head_tail
