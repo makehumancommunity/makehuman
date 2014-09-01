@@ -230,6 +230,7 @@ class BVH():
     def getJoints(self):
         """
         Returns linear list of all joints in breadth-first order.
+        Requires __cacheGetJoints to be called first.
         """
         return self.jointslist
 
@@ -245,6 +246,14 @@ class BVH():
         Loads both the skeleton hierarchy and the animation track from the 
         specified BVH file.
         """
+        if self.convertFromZUp == "auto":
+            autoAxis = True
+            self.convertFromZUp = False
+        elif not isinstance(self.convertFromZUp, bool):
+            raise RuntimeError('Cannot load BVH, illegal option for "convertFromZUp" (%s)' % self.convertFromZUp)
+        else:
+            autoAxis = False
+
         fp = open(filepath, "rU")
 
         # Read hierarchy
@@ -253,6 +262,16 @@ class BVH():
         rootJoint = self.addRootJoint(words[1])        
 
         self.__readJoint(self.rootJoint, fp)
+
+        # Auto determine and adjust for up axis
+        if autoAxis:
+            self.convertFromZUp = self._autoGuessCoordinateSystem()
+            log.message("Automatically guessed coordinate system for BVH file %s (%s)" % (filepath, "Z-up" if self.convertFromZUp else "Y-up"))
+            if self.convertFromZUp:
+                # Conversion needed: convert from Z-up to Y-up
+                self.__cacheGetJoints()
+                for joint in self.jointslist:
+                    self.__calcPosition(joint, joint.offset)
 
         # Read motion
         self.__expectKeyword('MOTION', fp)
@@ -274,6 +293,41 @@ class BVH():
         # Transform frame data into transformation matrices for all joints
         for joint in self.getJoints():
             joint.calculateFrames()     # TODO we don't need to calculate pose matrices for end effectors
+
+    def _autoGuessCoordinateSystem(self):
+        """
+        Guesses whether this BVH rig uses a Y-up or Z-up axis system, using the
+        joint offsets of this rig (longest direction is expected to be the height).
+        Requires joints of this BVH skeleton to be initialized.
+        Returns False if no conversion is needed (BVH file uses Y-up coordinates),
+        returns True if BVH uses Z-up coordinates and conversion is needed.
+        Note that coordinate system is expected to be right-handed.
+        """
+        ref_joint = None
+        ref_names = ['head', 'spine3', 'spine2', 'spine1', 'upperleg02.L', 'lowerleg02.L']
+        while ref_joint is None and len(ref_names) != 0:
+            joint_name = ref_names.pop()
+            try:
+                ref_joint = self.joints[joint_name]
+            except:
+                try:
+                    ref_joint = self.joints[joint_name[0].capitalize()+joint_name[1:]]
+                except:
+                    ref_joint = None
+            if ref_joint != None and len(ref_joint.children) == 0:
+                log.debug("Cannot use reference joint %s for determining axis system, it is an end-effector (has no children)" % ref_joint.name)
+                ref_joint = None
+        if ref_joint is None:
+            log.warning("Could not auto guess axis system for BVH file %s because no known joint name is found. Using Y up as default axis orientation." % filepath)
+        else:
+            tail_joint = ref_joint.children[0]
+            direction = tail_joint.position - ref_joint.position
+            if abs(direction[1]) > abs(direction[2]):
+                # Y-up
+                return False
+            else:
+                # Z-up
+                return True
 
     def fromSkeleton(self, skel, animationTrack=None, dummyJoints=True):
         """
@@ -670,7 +724,7 @@ class BVHJoint():
         return not self.hasChildren()
 
 
-def load(filename, convertFromZUp = False, allowTranslation="onlyroot"):
+def load(filename, convertFromZUp="auto", allowTranslation="onlyroot"):
     """
     allowTranslation    determine which should receive translation animation 
                         (allowed values: "onlyroot", "all", "none")
