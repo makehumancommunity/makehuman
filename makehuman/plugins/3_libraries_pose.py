@@ -81,12 +81,12 @@ class PoseLibraryTaskView(gui3d.TaskView):
             anim = self.loadMhp(filepath)
         elif os.path.splitext(filepath)[1].lower() == '.bvh':
             # TODO SCALE!!!
-            # TODO investigate why bones are offset (should take only rotations from BVH)
-            anim = self.loadBvh(filepath, convertFromZUp=True) # TODO figure this out
+            anim = self.loadBvh(filepath, convertFromZUp="auto")
         else:
             log.error("Cannot load pose file %s: File type unknown." % filepath)
             return
 
+        #self.human.setAnimateInPlace(True)
         self.human.setPosed(False)
         self.human.resetToRestPose()
         self.human.addAnimation(anim)
@@ -97,7 +97,7 @@ class PoseLibraryTaskView(gui3d.TaskView):
     def loadMhp(self, filepath):
         return animation.loadPoseFromMhpFile(filepath, self.human.getSkeleton())
 
-    def loadBvh(self, filepath, convertFromZUp=False):
+    def loadBvh(self, filepath, convertFromZUp="auto"):
         bvh_file = bvh.load(filepath, convertFromZUp)
         jointNames = [bone.name for bone in self.human.getSkeleton().getBones()]
         return bvh_file.createAnimationTrack(jointNames)
