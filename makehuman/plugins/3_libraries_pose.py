@@ -80,7 +80,6 @@ class PoseLibraryTaskView(gui3d.TaskView):
         if os.path.splitext(filepath)[1].lower() == '.mhp':
             anim = self.loadMhp(filepath)
         elif os.path.splitext(filepath)[1].lower() == '.bvh':
-            # TODO SCALE!!!
             anim = self.loadBvh(filepath, convertFromZUp="auto")
         else:
             log.error("Cannot load pose file %s: File type unknown." % filepath)
@@ -99,8 +98,24 @@ class PoseLibraryTaskView(gui3d.TaskView):
 
     def loadBvh(self, filepath, convertFromZUp="auto"):
         bvh_file = bvh.load(filepath, convertFromZUp)
+        self.autoScaleBVH(bvh_file)
         jointNames = [bone.name for bone in self.human.getSkeleton().getBones()]
         return bvh_file.createAnimationTrack(jointNames)
+
+    def autoScaleBVH(self, bvh_file):
+        """
+        Auto scale BVH translations by comparing upper leg length
+        """
+        import numpy as np
+        import numpy.linalg as la
+        if "upperleg02.L" not in bvh_file.joints:
+            raise RuntimeError('Failed to auto scale BVH file %s, it does not contain a joint for "upperleg02.L"' % bvh_file.name)
+        bvh_joint = bvh_file.joints["upperleg02.L"]
+        bone = self.human.getSkeleton().getBone("upperleg02.L")
+        joint_length = la.norm(bvh_joint.children[0].position - bvh_joint.position)
+        scale_factor = bone.length / joint_length
+        log.message("Scaling BVH file %s with factor %s" % (bvh_file.name, scale_factor))
+        bvh_file.scale(scale_factor)
 
     def onShow(self, event):
         self.filechooser.refresh()
