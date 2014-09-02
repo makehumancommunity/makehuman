@@ -1167,6 +1167,9 @@ class Dialog(QtGui.QDialog):
 
         which = self.exec_()
 
+        if helpId and self.check.isChecked():
+            self.helpIds.add(helpId)
+
         if which == QtGui.QDialog.Accepted:
             if button1Action:
                 button1Action()
@@ -1176,8 +1179,6 @@ class Dialog(QtGui.QDialog):
                 button2Action()
             return False
 
-        if helpId and self.check.isChecked():
-            self.helpIds.add(helpId)
 
 
 class FileEntryView(QtGui.QWidget, Widget):
