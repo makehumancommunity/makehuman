@@ -1,4 +1,4 @@
 #!/bin/bash
 
-python /usr/share/makehuman/makehuman.py
+python /usr/share/makehuman/makehuman.py "$@"
 
