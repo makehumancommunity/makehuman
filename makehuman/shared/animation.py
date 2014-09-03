@@ -413,8 +413,12 @@ class AnimatedMesh(object):
         the pose if this animated object was in posed mode.
         """
         for mIdx, mesh in enumerate(self.__meshes):
-            self.__originalMeshCoords[mIdx] = mesh.coord[:,:3]
+            self.__originalMeshCoords[mIdx][:,:3] = mesh.coord[:,:3]
         self.refreshPose(updateIfInRest=False)
+
+    def _updateOriginalMeshCoords(self, name, coord):
+        rIdx = self._getBoundMeshIndex(name)
+        self.__originalMeshCoords[rIdx][:,:3] = coord[:,:3]
 
     def refreshPose(self, updateIfInRest=False):
         if not self.getSkeleton():
