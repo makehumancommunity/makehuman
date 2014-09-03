@@ -998,6 +998,12 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         """
         return set( [t[0] for m in self.modifiers for t in m.targets] )
 
+    def getRestposeCoordinates(self):
+        """
+        Retrieve human seed mesh vertex coordinates in rest pose.
+        """
+        return self.getRestCoordinates(self.name)
+
     def applyAllTargets(self, update=True):
         """
         This method applies all targets, in function of age and sex
@@ -1012,10 +1018,14 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         # so that mesh is not drawn in its reset state
         algos3d.resetObj(self.meshData)
 
+        # Apply targets to seedmesh coordinates
         itprog = Progress(len(self.targetsDetailStack))
         for (targetPath, morphFactor) in self.targetsDetailStack.iteritems():
             algos3d.loadTranslationTarget(self.meshData, targetPath, morphFactor, None, 0, 0)
             itprog.step()
+
+        # Make sure self.getRestposeCoordinates is up-to-date directly (required for proxy fitting)
+        self._updateOriginalMeshCoords(self.name, self.meshData.coord)
 
         # Update all verts
         self.getSeedMesh().update()

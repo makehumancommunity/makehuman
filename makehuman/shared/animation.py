@@ -308,6 +308,10 @@ class AnimatedMesh(object):
         except:
             pass
 
+    def getRestCoordinates(self, name):
+        rIdx = self._getBoundMeshIndex(name)
+        return self.__originalMeshCoords[rIdx][:,:3]
+
     def containsBoundMesh(self, mesh):
         mesh2, _ = self.getBoundMesh(mesh.name)
         return mesh2 == mesh
