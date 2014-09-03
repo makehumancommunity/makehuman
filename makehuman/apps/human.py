@@ -1125,9 +1125,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         self.refreshPose()
 
     def _updateMeshVertexWeights(self, mesh):
-        if not self.getSkeleton():
-            return
-
         obj = mesh.object
 
         if not obj:
@@ -1135,14 +1132,18 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             self.removeBoundMesh(mesh.name)
             return
 
-        bodyVertexWeights = self.getVertexWeights()
+        if self.getSkeleton():
+            bodyVertexWeights = self.getVertexWeights()
 
-        if obj.proxy:
-            # Determine vertex weights for proxy (map to unfiltered proxy mesh)
-            weights = self.getSkeleton().getProxyWeights(obj.proxy, bodyVertexWeights)
+            if obj.proxy:
+                import skeleton
+                # Determine vertex weights for proxy (map to unfiltered proxy mesh)
+                weights = skeleton.getProxyWeights(obj.proxy, bodyVertexWeights)
+            else:
+                # Use vertex weights for human body
+                weights = bodyVertexWeights
         else:
-            # Use vertex weights for human body
-            weights = bodyVertexWeights
+            weights = {}
 
         if not self.containsBoundMesh(mesh):
             animation.AnimatedMesh.addBoundMesh(self, mesh, weights)
