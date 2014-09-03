@@ -217,6 +217,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         if newPxy:
             # Add new mesh and vertex weight assignments
             self._updateMeshVertexWeights(newPxy.object.mesh)
+            self.refreshPose()
 
     def maskFaces(self):
         """
