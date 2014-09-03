@@ -79,13 +79,12 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         self._hairProxy = None
         self._eyesProxy = None
         self._genitalsProxy = None
-        # TODO add accessors for other proxies as well
-        self.eyebrowsProxy = None
-        self.eyelashesProxy = None
-        self.teethProxy = None
-        self.tongueProxy = None
+        self._eyebrowsProxy = None
+        self._eyelashesProxy = None
+        self._teethProxy = None
+        self._tongueProxy = None
 
-        self.clothesProxies = {}
+        self._clothesProxies = {}
 
         self.targetsDetailStack = {}  # All details targets applied, with their values
         self.symmetryModeEnabled = False
@@ -142,6 +141,72 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         return self._genitalsProxy
 
     genitalsProxy = property(getGenitalsProxy, setGenitalsProxy)
+
+    def setEyebrowsProxy(self, proxy):
+        self._swapProxies(self._eyebrowsProxy, proxy)
+        self._eyebrowsProxy = proxy
+        event = events3d.HumanEvent(self, 'proxyChange')
+        event.proxy = 'eyebrows'
+        self.callEvent('onChanged', event)
+    def getEyebrowsProxy(self):
+        return self._eyebrowsProxy
+
+    eyebrowsProxy = property(getEyebrowsProxy, setEyebrowsProxy)
+
+    def setEyelashesProxy(self, proxy):
+        self._swapProxies(self._eyelashesProxy, proxy)
+        self._eyelashesProxy = proxy
+        event = events3d.HumanEvent(self, 'proxyChange')
+        event.proxy = 'eyelashes'
+        self.callEvent('onChanged', event)
+    def getEyelashesProxy(self):
+        return self._eyelashesProxy
+
+    eyelashesProxy = property(getEyelashesProxy, setEyelashesProxy)
+
+    def setTeethProxy(self, proxy):
+        self._swapProxies(self._teethProxy, proxy)
+        self._teethProxy = proxy
+        event = events3d.HumanEvent(self, 'proxyChange')
+        event.proxy = 'teeth'
+        self.callEvent('onChanged', event)
+    def getTeethProxy(self):
+        return self._teethProxy
+
+    teethProxy = property(getTeethProxy, setTeethProxy)
+
+    def setTongueProxy(self, proxy):
+        self._swapProxies(self._tongueProxy, proxy)
+        self._tongueProxy = proxy
+        event = events3d.HumanEvent(self, 'proxyChange')
+        event.proxy = 'tongue'
+        self.callEvent('onChanged', event)
+    def getTongueProxy(self):
+        return self._tongueProxy
+
+    tongueProxy = property(getTongueProxy, setTongueProxy)
+
+    @property
+    def clothesProxies(self):
+        """
+        Read-only access to the clothes proxies attached to this human
+        """
+        return dict(self._clothesProxies)
+
+    def addClothesProxy(self, proxy):
+        uuid = proxy.getUuid()
+        self._swapProxies(self._clothesProxies.get(uuid, None), proxy)
+        self._clothesProxies[uuid] = proxy
+        event = events3d.HumanEvent(self, 'proxyChange')
+        event.proxy = 'clothes'
+        self.callEvent('onChanged', event)
+
+    def removeClothesProxy(self, uuid):
+        self._swapProxies(self._clothesProxies.get(uuid, None), None)
+        event = events3d.HumanEvent(self, 'proxyChange')
+        del self._clothesProxies[uuid]
+        event.proxy = 'clothes'
+        self.callEvent('onChanged', event)
 
     def _swapProxies(self, oldPxy, newPxy):
         """
@@ -237,10 +302,9 @@ class Human(guicommon.Object, animation.AnimatedMesh):
                 proxies.append(pxy)
         if includeHumanProxy and self.proxy:
             proxies.append(self.proxy)
-        for pxy in self.clothesProxies.values():
+        for pxy in self._clothesProxies.values():
             proxies.append(pxy)
         return proxies
-
 
     def getTypedSimpleProxies(self, ptype):
         ptype = ptype.capitalize()
