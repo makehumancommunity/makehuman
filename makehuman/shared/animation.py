@@ -40,6 +40,7 @@ Data handlers for skeletal animation.
 import math
 import numpy as np
 import numpy.linalg as la
+import log
 
 
 INTERPOLATION = {
@@ -281,6 +282,12 @@ class AnimatedMesh(object):
         return self.__skeleton
 
     def addBoundMesh(self, mesh, vertexToBoneMapping):
+        if mesh.name in self.getBoundMeshes():
+            log.warning("Replacing bound mesh with same name %s" % mesh.name)
+            m, _ = self.getBoundMesh(mesh.name)
+            if m == mesh:
+                log.warning("Attempt to add the same bound mesh %s twice" % mesh.name)
+
         # allows multiple meshes (also to allow to animate one model consisting of multiple meshes)
         originalMeshCoords = np.zeros((mesh.getVertexCount(),4), np.float32)
         originalMeshCoords[:,3] = 1
