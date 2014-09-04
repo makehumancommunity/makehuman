@@ -455,6 +455,11 @@ class ProxyChooserTaskView(gui3d.TaskView):
             self.showObjects() # Make sure objects are shown again after onHumanChanging events
             #log.debug("Human changed, adapting all proxies (event: %s)", event)
             self.adaptAllProxies()
+        if event.change in ['poseRefresh']:
+            # Update subdivided proxies after posing
+            for obj in self.getObjects():
+                if obj.isSubdivided():
+                    obj.getSubdivisionMesh()
 
     def onHumanChanging(self, event):
         if event.change == 'modifier':
