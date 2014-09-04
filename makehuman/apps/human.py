@@ -59,7 +59,6 @@ from makehuman import getBasemeshVersion, getShortVersion, getVersionStr, getVer
 class Human(guicommon.Object, animation.AnimatedMesh):
 
     def __init__(self, mesh):
-
         guicommon.Object.__init__(self, mesh)
 
         self.hasWarpTargets = False
@@ -107,6 +106,23 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
         animation.AnimatedMesh.__init__(self, skel=None, mesh=self.meshData, vertexToBoneMapping=None)
 
+
+    def setProxy(self, proxy):
+        oldPxy = self.getProxy()
+        oldPxyMesh = self._Object__proxyMesh # We access the private member of the superclass here
+        # Fit to basemesh in rest pose, then pose proxy
+        super(Human, self).setProxy(proxy)
+
+        if oldPxyMesh:
+            self.removeBoundMesh(oldPxyMesh)
+        if self.proxy:
+            # Add new mesh and vertex weight assignments
+            self._updateMeshVertexWeights(self._Object__proxyMesh)
+            self.refreshPose()
+
+        event = events3d.HumanEvent(self, 'proxyChange')
+        event.proxy = 'human'
+        self.callEvent('onChanged', event)
 
     # TODO introduce better system for managing proxies, nothing done for clothes yet
     def setHairProxy(self, proxy):
@@ -1003,7 +1019,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         """
         Retrieve human seed mesh vertex coordinates in rest pose.
         """
-        return self.getRestCoordinates(self.name)
+        return self.getRestCoordinates(self.meshData.name)
 
     def applyAllTargets(self, update=True):
         """
@@ -1214,7 +1230,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         if self.getSkeleton():
             bodyVertexWeights = self.getVertexWeights()
 
-            if obj.proxy:
+            if obj.proxy and mesh != self.meshData:
                 import skeleton
                 # Determine vertex weights for proxy (map to unfiltered proxy mesh)
                 weights = skeleton.getProxyWeights(obj.proxy, bodyVertexWeights)

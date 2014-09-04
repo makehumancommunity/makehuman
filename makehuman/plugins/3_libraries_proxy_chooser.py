@@ -126,7 +126,6 @@ class ProxyTaskView(proxychooser.ProxyChooserTaskView):
         mesh,obj = pxy.loadMeshAndObject(self.human)
 
         self.human.setProxy(pxy)
-        self.human.updateProxyMesh()
 
         # Add to selection
         self.selectedProxies.append(pxy)
