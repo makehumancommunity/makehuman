@@ -232,7 +232,7 @@ class AnimatedMesh(object):
         self.__playTime = 0.0
 
         self.__inPlace = False  # Animate in place (ignore translation component of animation)
-        self.onlyAnimateVisible = True  # Only animate visible meshes
+        self.onlyAnimateVisible = False  # Only animate visible meshes (note: enabling this can have undesired consequences!)
 
     def setSkeleton(self, skel):
         self.__skeleton = skel
@@ -357,10 +357,10 @@ class AnimatedMesh(object):
         Set mesh posed (True) or set to rest pose (False), changes pose state.
         """
         self._posed = posed
-        self._pose()
+        self.refreshPose(True)
 
     def isPosed(self):
-        return self._posed
+        return self._posed and self.__currentAnim and self.getSkeleton()
 
     @property
     def posed(self):
@@ -378,7 +378,7 @@ class AnimatedMesh(object):
         return self.__playTime
 
     def _pose(self):
-        if self.isPosed() and self.__currentAnim:
+        if self.isPosed():
             if not self.getSkeleton():
                 return
             poseState = self.__currentAnim.getAtTime(self.__playTime)
@@ -407,7 +407,7 @@ class AnimatedMesh(object):
         #originalToUnweldedMap = mesh.inverse_vmap
 
         mesh.changeCoords(verts)
-        mesh.calcNormals()
+        mesh.calcNormals()  # TODO this is too slow for animation
         mesh.update()
 
     def refreshStaticMeshes(self):
