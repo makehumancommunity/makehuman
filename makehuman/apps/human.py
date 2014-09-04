@@ -1026,27 +1026,11 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             itprog.step()
 
         # Make sure self.getRestposeCoordinates is up-to-date directly (required for proxy fitting)
-        self._updateOriginalMeshCoords(self.name, self.meshData.coord)
+        self._updateOriginalMeshCoords(self.meshData.name, self.meshData.coord)
 
         # Update all verts
         self.getSeedMesh().update()
         self.updateProxyMesh()
-        if self.isSubdivided():
-            progress(0.5, 0.7)
-            self.updateSubdivisionMesh()
-            progress(0.7, 0.8)
-            self.mesh.calcNormals()
-            progress(0.8, 0.99)
-            if update:
-                self.mesh.update()
-        else:
-            progress(0.5, 0.8)
-            self.meshData.calcNormals(1, 1)
-            progress(0.8, 0.99)
-            if update:
-                self.meshData.update()
-
-        progress(1.0)
 
         #self.traceStack(all=True)
         #self.traceBuffer(all=True, vertsToList=0)
@@ -1058,11 +1042,31 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
         self.callEvent('onChanged', events3d.HumanEvent(self, 'targets'))
 
-        # Restore posed mode, and shadow copy of vertex positions 
+        # Restore pose, and shadow copy of vertex positions 
         # (We do this after onChanged event so that proxies are already updated)
         if self.getSkeleton():
             self.refreshStaticMeshes()  # TODO document: an external plugin that modifies the rest pose verts outside of an onHumanChang(ing/ed) event should explicitly call this method on the human
         # TODO for static poses we can do better and recalculate normals at this point (after having posed the mesh), for animation this will be too slow, though.
+
+        # Update subdivision mesh
+        if self.isSubdivided():
+            progress(0.5, 0.7)
+            self.updateSubdivisionMesh()
+            progress(0.7, 0.8)
+            self.mesh.calcNormals()
+            progress(0.8, 0.99)
+            if update:
+                self.mesh.update()
+        else:
+            progress(0.5, 0.8)
+            if not self.isPosed():
+                # Update seedmesh normals (if not already done so by posing)
+                self.meshData.calcNormals(1, 1)
+                progress(0.8, 0.99)
+                if update:
+                    self.meshData.update()
+
+        progress(1.0)
 
     def getPartNameForGroupName(self, groupName):
         # TODO is this still used anywhere?
@@ -1238,6 +1242,16 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         event.state = posed
         self.callEvent('onChanging', event)
         animation.AnimatedMesh.setPosed(self, posed)
+        self.callEvent('onChanged', event)
+
+    def refreshPose(self, updateIfInRest=False):
+        event = events3d.HumanEvent(self, 'poseRefresh')
+        self.callEvent('onChanging', event)
+        super(Human, self).refreshPose(updateIfInRest)
+        if self.isSubdivided():
+            self.updateSubdivisionMesh()
+            self.mesh.calcNormals()
+            self.mesh.update()
         self.callEvent('onChanged', event)
 
     def load(self, filename, update=True):
