@@ -109,7 +109,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
     def setProxy(self, proxy):
         oldPxy = self.getProxy()
-        oldPxyMesh = self._Object__proxyMesh # We access the private member of the superclass here
+        oldPxyMesh = self.getProxyMesh()
         # Fit to basemesh in rest pose, then pose proxy
         super(Human, self).setProxy(proxy)
 
@@ -117,7 +117,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             self.removeBoundMesh(oldPxyMesh)
         if self.proxy:
             # Add new mesh and vertex weight assignments
-            self._updateMeshVertexWeights(self._Object__proxyMesh)
+            self._updateMeshVertexWeights(self.getProxyMesh())
             self.refreshPose()
 
         event = events3d.HumanEvent(self, 'proxyChange')
