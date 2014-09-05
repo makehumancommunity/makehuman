@@ -256,8 +256,8 @@ class Skeleton(object):
                 bone = self.getBone(bname)
                 verts,weights = mapping
                 vec = np.dot(bone.matPoseVerts, meshCoords[verts].transpose())
-                wvec = weights*vec
-                coords[verts] += wvec.transpose()[:,:3]
+                vec *= weights
+                coords[verts] += vec.transpose()[:,:3]
             except:
                 log.warning("Could not skin bone %s: no such bone in skeleton" % bname)
 
