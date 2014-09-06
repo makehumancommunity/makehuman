@@ -64,6 +64,8 @@ from getpath import getSysDataPath, canonicalPath
 
 _targetBuffer = {}
 
+_posedCoordBuffer = None
+
 
 class Target(object):
     """
@@ -208,7 +210,7 @@ class Target(object):
             self._load_text(name)
         logger.debug('loaded target %s', name)
 
-    def apply(self, obj, morphFactor, update=True, calcNormals=True, faceGroupToUpdateName=None, scale=(1.0,1.0,1.0)):
+    def apply(self, obj, morphFactor, update=True, calcNormals=True, faceGroupToUpdateName=None, scale=(1.0,1.0,1.0), rigging=None):
         self.morphFactor = morphFactor
 
         if len(self.verts):
@@ -235,7 +237,17 @@ class Target(object):
                 # Adding the translation vector
 
                 scale = np.array(scale) * morphFactor
-                obj.coord[dstVerts] += self.data[srcVerts] * scale[None,:]
+                if rigging is not None:
+                    global _posedCoordBuffer
+                    skeleton, vertBoneMapping = rigging
+                    if _posedCoordBuffer is None:
+                        _posedCoordBuffer = np.zeros((obj.getVertexCount(), 4), dtype=np.float32)
+                    _posedCoordBuffer[:,3] = 1.0
+                    _posedCoordBuffer[dstVerts,:3] = self.data[srcVerts] * scale[None,:]
+                    skeleton.skinMesh(_posedCoordBuffer, vertBoneMapping)
+                    obj.coord[dstVerts] += _posedCoordBuffer[dstVerts,:3]
+                else:
+                    obj.coord[dstVerts] += self.data[srcVerts] * scale[None,:]
                 obj.markCoords(dstVerts, coor=True)
 
             if calcNormals:
@@ -290,7 +302,7 @@ def getTarget(obj, targetPath):
     return target
 
 
-def loadTranslationTarget(obj, targetPath, morphFactor, faceGroupToUpdateName=None, update=1, calcNorm=1, scale=[1.0,1.0,1.0]):
+def loadTranslationTarget(obj, targetPath, morphFactor, faceGroupToUpdateName=None, update=1, calcNorm=1, scale=[1.0,1.0,1.0], rigging=None):
     """
     This function retrieves a set of translation vectors and applies those
     translations to the specified vertices of the mesh object. This set of
@@ -337,6 +349,13 @@ def loadTranslationTarget(obj, targetPath, morphFactor, faceGroupToUpdateName=No
         *int flag*. A flag to indicate whether the normals are to be recalculated (1/true)
         or not (0/false).
 
+    scale:
+        *float*. Scale the target offsets with this vector. Defaults to unit vector.
+
+    rigging:
+        *tuple of 2*. Posed state of the basemesh with which the target should be
+        transformed before being applied. Is a tuple of (skeleton, vertexBoneWeights)
+
     """
 
     if not (morphFactor or update):
@@ -344,7 +363,7 @@ def loadTranslationTarget(obj, targetPath, morphFactor, faceGroupToUpdateName=No
 
     target = getTarget(obj, targetPath)
 
-    target.apply(obj, morphFactor, update, calcNorm, faceGroupToUpdateName, scale)
+    target.apply(obj, morphFactor, update, calcNorm, faceGroupToUpdateName, scale, rigging)
 
 def saveTranslationTarget(obj, targetPath, groupToSave=None, epsilon=0.001):
     """

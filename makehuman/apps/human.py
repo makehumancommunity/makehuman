@@ -1033,7 +1033,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
         # First call progress callback (which often processes events) before resetting mesh
         # so that mesh is not drawn in its reset state
-        algos3d.resetObj(self.meshData)
+        algos3d.resetObj(self.meshData)  # Reset mesh is in rest pose
 
         # Apply targets to seedmesh coordinates
         itprog = Progress(len(self.targetsDetailStack))
