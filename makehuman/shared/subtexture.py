@@ -36,31 +36,48 @@
 Abstract
 --------
 
-Subtexture class definition.
-Functions for combining and manipulating subtextures.
+Definitions for combining and manipulating subtextures
+as multi-layered images.
 """
 
-import inifile
-import image
-from codecs import open
+from image import Image
 
 
-class Subtexture(object):
+class Layer(Image):
     """
-    A Subtexture is a texture that can be
-    combined with a larger texture by overlapping it.
-    It is useful for modifying small areas of large textures
-    without replacing the whole texture.
+    A Layer is an Image that can be inserted in a
+    LayeredImage to be processed as a layer of a
+    greater image compilation.
+    """
+    def __init__(self, img, borders=(0, 0, 0, 0)):
+        super(Layer, self).__init__(img)
+        self.borders = borders
+
+
+class LayeredImage(Image):
+    """
+    A LayeredImage is a container of multiple
+    overlapping image layers.
+    It is designed to inherit from and externally
+    behave like an Image, while managing all its
+    layers in the background.
     """
 
-    def __init__(self, source, position):
-        super(Subtexture, self).__init__()
-        self.source = image.Image(source)
-        self.position = position
+    def __init__(self, *args, **kwargs):
+        self.layers = []
+        for arg in args:
+            if isinstance(arg, Layer):
+                self.addLayer(arg)
+            elif isinstance(arg, Image):
+                self.addLayer(Layer(arg))
+            elif isinstance(arg, tuple):
+                self.addLayer(Layer(*arg))
 
-    def overlap(img):
-        img = image.Image(img)
-        img.blit(self.source, *self.position)
-        return img
+    def addLayer(self, layer):
+        self.layers.append(layer)
 
-    # [("(","["), (")","]")]
+    # TODO Override and imitate Image's methods
+    # so that they return the result calculated
+    # by processing all layers. Use caching to
+    # avoid calculation repetitions.
+
