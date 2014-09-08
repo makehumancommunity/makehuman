@@ -243,6 +243,10 @@ def buildDeb(dest = None):
   svgIcon = os.path.join(hgrootdir, 'makehuman/icons/makehuman.svg')
   shutil.copy(svgIcon, os.path.join(programdir,"makehuman.svg"))
 
+  # Copy bash wrapper executable
+  execFile = os.path.join(hgrootdir, 'makehuman/makehuman')
+  shutil.copy(execFile, execDest)
+
   # Copy files in src bin dir to dest bin dir
   _cp_files(srcbin, bindir)
 

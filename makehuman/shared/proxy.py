@@ -147,21 +147,6 @@ class Proxy:
         return self.object.mesh
 
 
-    def getActualTexture(self, human):
-        uuid = self.getUuid()
-        mesh = None
-
-        if human.proxy and uuid == human.proxy.uuid:
-            mesh = human.mesh
-        else:
-            for pxy in human.getProxies():
-                if pxy and uuid == pxy.uuid:
-                    mesh = pxy.object.mesh
-                    break
-
-        return getpath.formatPath(mesh.texture)
-
-
     def loadMeshAndObject(self, human):
         import files3d
         import guicommon
