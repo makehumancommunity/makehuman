@@ -540,6 +540,7 @@ class Parser:
         """
 
         obj = human.meshData
+        coord = human.getRestposeCoordinates()
         scale = self.armature.options.scale
         for (key, type, data) in self.joints:
             if type == 'j':
@@ -548,17 +549,17 @@ class Parser:
                 self.locations[data] = loc
             elif type == 'v':
                 v = int(data)
-                self.locations[key] = obj.coord[v]
+                self.locations[key] = coord[v]
             elif type == 'x':
                 self.locations[key] = np.array((float(data[0]), float(data[2]), -float(data[1])))
             elif type == 'vo':
                 v = int(data[0])
                 offset = np.array((float(data[1]), float(data[3]), -float(data[2])))
-                self.locations[key] = (obj.coord[v] + scale*offset)
+                self.locations[key] = (coord[v] + scale*offset)
             elif type == 'vl':
                 ((k1, v1), (k2, v2)) = data
-                loc1 = obj.coord[int(v1)]
-                loc2 = obj.coord[int(v2)]
+                loc1 = coord[int(v1)]
+                loc2 = coord[int(v2)]
                 self.locations[key] = (k1*loc1 + k2*loc2)
             elif type == 'so':
                 base, left, right, offset = data
@@ -586,7 +587,7 @@ class Parser:
                 self.locations[key] = np.array((x[0],y[1],z[2]))
             elif type == 'vz':
                 v = int(data[0])
-                z = obj.coord[v][2]
+                z = coord[v][2]
                 loc = self.locations[data[1]]
                 self.locations[key] = np.array((loc[0],loc[1],z))
             elif type == 'X':
