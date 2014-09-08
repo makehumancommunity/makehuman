@@ -105,6 +105,8 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         self.blockEthnicUpdates = False                 # When set to True, changes to race are not normalized automatically
 
         animation.AnimatedMesh.__init__(self, skel=None, mesh=self.meshData, vertexToBoneMapping=None)
+        # Make sure that shadow vertices are copied
+        self.refreshStaticMeshes()
 
 
     def setProxy(self, proxy):
@@ -228,6 +230,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         """
         Update bound meshes for animation when proxies are changed
         """
+        # TODO avoid continually reposing when loading mhm file with many proxies
         if oldPxy:
             self.removeBoundMesh(oldPxy.object.mesh.name)
         if newPxy:
@@ -1205,9 +1208,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
         self.callEvent('onChanging', events3d.HumanEvent(self, 'skeleton'))
         animation.AnimatedMesh.setSkeleton(self, skel)
-        if prev_skel is None:
-            # Make sure that shadow vertices are copied
-            self.refreshStaticMeshes()
         self.updateVertexWeights(vertexWeights)
         self.callEvent('onChanged', events3d.HumanEvent(self, 'skeleton'))
         self.refreshPose()
