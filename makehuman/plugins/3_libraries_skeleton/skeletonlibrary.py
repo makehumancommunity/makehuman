@@ -99,8 +99,6 @@ class SkeletonLibrary(gui3d.TaskView):
         self.selectedRig = None
         self.selectedBone = None
 
-        self.oldSmoothValue = False
-
         self.humanChanged = False   # Used for determining when joints need to be redrawn
 
         self.skelMesh = None
@@ -208,10 +206,7 @@ class SkeletonLibrary(gui3d.TaskView):
         if gui3d.app.settings.get('cameraAutoZoom', True):
             gui3d.app.setGlobalCamera()
 
-        # Disable smoothing in skeleton library
-        self.oldSmoothValue = self.human.isSubdivided()
-        self.human.setSubdivided(False)
-
+        # Set X-ray material
         self.oldHumanMat = self.human.material.clone()
         self.oldPxyMats = dict()
         xray_mat = material.fromFile(mh.getSysDataPath('materials/xray.mhmat'))
@@ -224,6 +219,7 @@ class SkeletonLibrary(gui3d.TaskView):
         # Make sure skeleton is updated if human has changed
         if self.human.getSkeleton():
             self.drawSkeleton(self.human.getSkeleton())
+            self.human.refreshPose()
             mh.redraw()
 
 
@@ -235,8 +231,6 @@ class SkeletonLibrary(gui3d.TaskView):
             if pxy.uuid in self.oldPxyMats:
                 pxy.object.material = self.oldPxyMats[pxy.uuid]
 
-        # Reset smooth setting
-        self.human.setSubdivided(self.oldSmoothValue)
         mh.redraw()
 
 
@@ -264,17 +258,17 @@ class SkeletonLibrary(gui3d.TaskView):
 
         # Load skeleton definition from options
         skel, boneWeights = skeleton.loadRig(options, self.human.meshData)
+
+        # (Re-)draw the skeleton (before setting skeleton on human so it is automatically re-posed)
+        self.drawSkeleton(skel)
+
+        # Assign to human
         self.human.setSkeleton(skel, boneWeights)
 
         # Store a reference to the currently loaded rig
         self.human.getSkeleton().options = options
 
         #self.filechooser.selectItem(options)
-
-        # (Re-)draw the skeleton
-        skel = self.human.getSkeleton()
-        self.drawSkeleton(skel)
-        self.human.refreshPose()
 
         self.boneCountLbl.setTextFormat(["Bones",": %s"], self.human.getSkeleton().getBoneCount())
 
@@ -310,8 +304,6 @@ class SkeletonLibrary(gui3d.TaskView):
         mapping = skeleton_drawing.getVertBoneMapping(skel, self.skelMesh)
         self.human.addBoundMesh(self.skelMesh, mapping)
 
-        # Store a reference to the skeleton mesh object for other plugins
-        self.human.getSkeleton().object = self.skelObj
         mh.redraw()
 
 
