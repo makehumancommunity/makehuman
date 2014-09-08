@@ -57,7 +57,7 @@ def load(app):
 
     human = gui3d.app.selectedHuman
     app.addLoadHandler('skeleton', maintask.loadHandler)
-    app.addSaveHandler(maintask.saveHandler)
+    app.addSaveHandler(maintask.saveHandler, priority=5)
 
     if not mh.isRelease():
         from . import debugtab

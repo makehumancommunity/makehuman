@@ -46,6 +46,7 @@ import animation
 import bvh
 import os
 from core import G
+import getpath
 
 import skeleton_drawing
 import material
@@ -207,6 +208,22 @@ class PoseLibraryTaskView(gui3d.TaskView):
             if self.isShown():
                 self.onShow(event)
 
+    def loadHandler(self, human, values):
+        if values[0] == "pose":
+            poseFile = values[1]
+            poseFile = getpath.findFile(poseFile, self.paths)
+            if not os.path.isfile(poseFile):
+                log.warning("Could not load pose %s, file does not exist." % poseFile)
+            else:
+                self.loadPose(poseFile)
+            return
+
+    def saveHandler(self, human, file):
+        if human.getSkeleton() and self.currentPose:
+            poseFile = getpath.getRelativePath(self.currentPose, self.paths)
+            file.write('pose %s\n' % poseFile)
+
+
 category = None
 taskview = None
 
@@ -218,7 +235,10 @@ def load(app):
     category = app.getCategory('Pose/Animate')
     taskview = PoseLibraryTaskView(category)
     taskview.sortOrder = 2
-    category.addTask(PoseLibraryTaskView(category))
+    category.addTask(taskview)
+
+    app.addLoadHandler('pose', taskview.loadHandler)
+    app.addSaveHandler(taskview.saveHandler, priority=6) # After skeleton library
 
 
 # This method is called when the plugin is unloaded from makehuman
