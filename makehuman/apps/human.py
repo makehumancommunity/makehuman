@@ -1169,6 +1169,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
     def resetMeshValues(self):
         self.setSubdivided(False, update=False)
         self.setDefaultValues()
+        self.resetToRestPose(update=False)
 
         self.targetsDetailStack = {}
 
@@ -1209,6 +1210,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             self.refreshStaticMeshes()
         self.updateVertexWeights(vertexWeights)
         self.callEvent('onChanged', events3d.HumanEvent(self, 'skeleton'))
+        self.refreshPose()
 
     def updateVertexWeights(self, vertexWeights):
         for mName in self.getBoundMeshes():  # Meshes are unsubdivided
@@ -1217,7 +1219,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
                 animation.AnimatedMesh.updateVertexWeights(self, mName, vertexWeights)
             else:
                 self._updateMeshVertexWeights(self.getBoundMesh(mName)[0])
-        self.refreshPose()
 
     def _updateMeshVertexWeights(self, mesh):
         obj = mesh.object
