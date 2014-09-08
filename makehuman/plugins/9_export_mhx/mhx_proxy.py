@@ -155,7 +155,6 @@ class Writer(mhx_writer.Writer):
 
     def writeProxyMaterial(self, fp, mat, pxy):
         if mat.diffuseTexture:
-            #mat.diffuseTexture = pxy.getActualTexture(self.human)
             alpha = 0
         else:
             alpha = 1
