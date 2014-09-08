@@ -50,6 +50,22 @@ from core import G
 import skeleton_drawing
 import material
 
+class PoseAction(gui3d.Action):
+    def __init__(self, name, library, before, after):
+        super(PoseAction, self).__init__(name)
+        self.library = library
+        self.before = before
+        self.after = after
+
+    def do(self):
+        self.library.loadPose(self.after)
+        return True
+
+    def undo(self):
+        self.library.loadPose(self.before)
+        return True
+
+
 # TODO add save/load handlers
 class PoseLibraryTaskView(gui3d.TaskView):
 
@@ -66,8 +82,7 @@ class PoseLibraryTaskView(gui3d.TaskView):
 
         @self.filechooser.mhEvent
         def onFileSelected(filename):
-            # TODO add action
-            self.loadPose(filename)
+            gui3d.app.do(PoseAction("Change pose", self, self.currentPose, filename))
 
         box = self.addLeftWidget(gui.GroupBox('Pose'))
 
@@ -82,6 +97,7 @@ class PoseLibraryTaskView(gui3d.TaskView):
 
         if not filepath:
             self.human.resetToRestPose()
+            return
 
         if os.path.splitext(filepath)[1].lower() == '.mhp':
             anim = self.loadMhp(filepath)
