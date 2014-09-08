@@ -713,14 +713,20 @@ def _normalizeQuaternion(quat):
         sign = -1
     quat[0] = sign*math.sqrt(1-r2)
 
-def getHumanJointPosition(mesh, jointName):
+def getHumanJointPosition(human, jointName, rest_coord=True):
     """
     Get the position of a joint from the human mesh.
     This position is determined by the center of the joint helper with the
     specified name.
     """
-    fg = mesh.getFaceGroup(jointName)
-    verts = mesh.getCoords(mesh.getVerticesForGroups([fg.name]))
+    if not jointName.startswith("joint-"):
+        jointName = "joint-" + jointName
+    fg = human.meshData.getFaceGroup(jointName)
+    v_idx = human.meshData.getVerticesForGroups([fg.name])
+    if rest_coord:
+        verts = human.getRestposeCoordinates()[v_idx]
+    else:
+        verts = human.meshData.getCoords(v_idx)
     return verts.mean(axis=0)
 
 def loadRig(options, mesh):
