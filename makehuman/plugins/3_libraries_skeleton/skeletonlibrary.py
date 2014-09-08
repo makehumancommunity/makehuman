@@ -274,6 +274,7 @@ class SkeletonLibrary(gui3d.TaskView):
         # (Re-)draw the skeleton
         skel = self.human.getSkeleton()
         self.drawSkeleton(skel)
+        self.human.refreshPose()
 
         self.boneCountLbl.setTextFormat(["Bones",": %s"], self.human.getSkeleton().getBoneCount())
 
@@ -289,6 +290,9 @@ class SkeletonLibrary(gui3d.TaskView):
             self.skelObj = None
             self.skelMesh = None
             self.selectedBone = None
+
+        if not skel:
+            return
 
         # Create a mesh from the skeleton in rest pose
         skel.setToRestPose() # Make sure skeleton is in rest pose when constructing the skeleton mesh
