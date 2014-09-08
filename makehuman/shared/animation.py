@@ -39,6 +39,8 @@ Data handlers for skeletal animation.
 
 import math
 import numpy as np
+import numpy.linalg as la
+import log
 
 
 INTERPOLATION = {
@@ -162,6 +164,54 @@ class AnimationTrack(object):
         self.dataLen = len(self.data)
         self.nFrames = self.dataLen/self.nBones
 
+class Pose(AnimationTrack):
+    """
+    A pose is an animation track with only one frame, and is not affected by
+    playback time.
+
+    It's possible to convert a frame from an animation to a pose using:
+        Pose(anim.name, anim.getAtTime(t))
+    or
+        Pose(anim.name, anim.getAtFramePos(i))
+    """
+
+    def __init__(self, name, poseData):
+        super(Pose, self).__init__(name, poseData, nFrames=1, framerate=1)
+
+    def sparsify(self, newFrameRate):
+        raise NotImplementedError("sparsify() does not exist for poses")
+
+    def getData(self):
+        """
+        Structured pose data
+        """
+        return self.getAtFramePos(0)
+
+    def fromUnitPose(self, unitPoseData):
+        # TODO
+        pass
+
+def poseFromUnitPose(name, unitPoseData):
+    # TODO
+    pass
+
+def blendPoses(poses, weights):
+    """
+    Blend multiple poses (or pose data constructed from an animation frame).
+    """
+    if len(weights) < 1:
+        return None
+
+    if len(weights) == 1:
+        return poses[0].getData()
+
+    poseData = weights[0] * poses[0]
+    for pIdx, pose in poses[1:]:
+        w = weights[pIdx]
+        poseData += w * pose
+
+    return poseData
+
 class AnimatedMesh(object):
     """
     Manages skeletal animation for a mesh or multiple meshes.
@@ -175,16 +225,25 @@ class AnimatedMesh(object):
         self.__meshes = []
         self.__vertexToBoneMaps = []
         self.__originalMeshCoords = []
-        self.addMesh(mesh, vertexToBoneMapping)
+        self.addBoundMesh(mesh, vertexToBoneMapping)
 
+        self._posed = True
         self.__animations = {}
         self.__currentAnim = None
         self.__playTime = 0.0
 
-        self.__inPlace = False
-        self.onlyAnimateVisible = True
+        self.__inPlace = False  # Animate in place (ignore translation component of animation)
+        self.onlyAnimateVisible = False  # Only animate visible meshes (note: enabling this can have undesired consequences!)
+
+    def setSkeleton(self, skel):
+        self.__skeleton = skel
+        self.removeAnimations(update=False)
 
     def addAnimation(self, anim):
+        """
+        Add an animation to this animated mesh.
+        Note: poses are simply animations with only one frame.
+        """
         self.__animations[anim.name] = anim
 
     def getAnimation(self, name):
@@ -196,9 +255,9 @@ class AnimatedMesh(object):
     def getAnimations(self):
         return self.__animations.keys()
 
-    def removeAnimations(self):
+    def removeAnimations(self, update=True):
+        self.resetToRestPose(update)
         self.__animations = {}
-        self.__currentAnim = None
 
     def removeAnimation(self, name):
         del self.__animations[name]
@@ -211,29 +270,42 @@ class AnimatedMesh(object):
         else:
             self.__currentAnim = self.__animations[name]
 
+    def getActiveAnimation(self):
+        if self.__currentAnim is None:
+            return None
+        else:
+            return self.__currentAnim.name
+
     def setAnimateInPlace(self, enable):
         self.__inPlace = enable
 
     def getSkeleton(self):
         return self.__skeleton
 
-    def addMesh(self, mesh, vertexToBoneMapping):
+    def addBoundMesh(self, mesh, vertexToBoneMapping):
+        if mesh.name in self.getBoundMeshes():
+            log.warning("Replacing bound mesh with same name %s" % mesh.name)
+            m, _ = self.getBoundMesh(mesh.name)
+            if m == mesh:
+                log.warning("Attempt to add the same bound mesh %s twice" % mesh.name)
+            self.removeBoundMesh(mesh.name)
+
         # allows multiple meshes (also to allow to animate one model consisting of multiple meshes)
         originalMeshCoords = np.zeros((mesh.getVertexCount(),4), np.float32)
         originalMeshCoords[:,3] = 1
-        originalMeshCoords[:,:3] = mesh.coord[:,:3]        
+        originalMeshCoords[:,:3] = mesh.coord[:,:3]
         self.__originalMeshCoords.append(originalMeshCoords)
         self.__vertexToBoneMaps.append(vertexToBoneMapping)
         self.__meshes.append(mesh)
 
-    def removeMesh(self, name):
-        rIdx = -1
-        for idx,m in enumerate(self.__meshes):
-            if name == m.name:
-                rIdx = idx
-                break
+    def updateVertexWeights(self, meshName, vertexToBoneMapping):
+        rIdx = self._getBoundMeshIndex(meshName)
+        self.__vertexToBoneMaps[rIdx] = vertexToBoneMapping
 
-        if rIdx > -1:
+    def removeBoundMesh(self, name):
+        try:
+            rIdx = self._getBoundMeshIndex(name)
+
             # First restore rest coords of mesh, then remove it
             try:
                 self._updateMeshVerts(self.__meshes[rIdx], self.__originalMeshCoords[rIdx][:,:3])
@@ -242,25 +314,33 @@ class AnimatedMesh(object):
             del self.__meshes[rIdx]
             del self.__originalMeshCoords[rIdx]
             del self.__vertexToBoneMaps[rIdx]
+        except:
+            pass
 
-    def containsMesh(self, mesh):
-        mesh2, _ = self.getMesh(mesh.name)
+    def getRestCoordinates(self, name):
+        rIdx = self._getBoundMeshIndex(name)
+        return self.__originalMeshCoords[rIdx][:,:3]
+
+    def containsBoundMesh(self, mesh):
+        mesh2, _ = self.getBoundMesh(mesh.name)
         return mesh2 == mesh
 
-    def getMesh(self, name):
-        rIdx = -1
-        for idx, mesh in enumerate(self.__meshes):
-            if mesh.name == name:
-                rIdx = idx
-                break
-
-        if rIdx > -1:
-            return self.__meshes[rIdx], self.__vertexToBoneMaps[rIdx]
-        else:
+    def getBoundMesh(self, name):
+        try:
+            rIdx = self._getBoundMeshIndex(name)
+        except:
             return None, None
 
-    def getMeshes(self):
+        return self.__meshes[rIdx], self.__vertexToBoneMaps[rIdx]
+
+    def getBoundMeshes(self):
         return [mesh.name for mesh in self.__meshes]
+
+    def _getBoundMeshIndex(self, meshName):
+        for idx, mesh in enumerate(self.__meshes):
+            if mesh.name == meshName:
+                return idx
+        raise RuntimeError("No mesh with name %s bound to this animatedmesh" % meshName)
 
     def update(self, timeDeltaSecs):
         self.__playTime = self.__playTime + timeDeltaSecs
@@ -270,48 +350,107 @@ class AnimatedMesh(object):
         self.__playTime = 0.0
         self._pose()
 
-    def setToTime(self, time):
+    def setToTime(self, time, update=True):
         self.__playTime = float(time)
-        self._pose()
+        if update:
+            self._pose()
 
-    def setToFrame(self, frameNb):
+    def setToFrame(self, frameNb, update=True):
         if not self.__currentAnim:
             return
         frameNb = int(frameNb)
         self.__playTime = float(frameNb)/self.__currentAnim.frameRate
-        self._pose()
+        if update:
+            self._pose()
 
-    def setToRestPose(self):
+    def setPosed(self, posed):
+        """
+        Set mesh posed (True) or set to rest pose (False), changes pose state.
+        """
+        self._posed = posed
+        self.refreshPose(True)
+
+    def isPosed(self):
+        return self._posed and self.isPoseable()
+
+    def isPoseable(self):
+        return bool(self.__currentAnim and self.getSkeleton())
+
+    @property
+    def posed(self):
+        return self.isPosed()
+
+    def resetToRestPose(self, update=True):
+        """
+        Remove the currently set animation/pose and reset the mesh in rest pose.
+        Does not affect posed state.
+        """
         self.setActiveAnimation(None)
-        self.resetTime()
+        if update:
+            self.resetTime()
+        else:
+            self.__playTime = 0.0
 
     def getTime(self):
         return self.__playTime
 
     def _pose(self):
-        if self.__currentAnim:
+        if self.isPosed():
+            if not self.getSkeleton():
+                return
             poseState = self.__currentAnim.getAtTime(self.__playTime)
             if self.__inPlace:
                 poseState = poseState.copy()
                 # Remove translation from matrix
                 poseState[:,:3,3] = np.zeros((poseState.shape[0],3), dtype=np.float32)
             # TODO pass poseVerts matrices immediately from animation track for performance improvement (cache them)
-            self.__skeleton.setPose(poseState)
+            self.getSkeleton().setPose(poseState)
             for idx,mesh in enumerate(self.__meshes):
                 if self.onlyAnimateVisible and not mesh.visibility:
                     continue
-                posedCoords = self.__skeleton.skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx])
+                try:
+                    posedCoords = self.getSkeleton().skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx])
+                except Exception as e:
+                    log.error("Error skinning mesh %s" % mesh.name)
+                    raise e
                 # TODO you could avoid an array copy by passing the mesh.coord list directly and modifying it in place
                 self._updateMeshVerts(mesh, posedCoords[:,:3])
         else:
-            self.__skeleton.setToRestPose() # TODO not strictly necessary if you only want to skin the mesh
+            if self.getSkeleton():
+                self.getSkeleton().setToRestPose() # TODO not strictly necessary if you only want to skin the mesh
             for idx,mesh in enumerate(self.__meshes):
                 self._updateMeshVerts(mesh, self.__originalMeshCoords[idx][:,:3])
 
     def _updateMeshVerts(self, mesh, verts):
+        # TODO this is way too slow for realtime animation, but good for posing. For animation, update the r_ verts directly, as well as the r_vnorm members
+        # TODO use this mapping to directly update the opengl data for animation
+        # Remap vertex weights to the unwelded vertices of the object (mesh.coord to mesh.r_coord)
+        #originalToUnweldedMap = mesh.inverse_vmap
+
         mesh.changeCoords(verts)
-        mesh.calcNormals()
+        mesh.calcNormals()  # TODO this is too slow for animation
         mesh.update()
+
+    def refreshStaticMeshes(self):
+        """
+        Invoke this method after the static (rest pose) meshes were changed.
+        Updates the shadow copies with original vertex coordinates and re-applies
+        the pose if this animated object was in posed mode.
+        """
+        for mIdx, mesh in enumerate(self.__meshes):
+            self.__originalMeshCoords[mIdx][:,:3] = mesh.coord[:,:3]
+        self.refreshPose(updateIfInRest=False)
+
+    def _updateOriginalMeshCoords(self, name, coord):
+        rIdx = self._getBoundMeshIndex(name)
+        self.__originalMeshCoords[rIdx][:,:3] = coord[:,:3]
+
+    def refreshPose(self, updateIfInRest=False):
+        if not self.getSkeleton():
+            self.resetToRestPose()
+        if updateIfInRest or self.isPosed():
+            self._pose()
+
 
 def emptyTrack(nFrames, nBones=1):
     """
@@ -325,3 +464,81 @@ def emptyPose(nBones=1):
     Create an empty animation containing one frame. 
     """
     return emptyTrack(1, nBones)
+
+def loadPoseFromMhpFile(filepath, skel):
+    """
+    Load a MHP pose file that contains a static pose. Posing data is defined
+    with quaternions to indicate rotation angles.
+    Creates a single frame animation track (a pose).
+    """
+    import log
+    import os
+    from codecs import open
+
+    log.message("Loading MHP file %s", filepath)
+    fp = open(filepath, "rU", encoding="utf-8")
+    valid_file = False
+
+    boneMap = skel.getBoneToIdxMapping()
+    nBones = len(boneMap.keys())
+    poseMats = np.zeros((nBones,4,4),dtype=np.float32)
+    poseMats[:] = np.identity(4, dtype=np.float32)
+
+    mats = dict()
+    for line in fp:
+        words = line.split()
+        if len(words) > 0 and words[0].startswith('#'):
+            # comment
+            continue
+        if len(words) < 10:
+            log.warning("Too short line in mhp file: %s" % " ".join(words))
+            continue
+        elif words[1] == "matrix":
+            bname = words[0]
+            boneIdx = boneMap[bname]
+            rows = []
+            n = 2
+            for i in range(4):
+                rows.append([float(words[n]), float(words[n+1]), float(words[n+2]), float(words[n+3])])
+                n += 4
+            # Invert Z rotation (for some reason this is required to make MHP orientations work)
+            rows[0][1] = -rows[0][1]
+            rows[1][0] = -rows[1][0]
+            # Invert X rotation
+            #rows[1][2] = -rows[1][2]
+            #rows[2][1] = -rows[2][1]
+            # Invert Y rotation
+            rows[0][2] = -rows[0][2]
+            rows[2][0] = -rows[2][0]
+
+            mats[boneIdx] = np.array(rows)
+        else:
+            log.warning("Unknown keyword in mhp file: %s" % words[1])
+
+    if not valid_file:
+        log.error("Loading of MHP file %s failed, probably a bad file." % filepath)
+
+    '''
+    # Apply pose to bones in breadth-first order (parent to child bone)
+    for boneIdx in sorted(mats.keys()):
+        bone = skel.boneslist[boneIdx]
+        mat = mats[boneIdx]
+        if bone.parent:
+            mat = np.dot(poseMats[bone.parent.index], np.dot(bone.matRestRelative, mat))
+        else:
+            mat = np.dot(self.matRestGlobal, mat)
+        poseMats[boneIdx] = mat
+
+    for boneIdx in sorted(mats.keys()):
+        bone = skel.boneslist[boneIdx]
+        poseMats[boneIdx] = np.dot(poseMats[boneIdx], la.inv(bone.matRestGlobal))
+    '''
+    for boneIdx in sorted(mats.keys()):
+        poseMats[boneIdx] = mats[boneIdx]
+
+    fp.close()
+
+    name = os.path.splitext(os.path.basename(filepath))[0]
+    result = Pose(name, poseMats)
+
+    return result

@@ -46,7 +46,7 @@ import log
 from collections import OrderedDict
 
 import material
-import io_json
+import json
 
 
 #
@@ -106,7 +106,7 @@ class Proxy:
         self.vertexGroups = None
         self._material_file = None
 
-        self.deleteVerts = np.zeros(len(human.meshData.coord), bool)
+        self.deleteVerts = np.zeros(human.meshData.getVertexCount(), bool)
 
 
     @property
@@ -195,16 +195,16 @@ class Proxy:
 
 
     def getCoords(self):
-        hmesh = self.human.meshData
-        matrix = self.tmatrix.getMatrix(hmesh)
+        hcoord = self.human.getRestposeCoordinates()
+        matrix = self.tmatrix.getMatrix(hcoord)
 
         ref_vIdxs = self.ref_vIdxs
         weights = self.weights
 
         coord = (
-            hmesh.coord[ref_vIdxs[:,0]] * weights[:,0,None] +
-            hmesh.coord[ref_vIdxs[:,1]] * weights[:,1,None] +
-            hmesh.coord[ref_vIdxs[:,2]] * weights[:,2,None] +
+            hcoord[ref_vIdxs[:,0]] * weights[:,0,None] +
+            hcoord[ref_vIdxs[:,1]] * weights[:,1,None] +
+            hcoord[ref_vIdxs[:,2]] * weights[:,2,None] +
             np.dot(matrix, self.offsets.transpose()).transpose()
             )
 
@@ -417,7 +417,7 @@ def loadTextProxy(human, filepath, type="Clothes"):
 
         elif key == 'vertexgroup_file':
             proxy.vertexgroup_file = _getFileName(folder, words[1], ".json")
-            proxy.vertexGroups = io_json.loadJson(proxy.vertexgroup_file)
+            proxy.vertexGroups = json.load(open(proxy.vertexgroup_file, "rU"))
 
         elif key == 'material':
             matFile = _getFileName(folder, words[1], ".mhmat")
@@ -659,7 +659,7 @@ def loadBinaryProxy(path, human, type):
     if 'vertexgroup_file' in npzfile:
         proxy._vertexgroup_file = npzfile['vertexgroup_file'].tostring()
         if proxy.vertexgroup_file:
-            proxy.vertexGroups = io_json.loadJson(proxy.vertexgroup_file)
+            proxy.vertexGroups = json.load(open(proxy.vertexgroup_file, "rU"))
 
 
     if proxy.z_depth == -1:
@@ -714,8 +714,9 @@ class ProxyRefVert:
         return self._weights
 
     def getCoord(self, matrix):
+        hcoord = self.human.getRestposeCoordinates()
         return (
-            np.dot(self.human.meshData.coord[self._verts], self._weights) +
+            np.dot(hcoord[self._verts], self._weights) +
             np.dot(matrix, self._offset)
             )
 
@@ -768,28 +769,28 @@ class TMatrix:
             self.shearData[idx] = bbdata
 
 
-    def getMatrix(self, hmesh):
+    def getMatrix(self, hcoord):
         if self.scaleData:
             matrix = np.identity(3, float)
             for n in range(3):
                 (vn1, vn2, den) = self.scaleData[n]
-                co1 = hmesh.coord[vn1]
-                co2 = hmesh.coord[vn2]
+                co1 = hcoord[vn1]
+                co2 = hcoord[vn2]
                 num = abs(co1[n] - co2[n])
                 matrix[n][n] = (num/den)
             return matrix
 
         elif self.shearData:
-            return self.matrixFromShear(self.shearData, hmesh)
+            return self.matrixFromShear(self.shearData, hcoord)
         elif self.lShearData:
-            return self.matrixFromShear(self.lShearData, hmesh)
+            return self.matrixFromShear(self.lShearData, hcoord)
         elif self.rShearData:
-            return self.matrixFromShear(self.rShearData, hmesh)
+            return self.matrixFromShear(self.rShearData, hcoord)
         else:
             return Unit3
 
 
-    def matrixFromShear(self, shear, obj):
+    def matrixFromShear(self, shear, hcoord):
         from transformations import affine_matrix_from_points
 
         # sfaces and tfaces are the face coordinates
@@ -797,8 +798,8 @@ class TMatrix:
         tfaces = np.zeros((3,2), float)
         for n in range(3):
             (vn1, vn2, sfaces[n,0], sfaces[n,1], side) = shear[n]
-            tfaces[n,0] = obj.coord[vn1][n]
-            tfaces[n,1] = obj.coord[vn2][n]
+            tfaces[n,0] = hcoord[vn1][n]
+            tfaces[n,1] = hcoord[vn2][n]
 
         # sverts and tverts are the vertex coordinates
         sverts = []

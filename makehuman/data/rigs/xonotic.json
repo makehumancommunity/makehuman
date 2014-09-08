@@ -123,22 +123,19 @@
     },
 
     "merge" : {
-        "spine":        ["spine", "spine-1"],
-            
-        "head":         ["uplid.L", "lolid.L", "uplid.R", "lolid.R", "jaw",
-                         "tongue_base", "tongue_mid", "tongue_tip", "eye.L", "eye.R"],
-
-        "clavicle.L":   ["clavicle.L", "deltoid.L"],                             
-
-        "clavicle.R":   ["clavicle.R", "deltoid.R"],                             
-
-        "hand.L":       ["hand.L", "palm_index.L", "palm_middle.L", "palm_ring.L", "palm_pinky.L"],
-
-        "hand.R":       ["hand.R", "palm_index.R", "palm_middle.R", "palm_ring.R", "palm_pinky.R"]
+        "spine":        ["spine", "spine-1"]
     },
     
     "settings" : {
-        "useIkLegs":    false
+    	"useMakeHumanRig" : true,
+    	"useMhxCompat" : true,
+        "mergeShoulders" : true,
+        "mergePalms" : true,
+        "mergeHead" : true,
+        "mergeNeck" : true,
+        "mergeTwist" : true,
+        "mergeFeet" : true,
+        "mergeToes" : true
     }
     
 }

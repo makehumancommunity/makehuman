@@ -47,6 +47,7 @@ class FbxConfig(Config):
         Config.__init__(self)
 
         self.useRelPaths     = False
+        self.useFaceRig =           True
         self.expressions = False    #exporter.expressions.selected
         self.useCustomTargets = False   #exporter.useCustomTargets.selected
         self.useMaterials    = True # for debugging
@@ -89,8 +90,8 @@ class FbxConfig(Config):
 
 
     def __repr__(self):
-        return("<FbxConfig %s e %s>" % (
-            self.expressions,))
+        return("<FbxConfig f %s>" % (
+            self.useFaceRig,))
 
 
 class ExporterFBX(Exporter):
@@ -103,9 +104,8 @@ class ExporterFBX(Exporter):
 
     def build(self, options, taskview):
         import gui
+        self.useFaceRig   = options.addWidget(gui.CheckBox("Face rig", True))
         Exporter.build(self, options, taskview)
-        #self.expressions     = options.addWidget(gui.CheckBox("Expressions", False))
-        #self.useCustomTargets = options.addWidget(gui.CheckBox("Custom targets", False))
 
     def export(self, human, filename):
         from . import mh2fbx
@@ -118,6 +118,7 @@ class ExporterFBX(Exporter):
     def getConfig(self):
         cfg = FbxConfig()
         cfg.useTPose          = False # self.useTPose.selected
+        cfg.useFaceRig = self.useFaceRig.selected
         cfg.feetOnGround      = self.feetOnGround.selected
         cfg.scale,cfg.unit    = self.taskview.getScale()
 

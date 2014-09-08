@@ -119,7 +119,7 @@ class Writer(mhx_writer.Writer):
 
         # Proxy layers
 
-        fp.write("layers Array ")
+        fp.write("  layers Array ")
         for n in range(20):
             if n == layer:
                 fp.write("1 ")
@@ -129,24 +129,25 @@ class Writer(mhx_writer.Writer):
 
         self.meshWriter.writeArmatureModifier(fp, pxy)
 
+        if self.armature:
+            fp.write(
+                '  lock_location Array 1 1 1 ;\n' +
+                '  lock_rotation Array 1 1 1 ;\n' +
+                '  lock_scale Array 1 1 1  ;\n'
+            )
+
         fp.write(
-"""
-      parent_type 'OBJECT' ;
-      color Array 1.0 1.0 1.0 1.0  ;
-      show_name True ;
-      select True ;
-      lock_location Array 1 1 1 ;
-      lock_rotation Array 1 1 1 ;
-      lock_scale Array 1 1 1  ;
-      Property MhxProxy True ;
-""")
-        fp.write(
-            '      Property MhxScale theScale*%.4f ;\n' % self.config.scale +
-            '      Property MhxProxyName "%s" ;\n' % pxy.name.replace(" ","_") +
-            '      Property MhxProxyUuid "%s" ;\n' % pxy.uuid +
-            '      Property MhxProxyFile "%s" ;\n' % pxy.file.replace("\\", "/").replace(" ","%20") +
-            '      Property MhxProxyType "%s" ;\n' % pxy.type +
-            '    end Object')
+            '  parent_type "OBJECT" ;\n' +
+            '  color Array 1.0 1.0 1.0 1.0  ;\n' +
+            '  show_name True ;\n' +
+            '  select False ;\n' +
+            '  Property MhxProxy True ;\n' +
+            '  Property MhxScale theScale*%.4f ;\n' % self.config.scale +
+            '  Property MhxProxyName "%s" ;\n' % pxy.name.replace(" ","_") +
+            '  Property MhxProxyUuid "%s" ;\n' % pxy.uuid +
+            '  Property MhxProxyFile "%s" ;\n' % pxy.file.replace("\\", "/").replace(" ","%20") +
+            '  Property MhxProxyType "%s" ;\n' % pxy.type +
+            'end Object')
 
     #-------------------------------------------------------------------------------
     #

@@ -387,9 +387,13 @@ class MHApplication(gui3d.Application, mh.Application):
 
         @self.selectedHuman.mhEvent
         def onChanged(event):
+            self.actions.pose.setEnabled(self.selectedHuman.isPoseable())
+
             if event.change == 'smooth':
                 # Update smooth action state (without triggering it)
                 self.actions.smooth.setChecked(self.selectedHuman.isSubdivided())
+            elif event.change in ['poseState', 'poseRefresh']:
+                self.actions.pose.setChecked(self.selectedHuman.isPosed())
             elif event.change == 'load':
                 self.currentFile.loaded(event.path)
             elif event.change == 'save':
@@ -1268,6 +1272,10 @@ class MHApplication(gui3d.Application, mh.Application):
         self.selectedHuman.setSubdivided(self.actions.smooth.isChecked(), True)
         self.redraw()
 
+    def togglePose(self):
+        self.selectedHuman.setPosed(self.actions.pose.isChecked())
+        self.redraw()
+
     def symmetryRight(self):
         human = self.selectedHuman
         self.do( SymmetryAction(human, 'r') )
@@ -1501,6 +1509,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.actions.smooth    = action('smooth',    self.getLanguageString('Smooth'),        self.toggleSubdivision, toggle=True)
         self.actions.wireframe = action('wireframe', self.getLanguageString('Wireframe'),     self.toggleSolid, toggle=True)
+        self.actions.pose      = action('pose', self.getLanguageString('Pose'),               self.togglePose,  toggle=True)
 
 
         # 4 - Symmetry toolbar

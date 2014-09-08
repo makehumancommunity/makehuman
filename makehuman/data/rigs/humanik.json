@@ -86,8 +86,13 @@
         "toe.R":        "RightToeBase"
     },
 
-    "merge" : {
-            "head":         ["uplid.L", "lolid.L", "uplid.R", "lolid.R", "jaw",
-                             "tongue_base", "tongue_mid", "tongue_tip"]
+    "settings" : {
+    	"useMakeHumanRig" : true,
+    	"useMhxCompat" : true,
+        "mergeHead" : true,
+        "mergeNeck" : true,
+        "mergeTwist" : true,
+        "mergeFeet" : true,
+        "mergeToes" : true
     }
 }

@@ -509,7 +509,7 @@ class Object3D(object):
         self.vface = np.zeros((nverts, self.MAX_FACES), dtype=np.uint32)
         self.nfaces = np.zeros(nverts, dtype=np.uint8)
 
-        self.orig_coord = self.coord.copy()
+        self.orig_coord = self.coord.copy() # Keep a copy of the original coordinates
 
         self.ucoor = True
         self.unorm = True
