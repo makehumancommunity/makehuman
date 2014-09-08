@@ -400,7 +400,7 @@ class SkeletonLibrary(gui3d.TaskView):
     def onHumanChanged(self, event):
         human = event.human
         if event.change == 'reset':
-            if gui3d.app.currentTask == self:
+            if self.isShown():
                 # Refresh onShow status
                 self.onShow(event)
 
