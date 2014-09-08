@@ -288,6 +288,7 @@ class AnimatedMesh(object):
             m, _ = self.getBoundMesh(mesh.name)
             if m == mesh:
                 log.warning("Attempt to add the same bound mesh %s twice" % mesh.name)
+            self.removeBoundMesh(mesh.name)
 
         # allows multiple meshes (also to allow to animate one model consisting of multiple meshes)
         originalMeshCoords = np.zeros((mesh.getVertexCount(),4), np.float32)
