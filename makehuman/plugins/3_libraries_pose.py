@@ -55,6 +55,7 @@ class PoseLibraryTaskView(gui3d.TaskView):
     def __init__(self, category):
         gui3d.TaskView.__init__(self, category, 'Pose')
         self.human = G.app.selectedHuman
+        self.currentPose = None
 
         self.paths = [mh.getDataPath('poses'), mh.getSysDataPath('poses')]
 
@@ -64,18 +65,22 @@ class PoseLibraryTaskView(gui3d.TaskView):
 
         @self.filechooser.mhEvent
         def onFileSelected(filename):
+            # TODO add action
             self.loadPose(filename)
 
         box = self.addLeftWidget(gui.GroupBox('Pose'))
 
         self.skelObj = None
 
-    def loadPose(self, filepath):
+    def loadPose(self, filepath, apply_pose=True):
         if not self.human.getSkeleton():
             log.error("No skeleton selected, cannot load pose")
             return
 
-        self.drawSkeleton(self.human.getSkeleton())
+        self.currentPose = filepath
+
+        if not filepath:
+            self.human.resetToRestPose()
 
         if os.path.splitext(filepath)[1].lower() == '.mhp':
             anim = self.loadMhp(filepath)
@@ -86,12 +91,11 @@ class PoseLibraryTaskView(gui3d.TaskView):
             return
 
         #self.human.setAnimateInPlace(True)
-        self.human.setPosed(False)
-        self.human.resetToRestPose()
         self.human.addAnimation(anim)
         self.human.setActiveAnimation(anim.name)
-        self.human.setToFrame(0)
-        self.human.setPosed(True)
+        self.human.setToFrame(0, update=False)
+        if apply_pose:
+            self.human.setPosed(True)
 
     def loadMhp(self, filepath):
         return animation.loadPoseFromMhpFile(filepath, self.human.getSkeleton())
@@ -119,11 +123,10 @@ class PoseLibraryTaskView(gui3d.TaskView):
 
     def onShow(self, event):
         self.filechooser.refresh()
+        self.drawSkeleton(self.human.getSkeleton())
+        self.human.refreshPose()
 
-        # Disable smoothing in skeleton library
-        self.oldSmoothValue = self.human.isSubdivided()
-        self.human.setSubdivided(False)
-
+        # Set X-ray material
         self.oldHumanMat = self.human.material.clone()
         self.oldPxyMats = dict()
         xray_mat = material.fromFile(mh.getSysDataPath('materials/xray.mhmat'))
@@ -132,25 +135,16 @@ class PoseLibraryTaskView(gui3d.TaskView):
             obj = pxy.object
             self.oldPxyMats[pxy.uuid] = obj.material.clone()
             obj.material = xray_mat
-
-        # Make sure skeleton is updated if human has changed
-        if self.human.getSkeleton():
-            self.drawSkeleton(self.human.getSkeleton())
-            mh.redraw()
-
+        mh.redraw()
 
     def onHide(self, event):
         gui3d.app.statusPersist('')
 
+        # Restore material
         self.human.material = self.oldHumanMat
         for pxy in self.human.getProxies(includeHumanProxy=False):
             if pxy.uuid in self.oldPxyMats:
                 pxy.object.material = self.oldPxyMats[pxy.uuid]
-
-        # Reset smooth setting
-        self.human.setSubdivided(self.oldSmoothValue)
-        mh.redraw()
-
 
     def drawSkeleton(self, skel):
         if self.skelObj:
@@ -161,9 +155,13 @@ class PoseLibraryTaskView(gui3d.TaskView):
             self.skelMesh = None
             self.selectedBone = None
 
+        if not skel:
+            return
+
         # Create a mesh from the skeleton in rest pose
         skel.setToRestPose() # Make sure skeleton is in rest pose when constructing the skeleton mesh
         self.skelMesh = skeleton_drawing.meshFromSkeleton(skel, "Prism")
+        self.skelMesh.name = 'SkeletonMesh-poseLibrary'
         self.skelMesh.priority = 100
         self.skelMesh.setPickable(False)
         self.skelObj = self.addObject(gui3d.Object(self.skelMesh, self.human.getPosition()) )
@@ -181,6 +179,15 @@ class PoseLibraryTaskView(gui3d.TaskView):
         self.human.getSkeleton().object = self.skelObj
         mh.redraw()
 
+    def onHumanChanged(self, event):
+        if event.change == 'skeleton':
+            self.drawSkeleton(self.human.getSkeleton())
+            if self.currentPose:
+                self.loadPose(self.currentPose, apply_pose=False)
+        elif event.change == 'reset':
+            # Update GUI after reset (if tab is currently visible)
+            if self.isShown():
+                self.onShow(event)
 
 category = None
 taskview = None
