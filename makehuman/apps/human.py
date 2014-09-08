@@ -1214,13 +1214,14 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
     def updateVertexWeights(self, vertexWeights):
         for mName in self.getBoundMeshes():  # Meshes are unsubdivided
-            # We assume the basemesh is the first mesh bound to the skeleton
-            if vertexWeights is None or mName == self.meshData.name: # TODO perhaps this identity by name is not strong enough, or enforce unique names in AnimatedMesh
+            # TODO perhaps this identity by name is not strong enough, or enforce unique names in AnimatedMesh
+            if vertexWeights is None: 
                 animation.AnimatedMesh.updateVertexWeights(self, mName, vertexWeights)
             else:
-                self._updateMeshVertexWeights(self.getBoundMesh(mName)[0])
+                # Update proxy mesh weights
+                self._updateMeshVertexWeights(self.getBoundMesh(mName)[0], vertexWeights)
 
-    def _updateMeshVertexWeights(self, mesh):
+    def _updateMeshVertexWeights(self, mesh, bodyVertexWeights=None):
         obj = mesh.object
 
         if not obj:
@@ -1229,15 +1230,19 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             return
 
         if self.getSkeleton():
-            bodyVertexWeights = self.getVertexWeights()
+            if bodyVertexWeights is None:
+                bodyVertexWeights = self.getVertexWeights()
 
-            if obj.proxy and mesh != self.meshData:
+            if mesh == self.meshData:
+                # Use vertex weights for human body
+                weights = bodyVertexWeights
+            elif obj.proxy:
                 import skeleton
                 # Determine vertex weights for proxy (map to unfiltered proxy mesh)
                 weights = skeleton.getProxyWeights(obj.proxy, bodyVertexWeights)
             else:
-                # Use vertex weights for human body
-                weights = bodyVertexWeights
+                # We assume this bound mesh is manually handled by an external plugin
+                return
         else:
             weights = {}
 
