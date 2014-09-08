@@ -237,6 +237,7 @@ class AnimatedMesh(object):
 
     def setSkeleton(self, skel):
         self.__skeleton = skel
+        self.removeAnimations(update=False)
 
     def addAnimation(self, anim):
         """
@@ -254,8 +255,8 @@ class AnimatedMesh(object):
     def getAnimations(self):
         return self.__animations.keys()
 
-    def removeAnimations(self):
-        self.resetToRestPose()
+    def removeAnimations(self, update=True):
+        self.resetToRestPose(update)
         self.__animations = {}
 
     def removeAnimation(self, name):
@@ -367,19 +368,25 @@ class AnimatedMesh(object):
         self.refreshPose(True)
 
     def isPosed(self):
-        return bool(self._posed and self.__currentAnim and self.getSkeleton())
+        return self._posed and self.isPoseable()
+
+    def isPoseable(self):
+        return bool(self.__currentAnim and self.getSkeleton())
 
     @property
     def posed(self):
         return self.isPosed()
 
-    def resetToRestPose(self):
+    def resetToRestPose(self, update=True):
         """
         Remove the currently set animation/pose and reset the mesh in rest pose.
         Does not affect posed state.
         """
         self.setActiveAnimation(None)
-        self.resetTime()
+        if update:
+            self.resetTime()
+        else:
+            self.__playTime = 0.0
 
     def getTime(self):
         return self.__playTime
