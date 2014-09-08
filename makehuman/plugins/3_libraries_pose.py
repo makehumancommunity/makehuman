@@ -50,6 +50,7 @@ from core import G
 import skeleton_drawing
 import material
 
+# TODO add save/load handlers
 class PoseLibraryTaskView(gui3d.TaskView):
 
     def __init__(self, category):
@@ -181,7 +182,8 @@ class PoseLibraryTaskView(gui3d.TaskView):
 
     def onHumanChanged(self, event):
         if event.change == 'skeleton':
-            self.drawSkeleton(self.human.getSkeleton())
+            if self.isShown():
+                self.drawSkeleton(self.human.getSkeleton())
             if self.currentPose:
                 self.loadPose(self.currentPose, apply_pose=False)
         elif event.change == 'reset':
