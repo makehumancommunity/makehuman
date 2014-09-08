@@ -367,7 +367,7 @@ class AnimatedMesh(object):
         self.refreshPose(True)
 
     def isPosed(self):
-        return self._posed and self.__currentAnim and self.getSkeleton()
+        return bool(self._posed and self.__currentAnim and self.getSkeleton())
 
     @property
     def posed(self):
