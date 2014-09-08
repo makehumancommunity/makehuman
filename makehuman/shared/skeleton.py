@@ -258,8 +258,8 @@ class Skeleton(object):
                 vec = np.dot(bone.matPoseVerts, meshCoords[verts].transpose())
                 vec *= weights
                 coords[verts] += vec.transpose()[:,:3]
-            except:
-                log.warning("Could not skin bone %s: no such bone in skeleton" % bname)
+            except KeyError as e:
+                log.warning("Could not skin bone %s: no such bone in skeleton (%s)" % (bname, e))
 
         return coords
 
