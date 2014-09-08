@@ -326,7 +326,7 @@ class SkeletonLibrary(gui3d.TaskView):
         # TODO maybe define a getter for this list in the skeleton module
         jointPositions = []
         for groupName in jointGroupNames:
-            jointPositions.append(skeleton.getHumanJointPosition(self.human.meshData, groupName))
+            jointPositions.append(skeleton.getHumanJointPosition(self.human, groupName))
 
         self.jointsMesh = skeleton_drawing.meshFromJoints(jointPositions, jointGroupNames)
         self.jointsMesh.priority = 100

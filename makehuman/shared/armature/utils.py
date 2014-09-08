@@ -47,9 +47,16 @@ import transformations as tm
 #   Calc joint position. Moved here from mh2proxy
 #-------------------------------------------------------------------------------
 
-def calcJointPos(obj, joint):
-    verts = obj.getVerticesForGroups(["joint-"+joint])
-    coords = obj.coord[verts]
+def calcJointPos(mesh, joint, rest_coord=True):
+    from core import G
+    if mesh.object == G.app.selectedHuman:
+        import skeleton
+        human = G.app.selectedHuman
+        return skeleton.getHumanJointPosition(human, "joint-"+joint, rest_coord)
+    elif rest_coord:
+        log.warning('armature.utils.calcJointPos: No human obj passed, cannot ensure joint position is calculated from rest coordinates.')
+    verts = mesh.getVerticesForGroups(["joint-"+joint])
+    coords = mesh.coord[verts]
     return coords.mean(axis=0)
 
 #-------------------------------------------------------------------------------
