@@ -349,16 +349,18 @@ class AnimatedMesh(object):
         self.__playTime = 0.0
         self._pose()
 
-    def setToTime(self, time):
+    def setToTime(self, time, update=True):
         self.__playTime = float(time)
-        self._pose()
+        if update:
+            self._pose()
 
-    def setToFrame(self, frameNb):
+    def setToFrame(self, frameNb, update=True):
         if not self.__currentAnim:
             return
         frameNb = int(frameNb)
         self.__playTime = float(frameNb)/self.__currentAnim.frameRate
-        self._pose()
+        if update:
+            self._pose()
 
     def setPosed(self, posed):
         """
@@ -405,7 +407,11 @@ class AnimatedMesh(object):
             for idx,mesh in enumerate(self.__meshes):
                 if self.onlyAnimateVisible and not mesh.visibility:
                     continue
-                posedCoords = self.getSkeleton().skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx])
+                try:
+                    posedCoords = self.getSkeleton().skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx])
+                except Exception as e:
+                    log.error("Error skinning mesh %s" % mesh.name)
+                    raise e
                 # TODO you could avoid an array copy by passing the mesh.coord list directly and modifying it in place
                 self._updateMeshVerts(mesh, posedCoords[:,:3])
         else:
