@@ -41,11 +41,6 @@ import gui
 import targets
 import os
 from core import G
-import log
-
-JOINTDIFF_EPSILON = 2
-JOINTS_TO_DIFF = ['joint-l-hand', 'joint-r-hand', 'joint-l-elbow', 'joint-r-elbow', 'joint-l-ankle', 'joint-r-ankle', 'joint-l-knee', 'joint-r-knee']
-_joints_pos_cache = []
 
 class ModifierSlider(gui.Slider):
 
@@ -139,30 +134,6 @@ class ModifierSlider(gui.Slider):
                     else:
                         human.getSeedMesh().setVisibility(1)
                     human.getSubdivisionMesh(False).setVisibility(0)
-                if human.isPosed():
-                    # Cache joint positions
-                    import numpy as np
-                    _joints_pos_cache = np.zeros((len(JOINTS_TO_DIFF),3), dtype=np.float32)
-                    global _joints_pos_cache, JOINTS_TO_DIFF
-                    for j_idx, jname in enumerate(JOINTS_TO_DIFF):
-                        _joints_pos_cache[j_idx][:] = human.getJointPosition(jname, rest_coord=False)
-
-            if human.isPosed():
-                # Update skeleton joint positions if difference is too large
-                import numpy as np
-                global _joints_pos_cache, JOINTS_TO_DIFF, JOINTDIFF_EPSILON
-                joints_pos = np.zeros((len(JOINTS_TO_DIFF),3), dtype=np.float32)
-                for j_idx, jname in enumerate(JOINTS_TO_DIFF):
-                    joints_pos[j_idx][:] = human.getJointPosition(jname, rest_coord=False)
-                if np.max(np.abs(joints_pos - _joints_pos_cache)) > JOINTDIFF_EPSILON:
-                    log.message("Skeleton difference beyond threshold, updating joint positions.")
-                    _joints_pos_cache = joints_pos
-                    human.getSkeleton().updateJoints(human.meshData)
-                    self.modifier.setValue(value)
-                    self.value = value
-                    human.applyAllTargets()
-                    return
-
             self.modifier.updateValue(value, G.app.settings.get('realtimeNormalUpdates', True))
             human.updateProxyMesh(fit_to_posed=True)
 
