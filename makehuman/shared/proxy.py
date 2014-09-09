@@ -194,8 +194,11 @@ class Proxy:
             _addProxyVertWeight(self.vertWeights, self.ref_wvIdxs[pxy_vIdx, 2], pxy_vIdx, self.weights[pxy_vIdx, 2])
 
 
-    def getCoords(self):
-        hcoord = self.human.getRestposeCoordinates()
+    def getCoords(self, fit_to_posed=False):
+        if fit_to_posed:
+            hcoord = self.human.meshData.coord
+        else:
+            hcoord = self.human.getRestposeCoordinates()
         matrix = self.tmatrix.getMatrix(hcoord)
 
         ref_vIdxs = self.ref_vIdxs
@@ -211,9 +214,9 @@ class Proxy:
         return coord
 
 
-    def update(self, mesh):
+    def update(self, mesh, fit_to_posed=False):
         #log.debug("Updating proxy %s.", self.name)
-        coords = self.getCoords()
+        coords = self.getCoords(fit_to_posed)
         mesh.changeCoords(coords)
         mesh.calcNormals()
 
