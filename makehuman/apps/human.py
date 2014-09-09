@@ -1024,6 +1024,21 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         """
         return self.getRestCoordinates(self.meshData.name)
 
+    def getJointPosition(self, jointName, rest_coord=True):
+        """
+        Get the position of a joint from the human mesh.
+        This position is determined by the center of the joint helper with the
+        specified name.
+        """
+        import skeleton
+        return skeleton.getHumanJointPosition(self, jointName, rest_coord)
+
+    def getJoints(self):
+        """
+        Return names of joint positions defined as joint helpers on the basemesh.
+        """
+        return [ fg_name for fg_name in self.meshData.getFaceGroups() if fg_name.startswith('joint-') ]
+
     def applyAllTargets(self, update=True):
         """
         This method applies all targets, in function of age and sex
@@ -1189,18 +1204,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         self.callEvent('onChanged', events3d.HumanEvent(self, 'material'))
 
     material = property(getMaterial, setMaterial)
-
-    def getJointPosition(self, jointName):
-        """
-        Get the position of a joint from the human mesh.
-        This position is determined by the center of the joint helper with the
-        specified name.
-        """
-        fg = self.meshData.getFaceGroup("joint-"+jointName)
-        if not fg:
-            raise RuntimeError("Human does not contain a joint helper with name %s" % ("joint-"+jointName))
-        verts = self.meshData.getCoords(self.meshData.getVerticesForGroups([fg.name]))
-        return verts.mean(axis=0)
 
     def setSkeleton(self, skel, vertexWeights=None):
         prev_skel = self.getSkeleton()
