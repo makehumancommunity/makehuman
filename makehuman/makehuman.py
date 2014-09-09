@@ -165,7 +165,7 @@ def getHgRoot(subpath=''):
 def get_revision_hg_info():
     # Return local revision number of hg parent
     hgRoot = getHgRoot()
-    output = subprocess.Popen(["hg","-q","parent","--template","{rev}:{node|short}"], stdout=subprocess.PIPE, stderr=sys.stderr, cwd=hgRoot).communicate()[0]
+    output = subprocess.Popen(["hg","-q","parents","--template","{rev}:{node|short}"], stdout=subprocess.PIPE, stderr=sys.stderr, cwd=hgRoot).communicate()[0]
     output = output.strip().split(':')
     rev = output[0].strip().replace('+', '')
     revid = output[1].strip().replace('+', '')
@@ -242,13 +242,14 @@ def get_revision_file():
 
 def get_hg_revision_1():
     """
-    Retrieve (local) revision number and short nodeId for current tip.
+    Retrieve (local) revision number and short nodeId of current working dir
+    parent.
     """
     hgrev = None
 
     try:
         hgrev = get_revision_hg_info()
-        os.environ['HGREVISION_SOURCE'] = "hg tip command"
+        os.environ['HGREVISION_SOURCE'] = "hg parents command"
         os.environ['HGREVISION'] = str(hgrev[0])
         os.environ['HGNODEID'] = str(hgrev[1])
         if hgrev[2]:
@@ -279,7 +280,7 @@ def get_hg_revision_1():
 
     try:
         hgrev = get_revision_cache_tip()
-        os.environ['HGREVISION_SOURCE'] = ".hg cache file"
+        os.environ['HGREVISION_SOURCE'] = ".hg cache file tip"
         os.environ['HGREVISION'] = str(hgrev[0])
         os.environ['HGNODEID'] = str(hgrev[1])
         return hgrev
