@@ -431,7 +431,7 @@ class AnimatedMesh(object):
         mesh.calcNormals()  # TODO this is too slow for animation
         mesh.update()
 
-    def refreshStaticMeshes(self):
+    def refreshStaticMeshes(self, refresh_pose=True):
         """
         Invoke this method after the static (rest pose) meshes were changed.
         Updates the shadow copies with original vertex coordinates and re-applies
@@ -439,7 +439,8 @@ class AnimatedMesh(object):
         """
         for mIdx, mesh in enumerate(self.__meshes):
             self.__originalMeshCoords[mIdx][:,:3] = mesh.coord[:,:3]
-        self.refreshPose(updateIfInRest=False)
+        if refresh_pose:
+            self.refreshPose(updateIfInRest=False)
 
     def _updateOriginalMeshCoords(self, name, coord):
         rIdx = self._getBoundMeshIndex(name)
