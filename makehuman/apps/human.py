@@ -1063,9 +1063,8 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
         # Restore pose, and shadow copy of vertex positions 
         # (We do this after onChanged event so that proxies are already updated)
-        if self.getSkeleton():
-            self.refreshStaticMeshes()  # TODO document: an external plugin that modifies the rest pose verts outside of an onHumanChang(ing/ed) event should explicitly call this method on the human
-        # TODO for static poses we can do better and recalculate normals at this point (after having posed the mesh), for animation this will be too slow, though.
+        self.refreshStaticMeshes()  # TODO document: an external plugin that modifies the rest pose verts outside of an onHumanChang(ing/ed) event should explicitly call this method on the human
+        # TODO for static poses we can do better and recalculate normals at this point (after having posed the mesh -- this already happens in animation.py by the way), for animation this will be too slow, though.
 
         # Update subdivision mesh
         if self.isSubdivided():
