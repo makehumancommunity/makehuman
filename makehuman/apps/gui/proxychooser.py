@@ -409,9 +409,9 @@ class ProxyChooserTaskView(gui3d.TaskView):
         #self.filechooser.deselectAll()
         self.deselectAllProxies()
 
-    def adaptProxyToHuman(self, pxy, obj, updateSubdivided=True):
+    def adaptProxyToHuman(self, pxy, obj, updateSubdivided=True, fit_to_posed=False):
         mesh = obj.getSeedMesh()
-        pxy.update(mesh)
+        pxy.update(mesh, fit_to_posed)
         mesh.update()
         # Update subdivided mesh if smoothing is enabled
         if updateSubdivided and obj.isSubdivided():
@@ -464,7 +464,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
     def onHumanChanging(self, event):
         if event.change == 'modifier':
             if gui3d.app.settings.get('realtimeFitting', False):
-                self.adaptAllProxies(updateSubdivided=False)
+                self.adaptAllProxies(updateSubdivided=False, fit_to_posed=True)
                 for obj in self.getObjects():
                     if obj.isSubdivided():
                         obj.getSeedMesh().setVisibility(1)
@@ -472,13 +472,13 @@ class ProxyChooserTaskView(gui3d.TaskView):
             else:
                 self.hideObjects()
 
-    def adaptAllProxies(self, updateSubdivided=True):
+    def adaptAllProxies(self, updateSubdivided=True, fit_to_posed=False):
         proxyCount = len(self.getSelection())
         if proxyCount > 0:
             pass  #log.message("Adapting all %s proxies (%s).", self.proxyName, proxyCount)
         for pIdx, pxy in enumerate(self.getSelection()):
             obj = self.getObjects()[pIdx]
-            self.adaptProxyToHuman(pxy, obj, updateSubdivided)
+            self.adaptProxyToHuman(pxy, obj, updateSubdivided, fit_to_posed)
 
     def loadHandler(self, human, values):
         if values[0] == 'status':
