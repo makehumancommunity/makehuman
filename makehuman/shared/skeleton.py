@@ -247,7 +247,7 @@ class Skeleton(object):
         nVerts = len(meshCoords)
         coords = np.zeros((nVerts,3), float)
         if meshCoords.shape[1] != 4:
-            meshCoords_ = np.ones((nVerts, 4), float)   # TODO also allow skinning vectors (normals)? 
+            meshCoords_ = np.ones((nVerts, 4), float)   # TODO also allow skinning vectors (normals)? -- in this case you need to renormalize normals, unless you only multiply each normal with the transformation with largest weight
             meshCoords_[:,:3] = meshCoords
             meshCoords = meshCoords_
             log.debug("Unoptimized data structure passed to skinMesh, this will incur performance penalty when used for animation.")
