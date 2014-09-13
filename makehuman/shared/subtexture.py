@@ -49,9 +49,22 @@ class Layer(Image):
     LayeredImage to be processed as a layer of a
     greater image compilation.
     """
+
     def __init__(self, img, borders=(0, 0, 0, 0)):
-        super(Layer, self).__init__(img)
+        self.image = img
+        self.copyonwrite = True
         self.borders = borders
+
+    def __getattr__(self, attr):
+        if hasattr(self.image, attr):
+            # When image is shared, create a copy on modifying operations.
+            if self.copyonwrite and \
+               attr in ("resize", "data", "blit", "__setitem__"):
+                self.image = Image(self.image)
+                self.copyonwrite = False
+            return getattr(self.image, attr)
+        else:
+            return object.__getattribute__(self, attr)
 
 
 class LayeredImage(Image):
@@ -65,16 +78,13 @@ class LayeredImage(Image):
 
     def __init__(self, *args, **kwargs):
         self.layers = []
-        for arg in args:
-            if isinstance(arg, Layer):
-                self.addLayer(arg)
-            elif isinstance(arg, Image):
-                self.addLayer(Layer(arg))
-            elif isinstance(arg, tuple):
-                self.addLayer(Layer(*arg))
+        for arg in args: self.addLayer(arg)
 
     def addLayer(self, layer):
-        self.layers.append(layer)
+        if isinstance(layer, Layer):
+            self.layers.append(layer)
+        elif isinstance(layer, Image):
+            self.layers.append(Layer(layer))
 
     # TODO Override and imitate Image's methods
     # so that they return the result calculated
