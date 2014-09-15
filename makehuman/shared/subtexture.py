@@ -43,6 +43,22 @@ as multi-layered images.
 from image import Image
 
 
+class Cache(object):
+    """
+    Method decorator class.
+    Used on methods whose result will be cached.
+    """
+
+    def __init__(self, method):
+        self.method = method
+        self.cache = None
+
+    def __call__(self, *args, **kwargs):
+        if self.cache is None:
+            self.cache = self.method(*args, **kwargs)
+        return self.cache
+
+
 class Layer(Image):
     """
     A Layer is an Image that can be inserted in a
