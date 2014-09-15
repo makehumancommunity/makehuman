@@ -21,10 +21,11 @@ Application Modules
 .. toctree::
    :titlesonly:
    
-   module_aljabr
+   module_algos3d
    module_animation3d
    module_events3d
-   module_font3d
+   module_export
+   module_files3d
    module_geometry3d
    module_gui3d
    module_module3d

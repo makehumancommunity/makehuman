@@ -17,9 +17,13 @@ import sys, os
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('.'))
-sys.path.append('../core')
-sys.path.append('../apps')
-sys.path.append('..')
+sys.path.append('../../makehuman/')
+sys.path.append('../../makehuman/lib/')
+sys.path.append('../../makehuman/core/')
+sys.path.append('../../makehuman/apps/')
+sys.path.append('../../makehuman/shared/')
+
+#print("DEBUG INFO", dir("../")
 
 # -- General configuration -----------------------------------------------------
 
@@ -52,14 +56,14 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'MakeHuman'
-copyright = u'2012, MHteam'
+copyright = u'2014, MHteam'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = 'alpha 7'
+version = '2'
 # The full version, including alpha/beta/rc tags.
 release = '1.0'
 
@@ -107,8 +111,8 @@ pygments_style = 'sphinx'
 # -- Themes -----------------------------------------
 
 # mhtheme theme
-html_theme_path = ['.']
-html_theme = 'mhtheme3'
+#html_theme_path = ['.']
+#html_theme = 'mhtheme3'
 
 #html_theme = 'haiku'
 
