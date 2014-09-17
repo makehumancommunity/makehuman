@@ -1,7 +1,7 @@
 #!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
-""" 
+"""
 **Project Name:**      MakeHuman
 
 **Product Home Page:** http://www.makehuman.org/
@@ -107,3 +107,62 @@ class LayeredImage(Image):
     # by processing all layers. Use caching to
     # avoid calculation repetitions.
 
+    #TODO: Possibly redesign cache so that it is invalidated properly.
+
+    @property
+    @Cache
+    def borders(self):
+        if not self.layers: return (0, 0, 0, 0)
+        b = self.layers[0].borders
+        for layer in self.layers[1:]:
+            b[0] = min(b[0], layer.borders[0])
+            b[1] = min(b[1], layer.borders[1])
+            b[2] = max(b[2], layer.borders[2])
+            b[3] = max(b[3], layer.borders[3])
+
+    @property
+    def size(self):
+        b = self.borders
+        return (b[2] - b[0], b[3] - b[1])
+
+    @property
+    def width(self):
+        return self.size[0]
+
+    @property
+    def height(self):
+        return self.size[1]
+
+    @property
+    @Cache
+    def components(self):
+        if not self.layers: return 4  # Empty Image default.
+        c = self.layers[0].components
+        for layer in self.layers[1:]:
+            c = max(c, layer.components)
+
+    @property
+    def bitsPerPixel(self):
+        return self.components * 8
+
+    @property
+    @Cache
+    def data(self):
+        """
+        Return the result of flattening all layers.
+        Operations on the returned array will only
+        affect the cached object.
+        """
+
+        if not self.layers: return Image()
+
+        img = Image(None, *self.size, components=self.components)
+        for layer in self.layers:
+            img.blit(layer, *layer.borders[0:1])
+
+        return img.data
+
+    def save(self, path):
+        import image_qt as image_lib
+
+        image_lib.save(path, self.data)
