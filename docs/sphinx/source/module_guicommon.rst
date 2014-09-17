@@ -2,7 +2,7 @@
 
 
 *********************
-The guicommon Module
+The Guicommon Module
 *********************
  
 .. automodule:: guicommon

@@ -21,6 +21,7 @@ Application Modules
 .. toctree::
    :titlesonly:
    
+   structural_organization
    module_mhmain
    module_algos3d
    module_animation3d
