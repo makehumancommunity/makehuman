@@ -6,5 +6,6 @@ The Geometry3D Module
 *********************
 
 .. automodule:: geometry3d
+    :members:
 
 

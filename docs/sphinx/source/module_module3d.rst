@@ -6,5 +6,6 @@ The Module3D Module
 *******************
  
 .. automodule:: module3d
+    :members:
 
 
