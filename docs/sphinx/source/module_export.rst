@@ -6,5 +6,6 @@ The Export Module
 *******************
  
 .. automodule:: export
+    :members:
 
 

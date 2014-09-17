@@ -6,5 +6,6 @@ The Events3D Module
 *******************
 
 .. automodule:: files3d
+    :members:
 
 
