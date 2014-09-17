@@ -22,6 +22,7 @@ sys.path.append('../../makehuman/lib/')
 sys.path.append('../../makehuman/core/')
 sys.path.append('../../makehuman/apps/')
 sys.path.append('../../makehuman/shared/')
+sys.path.append('../../makehuman/apps/gui')
 
 #print("DEBUG INFO", dir("../")
 

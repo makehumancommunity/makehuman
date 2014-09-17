@@ -21,6 +21,7 @@ Application Modules
 .. toctree::
    :titlesonly:
    
+   module_mhmain
    module_algos3d
    module_animation3d
    module_events3d
@@ -28,7 +29,11 @@ Application Modules
    module_files3d
    module_geometry3d
    module_gui3d
+   module_guicommon
+   module_managed_file
    module_module3d
+   module_selection
+   module_transformations
    
 
 Indices and tables
