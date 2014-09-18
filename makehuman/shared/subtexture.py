@@ -97,10 +97,24 @@ class LayeredImage(Image):
         for arg in args: self.addLayer(arg)
 
     def addLayer(self, layer):
+        """
+        Add a layer in front of the LayeredImage's
+        existing layers.
+
+        If the layer added is a LayeredImage, its layers are
+        appended to this LayeredImage's layers.
+        To add a LayeredImage as a single layer, you can
+        do it explicitly using addLayer(Layer(limg)).
+        """
+
         if isinstance(layer, Layer):
             self.layers.append(layer)
+        elif isinstance(layer, LayeredImage):
+            self.layers.extend(layer.layers)
         elif isinstance(layer, Image):
             self.layers.append(Layer(layer))
+        else:  # Layers from paths etc.
+            self.layers.append(Layer(Image(layer)))
 
     # TODO Override and imitate Image's methods
     # so that they return the result calculated
