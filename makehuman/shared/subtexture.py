@@ -67,9 +67,21 @@ class Layer(Image):
     """
 
     def __init__(self, img, borders=(0, 0, 0, 0)):
+        if isinstance(img, Layer):  # Copy construction
+            self.copyFrom(img)
+            return
+
         self.image = img
         self.copyonwrite = True
-        self.borders = borders
+        if len(borders) == 2:
+            self.borders = borders + img.size
+        else:
+            self.borders = borders
+
+    def copyFrom(self, other):
+        self.image = other.image
+        self.copyonwrite = other.copyonwrite
+        self.borders = other.borders
 
     def __getattr__(self, attr):
         if hasattr(self.image, attr):
@@ -174,3 +186,11 @@ class LayeredImage(Image):
         import image_qt as image_lib
 
         image_lib.save(path, self.data)
+
+    def blit(self, other, x, y):
+        """
+        Blitting an image onto a LayeredImage is,
+        guess what, adding a new layer.
+        """
+
+        self.addLayer(Layer(other, (x, y)))
