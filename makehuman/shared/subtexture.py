@@ -111,19 +111,13 @@ class LayeredImage(Image):
 
     @property
     @Cache
-    def borders(self):
-        if not self.layers: return (0, 0, 0, 0)
-        b = self.layers[0].borders
-        for layer in self.layers[1:]:
-            b[0] = min(b[0], layer.borders[0])
-            b[1] = min(b[1], layer.borders[1])
-            b[2] = max(b[2], layer.borders[2])
-            b[3] = max(b[3], layer.borders[3])
-
-    @property
     def size(self):
-        b = self.borders
-        return (b[2] - b[0], b[3] - b[1])
+        if not self.layers: return (0, 0)
+        b = self.layers[0].borders[2:3]
+        for layer in self.layers[1:]:
+            for i in xrange(1):
+                b[i] = max(b[i], layer.borders[i + 2])
+        return b
 
     @property
     def width(self):
