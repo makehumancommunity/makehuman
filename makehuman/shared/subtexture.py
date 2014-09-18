@@ -194,3 +194,17 @@ class LayeredImage(Image):
         """
 
         self.addLayer(Layer(other, (x, y)))
+
+    @property
+    @Cache
+    def isEmpty(self):
+        """
+        Returns True if the LayeredImage has no layers
+        or if all its layers are empty.
+        Returns False if any of the layers contains data
+        or has been modified.
+        """
+
+        for layer in self.layers:
+            if not layer.isEmpty: return False
+        return True
