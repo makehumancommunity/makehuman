@@ -431,7 +431,7 @@ def initRig(context):
         pb.matrix_basis = mat
 
     if isRigify(rig):
-        setRigifyFKIK(rig, 0)
+        setRigifyFKIK(rig, 0.0)
 
     return rig
 

@@ -326,7 +326,7 @@ def retargetAnimation(context, srcRig, trgRig):
 
     startProgress("Retargeting")
     scn = context.scene
-    setMhxIk(trgRig, True, True, False)
+    setMhxIk(trgRig, True, True, 0.0)
     frames = getActiveFrames(srcRig)
     nFrames = len(frames)
     scn.objects.active = trgRig
@@ -335,7 +335,7 @@ def retargetAnimation(context, srcRig, trgRig):
     scn.update()
 
     if isRigify(trgRig):
-        setRigifyFKIK(trgRig, 0)
+        setRigifyFKIK(trgRig, 0.0)
 
     try:
         scn.frame_current = frames[0]
@@ -514,6 +514,7 @@ class VIEW3D_OT_NewRetargetMhxButton(bpy.types.Operator):
         scn = context.scene
         data = changeTargetData(trgRig, scn)
         rigList = list(context.selected_objects)
+
         try:
             target.getTargetArmature(trgRig, scn)
             for srcRig in rigList:
