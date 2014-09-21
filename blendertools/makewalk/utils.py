@@ -455,6 +455,8 @@ def getObjectProblems(self, context):
 
 def checkObjectProblems(self, context):
     problems = getObjectProblems(self, context)
+    print("PROB", problems)
+    halt
     if problems:
         return problems
     else:
@@ -470,10 +472,11 @@ def problemFreeFileSelect(self, context):
 
 
 def drawObjectProblems(self):
-    self.layout.label("MakeWalk cannot use this rig because it has:")
-    for problem in self.problems.split("\n"):
-        self.layout.label("  %s" % problem)
-    self.layout.label("Apply object transformations before using MakeWalk")
+    if self.problems:
+        self.layout.label("MakeWalk cannot use this rig because it has:")
+        for problem in self.problems.split("\n"):
+            self.layout.label("  %s" % problem)
+        self.layout.label("Apply object transformations before using MakeWalk")
 
 #
 #   showProgress(n, frame):
