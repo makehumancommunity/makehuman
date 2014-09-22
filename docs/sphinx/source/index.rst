@@ -22,6 +22,7 @@ Application Modules
    :titlesonly:
    
    structural_organization
+   basic_of_events
    module_mhmain
    module_algos3d
    module_animation3d
