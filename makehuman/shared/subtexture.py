@@ -128,6 +128,12 @@ class LayeredImage(Image):
         else:  # Layers from paths etc.
             self.layers.append(Layer(Image(layer)))
 
+        # Invalidate cache
+        self.size.cache = None
+        self.components.cache = None
+        self.data.cache = None
+        self.isEmpty.cache = None
+
     # TODO Override and imitate Image's methods
     # so that they return the result calculated
     # by processing all layers. Use caching to
