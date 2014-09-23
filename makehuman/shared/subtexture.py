@@ -131,15 +131,13 @@ class LayeredImage(Image):
         # Invalidate cache
         self.size.cache = None
         self.components.cache = None
-        self.data.cache = None
+        self.compile.cache = None
         self.isEmpty.cache = None
 
     # TODO Override and imitate Image's methods
     # so that they return the result calculated
     # by processing all layers. Use caching to
     # avoid calculation repetitions.
-
-    #TODO: Possibly redesign cache so that it is invalidated properly.
 
     @property
     @Cache
@@ -171,13 +169,11 @@ class LayeredImage(Image):
     def bitsPerPixel(self):
         return self.components * 8
 
-    @property
     @Cache
-    def data(self):
+    def compile(self):
         """
-        Return the result of flattening all layers.
-        Operations on the returned array will only
-        affect the cached object.
+        Compute the result of flattening all layers
+        and return it as an Image.
         """
 
         if not self.layers: return Image()
@@ -186,7 +182,17 @@ class LayeredImage(Image):
         for layer in self.layers:
             img.blit(layer, *layer.borders[0:1])
 
-        return img.data
+        return img
+
+    @property
+    def data(self):
+        """
+        Return the result of flattening all layers.
+        Operations on the returned array will only
+        affect the cached object.
+        """
+
+        return self.compile().data
 
     def save(self, path):
         import image_qt as image_lib
