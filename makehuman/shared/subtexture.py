@@ -57,7 +57,7 @@ class Cache(object):
         self.cache = Cache.Empty
 
     def __call__(self, parent, *args, **kwargs):
-        ManagedCache.of(parent).caches.add(self)
+        CacheManager.of(parent).caches.add(self)
 
         if self.cache is Cache.Empty:
             self.cache = self.method(parent, *args, **kwargs)
@@ -81,10 +81,10 @@ class Cache(object):
         Invalidate all caches of the given object.
         """
 
-        Cache.invalidate(object, *ManagedCache.of(object).caches)
+        Cache.invalidate(object, *CacheManager.of(object).caches)
 
 
-class ManagedCache(object):
+class CacheManager(object):
     """
     Interface hidden in objects utilized by caches
     that enables the use of operations on all the
@@ -92,30 +92,30 @@ class ManagedCache(object):
     """
 
     # Name of the hidden member of the managed object
-    # that holds the ManagedCache.
-    MCMemberName = "_MC_Managed_Cache_"
+    # that holds the CacheManager.
+    CMMemberName = "_CM_Cache_Manager_"
 
     @staticmethod
     def of(object):
         """
-        Return the ManagedCache of the object.
+        Return the CacheManager of the object.
         Instantiates a new one if it doesn't have one.
         """
 
-        ManagedCache(object)
-        return getattr(object, ManagedCache.MCMemberName)
+        CacheManager(object)
+        return getattr(object, CacheManager.CMMemberName)
 
     def __init__(self, parent):
         """
-        ManagedCache constructor.
+        CacheManager constructor.
         :param parent: The object whose caches will be managed.
         """
 
-        if hasattr(parent, ManagedCache.MCMemberName) and \
-           isinstance(getattr(parent, ManagedCache.MCMemberName), ManagedCache):
+        if hasattr(parent, CacheManager.CMMemberName) and \
+           isinstance(getattr(parent, CacheManager.CMMemberName), CacheManager):
             return
 
-        setattr(parent, ManagedCache.MCMemberName, self)
+        setattr(parent, CacheManager.CMMemberName, self)
 
         self.caches = set()
 
