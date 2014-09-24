@@ -49,6 +49,43 @@ class Cache(object):
     Used on methods whose result will be cached.
     """
 
+
+    class Manager(object):
+        """
+        Interface hidden in objects utilized by caches
+        that enables the use of operations on all the
+        cached objects of the parent.
+        """
+
+        # Name of the hidden member of the managed object
+        # that holds the Cache Manager.
+        CMMemberName = "_CM_Cache_Manager_"
+
+        @staticmethod
+        def of(object):
+            """
+            Return the Cache Manager of the object.
+            Instantiates a new one if it doesn't have one.
+            """
+
+            Manager(object)
+            return getattr(object, Manager.CMMemberName)
+
+        def __init__(self, parent):
+            """
+            Cache Manager constructor.
+            :param parent: The object whose caches will be managed.
+            """
+
+            if hasattr(parent, Manager.CMMemberName) and \
+               isinstance(getattr(parent, Manager.CMMemberName), Manager):
+                return
+
+            setattr(parent, Manager.CMMemberName, self)
+
+            self.caches = set()
+
+
     # Represents an empty cache.
     Empty = object()
 
@@ -57,7 +94,7 @@ class Cache(object):
         self.cache = Cache.Empty
 
     def __call__(self, parent, *args, **kwargs):
-        CacheManager.of(parent).caches.add(self)
+        Cache.Manager.of(parent).caches.add(self)
 
         if self.cache is Cache.Empty:
             self.cache = self.method(parent, *args, **kwargs)
@@ -81,43 +118,7 @@ class Cache(object):
         Invalidate all caches of the given object.
         """
 
-        Cache.invalidate(object, *CacheManager.of(object).caches)
-
-
-class CacheManager(object):
-    """
-    Interface hidden in objects utilized by caches
-    that enables the use of operations on all the
-    cached objects of the parent.
-    """
-
-    # Name of the hidden member of the managed object
-    # that holds the CacheManager.
-    CMMemberName = "_CM_Cache_Manager_"
-
-    @staticmethod
-    def of(object):
-        """
-        Return the CacheManager of the object.
-        Instantiates a new one if it doesn't have one.
-        """
-
-        CacheManager(object)
-        return getattr(object, CacheManager.CMMemberName)
-
-    def __init__(self, parent):
-        """
-        CacheManager constructor.
-        :param parent: The object whose caches will be managed.
-        """
-
-        if hasattr(parent, CacheManager.CMMemberName) and \
-           isinstance(getattr(parent, CacheManager.CMMemberName), CacheManager):
-            return
-
-        setattr(parent, CacheManager.CMMemberName, self)
-
-        self.caches = set()
+        Cache.invalidate(object, *Cache.Manager.of(object).caches)
 
 
 class Layer(Image):
