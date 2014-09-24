@@ -51,12 +51,70 @@ class Cache(object):
 
     def __init__(self, method):
         self.method = method
-        self.cache = None
+        self.cache = None  # TODO Maybe use something else except of None?
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, parent, *args, **kwargs):
+        ManagedCache.of(parent).caches.add(self)
+
         if self.cache is None:
-            self.cache = self.method(*args, **kwargs)
+            self.cache = self.method(parent, *args, **kwargs)
         return self.cache
+
+    @staticmethod
+    def invalidate(object, *args):
+        """
+        Invalidate the caches of the object
+        defined in the arguments.
+        """
+
+        for arg in args:
+            if hasattr(object, arg) and \
+               isinstance(getattr(object, arg), Cache):
+                getattr(object, arg).cache = None
+
+    @staticmethod
+    def invalidateAll(object):
+        """
+        Invalidate all caches of the given object.
+        """
+
+        Cache.invalidate(object, *ManagedCache.of(object).caches)
+
+
+class ManagedCache(object):
+    """
+    Interface hidden in objects utilized by caches
+    that enables the use of operations on all the
+    cached objects of the parent.
+    """
+
+    # Name of the hidden member of the managed object
+    # that holds the ManagedCache.
+    MCMemberName = "_MC_Managed_Cache_"
+
+    @classmethod
+    def of(cls, object):
+        """
+        Return the ManagedCache of the object.
+        Instantiates a new one if it doesn't have one.
+        """
+
+        ManagedCache(object)
+        return getattr(object, cls.MCMemberName)
+
+    def __init__(self, parent):
+        """
+        ManagedCache constructor.
+        :param parent: The object whose caches will be managed.
+        """
+
+        if hasattr(parent, self.MCMemberName) and \
+           isinstance(getattr(parent, self.MCMemberName), ManagedCache):
+            return
+
+        setattr(parent, self.MCMemberName, self)
+
+        self.caches = set()
 
 
 class Layer(Image):
@@ -128,11 +186,7 @@ class LayeredImage(Image):
         else:  # Layers from paths etc.
             self.layers.append(Layer(Image(layer)))
 
-        # Invalidate cache
-        self.size.cache = None
-        self.components.cache = None
-        self.compile.cache = None
-        self.isEmpty.cache = None
+        Cache.invalidateAll(self)
 
     # TODO Override and imitate Image's methods
     # so that they return the result calculated
