@@ -49,14 +49,17 @@ class Cache(object):
     Used on methods whose result will be cached.
     """
 
+    # Represents an empty cache.
+    Empty = object()
+
     def __init__(self, method):
         self.method = method
-        self.cache = None  # TODO Maybe use something else except of None?
+        self.cache = Cache.Empty
 
     def __call__(self, parent, *args, **kwargs):
         ManagedCache.of(parent).caches.add(self)
 
-        if self.cache is None:
+        if self.cache is Cache.Empty:
             self.cache = self.method(parent, *args, **kwargs)
         return self.cache
 
@@ -70,7 +73,7 @@ class Cache(object):
         for arg in args:
             if hasattr(object, arg) and \
                isinstance(getattr(object, arg), Cache):
-                getattr(object, arg).cache = None
+                getattr(object, arg).cache = Cache.Empty
 
     @staticmethod
     def invalidateAll(object):
@@ -92,15 +95,15 @@ class ManagedCache(object):
     # that holds the ManagedCache.
     MCMemberName = "_MC_Managed_Cache_"
 
-    @classmethod
-    def of(cls, object):
+    @staticmethod
+    def of(object):
         """
         Return the ManagedCache of the object.
         Instantiates a new one if it doesn't have one.
         """
 
         ManagedCache(object)
-        return getattr(object, cls.MCMemberName)
+        return getattr(object, ManagedCache.MCMemberName)
 
     def __init__(self, parent):
         """
@@ -108,11 +111,11 @@ class ManagedCache(object):
         :param parent: The object whose caches will be managed.
         """
 
-        if hasattr(parent, self.MCMemberName) and \
-           isinstance(getattr(parent, self.MCMemberName), ManagedCache):
+        if hasattr(parent, ManagedCache.MCMemberName) and \
+           isinstance(getattr(parent, ManagedCache.MCMemberName), ManagedCache):
             return
 
-        setattr(parent, self.MCMemberName, self)
+        setattr(parent, ManagedCache.MCMemberName, self)
 
         self.caches = set()
 
