@@ -49,6 +49,24 @@ class Cache(object):
     Used on methods whose result will be cached.
     """
 
+    # A unique ever-increasing id for each cache update.
+    # Can be used for comparing the age of caches.
+    _C_CacheUID = 0
+
+    # Represents an empty cache.
+    Empty = object()
+
+    @staticmethod
+    def getNewCacheUID():
+        """
+        Get a new unique ID for the Cache that is
+        about to be constructed or updated.
+        """
+
+        r = _C_CacheUID
+        _C_CacheUID += 1
+        return r
+
 
     class Manager(object):
         """
@@ -84,21 +102,76 @@ class Cache(object):
             setattr(parent, Manager.CMMemberName, self)
 
             self.caches = set()
+            self.compiler = None
 
 
-    # Represents an empty cache.
-    Empty = object()
+    class Compiler(Cache):
+        """
+        A Cache Compiler is a special form of cache,
+        which when invoked creates a "Compiled Cache".
+
+        A Compiled Cache is a cache that is stored in the
+        parent's Cache Manager, and essentialy replaces
+        the parent. So, the method that will be decorated
+        with the Compiler has to return an object with the
+        same type as the parent, or at least one that supports
+        the same methods of the parent that are decorated as
+        Cache. After that, whenever a cached method is called,
+        the result is taken from the compiled cache (except if
+        the method's cache is newer).
+
+        This is useful for objects that cache many parameters,
+        but also have a greater method that creates a 'baked'
+        replica of themselves. After the 'baking', the parameters
+        can simply be taken from the cached replica.
+        """
+
+        @staticmethod
+        def of(object):
+            """
+            Return the Cache Compiler of the object.
+            """
+
+            return Cache.Manager.of(parent).compiler
+
+        def __call__(self, parent, *args, **kwargs):
+            Cache.Manager.of(parent).compiler = self
+
+            if self.cache is Cache.Empty:
+                self.calculate(parent, *args, **kwargs)
+            return self.cache
+
 
     def __init__(self, method):
+        """
+        Cache constructor.
+
+        Cache is a decorator class, so the constructor is
+        essentialy applied to a method to be cached.
+        """
+
         self.method = method
         self.cache = Cache.Empty
+        self.cacheUID = Cache.getNewCacheUID()
 
     def __call__(self, parent, *args, **kwargs):
         Cache.Manager.of(parent).caches.add(self)
 
+        # If a compiled cache exists and is newer,
+        # prefer to get the value from it instead.
+        compiler = Cache.Compiler.of(parent)
+        if compiler and \
+           compiler.cacheUID > self.cacheUID and \
+           compiler.cache is not Cache.Empty:
+            return getattr(compiler.cache, self.method)(parent, *args, **kwargs)
+
         if self.cache is Cache.Empty:
-            self.cache = self.method(parent, *args, **kwargs)
+            self.calculate(parent, *args, **kwargs)
         return self.cache
+
+    def calculate(self, *args, **kwargs):
+        self.cache = self.method(*args, **kwargs)
+        self.cacheUID = Cache.getNewCacheUID()
 
     @staticmethod
     def invalidate(object, *args):
@@ -227,7 +300,7 @@ class LayeredImage(Image):
     def bitsPerPixel(self):
         return self.components * 8
 
-    @Cache
+    @Cache.Compiler
     def compile(self):
         """
         Compute the result of flattening all layers
