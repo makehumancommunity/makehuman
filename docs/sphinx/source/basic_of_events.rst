@@ -70,4 +70,73 @@ Similarly, MH Slider widget connects various slider operations to its event hand
 
 
   
+Overriding vs event decorators
+===============================
+
+The View, Category and Application classes inherit from events3d.EventHandler, hence they have callEvent() function.  The events that apply to this category are usually application-wide. If user make a change that impacts the whole application, and whole application must know about this change, then best way to do so is to call callEvent() for all the taskviews of the application,as follows::
+
+    for category in self.categories.itervalues():
+        for task in category.tasks:
+            task.callEvent('onMyEvent', params)
+
+A good example is the event of makehuman's scene changing(core.qtui.MHApplication._sceneChanged).  So when callEvent is called on a taskview object and it has onMyEvent implemented,it is being called.  In core.gui3d.View too one can see that most of the events (onShow, onMouseDown,...) on the taskview are propagated by default to their parents - the categories. The categories also are views, so the events are propagated again to their parent, the application. If, again, the application or any category has an onMyEvent method, it is executed.
+
+There are some events that affect the application, but only a single task at a time,for example onMouseDown event. It only happens to the active taskview
+(the others are hidden, so they receive no mouse events). Once the mouse is pressed, an Application.currentTask.callEvent("onMouseDown", event) is issued. This causes the onMouseDown event to be received by the active Taskview, its parent Category, and finally the Application. This call executes any onMouseDown method in these objects.
+
+Apart from the Category events described above, there are events used for local purposes.  Such events are handled with event decorators.  Suppose we have a new Taskview, FooTaskView. This Taskview has a 'mybar' member variable, which is of type Bar(events3d.eventHandler).  The requirement is that when self.mybar executes code, we may want to communicate with its parent to inform it about an event that just happened. So, inside the code for Bar, is located a 'self.callEvent('onBaz', 42)' command.  Thus, in the Bar class, we emit a timely event signal and use the event decorator to let the parent Taskview know about the event.  In the  FooTaskView class, but below the place where self.mybar is created, we add::
+
+    @self.mybar.mhEvent
+    def onBaz(event):
+        # code on event.
+        # guess what, event == 42.
+
+When now the self.mybar Bar reaches that callEvent, the above method, located in FooTaskView, will be executed.
+
+core.mhmain.MHApplication's human is perfect example of this approach.Human has onMouseDown event handler and we need to relay it to application.
+In loadMainGui function of MHApplication, we add decorator to human attribute as::
+
+    def loadMainGui(self):
+            ..............
+            
+            @self.selectedHuman.mhEvent
+            def onMouseDown(event):
+              if self.tool:
+                self.selectedGroup = self.getSelectedFaceGroup()
+                self.tool.callEvent("onMouseDown", event)
+              else:
+                self.currentTask.callEvent("onMouseDown", event)
+            .............    
+
+Application.human.onMouseDown event is caught and it starts its trip from the Human; it is captured by the decorated method located in Application.loadMainGui (this is the place where the method is bound with the event), it is sent to the currentTask, propagated through the parent category, and finally reaches its destination, the Application.
+
+A more intense process happens on Human.onChanged. This is emitted when a save/load happpens, so the whole application has to know. So it starts from the human, captured by the decorated method in app, sent to ALL the taskviews in MH, and finally through the categories again to the app.
+
+ 
+The MakeHuman Graphical User Interface (GUI)
+===============================================
+
+The MakeHuman GUI is based on the pyQt library which, in turn, is built on the Qt library.   Qt is a development framework for the creation of applications and user interfaces for desktop.
+
+Important GUI classes in MakeHuman are:
+
+lib.qtui.Canvas
+-----------------
+
+This is the class in MakeHuman which takes care of rendering openGL graphics.It inherits from Qt's QGLWidget class which is a widget for rendering OpenGL graphics.  QGLWidget provides functionality for displaying OpenGL graphics integrated into a Qt application. It is very simple to use. You inherit from it and use the subclass like any other QWidget, except that you have the choice between using QPainter and standard OpenGL rendering commands.  
+
+The Canvas class reimplements three functions from parent class to perform openGL tasks:
+
+- paintGL() - Renders the OpenGL scene. It gets called whenever the widget needs to be updated.
+- resizeGL() - Sets up the OpenGL viewport, projection, etc. Gets called whenever the widget has been resized (and also when it is shown for the first time because all newly created widgets get a resize event automatically).
+- initializeGL() - Sets up the OpenGL rendering context, defines display lists, etc. Gets called once before the first time resizeGL() or paintGL() is called.
+
+lib.qtui.Application
+---------------------
+This is the foundation class which manages GUI's control flow and main settings. It inherits from QtGui.QApplication and events3d.EventHandler.  QApplication contains the main event loop, where all events from the window system and other sources are processed and dispatched. It also handles the application's initialization and finalization.Application class holds gui main window(instance of lib.qtui.Frame). Application class receives event notifications from underlying Qt user intrface framework and dispatches them to appropriate user intrface elements in MakeHuman.
+
+.. figure::  _static/mh-uiarchitecture.png
+   :align:   center
+
+   GUI architecture in MakeHumanMH can be depicted as follows
 
