@@ -66,7 +66,6 @@ class MhxConfig(Config):
         self.useRotationLimits =    False
 
         self.feetOnGround =         True
-        self.useFaceRig =           False
         self.expressions =          False
         self.useCustomTargets =     False
 
@@ -90,7 +89,6 @@ class MhxConfig(Config):
                 useLocks = True,
                 useRotationLimits = self.useRotationLimits,
                 useCorrectives = False,
-                useFaceRig = self.useFaceRig,
                 useExpressions = self.expressions,
                 useLeftRight = False,
             )
@@ -110,9 +108,6 @@ class ExporterMHX(Exporter):
         self.taskview       = taskview
         self.feetOnGround   = options.addWidget(gui.CheckBox("Feet on ground", True))
         self.useRotationLimits   = options.addWidget(gui.CheckBox("Rotation limits", False))
-        #self.useFaceRig     = options.addWidget(gui.CheckBox("Face rig", True))
-        #self.expressions    = options.addWidget(gui.CheckBox("Expressions", False))
-        #self.useCustomTargets = options.addWidget(gui.CheckBox("Custom targets", False))
         self.useRigify      = options.addWidget(gui.CheckBox("Export for Rigify", False))
 
     def getConfig(self):
@@ -123,10 +118,6 @@ class ExporterMHX(Exporter):
         cfg.scale, cfg.unit = self.taskview.getScale()
 
         cfg.feetOnGround = self.feetOnGround.selected
-
-        #cfg.useFaceRig = self.useFaceRig.selected
-        #cfg.expressions = self.expressions.selected
-        #cfg.useCustomTargets = self.useCustomTargets.selected
 
         cfg.useRigify = self.useRigify.selected
         cfg.useRotationLimits = self.useRotationLimits.selected

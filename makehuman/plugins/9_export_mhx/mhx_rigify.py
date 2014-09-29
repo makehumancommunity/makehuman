@@ -80,7 +80,6 @@ Only works with MHX export.
         self.useRotationLimits = False
         self.useBoneGroups = False
         self.useCorrectives = False
-        self.useFaceRig = config.useFaceRig
         self.useExpressions = config.expressions
 
         renameBones = {
