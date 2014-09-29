@@ -59,7 +59,6 @@ class ArmatureOptions(object):
         self.useReverseHip = False
         self.useMuscles = False
         self.useTerminators = False
-        self.useFaceRig = False
         self.useLocks = False
         self.useRotationLimits = False
         self.addConnectingBones = False
@@ -106,7 +105,6 @@ class ArmatureOptions(object):
             useCorrectives = False,
             useRotationLimits = False,
             useLocks = False,
-            useFaceRig = False,
             useExpressions = False,
             useTPose = False,
             useIkHair = False,
@@ -118,7 +116,6 @@ class ArmatureOptions(object):
         self.useCorrectives = useCorrectives
         self.useRotationLimits = useRotationLimits
         self.useLocks = useLocks
-        self.useFaceRig = useFaceRig
         self.useExpressions = useExpressions
         self.useTPose = useTPose
         self.useIkHair = useIkHair
@@ -133,7 +130,6 @@ class ArmatureOptions(object):
             "   scale : %s\n" % self.scale +
             "   boneMap : %s\n" % self.boneMap +
             "   useMuscles : %s\n" % self.useMuscles +
-            "   useFaceRig : %s\n" % self.useFaceRig +
             "   addConnectingBones : %s\n" % self.addConnectingBones +
             "   mergeSpine : %s\n" % self.mergeSpine +
             "   mergeShoulders : %s\n" % self.mergeShoulders +
@@ -160,7 +156,6 @@ class ArmatureOptions(object):
             return
 
         self.useMuscles = selector.useMuscles.selected
-        self.useFaceRig = selector.useFaceRig.selected
         self.useReverseHip = selector.useReverseHip.selected
         #self.useCorrectives = selector.useCorrectives.selected
         self.addConnectingBones = selector.addConnectingBones.selected
@@ -182,10 +177,9 @@ class ArmatureOptions(object):
         self.useMasterBone = selector.useMasterBone.selected
 
 
-    def reset(self, selector, useMuscles=False, useFaceRig=False):
+    def reset(self, selector, useMuscles=False):
         self._setDefaults()
         self.useMuscles = useMuscles
-        self.useFaceRig = useFaceRig
         if selector is not None:
             selector.fromOptions(self)
 
@@ -241,7 +235,6 @@ class ArmatureSelector:
 
         import gui
         self.useMuscles = box.addWidget(gui.CheckBox("Muscle bones (MHX only)"))
-        self.useFaceRig = box.addWidget(gui.CheckBox("Face rig (MHX only)"))
         self.useReverseHip = box.addWidget(gui.CheckBox("Reverse hips"))
         self.addConnectingBones = box.addWidget(gui.CheckBox("Connecting bones"))
 
@@ -263,7 +256,6 @@ class ArmatureSelector:
 
     def fromOptions(self, options):
         self.useMuscles.setSelected(options.useMuscles)
-        self.useFaceRig.setSelected(options.useFaceRig)
         self.useReverseHip.setSelected(options.useReverseHip)
         self.addConnectingBones.setSelected(options.addConnectingBones)
 
