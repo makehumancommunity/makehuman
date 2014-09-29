@@ -78,56 +78,6 @@ Joints = [
     ('r-lolid-top',       'o', ('r-lolid', dy)),
 
 ]
-'''
-    ('l-uplid0',        'p', ('l-eye', 'l-upperlid', 'l-upperlid')),
-    ('r-uplid0',        'p', ('r-eye', 'r-upperlid', 'r-upperlid')),
-    ('l-lolid0',        'p', ('l-eye', 'l-lowerlid', 'l-lowerlid')),
-    ('r-lolid0',        'p', ('r-eye', 'r-lowerlid', 'r-lowerlid')),
-
-    ('l-uplid',         'l', ((LidPct, 'l-uplid0'), (1-LidPct, 'l-eye'))),
-    ('r-uplid',         'l', ((LidPct, 'r-uplid0'), (1-LidPct, 'r-eye'))),
-    ('l-lolid',         'l', ((LidPct, 'l-lolid0'), (1-LidPct, 'l-eye'))),
-    ('r-lolid',         'l', ((LidPct, 'r-lolid0'), (1-LidPct, 'r-eye'))),
-
-    ('m-uplip-0',       'v', 467),
-    ('l-uplip-1',       'v', 7255),
-    ('r-uplip-1',       'v', 506),
-    ('l-uplip-2',       'v', 7253),
-    ('r-uplip-2',       'v', 504),
-
-    ('m-lolip-0',       'v', 495),
-    ('l-lolip-1',       'vl', ((0.4, 7238), (0.6, 7244))),
-    ('r-lolip-1',       'vl', ((0.4, 483), (0.6, 489))),
-    ('l-lolip-2',       'vl', ((0.1, 7238), (0.9, 7232))),
-    ('r-lolip-2',       'vl', ((0.1, 483), (0.9, 477))),
-
-    ('l-lip-3',        'v', 7249),
-    ('r-lip-3',        'v', 500),
-
-    ('l-mouthside-1',   'v', 11770),
-    ('r-mouthside-1',   'v', 5156),
-    ('l-mouthside-2',   'vl', ((0.5, 11904), (0.5, 11905))),
-    ('r-mouthside-2',   'vl', ((0.5, 5299), (0.5, 5300))),
-
-    ('l-noseside-1',    'v', 11673),
-    ('r-noseside-1',    'v', 5056),
-    ('l-noseside-2',    'v', 11764),
-    ('r-noseside-2',    'v', 5150),
-
-    ('l-loeye-1',       'v', 6920),
-    ('r-loeye-1',       'v', 142),
-    ('l-loeye-2',       'v', 6917),
-    ('r-loeye-2',       'v', 139),
-    ('l-loeye-3',       'v', 11714),
-    ('r-loeye-3',       'v', 5099),
-
-    ('l-brow-1',        'vl', ((0.5, 6957), (0.5, 6983))),
-    ('r-brow-1',        'vl', ((0.5, 181), (0.5, 208))),
-    ('l-brow-2',        'v', 6979),
-    ('r-brow-2',        'v', 204),
-    ('l-brow-3',        'v', 6982),
-    ('r-brow-3',        'v', 207),
-'''
 
 Planes = {
     "PlaneEye.L" :         ('l-eye', 'l-eye-end', 'l-eye-top'),
@@ -151,65 +101,6 @@ HeadsTails = {
     'lolid.L' :             ('l-lolid0', 'l-lolid'),
 }
 
-'''
-Markers = [
-    ('lip_upper_mid',       'm-uplip-0', 'head_back'),
-    ('lip_upper_1.L',       'l-uplip-1', 'head_back'),
-    ('lip_upper_1.R',       'r-uplip-1', 'head_back'),
-    ('lip_upper_2.L',       'l-uplip-2', 'head_back'),
-    ('lip_upper_2.R',       'r-uplip-2', 'head_back'),
-
-    ('lip_lower_mid',       'm-lolip-0', 'jaw'),
-    ('lip_lower_1.L',       'l-lolip-1', 'jaw'),
-    ('lip_lower_1.R',       'r-lolip-1', 'jaw'),
-    ('lip_lower_2.L',       'l-lolip-2', 'jaw'),
-    ('lip_lower_2.R',       'r-lolip-2', 'jaw'),
-
-    ('lip_3.L',             'l-lip-3', 'head_jaw'),
-    ('lip_3.R',             'r-lip-3', 'head_jaw'),
-    ('mouthside_1.L',       'l-mouthside-1', 'head_jaw'),
-    ('mouthside_1.R',       'r-mouthside-1', 'head_jaw'),
-    ('mouthside_2.L',       'l-mouthside-2', 'head_jaw'),
-    ('mouthside_2.R',       'r-mouthside-2', 'head_jaw'),
-
-    ('noseside_1.L',        'l-noseside-1', 'head_back'),
-    ('noseside_1.R',        'r-noseside-1', 'head_back'),
-    ('noseside_2.L',        'l-noseside-2', 'head_back'),
-    ('noseside_2.R',        'r-noseside-2', 'head_back'),
-
-    ('eye_below_1.L',       'l-loeye-1', 'head_back'),
-    ('eye_below_1.R',       'r-loeye-1', 'head_back'),
-    ('eye_below_2.L',       'l-loeye-2', 'head_back'),
-    ('eye_below_2.R',       'r-loeye-2', 'head_back'),
-    ('eye_below_3.L',       'l-loeye-3', 'head_back'),
-    ('eye_below_3.R',       'r-loeye-3', 'head_back'),
-
-    ('eyebrow_1.L',         'l-brow-1', 'head_back'),
-    ('eyebrow_1.R',         'r-brow-1', 'head_back'),
-    ('eyebrow_2.L',         'l-brow-2', 'head_back'),
-    ('eyebrow_2.R',         'r-brow-2', 'head_back'),
-    ('eyebrow_3.L',         'l-brow-3', 'head_back'),
-    ('eyebrow_3.R',         'r-brow-3', 'head_back'),
-]
-
-
-FaceRigHeadsTails = {
-    'head_back' :           ('mouth', ('mouth', (0,1,0))),
-    'head_jaw' :            ('mouth', 'jaw'),
-}
-
-posOffs = (0,0,0.01)
-negOffs = (0,0,-0.05)
-
-if UseTranslationBones:
-    for bone,marker,_ in Markers:
-        FaceRigHeadsTails[bone] = ((marker, posOffs), (marker, negOffs))
-else:
-    for bone,marker,parent in Markers:
-        Joints.append( (bone, 'p', (marker, marker, 'mouth')) )
-        FaceRigHeadsTails[bone] = (bone, (marker, posOffs))
-'''
-
 Armature = {
     'jaw' :                 (0, 'head', F_DEF|F_NOLOCK, L_HEAD),
     'tongue_base' :         (0, 'jaw', F_DEF|F_SCALE, L_HEAD),
@@ -222,20 +113,6 @@ Armature = {
     'uplid.L' :             (0, 'head', F_DEF|F_LOCKY, L_HEAD),
     'lolid.L' :             (0, 'head', F_DEF|F_LOCKY, L_HEAD),
 }
-
-'''
-FaceRigArmature = {
-    'head_back' :           (0, 'head', 0, L_HELP),
-    'head_jaw' :            (0, 'head', 0, L_HELP),
-}
-
-if UseTranslationBones:
-    for bone,marker,parent in Markers:
-        FaceRigArmature[bone] = (0, parent, F_DEF|F_WIR|F_NOLOCK|F_LOCKROT, L_PANEL)
-else:
-    for bone,marker,parent in Markers:
-        FaceRigArmature[bone] = (0, parent, F_DEF|F_WIR|F_LOCKY, L_PANEL)
-'''
 
 Constraints = {}
 
@@ -265,24 +142,6 @@ RotationLimits = {
     'lolid.L':  (-45,10, 0,0, 0,0),
     'lolid.R':  (-45,10, 0,0, 0,0),
 }
-
-'''
-FaceRigConstraints = {
-     'head_jaw' : [('CopyTrans', 0, 0.5, ['Jaw', 'jaw', 0])],
-}
-
-FaceRigCustomShapes = {}
-FaceRigLocationLimits = {}
-FaceRigRotationLimits = {}
-
-if UseTranslationBones:
-    for bone,_,_ in Markers:
-        FaceRigCustomShapes[bone] = 'GZM_Cube025'
-        FaceRigLocationLimits[bone] = (-0.1,0.1, -0.1,0.1, -0.1,0.1)
-else:
-    for bone,_,_ in Markers:
-        FaceRigCustomShapes[bone] = 'GZM_FaceJaw'
-'''
 
 #
 #    DeformDrivers(fp, amt):

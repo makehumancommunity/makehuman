@@ -89,8 +89,6 @@ class ExportArmature(Armature):
             layers |= L_LHANDIK|L_RHANDIK
         else:
             layers |= L_LHANDFK|L_RHANDFK|L_LPALM|L_RPALM|L_TWEAK
-        if options.useFaceRig:
-            layers |= L_PANEL
         self.visibleLayers = "%08x" % layers
 
         self.activeBoneLayers = layers
