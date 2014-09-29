@@ -215,7 +215,7 @@ class ArmatureOptions(object):
             if hasattr(self, key):
                 setattr(self, key, value)
             else:
-                log.warning("Unknown property defined in armature options file %s" % filename)
+                log.warning("Unknown property %s defined in armature options file %s" % (key, filepath))
 
         if selector is not None:
             selector.fromOptions(self)
