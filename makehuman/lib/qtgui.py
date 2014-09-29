@@ -1254,8 +1254,8 @@ class FileEntryView(QtGui.QWidget, Widget):
             Before the browse dialog is shown, make sure to set
             its path properly.
             """
-            if self.mode == 'dir':
-                self.browse.path = self.directory
+            if self.mode == 'dir' or not self.text:
+                self.browse.directory = self.directory
             else:
                 self.browse.path = self.path
 
@@ -1750,7 +1750,8 @@ class BrowseButton(Button):
 
     def __init__(self, mode = 'open'):
         super(BrowseButton, self).__init__("...")
-        self._path = self.getExistingPath("")
+        self._directory = self.getExistingPath("")
+        self.filename = ""
         self._filter = ''
         self._mode = None
 
@@ -1767,11 +1768,24 @@ class BrowseButton(Button):
 
     mode = property(getMode, setMode)
 
+    def getDirectory(self):
+        """Get the directory in which the dialog will browse."""
+        return self._directory
+
+    def setDirectory(self, dir):
+        """Set the directory in which the dialog will browse."""
+        self._directory = pathToUnicode(dir)
+
+    directory = property(getDirectory, setDirectory)
+
     def getPath(self):
-        return self._path
+        return pathToUnicode(os.path.normpath(os.path.join(
+            self.directory, self.filename)))
 
     def setPath(self, path):
-        self._path = pathToUnicode(os.path.normpath(path))
+        """WARNING: Use only with complete file paths that include filename."""
+        self.directory = pathToUnicode(os.path.dirname(path))
+        self.filename = pathToUnicode(os.path.basename(path))
 
     path = property(getPath, setPath)
 
@@ -1787,9 +1801,9 @@ class BrowseButton(Button):
         self.callEvent('beforeBrowse', None)
 
         path = self.getExistingPath(self.path)
-        if self.mode == 'save' and path != self.path:
+        if self.mode == 'save' and self.filename:
             # Don't discard filename when saving
-            path = os.path.join(path, os.path.basename(self.path))
+            path = os.path.join(path, self.filename)
 
         if self.mode == 'open':
             path = str(QtGui.QFileDialog.getOpenFileName(G.app.mainwin, directory=path, filter=self.filter))
@@ -1799,7 +1813,8 @@ class BrowseButton(Button):
             path = str(QtGui.QFileDialog.getExistingDirectory(G.app.mainwin, directory=path))
 
         if path:
-            self.path = path
+            if self.mode == 'dir': self.directory = path
+            else: self.path = path
         self.callEvent('onClicked', pathToUnicode(path))
 
 
