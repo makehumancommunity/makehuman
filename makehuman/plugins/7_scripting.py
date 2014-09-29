@@ -65,10 +65,10 @@ class ScriptingView(gui3d.TaskView):
 
         self.loadButton = box.addWidget(gui.BrowseButton(mode='open'), 0, 0)
         self.loadButton.setLabel('Load ...')
-        self.loadButton._path = mh.getPath()
+        self.loadButton.directory = mh.getPath()
         self.saveButton = box.addWidget(gui.BrowseButton(mode='save'), 0, 1)
         self.saveButton.setLabel('Save ...')
-        self.saveButton._path = mh.getPath()
+        self.saveButton.directory = mh.getPath()
 
         @self.loadButton.mhEvent
         def onClicked(filename):
