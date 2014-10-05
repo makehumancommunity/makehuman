@@ -53,7 +53,6 @@ from makehuman import getBasemeshVersion, getShortVersion, getVersionStr, getVer
 
 # TODO emit event when skeleton changed, posed or unposed
 # TODO reimplement setPosed() with event emission, same for setSkeleton
-# TODO add getVertexWeights method
 # TODO reimplement setSkeleton ? -> for vertexWEights, or handle this automatically in animatedMesh?
 
 class Human(guicommon.Object, animation.AnimatedMesh):
@@ -1073,6 +1072,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         if self.getSkeleton():
             log.debug("Updating skeleton joint positions")
             self.getSkeleton().updateJoints(self.meshData)
+            self.updateBakedAnimations()    # TODO decide whether we require calling this manually, or whether animatedMesh automatically tracks updates of skeleton and updates accordingly
 
         self.callEvent('onChanged', events3d.HumanEvent(self, 'targets'))
 

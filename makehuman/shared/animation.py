@@ -37,6 +37,8 @@ Abstract
 Data handlers for skeletal animation.
 """
 
+# TODO create class for vertexweights data
+
 import math
 import numpy as np
 import numpy.linalg as la
@@ -76,15 +78,50 @@ class AnimationTrack(object):
         if poseData.shape != (self.dataLen, 4, 4):
             raise RuntimeError("The specified pose data does not have the proper dimensions. Is %s, expected (%s, 4, 4)" % (poseData.shape, self.dataLen))
 
-        self.data = poseData
+        self._data = poseData
         self.frameRate = float(framerate)      # Numer of frames per second
         self.loop = True
+
+        self._data_baked = None
         
         # Type of interpolation between animation frames
         #   0  no interpolation
         #   1  linear
         #   2  logarithmic   # TODO!
         self.interpolationType = 0
+
+    @property
+    def data(self):
+        if self.isBaked():
+            return self._data_baked
+        else:
+            return self._data
+
+    def isBaked(self):
+        return self._data_baked is not None
+
+    def bake(self, skel):
+        """
+        Bake animation as skinning matrices for the specified skeleton.
+        Results in significant performance gain when skinning.
+        We do skinning with 3x4 matrixes, as suggested in http://graphics.ucsd.edu/courses/cse169_w05/2-Skeleton.htm
+        Section 2.3 (We assume the 4th column contains [0 0 0 1], so no translation) --> turns out not to be the case in our algorithm!
+        """
+        bones = skel.getBones()
+        if len(bones) != self.nBones:
+            raise RuntimeError("Error baking animation %s: number of bones in animation data differs from bone count of skeleton %s" % (self.name, skel.name))
+
+        old_pose = skel.getPose()
+        self._data_baked = np.zeros((self.dataLen, 4, 4))
+
+        for f_idx in xrange(self.nFrames):
+            skel.setPose(self._data[f_idx:f_idx+self.nBones])
+            for b_idx in xrange(self.nBones):
+                idx = (f_idx * self.nBones) + b_idx
+                self._data_baked[idx,:,:] = bones[b_idx].matPoseVerts[:,:]
+
+        # TODO store translation of first bone (== root bone) separately
+        skel.setPose(old_pose)
 
     def getAtTime(self, time):
         """
@@ -212,6 +249,73 @@ def blendPoses(poses, weights):
 
     return poseData
 
+def _compileVertexWeights(vertBoneMapping, skel, vertexCount=None, nWeights=17):
+    """
+    Compile vertex weights data to a more performant per-vertex format.
+    """
+    #if nWeights != 1 and nWeights != 3:
+    #    # nWeights should be either 1 or 3
+    #    nWeights = 3
+    if vertexCount is None:
+        vertexCount = 0
+        for bname, mapping in vertBoneMapping.items():
+            verts,weights = mapping
+            vertexCount = max(max(verts), vertexCount)
+        if vertexCount:
+            vertexCount += 1
+
+    if nWeights == 3:
+        dtype = [('b_idx1', np.uint32), ('b_idx2', np.uint32), ('b_idx3', np.uint32), 
+                 ('wght1', np.float32), ('wght2', np.float32), ('wght3', np.float32)]
+    elif nWeights == 17:
+        dtype = [('b_idx1', np.uint32), ('b_idx2', np.uint32), ('b_idx3', np.uint32), 
+                 ('b_idx4', np.uint32), 
+                 ('b_idx5', np.uint32), ('b_idx6', np.uint32), ('b_idx7', np.uint32), 
+                 ('b_idx8', np.uint32), ('b_idx9', np.uint32), ('b_idx10', np.uint32), 
+                 ('b_idx11', np.uint32), ('b_idx12', np.uint32), ('b_idx13', np.uint32), 
+                 ('b_idx14', np.uint32), ('b_idx15', np.uint32), ('b_idx16', np.uint32), ('b_idx17', np.uint32), 
+                 ('wght1', np.float32), ('wght2', np.float32), ('wght3', np.float32), 
+                 ('wght4', np.float32), ('wght5', np.float32), ('wght6', np.float32), 
+                 ('wght7', np.float32), ('wght8', np.float32), ('wght9', np.float32), 
+                 ('wght10', np.float32), ('wght11', np.float32), ('wght12', np.float32), 
+                 ('wght13', np.float32), ('wght14', np.float32), ('wght15', np.float32), 
+                 ('wght16', np.float32), ('wght17', np.float32)]
+    else:
+        dtype = [('b_idx1', np.uint32), ('wght1', np.float32)]
+    compiled_vertweights = np.zeros(vertexCount, dtype=dtype)
+
+    _ws = dict()
+    b_lookup = dict([(b.name,b_idx) for b_idx,b in enumerate(skel.getBones())])
+    for bname, mapping in vertBoneMapping.items():
+        try:
+            b_idx = b_lookup[bname]
+            verts,weights = mapping
+            for v_idx, wght in zip(verts, weights):
+                if v_idx not in _ws:
+                    _ws[v_idx] = []
+                _ws[v_idx].append( (wght, b_idx) )
+        except KeyError as e:
+            log.warning("Bone %s not found in skeleton: %s" % (bname, e))
+    for v_idx in _ws:
+        # Sort by weight and keep only nWeights most significant weights
+        if len(_ws[v_idx]) > nWeights:
+            log.debug("Vertex %s has too many weights (%s): %s", (v_idx, len(_ws[v_idx]), str(sorted(_ws[v_idx], reverse=True))))
+            _ws[v_idx] = sorted(_ws[v_idx], reverse=True)[:nWeights]
+            # Re-normalize weights
+            weightvals = np.asarray( [e[0] for e in _ws[v_idx]], dtype=np.float32)
+            weightvals /= np.sum(weightvals)
+            for i in xrange(nWeights):
+                _ws[v_idx][i] = (weightvals[i], _ws[v_idx][i][1])
+        else:
+            _ws[v_idx] = sorted(_ws[v_idx], reverse=True)
+
+    for v_idx, wghts in _ws.items():
+        for i, (w, bidx) in enumerate(wghts):
+            compiled_vertweights[v_idx]['wght%s' % (i+1)] = w
+            compiled_vertweights[v_idx]['b_idx%s' % (i+1)] = bidx
+
+    return compiled_vertweights
+
 class AnimatedMesh(object):
     """
     Manages skeletal animation for a mesh or multiple meshes.
@@ -245,6 +349,17 @@ class AnimatedMesh(object):
         Note: poses are simply animations with only one frame.
         """
         self.__animations[anim.name] = anim
+        if self.getSkeleton():
+            anim.bake(self.getSkeleton())
+
+    def updateBakedAnimations(self):
+        """
+        Call to update baked animations after modifying skeleton joint positions.
+        """
+        for anim_name in self.getAnimations():
+            anim = self.getAnimation(anim_name)
+            if anim.isBaked():
+                anim.bake(self.getSkeleton())
 
     def getAnimation(self, name):
         return self.__animations[name]
@@ -292,14 +407,19 @@ class AnimatedMesh(object):
 
         # allows multiple meshes (also to allow to animate one model consisting of multiple meshes)
         originalMeshCoords = np.zeros((mesh.getVertexCount(),4), np.float32)
-        originalMeshCoords[:,3] = 1
         originalMeshCoords[:,:3] = mesh.coord[:,:3]
+        originalMeshCoords[:,3] = 1.0
         self.__originalMeshCoords.append(originalMeshCoords)
+        if self.getSkeleton():
+            vertexToBoneMapping = _compileVertexWeights(vertexToBoneMapping, self.getSkeleton(), vertexCount=mesh.getVertexCount(), nWeights=17)
         self.__vertexToBoneMaps.append(vertexToBoneMapping)
         self.__meshes.append(mesh)
 
     def updateVertexWeights(self, meshName, vertexToBoneMapping):
         rIdx = self._getBoundMeshIndex(meshName)
+        mesh = self.__meshes[rIdx]
+        if self.getSkeleton():
+            vertexToBoneMapping = _compileVertexWeights(vertexToBoneMapping, self.getSkeleton(), vertexCount=mesh.getVertexCount(), nWeights=17)
         self.__vertexToBoneMaps[rIdx] = vertexToBoneMapping
 
     def removeBoundMesh(self, name):
@@ -403,13 +523,18 @@ class AnimatedMesh(object):
                 poseState = poseState.copy()
                 # Remove translation from matrix
                 poseState[:,:3,3] = np.zeros((poseState.shape[0],3), dtype=np.float32)
-            # TODO pass poseVerts matrices immediately from animation track for performance improvement (cache them)
-            self.getSkeleton().setPose(poseState)
+            if not self.__currentAnim.isBaked():
+                self.getSkeleton().setPose(poseState)
+            # Else we pass poseVerts matrices immediately from animation track for performance improvement (cached or baked)
             for idx,mesh in enumerate(self.__meshes):
                 if self.onlyAnimateVisible and not mesh.visibility:
                     continue
                 try:
-                    posedCoords = self.getSkeleton().skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx])
+                    if not self.__currentAnim.isBaked():
+                        # TODO in practice this slower method is never used (anim is always baked if a skeleton is set)
+                        posedCoords = self.getSkeleton().skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx])
+                    else:
+                        posedCoords = skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx], poseState)
                 except Exception as e:
                     log.error("Error skinning mesh %s" % mesh.name)
                     raise e
@@ -419,7 +544,7 @@ class AnimatedMesh(object):
             if self.getSkeleton():
                 self.getSkeleton().setToRestPose() # TODO not strictly necessary if you only want to skin the mesh
             for idx,mesh in enumerate(self.__meshes):
-                self._updateMeshVerts(mesh, self.__originalMeshCoords[idx][:,:3])
+                self._updateMeshVerts(mesh, self.__originalMeshCoords[idx])
 
     def _updateMeshVerts(self, mesh, verts):
         # TODO this is way too slow for realtime animation, but good for posing. For animation, update the r_ verts directly, as well as the r_vnorm members
@@ -427,7 +552,7 @@ class AnimatedMesh(object):
         # Remap vertex weights to the unwelded vertices of the object (mesh.coord to mesh.r_coord)
         #originalToUnweldedMap = mesh.inverse_vmap
 
-        mesh.changeCoords(verts)
+        mesh.changeCoords(verts[:,:3])
         mesh.calcNormals()  # TODO this is too slow for animation
         mesh.update()
 
@@ -452,6 +577,52 @@ class AnimatedMesh(object):
         if updateIfInRest or self.isPosed():
             self._pose()
 
+def skinMesh(coords, compiledVertWeights, poseData):
+    """
+    More efficient way of linear blend skinning or smooth skinning.
+    As proposed in http://graphics.ucsd.edu/courses/cse169_w05/3-Skin.htm we use
+    a vertex-major loop.
+    We also use a fixed number of weights per vertex.
+    """
+    # TODO use accumulated matrix skinning (http://http.developer.nvidia.com/GPUGems/gpugems_ch04.html)
+
+    # TODO compare old and new method alongside each other, save some sample data and compare result, and time difference
+    if coords.shape[1] != 4:
+        log.debug('Warning, slow skinning code: mismatched size of array')
+        coords_ = np.ones((coords.shape[0],4), dtype=np.float32)
+        coords_[:,:3] = coords
+        coords = coords_
+    W = compiledVertWeights
+    P = poseData
+    if len(compiledVertWeights.dtype) == 2:
+        nWeights = 1
+        # Note: np.sum(M * vs, axis=-1) is a matrix multiplication of mat M with
+        # a series of vertices vs
+        return W['wght1'][:,None] * np.sum(P[W['b_idx1']][:,:3,:3] * coords[:,None,:], axis=-1)
+    elif len(compiledVertWeights.dtype) == 17*2:
+        nWeights = 17
+        return W['wght1'][:,None] * np.sum(P[W['b_idx1']][:,:4,:4] * coords[:,None,:], axis=-1) + \
+               W['wght2'][:,None] * np.sum(P[W['b_idx2']][:,:4,:4] * coords[:,None,:], axis=-1) + \
+               W['wght3'][:,None] * np.sum(P[W['b_idx3']][:,:4,:4] * coords[:,None,:], axis=-1) + \
+               W['wght4'][:,None] * np.sum(P[W['b_idx4']][:,:4,:4] * coords[:,None,:], axis=-1) + \
+               W['wght5'][:,None] * np.sum(P[W['b_idx5']][:,:4,:4] * coords[:,None,:], axis=-1) + \
+               W['wght6'][:,None] * np.sum(P[W['b_idx6']][:,:4,:4] * coords[:,None,:], axis=-1) + \
+               W['wght7'][:,None] * np.sum(P[W['b_idx7']][:,:4,:4] * coords[:,None,:], axis=-1) + \
+               W['wght8'][:,None] * np.sum(P[W['b_idx8']][:,:4,:4] * coords[:,None,:], axis=-1) + \
+               W['wght9'][:,None] * np.sum(P[W['b_idx9']][:,:4,:4] * coords[:,None,:], axis=-1) + \
+               W['wght10'][:,None] * np.sum(P[W['b_idx10']][:,:4,:4] * coords[:,None,:], axis=-1) + \
+               W['wght11'][:,None] * np.sum(P[W['b_idx11']][:,:4,:4] * coords[:,None,:], axis=-1) + \
+               W['wght12'][:,None] * np.sum(P[W['b_idx12']][:,:4,:4] * coords[:,None,:], axis=-1) + \
+               W['wght13'][:,None] * np.sum(P[W['b_idx13']][:,:4,:4] * coords[:,None,:], axis=-1) + \
+               W['wght14'][:,None] * np.sum(P[W['b_idx14']][:,:4,:4] * coords[:,None,:], axis=-1) + \
+               W['wght15'][:,None] * np.sum(P[W['b_idx15']][:,:4,:4] * coords[:,None,:], axis=-1) + \
+               W['wght16'][:,None] * np.sum(P[W['b_idx16']][:,:4,:4] * coords[:,None,:], axis=-1) + \
+               W['wght17'][:,None] * np.sum(P[W['b_idx17']][:,:4,:4] * coords[:,None,:], axis=-1)
+    else:
+        nWeights = 3
+        return W['wght1'][:,None] * np.sum(P[W['b_idx1']][:,:4,:4] * coords[:,None,:], axis=-1) + \
+               W['wght2'][:,None] * np.sum(P[W['b_idx2']][:,:4,:4] * coords[:,None,:], axis=-1) + \
+               W['wght3'][:,None] * np.sum(P[W['b_idx3']][:,:4,:4] * coords[:,None,:], axis=-1)
 
 def emptyTrack(nFrames, nBones=1):
     """
