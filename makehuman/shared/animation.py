@@ -596,7 +596,6 @@ def skinMesh(coords, compiledVertWeights, poseData):
     """
     # TODO use accumulated matrix skinning (http://http.developer.nvidia.com/GPUGems/gpugems_ch04.html)
 
-    # TODO compare old and new method alongside each other, save some sample data and compare result, and time difference
     if coords.shape[1] != 4:
         log.debug('Warning, slow skinning code: mismatched size of array')
         coords_ = np.ones((coords.shape[0],4), dtype=np.float32)
@@ -628,6 +627,12 @@ def skinMesh(coords, compiledVertWeights, poseData):
                W['wght15'][:,None] * np.sum(P[W['b_idx15']][:,:4,:4] * coords[:,None,:], axis=-1) + \
                W['wght16'][:,None] * np.sum(P[W['b_idx16']][:,:4,:4] * coords[:,None,:], axis=-1) + \
                W['wght17'][:,None] * np.sum(P[W['b_idx17']][:,:4,:4] * coords[:,None,:], axis=-1)
+    elif len(compiledVertWeights.dtype) == 4*2:
+        nWeights = 4
+        return W['wght1'][:,None] * np.sum(P[W['b_idx1']][:,:4,:4] * coords[:,None,:], axis=-1) + \
+               W['wght2'][:,None] * np.sum(P[W['b_idx2']][:,:4,:4] * coords[:,None,:], axis=-1) + \
+               W['wght3'][:,None] * np.sum(P[W['b_idx3']][:,:4,:4] * coords[:,None,:], axis=-1) + \
+               W['wght4'][:,None] * np.sum(P[W['b_idx4']][:,:4,:4] * coords[:,None,:], axis=-1)
     else:
         nWeights = 3
         return W['wght1'][:,None] * np.sum(P[W['b_idx1']][:,:4,:4] * coords[:,None,:], axis=-1) + \
