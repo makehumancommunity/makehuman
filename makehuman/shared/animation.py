@@ -293,7 +293,17 @@ def _compileVertexWeights(vertBoneMapping, skel, vertexCount=None, nWeights=17):
             for v_idx, wght in zip(verts, weights):
                 if v_idx not in _ws:
                     _ws[v_idx] = []
-                _ws[v_idx].append( (wght, b_idx) )
+                # Merge double bone assignments
+                d_idx = -1
+                for idx in range( len(_ws[v_idx]) ):
+                    _b_idx = _ws[v_idx][idx][1]
+                    if _b_idx == b_idx:
+                        d_idx = idx
+                if d_idx != -1:
+                    #log.debug("Merging double assignment (%s, %s)", (bname, v_idx))
+                    _ws[v_idx][d_idx] = (_ws[v_idx][d_idx][0] + wght, b_idx)
+                else:
+                    _ws[v_idx].append( (wght, b_idx) )
         except KeyError as e:
             log.warning("Bone %s not found in skeleton: %s" % (bname, e))
     for v_idx in _ws:
