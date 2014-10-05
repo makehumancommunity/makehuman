@@ -226,7 +226,8 @@ class Skeleton(object):
             bone.matPose = np.dot(np.dot(invRest, bone.matPose), bone.matRestGlobal)
 
             # Add translations from original
-            bone.matPose[:3,3] = poseMats[bIdx,:3,3]
+            if poseMats.shape[2] == 4:
+                bone.matPose[:3,3] = poseMats[bIdx,:3,3]
         # TODO avoid this loop, eg by storing a pre-allocated poseMats np array in skeleton and keeping a reference to a sub-array in each bone. It would allow batch processing of all pose matrices in one np call
         self.update()
 
@@ -244,6 +245,12 @@ class Skeleton(object):
         """
         Update (pose) assigned mesh using linear blend skinning.
         """
+        # TODO try creating an array P(nBones,3,4) with pose matrices, and an array W(nCoord,nWeights(float)*2(int))
+        # for 3 weights
+        # cache meshCoords.transpose()  or .T (is this faster? difference?)
+        #   http://jameshensman.wordpress.com/2010/06/14/multiple-matrix-multiplication-in-numpy/
+        # use np.dot for matrix multiply or is using sum() and * faster?
+        # coords = W[:,1] * P[W[:,0]] * meshCoords.transpose()[:] + W[:,3] * P[W[:,2]] * meshCoords.transpose()[:] + W[:,5] * P[W[:,4]] * meshCoords.transpose()[:]
         nVerts = len(meshCoords)
         coords = np.zeros((nVerts,3), float)
         if meshCoords.shape[1] != 4:
@@ -253,8 +260,8 @@ class Skeleton(object):
             log.debug("Unoptimized data structure passed to skinMesh, this will incur performance penalty when used for animation.")
         for bname, mapping in vertBoneMapping.items():
             try:
-                bone = self.getBone(bname)
                 verts,weights = mapping
+                bone = self.getBone(bname)
                 vec = np.dot(bone.matPoseVerts, meshCoords[verts].transpose())
                 vec *= weights
                 coords[verts] += vec.transpose()[:,:3]
@@ -376,7 +383,6 @@ class Bone(object):
         restmat = self.getRestMatrix(meshOrientation, localBoneAxis, offsetVect)
 
         # TODO this matrix is possibly the same as self.matRestRelative, but with optional adapted axes
-
         if self.parent:
             parmat = self.parent.getRestMatrix(meshOrientation, localBoneAxis, offsetVect)
             return np.dot(la.inv(parmat), restmat)
