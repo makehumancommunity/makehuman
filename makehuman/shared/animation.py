@@ -659,41 +659,49 @@ def skinMesh(coords, compiledVertWeights, poseData):
         coords_[:,:3] = coords
         coords = coords_
     '''
+    if coords.shape[1] == 4:
+        # Vertices contain homogenous coordinate (1 if translation affects position,
+        # 0 if vertex should not be affected by translation (only direction) )
+        c = 4
+    else:
+        # Translations do not affect vertices (faster as this requires only 3x3 matrix multiplies)
+        c = 3
+
     W = compiledVertWeights
     P = poseData
     if len(compiledVertWeights.dtype) == 4*2:
         # nWeights = 4
-        accum = W['wght1'][:,None,None] * P[W['b_idx1']][:,:3,:4] + \
-                W['wght2'][:,None,None] * P[W['b_idx2']][:,:3,:4] + \
-                W['wght3'][:,None,None] * P[W['b_idx3']][:,:3,:4] + \
-                W['wght4'][:,None,None] * P[W['b_idx4']][:,:3,:4]
+        accum = W['wght1'][:,None,None] * P[W['b_idx1']][:,:3,:c] + \
+                W['wght2'][:,None,None] * P[W['b_idx2']][:,:3,:c] + \
+                W['wght3'][:,None,None] * P[W['b_idx3']][:,:3,:c] + \
+                W['wght4'][:,None,None] * P[W['b_idx4']][:,:3,:c]
     elif len(compiledVertWeights.dtype) == 2:
         # nWeights = 1
-        accum = W['wght1'][:,None,None] * P[W['b_idx1']][:,:4,:4]
+        accum = W['wght1'][:,None,None] * P[W['b_idx1']][:,:3,:c]
     elif len(compiledVertWeights.dtype) == 17*2:
         # nWeights = 17
-        accum = W['wght1'][:,None,None] * P[W['b_idx1']][:,:3,:4] + \
-                W['wght2'][:,None,None] * P[W['b_idx2']][:,:3,:4] + \
-                W['wght3'][:,None,None] * P[W['b_idx3']][:,:3,:4] + \
-                W['wght4'][:,None,None] * P[W['b_idx4']][:,:3,:4] + \
-                W['wght5'][:,None,None] * P[W['b_idx5']][:,:3,:4] + \
-                W['wght6'][:,None,None] * P[W['b_idx6']][:,:3,:4] + \
-                W['wght7'][:,None,None] * P[W['b_idx7']][:,:3,:4] + \
-                W['wght8'][:,None,None] * P[W['b_idx8']][:,:3,:4] + \
-                W['wght9'][:,None,None] * P[W['b_idx9']][:,:3,:4] + \
-                W['wght10'][:,None,None] * P[W['b_idx10']][:,:3,:4] + \
-                W['wght11'][:,None,None] * P[W['b_idx11']][:,:3,:4] + \
-                W['wght12'][:,None,None] * P[W['b_idx12']][:,:3,:4] + \
-                W['wght13'][:,None,None] * P[W['b_idx13']][:,:3,:4] + \
-                W['wght14'][:,None,None] * P[W['b_idx14']][:,:3,:4] + \
-                W['wght15'][:,None,None] * P[W['b_idx15']][:,:3,:4] + \
-                W['wght16'][:,None,None] * P[W['b_idx16']][:,:3,:4] + \
-                W['wght17'][:,None,None] * P[W['b_idx17']][:,:3,:4]
+        accum = W['wght1'][:,None,None] * P[W['b_idx1']][:,:3,:c] + \
+                W['wght2'][:,None,None] * P[W['b_idx2']][:,:3,:c] + \
+                W['wght3'][:,None,None] * P[W['b_idx3']][:,:3,:c] + \
+                W['wght4'][:,None,None] * P[W['b_idx4']][:,:3,:c] + \
+                W['wght5'][:,None,None] * P[W['b_idx5']][:,:3,:c] + \
+                W['wght6'][:,None,None] * P[W['b_idx6']][:,:3,:c] + \
+                W['wght7'][:,None,None] * P[W['b_idx7']][:,:3,:c] + \
+                W['wght8'][:,None,None] * P[W['b_idx8']][:,:3,:c] + \
+                W['wght9'][:,None,None] * P[W['b_idx9']][:,:3,:c] + \
+                W['wght10'][:,None,None] * P[W['b_idx10']][:,:3,:c] + \
+                W['wght11'][:,None,None] * P[W['b_idx11']][:,:3,:c] + \
+                W['wght12'][:,None,None] * P[W['b_idx12']][:,:3,:c] + \
+                W['wght13'][:,None,None] * P[W['b_idx13']][:,:3,:c] + \
+                W['wght14'][:,None,None] * P[W['b_idx14']][:,:3,:c] + \
+                W['wght15'][:,None,None] * P[W['b_idx15']][:,:3,:c] + \
+                W['wght16'][:,None,None] * P[W['b_idx16']][:,:3,:c] + \
+                W['wght17'][:,None,None] * P[W['b_idx17']][:,:3,:c]
     else:
         # nWeights = 3
-        accum = W['wght1'][:,None,None] * P[W['b_idx1']][:,:3,:4] + \
-                W['wght2'][:,None,None] * P[W['b_idx2']][:,:3,:4] + \
-                W['wght3'][:,None,None] * P[W['b_idx3']][:,:3,:4]
+        accum = W['wght1'][:,None,None] * P[W['b_idx1']][:,:3,:c] + \
+                W['wght2'][:,None,None] * P[W['b_idx2']][:,:3,:c] + \
+                W['wght3'][:,None,None] * P[W['b_idx3']][:,:3,:c]
 
     # Note: np.sum(M * vs, axis=-1) is a matrix multiplication of mat M with
     # a series of vertices vs
@@ -701,7 +709,7 @@ def skinMesh(coords, compiledVertWeights, poseData):
 
     # Using einstein summation for matrix * vertex multiply, appears to be
     # slightly faster
-    return np.einsum('ijk,ikl -> ij', accum[:,:3,:], coords[:,:,None])
+    return np.einsum('ijk,ikl -> ij', accum[:,:3,:c], coords[:,:c,None])
 
 
 def emptyTrack(nFrames, nBones=1):

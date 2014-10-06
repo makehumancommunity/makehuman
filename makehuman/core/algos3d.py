@@ -64,8 +64,6 @@ from getpath import getSysDataPath, canonicalPath
 
 _targetBuffer = {}
 
-_posedCoordBuffer = None
-
 
 class Target(object):
     """
@@ -238,11 +236,6 @@ class Target(object):
 
                 scale = np.array(scale) * morphFactor
                 if animatedMesh is not None:
-                    global _posedCoordBuffer
-                    if _posedCoordBuffer is None:
-                        _posedCoordBuffer = np.zeros((obj.getVertexCount(), 4), dtype=np.float32)
-                    _posedCoordBuffer[:,3] = 0.0
-                    _posedCoordBuffer[dstVerts,:3] = self.data[srcVerts] * scale[None,:]
                     import animation
                     vertBoneMapping = animatedMesh.getBoundMesh(obj.name)[1]
                     if not vertBoneMapping.isCompiled():
@@ -251,7 +244,9 @@ class Target(object):
                     if not animationTrack.isBaked():
                         animationTrack.bake(animatedMesh.getSkeleton())
                     poseData = animatedMesh.getPoseState()
-                    obj.coord[dstVerts] += animation.skinMesh(_posedCoordBuffer, vertBoneMapping.compiled, poseData)[dstVerts,:3]
+                    obj.coord[dstVerts] += animation.skinMesh( \
+                                  self.data[srcVerts] * scale[None,:], 
+                                  vertBoneMapping.compiled[dstVerts], poseData )
                 else:
                     obj.coord[dstVerts] += self.data[srcVerts] * scale[None,:]
                 obj.markCoords(dstVerts, coor=True)
