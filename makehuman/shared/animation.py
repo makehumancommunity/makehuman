@@ -253,9 +253,6 @@ def _compileVertexWeights(vertBoneMapping, skel, vertexCount=None, nWeights=17):
     """
     Compile vertex weights data to a more performant per-vertex format.
     """
-    #if nWeights != 1 and nWeights != 3:
-    #    # nWeights should be either 1 or 3
-    #    nWeights = 3
     if vertexCount is None:
         vertexCount = 0
         for bname, mapping in vertBoneMapping.items():
@@ -267,13 +264,16 @@ def _compileVertexWeights(vertBoneMapping, skel, vertexCount=None, nWeights=17):
     if nWeights == 3:
         dtype = [('b_idx1', np.uint32), ('b_idx2', np.uint32), ('b_idx3', np.uint32), 
                  ('wght1', np.float32), ('wght2', np.float32), ('wght3', np.float32)]
+    elif nWeights == 4:
+        dtype = [('b_idx1', np.uint32), ('b_idx2', np.uint32), ('b_idx3', np.uint32), ('b_idx4', np.uint32),
+                 ('wght1', np.float32), ('wght2', np.float32), ('wght3', np.float32), ('wght4', np.float32)]
     elif nWeights == 17:
         dtype = [('b_idx1', np.uint32), ('b_idx2', np.uint32), ('b_idx3', np.uint32), 
-                 ('b_idx4', np.uint32), 
-                 ('b_idx5', np.uint32), ('b_idx6', np.uint32), ('b_idx7', np.uint32), 
-                 ('b_idx8', np.uint32), ('b_idx9', np.uint32), ('b_idx10', np.uint32), 
-                 ('b_idx11', np.uint32), ('b_idx12', np.uint32), ('b_idx13', np.uint32), 
-                 ('b_idx14', np.uint32), ('b_idx15', np.uint32), ('b_idx16', np.uint32), ('b_idx17', np.uint32), 
+                 ('b_idx4', np.uint32), ('b_idx5', np.uint32), ('b_idx6', np.uint32), 
+                 ('b_idx7', np.uint32), ('b_idx8', np.uint32), ('b_idx9', np.uint32), 
+                 ('b_idx10', np.uint32), ('b_idx11', np.uint32), ('b_idx12', np.uint32), 
+                 ('b_idx13', np.uint32), ('b_idx14', np.uint32), ('b_idx15', np.uint32), 
+                 ('b_idx16', np.uint32), ('b_idx17', np.uint32), 
                  ('wght1', np.float32), ('wght2', np.float32), ('wght3', np.float32), 
                  ('wght4', np.float32), ('wght5', np.float32), ('wght6', np.float32), 
                  ('wght7', np.float32), ('wght8', np.float32), ('wght9', np.float32), 
