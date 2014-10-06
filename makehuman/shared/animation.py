@@ -637,51 +637,53 @@ def skinMesh(coords, compiledVertWeights, poseData):
     As proposed in http://graphics.ucsd.edu/courses/cse169_w05/3-Skin.htm we use
     a vertex-major loop.
     We also use a fixed number of weights per vertex.
+    Uses accumulated matrix skinning (http://http.developer.nvidia.com/GPUGems/gpugems_ch04.html)
     """
-    # TODO use accumulated matrix skinning (http://http.developer.nvidia.com/GPUGems/gpugems_ch04.html)
-
     if coords.shape[1] != 4:
-        log.debug('Warning, slow skinning code: mismatched size of array')
+        log.debug('Warning, slow skinning code: mismatched size of array!')
         coords_ = np.ones((coords.shape[0],4), dtype=np.float32)
         coords_[:,:3] = coords
         coords = coords_
     W = compiledVertWeights
     P = poseData
-    if len(compiledVertWeights.dtype) == 2:
-        nWeights = 1
-        # Note: np.sum(M * vs, axis=-1) is a matrix multiplication of mat M with
-        # a series of vertices vs
-        return W['wght1'][:,None] * np.sum(P[W['b_idx1']][:,:3,:4] * coords[:,None,:], axis=-1)
+    if len(compiledVertWeights.dtype) == 4*2:
+        # nWeights = 4
+        accum = W['wght1'][:,None,None] * P[W['b_idx1']][:,:3,:4] + \
+                W['wght2'][:,None,None] * P[W['b_idx2']][:,:3,:4] + \
+                W['wght3'][:,None,None] * P[W['b_idx3']][:,:3,:4] + \
+                W['wght4'][:,None,None] * P[W['b_idx4']][:,:3,:4]
+    elif len(compiledVertWeights.dtype) == 2:
+        # nWeights = 1
+        accum = W['wght1'][:,None,None] * P[W['b_idx1']][:,:4,:4]
     elif len(compiledVertWeights.dtype) == 17*2:
-        nWeights = 17
-        return W['wght1'][:,None] * np.sum(P[W['b_idx1']][:,:3,:4] * coords[:,None,:], axis=-1) + \
-               W['wght2'][:,None] * np.sum(P[W['b_idx2']][:,:3,:4] * coords[:,None,:], axis=-1) + \
-               W['wght3'][:,None] * np.sum(P[W['b_idx3']][:,:3,:4] * coords[:,None,:], axis=-1) + \
-               W['wght4'][:,None] * np.sum(P[W['b_idx4']][:,:3,:4] * coords[:,None,:], axis=-1) + \
-               W['wght5'][:,None] * np.sum(P[W['b_idx5']][:,:3,:4] * coords[:,None,:], axis=-1) + \
-               W['wght6'][:,None] * np.sum(P[W['b_idx6']][:,:3,:4] * coords[:,None,:], axis=-1) + \
-               W['wght7'][:,None] * np.sum(P[W['b_idx7']][:,:3,:4] * coords[:,None,:], axis=-1) + \
-               W['wght8'][:,None] * np.sum(P[W['b_idx8']][:,:3,:4] * coords[:,None,:], axis=-1) + \
-               W['wght9'][:,None] * np.sum(P[W['b_idx9']][:,:3,:4] * coords[:,None,:], axis=-1) + \
-               W['wght10'][:,None] * np.sum(P[W['b_idx10']][:,:3,:4] * coords[:,None,:], axis=-1) + \
-               W['wght11'][:,None] * np.sum(P[W['b_idx11']][:,:3,:4] * coords[:,None,:], axis=-1) + \
-               W['wght12'][:,None] * np.sum(P[W['b_idx12']][:,:3,:4] * coords[:,None,:], axis=-1) + \
-               W['wght13'][:,None] * np.sum(P[W['b_idx13']][:,:3,:4] * coords[:,None,:], axis=-1) + \
-               W['wght14'][:,None] * np.sum(P[W['b_idx14']][:,:3,:4] * coords[:,None,:], axis=-1) + \
-               W['wght15'][:,None] * np.sum(P[W['b_idx15']][:,:3,:4] * coords[:,None,:], axis=-1) + \
-               W['wght16'][:,None] * np.sum(P[W['b_idx16']][:,:3,:4] * coords[:,None,:], axis=-1) + \
-               W['wght17'][:,None] * np.sum(P[W['b_idx17']][:,:3,:4] * coords[:,None,:], axis=-1)
-    elif len(compiledVertWeights.dtype) == 4*2:
-        nWeights = 4
-        return W['wght1'][:,None] * np.sum(P[W['b_idx1']][:,:3,:4] * coords[:,None,:], axis=-1) + \
-               W['wght2'][:,None] * np.sum(P[W['b_idx2']][:,:3,:4] * coords[:,None,:], axis=-1) + \
-               W['wght3'][:,None] * np.sum(P[W['b_idx3']][:,:3,:4] * coords[:,None,:], axis=-1) + \
-               W['wght4'][:,None] * np.sum(P[W['b_idx4']][:,:3,:4] * coords[:,None,:], axis=-1)
+        # nWeights = 17
+        accum = W['wght1'][:,None,None] * P[W['b_idx1']][:,:3,:4] + \
+                W['wght2'][:,None,None] * P[W['b_idx2']][:,:3,:4] + \
+                W['wght3'][:,None,None] * P[W['b_idx3']][:,:3,:4] + \
+                W['wght4'][:,None,None] * P[W['b_idx4']][:,:3,:4] + \
+                W['wght5'][:,None,None] * P[W['b_idx5']][:,:3,:4] + \
+                W['wght6'][:,None,None] * P[W['b_idx6']][:,:3,:4] + \
+                W['wght7'][:,None,None] * P[W['b_idx7']][:,:3,:4] + \
+                W['wght8'][:,None,None] * P[W['b_idx8']][:,:3,:4] + \
+                W['wght9'][:,None,None] * P[W['b_idx9']][:,:3,:4] + \
+                W['wght10'][:,None,None] * P[W['b_idx10']][:,:3,:4] + \
+                W['wght11'][:,None,None] * P[W['b_idx11']][:,:3,:4] + \
+                W['wght12'][:,None,None] * P[W['b_idx12']][:,:3,:4] + \
+                W['wght13'][:,None,None] * P[W['b_idx13']][:,:3,:4] + \
+                W['wght14'][:,None,None] * P[W['b_idx14']][:,:3,:4] + \
+                W['wght15'][:,None,None] * P[W['b_idx15']][:,:3,:4] + \
+                W['wght16'][:,None,None] * P[W['b_idx16']][:,:3,:4] + \
+                W['wght17'][:,None,None] * P[W['b_idx17']][:,:3,:4]
     else:
-        nWeights = 3
-        return W['wght1'][:,None] * np.sum(P[W['b_idx1']][:,:3,:4] * coords[:,None,:], axis=-1) + \
-               W['wght2'][:,None] * np.sum(P[W['b_idx2']][:,:3,:4] * coords[:,None,:], axis=-1) + \
-               W['wght3'][:,None] * np.sum(P[W['b_idx3']][:,:3,:4] * coords[:,None,:], axis=-1)
+        # nWeights = 3
+        accum = W['wght1'][:,None,None] * P[W['b_idx1']][:,:3,:4] + \
+                W['wght2'][:,None,None] * P[W['b_idx2']][:,:3,:4] + \
+                W['wght3'][:,None,None] * P[W['b_idx3']][:,:3,:4]
+
+    # Note: np.sum(M * vs, axis=-1) is a matrix multiplication of mat M with
+    # a series of vertices vs
+    return np.sum(accum[:,:3,:4] * coords[:,None,:], axis=-1)
+
 
 def emptyTrack(nFrames, nBones=1):
     """
