@@ -682,7 +682,11 @@ def skinMesh(coords, compiledVertWeights, poseData):
 
     # Note: np.sum(M * vs, axis=-1) is a matrix multiplication of mat M with
     # a series of vertices vs
-    return np.sum(accum[:,:3,:4] * coords[:,None,:], axis=-1)
+    #return np.sum(accum[:,:3,:4] * coords[:,None,:], axis=-1)
+
+    # Using einstein summation for matrix * vertex multiply, appears to be
+    # slightly faster
+    return np.einsum('ijk,ikl -> ij', accum[:,:3,:], coords[:,:,None])
 
 
 def emptyTrack(nFrames, nBones=1):
