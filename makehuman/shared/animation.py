@@ -37,8 +37,6 @@ Abstract
 Data handlers for skeletal animation.
 """
 
-# TODO create class for vertexweights data
-
 import math
 import numpy as np
 import numpy.linalg as la
@@ -249,6 +247,38 @@ def blendPoses(poses, weights):
 
     return poseData
 
+
+class VertexBoneWeights(object):
+    """
+    Weighted vertex to bone assignments.
+    """
+    def __init__(self, data, nWeights=4, vertexCount=None):
+        self._data = data
+        self._compiled = None
+        self._vertexCount = vertexCount
+        self._nWeights = nWeights
+
+    @property
+    def data(self):
+        return self._data
+    
+    @property
+    def compiled(self):
+        return self._compiled
+
+    def isCompiled(self):
+        return self.compiled != None
+
+    def compileData(self, skel, nWeights=None):
+        if nWeights != None:
+            self._nWeights = nWeights
+        self._compiled = _compileVertexWeights(self.data, skel, vertexCount=self._vertexCount, nWeights=self._nWeights)
+        self._vertexCount = len(self._compiled)
+
+    def clearCompiled(self):
+        self._compiled = None
+
+
 def _compileVertexWeights(vertBoneMapping, skel, vertexCount=None, nWeights=17):
     """
     Compile vertex weights data to a more performant per-vertex format.
@@ -352,6 +382,11 @@ class AnimatedMesh(object):
     def setSkeleton(self, skel):
         self.__skeleton = skel
         self.removeAnimations(update=False)
+        self.resetCompiledWeights()
+
+    def resetCompiledWeights(self):
+        for vmap in self.__vertexToBoneMaps:
+            vmap.clearCompiled()
 
     def addAnimation(self, anim):
         """
@@ -415,21 +450,27 @@ class AnimatedMesh(object):
                 log.warning("Attempt to add the same bound mesh %s twice" % mesh.name)
             self.removeBoundMesh(mesh.name)
 
+        if not isinstance(vertexToBoneMapping, VertexBoneWeights):
+            vertexToBoneMapping = VertexBoneWeights(vertexToBoneMapping, nWeights=4, vertexCount=mesh.getVertexCount())
+
         # allows multiple meshes (also to allow to animate one model consisting of multiple meshes)
         originalMeshCoords = np.zeros((mesh.getVertexCount(),4), np.float32)
         originalMeshCoords[:,:3] = mesh.coord[:,:3]
         originalMeshCoords[:,3] = 1.0
         self.__originalMeshCoords.append(originalMeshCoords)
         if self.getSkeleton():
-            vertexToBoneMapping = _compileVertexWeights(vertexToBoneMapping, self.getSkeleton(), vertexCount=mesh.getVertexCount(), nWeights=4)
+            log.debug("Compiling vertex bone weights for %s", mesh.name)
+            vertexToBoneMapping.compileData(self.getSkeleton())
         self.__vertexToBoneMaps.append(vertexToBoneMapping)
         self.__meshes.append(mesh)
 
     def updateVertexWeights(self, meshName, vertexToBoneMapping):
         rIdx = self._getBoundMeshIndex(meshName)
         mesh = self.__meshes[rIdx]
+        if not isinstance(vertexToBoneMapping, VertexBoneWeights):
+            vertexToBoneMapping = VertexBoneWeights(vertexToBoneMapping, nWeights=4, vertexCount=mesh.getVertexCount())
         if self.getSkeleton():
-            vertexToBoneMapping = _compileVertexWeights(vertexToBoneMapping, self.getSkeleton(), vertexCount=mesh.getVertexCount(), nWeights=4)
+            vertexToBoneMapping.compileData(self.getSkeleton())
         self.__vertexToBoneMaps[rIdx] = vertexToBoneMapping
 
     def removeBoundMesh(self, name):
@@ -542,9 +583,12 @@ class AnimatedMesh(object):
                 try:
                     if not self.__currentAnim.isBaked():
                         # TODO in practice this slower method is never used (anim is always baked if a skeleton is set)
-                        posedCoords = self.getSkeleton().skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx])
+                        posedCoords = self.getSkeleton().skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx].data)
                     else:
-                        posedCoords = skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx], poseState)
+                        if not self.__vertexToBoneMaps[idx].isCompiled():
+                            log.debug("Compiling vertex bone weights for %s", mesh.name)
+                            self.__vertexToBoneMaps[idx].compileData(self.getSkeleton())
+                        posedCoords = skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx].compiled, poseState)
                 except Exception as e:
                     log.error("Error skinning mesh %s" % mesh.name)
                     raise e
