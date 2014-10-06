@@ -309,7 +309,7 @@ def _compileVertexWeights(vertBoneMapping, skel, vertexCount=None, nWeights=17):
     for v_idx in _ws:
         # Sort by weight and keep only nWeights most significant weights
         if len(_ws[v_idx]) > nWeights:
-            log.debug("Vertex %s has too many weights (%s): %s", (v_idx, len(_ws[v_idx]), str(sorted(_ws[v_idx], reverse=True))))
+            #log.debug("Vertex %s has too many weights (%s): %s" % (v_idx, len(_ws[v_idx]), str(sorted(_ws[v_idx], reverse=True))))
             _ws[v_idx] = sorted(_ws[v_idx], reverse=True)[:nWeights]
             # Re-normalize weights
             weightvals = np.asarray( [e[0] for e in _ws[v_idx]], dtype=np.float32)
@@ -421,7 +421,7 @@ class AnimatedMesh(object):
         originalMeshCoords[:,3] = 1.0
         self.__originalMeshCoords.append(originalMeshCoords)
         if self.getSkeleton():
-            vertexToBoneMapping = _compileVertexWeights(vertexToBoneMapping, self.getSkeleton(), vertexCount=mesh.getVertexCount(), nWeights=17)
+            vertexToBoneMapping = _compileVertexWeights(vertexToBoneMapping, self.getSkeleton(), vertexCount=mesh.getVertexCount(), nWeights=4)
         self.__vertexToBoneMaps.append(vertexToBoneMapping)
         self.__meshes.append(mesh)
 
@@ -429,7 +429,7 @@ class AnimatedMesh(object):
         rIdx = self._getBoundMeshIndex(meshName)
         mesh = self.__meshes[rIdx]
         if self.getSkeleton():
-            vertexToBoneMapping = _compileVertexWeights(vertexToBoneMapping, self.getSkeleton(), vertexCount=mesh.getVertexCount(), nWeights=17)
+            vertexToBoneMapping = _compileVertexWeights(vertexToBoneMapping, self.getSkeleton(), vertexCount=mesh.getVertexCount(), nWeights=4)
         self.__vertexToBoneMaps[rIdx] = vertexToBoneMapping
 
     def removeBoundMesh(self, name):
@@ -607,37 +607,37 @@ def skinMesh(coords, compiledVertWeights, poseData):
         nWeights = 1
         # Note: np.sum(M * vs, axis=-1) is a matrix multiplication of mat M with
         # a series of vertices vs
-        return W['wght1'][:,None] * np.sum(P[W['b_idx1']][:,:3,:3] * coords[:,None,:], axis=-1)
+        return W['wght1'][:,None] * np.sum(P[W['b_idx1']][:,:3,:4] * coords[:,None,:], axis=-1)
     elif len(compiledVertWeights.dtype) == 17*2:
         nWeights = 17
-        return W['wght1'][:,None] * np.sum(P[W['b_idx1']][:,:4,:4] * coords[:,None,:], axis=-1) + \
-               W['wght2'][:,None] * np.sum(P[W['b_idx2']][:,:4,:4] * coords[:,None,:], axis=-1) + \
-               W['wght3'][:,None] * np.sum(P[W['b_idx3']][:,:4,:4] * coords[:,None,:], axis=-1) + \
-               W['wght4'][:,None] * np.sum(P[W['b_idx4']][:,:4,:4] * coords[:,None,:], axis=-1) + \
-               W['wght5'][:,None] * np.sum(P[W['b_idx5']][:,:4,:4] * coords[:,None,:], axis=-1) + \
-               W['wght6'][:,None] * np.sum(P[W['b_idx6']][:,:4,:4] * coords[:,None,:], axis=-1) + \
-               W['wght7'][:,None] * np.sum(P[W['b_idx7']][:,:4,:4] * coords[:,None,:], axis=-1) + \
-               W['wght8'][:,None] * np.sum(P[W['b_idx8']][:,:4,:4] * coords[:,None,:], axis=-1) + \
-               W['wght9'][:,None] * np.sum(P[W['b_idx9']][:,:4,:4] * coords[:,None,:], axis=-1) + \
-               W['wght10'][:,None] * np.sum(P[W['b_idx10']][:,:4,:4] * coords[:,None,:], axis=-1) + \
-               W['wght11'][:,None] * np.sum(P[W['b_idx11']][:,:4,:4] * coords[:,None,:], axis=-1) + \
-               W['wght12'][:,None] * np.sum(P[W['b_idx12']][:,:4,:4] * coords[:,None,:], axis=-1) + \
-               W['wght13'][:,None] * np.sum(P[W['b_idx13']][:,:4,:4] * coords[:,None,:], axis=-1) + \
-               W['wght14'][:,None] * np.sum(P[W['b_idx14']][:,:4,:4] * coords[:,None,:], axis=-1) + \
-               W['wght15'][:,None] * np.sum(P[W['b_idx15']][:,:4,:4] * coords[:,None,:], axis=-1) + \
-               W['wght16'][:,None] * np.sum(P[W['b_idx16']][:,:4,:4] * coords[:,None,:], axis=-1) + \
-               W['wght17'][:,None] * np.sum(P[W['b_idx17']][:,:4,:4] * coords[:,None,:], axis=-1)
+        return W['wght1'][:,None] * np.sum(P[W['b_idx1']][:,:3,:4] * coords[:,None,:], axis=-1) + \
+               W['wght2'][:,None] * np.sum(P[W['b_idx2']][:,:3,:4] * coords[:,None,:], axis=-1) + \
+               W['wght3'][:,None] * np.sum(P[W['b_idx3']][:,:3,:4] * coords[:,None,:], axis=-1) + \
+               W['wght4'][:,None] * np.sum(P[W['b_idx4']][:,:3,:4] * coords[:,None,:], axis=-1) + \
+               W['wght5'][:,None] * np.sum(P[W['b_idx5']][:,:3,:4] * coords[:,None,:], axis=-1) + \
+               W['wght6'][:,None] * np.sum(P[W['b_idx6']][:,:3,:4] * coords[:,None,:], axis=-1) + \
+               W['wght7'][:,None] * np.sum(P[W['b_idx7']][:,:3,:4] * coords[:,None,:], axis=-1) + \
+               W['wght8'][:,None] * np.sum(P[W['b_idx8']][:,:3,:4] * coords[:,None,:], axis=-1) + \
+               W['wght9'][:,None] * np.sum(P[W['b_idx9']][:,:3,:4] * coords[:,None,:], axis=-1) + \
+               W['wght10'][:,None] * np.sum(P[W['b_idx10']][:,:3,:4] * coords[:,None,:], axis=-1) + \
+               W['wght11'][:,None] * np.sum(P[W['b_idx11']][:,:3,:4] * coords[:,None,:], axis=-1) + \
+               W['wght12'][:,None] * np.sum(P[W['b_idx12']][:,:3,:4] * coords[:,None,:], axis=-1) + \
+               W['wght13'][:,None] * np.sum(P[W['b_idx13']][:,:3,:4] * coords[:,None,:], axis=-1) + \
+               W['wght14'][:,None] * np.sum(P[W['b_idx14']][:,:3,:4] * coords[:,None,:], axis=-1) + \
+               W['wght15'][:,None] * np.sum(P[W['b_idx15']][:,:3,:4] * coords[:,None,:], axis=-1) + \
+               W['wght16'][:,None] * np.sum(P[W['b_idx16']][:,:3,:4] * coords[:,None,:], axis=-1) + \
+               W['wght17'][:,None] * np.sum(P[W['b_idx17']][:,:3,:4] * coords[:,None,:], axis=-1)
     elif len(compiledVertWeights.dtype) == 4*2:
         nWeights = 4
-        return W['wght1'][:,None] * np.sum(P[W['b_idx1']][:,:4,:4] * coords[:,None,:], axis=-1) + \
-               W['wght2'][:,None] * np.sum(P[W['b_idx2']][:,:4,:4] * coords[:,None,:], axis=-1) + \
-               W['wght3'][:,None] * np.sum(P[W['b_idx3']][:,:4,:4] * coords[:,None,:], axis=-1) + \
-               W['wght4'][:,None] * np.sum(P[W['b_idx4']][:,:4,:4] * coords[:,None,:], axis=-1)
+        return W['wght1'][:,None] * np.sum(P[W['b_idx1']][:,:3,:4] * coords[:,None,:], axis=-1) + \
+               W['wght2'][:,None] * np.sum(P[W['b_idx2']][:,:3,:4] * coords[:,None,:], axis=-1) + \
+               W['wght3'][:,None] * np.sum(P[W['b_idx3']][:,:3,:4] * coords[:,None,:], axis=-1) + \
+               W['wght4'][:,None] * np.sum(P[W['b_idx4']][:,:3,:4] * coords[:,None,:], axis=-1)
     else:
         nWeights = 3
-        return W['wght1'][:,None] * np.sum(P[W['b_idx1']][:,:4,:4] * coords[:,None,:], axis=-1) + \
-               W['wght2'][:,None] * np.sum(P[W['b_idx2']][:,:4,:4] * coords[:,None,:], axis=-1) + \
-               W['wght3'][:,None] * np.sum(P[W['b_idx3']][:,:4,:4] * coords[:,None,:], axis=-1)
+        return W['wght1'][:,None] * np.sum(P[W['b_idx1']][:,:3,:4] * coords[:,None,:], axis=-1) + \
+               W['wght2'][:,None] * np.sum(P[W['b_idx2']][:,:3,:4] * coords[:,None,:], axis=-1) + \
+               W['wght3'][:,None] * np.sum(P[W['b_idx3']][:,:3,:4] * coords[:,None,:], axis=-1)
 
 def emptyTrack(nFrames, nBones=1):
     """
