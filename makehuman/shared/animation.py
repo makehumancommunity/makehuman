@@ -401,10 +401,13 @@ class AnimatedMesh(object):
         """
         Call to update baked animations after modifying skeleton joint positions.
         """
+        log.debug('Updating baked animations')
         for anim_name in self.getAnimations():
             anim = self.getAnimation(anim_name)
             if anim.isBaked():
+                # TODO better to lazily do this, and just reset bake data
                 anim.bake(self.getSkeleton())
+        log.debug('Done baking animations')
 
     def getAnimation(self, name):
         return self.__animations[name]
@@ -434,7 +437,7 @@ class AnimatedMesh(object):
         if self.__currentAnim is None:
             return None
         else:
-            return self.__currentAnim.name
+            return self.__currentAnim
 
     def setAnimateInPlace(self, enable):
         self.__inPlace = enable
@@ -565,15 +568,25 @@ class AnimatedMesh(object):
     def getTime(self):
         return self.__playTime
 
+    def getPoseState(self):
+        """
+        Get the pose matrices of the active animation at the current play time.
+        Returned matrices are baked (they are skin matrices, relative to bone 
+        rest pose in object space) if the active animation is baked, otherwise
+        they are plain pose matrices in local bone space.
+        """
+        poseState = self.__currentAnim.getAtTime(self.__playTime)
+        if self.__inPlace:
+            poseState = poseState.copy()
+            # Remove translation from matrix
+            poseState[:,:3,3] = np.zeros((poseState.shape[0],3), dtype=np.float32)
+        return poseState
+
     def _pose(self):
         if self.isPosed():
             if not self.getSkeleton():
                 return
-            poseState = self.__currentAnim.getAtTime(self.__playTime)
-            if self.__inPlace:
-                poseState = poseState.copy()
-                # Remove translation from matrix
-                poseState[:,:3,3] = np.zeros((poseState.shape[0],3), dtype=np.float32)
+            poseState = self.getPoseState()
             if not self.__currentAnim.isBaked():
                 self.getSkeleton().setPose(poseState)
             # Else we pass poseVerts matrices immediately from animation track for performance improvement (cached or baked)
@@ -639,11 +652,13 @@ def skinMesh(coords, compiledVertWeights, poseData):
     We also use a fixed number of weights per vertex.
     Uses accumulated matrix skinning (http://http.developer.nvidia.com/GPUGems/gpugems_ch04.html)
     """
+    '''
     if coords.shape[1] != 4:
         log.debug('Warning, slow skinning code: mismatched size of array!')
         coords_ = np.ones((coords.shape[0],4), dtype=np.float32)
         coords_[:,:3] = coords
         coords = coords_
+    '''
     W = compiledVertWeights
     P = poseData
     if len(compiledVertWeights.dtype) == 4*2:
