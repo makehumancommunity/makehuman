@@ -651,14 +651,15 @@ def skinMesh(coords, compiledVertWeights, poseData):
     a vertex-major loop.
     We also use a fixed number of weights per vertex.
     Uses accumulated matrix skinning (http://http.developer.nvidia.com/GPUGems/gpugems_ch04.html)
+
+    Care should be taken to supply coords with the right dimensions. This method
+    accepts both coords[nverts, 3] and coords[nverts, 4] dimensions. The fourth
+    member being the homogenous coordinate, which should be 1 if translations
+    should affect the vertex position (eg for mesh coordinates), and 0 for
+    rotations only (for directions such as normals, tangents and targets).
+    If coords is nx3 size, this method will perform faster as only 3x3 matrix
+    multiplies are performed, otherwise 3x4 matrices are multiplied.
     """
-    '''
-    if coords.shape[1] != 4:
-        log.debug('Warning, slow skinning code: mismatched size of array!')
-        coords_ = np.ones((coords.shape[0],4), dtype=np.float32)
-        coords_[:,:3] = coords
-        coords = coords_
-    '''
     if coords.shape[1] == 4:
         # Vertices contain homogenous coordinate (1 if translation affects position,
         # 0 if vertex should not be affected by translation (only direction) )
