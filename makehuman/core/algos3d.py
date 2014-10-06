@@ -10,7 +10,7 @@ MakeHuman 3D Transformation functions.
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Manuel Bastioni, Marc Flerackers
+**Authors:**           Manuel Bastioni, Marc Flerackers, Jonas Hauquier
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
@@ -236,6 +236,8 @@ class Target(object):
 
                 scale = np.array(scale) * morphFactor
                 if animatedMesh is not None:
+                    # Pose the direction in which the target is applied, for fast
+                    # approximate modeling of a posed model
                     import animation
                     vertBoneMapping = animatedMesh.getBoundMesh(obj.name)[1]
                     if not vertBoneMapping.isCompiled():
