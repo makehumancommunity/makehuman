@@ -291,41 +291,6 @@ class Proxy:
         return weights
 
 
-
-    def getShapes(self, rawShapes, scale):
-        # TODO document
-
-        # TODO dependency on richmesh?
-        from richmesh import FakeTarget
-
-        targets = []
-        if (not rawShapes) or (self.type not in ['Proxymeshes', 'Clothes']):
-            return targets
-
-        for (key, rawShape) in rawShapes:
-            shape = {}
-            for n,vn in enumerate(rawShape.verts):
-                try:
-                    pvlist = self.vertWeights[vn]
-                except KeyError:
-                    pvlist = []
-                for (pv, w) in pvlist:
-                    dr = scale*w*rawShape.data[n]
-                    try:
-                        shape[pv] += dr
-                    except KeyError:
-                        shape[pv] = dr
-
-            verts = []
-            data = []
-            for pv,dr in shape.items():
-                if np.dot(dr,dr) > 1e-8:
-                    verts.append(pv)
-                    data.append(dr)
-            targets.append((key, FakeTarget(rawShape.name, verts, data)))
-        return targets
-
-
 doRefVerts = 1
 doWeights = 2
 doDeleteVerts = 3

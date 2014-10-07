@@ -40,13 +40,12 @@ Exporter plugin for the Ogre3d mesh format.
 import gui3d
 import gui
 import mh2ogre
-from export import Exporter
-from exportutils.config import Config
+from export import Exporter, ExportConfig
 
-class OgreConfig(Config):
+class OgreConfig(ExportConfig):
 
     def __init__(self):
-        Config.__init__(self)
+        ExportConfig.__init__(self)
         self.useRelPaths = True
         self.exportShaders = False  # TODO add support for this
 
@@ -74,7 +73,6 @@ class ExporterOgre(Exporter):
 
     def getConfig(self):
         cfg = OgreConfig()
-        cfg.useTPose          = False # self.useTPose.selected
         cfg.feetOnGround      = self.feetOnGround.selected
         cfg.scale,cfg.unit    = self.taskview.getScale()
 

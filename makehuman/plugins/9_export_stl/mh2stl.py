@@ -49,7 +49,6 @@ __docformat__ = 'restructuredtext'
 
 import os
 import struct
-import exportutils
 import numpy as np
 from progress import Progress
 

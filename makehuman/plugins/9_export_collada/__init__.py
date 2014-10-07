@@ -37,22 +37,15 @@ Abstract
 TODO
 """
 
-from export import Exporter
-from exportutils.config import Config
+from export import Exporter, ExportConfig
 
 
-class DaeConfig(Config):
+class DaeConfig(ExportConfig):
     def __init__(self):
-
-        Config.__init__(self)
+        ExportConfig.__init__(self)
 
         self.useRelPaths = True
         self.useNormals = True
-
-        self.useFaceRig =           True
-        self.expressions = False
-        self.useCustomTargets = False
-        self.useTPose = False
 
         self.yUpFaceZ = True
         self.yUpFaceX = False
@@ -102,18 +95,6 @@ class DaeConfig(Config):
         return result
     '''
 
-    def getRigOptions(self):
-        rigOptions = super(DaeConfig, self).getRigOptions()
-        if rigOptions is None:
-            return None
-        else:
-            rigOptions.setExportOptions(
-                useFaceRig = self.useFaceRig,
-                useTPose = self.useTPose,
-            )
-        return rigOptions
-
-
 class ExporterCollada(Exporter):
     def __init__(self):
         Exporter.__init__(self)
@@ -124,7 +105,6 @@ class ExporterCollada(Exporter):
 
     def build(self, options, taskview):
         import gui
-        self.useFaceRig   = options.addWidget(gui.CheckBox("Face rig", True))
         Exporter.build(self, options, taskview)
 
         orients = []
@@ -140,31 +120,19 @@ class ExporterCollada(Exporter):
 
     def export(self, human, filename):
         from .mh2collada import exportCollada
-        #self.taskview.exitPoseMode()
         cfg = self.getConfig()
         cfg.setHuman(human)
         exportCollada(filename("dae"), cfg)
-        #self.taskview.enterPoseMode()
 
     def getConfig(self):
         cfg = DaeConfig()
-        cfg.useTPose           = False # self.useTPose.selected
-        cfg.useFaceRig = self.useFaceRig.selected
         cfg.feetOnGround       = self.feetOnGround.selected
         cfg.scale,cfg.unit    = self.taskview.getScale()
-
-        #cfg.expressions = self.expressions.selected
-        #cfg.useCustomTargets = self.useCustomTargets.selected
-        #cfg.useTPose = self.useTPose.selected
 
         cfg.yUpFaceZ = self.yUpFaceZ.selected
         cfg.yUpFaceX = self.yUpFaceX.selected
         cfg.zUpFaceNegY = self.zUpFaceNegY.selected
         cfg.zUpFaceX = self.zUpFaceX.selected
-
-        #cfg.localY = self.localY.selected
-        #cfg.localX = self.localX.selected
-        #cfg.localG = self.localG.selected
 
         return cfg
 

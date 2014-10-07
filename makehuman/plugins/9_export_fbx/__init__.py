@@ -37,23 +37,16 @@ Abstract
 TODO
 """
 
-from export import Exporter
-from exportutils.config import Config
+from export import Exporter, ExportConfig
 
 
-class FbxConfig(Config):
+class FbxConfig(ExportConfig):
 
     def __init__(self):
-        Config.__init__(self)
+        ExportConfig.__init__(self)
 
         self.useRelPaths     = False
-        self.useFaceRig =           True
-        self.expressions = False    #exporter.expressions.selected
-        self.useCustomTargets = False   #exporter.useCustomTargets.selected
-        self.useMaterials    = True # for debugging
-
-        # Used by Collada, needed for armature access
-        self.useTPose = False
+        self.useMaterials    = True # for debugging  # TODO what is the function of this?
 
         self.yUpFaceZ = True
         self.yUpFaceX = False
@@ -89,11 +82,6 @@ class FbxConfig(Config):
         return 'y'
 
 
-    def __repr__(self):
-        return("<FbxConfig f %s>" % (
-            self.useFaceRig,))
-
-
 class ExporterFBX(Exporter):
     def __init__(self):
         Exporter.__init__(self)
@@ -104,21 +92,16 @@ class ExporterFBX(Exporter):
 
     def build(self, options, taskview):
         import gui
-        self.useFaceRig   = options.addWidget(gui.CheckBox("Face rig", True))
         Exporter.build(self, options, taskview)
 
     def export(self, human, filename):
         from . import mh2fbx
-        #self.taskview.exitPoseMode()
         cfg = self.getConfig()
         cfg.setHuman(human)
         mh2fbx.exportFbx(filename("fbx"), cfg)
-        #self.taskview.enterPoseMode()
 
     def getConfig(self):
         cfg = FbxConfig()
-        cfg.useTPose          = False # self.useTPose.selected
-        cfg.useFaceRig = self.useFaceRig.selected
         cfg.feetOnGround      = self.feetOnGround.selected
         cfg.scale,cfg.unit    = self.taskview.getScale()
 

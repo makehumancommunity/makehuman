@@ -154,7 +154,6 @@ def writeSkinController(fp, human, mesh, skel, config):
 
     progress(0.4, 0.6)
     for bone in skel.getBones():
-        #mat = la.inv(bone.getRestOrTPoseMatrix(config))    # TODO remove (this is a hack)
         mat = la.inv(bone.getRestMatrix(config.meshOrientation, config.localBoneAxis, config.offset))
         for i in range(4):
             fp.write('\n           ')
