@@ -42,7 +42,6 @@ import sys
 import codecs
 
 from core import G
-import exportutils
 import log
 
 from . import fbx_utils
@@ -66,7 +65,6 @@ def exportFbx(filepath, config):
 
     filename = os.path.basename(filepath)
     name = config.goodName(os.path.splitext(filename)[0])
-    #rawTargets = exportutils.collect.readTargets(human, config)    # TODO no idea what to do with this
 
     # Collect objects, scale meshes and filter out hidden faces/verts, scale rig
     objects = human.getObjects(excludeZeroFaceObjs=True)

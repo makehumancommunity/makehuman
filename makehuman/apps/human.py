@@ -343,7 +343,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
     def getObjects(self, excludeZeroFaceObjs=False):
         """
         All mesh objects that belong to this human, usually everything that has
-        to be exported. This can replace exportutils.collect
+        to be exported.
 
         If excludeZeroFaceObjs is set True, the result will not contain objects
         for which the meshes have 0 visible faces (all faces are masked)
