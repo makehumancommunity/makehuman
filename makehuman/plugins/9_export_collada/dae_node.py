@@ -43,8 +43,6 @@ import numpy as np
 import numpy.linalg as la
 import transformations as tm
 
-from armature.utils import getMatrix
-
 import log
 
 _Identity = np.identity(4, float)
