@@ -37,13 +37,12 @@ Abstract
 TODO
 """
 
-from export import Exporter
-from exportutils.config import Config
+from export import Exporter, ExportConfig
 
-class ObjConfig(Config):
+class ObjConfig(ExportConfig):
 
     def __init__(self):
-        Config.__init__(self)
+        ExportConfig.__init__(self)
         self.useRelPaths = True
         self.useNormals = False
 
@@ -74,7 +73,6 @@ class ExporterOBJ(Exporter):
         cfg = ObjConfig()
         cfg.useNormals = self.useNormals.selected
 
-        cfg.useTPose          = False # self.useTPose.selected
         cfg.feetOnGround      = self.feetOnGround.selected
         cfg.scale,cfg.unit    = self.taskview.getScale()
 

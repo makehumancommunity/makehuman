@@ -46,7 +46,6 @@ import codecs
 import log
 
 import gui3d
-import exportutils
 
 from progress import Progress
 
@@ -75,7 +74,6 @@ def exportCollada(filepath, config):
     name = config.goodName(os.path.splitext(filename)[0])
 
     progress(0, 0.5, "Preparing")
-    #rawTargets = exportutils.collect.readTargets(human, config)    # TODO what is this used for?
 
     objects = human.getObjects(excludeZeroFaceObjs=True)
     # Clone meshes with desired scale and hidden faces/vertices filtered out
