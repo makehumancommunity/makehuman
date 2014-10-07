@@ -77,7 +77,7 @@ class PoseLibraryTaskView(gui3d.TaskView):
 
         self.paths = [mh.getDataPath('poses'), mh.getSysDataPath('poses')]
 
-        self.filechooser = self.addRightWidget(fc.IconListFileChooser(self.paths, ['bvh'], 'thumb', mh.getSysDataPath('poses/notfound.thumb'), name='Pose'))
+        self.filechooser = self.addRightWidget(fc.IconListFileChooser(self.paths, ['bvh'], 'thumb', mh.getSysDataPath('poses/notfound.thumb'), name='Pose', noneItem=True))
         self.filechooser.setIconSize(50,50)
         self.filechooser.enableAutoRefresh(False)
 
@@ -141,6 +141,7 @@ class PoseLibraryTaskView(gui3d.TaskView):
 
     def onShow(self, event):
         self.filechooser.refresh()
+        self.filechooser.selectItem(self.currentPose)
         self.drawSkeleton(self.human.getSkeleton())
         self.human.refreshPose()
 
@@ -196,6 +197,11 @@ class PoseLibraryTaskView(gui3d.TaskView):
         # Store a reference to the skeleton mesh object for other plugins
         self.human.getSkeleton().object = self.skelObj
         mh.redraw()
+
+    def onHumanChanging(self, event):
+        if event.change == 'reset':
+            self.human.removeAnimations(update=False)
+            self.currentPose = None
 
     def onHumanChanged(self, event):
         if event.change == 'skeleton':
