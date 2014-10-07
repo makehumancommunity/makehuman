@@ -82,6 +82,8 @@ class Skeleton(object):
         """
         import json
         from collections import OrderedDict
+        import getpath
+        import os
         self._clear()
         skelData = json.load(open(filepath, 'rb'), object_pairs_hook=OrderedDict)
 
@@ -114,7 +116,11 @@ class Skeleton(object):
 
         self.build()
 
-        self.vertexWeights = _build_vertex_weights(skelData["weights"], self, mesh)
+        weights_file = skelData["weights_file"]
+        weights_file = getpath.thoroughFindFile(weights_file, os.path.dirname(getpath.canonicalPath(filepath)), True)
+        weightsData = json.load(open(weights_file, 'rb'), object_pairs_hook=OrderedDict)
+
+        self.vertexWeights = _build_vertex_weights(weightsData["weights"], self, mesh)
         return self.vertexWeights
 
     def getJointPosition(self, joint_name, human, rest_coord=True):
