@@ -51,10 +51,6 @@ import animation
 from makehuman import getBasemeshVersion, getShortVersion, getVersionStr, getVersion
 
 
-# TODO emit event when skeleton changed, posed or unposed
-# TODO reimplement setPosed() with event emission, same for setSkeleton
-# TODO reimplement setSkeleton ? -> for vertexWEights, or handle this automatically in animatedMesh?
-
 class Human(guicommon.Object, animation.AnimatedMesh):
 
     def __init__(self, mesh):
@@ -1072,14 +1068,13 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         if self.getSkeleton():
             log.debug("Updating skeleton joint positions")
             self.getSkeleton().updateJoints(self.meshData)
-            self.updateBakedAnimations()    # TODO decide whether we require calling this manually, or whether animatedMesh automatically tracks updates of skeleton and updates accordingly
+            self.resetBakedAnimations()    # TODO decide whether we require calling this manually, or whether animatedMesh automatically tracks updates of skeleton and updates accordingly
 
         self.callEvent('onChanged', events3d.HumanEvent(self, 'targets'))
 
         # Restore pose, and shadow copy of vertex positions 
         # (We do this after onChanged event so that proxies are already updated)
         self.refreshStaticMeshes()  # TODO document: an external plugin that modifies the rest pose verts outside of an onHumanChang(ing/ed) event should explicitly call this method on the human
-        # TODO for static poses we can do better and recalculate normals at this point (after having posed the mesh -- this already happens in animation.py by the way), for animation this will be too slow, though.
 
         # Update subdivision mesh
         if self.isSubdivided():

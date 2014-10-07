@@ -98,6 +98,9 @@ class AnimationTrack(object):
     def isBaked(self):
         return self._data_baked is not None
 
+    def resetBaked(self):
+        self._data_baked = None
+
     def bake(self, skel):
         """
         Bake animation as skinning matrices for the specified skeleton.
@@ -105,6 +108,7 @@ class AnimationTrack(object):
         We do skinning with 3x4 matrixes, as suggested in http://graphics.ucsd.edu/courses/cse169_w05/2-Skeleton.htm
         Section 2.3 (We assume the 4th column contains [0 0 0 1], so no translation) --> turns out not to be the case in our algorithm!
         """
+        log.debug('Updating baked animation %s', self.name)
         bones = skel.getBones()
         if len(bones) != self.nBones:
             raise RuntimeError("Error baking animation %s: number of bones in animation data differs from bone count of skeleton %s" % (self.name, skel.name))
@@ -394,19 +398,15 @@ class AnimatedMesh(object):
         Note: poses are simply animations with only one frame.
         """
         self.__animations[anim.name] = anim
-        if self.getSkeleton():
-            anim.bake(self.getSkeleton())
 
-    def updateBakedAnimations(self):
+    def resetBakedAnimations(self):
         """
-        Call to update baked animations after modifying skeleton joint positions.
+        Call to invalidate baked animations when they should be re-baked after
+        modifying skeleton joint positions.
         """
-        log.debug('Updating baked animations')
         for anim_name in self.getAnimations():
             anim = self.getAnimation(anim_name)
-            if anim.isBaked():
-                # TODO better to lazily do this, and just reset bake data
-                anim.bake(self.getSkeleton())
+            anim.resetBaked()
         log.debug('Done baking animations')
 
     def getAnimation(self, name):
@@ -586,24 +586,32 @@ class AnimatedMesh(object):
         if self.isPosed():
             if not self.getSkeleton():
                 return
-            poseState = self.getPoseState()
+
             if not self.__currentAnim.isBaked():
-                self.getSkeleton().setPose(poseState)
+                #self.getSkeleton().setPose(poseState)  # Old slow way of skinning
+
+                # Ensure animation is baked for fast skinning
+                self.__currentAnim.bake(self.getSkeleton())
+
+            poseState = self.getPoseState()
+
             # Else we pass poseVerts matrices immediately from animation track for performance improvement (cached or baked)
             for idx,mesh in enumerate(self.__meshes):
                 if self.onlyAnimateVisible and not mesh.visibility:
                     continue
+
+                if not self.__vertexToBoneMaps[idx].isCompiled():
+                    log.debug("Compiling vertex bone weights for %s", mesh.name)
+                    self.__vertexToBoneMaps[idx].compileData(self.getSkeleton())
+
                 try:
-                    if not self.__currentAnim.isBaked():
-                        # TODO in practice this slower method is never used (anim is always baked if a skeleton is set)
-                        posedCoords = self.getSkeleton().skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx].data)
-                    else:
-                        if not self.__vertexToBoneMaps[idx].isCompiled():
-                            log.debug("Compiling vertex bone weights for %s", mesh.name)
-                            self.__vertexToBoneMaps[idx].compileData(self.getSkeleton())
-                        posedCoords = skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx].compiled, poseState)
+                    # Old slow way of skinning
+                    #posedCoords = self.getSkeleton().skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx].data)
+
+                    # New fast skinnig approach
+                    posedCoords = skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx].compiled, poseState)
                 except Exception as e:
-                    log.error("Error skinning mesh %s" % mesh.name)
+                    log.error("Error skinning mesh %s", mesh.name, exc_info=True)
                     raise e
                 # TODO you could avoid an array copy by passing the mesh.coord list directly and modifying it in place
                 self._updateMeshVerts(mesh, posedCoords[:,:3])
@@ -706,6 +714,7 @@ def skinMesh(coords, compiledVertWeights, poseData):
 
     # Note: np.sum(M * vs, axis=-1) is a matrix multiplication of mat M with
     # a series of vertices vs
+    # Good resource: http://jameshensman.wordpress.com/2010/06/14/multiple-matrix-multiplication-in-numpy
     #return np.sum(accum[:,:3,:4] * coords[:,None,:], axis=-1)
 
     # Using einstein summation for matrix * vertex multiply, appears to be

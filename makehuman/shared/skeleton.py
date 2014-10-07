@@ -245,12 +245,6 @@ class Skeleton(object):
         """
         Update (pose) assigned mesh using linear blend skinning.
         """
-        # TODO try creating an array P(nBones,3,4) with pose matrices, and an array W(nCoord,nWeights(float)*2(int))
-        # for 3 weights
-        # cache meshCoords.transpose()  or .T (is this faster? difference?)
-        #   http://jameshensman.wordpress.com/2010/06/14/multiple-matrix-multiplication-in-numpy/
-        # use np.dot for matrix multiply or is using sum() and * faster?
-        # coords = W[:,1] * P[W[:,0]] * meshCoords.transpose()[:] + W[:,3] * P[W[:,2]] * meshCoords.transpose()[:] + W[:,5] * P[W[:,4]] * meshCoords.transpose()[:]
         nVerts = len(meshCoords)
         coords = np.zeros((nVerts,3), float)
         if meshCoords.shape[1] != 4:
