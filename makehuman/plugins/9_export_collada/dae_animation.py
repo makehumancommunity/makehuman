@@ -49,7 +49,9 @@ from .dae_node import goodBoneName
 #----------------------------------------------------------------------
 
 def writeLibraryAnimations(fp, human, config):
-    from armature.armature import loadAction
+    return
+
+    # TODO allow exporting poseunits
     skel = human.getSkeleton()
     if (skel is None or
         not config.useFaceRig):

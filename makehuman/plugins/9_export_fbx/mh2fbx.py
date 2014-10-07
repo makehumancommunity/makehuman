@@ -83,8 +83,8 @@ def exportFbx(filepath, config):
         mesh.name = fbx_utils.getMeshName(mesh, skel)
 
     if useAnim:
-        from armature.armature import loadAction
-        action,_ = loadAction()
+        # TODO allow exporting poseunits
+        action = None
     else:
         action = None
 
