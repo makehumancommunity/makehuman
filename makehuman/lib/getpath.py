@@ -236,6 +236,33 @@ def findFile(relPath, searchPaths = [getDataPath(), getSysDataPath()], strict=Fa
     else:
         return relPath
 
+def thoroughFindFile(filename, searchPaths=[], searchDefaultPaths=True):
+    """
+    Extensively search the data paths to find a file with matching filename in
+    as much cases as possible. If file is found, returns absolute filename.
+    If nothing is found return the most probable filename.
+    """
+    # Ensure unix style path
+    filename.replace('\\', '/')
+
+    if not isinstance(searchPaths, list):
+        searchPaths = [searchPaths]
+
+    if searchDefaultPaths:
+        # Search in user / sys data, and user / sys root folders
+        searchPaths.extend([getDataPath(), getSysDataPath(), getPath(), getSysPath()])
+
+    path = findFile(filename, searchPaths, strict=True)
+    if path:
+        return os.path.abspath(path)
+
+    # Treat as absolute path or search relative to application path
+    if os.path.isfile(filename):
+        return os.path.abspath(filename)
+
+    # Nothing found
+    return os.path.normpath(filename)
+
 def search(paths, extensions, recursive=True, mutexExtensions=False):
     """
     Search for files with specified extensions in specified paths.
