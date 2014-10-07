@@ -40,7 +40,7 @@ Armature options
 
 import os
 import log
-import io_json
+import json
 from getpath import getSysDataPath
 
 class ArmatureOptions(object):
@@ -54,6 +54,9 @@ class ArmatureOptions(object):
         self.scale = 1.0
         self.boneMap = None
 
+        self.useMakeHumanRig = False
+        self.useRigify = False
+        self.useMhxCompat = False
         self.useMasterBone = False
         self.useHeadControl = False
         self.useReverseHip = False
@@ -69,6 +72,10 @@ class ArmatureOptions(object):
         self.mergeFingers = False
         self.mergePalms = False
         self.mergeHead = False
+        self.mergeNeck = False
+        self.mergeFeet = False
+        self.mergeToes = False
+        self.mergeTwist = False
         self.merge = None
         self.terminals = {}
 
@@ -99,22 +106,26 @@ class ArmatureOptions(object):
         self.clothesRig = False
 
     def setExportOptions(self,
+            useFaceRig = True,
             useCustomShapes = None,
             useConstraints = False,
             useBoneGroups = False,
             useCorrectives = False,
             useRotationLimits = False,
+            addConnectingBones = False,
             useLocks = False,
             useExpressions = False,
             useTPose = False,
             useIkHair = False,
             useLeftRight = False,
             ):
+        self.mergeHead = not useFaceRig
         self.useCustomShapes = useCustomShapes
         self.useConstraints = useConstraints
         self.useBoneGroups = useBoneGroups
         self.useCorrectives = useCorrectives
         self.useRotationLimits = useRotationLimits
+        self.addConnectingBones = addConnectingBones
         self.useLocks = useLocks
         self.useExpressions = useExpressions
         self.useTPose = useTPose
@@ -131,11 +142,12 @@ class ArmatureOptions(object):
             "   boneMap : %s\n" % self.boneMap +
             "   useMuscles : %s\n" % self.useMuscles +
             "   addConnectingBones : %s\n" % self.addConnectingBones +
-            "   mergeSpine : %s\n" % self.mergeSpine +
+            "   mergeHead : %s\n" % self.mergeHead +
+            "   mergeNeck : %s\n" % self.mergeNeck +
             "   mergeShoulders : %s\n" % self.mergeShoulders +
             "   mergeFingers : %s\n" % self.mergeFingers +
-            "   mergePalms : %s\n" % self.mergePalms +
-            "   mergeHead : %s\n" % self.mergeHead +
+            "   mergeFeet : %s\n" % self.mergeFeet +
+            "   mergeToes : %s\n" % self.mergeToes +
             "   useSplitBones : %s\n" % self.useSplitBones +
             "   useSplitNames : %s\n" % self.useSplitNames +
             "   useDeformBones : %s\n" % self.useDeformBones +
@@ -144,7 +156,8 @@ class ArmatureOptions(object):
             "   useIkArms : %s\n" % self.useIkArms +
             "   useIkLegs : %s\n" % self.useIkLegs +
             "   useFingers : %s\n" % self.useFingers +
-            "   useMasterBone : %s\n" % self.useMasterBone +
+            "   useMakeHumanRig : %s\n" % self.useMakeHumanRig +
+            "   useMhxCompat : %s\n" % self.useMhxCompat +
             "   useLocks : %s\n" % self.useLocks +
             "   useRotationLimits : %s\n" % self.useRotationLimits +
             "   merge : %s\n" % self.merge +
@@ -185,28 +198,19 @@ class ArmatureOptions(object):
 
 
     def loadPreset(self, filepath, selector):
-        struct = io_json.loadJson(filepath)
+        struct = json.load(open(filepath, 'rU'))
         self._setDefaults()
         try:
             self.rigtype = struct["name"]
         except KeyError:
             pass
-        try:
-            self.description = struct["description"]
-        except KeyError:
-            pass
-        try:
-            self.merge = struct["merge"]
-        except KeyError:
-            pass
-        try:
-            self.terminals = struct["terminals"]
-        except KeyError:
-            pass
-        try:
-            self.useTerminators = struct["use_terminators"]
-        except KeyError:
-            pass
+
+        for key in ["description", "merge", "terminals", "use_terminators"]:
+            try:
+                setattr(self, key, struct[key])
+            except KeyError:
+                pass
+
         try:
             settings = struct["settings"]
         except KeyError:
@@ -215,7 +219,7 @@ class ArmatureOptions(object):
             if hasattr(self, key):
                 setattr(self, key, value)
             else:
-                log.warning("Unknown property %s defined in armature options file %s" % (key, filepath))
+                log.warning("Unknown property defined in armature options file %s" % filepath)
 
         if selector is not None:
             selector.fromOptions(self)
@@ -296,7 +300,7 @@ class Locale:
             return
         if filepath:
             self.filepath = filepath
-        struct = io_json.loadJson(self.filepath)
+        struct = json.load(open(self.filepath, 'rU'))
         #self.language = struct["language"]
         self.bones = struct["bones"]
 

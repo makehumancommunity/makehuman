@@ -54,7 +54,6 @@ import numpy.linalg as la
 import transformations as tm
 import matrix
 
-from codecs import open
 import log
 
 D = pi/180
@@ -64,12 +63,76 @@ class Skeleton(object):
 
     def __init__(self, name="Skeleton"):
         self.name = name
+        self._clear()
 
+    def _clear(self):
         self.origin = np.zeros(3, dtype=np.float32)   # TODO actually use origin somewhere?
 
         self.bones = {}     # Bone lookup list by name
         self.boneslist = []  # Breadth-first ordered list of all bones
         self.roots = []     # Root bones of this skeleton, a skeleton can have multiple root bones.
+
+        self.joint_pos_idxs = {}  # Lookup by joint name referencing vertex indices on the human, to determine joint position
+
+        self.vertexWeights = None  # Source vertex weights, defined on the basemesh
+
+    def fromFile(self, filepath, mesh=None):
+        """
+        Load skeleton from json rig file.
+        """
+        import json
+        from collections import OrderedDict
+        self._clear()
+        skelData = json.load(open(filepath, 'rb'), object_pairs_hook=OrderedDict)
+
+        self.name = skelData.get("name", self.name)
+        self.version = int(skelData.get("version", 1))
+        self.copyright = skelData.get("copyright", "")
+        self.description = skelData.get("description", "")
+
+        for joint_name, v_idxs in skelData.get("joints", dict()).items():
+            self.joint_pos_idxs[joint_name] = v_idxs
+
+        # Order bones breadth-first
+        breadthfirst_bones = []
+        prev_len = -1   # anti-deadlock
+        while(len(breadthfirst_bones) != len(skelData["bones"]) and prev_len != len(breadthfirst_bones)):
+            prev_len = len(breadthfirst_bones)
+            for bone_name, bone_defs in skelData["bones"].items():
+                if bone_name not in breadthfirst_bones:
+                    if not bone_defs.get("parent", None):
+                        breadthfirst_bones.append(bone_name)
+                    elif bone_defs["parent"] in breadthfirst_bones:
+                        breadthfirst_bones.append(bone_name)
+        if len(breadthfirst_bones) != len(skelData["bones"]):
+            missing = [bname for bname in skelData["bones"].keys() if bname not in breadthfirst_bones]
+            log.warning("Some bones defined in file %s could not be added to skeleton %s, because they have an invalid parent bone (%s)", filepath, self.name, ', '.join(missing))
+
+        for bone_name in breadthfirst_bones:
+            bone_defs = skelData["bones"][bone_name]
+            self.addBone(bone_name, bone_defs.get("parent", None), bone_defs["head"], bone_defs["tail"], bone_defs["roll"], bone_defs.get("reference",None))
+
+        self.build()
+
+        self.vertexWeights = _build_vertex_weights(skelData["weights"], self, mesh)
+        return self.vertexWeights
+
+    def getJointPosition(self, joint_name, human, rest_coord=True):
+        """
+        Calculate the position of specified named joint from the current
+        state of the human mesh. If this skeleton contains no vertex mapping
+        for that joint name, it falls back to looking for a vertex group in the
+        human basemesh with that joint name.
+        """
+        if joint_name in self.joint_pos_idxs:
+            v_idx = self.joint_pos_idxs[joint_name]
+            if rest_coord:
+                verts = human.getRestposeCoordinates()[v_idx]
+            else:
+                verts = human.meshData.getCoords(v_idx)
+            return verts.mean(axis=0)
+        else:
+            return _getHumanJointPosition(human, joint_name, rest_coord)
 
     def __repr__(self):
         return ("  <Skeleton %s>" % self.name)
@@ -88,59 +151,6 @@ class Skeleton(object):
             newBones[bone.name] = bone
         self.bones = newBones
 
-    def fromOptions(self, options, mesh):
-        """
-        Create armature from option set.
-        Convert to skeleton.
-        TODO: Merge Armature and Skeleton classes one day.
-        """
-
-        from armature.armature import setupArmature
-        from core import G
-
-        amt = setupArmature("python", G.app.selectedHuman, options)
-        for bone in amt.bones.values():
-            self.addBone(bone.name, bone.parent, bone.head, bone.tail, bone.roll)
-
-        self.build()
-
-        # Normalize weights and put them in np format
-        boneWeights = {}
-        wtot = np.zeros(mesh.getVertexCount(), np.float32)
-        for vgroup in amt.vertexWeights.values():
-            for vn,w in vgroup:
-                wtot[vn] += w
-
-        for bname,vgroup in amt.vertexWeights.items():
-            weights = np.zeros(len(vgroup), np.float32)
-            verts = []
-            n = 0
-            for vn,w in vgroup:
-                verts.append(vn)
-                weights[n] = w/wtot[vn]
-                n += 1
-            boneWeights[bname] = (verts, weights)
-
-        # Assign unweighted vertices to root bone with weight 1
-        rootBone = self.roots[0].name
-        informed = False
-        if rootBone not in boneWeights.keys():
-            boneWeights[rootBone] = ([], [])
-        else:
-            vs,ws = boneWeights[rootBone]
-            boneWeights[rootBone] = (list(vs), list(ws))
-        vs,ws = boneWeights[rootBone]
-        for vIdx, wCount in enumerate(wtot):
-            if wCount == 0:
-                vs.append(vIdx)
-                ws.append(1.0)
-                if not informed:
-                    log.debug("Adding trivial bone weights to bone %s for unweighted vertices.", rootBone)
-                    informed = True
-        boneWeights[rootBone] = (vs, np.asarray(ws, dtype=np.float32))
-
-        return boneWeights
-
     def scaled(self, scale):
         """
         Create a scaled clone of this skeleton
@@ -157,10 +167,10 @@ class Skeleton(object):
 
         return result
 
-    def addBone(self, name, parentName, head, tail, roll=0):
+    def addBone(self, name, parentName, headJoint, tailJoint, roll=0, reference_bone=None):
         if name in self.bones.keys():
             raise RuntimeError("The skeleton %s already contains a bone named %s." % (self.__repr__(), name))
-        bone = Bone(self, name, parentName, head, tail, roll)
+        bone = Bone(self, name, parentName, headJoint, tailJoint, roll, reference_bone)
         self.bones[name] = bone
         if not parentName:
             self.roots.append(bone)
@@ -171,8 +181,30 @@ class Skeleton(object):
             bone.build()
 
     def update(self):
+        """
+        Update skeleton pose matrices after setting a new pose.
+        """
         for bone in self.getBones():
             bone.update()
+
+    def updateJoints(self, humanMesh):
+        """
+        Update skeleton rest matrices to new joint positions after modifying
+        human.
+        """
+        '''
+        self._amt.updateJoints()
+        for amtBone in self._amt.bones.values():
+            bone = self.getBone(amtBone.name)
+            bone.headPos[:] = amtBone.head
+            bone.tailPos[:] = amtBone.tail
+            bone.roll = amtBone.roll
+        '''
+
+        for bone in self.getBones():
+            bone.updateJointPositions()
+
+        self.build()
 
     def getBoneCount(self):
         return len(self.getBones())
@@ -209,7 +241,8 @@ class Skeleton(object):
             bone.matPose = np.dot(np.dot(invRest, bone.matPose), bone.matRestGlobal)
 
             # Add translations from original
-            bone.matPose[:3,3] = poseMats[bIdx,:3,3]
+            if poseMats.shape[2] == 4:
+                bone.matPose[:3,3] = poseMats[bIdx,:3,3]
         # TODO avoid this loop, eg by storing a pre-allocated poseMats np array in skeleton and keeping a reference to a sub-array in each bone. It would allow batch processing of all pose matrices in one np call
         self.update()
 
@@ -228,13 +261,21 @@ class Skeleton(object):
         Update (pose) assigned mesh using linear blend skinning.
         """
         nVerts = len(meshCoords)
-        coords = np.zeros((nVerts,4), float)
+        coords = np.zeros((nVerts,3), float)
+        if meshCoords.shape[1] != 4:
+            meshCoords_ = np.ones((nVerts, 4), float)   # TODO also allow skinning vectors (normals)? -- in this case you need to renormalize normals, unless you only multiply each normal with the transformation with largest weight
+            meshCoords_[:,:3] = meshCoords
+            meshCoords = meshCoords_
+            log.debug("Unoptimized data structure passed to skinMesh, this will incur performance penalty when used for animation.")
         for bname, mapping in vertBoneMapping.items():
-            bone = self.getBone(bname)
-            verts,weights = mapping
-            vec = np.dot(bone.matPoseVerts, meshCoords[verts].transpose())
-            wvec = weights*vec
-            coords[verts] += wvec.transpose()
+            try:
+                verts,weights = mapping
+                bone = self.getBone(bname)
+                vec = np.dot(bone.matPoseVerts, meshCoords[verts].transpose())
+                vec *= weights
+                coords[verts] += vec.transpose()[:,:3]
+            except KeyError as e:
+                log.warning("Could not skin bone %s: no such bone in skeleton (%s)" % (bname, e))
 
         return coords
 
@@ -284,36 +325,6 @@ class Skeleton(object):
             result[name] = idx
         return result
 
-    def loadPoseFromMhpFile(self, filepath):
-        """
-        Load a MHP pose file that contains a static pose. Posing data is defined
-        with quaternions to indicate rotation angles.
-        Sets current pose to
-        """
-        log.message("Mhp %s", filepath)
-        fp = open(filepath, "rU", encoding="utf-8")
-
-        boneMap = self.getBoneToIdxMapping()
-        nBones = len(boneMap.keys())
-        poseMats = np.zeros((nBones,4,4),dtype=np.float32)
-        poseMats[:] = np.identity(4, dtype=np.float32)
-
-        for line in fp:
-            words = line.split()
-            if len(words) < 5:
-                continue
-            elif words[1] in ["quat", "gquat"]:
-                boneIdx = boneMap[words[0]]
-                quat = float(words[2]),float(words[3]),float(words[4]),float(words[5])
-                mat = tm.quaternion_matrix(quat)
-                if words[1] == "gquat":
-                    bone = self.bones[boneIdx]
-                    mat = np.dot(la.inv(bone.matRestRelative), mat)
-                poseMats[boneIdx] = mat[:3,:3]
-
-        fp.close()
-        self.setPose(poseMats)
-
     def compare(self, other):
         pass
         # TODO compare two skeletons (structure only)
@@ -321,7 +332,7 @@ class Skeleton(object):
 
 class Bone(object):
 
-    def __init__(self, skel, name, parentName, headPos, tailPos, roll=0):
+    def __init__(self, skel, name, parentName, headJoint, tailJoint, roll=0, reference_bone=None):
         """
         Construct a new bone for specified skeleton.
         headPos and tailPos should be in world space coordinates (relative to root).
@@ -330,14 +341,18 @@ class Bone(object):
         self.name = name
         self.skeleton = skel
 
+        self.headJoint = headJoint
+        self.tailJoint = tailJoint
+
         self.headPos = np.zeros(3,dtype=np.float32)
-        self.headPos[:] = headPos[:3]
         self.tailPos = np.zeros(3,dtype=np.float32)
-        self.tailPos[:] = tailPos[:3]
 
         self.roll = float(roll)
         self.length = 0
         self.yvector4 = None    # Direction vector of this bone
+
+        self.updateJointPositions()
+        # TODO calculate roll angle (after updating joint positions)
 
         self.children = []
         if parentName:
@@ -347,6 +362,8 @@ class Bone(object):
             self.parent = None
 
         self.index = None   # The index of this bone in the breadth-first bone list
+
+        self.reference_bone = reference_bone  # Used for mapping animations
 
         # Matrices:
         # static
@@ -362,6 +379,13 @@ class Bone(object):
         self.matPose = None
         self.matPoseGlobal = None
         self.matPoseVerts = None
+
+    def updateJointPositions(self, human=None):
+        if not human:
+            from core import G
+            human = G.app.selectedHuman
+        self.headPos[:] = self.skeleton.getJointPosition(self.headJoint, human)[:3]
+        self.tailPos[:] = self.skeleton.getJointPosition(self.tailJoint, human)[:3]
 
     def getRestMatrix(self, meshOrientation='yUpFaceZ', localBoneAxis='y', offsetVect=[0,0,0]):
         """
@@ -381,7 +405,6 @@ class Bone(object):
         restmat = self.getRestMatrix(meshOrientation, localBoneAxis, offsetVect)
 
         # TODO this matrix is possibly the same as self.matRestRelative, but with optional adapted axes
-
         if self.parent:
             parmat = self.parent.getRestMatrix(meshOrientation, localBoneAxis, offsetVect)
             return np.dot(la.inv(parmat), restmat)
@@ -718,30 +741,75 @@ def _normalizeQuaternion(quat):
         sign = -1
     quat[0] = sign*math.sqrt(1-r2)
 
-def getHumanJointPosition(mesh, jointName):
+def _getHumanJointPosition(human, jointName, rest_coord=True):
     """
     Get the position of a joint from the human mesh.
     This position is determined by the center of the joint helper with the
     specified name.
+    Note: you probably want to use Skeleton.getJointPosition()
     """
-    fg = mesh.getFaceGroup(jointName)
-    verts = mesh.getCoords(mesh.getVerticesForGroups([fg.name]))
+    if not jointName.startswith("joint-"):
+        jointName = "joint-" + jointName
+    fg = human.meshData.getFaceGroup(jointName)
+    v_idx = human.meshData.getVerticesForGroups([fg.name])
+    if rest_coord:
+        verts = human.getRestposeCoordinates()[v_idx]
+    else:
+        verts = human.meshData.getCoords(v_idx)
     return verts.mean(axis=0)
 
-def loadRig(options, mesh):
+def _build_vertex_weights(vertexWeightsDict, skel, mesh=None):
     """
-    Initializes a skeleton from an option set
-    Returns the skeleton and vertex-to-bone weights.
-    Weights are of format: {"boneName": [ (vertIdx, weight), ...], ...}
+    Build a consistent set of per-bone vertex weights from a dictionary loaded
+    from (json) data file.
+    The format of vertexWeightsDict is expected to be: 
+        { "bone_name": [(v_idx, v_weight), ...], ... }
     """
-    from armature.options import ArmatureOptions
+    if mesh is not None:
+        vcount = mesh.getVertexCount()
+    else:
+        vcount = max([vn for vg in vertexWeightsDict.values() for vn,_ in vg])+1
 
-    #rigName = os.path.splitext(os.path.basename(filename))[0]
-    if not isinstance(options, ArmatureOptions):
-        options = ArmatureOptions()
-    skel = Skeleton("python")
-    weights = skel.fromOptions(options, mesh)
-    return skel, weights
+    # Normalize weights and put them in np format
+    wtot = np.zeros(vcount, np.float32)
+    boneWeights = {}
+    for vgroup in vertexWeightsDict.values():
+        for vn,w in vgroup:
+            wtot[vn] += w
+
+    for bname,vgroup in vertexWeightsDict.items():
+        weights = np.zeros(len(vgroup), np.float32)
+        verts = []
+        n = 0
+        for vn,w in vgroup:
+            verts.append(vn)
+            weights[n] = w/wtot[vn]
+            n += 1
+        boneWeights[bname] = (verts, weights)
+
+    # Assign unweighted vertices to root bone with weight 1
+    rootBone = skel.roots[0].name
+    rootWeighted = []
+    if rootBone not in boneWeights.keys():
+        boneWeights[rootBone] = ([], [])
+    else:
+        vs,ws = boneWeights[rootBone]
+        boneWeights[rootBone] = (list(vs), list(ws))
+    vs,ws = boneWeights[rootBone]
+    for vIdx, wCount in enumerate(wtot):
+        if wCount == 0:
+            vs.append(vIdx)
+            ws.append(1.0)
+            rootWeighted.append(vIdx)
+    if len(rootWeighted) > 0:
+        if len(rootWeighted) < 100:
+            # To avoid spamming the log, only print vertex indices if there's less than 100
+            log.debug("Adding trivial bone weights to bone %s for %s unweighted vertices. [%s]", rootBone, len(rootWeighted), ', '.join([str(s) for s in rootWeighted]))
+        else:
+            log.debug("Adding trivial bone weights to bone %s for %s unweighted vertices.", rootBone, len(rootWeighted))
+    boneWeights[rootBone] = (vs, np.asarray(ws, dtype=np.float32))
+
+    return boneWeights
 
 def getProxyWeights(proxy, humanWeights):
     # TODO duplicate of proxy.getWeights()
@@ -831,3 +899,11 @@ def transformBoneMatrix(mat, meshOrientation='yUpFaceZ', localBoneAxis='y', offs
 
     log.warning('invalid localBoneAxis parameter %s', localBoneAxis)
     return None
+
+def load(filename, mesh=None):
+    """
+    Load a skeleton from a json rig file.
+    """
+    skel = Skeleton()
+    skel.fromFile(filename, mesh)
+    return skel

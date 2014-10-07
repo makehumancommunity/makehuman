@@ -57,14 +57,16 @@ def load(app):
 
     human = gui3d.app.selectedHuman
     app.addLoadHandler('skeleton', maintask.loadHandler)
-    app.addSaveHandler(maintask.saveHandler)
+    app.addSaveHandler(maintask.saveHandler, priority=5)
 
+    '''
     if not mh.isRelease():
         from . import debugtab
         debugtask = debugtab.SkeletonDebugLibrary(category, maintask)
         debugtask.sortOrder = 3
         category = app.getCategory('Utilities')
         category.addTask(debugtask)
+    '''
 
 # This method is called when the plugin is unloaded from makehuman
 # At the moment this is not used, but in the future it will remove the added GUI elements

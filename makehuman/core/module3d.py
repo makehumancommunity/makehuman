@@ -509,7 +509,7 @@ class Object3D(object):
         self.vface = np.zeros((nverts, self.MAX_FACES), dtype=np.uint32)
         self.nfaces = np.zeros(nverts, dtype=np.uint8)
 
-        self.orig_coord = self.coord.copy()
+        self.orig_coord = self.coord.copy() # Keep a copy of the original coordinates
 
         self.ucoor = True
         self.unorm = True
@@ -1056,8 +1056,13 @@ class Object3D(object):
         :return: The FaceGroup if found, None otherwise.
         :rtype: :py:class:`module3d.FaceGroup`
         """
-
         return self._groups_rev.get(name, None)
+
+    def getFaceGroups(self):
+        """
+        The names of the facegroups available on this mesh.
+        """
+        return self._groups_rev.keys()
 
     def getGroupMaskForGroups(self, groupNames):
         groups = np.zeros(len(self._faceGroups), dtype=bool)

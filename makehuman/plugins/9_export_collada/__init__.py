@@ -49,6 +49,7 @@ class DaeConfig(Config):
         self.useRelPaths = True
         self.useNormals = True
 
+        self.useFaceRig =           True
         self.expressions = False
         self.useCustomTargets = False
         self.useTPose = False
@@ -105,11 +106,9 @@ class DaeConfig(Config):
         rigOptions = super(DaeConfig, self).getRigOptions()
         if rigOptions is None:
             return None
-            #from armature.options import ArmatureOptions
-            #self.rigOptions = ArmatureOptions()
         else:
             rigOptions.setExportOptions(
-                useExpressions = self.expressions,
+                useFaceRig = self.useFaceRig,
                 useTPose = self.useTPose,
             )
         return rigOptions
@@ -125,10 +124,8 @@ class ExporterCollada(Exporter):
 
     def build(self, options, taskview):
         import gui
+        self.useFaceRig   = options.addWidget(gui.CheckBox("Face rig", True))
         Exporter.build(self, options, taskview)
-        #self.expressions     = options.addWidget(gui.CheckBox("Expressions", False))
-        #self.useCustomTargets = options.addWidget(gui.CheckBox("Custom targets", False))
-        #self.useTPose = options.addWidget(gui.CheckBox("T-pose", False))
 
         orients = []
         self.yUpFaceZ = options.addWidget(gui.RadioButton(orients, "Y up, face Z", True))
@@ -152,6 +149,7 @@ class ExporterCollada(Exporter):
     def getConfig(self):
         cfg = DaeConfig()
         cfg.useTPose           = False # self.useTPose.selected
+        cfg.useFaceRig = self.useFaceRig.selected
         cfg.feetOnGround       = self.feetOnGround.selected
         cfg.scale,cfg.unit    = self.taskview.getScale()
 

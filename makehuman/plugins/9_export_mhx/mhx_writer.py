@@ -53,8 +53,10 @@ class Writer:
     def meshName(self, proxy=None):
         if proxy:
             return "%s:%s" % (self.name, proxy.name)
-        else:
+        elif self.armature:
             return "%s:Body" % self.name
+        else:
+            return self.name
 
     def materialName(self, matname, proxy=None):
         if proxy:

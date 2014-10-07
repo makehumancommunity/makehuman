@@ -26,20 +26,37 @@
 
 import os
 import bpy
+from bpy.props import *
+from mathutils import *
 
 #------------------------------------------------------------------------
 #
 #------------------------------------------------------------------------
 
-def addDriver(rig, rna, path, bprop, props, expr="x"):
+def addDrivers(rig, rna, path, data, exprs):
+    fcurves = rna.driver_add(path)
+    for idx,fcu in enumerate(fcurves):
+        if idx > 0:
+            addDriver1(fcu, rig, None, data[idx], exprs[idx])
+
+
+def addDriver(rig, rna, path, bprop, data, expr="x"):
     fcu = rna.driver_add(path)
+    addDriver1(fcu, rig, bprop, data, expr)
+
+
+def addDriver1(fcu, rig, bprop, data, expr):
     drv = fcu.driver
     drv.type = 'SCRIPTED'
     n = 1
-    addDriverVar("x", bprop, drv, rig)
-    for prop,val in props:
+    if bprop is not None:
+        addDriverVar("x", bprop, drv, rig)
+    for prop,val in data:
         addDriverVar("x%d" % n, prop, drv, rig)
-        expr += "+%.3f*x%d" % (val, n)
+        if val > 0:
+            expr += " + %.3f*x%d" % (val, n)
+        else:
+            expr += " - %.3f*x%d" % (-val, n)
         n += 1
     drv.expression = expr
 
@@ -101,3 +118,59 @@ def updateScene(context):
     scn = context.scene
     scn.frame_current = scn.frame_current
 
+
+def getBoneName(fcu):
+    return fcu.data_path.split('"')[1]
+
+#------------------------------------------------------------------------
+#   User interface
+#------------------------------------------------------------------------
+
+def resetProps(rig, prefix):
+    for key in rig.keys():
+        if key[0:3] == prefix:
+            rig[key] = 0.0
+
+
+def getArmature(ob):
+    if ob.type == 'MESH':
+        return ob.parent
+    elif ob.type == 'ARMATURE':
+        return ob
+
+
+class VIEW3D_OT_PinPropButton(bpy.types.Operator):
+    bl_idname = "mhx.pin_prop"
+    bl_label = ""
+    bl_description = "Pin property"
+    bl_options = {'UNDO'}
+
+    key = StringProperty()
+    prefix = StringProperty()
+
+    def execute(self, context):
+        rig = getArmature(context.object)
+        if rig:
+            resetProps(rig, self.prefix)
+            try:
+                rig[self.key] = rig["_RNA_UI"][self.key]["max"]
+            except KeyError:
+                rig[self.key] = 1.0
+            updateScene(context)
+        return{'FINISHED'}
+
+
+class VIEW3D_OT_ResetPropsButton(bpy.types.Operator):
+    bl_idname = "mhx.reset_props"
+    bl_label = "Reset Props"
+    bl_description = ""
+    bl_options = {'UNDO'}
+
+    prefix = StringProperty()
+
+    def execute(self, context):
+        rig = getArmature(context.object)
+        if rig:
+            resetProps(rig, self.prefix)
+            updateScene(context)
+        return{'FINISHED'}
