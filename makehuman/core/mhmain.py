@@ -1034,10 +1034,14 @@ class MHApplication(gui3d.Application, mh.Application):
         else:
             self.progressBar.setProgress(value)
 
+        self.mainwin.canvas.blockRedraw = True
+
         # Process all non-user-input events in the queue to run callAsync tasks.
         # This is invoked here so events are processed in every step during the
         # onStart() init sequence.
         self.processEvents()
+
+        self.mainwin.canvas.blockRedraw = False
 
     # Global dialog
     def prompt(self, title, text, button1Label, button2Label=None, button1Action=None, button2Action=None, helpId=None, fmtArgs = None):
