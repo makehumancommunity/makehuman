@@ -57,7 +57,7 @@ class AnimationTrack(object):
         data. An animation track usually represents one discrete animation.
 
         poseData    np.array((n,4,4), dtype=np.float32)
-            as a list of 4x4 pose matrices
+            as a list of 4x4 pose matrices or 3x4 (the final row is always 0 0 0 1 anyway)
             with n = nBones*nFrames
             pose matrices should be ordered per frame - per bone
             eg: poseData = [ B0F0, B1F0, B2F0, B0F1, B1F1, B2F1]
@@ -73,10 +73,10 @@ class AnimationTrack(object):
 
         if self.nBones*self.nFrames != self.dataLen:
             raise RuntimeError("The specified pose data does not have the proper length. Is %s, expected %s (nBones*nFrames)." % (self.dataLen, self.nBones*self.nFrames))
-        if poseData.shape != (self.dataLen, 4, 4):
-            raise RuntimeError("The specified pose data does not have the proper dimensions. Is %s, expected (%s, 4, 4)" % (poseData.shape, self.dataLen))
+        if not (poseData.shape == (self.dataLen, 3, 4) or poseData.shape == (self.dataLen, 4, 4)):
+            raise RuntimeError("The specified pose data does not have the proper dimensions. Is %s, expected (%s, 4, 4) or (%s, 3, 4)" % (poseData.shape, self.dataLen, self.dataLen))
 
-        self._data = poseData
+        self._data = poseData[:self.dataLen,:3,:4]  # We do not store the last row to save memory
         self.frameRate = float(framerate)      # Numer of frames per second
         self.loop = True
 
@@ -106,7 +106,7 @@ class AnimationTrack(object):
         Bake animation as skinning matrices for the specified skeleton.
         Results in significant performance gain when skinning.
         We do skinning with 3x4 matrixes, as suggested in http://graphics.ucsd.edu/courses/cse169_w05/2-Skeleton.htm
-        Section 2.3 (We assume the 4th column contains [0 0 0 1], so no translation) --> turns out not to be the case in our algorithm!
+        Section 2.3 (We assume the 4th row contains [0 0 0 1])
         """
         from progress import Progress
 
@@ -118,13 +118,13 @@ class AnimationTrack(object):
             raise RuntimeError("Error baking animation %s: number of bones in animation data differs from bone count of skeleton %s" % (self.name, skel.name))
 
         old_pose = skel.getPose()
-        self._data_baked = np.zeros((self.dataLen, 4, 4))
+        self._data_baked = np.zeros((self.dataLen, 3, 4))
 
         for f_idx in xrange(self.nFrames):
             skel.setPose(self._data[f_idx:f_idx+self.nBones])
             for b_idx in xrange(self.nBones):
                 idx = (f_idx * self.nBones) + b_idx
-                self._data_baked[idx,:,:] = bones[b_idx].matPoseVerts[:,:]
+                self._data_baked[idx,:,:] = bones[b_idx].matPoseVerts[:3,:4]
             progress.step("Baking animation frame %s", f_idx+1)
 
         # TODO store translation of first bone (== root bone) separately
