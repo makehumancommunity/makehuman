@@ -61,7 +61,7 @@ class AnimationTrack(object):
             with n = nBones*nFrames
             pose matrices should be ordered per frame - per bone
             eg: poseData = [ B0F0, B1F0, B2F0, B0F1, B1F1, B2F1]
-                with each BxFy a 4x4 pose matrix for one bone in one frame
+                with each BxFy a 4x4 or 3x4 pose matrix for one bone in one frame
                 with x the bone index, and y the frame index
             Bones should always appear in the same order and are usually
             ordered in breadth-first fashion.
@@ -127,7 +127,6 @@ class AnimationTrack(object):
                 self._data_baked[idx,:,:] = bones[b_idx].matPoseVerts[:3,:4]
             progress.step("Baking animation frame %s", f_idx+1)
 
-        # TODO store translation of first bone (== root bone) separately
         skel.setPose(old_pose)
 
     def getAtTime(self, time):

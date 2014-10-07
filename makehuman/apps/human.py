@@ -1025,8 +1025,11 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         This position is determined by the center of the joint helper with the
         specified name.
         """
-        import skeleton
-        return skeleton.getHumanJointPosition(self, jointName, rest_coord)
+        if self.getSkeleton():
+            return self.getSkeleton().getJointPosition(jointName, self, rest_coord)
+        else:
+            import skeleton
+            return skeleton._getHumanJointPosition(self, jointName, rest_coord)
 
     def getJoints(self):
         """
@@ -1200,12 +1203,12 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
     material = property(getMaterial, setMaterial)
 
-    def setSkeleton(self, skel, vertexWeights=None):
+    def setSkeleton(self, skel):
         prev_skel = self.getSkeleton()
 
         self.callEvent('onChanging', events3d.HumanEvent(self, 'skeleton'))
         animation.AnimatedMesh.setSkeleton(self, skel)
-        self.updateVertexWeights(vertexWeights)
+        self.updateVertexWeights(skel.vertexWeights)
         self.callEvent('onChanged', events3d.HumanEvent(self, 'skeleton'))
         self.refreshPose()
 
