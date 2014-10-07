@@ -230,9 +230,54 @@ class Pose(AnimationTrack):
         """
         return self.getAtFramePos(0)
 
-    def fromUnitPose(self, unitPoseData):
+    def fromPoseUnit(self, unitPoseData):
         # TODO
         pass
+
+class PoseUnit(AnimationTrack):
+    """
+    A poseunit is an animation track where each frame contains a named unit pose.
+    These poses can be blended together with a certain weight to form a new
+    composite pose.
+    """
+    def __init__(self, name, poseData, poseNames):
+        super(PoseUnit, self).__init__(name, poseData, nFrames=len(poseNames), framerate=1)
+        self._poseNames = poseNames
+
+    def sparsify(self, newFrameRate):
+        raise NotImplementedError("sparsify() does not exist for poseunits")
+
+    def getPoseNames(self):
+        return self._poseNames
+
+    def getUnitPose(self, name):
+        if isinstance(name, basestring):
+            frame_idx = poseNames.index(name)
+        else:
+            frame_idx = name
+        return self.getAtFramePos(frame_idx)
+
+    def getBlendedPose(self, poses, weights):
+        # TODO normalize weights?
+        if isinstance(poses[0], basestring):
+            f_idxs = [self.getPoseNames().index(pname) for pname in poses]
+        else:
+            f_idxs = poses
+
+        if not isinstance(weights, np.ndarray):
+            weights = np.asarray(weights, dtype=np.float32)
+
+        if len(f_idxs) == 1:
+            return float(weights[0]) * self.getAtFramePos(f_idxs[0])
+        else:
+            result = float(weights[0]) * self.getAtFramePos(f_idxs[0]) + \
+                     float(weights[1]) * self.getAtFramePos(f_idxs[1])
+
+        for i,f_idx in enumerate(f_idxs[2:]):
+            result = result + float(weights[i]) * self.getAtFramePos(f_idx)
+
+        return result
+
 
 def poseFromUnitPose(name, unitPoseData):
     # TODO
