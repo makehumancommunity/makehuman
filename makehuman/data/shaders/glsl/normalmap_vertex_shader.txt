@@ -1,0 +1,40 @@
+#version 120
+
+/**
+ * Simple normal mapping shader used for testing.
+ * Based on example from http://www.ozone3d.net/tutorials/bump_mapping_p4.php
+ **/
+
+// Inputs
+attribute vec4 tangent; // Vertex tangent, in tangent space
+
+// Outputs
+varying vec3 lightVec;  // Light direction in tangent space
+varying vec3 eyeVec;    // View direction in tangent space
+varying vec2 texCoord;  // Texture UV coordinate to sample from
+
+void main(void)
+{
+    gl_Position = ftransform();
+    texCoord = gl_MultiTexCoord0.xy;
+
+    // Normal, Tangent, Bitangent base, converted from object space to view space
+    vec3 n = normalize(gl_NormalMatrix * gl_Normal);
+    vec3 t = normalize(gl_NormalMatrix * tangent.xyz);
+    vec3 b = cross(n, t);   // Bitangent as orthogonal on n-t plane
+    // TBN matrix with base in view space, converts tangent space to view space
+
+    vec3 vVertex = vec3(gl_ModelViewMatrix * gl_Vertex);    // Vertex position in view space
+    vec3 tmpVec = gl_LightSource[0].position.xyz - vVertex; // Store view space light direction in tmp
+
+    // Transform light and eye vector from view space to tangent space
+    // Equals: vec * transpose(mat3(t,b,n))
+    lightVec.x = dot(tmpVec, t);
+    lightVec.y = dot(tmpVec, b);
+    lightVec.z = dot(tmpVec, n);
+
+    tmpVec = -vVertex;          // Store view space eye direction in tmp
+    eyeVec.x = dot(tmpVec, t);
+    eyeVec.y = dot(tmpVec, b);
+    eyeVec.z = dot(tmpVec, n);
+}
