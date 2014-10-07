@@ -44,7 +44,6 @@ from collections import OrderedDict
 import mh
 import gui
 import gui3d
-import armature
 
 #------------------------------------------------------------------------------------------
 #   class SkeletonDebugLibrary
