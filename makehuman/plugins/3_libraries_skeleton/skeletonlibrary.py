@@ -47,8 +47,6 @@ import filechooser as fc
 import skeleton
 import skeleton_drawing
 import animation
-import armature
-from armature.options import ArmatureOptions
 import getpath
 import material
 
@@ -84,7 +82,6 @@ class SkeletonLibrary(gui3d.TaskView):
     def __init__(self, category):
         gui3d.TaskView.__init__(self, category, 'Skeleton')
         self.debugLib = None
-        self.amtOptions = ArmatureOptions()
         self.optionsSelector = None
 
         self.systemRigs = mh.getSysDataPath('rigs')
@@ -149,7 +146,7 @@ class SkeletonLibrary(gui3d.TaskView):
         #   Preset box
         #
 
-        self.presetChooser = self.addRightWidget(fc.IconListFileChooser( \
+        self.filechooser = self.addRightWidget(fc.IconListFileChooser( \
                                                     self.paths,
                                                     'json',
                                                     'thumb',
@@ -157,49 +154,21 @@ class SkeletonLibrary(gui3d.TaskView):
                                                     notFoundImage = mh.getSysDataPath('notfound.thumb'), 
                                                     noneItem = True, 
                                                     doNotRecurse = True))
-        self.presetChooser.setIconSize(50,50)
+        self.filechooser.setIconSize(50,50)
 
-        @self.presetChooser.mhEvent
+        @self.filechooser.mhEvent
         def onFileSelected(filename):
-            self.rigPresetFileSelected(filename)
+            if filename:
+                msg = "Change skeleton"
+            else:
+                msg = "Clear skeleton"
+            gui3d.app.do(SkeletonAction(msg, self, self.selectedRig, filename))
 
         self.infoBox = self.addLeftWidget(gui.GroupBox('Rig info'))
         self.boneCountLbl = self.infoBox.addWidget(gui.TextView('Bones: '))
         self.descrLbl = self.infoBox.addWidget(gui.TextView('Description: '))
         self.descrLbl.setSizePolicy(gui.QtGui.QSizePolicy.Ignored, gui.QtGui.QSizePolicy.Preferred)
         self.descrLbl.setWordWrap(True)
-
-    def rigPresetFileSelected(self, filename, suppressAction = False):
-        self.selectedRig = filename
-
-        if not filename:
-            self.amtOptions.reset(self.optionsSelector, useMuscles=False)
-            self.descrLbl.setText("")
-            self.updateSkeleton(useOptions=False)
-            return
-
-        descr = self.amtOptions.loadPreset(filename, self.optionsSelector)   # TODO clean up this design
-        self.descrLbl.setTextFormat(["Description",": %s"], gui.getLanguageString(descr))
-        self.updateSkeleton(suppressAction = suppressAction)
-
-    def updateSkeleton(self, useOptions=True, suppressAction = False):
-        if self.human.getSkeleton():
-            oldSkelOptions = self.human.getSkeleton().options
-        else:
-            oldSkelOptions = None
-        self.amtOptions.fromSelector(self.optionsSelector)
-        if useOptions:
-            string = "Change skeleton"
-            options = self.amtOptions
-        else:
-            string = "Clear skeleton"
-            options = None
-
-        if suppressAction:
-            self.chooseSkeleton(options)
-        else:
-            gui3d.app.do(SkeletonAction(string, self, oldSkelOptions, options))
-
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
@@ -234,15 +203,15 @@ class SkeletonLibrary(gui3d.TaskView):
         mh.redraw()
 
 
-    def chooseSkeleton(self, options):
-        """
-        Load skeleton from an options set.
-        """
-        log.debug("Loading skeleton with options %s", options)
+    def chooseSkeleton(self, filename):
+        log.debug("Loading skeleton from %s", filename)
+        self.selectedRig = filename
 
-        if not options:
-            # Unload current skeleton
-            self.human.setSkeleton(None)
+        if not filename:
+            if self.human.getSkeleton():
+                # Unload current skeleton
+                self.human.setSkeleton(None)
+
             if self.skelObj:
                 # Remove old skeleton mesh
                 self.removeObject(self.skelObj)
@@ -251,26 +220,25 @@ class SkeletonLibrary(gui3d.TaskView):
                 self.skelMesh = None
             self.boneCountLbl.setTextFormat(["Bones",": %s"], "")
             #self.selectedBone = None
-
-            if self.debugLib:
-                self.debugLib.reloadBoneExplorer()
+            self.descrLbl.setText("")
+            self.filechooser.selectItem(None)
             return
 
         # Load skeleton definition from options
-        skel, boneWeights = skeleton.loadRig(options, self.human.meshData)
+        skel = skeleton.load(filename, self.human.meshData)
+
+        # Update description
+        descr = skel.description
+        self.descrLbl.setTextFormat(["Description",": %s"], gui.getLanguageString(descr))
+        self.boneCountLbl.setTextFormat(["Bones",": %s"], skel.getBoneCount())
 
         # (Re-)draw the skeleton (before setting skeleton on human so it is automatically re-posed)
         self.drawSkeleton(skel)
 
         # Assign to human
-        self.human.setSkeleton(skel, boneWeights)
+        self.human.setSkeleton(skel)
 
-        # Store a reference to the currently loaded rig
-        self.human.getSkeleton().options = options
-
-        #self.filechooser.selectItem(options)
-
-        self.boneCountLbl.setTextFormat(["Bones",": %s"], self.human.getSkeleton().getBoneCount())
+        self.filechooser.selectItem(filename)
 
         if self.debugLib:
             self.debugLib.reloadBoneExplorer()
@@ -318,11 +286,16 @@ class SkeletonLibrary(gui3d.TaskView):
             self.jointsMesh = None
             self.selectedJoint = None
 
-        jointGroupNames = [group.name for group in self.human.meshData.faceGroups if group.name.startswith("joint-")]
-        # TODO maybe define a getter for this list in the skeleton module
         jointPositions = []
-        for groupName in jointGroupNames:
-            jointPositions.append(skeleton.getHumanJointPosition(self.human, groupName))
+        # TODO maybe define a getter for this list in the skeleton module
+        jointGroupNames = [group.name for group in self.human.meshData.faceGroups if group.name.startswith("joint-")]
+        if self.human.getSkeleton():
+            jointGroupNames += self.human.getSkeleton().joint_pos_idxs.keys()
+            for groupName in jointGroupNames:
+                jointPositions.append(self.human.getSkeleton().getJointPosition(groupName, self.human))
+        else:
+            for groupName in jointGroupNames:
+                jointPositions.append(skeleton._getHumanJointPosition(self.human, groupName))
 
         self.jointsMesh = skeleton_drawing.meshFromJoints(jointPositions, jointGroupNames)
         self.jointsMesh.priority = 100
@@ -403,7 +376,7 @@ class SkeletonLibrary(gui3d.TaskView):
     def onHumanChanging(self, event):
         if event.change == 'reset':
             self.chooseSkeleton(None)
-            self.presetChooser.selectItem(None)
+            self.filechooser.selectItem(None)
 
 
     def onHumanRotated(self, event):
@@ -427,7 +400,7 @@ class SkeletonLibrary(gui3d.TaskView):
             if not os.path.isfile(skelFile):
                 log.warning("Could not load rig %s, file does not exist." % skelFile)
             else:
-                self.rigPresetFileSelected(skelFile, True)
+                self.chooseSkeleton(skelFile)
             return
 
     def saveHandler(self, human, file):
