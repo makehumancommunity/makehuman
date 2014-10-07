@@ -1365,29 +1365,14 @@ def getFilePath(filename, folder = None):
     if not filename or not isinstance(filename, basestring):
         return filename
 
-    # Ensure unix style path
-    filename.replace('\\', '/')
-
     searchPaths = []
 
     # Search within current folder
     if folder:
         searchPaths.append(folder)
 
-    from getpath import findFile, getPath, getSysDataPath, getSysPath, getDataPath
-    searchPaths.extend([getDataPath(), getSysDataPath(), getPath(), getSysPath()])
-
-    # Search in user / sys data, and user / sys root folders
-    path = findFile(filename, searchPaths, strict=True)
-    if path:
-        return os.path.abspath(path)
-
-    # Treat as absolute path or search relative to application path
-    if os.path.isfile(filename):
-        return os.path.abspath(filename)
-
-    # Nothing found
-    return os.path.normpath(filename)
+    import getpath
+    return getpath.thoroughFindFile(filename, searchPaths, True)
 
 def getShaderPath(shader, folder = None):
     if not shader:
