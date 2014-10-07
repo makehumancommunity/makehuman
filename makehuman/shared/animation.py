@@ -108,7 +108,11 @@ class AnimationTrack(object):
         We do skinning with 3x4 matrixes, as suggested in http://graphics.ucsd.edu/courses/cse169_w05/2-Skeleton.htm
         Section 2.3 (We assume the 4th column contains [0 0 0 1], so no translation) --> turns out not to be the case in our algorithm!
         """
+        from progress import Progress
+
         log.debug('Updating baked animation %s (%s frames)', self.name, self.nFrames)
+        progress = Progress(self.nFrames)
+
         bones = skel.getBones()
         if len(bones) != self.nBones:
             raise RuntimeError("Error baking animation %s: number of bones in animation data differs from bone count of skeleton %s" % (self.name, skel.name))
@@ -121,6 +125,7 @@ class AnimationTrack(object):
             for b_idx in xrange(self.nBones):
                 idx = (f_idx * self.nBones) + b_idx
                 self._data_baked[idx,:,:] = bones[b_idx].matPoseVerts[:,:]
+            progress.step("Baking animation frame %s", f_idx+1)
 
         # TODO store translation of first bone (== root bone) separately
         skel.setPose(old_pose)
