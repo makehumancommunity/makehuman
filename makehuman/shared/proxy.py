@@ -85,6 +85,7 @@ class Proxy:
         self.uuid = None
         self.basemesh = makehuman.getBasemeshVersion()
         self.tags = []
+        self.version = 101
 
         self.ref_vIdxs = None       # (Vidx1,Vidx2,Vidx3) list with references to human vertex indices, indexed by proxy vert
         self.weights = None         # (w1,w2,w3) list, with weights per human vertex (mapped by ref_vIdxs), indexed by proxy vert
@@ -385,6 +386,8 @@ def loadTextProxy(human, filepath, type="Clothes"):
             proxy.uuid = " ".join(words[1:])
         elif key == 'tag':
             proxy.tags.append( " ".join(words[1:]).lower() )
+        if key == 'version':
+            proxy.version = int(words[1])
         elif key == 'z_depth':
             proxy.z_depth = int(words[1])
         elif key == 'max_pole':
@@ -532,6 +535,7 @@ def saveBinaryProxy(proxy, path):
         uvLayers_str = uvStr,
         uvLayers_idx = uvIdx,
         obj_file = np.fromstring(_properPath(proxy.obj_file), dtype='S1'),
+        version = np.asarray(proxy.version, dtype=np.int32)
     )
 
     if proxy.material_file:
@@ -579,6 +583,9 @@ def loadBinaryProxy(path, human, type):
     proxy.name = npzfile['name'].tostring()
     proxy.uuid = npzfile['uuid'].tostring()
     proxy.basemesh = npzfile['basemesh'].tostring()
+
+    if 'version' in npzfile:
+        proxy.version = int(npzfile['version'])
 
     proxy.tags = set(_unpackStringList(npzfile['tags_str'], npzfile['tags_idx']))
 
