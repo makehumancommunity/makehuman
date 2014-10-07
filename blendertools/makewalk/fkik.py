@@ -290,22 +290,22 @@ def clearAnimation(rig, scn, act, type, snapBones):
         act.fcurves.remove(fcu)
 
 
-def setMhxIk(rig, useArms, useLegs, turnOn):
+def setMhxIk(rig, useArms, useLegs, value):
     if isMhxRig(rig):
         ikLayers = []
         fkLayers = []
         if useArms:
-            rig["MhaArmIk_L"] = turnOn
-            rig["MhaArmIk_R"] = turnOn
+            rig["MhaArmIk_L"] = value
+            rig["MhaArmIk_R"] = value
             ikLayers += [2,18]
             fkLayers += [3,19]
         if useLegs:
-            rig["MhaLegIk_L"] = turnOn
-            rig["MhaLegIk_R"] = turnOn
+            rig["MhaLegIk_L"] = value
+            rig["MhaLegIk_R"] = value
             ikLayers += [4,20]
             fkLayers += [5,21]
 
-        if turnOn:
+        if value:
             first = ikLayers
             second = fkLayers
         else:
@@ -334,7 +334,7 @@ def transferMhxToFk(rig, scn):
     #muteAllConstraints(rig, True)
 
     oldLayers = list(rig.data.layers)
-    setMhxIk(rig, scn.McpFkIkArms, scn.McpFkIkLegs, True)
+    setMhxIk(rig, scn.McpFkIkArms, scn.McpFkIkLegs, 1.0)
     rig.data.layers = MhxLayers
 
     lLegIkToAnkle = rig["MhaLegIkToAnkle_L"]
@@ -356,7 +356,7 @@ def transferMhxToFk(rig, scn):
             snapFkLeg(rig, rLegSnapIk, rLegSnapFk, frame, rLegIkToAnkle)
 
     rig.data.layers = oldLayers
-    setMhxIk(rig, scn.McpFkIkArms, scn.McpFkIkLegs, False)
+    setMhxIk(rig, scn.McpFkIkArms, scn.McpFkIkLegs, 0.0)
     setInterpolation(rig)
     #muteAllConstraints(rig, False)
 
@@ -378,7 +378,7 @@ def transferMhxToIk(rig, scn):
     #muteAllConstraints(rig, True)
 
     oldLayers = list(rig.data.layers)
-    setMhxIk(rig, scn.McpFkIkArms, scn.McpFkIkLegs, False)
+    setMhxIk(rig, scn.McpFkIkArms, scn.McpFkIkLegs, 0.0)
     rig.data.layers = MhxLayers
 
     lLegIkToAnkle = rig["MhaLegIkToAnkle_L"]
@@ -399,7 +399,7 @@ def transferMhxToIk(rig, scn):
             snapIkLeg(rig, rLegSnapIk, rLegSnapFk, frame, rLegIkToAnkle)
 
     rig.data.layers = oldLayers
-    setMhxIk(rig, scn.McpFkIkArms, scn.McpFkIkLegs, True)
+    setMhxIk(rig, scn.McpFkIkArms, scn.McpFkIkLegs, 1.0)
     setInterpolation(rig)
     #muteAllConstraints(rig, False)
 
@@ -715,7 +715,11 @@ class VIEW3D_OT_ClearAnimationButton(bpy.types.Operator):
 
             if isMhxRig(rig):
                 clearAnimation(rig, scn, act, self.type, SnapBonesAlpha8)
-                setMhxIk(rig, scn.McpFkIkArms, scn.McpFkIkLegs, (self.type=="FK"))
+                if self.type == "FK":
+                    value = 1.0
+                else:
+                    value = 0.0
+                setMhxIk(rig, scn.McpFkIkArms, scn.McpFkIkLegs, value)
             elif isRigify(rig):
                 clearAnimation(rig, scn, act, self.type, SnapBonesRigify)
             else:
