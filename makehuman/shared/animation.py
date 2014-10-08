@@ -121,9 +121,10 @@ class AnimationTrack(object):
         self._data_baked = np.zeros((self.dataLen, 3, 4))
 
         for f_idx in xrange(self.nFrames):
-            skel.setPose(self._data[f_idx:f_idx+self.nBones])
+            i = f_idx * self.nBones
+            skel.setPose(self._data[i:i+self.nBones])
             for b_idx in xrange(self.nBones):
-                idx = (f_idx * self.nBones) + b_idx
+                idx = i + b_idx
                 self._data_baked[idx,:,:] = bones[b_idx].matPoseVerts[:3,:4]
             progress.step("Baking animation frame %s", f_idx+1)
 
