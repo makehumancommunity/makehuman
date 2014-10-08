@@ -200,7 +200,7 @@ class BVH():
         nFrames = len(jointsData[0])
 
         # Interweave joints animation data, per frame with joints in breadth-first order
-        animData = np.hstack(jointsData).reshape(nJoints*nFrames,4,4)
+        animData = np.hstack(jointsData).reshape(nJoints*nFrames,3,4)
         framerate = 1.0/self.frameTime
         return animation.AnimationTrack(name, animData, nFrames, framerate)
 
