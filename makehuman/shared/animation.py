@@ -245,6 +245,8 @@ class PoseUnit(AnimationTrack):
         super(PoseUnit, self).__init__(name, poseData, nFrames=len(poseNames), framerate=1)
         self._poseNames = poseNames
 
+        self._affectedBones = None  # Stores for every frame which bones are posed
+
     def sparsify(self, newFrameRate):
         raise NotImplementedError("sparsify() does not exist for poseunits")
 
@@ -257,6 +259,30 @@ class PoseUnit(AnimationTrack):
         else:
             frame_idx = name
         return self.getAtFramePos(frame_idx)
+
+    def getAffectedBones(self, frame_idx=None):
+        """
+        Return the (breadth-first) indices of the bones affected in the frame
+        with specified frame number. Specify no frame number to get a list for
+        all frames.
+        """
+        if self._affectedBones is None:
+            self._cacheAffectedBones()
+        if frame_idx is None:
+            return self._affectedBones
+        else:
+            return self._affectedBones[frame_idx]
+
+    def _cacheAffectedBones(self):
+        self._affectedBones = []
+        IDENT = emptyPose()
+
+        for f_idx in xrange(self.nFrames):
+            frameData = self.getAtFramePos(f_idx)
+            self._affectedBones.append( [] )
+            for b_idx in xrange(self.nBones):
+                if not (frameData[b_idx] == IDENT).all():
+                    self._affectedBones[f_idx].append(b_idx)
 
     def getBlendedPose(self, poses, weights):
         # TODO normalize weights?
