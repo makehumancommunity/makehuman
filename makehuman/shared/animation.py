@@ -241,6 +241,10 @@ class PoseUnit(AnimationTrack):
     These poses can be blended together with a certain weight to form a new
     composite pose.
     """
+
+    # TODO allow selectively applying poses, eg only on face bones >> could be achieved by an extra blend with another pose
+    # TODO track for each frame which bones are effectively posed
+
     def __init__(self, name, poseData, poseNames):
         super(PoseUnit, self).__init__(name, poseData, nFrames=len(poseNames), framerate=1)
         self._poseNames = poseNames
@@ -673,6 +677,7 @@ class AnimatedMesh(object):
 
             # Else we pass poseVerts matrices immediately from animation track for performance improvement (cached or baked)
             for idx,mesh in enumerate(self.__meshes):
+                # TODO make onlyAnimateVisible work by excluding some meshes from the filter that should always be animated
                 if self.onlyAnimateVisible and not mesh.visibility:
                     continue
 
@@ -744,6 +749,8 @@ def skinMesh(coords, compiledVertWeights, poseData):
     If coords is nx3 size, this method will perform faster as only 3x3 matrix
     multiplies are performed, otherwise 3x4 matrices are multiplied.
     """
+    # TODO allow skinning only the visible (not statically hidden) vertices, for performance reasons
+
     if coords.shape[1] == 4:
         # Vertices contain homogenous coordinate (1 if translation affects position,
         # 0 if vertex should not be affected by translation (only direction) )
