@@ -776,7 +776,9 @@ def emptyTrack(nFrames, nBones=1):
     Create an empty (rest pose) animation track pose data array.
     """
     nMats = nFrames*nBones
-    return np.tile(np.identity(4), nMats).transpose().reshape((nMats,4,4))
+    matData = np.zeros((nMats,3,4), dtype=np.float32)
+    matData[:,:3,:3] = np.identity(3, dtype=np.float32)
+    return matData
 
 def emptyPose(nBones=1):
     """
