@@ -487,7 +487,6 @@ class VertexBoneWeights(object):
             boneWeights[bname] = (verts, weights)
 
         # Assign unweighted vertices to root bone with weight 1
-        rootWeighted = []
         if rootBone not in boneWeights.keys():
             vs = []
             ws = []
@@ -495,17 +494,15 @@ class VertexBoneWeights(object):
             vs,ws = boneWeights[rootBone]
             vs = list(vs)
             ws = list(ws)
-        for vIdx, wCount in enumerate(wtot):
-            if wCount == 0:
-                vs.append(vIdx)
-                ws.append(1.0)
-                rootWeighted.append(vIdx)
-        if len(rootWeighted) > 0:
-            if len(rootWeighted) < 100:
+        rw_i = np.argwhere(wtot == 0)[:,0]
+        vs.extend(rw_i)
+        ws.extend(np.ones(len(rw_i), dtype=np.float32))
+        if len(rw_i) > 0:
+            if len(rw_i) < 100:
                 # To avoid spamming the log, only print vertex indices if there's less than 100
-                log.debug("Adding trivial bone weights to bone %s for %s unweighted vertices. [%s]", rootBone, len(rootWeighted), ', '.join([str(s) for s in rootWeighted]))
+                log.debug("Adding trivial bone weights to bone %s for %s unweighted vertices. [%s]", rootBone, len(rw_i), ', '.join([str(s) for s in rw_i]))
             else:
-                log.debug("Adding trivial bone weights to bone %s for %s unweighted vertices.", rootBone, len(rootWeighted))
+                log.debug("Adding trivial bone weights to bone %s for %s unweighted vertices.", rootBone, len(rw_i))
         if len(vs) > 0:
             boneWeights[rootBone] = (np.asarray(vs, dtype=np.uint32), np.asarray(ws, dtype=np.float32))
 
