@@ -1237,14 +1237,13 @@ class Human(guicommon.Object, animation.AnimatedMesh):
                 # Use vertex weights for human body
                 weights = bodyVertexWeights
             elif obj.proxy:
-                import skeleton
                 # Determine vertex weights for proxy (map to unfiltered proxy mesh)
-                weights = skeleton.getProxyWeights(obj.proxy, bodyVertexWeights)
+                weights = obj.proxy.getVertexWeights(bodyVertexWeights)
             else:
                 # We assume this bound mesh is manually handled by an external plugin
                 return
         else:
-            weights = {}
+            weights = None
 
         if not self.containsBoundMesh(mesh):
             animation.AnimatedMesh.addBoundMesh(self, mesh, weights)

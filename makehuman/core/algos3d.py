@@ -240,15 +240,15 @@ class Target(object):
                     # approximate modeling of a posed model
                     import animation
                     vertBoneMapping = animatedMesh.getBoundMesh(obj.name)[1]
-                    if not vertBoneMapping.isCompiled():
-                        vertBoneMapping.compileData(animatedMesh.getSkeleton())
+                    if not vertBoneMapping.isCompiled(4):
+                        vertBoneMapping.compileData(animatedMesh.getSkeleton(), 4)
                     animationTrack = animatedMesh.getActiveAnimation()
                     if not animationTrack.isBaked():
                         animationTrack.bake(animatedMesh.getSkeleton())
                     poseData = animatedMesh.getPoseState()
                     obj.coord[dstVerts] += animation.skinMesh( \
                                   self.data[srcVerts] * scale[None,:], 
-                                  vertBoneMapping.compiled[dstVerts], poseData )
+                                  vertBoneMapping.compiled(4)[dstVerts], poseData )
                 else:
                     obj.coord[dstVerts] += self.data[srcVerts] * scale[None,:]
                 obj.markCoords(dstVerts, coor=True)

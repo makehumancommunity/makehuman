@@ -692,54 +692,27 @@ class Object3D(object):
             log.error("Failed to index faces of mesh %s, you are probably loading a mesh with mixed nb of verts per face (do not mix tris and quads). Or your mesh has too many faces attached to one vertex (the maximum is %s-poles). In the second case, either increase MAX_FACES for this mesh, or improve the mesh topology. Original error message: (%s) %s", self.name, self.MAX_FACES, type(e), format(str(e)))
             raise RuntimeError('Incompatible mesh topology.')
 
-    def getWeights(self, parentWeights):
+    def getVertexWeights(self, parentWeights):
         """
         Map armature weights mapped to the root parent (original mesh) to this
         child mesh. Returns parentWeights unaltered if this mesh has no parent.
         If this is a proxy mesh, parentWeights should be the weights mapped 
-        through the proxy.getWeights() method first.
-        """
-        # TODO this would heavily benefit from numpy optimization
+        through the proxy.getVertexWeights() method first.
 
+        This particular vertex weights mapping is only used for exporting rigged
+        meshes, as in MakeHuman only unsubdivided meshes are posed, and then
+        smoothed in their posed state if required. Vertices are not removed 
+        within MH when faces are hidden, either.
+        """
         vmap = self.inverse_parent_map
         vwmap = self.parent_map_weights
 
         from collections import OrderedDict
         weights = OrderedDict()
-        if not parentWeights:
-            return weights
-
-        # Zip vertex indices and weights
-        zippedWeights = {}
-        for (key, val) in parentWeights.items():
-            indxs, wghts = val
-            zippedWeights[key] = zip(indxs, wghts)
-        parentWeights = zippedWeights
-
-        def _fixVertexGroup(vgroup):
-            """
-            Merge duplicate weighings to the same vertex by reducing it to only
-            one entry with summed weights.
-            """
-            fixedVGroup = []
-            vgroup.sort()
-            pv = -1
-            while vgroup:
-                (pv0, wt0) = vgroup.pop()
-                if pv0 == pv:
-                    wt += wt0
-                else:
-                    if pv >= 0 and wt > 1e-4:
-                        fixedVGroup.append((pv, wt))
-                    (pv, wt) = (pv0, wt0)
-            if pv >= 0 and wt > 1e-4:
-                fixedVGroup.append((pv, wt))
-            return fixedVGroup
-
-        for key in parentWeights.keys():
+        for bname, (verts,wghts) in parentWeights.data():
             vgroup = []
             empty = True
-            for (v,wt) in parentWeights[key]:
+            for (v,wt) in zip(verts,wghts):
                 mvs = vmap[v]
                 if isinstance(mvs, (int, np.int32)):
                     mvs = [mvs]
@@ -749,28 +722,9 @@ class Object3D(object):
                         vgroup.append((mv, w * wt))
                         empty = False
             if not empty:
-                vgroup = _fixVertexGroup(vgroup)
-                weights[key] = vgroup
+                weights[bname] = vgroup
 
-        # Unzip and normalize weights (and put them in np format)
-        # TODO it would be a good idea to impose a max limit on nb of weights per vertex here
-        boneWeights = {}
-        wtot = np.zeros(self.getVertexCount(), np.float32)
-        for vgroup in weights.values():
-            for vn,w in vgroup:
-                wtot[vn] += w
-
-        for bname,vgroup in weights.items():
-            weights = np.zeros(len(vgroup), np.float32)
-            verts = []
-            n = 0
-            for vn,w in vgroup:
-                verts.append(vn)
-                weights[n] = w/wtot[vn]
-                n += 1
-            boneWeights[bname] = (verts, weights)
-
-        return boneWeights
+        return parentWeights.create(weights, self.getVertexCount())
 
 
     def updateIndexBuffer(self):

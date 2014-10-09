@@ -99,11 +99,11 @@ def exportFbx(filepath, config):
         for mesh in meshes:
             if mesh.object.proxy:
                 # Transfer weights to proxy
-                parentWeights = skeleton.getProxyWeights(mesh.object.proxy, rawWeights)
+                parentWeights = mesh.object.proxy.getVertexWeights(rawWeights)
             else:
                 parentWeights = rawWeights
             # Transfer weights to face/vert masked and/or subdivided mesh
-            weights = mesh.getWeights(parentWeights)
+            weights = mesh.getVertexWeights(parentWeights)
 
             # Attach these vertexWeights to the mesh to pass them around the
             # exporter easier, the cloned mesh is discarded afterwards, anyway

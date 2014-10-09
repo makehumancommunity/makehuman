@@ -150,12 +150,11 @@ def exportMd5(filepath, config):
             # Remap vertex weights to mesh
             if obj.proxy:
                 # Determine vertex weights for proxy
-                import skeleton
-                parentWeights = skeleton.getProxyWeights(obj.proxy, rawWeights)
+                parentWeights = obj.proxy.getVertexWeights(rawWeights)
             else:
                 parentWeights = rawWeights
             # Account for vertices that are filtered out
-            weights = mesh.getWeights(parentWeights)
+            weights = mesh.getVertexWeights(parentWeights)
 
             # Remap vertex weights to the unwelded vertices of the object (mesh.coord to mesh.r_coord)
             originalToUnweldedMap = mesh.inverse_vmap
