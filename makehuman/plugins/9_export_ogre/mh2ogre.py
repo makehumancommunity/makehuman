@@ -170,14 +170,14 @@ def writeMeshFile(human, filepath, objects, config):
             bodyWeights = human.getVertexWeights()
             if pxy:
                 # Determine vertex weights for proxy (map to unfiltered proxy mesh)
-                weights = skeleton.getProxyWeights(pxy, bodyWeights)
+                weights = pxy.getVertexWeights(bodyWeights)
             else:
                 # Use vertex weights for human body
                 weights = bodyWeights
 
             # Remap vertex weights to account for hidden vertices that are 
             # filtered out, and remap to multiple vertices if mesh is subdivided
-            weights = mesh.getWeights(weights)
+            weights = mesh.getVertexWeights(weights)
 
             # Remap vertex weights to the unwelded vertices of the object (mesh.coord to mesh.r_coord)
             originalToUnweldedMap = mesh.inverse_vmap
