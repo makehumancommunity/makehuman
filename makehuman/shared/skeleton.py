@@ -53,6 +53,7 @@ import numpy as np
 import numpy.linalg as la
 import transformations as tm
 import matrix
+from animation import VertexBoneWeights
 
 import log
 
@@ -66,15 +67,13 @@ class Skeleton(object):
         self._clear()
 
     def _clear(self):
-        self.origin = np.zeros(3, dtype=np.float32)   # TODO actually use origin somewhere?
-
         self.bones = {}     # Bone lookup list by name
         self.boneslist = []  # Breadth-first ordered list of all bones
         self.roots = []     # Root bones of this skeleton, a skeleton can have multiple root bones.
 
         self.joint_pos_idxs = {}  # Lookup by joint name referencing vertex indices on the human, to determine joint position
 
-        self.vertexWeights = None  # Source vertex weights, defined on the basemesh
+        self.vertexWeights = None  # Source vertex weights, defined on the basemesh, for this skeleton
 
     def fromFile(self, filepath, mesh=None):
         """
@@ -118,10 +117,40 @@ class Skeleton(object):
 
         weights_file = skelData["weights_file"]
         weights_file = getpath.thoroughFindFile(weights_file, os.path.dirname(getpath.canonicalPath(filepath)), True)
-        weightsData = json.load(open(weights_file, 'rb'), object_pairs_hook=OrderedDict)
 
-        self.vertexWeights = _build_vertex_weights(weightsData["weights"], self, mesh)
+        self.vertexWeights = VertexBoneWeights.fromFile(weights_file, mesh.getVertexCount() if mesh else None)
         return self.vertexWeights
+
+    def getVertexWeights(referenceWeights=None):
+        if referenceWeights is None:
+            return self.vertexWeights
+
+        # Remap vertex weights from reference bones
+        weights = OrderedDict()
+
+        for bone in self.getBones():
+            b_weights = []
+            if len(bone.reference_bones) > 0:
+                for rbname in bone.reference_bones:
+                    if rbname in referenceWeights.data:
+                        vrts,wghs = referenceWeights.data[rbname]
+                        b_weights.extend( zip(vrts,wghs) )
+                    else:
+                        log.warning("Reference bone %s is not present in reference weights", rbname)
+            else:
+                # Try to map by bone name
+                if bone.name in referenceWeights.data:
+                    # Implicitly map bone by name to reference skeleton weights
+                    vrts,wghs = referenceWeights.data[bone.name]
+                    b_weights = zip(vrts,wghs)
+                else:
+                    log.warning("No explicit reference bone mapping for bone %s, and cannot implicitly map by name", bone.name)
+
+            if len(b_weights) > 0:
+                weights[bone.name] = b_weights
+        
+        return referenceWeights.create(weights)    
+
 
     def getJointPosition(self, joint_name, human, rest_coord=True):
         """
@@ -167,16 +196,16 @@ class Skeleton(object):
             scaledHead = scale * bone.getRestHeadPos()
             scaledTail = scale * bone.getRestTailPos()
             parentName = bone.parent.name if bone.parent else None
-            result.addBone(bone.name, parentName, scaledHead, scaledTail, bone.roll)
+            result.addBone(bone.name, parentName, scaledHead, scaledTail, bone.roll, bone.reference_bones)
 
         result.build()
 
         return result
 
-    def addBone(self, name, parentName, headJoint, tailJoint, roll=0, reference_bone=None):
+    def addBone(self, name, parentName, headJoint, tailJoint, roll=0, reference_bones=None):
         if name in self.bones.keys():
             raise RuntimeError("The skeleton %s already contains a bone named %s." % (self.__repr__(), name))
-        bone = Bone(self, name, parentName, headJoint, tailJoint, roll, reference_bone)
+        bone = Bone(self, name, parentName, headJoint, tailJoint, roll, reference_bones)
         self.bones[name] = bone
         if not parentName:
             self.roots.append(bone)
@@ -322,7 +351,7 @@ class Skeleton(object):
         return self.bones[name]
 
     def containsBone(self, name):
-        return name in self.bones.keys()
+        return name in self.bones
 
     def getBoneToIdxMapping(self):
         result = {}
@@ -338,7 +367,7 @@ class Skeleton(object):
 
 class Bone(object):
 
-    def __init__(self, skel, name, parentName, headJoint, tailJoint, roll=0, reference_bone=None):
+    def __init__(self, skel, name, parentName, headJoint, tailJoint, roll=0, reference_bones=None):
         """
         Construct a new bone for specified skeleton.
         headPos and tailPos should be in world space coordinates (relative to root).
@@ -369,7 +398,11 @@ class Bone(object):
 
         self.index = None   # The index of this bone in the breadth-first bone list
 
-        self.reference_bone = reference_bone  # Used for mapping animations
+        self.reference_bones = []  # Used for mapping animations and vertex weights
+        if reference_bones is not None:
+            if not isinstance(reference_bones, list):
+                reference_bones = [ reference_bones ]
+            self.reference_bones.extend( reference_bones )
 
         # Matrices:
         # static
@@ -763,90 +796,6 @@ def _getHumanJointPosition(human, jointName, rest_coord=True):
     else:
         verts = human.meshData.getCoords(v_idx)
     return verts.mean(axis=0)
-
-def _build_vertex_weights(vertexWeightsDict, skel, mesh=None):
-    """
-    Build a consistent set of per-bone vertex weights from a dictionary loaded
-    from (json) data file.
-    The format of vertexWeightsDict is expected to be: 
-        { "bone_name": [(v_idx, v_weight), ...], ... }
-    """
-    if mesh is not None:
-        vcount = mesh.getVertexCount()
-    else:
-        vcount = max([vn for vg in vertexWeightsDict.values() for vn,_ in vg])+1
-
-    # Normalize weights and put them in np format
-    wtot = np.zeros(vcount, np.float32)
-    boneWeights = {}
-    for vgroup in vertexWeightsDict.values():
-        for vn,w in vgroup:
-            wtot[vn] += w
-
-    for bname,vgroup in vertexWeightsDict.items():
-        weights = np.zeros(len(vgroup), np.float32)
-        verts = []
-        n = 0
-        for vn,w in vgroup:
-            verts.append(vn)
-            weights[n] = w/wtot[vn]
-            n += 1
-        boneWeights[bname] = (verts, weights)
-
-    # Assign unweighted vertices to root bone with weight 1
-    rootBone = skel.roots[0].name
-    rootWeighted = []
-    if rootBone not in boneWeights.keys():
-        boneWeights[rootBone] = ([], [])
-    else:
-        vs,ws = boneWeights[rootBone]
-        boneWeights[rootBone] = (list(vs), list(ws))
-    vs,ws = boneWeights[rootBone]
-    for vIdx, wCount in enumerate(wtot):
-        if wCount == 0:
-            vs.append(vIdx)
-            ws.append(1.0)
-            rootWeighted.append(vIdx)
-    if len(rootWeighted) > 0:
-        if len(rootWeighted) < 100:
-            # To avoid spamming the log, only print vertex indices if there's less than 100
-            log.debug("Adding trivial bone weights to bone %s for %s unweighted vertices. [%s]", rootBone, len(rootWeighted), ', '.join([str(s) for s in rootWeighted]))
-        else:
-            log.debug("Adding trivial bone weights to bone %s for %s unweighted vertices.", rootBone, len(rootWeighted))
-    boneWeights[rootBone] = (vs, np.asarray(ws, dtype=np.float32))
-
-    return boneWeights
-
-def getProxyWeights(proxy, humanWeights):
-    # TODO duplicate of proxy.getWeights()
-
-    # Zip vertex indices and weights
-    rawWeights = {}
-    for (key, val) in humanWeights.items():
-        indxs, weights = val
-        rawWeights[key] = zip(indxs, weights)
-
-    vertexWeights = proxy.getWeights(rawWeights)
-
-    # TODO this normalization and unzipping is duplicated in module3d.getWeights()
-    # Unzip and normalize weights (and put them in np format)
-    boneWeights = {}
-    wtot = np.zeros(proxy.object.getSeedMesh().getVertexCount(), np.float32)
-    for vgroup in vertexWeights.values():
-        for vn,w in vgroup:
-            wtot[vn] += w
-
-    for bname,vgroup in vertexWeights.items():
-        weights = np.zeros(len(vgroup), np.float32)
-        verts = []
-        n = 0
-        for vn,w in vgroup:
-            verts.append(vn)
-            weights[n] = w/wtot[vn]
-            n += 1
-        boneWeights[bname] = (verts, weights)
-
-    return boneWeights
 
 
 _Identity = np.identity(4, float)

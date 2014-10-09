@@ -37,6 +37,8 @@ Abstract
 Data handlers for skeletal animation.
 """
 
+# TODO perhaps do not adapt camera to posed position, always use rest coordinates
+
 import math
 import numpy as np
 import numpy.linalg as la
@@ -336,109 +338,262 @@ class VertexBoneWeights(object):
     """
     Weighted vertex to bone assignments.
     """
-    def __init__(self, data, nWeights=4, vertexCount=None):
-        self._data = data
-        self._compiled = None
-        self._vertexCount = vertexCount
-        self._nWeights = nWeights
+    def __init__(self, data, vertexCount=None):
+        """
+        Note: specifiying vertexCount is just for speeding up loading, if not 
+        specified, vertexCount will be calculated automatically (taking a little
+        longer to load).
+        """
+        self._vertexCount = None    # The number of vertices that are mapped
+        self._wCounts = None        # Per vertex, the number of weights attached
+        self._nWeights = None       # The maximum number of weights per vertex
+
+        self._data = self._build_vertex_weights_data(data, vertexCount)
+        self._calculate_num_weights()
+
+        self._compiled = {}
+
+    @staticmethod
+    def fromFile(filename, vertexCount=None):
+        """
+        Load vertex to bone weights from file
+        """
+        from collections import OrderedDict
+        import json
+        weightsData = json.load(open(filename, 'rb'), object_pairs_hook=OrderedDict)
+        log.message("Loaded vertex weights %s from file %s", weightsData.get('name', 'unnamed'), filename)
+        return VertexBoneWeights(weightsData['weights'], vertexCount)
+
+    def create(self, data, vertexCount=None):
+        """
+        Create new VertexBoneWeights object with specified weights data
+        """
+        return type(self)(data, vertexCount)
 
     @property
     def data(self):
         return self._data
     
-    @property
-    def compiled(self):
-        return self._compiled
+    def compiled(self, nWeights=None, skel=None):
+        if nWeights is None:
+            nWeights = self._nWeights
+        elif nWeights > self._nWeights:
+            nWeights = self._nWeights
 
-    def isCompiled(self):
-        return self.compiled != None
+        if nWeights in self._compiled:
+            return self._compiled[nWeights]
+        elif skel is not None:
+            self.compileData(skel, nWeights)
+            return self._compiled[nWeights]
+        else:
+            return None
+
+    def isCompiled(self, nWeights=None):
+        if nWeights is None:
+            nWeights = self._nWeights
+        elif nWeights > self._nWeights:
+            nWeights = self._nWeights
+
+        return nWeights in self._compiled
 
     def compileData(self, skel, nWeights=None):
-        if nWeights != None:
-            self._nWeights = nWeights
-        self._compiled = _compileVertexWeights(self.data, skel, vertexCount=self._vertexCount, nWeights=self._nWeights)
-        self._vertexCount = len(self._compiled)
+        if nWeights is None:
+            nWeights = self._nWeights
+        elif nWeights > self._nWeights:
+            nWeights = self._nWeights
+
+        self._compiled[nWeights] = self._compileVertexWeights(self.data, skel, nWeights, vertexCount=self._vertexCount)
 
     def clearCompiled(self):
-        self._compiled = None
+        self._compiled = {}
 
+    def _calculate_num_weights(self):
+        self._wCounts = np.zeros(self._vertexCount, dtype=np.uint32)
+        for bname, wghts in self._data.items():
+            vs, _ = wghts
+            self._wCounts[vs] += 1
+        self._nWeights = max(self._wCounts)
+            
+    def _build_vertex_weights_data(self, vertexWeightsDict, vertexCount=None, rootBone="root"):
+        """
+        Build a consistent set of per-bone vertex weights from a dictionary loaded
+        from (json) data file.
+        The format of vertexWeightsDict is expected to be: 
+            { "bone_name": [(v_idx, v_weight), ...], ... }
 
-def _compileVertexWeights(vertBoneMapping, skel, vertexCount=None, nWeights=17):
-    """
-    Compile vertex weights data to a more performant per-vertex format.
-    """
-    if vertexCount is None:
-        vertexCount = 0
-        for bname, mapping in vertBoneMapping.items():
-            verts,weights = mapping
-            vertexCount = max(max(verts), vertexCount)
-        if vertexCount:
-            vertexCount += 1
+        The output format is of the form:
+            { "bone_name": ([v_idx, ...], [v_weight, ...]), ... }
+        With weights normalized, doubles merged, and unweighted vertices
+        assigned to the root bone.
+        """
+        WEIGHT_THRESHOLD = 1e-4  # Threshold for including bone weight
 
-    if nWeights == 3:
-        dtype = [('b_idx1', np.uint32), ('b_idx2', np.uint32), ('b_idx3', np.uint32), 
-                 ('wght1', np.float32), ('wght2', np.float32), ('wght3', np.float32)]
-    elif nWeights == 4:
-        dtype = [('b_idx1', np.uint32), ('b_idx2', np.uint32), ('b_idx3', np.uint32), ('b_idx4', np.uint32),
-                 ('wght1', np.float32), ('wght2', np.float32), ('wght3', np.float32), ('wght4', np.float32)]
-    elif nWeights == 17:
-        dtype = [('b_idx1', np.uint32), ('b_idx2', np.uint32), ('b_idx3', np.uint32), 
-                 ('b_idx4', np.uint32), ('b_idx5', np.uint32), ('b_idx6', np.uint32), 
-                 ('b_idx7', np.uint32), ('b_idx8', np.uint32), ('b_idx9', np.uint32), 
-                 ('b_idx10', np.uint32), ('b_idx11', np.uint32), ('b_idx12', np.uint32), 
-                 ('b_idx13', np.uint32), ('b_idx14', np.uint32), ('b_idx15', np.uint32), 
-                 ('b_idx16', np.uint32), ('b_idx17', np.uint32), 
-                 ('wght1', np.float32), ('wght2', np.float32), ('wght3', np.float32), 
-                 ('wght4', np.float32), ('wght5', np.float32), ('wght6', np.float32), 
-                 ('wght7', np.float32), ('wght8', np.float32), ('wght9', np.float32), 
-                 ('wght10', np.float32), ('wght11', np.float32), ('wght12', np.float32), 
-                 ('wght13', np.float32), ('wght14', np.float32), ('wght15', np.float32), 
-                 ('wght16', np.float32), ('wght17', np.float32)]
-    else:
-        dtype = [('b_idx1', np.uint32), ('wght1', np.float32)]
-    compiled_vertweights = np.zeros(vertexCount, dtype=dtype)
+        first_entry = vertexWeightsDict.keys()[0] if len(vertexWeightsDict) > 0 else None
+        if len(vertexWeightsDict) > 0 and \
+           len(vertexWeightsDict[first_entry]) == 2 and \
+           isinstance(vertexWeightsDict[first_entry], tuple) and \
+           isinstance(vertexWeightsDict[first_entry][1], np.ndarray) and \
+           isinstance(vertexWeightsDict[first_entry][2], np.ndarray):
+            # Input dict is already in the expected format, presume it does not
+            # need to be built again
+            if vertexCount is not None:
+                self._vertexCount = vertexCount
+            else:
+                self._vertexCount = max([vn for vg in vertexWeightsDict.values() for vn in vg[0]])+1
+            return vertexWeightsDict
 
-    _ws = dict()
-    b_lookup = dict([(b.name,b_idx) for b_idx,b in enumerate(skel.getBones())])
-    for bname, mapping in vertBoneMapping.items():
-        try:
-            b_idx = b_lookup[bname]
-            verts,weights = mapping
-            for v_idx, wght in zip(verts, weights):
-                if v_idx not in _ws:
-                    _ws[v_idx] = []
-                # Merge double bone assignments
-                d_idx = -1
-                for idx in range( len(_ws[v_idx]) ):
-                    _b_idx = _ws[v_idx][idx][1]
-                    if _b_idx == b_idx:
-                        d_idx = idx
-                if d_idx != -1:
-                    #log.debug("Merging double assignment (%s, %s)", (bname, v_idx))
-                    _ws[v_idx][d_idx] = (_ws[v_idx][d_idx][0] + wght, b_idx)
-                else:
-                    _ws[v_idx].append( (wght, b_idx) )
-        except KeyError as e:
-            log.warning("Bone %s not found in skeleton: %s" % (bname, e))
-    for v_idx in _ws:
-        # Sort by weight and keep only nWeights most significant weights
-        if len(_ws[v_idx]) > nWeights:
-            #log.debug("Vertex %s has too many weights (%s): %s" % (v_idx, len(_ws[v_idx]), str(sorted(_ws[v_idx], reverse=True))))
-            _ws[v_idx] = sorted(_ws[v_idx], reverse=True)[:nWeights]
-            # Re-normalize weights
-            weightvals = np.asarray( [e[0] for e in _ws[v_idx]], dtype=np.float32)
-            weightvals /= np.sum(weightvals)
-            for i in xrange(nWeights):
-                _ws[v_idx][i] = (weightvals[i], _ws[v_idx][i][1])
+        if vertexCount is not None:
+            vcount = vertexCount
         else:
-            _ws[v_idx] = sorted(_ws[v_idx], reverse=True)
+            vcount = max([vn for vg in vertexWeightsDict.values() for vn,_ in vg])+1
+        self._vertexCount = vcount
 
-    for v_idx, wghts in _ws.items():
-        for i, (w, bidx) in enumerate(wghts):
-            compiled_vertweights[v_idx]['wght%s' % (i+1)] = w
-            compiled_vertweights[v_idx]['b_idx%s' % (i+1)] = bidx
+        # Normalize weights and put them in np format
+        wtot = np.zeros(vcount, np.float32)
+        for vgroup in vertexWeightsDict.values():
+            for item in vgroup:
+                vn,w = item
+                # Calculate total weight per vertex
+                wtot[vn] += w
 
-    return compiled_vertweights
+        from collections import OrderedDict
+        boneWeights = OrderedDict()
+        for bname,vgroup in vertexWeightsDict.items():
+            if len(vgroup) == 0:
+                continue
+            weights = []
+            verts = []
+            v_lookup = {}
+            n = 0
+            for vn,w in vgroup:
+                if vn in v_lookup:
+                    # Merge doubles
+                    v_idx = v_lookup[vn]
+                    weights[v_idx] += w/wtot[vn]
+                else:
+                    v_lookup[vn] = len(verts)
+                    verts.append(vn)
+                    weights.append(w/wtot[vn])
+            verts = np.asarray(verts, dtype=np.uint32)
+            weights = np.asarray(weights, np.float32)
+            # Sort by vertex index
+            i_s = np.argsort(verts)
+            verts = verts[i_s]
+            weights = weights[i_s]
+            # Filter out weights under the threshold
+            i_s = np.argwhere(weights > WEIGHT_THRESHOLD)[:,0]
+            verts = verts[i_s]
+            weights = weights[i_s]
+            boneWeights[bname] = (verts, weights)
+
+        # Assign unweighted vertices to root bone with weight 1
+        rootWeighted = []
+        if rootBone not in boneWeights.keys():
+            vs = []
+            ws = []
+        else:
+            vs,ws = boneWeights[rootBone]
+            vs = list(vs)
+            ws = list(ws)
+        for vIdx, wCount in enumerate(wtot):
+            if wCount == 0:
+                vs.append(vIdx)
+                ws.append(1.0)
+                rootWeighted.append(vIdx)
+        if len(rootWeighted) > 0:
+            if len(rootWeighted) < 100:
+                # To avoid spamming the log, only print vertex indices if there's less than 100
+                log.debug("Adding trivial bone weights to bone %s for %s unweighted vertices. [%s]", rootBone, len(rootWeighted), ', '.join([str(s) for s in rootWeighted]))
+            else:
+                log.debug("Adding trivial bone weights to bone %s for %s unweighted vertices.", rootBone, len(rootWeighted))
+        if len(vs) > 0:
+            boneWeights[rootBone] = (np.asarray(vs, dtype=np.uint32), np.asarray(ws, dtype=np.float32))
+
+        return boneWeights
+
+    def _compileVertexWeights(self, vertBoneMapping, skel, nWeights, vertexCount=None):
+        """
+        Compile vertex weights data to a more performant per-vertex format.
+        """
+        if vertexCount is None:
+            vertexCount = 0
+            for bname, mapping in vertBoneMapping.items():
+                verts,weights = mapping
+                vertexCount = max(max(verts), vertexCount)
+            if vertexCount:
+                vertexCount += 1
+
+        # TODO use simple array columns instead of structured arrays (they are array of structs, not struct of arrays)
+        if nWeights == 3:
+            dtype = [('b_idx1', np.uint32), ('b_idx2', np.uint32), ('b_idx3', np.uint32), 
+                     ('wght1', np.float32), ('wght2', np.float32), ('wght3', np.float32)]
+        elif nWeights == 4:
+            dtype = [('b_idx1', np.uint32), ('b_idx2', np.uint32), ('b_idx3', np.uint32), ('b_idx4', np.uint32),
+                     ('wght1', np.float32), ('wght2', np.float32), ('wght3', np.float32), ('wght4', np.float32)]
+        elif nWeights == 13:
+            dtype = [('b_idx1', np.uint32), ('b_idx2', np.uint32), ('b_idx3', np.uint32), 
+                     ('b_idx4', np.uint32), ('b_idx5', np.uint32), ('b_idx6', np.uint32), 
+                     ('b_idx7', np.uint32), ('b_idx8', np.uint32), ('b_idx9', np.uint32), 
+                     ('b_idx10', np.uint32), ('b_idx11', np.uint32), ('b_idx12', np.uint32), 
+                     ('b_idx13', np.uint32),
+                     ('wght1', np.float32), ('wght2', np.float32), ('wght3', np.float32), 
+                     ('wght4', np.float32), ('wght5', np.float32), ('wght6', np.float32), 
+                     ('wght7', np.float32), ('wght8', np.float32), ('wght9', np.float32), 
+                     ('wght10', np.float32), ('wght11', np.float32), ('wght12', np.float32), 
+                     ('wght13', np.float32)]
+        elif nWeights == 2:
+            dtype = [('b_idx1', np.uint32), ('b_idx2', np.uint32), 
+                     ('wght1', np.float32), ('wght2', np.float32)]
+        else:
+            dtype = [('b_idx1', np.uint32), ('wght1', np.float32)]
+        compiled_vertweights = np.zeros(vertexCount, dtype=dtype)
+
+        # Convert weights from indexed by bone to indexed by vertex index
+        _ws = dict()
+        b_lookup = dict([(b.name,b_idx) for b_idx,b in enumerate(skel.getBones())])
+        for bname, mapping in vertBoneMapping.items():
+            try:
+                b_idx = b_lookup[bname]
+                verts,weights = mapping
+                for v_idx, wght in zip(verts, weights):
+                    if v_idx not in _ws:
+                        _ws[v_idx] = []
+
+                    # TODO not needed for now (no remapping yet), and perhaps doubles should be removed upon merge, not when compiling
+                    # also in case of proxy remapping doubles need to be prevented
+                    '''
+                    b_idxs = [bidx for (_,bidx) in _ws[v_idx]]
+                    if b_idx in b_idxs:
+                        # Merge doubles (this needs to happen even if the _build_vertex_weights_data()
+                        # step already performs double removal, in the case where
+                        # weights were remapped to another rig and bones merged)
+                        _i = b_idxs.index(b_idx)
+                        _ws[v_idx][_i] = (_ws[v_idx][_i][0] + wght, b_idx)
+                    else:
+                        _ws[v_idx].append( (wght, b_idx) )
+                    '''
+                    _ws[v_idx].append( (wght, b_idx) )  # For now, assume there are no doubles
+            except KeyError as e:
+                log.warning("Bone %s not found in skeleton: %s" % (bname, e))
+        for v_idx in _ws:
+            # Sort by weight and keep only nWeights most significant weights
+            if len(_ws[v_idx]) > nWeights:
+                #log.debug("Vertex %s has too many weights (%s): %s" % (v_idx, len(_ws[v_idx]), str(sorted(_ws[v_idx], reverse=True))))
+                _ws[v_idx] = sorted(_ws[v_idx], reverse=True)[:nWeights]
+                # Re-normalize weights
+                weightvals = np.asarray( [e[0] for e in _ws[v_idx]], dtype=np.float32)
+                weightvals /= np.sum(weightvals)
+                for i in xrange(nWeights):
+                    _ws[v_idx][i] = (weightvals[i], _ws[v_idx][i][1])
+            else:
+                _ws[v_idx] = sorted(_ws[v_idx], reverse=True)
+
+        for v_idx, wghts in _ws.items():
+            for i, (w, bidx) in enumerate(wghts):
+                compiled_vertweights[v_idx]['wght%s' % (i+1)] = w
+                compiled_vertweights[v_idx]['b_idx%s' % (i+1)] = bidx
+
+        return compiled_vertweights
 
 class AnimatedMesh(object):
     """
@@ -469,8 +624,9 @@ class AnimatedMesh(object):
         self.resetCompiledWeights()
 
     def resetCompiledWeights(self):
-        for vmap in self.__vertexToBoneMaps:
-            vmap.clearCompiled()
+        for i, vmap in enumerate(self.__vertexToBoneMaps):
+            if vmap is not None:
+                vmap.clearCompiled()
 
     def addAnimation(self, anim):
         """
@@ -533,27 +689,16 @@ class AnimatedMesh(object):
                 log.warning("Attempt to add the same bound mesh %s twice" % mesh.name)
             self.removeBoundMesh(mesh.name)
 
-        if not isinstance(vertexToBoneMapping, VertexBoneWeights):
-            vertexToBoneMapping = VertexBoneWeights(vertexToBoneMapping, nWeights=4, vertexCount=mesh.getVertexCount())
-
         # allows multiple meshes (also to allow to animate one model consisting of multiple meshes)
         originalMeshCoords = np.zeros((mesh.getVertexCount(),4), np.float32)
         originalMeshCoords[:,:3] = mesh.coord[:,:3]
         originalMeshCoords[:,3] = 1.0
         self.__originalMeshCoords.append(originalMeshCoords)
-        if self.getSkeleton():
-            log.debug("Compiling vertex bone weights for %s", mesh.name)
-            vertexToBoneMapping.compileData(self.getSkeleton())
         self.__vertexToBoneMaps.append(vertexToBoneMapping)
         self.__meshes.append(mesh)
 
     def updateVertexWeights(self, meshName, vertexToBoneMapping):
         rIdx = self._getBoundMeshIndex(meshName)
-        mesh = self.__meshes[rIdx]
-        if not isinstance(vertexToBoneMapping, VertexBoneWeights):
-            vertexToBoneMapping = VertexBoneWeights(vertexToBoneMapping, nWeights=4, vertexCount=mesh.getVertexCount())
-        if self.getSkeleton():
-            vertexToBoneMapping.compileData(self.getSkeleton())
         self.__vertexToBoneMaps[rIdx] = vertexToBoneMapping
 
     def removeBoundMesh(self, name):
@@ -681,16 +826,16 @@ class AnimatedMesh(object):
                 if self.onlyAnimateVisible and not mesh.visibility:
                     continue
 
-                if not self.__vertexToBoneMaps[idx].isCompiled():
+                if not self.__vertexToBoneMaps[idx].isCompiled(4):
                     log.debug("Compiling vertex bone weights for %s", mesh.name)
-                    self.__vertexToBoneMaps[idx].compileData(self.getSkeleton())
+                    self.__vertexToBoneMaps[idx].compileData(self.getSkeleton(), 4)
 
                 try:
                     # Old slow way of skinning
                     #posedCoords = self.getSkeleton().skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx].data)
 
                     # New fast skinnig approach
-                    posedCoords = skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx].compiled, poseState)
+                    posedCoords = skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx].compiled(4), poseState)
                 except Exception as e:
                     log.error("Error skinning mesh %s", mesh.name, exc_info=True)
                     raise e
@@ -749,7 +894,7 @@ def skinMesh(coords, compiledVertWeights, poseData):
     If coords is nx3 size, this method will perform faster as only 3x3 matrix
     multiplies are performed, otherwise 3x4 matrices are multiplied.
     """
-    # TODO allow skinning only the visible (not statically hidden) vertices, for performance reasons
+    # TODO allow skinning only the visible (not statically hidden) vertices, for performance reasons (eg if an alt. topology is set, do we animate both basemesh and topology?)
 
     if coords.shape[1] == 4:
         # Vertices contain homogenous coordinate (1 if translation affects position,
@@ -770,8 +915,8 @@ def skinMesh(coords, compiledVertWeights, poseData):
     elif len(compiledVertWeights.dtype) == 2:
         # nWeights = 1
         accum = W['wght1'][:,None,None] * P[W['b_idx1']][:,:3,:c]
-    elif len(compiledVertWeights.dtype) == 17*2:
-        # nWeights = 17
+    elif len(compiledVertWeights.dtype) == 13*2:
+        # nWeights = 13
         accum = W['wght1'][:,None,None] * P[W['b_idx1']][:,:3,:c] + \
                 W['wght2'][:,None,None] * P[W['b_idx2']][:,:3,:c] + \
                 W['wght3'][:,None,None] * P[W['b_idx3']][:,:3,:c] + \
@@ -784,11 +929,11 @@ def skinMesh(coords, compiledVertWeights, poseData):
                 W['wght10'][:,None,None] * P[W['b_idx10']][:,:3,:c] + \
                 W['wght11'][:,None,None] * P[W['b_idx11']][:,:3,:c] + \
                 W['wght12'][:,None,None] * P[W['b_idx12']][:,:3,:c] + \
-                W['wght13'][:,None,None] * P[W['b_idx13']][:,:3,:c] + \
-                W['wght14'][:,None,None] * P[W['b_idx14']][:,:3,:c] + \
-                W['wght15'][:,None,None] * P[W['b_idx15']][:,:3,:c] + \
-                W['wght16'][:,None,None] * P[W['b_idx16']][:,:3,:c] + \
-                W['wght17'][:,None,None] * P[W['b_idx17']][:,:3,:c]
+                W['wght13'][:,None,None] * P[W['b_idx13']][:,:3,:c]
+    elif len(compiledVertWeights.dtype) == 2*2:
+        # nWeights = 2
+        accum = W['wght1'][:,None,None] * P[W['b_idx1']][:,:3,:c] + \
+                W['wght2'][:,None,None] * P[W['b_idx2']][:,:3,:c]
     else:
         # nWeights = 3
         accum = W['wght1'][:,None,None] * P[W['b_idx1']][:,:3,:c] + \
@@ -819,6 +964,10 @@ def emptyPose(nBones=1):
     Create an empty animation containing one frame. 
     """
     return emptyTrack(1, nBones)
+
+def animationRelativeToPose(animation, restpose):
+    # TODO create animation track copy that is relative to restpose
+    pass
 
 def loadPoseFromMhpFile(filepath, skel):
     """

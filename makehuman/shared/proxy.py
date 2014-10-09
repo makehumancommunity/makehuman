@@ -92,6 +92,9 @@ class Proxy:
         self.vertWeights = {}       # (proxy-vert, weight) list for each parent vert (reverse mapping of self.weights, indexed by human vertex)
         self.offsets = None         # (x,y,z) list of vertex offsets, indexed by proxy vert
 
+        self.vertexBoneWeights = None   # Explicitly defined custom vertex-to-bone weights, connecting the proxy mesh to the reference skeleton (optional)
+                                        # Not to be confused with the vertex weights assigned for mapping the proxy mesh geometry to the base mesh
+
         self.tmatrix = TMatrix()    # Offset transformation matrix. Replaces scale
 
         self.z_depth = -1       # Render order depth for the proxy object. Also used to determine which proxy object should mask others (delete faces)
@@ -144,6 +147,8 @@ class Proxy:
 
 
     def getMesh(self):
+        if not self.object:
+            return None
         return self.object.mesh
 
 
@@ -223,68 +228,61 @@ class Proxy:
         else:
             return self.name
 
+    def hasCustomVertexWeights(self):
+        """
+        Determines whether this proxy explicitly defines its own set of vertex
+        to bone weights (defined on the bones of the reference skeleton).
+        Returns True if this proxy has custom vertex weights, False if it does
+        not, in which case vertex weights will be derived from the weights of
+        the basemesh, mapped through the vertex mapping of the proxy.
+        """
+        return self.vertexBoneWeights is not None
 
-    def getWeights(self, rawWeights, amt=None):
+
+    def getVertexWeights(self, humanWeights):
         """
         Map armature weights mapped to the human to the proxy mesh through the
         proxy mapping.
+        humanWeights is expected to be an animation.VertexBoneWeights object
+
+        Note: these vertex weights are intended for rigging and are not to be 
+        confused with getWeights() which returns the weights of the proxy 
+        mapping to the basemesh.
         """
-        if amt and self.vertexGroups:
-            weights = OrderedDict()
-            for name,data in self.vertexGroups:
-                for bone in amt.bones.values():
-                    if bone.origName == name:
-                        name1 = bone.name
-                        break
-                for name2 in [
-                    "DEF-"+name1,
-                    "DEF-"+name1.replace(".L", ".03.L"),
-                    "DEF-"+name1.replace(".R", ".03.R"),
-                    name1]:
-                    if name2 in rawWeights:
-                        weights[name2] = data
-                        break
-            return weights
+        if self.getMesh():
+            vertexCount = self.getMesh().getVertexCount()
+        else:
+            vertexCount = None
 
-        return self._getWeights1(rawWeights)
+        # Override proxy weights mapping behaviour if this proxy has its own 
+        # bone weights defined explicitly.
+        # This requires remapping the vertex weights of the proxy, defined on
+        # the bones of the reference skeleton, to those of the current skeleton.
+        # The current skeleton is retrieved from the human object linked to this
+        # proxy.
+        if self.hasCustomVertexWeights():
+            return self.human.getSkeleton().getVertexWeights(self.vertexBoneWeights, vertexCount)
 
-    def _getWeights1(self, rawWeights):
+        WEIGHT_THRESHOLD = 1e-4  # Threshold for including bone weight
         weights = OrderedDict()
-        if not rawWeights:
-            return weights
 
-        def _fixVertexGroup(vgroup):
-            fixedVGroup = []
-            vgroup.sort()
-            pv = -1
-            while vgroup:
-                (pv0, wt0) = vgroup.pop()
-                if pv0 == pv:
-                    wt += wt0
-                else:
-                    if pv >= 0 and wt > 1e-4:
-                        fixedVGroup.append((pv, wt))
-                    (pv, wt) = (pv0, wt0)
-            if pv >= 0 and wt > 1e-4:
-                fixedVGroup.append((pv, wt))
-            return fixedVGroup
-
-        for key in rawWeights.keys():
+        for bname, (indxs, wghts) in humanWeights.data.items():
             vgroup = []
             empty = True
-            for (v,wt) in rawWeights[key]:
+            for (v,wt) in zip(indxs, wghts):
                 try:
                     vlist = self.vertWeights[v]
                 except KeyError:
                     vlist = []
                 for (pv, w) in vlist:
                     pw = w*wt
-                    if (pw > 1e-4):
+                    if (pw > WEIGHT_THRESHOLD):
                         vgroup.append((pv, pw))
                         empty = False
             if not empty:
-                weights[key] = _fixVertexGroup(vgroup)
-        return weights
+                weights[bname] = vgroup
+        
+        return humanWeights.create(weights)#, vertexCount)
 
 
 doRefVerts = 1
@@ -383,6 +381,11 @@ def loadTextProxy(human, filepath, type="Clothes"):
             matFile = _getFileName(folder, words[1], ".mhmat")
             proxy._material_file = matFile
             proxy.material.fromFile(proxy.material_file)
+
+        elif key == 'vertexboneweights_file':
+            from animation import VertexBoneWeights
+            weightsfile = _getFileName(folder, words[1], ".jsonw")
+            proxy.vertexBoneWeights = VertexBoneWeights.fromFile(weightsfile)
 
         elif key == 'backface_culling':
             # TODO remove in future
