@@ -575,9 +575,6 @@ def loadBinaryProxy(path, human, type):
         proxy.weights = np.zeros((num_refs,3), dtype=np.float32)
         proxy.weights[:,0] = npzfile['weights']
 
-    if len(proxy.ref_wvIdxs) == 0:
-        proxy.ref_wvIdxs = proxy.ref_vIdxs
-
     if "deleteVerts" in npzfile:
         proxy.deleteVerts = npzfile['deleteVerts']
 
