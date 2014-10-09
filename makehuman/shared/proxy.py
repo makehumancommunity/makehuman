@@ -853,30 +853,33 @@ def peekMetadata(proxyFilePath):
     #if zipfile.is_zipfile(proxyFilePath):
     # Using the extension is faster (and will have to do):
     if os.path.splitext(proxyFilePath)[1][1:].lower() == 'mhpxy':
-        # Binary proxy file
-        npzfile = np.load(proxyFilePath)
+        try:
+            # Binary proxy file
+            npzfile = np.load(proxyFilePath)
 
-        uuid = npzfile['uuid'].tostring()
-        tags = set(_unpackStringList(npzfile['tags_str'], npzfile['tags_idx']))
-        return (uuid, tags)
-    else:
-        # ASCII proxy file
-        from codecs import open
-        fp = open(proxyFilePath, 'rU', encoding="utf-8")
-        uuid = None
-        tags = set()
-        for line in fp:
-            words = line.split()
-            if len(words) == 0:
-                pass
-            elif words[0] == 'uuid':
-                uuid = words[1]
-            elif words[0] == 'tag':
-                tags.add(words[1].lower())
-            elif words[0] == 'verts':
-                break
-        fp.close()
-        return (uuid, tags)
+            uuid = npzfile['uuid'].tostring()
+            tags = set(_unpackStringList(npzfile['tags_str'], npzfile['tags_idx']))
+            return (uuid, tags)
+        except Exception as e:
+            log.warning("Problem loading metadata from binary proxy, trying ASCII file: %s", e, exc_info=True)
+
+    # ASCII proxy file
+    from codecs import open
+    fp = open(proxyFilePath, 'rU', encoding="utf-8")
+    uuid = None
+    tags = set()
+    for line in fp:
+        words = line.split()
+        if len(words) == 0:
+            pass
+        elif words[0] == 'uuid':
+            uuid = words[1]
+        elif words[0] == 'tag':
+            tags.add(words[1].lower())
+        elif words[0] == 'verts':
+            break
+    fp.close()
+    return (uuid, tags)
 
 
 def _packStringList(strings):
