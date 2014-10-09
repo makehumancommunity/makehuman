@@ -105,8 +105,7 @@ class Proxy:
         self.material = material.Material(self.name)
 
         self._obj_file = None
-        self._vertexgroup_file = None    # TODO document, is this still used?
-        self.vertexGroups = None
+        self._vertexBoneWeights_file = None
         self._material_file = None
 
         self.deleteVerts = np.zeros(human.meshData.getVertexCount(), bool)
@@ -123,9 +122,9 @@ class Proxy:
         return _getFilePath(self._obj_file, folder, ['npz', 'obj'])
 
     @property
-    def vertexgroup_file(self):
+    def vertexBoneWeights_file(self):
         folder = os.path.dirname(self.file) if self.file else None
-        return _getFilePath(self._vertexgroup_file, folder)
+        return _getFilePath(self.__vertexBoneWeights_file, folder)
 
     def __repr__(self):
         return ("<Proxy %s %s %s %s>" % (self.name, self.type, self.file, self.uuid))
@@ -373,10 +372,6 @@ def loadTextProxy(human, filepath, type="Clothes"):
         elif key == 'obj_file':
             proxy._obj_file = _getFileName(folder, words[1], ".obj")
 
-        elif key == 'vertexgroup_file':
-            proxy.vertexgroup_file = _getFileName(folder, words[1], ".json")
-            proxy.vertexGroups = json.load(open(proxy.vertexgroup_file, "rU"))
-
         elif key == 'material':
             matFile = _getFileName(folder, words[1], ".mhmat")
             proxy._material_file = matFile
@@ -384,8 +379,8 @@ def loadTextProxy(human, filepath, type="Clothes"):
 
         elif key == 'vertexboneweights_file':
             from animation import VertexBoneWeights
-            weightsfile = _getFileName(folder, words[1], ".jsonw")
-            proxy.vertexBoneWeights = VertexBoneWeights.fromFile(weightsfile)
+            proxy._vertexBoneWeights_file = _getFileName(folder, words[1], ".jsonw")
+            proxy.vertexBoneWeights = VertexBoneWeights.fromFile(proxy.vertexBoneWeights_file)
 
         elif key == 'backface_culling':
             # TODO remove in future
@@ -441,7 +436,7 @@ def loadTextProxy(human, filepath, type="Clothes"):
         elif key == 'basemesh':
             proxy.basemesh = words[1]
 
-        elif key in ['shapekey', 'subsurf', 'shrinkwrap', 'solidify', 'objfile_layer', 'uvtex_layer', 'use_projection', 'mask_uv_layer', 'texture_uv_layer', 'delete']:
+        elif key in ['shapekey', 'subsurf', 'shrinkwrap', 'solidify', 'objfile_layer', 'uvtex_layer', 'use_projection', 'mask_uv_layer', 'texture_uv_layer', 'delete', 'vertexgroup_file']:
             log.warning('Deprecated parameter "%s" used in proxy file. Please remove.', key)
 
 
@@ -534,8 +529,8 @@ def saveBinaryProxy(proxy, path):
         vars_["weights"] = proxy.weights[:,0]
     vars_['num_refverts'] = np.asarray(num_refverts, dtype=np.int32)
 
-    if proxy.vertexgroup_file:
-        vars_['vertexgroup_file'] = np.fromstring(_properPath(proxy.vertexgroup_file), dtype='S1')
+    if proxy.vertexBoneWeights_file:
+        vars_['vertexBoneWeights_file'] = np.fromstring(_properPath(proxy.vertexBoneWeights_file), dtype='S1')
 
     np.savez_compressed(fp, **vars_)
     fp.close()
@@ -603,10 +598,10 @@ def loadBinaryProxy(path, human, type):
 
     proxy._obj_file = npzfile['obj_file'].tostring()
 
-    if 'vertexgroup_file' in npzfile:
-        proxy._vertexgroup_file = npzfile['vertexgroup_file'].tostring()
-        if proxy.vertexgroup_file:
-            proxy.vertexGroups = json.load(open(proxy.vertexgroup_file, "rU"))
+    if 'vertexBoneWeights_file' in npzfile:
+        proxy._vertexBoneWeights_file = npzfile['vertexBoneWeights_file'].tostring()
+        if proxy.vertexBoneWeights_file:
+            proxy.vertexBoneWeights = VertexBoneWeights.fromFile(proxy.vertexBoneWeights_file)
 
 
     if proxy.z_depth == -1:
