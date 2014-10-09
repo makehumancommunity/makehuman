@@ -434,14 +434,14 @@ def parse_arguments():
 
 def getCopyrightMessage(short=False):
     if short:
-        return """MakeHuman Copyright (C) 2014 http://www.makehuman.org
+        return """MakeHuman Copyright (C) 2001-2014 http://www.makehuman.org
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it
 under certain conditions. For details use the option --license"""
 
     return """Makehuman is a completely free, open source, innovative and 
 professional software for the modelling of 3-Dimensional humanoid characters
-Copyright (C) 2014  www.makehuman.org
+Copyright (C) 2001-2014  www.makehuman.org
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
