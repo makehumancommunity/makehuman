@@ -1054,6 +1054,12 @@ class MHApplication(gui3d.Application, mh.Application):
             self.dialog.helpIds.update(self.helpIds)
         return self.dialog.prompt(title, text, button1Label, button2Label, button1Action, button2Action, helpId, fmtArgs)
 
+    def about(self):
+        """
+        Show about dialog
+        """
+        gui.QtGui.QMessageBox.about(self.mainwin, 'About MakeHuman', mh.getCopyrightMessage())
+
     def setGlobalCamera(self):
         human = self.selectedHuman
 

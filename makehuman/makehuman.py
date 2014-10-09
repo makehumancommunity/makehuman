@@ -10,7 +10,7 @@ MakeHuman python entry-point.
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Glynn Clements, Joel Palmius, Jonas Hauquier
+**Authors:**           Manuel Bastioni, Glynn Clements, Jonas Hauquier, Joel Palmius
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
@@ -412,6 +412,7 @@ def parse_arguments():
 
     # optional arguments
     parser.add_argument('-v', '--version', action='version', version=getVersionStr())
+    parser.add_argument("--license", action="store_true", help="Show full copyright notice and software license")
     parser.add_argument("--noshaders", action="store_true", help="disable shaders")
     parser.add_argument("--nomultisampling", action="store_true", help="disable multisampling (used for anti-aliasing and alpha-to-coverage transparency rendering)")
     parser.add_argument("--debugopengl", action="store_true", help="enable OpenGL error checking and logging (slow)")
@@ -424,9 +425,66 @@ def parse_arguments():
     parser.add_argument("mhmFile", default=None, nargs='?', help=".mhm file to load (optional)")
 
     argOptions = vars(parser.parse_args())
+
+    if argOptions.get('license', False):
+        print "\n" + getCopyrightMessage() + "\n"
+        sys.exit(0)
+
     return argOptions
 
+def getCopyrightMessage(short=False):
+    if short:
+        return """MakeHuman Copyright (C) 2014 http://www.makehuman.org
+This program comes with ABSOLUTELY NO WARRANTY.
+This is free software, and you are welcome to redistribute it
+under certain conditions. For details use the option --license"""
+
+    return """Makehuman is a completely free, open source, innovative and 
+professional software for the modelling of 3-Dimensional humanoid characters
+Copyright (C) 2014  www.makehuman.org
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+MakeHuman's source code and its mesh data is distributed freely under 
+the AGPL3 license (see license.txt). Content created using the MakeHuman 
+application is released under the liberal CC0 license. For more details, 
+refer to these pages:
+
+    http://www.makehuman.org/doc/node/the_makehuman_application.html
+    http://www.makehuman.org/doc/node/makehuman_mesh_license.html
+
+Licenses for dependencies are included in the licenses folder.
+
+
+For further help, have a look at our documentation at 
+    http://www.makehuman.org/documentation
+Frequently asked questions are found at
+    http://www.makehuman.org/faq
+
+
+The MakeHuman team can be contacted at http://www.makehuman.org
+If you have other questions, feel free to ask them on our forums at 
+    http://www.makehuman.org/forum/
+Bugs can be reported on the project's bug tracker
+    http://bugtracker.makehuman.org
+"""
+
+
 def main():
+    print getCopyrightMessage(short=True) + "\n"
+
     try:
         set_sys_path()
         make_user_dir()

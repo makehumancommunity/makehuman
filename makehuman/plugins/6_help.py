@@ -41,6 +41,7 @@ import gui3d
 import webbrowser
 import mh
 import gui
+from gui import QtGui
 
 class HelpTaskView(gui3d.TaskView):
 
@@ -48,13 +49,20 @@ class HelpTaskView(gui3d.TaskView):
         
         gui3d.TaskView.__init__(self, category, 'Help')
 
+        aboutBox = self.addLeftWidget(gui.GroupBox('About MakeHuman'))
+        self.aboutButton = aboutBox.addWidget(gui.Button("About"))
+
         optionsBox = self.addLeftWidget(gui.GroupBox('Support options'))
         self.manualButton = optionsBox.addWidget(gui.Button("Manual"))
         self.reportBugButton = optionsBox.addWidget(gui.Button("Report bug"))
         self.requestFeatureButton = optionsBox.addWidget(gui.Button("Request feature"))   
         self.forumButton = optionsBox.addWidget(gui.Button("Forum")) 
-        self.facebookButton = optionsBox.addWidget(gui.Button("FaceBook page"))        
-        
+        self.facebookButton = optionsBox.addWidget(gui.Button("FaceBook page")) 
+
+        @self.aboutButton.mhEvent
+        def onClicked(event):
+            gui3d.app.about()
+
         @self.manualButton.mhEvent
         def onClicked(event):
             webbrowser.open('http://www.makehuman.org/documentation');
