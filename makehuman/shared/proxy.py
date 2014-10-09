@@ -351,7 +351,7 @@ def loadTextProxy(human, filepath, type="Clothes"):
             proxy.uuid = " ".join(words[1:])
         elif key == 'tag':
             proxy.tags.append( " ".join(words[1:]).lower() )
-        if key == 'version':
+        elif key == 'version':
             proxy.version = int(words[1])
         elif key == 'z_depth':
             proxy.z_depth = int(words[1])
