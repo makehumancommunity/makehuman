@@ -181,7 +181,7 @@ class ModifierSlider(gui.Slider):
         """Synchronize slider value with value of its modifier, make it up to
         date.
         """
-        human = G.app.selectedHuman
+        human = self.modifier.modifier
         self.blockSignals(True)
         if not self.slider.isSliderDown():
             # Only update slider position when it is not being clicked or dragged
