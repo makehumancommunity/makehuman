@@ -309,6 +309,12 @@ def loadProxy(human, path, type="Clothes"):
                     saveBinaryProxy(proxy, npzpath)
                 except StandardError:
                     log.notice('unable to save compiled proxy: %s', npzpath, exc_info=True)
+                    if os.path.isfile(npzpath):
+                        # Remove file again, in case an empty file is left
+                        try:
+                            os.remove(npzpath)
+                        except Exception as e:
+                            log.warning("Could not remove empty file %s that was left behind (%s).", npzpath, e)
             else:
                 log.debug('Not writing compiled proxies to system paths (%s).', npzpath)
     except:
