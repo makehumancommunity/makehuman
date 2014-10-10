@@ -64,6 +64,17 @@ for name in SimpleProxyTypes:
 _A7converter = None
 Unit3 = np.identity(3,float)
 
+class License:
+    def __init__(self):
+        self.author = "MakeHuman Team"
+        self.license = "AGPL3 (see also http://www.makehuman.org/doc/node/external_tools_license.html)"
+        self.homepage = "http://www.makehuman.org/"
+
+    def addStatement(self, words):
+        key = words[0]
+        if key in ["author", "license", "homepage"]:
+            setattr(self, key, " ".join(words[1:]))
+
 
 class Proxy:
     def __init__(self, file, type, human):
@@ -72,6 +83,7 @@ class Proxy:
 
         name = os.path.splitext(os.path.basename(file))[0]
         self.name = name.capitalize().replace(" ","_")
+        self.license = License()
         self.type = type
         self.object = None
         self.human = human
@@ -381,6 +393,11 @@ def loadTextProxy(human, filepath, type="Clothes"):
 
         if words[0].startswith('#') or words[0].startswith('//'):
             # Comment
+            if len(words) > 1:
+                if len(words[0]) == 1:
+                    proxy.license.addStatement(words[1:])
+                else:
+                    proxy.license.addStatement(words[0][1:] + words[1:])
             continue
 
         key = words[0]
@@ -389,6 +406,8 @@ def loadTextProxy(human, filepath, type="Clothes"):
             proxy.name = " ".join(words[1:])
         elif key == 'uuid':
             proxy.uuid = " ".join(words[1:])
+        elif key in ['author', 'license', 'homepage']:
+            proxy.license.addStatement(words)
         elif key == 'tag':
             proxy.tags.append( " ".join(words[1:]).lower() )
         elif key == 'z_depth':
