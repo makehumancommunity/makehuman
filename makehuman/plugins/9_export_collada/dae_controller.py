@@ -82,11 +82,10 @@ def writeSkinController(fp, human, mesh, skel, config):
 
     # Remap vertex weights to mesh
     if obj.proxy:
-        import skeleton
-        parentWeights = skeleton.getProxyWeights(obj.proxy, rawWeights)
+        parentWeights = obj.proxy.getVertexWeights(rawWeights)
     else:
         parentWeights = rawWeights
-    weights = mesh.getWeights(parentWeights)
+    weights = mesh.getVertexWeights(parentWeights)
 
 
     vertexWeights = [list() for _ in xrange(nVerts)]
@@ -154,7 +153,6 @@ def writeSkinController(fp, human, mesh, skel, config):
 
     progress(0.4, 0.6)
     for bone in skel.getBones():
-        #mat = la.inv(bone.getRestOrTPoseMatrix(config))    # TODO remove (this is a hack)
         mat = la.inv(bone.getRestMatrix(config.meshOrientation, config.localBoneAxis, config.offset))
         for i in range(4):
             fp.write('\n           ')

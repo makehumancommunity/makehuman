@@ -387,9 +387,13 @@ class MHApplication(gui3d.Application, mh.Application):
 
         @self.selectedHuman.mhEvent
         def onChanged(event):
+            self.actions.pose.setEnabled(self.selectedHuman.isPoseable())
+
             if event.change == 'smooth':
                 # Update smooth action state (without triggering it)
                 self.actions.smooth.setChecked(self.selectedHuman.isSubdivided())
+            elif event.change in ['poseState', 'poseRefresh']:
+                self.actions.pose.setChecked(self.selectedHuman.isPosed())
             elif event.change == 'load':
                 self.currentFile.loaded(event.path)
             elif event.change == 'save':
@@ -1030,10 +1034,14 @@ class MHApplication(gui3d.Application, mh.Application):
         else:
             self.progressBar.setProgress(value)
 
+        self.mainwin.canvas.blockRedraw = True
+
         # Process all non-user-input events in the queue to run callAsync tasks.
         # This is invoked here so events are processed in every step during the
         # onStart() init sequence.
         self.processEvents()
+
+        self.mainwin.canvas.blockRedraw = False
 
     # Global dialog
     def prompt(self, title, text, button1Label, button2Label=None, button1Action=None, button2Action=None, helpId=None, fmtArgs = None):
@@ -1045,6 +1053,12 @@ class MHApplication(gui3d.Application, mh.Application):
             self.dialog = gui.Dialog(self.mainwin)
             self.dialog.helpIds.update(self.helpIds)
         return self.dialog.prompt(title, text, button1Label, button2Label, button1Action, button2Action, helpId, fmtArgs)
+
+    def about(self):
+        """
+        Show about dialog
+        """
+        gui.QtGui.QMessageBox.about(self.mainwin, 'About MakeHuman', mh.getCopyrightMessage())
 
     def setGlobalCamera(self):
         human = self.selectedHuman
@@ -1266,6 +1280,10 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def toggleSubdivision(self):
         self.selectedHuman.setSubdivided(self.actions.smooth.isChecked(), True)
+        self.redraw()
+
+    def togglePose(self):
+        self.selectedHuman.setPosed(self.actions.pose.isChecked())
         self.redraw()
 
     def symmetryRight(self):
@@ -1501,6 +1519,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.actions.smooth    = action('smooth',    self.getLanguageString('Smooth'),        self.toggleSubdivision, toggle=True)
         self.actions.wireframe = action('wireframe', self.getLanguageString('Wireframe'),     self.toggleSolid, toggle=True)
+        self.actions.pose      = action('pose', self.getLanguageString('Pose'),               self.togglePose,  toggle=True)
 
 
         # 4 - Symmetry toolbar

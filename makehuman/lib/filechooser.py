@@ -391,7 +391,6 @@ class TaggedFileLoader(FileHandler):
         """
         Load tags from mhclo file.
         """
-        import exportutils.config
         for file in files:
             label = getpath.pathToUnicode( os.path.basename(file) )
             if len(self.fileChooser.extensions) > 0:

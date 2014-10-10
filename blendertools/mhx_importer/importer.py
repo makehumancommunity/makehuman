@@ -35,7 +35,7 @@ from bpy.props import *
 from .error import *
 from .rigify import rigifyMhx
 
-VERSION = (1,17,0)
+VERSION = (1,18,0)
 
 def setVersion(bl_info):
     global VERSION, FROM_VERSION, version
@@ -355,12 +355,13 @@ def readMhxFile(filePath):
     # Parse:
     # Take the list of tokens and create stuff
 
-    scn = clearScene()
     print( "Parsing" )
     parse(tokens)
 
     if theArmature:
+        scn = bpy.context.scene
         scn.objects.active = theArmature
+        print(scn, bpy.context.object, scn.objects.active)
         bpy.ops.object.mode_set(mode='OBJECT')
         bpy.ops.object.select_all(action='DESELECT')
         theArmature.select = True
@@ -449,9 +450,15 @@ def printMHXVersionInfo(versionStr, performVersionCheck = False):
             continue
         print("%s: %s" % (key, value))
 
+
 def parse(tokens):
-    global MHX249, ifResult, One, version, theArmature
+    global MHX249, ifResult, One, version, theArmature, theLayers
     versionInfoStr = ""
+
+    scn = bpy.context.scene
+    theLayers = list(scn.layers)
+    theLayers[19] = False
+    scn.layers = len(scn.layers)*[True]
 
     for (key, val, sub) in tokens:
         data = None
@@ -535,6 +542,7 @@ def parse(tokens):
         else:
             data = parseDefaultType(key, val, sub)
 
+    scn.layers = theLayers
 
 #
 #    parseDefaultType(typ, args, tokens):
@@ -567,133 +575,42 @@ def concatList(elts):
 
 #
 #    parseAction(args, tokens):
-#    parseFCurve(fcu, args, tokens):
-#    parseKeyFramePoint(pt, args, tokens):
+#    parseActionFCurve(act, args, tokens):
 #
 
 def parseAction(args, tokens):
     name = args[0]
-    if invalid(args[1]):
-        return
-
-    ob = bpy.context.object
-    bpy.ops.object.mode_set(mode='POSE')
-    if ob.animation_data:
-        ob.animation_data.action = None
-    created = {}
+    act = bpy.data.actions.new(name)
     for (key, val, sub) in tokens:
         if key == 'FCurve':
-            prepareActionFCurve(ob, created, val, sub)
-
-    act = ob.animation_data.action
-    loadedData['Action'][name] = act
-    if act is None:
-        print("Ignoring action %s" % name)
-        return act
-    act.name = name
-    print("Action", name, act, ob)
-
-    for (key, val, sub) in tokens:
-        if key == 'FCurve':
-            fcu = parseActionFCurve(act, ob, val, sub)
+            fcu = parseActionFCurve(act, val, sub)
         else:
             defaultKey(key, val, sub, act)
-    ob.animation_data.action = None
-    bpy.ops.object.mode_set(mode='OBJECT')
+
+    ob = bpy.context.object
+    ob.keyframe_insert(data_path="location", frame=1)
+    ob.animation_data.action = act
     return act
 
-def prepareActionFCurve(ob, created, args, tokens):
-    dataPath = args[0]
-    index = args[1]
-    (expr, channel) = channelFromDataPath(dataPath, index)
-    try:
-        if channel in created[expr]:
-            return
-        else:
-            created[expr].append(channel)
-    except:
-        created[expr] = [channel]
 
-    times = []
+def parseActionFCurve(act, args, tokens):
+    datapath = args[0]
+    idx = int(args[1])
+    words = datapath.split('"')
+    if len(words) > 1:
+        bone = words[1]
+    fcu = act.fcurves.new(data_path=datapath, index=idx, action_group=bone)
+
+    keypoints = [(float(val[0]), float(val[1])) for (key, val, sub) in tokens if key == 'kp']
+    fcu.keyframe_points.add(len(keypoints))
+    for n,kp in enumerate(keypoints):
+        fcu.keyframe_points[n].co = kp
+
     for (key, val, sub) in tokens:
-        if key == 'kp':
-            times.append(int(val[0]))
-
-    try:
-        data = mhxEval(expr)
-    except:
-        print("Ignoring illegal expression: %s" % expr)
-        return
-
-    n = 0
-    for t in times:
-        #bpy.context.scene.current_frame = t
-        bpy.ops.anim.change_frame(frame = t)
-        try:
-            data.keyframe_insert(channel)
-            n += 1
-        except:
-            pass
-            #print("failed", data, expr, channel)
-    if n != len(times):
-        print("Mismatch", n, len(times), expr, channel)
-    return
-
-def channelFromDataPath(dataPath, index):
-    words = dataPath.split(']')
-    if len(words) == 1:
-        # location
-        expr = "ob"
-        channel = dataPath
-    elif len(words) == 2:
-        # pose.bones["tongue"].location
-        expr = "ob.%s]" % (words[0])
-        cwords = words[1].split('.')
-        channel = cwords[1]
-    elif len(words) == 3:
-        # pose.bones["brow.R"]["mad"]
-        expr = "ob.%s]" % (words[0])
-        cwords = words[1].split('"')
-        channel = cwords[1]
-    return (expr, channel)
-
-def parseActionFCurve(act, ob, args, tokens):
-    dataPath = args[0]
-    index = args[1]
-    (expr, channel) = channelFromDataPath(dataPath, index)
-    index = int(args[1])
-
-    success = False
-    for fcu in act.fcurves:
-        (expr1, channel1) = channelFromDataPath(fcu.data_path, fcu.array_index)
-        if expr1 == expr and channel1 == channel and fcu.array_index == index:
-            success = True
-            break
-    if not success:
-        return None
-
-    n = 0
-    for (key, val, sub) in tokens:
-        if key == 'kp':
-            try:
-                pt = fcu.keyframe_points[n]
-                pt.interpolation = 'LINEAR'
-                pt = parseKeyFramePoint(pt, val, sub)
-                n += 1
-            except:
-                pass
-                #print(tokens)
-                #MyError("kp", fcu, n, len(fcu.keyframe_points), val)
-        else:
+        if key != 'kp':
             defaultKey(key, val, sub, fcu)
     return fcu
 
-def parseKeyFramePoint(pt, args, tokens):
-    pt.co = (float(args[0]), float(args[1]))
-    if len(args) > 2:
-        pt.handle1 = (float(args[2]), float(args[3]))
-        pt.handle2 = (float(args[3]), float(args[5]))
-    return pt
 
 #
 #    parseAnimationData(rna, args, tokens):
@@ -740,8 +657,7 @@ def parseAnimDataFCurve(adata, rna, args, tokens):
     return fcu
 
 
-def parseDriver(adata, dataPath, index, rna, args, tokens):
-    # First get fcurve from datapath.
+def getRnaFromDataPath(rna, dataPath):
     # Want to split with ., but bone names may contain . as well,
     # e.g. pose.bones["toe.01.R"].rotation_euler
     import re
@@ -761,8 +677,12 @@ def parseDriver(adata, dataPath, index, rna, args, tokens):
             attr = words2[0]
             idx = mhxEval(words2[1][:-1])
             rna = getattr(rna, attr)[idx]
-    fcu = rna.driver_add(words[-1])
+    return rna, words[-1]
 
+
+def parseDriver(adata, dataPath, index, rna, args, tokens):
+    rna,channel = getRnaFromDataPath(rna, dataPath)
+    fcu = rna.driver_add(channel)
     if fcu is None:
         raise MyError("Cannot parse driver:\n  %s" % dataPath)
 
@@ -1126,6 +1046,8 @@ def parseImage(args, tokens):
 #
 
 def parseObject(args, tokens, versionInfoStr=""):
+    global theLayers
+
     if verbosity > 2:
         print( "Parsing object %s" % args )
     name = args[0]
@@ -1165,6 +1087,12 @@ def parseObject(args, tokens, versionInfoStr=""):
             parseParticleSystem(ob, val, sub)
         elif key == 'FieldSettings':
             parseDefault(ob.field, sub, {}, [])
+        elif key == 'layers':
+            if val[-1] == '1':
+                ob.layers = 19*[False] + [True]
+            else:
+                ob.layers = theLayers
+            print(ob.name, list(ob.layers))
         else:
             defaultKey(key, val, sub, ob, ['type', 'data'])
 
@@ -1932,7 +1860,6 @@ def correctRig(args):
         ob = loadedData['Object'][human]
     except:
         return
-    ob.MhxShapekeyDrivers = (toggle&T_Shapekeys != 0 and toggle&T_ShapeDrivers != 0)
     bpy.context.scene.objects.active = ob
     bpy.ops.object.mode_set(mode='POSE')
     amt = ob.data
@@ -2290,41 +2217,30 @@ def invalid(condition):
 
 
 #
-#    clearScene(context):
-#
-
-def clearScene():
-    scn = bpy.context.scene
-    for n in range(len(scn.layers)):
-        scn.layers[n] = True
-    return scn
-
-#
 #    hideLayers(args):
 #    args = sceneLayers sceneHideLayers boneLayers boneHideLayers or nothing
 #
 
 def hideLayers(args):
+    global theLayers
+
     if len(args) > 1:
         sceneLayers = int(args[2], 16)
-        sceneHideLayers = int(args[3], 16)
+        #sceneHideLayers = int(args[3], 16)
+        sceneHideLayers = 0x8000
+        hidelayers = [19]
         boneLayers = int(args[4], 16)
         # boneHideLayers = int(args[5], 16)
         boneHideLayers = 0
     else:
         sceneLayers = 0x00ff
         sceneHideLayers = 0
+        hidelayers = []
         boneLayers = 0
         boneHideLayers = 0
 
     scn = bpy.context.scene
     mask = 1
-    hidelayers = []
-    for n in range(20):
-        scn.layers[n] = True if sceneLayers & mask else False
-        if sceneHideLayers & mask:
-            hidelayers.append(n)
-        mask = mask << 1
 
     for ob in scn.objects:
         for n in hidelayers:

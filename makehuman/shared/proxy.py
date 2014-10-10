@@ -46,7 +46,7 @@ import log
 from collections import OrderedDict
 
 import material
-import io_json
+import json
 
 
 #
@@ -97,12 +97,15 @@ class Proxy:
         self.uuid = None
         self.basemesh = makehuman.getBasemeshVersion()
         self.tags = []
+        self.version = 101
 
         self.ref_vIdxs = None       # (Vidx1,Vidx2,Vidx3) list with references to human vertex indices, indexed by proxy vert
-        self.ref_wvIdxs = None      # as ref_vIdxs, but used for weighting if there is a weighting_verts table
         self.weights = None         # (w1,w2,w3) list, with weights per human vertex (mapped by ref_vIdxs), indexed by proxy vert
         self.vertWeights = {}       # (proxy-vert, weight) list for each parent vert (reverse mapping of self.weights, indexed by human vertex)
         self.offsets = None         # (x,y,z) list of vertex offsets, indexed by proxy vert
+
+        self.vertexBoneWeights = None   # Explicitly defined custom vertex-to-bone weights, connecting the proxy mesh to the reference skeleton (optional)
+                                        # Not to be confused with the vertex weights assigned for mapping the proxy mesh geometry to the base mesh
 
         self.tmatrix = TMatrix()    # Offset transformation matrix. Replaces scale
 
@@ -114,11 +117,10 @@ class Proxy:
         self.material = material.Material(self.name)
 
         self._obj_file = None
-        self._vertexgroup_file = None    # TODO document, is this still used?
-        self.vertexGroups = None
+        self._vertexBoneWeights_file = None
         self._material_file = None
 
-        self.deleteVerts = np.zeros(len(human.meshData.coord), bool)
+        self.deleteVerts = np.zeros(human.meshData.getVertexCount(), bool)
 
 
     @property
@@ -132,9 +134,9 @@ class Proxy:
         return _getFilePath(self._obj_file, folder, ['npz', 'obj'])
 
     @property
-    def vertexgroup_file(self):
+    def vertexBoneWeights_file(self):
         folder = os.path.dirname(self.file) if self.file else None
-        return _getFilePath(self._vertexgroup_file, folder)
+        return _getFilePath(self.__vertexBoneWeights_file, folder)
 
     def __repr__(self):
         return ("<Proxy %s %s %s %s>" % (self.name, self.type, self.file, self.uuid))
@@ -156,6 +158,8 @@ class Proxy:
 
 
     def getMesh(self):
+        if not self.object:
+            return None
         return self.object.mesh
 
 
@@ -181,7 +185,7 @@ class Proxy:
         return mesh,obj
 
 
-    def _finalize(self, refVerts, wrefVerts):
+    def _finalize(self, refVerts):
         """
         Final step in parsing/loading a proxy file. Initializes numpy structures
         for performance improvement.
@@ -189,10 +193,6 @@ class Proxy:
         self.weights = np.asarray([v._weights for v in refVerts], dtype=np.float32)
         self.ref_vIdxs = np.asarray([v._verts for v in refVerts], dtype=np.uint32)
         self.offsets = np.asarray([v._offset for v in refVerts], dtype=np.float32)
-        if wrefVerts is None:
-            self.ref_wvIdxs = self.ref_vIdxs
-        else:
-            self.ref_wvIdxs = np.asarray([v._verts for v in wrefVerts], dtype=np.uint32)
 
 
     def _reloadReverseMapping(self):
@@ -200,32 +200,35 @@ class Proxy:
         Reconstruct reverse vertex (and weights) mapping
         """
         self.vertWeights = {}
-        for pxy_vIdx in xrange(self.ref_wvIdxs.shape[0]):
-            _addProxyVertWeight(self.vertWeights, self.ref_wvIdxs[pxy_vIdx, 0], pxy_vIdx, self.weights[pxy_vIdx, 0])
-            _addProxyVertWeight(self.vertWeights, self.ref_wvIdxs[pxy_vIdx, 1], pxy_vIdx, self.weights[pxy_vIdx, 1])
-            _addProxyVertWeight(self.vertWeights, self.ref_wvIdxs[pxy_vIdx, 2], pxy_vIdx, self.weights[pxy_vIdx, 2])
+        for pxy_vIdx in xrange(self.ref_vIdxs.shape[0]):
+            _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 0], pxy_vIdx, self.weights[pxy_vIdx, 0])
+            _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 1], pxy_vIdx, self.weights[pxy_vIdx, 1])
+            _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 2], pxy_vIdx, self.weights[pxy_vIdx, 2])
 
 
-    def getCoords(self):
-        hmesh = self.human.meshData
-        matrix = self.tmatrix.getMatrix(hmesh)
+    def getCoords(self, fit_to_posed=False):
+        if fit_to_posed:
+            hcoord = self.human.meshData.coord
+        else:
+            hcoord = self.human.getRestposeCoordinates()
+        matrix = self.tmatrix.getMatrix(hcoord)
 
         ref_vIdxs = self.ref_vIdxs
         weights = self.weights
 
         coord = (
-            hmesh.coord[ref_vIdxs[:,0]] * weights[:,0,None] +
-            hmesh.coord[ref_vIdxs[:,1]] * weights[:,1,None] +
-            hmesh.coord[ref_vIdxs[:,2]] * weights[:,2,None] +
+            hcoord[ref_vIdxs[:,0]] * weights[:,0,None] +
+            hcoord[ref_vIdxs[:,1]] * weights[:,1,None] +
+            hcoord[ref_vIdxs[:,2]] * weights[:,2,None] +
             np.dot(matrix, self.offsets.transpose()).transpose()
             )
 
         return coord
 
 
-    def update(self, mesh):
+    def update(self, mesh, fit_to_posed=False):
         #log.debug("Updating proxy %s.", self.name)
-        coords = self.getCoords()
+        coords = self.getCoords(fit_to_posed)
         mesh.changeCoords(coords)
         mesh.calcNormals()
 
@@ -236,109 +239,66 @@ class Proxy:
         else:
             return self.name
 
+    def hasCustomVertexWeights(self):
+        """
+        Determines whether this proxy explicitly defines its own set of vertex
+        to bone weights (defined on the bones of the reference skeleton).
+        Returns True if this proxy has custom vertex weights, False if it does
+        not, in which case vertex weights will be derived from the weights of
+        the basemesh, mapped through the vertex mapping of the proxy.
+        """
+        return self.vertexBoneWeights is not None
 
-    def getWeights(self, rawWeights, amt=None):
+
+    def getVertexWeights(self, humanWeights):
         """
         Map armature weights mapped to the human to the proxy mesh through the
         proxy mapping.
+        humanWeights is expected to be an animation.VertexBoneWeights object
+
+        Note: these vertex weights are intended for rigging and are not to be 
+        confused with getWeights() which returns the weights of the proxy 
+        mapping to the basemesh.
         """
-        if amt and self.vertexGroups:
-            weights = OrderedDict()
-            for name,data in self.vertexGroups:
-                for bone in amt.bones.values():
-                    if bone.origName == name:
-                        name1 = bone.name
-                        break
-                for name2 in [
-                    "DEF-"+name1,
-                    "DEF-"+name1.replace(".L", ".03.L"),
-                    "DEF-"+name1.replace(".R", ".03.R"),
-                    name1]:
-                    if name2 in rawWeights:
-                        weights[name2] = data
-                        break
-            return weights
+        if self.getMesh():
+            vertexCount = self.getMesh().getVertexCount()
+        else:
+            vertexCount = None
 
-        return self._getWeights1(rawWeights)
+        # Override proxy weights mapping behaviour if this proxy has its own 
+        # bone weights defined explicitly.
+        # This requires remapping the vertex weights of the proxy, defined on
+        # the bones of the reference skeleton, to those of the current skeleton.
+        # The current skeleton is retrieved from the human object linked to this
+        # proxy.
+        if self.hasCustomVertexWeights():
+            return self.human.getSkeleton().getVertexWeights(self.vertexBoneWeights, vertexCount)
 
-    def _getWeights1(self, rawWeights):
+        WEIGHT_THRESHOLD = 1e-4  # Threshold for including bone weight
         weights = OrderedDict()
-        if not rawWeights:
-            return weights
 
-        def _fixVertexGroup(vgroup):
-            fixedVGroup = []
-            vgroup.sort()
-            pv = -1
-            while vgroup:
-                (pv0, wt0) = vgroup.pop()
-                if pv0 == pv:
-                    wt += wt0
-                else:
-                    if pv >= 0 and wt > 1e-4:
-                        fixedVGroup.append((pv, wt))
-                    (pv, wt) = (pv0, wt0)
-            if pv >= 0 and wt > 1e-4:
-                fixedVGroup.append((pv, wt))
-            return fixedVGroup
-
-        for key in rawWeights.keys():
+        for bname, (indxs, wghts) in humanWeights.data.items():
             vgroup = []
             empty = True
-            for (v,wt) in rawWeights[key]:
+            for (v,wt) in zip(indxs, wghts):
                 try:
                     vlist = self.vertWeights[v]
                 except KeyError:
                     vlist = []
                 for (pv, w) in vlist:
                     pw = w*wt
-                    if (pw > 1e-4):
+                    if (pw > WEIGHT_THRESHOLD):
                         vgroup.append((pv, pw))
                         empty = False
             if not empty:
-                weights[key] = _fixVertexGroup(vgroup)
-        return weights
-
-
-
-    def getShapes(self, rawShapes, scale):
-        # TODO document
-
-        # TODO dependency on richmesh?
-        from richmesh import FakeTarget
-
-        targets = []
-        if (not rawShapes) or (self.type not in ['Proxymeshes', 'Clothes']):
-            return targets
-
-        for (key, rawShape) in rawShapes:
-            shape = {}
-            for n,vn in enumerate(rawShape.verts):
-                try:
-                    pvlist = self.vertWeights[vn]
-                except KeyError:
-                    pvlist = []
-                for (pv, w) in pvlist:
-                    dr = scale*w*rawShape.data[n]
-                    try:
-                        shape[pv] += dr
-                    except KeyError:
-                        shape[pv] = dr
-
-            verts = []
-            data = []
-            for pv,dr in shape.items():
-                if np.dot(dr,dr) > 1e-8:
-                    verts.append(pv)
-                    data.append(dr)
-            targets.append((key, FakeTarget(rawShape.name, verts, data)))
-        return targets
+                weights[bname] = vgroup
+        
+        return humanWeights.create(weights)#, vertexCount)
 
 
 doRefVerts = 1
 doWeights = 2
 doDeleteVerts = 3
-doWeightingVerts = 4
 
 def loadProxy(human, path, type="Clothes"):
     try:
@@ -380,9 +340,9 @@ def loadTextProxy(human, filepath, type="Clothes"):
     folder = os.path.realpath(os.path.expanduser(os.path.dirname(filepath)))
     proxy = Proxy(filepath, type, human)
     refVerts = []
-    wrefVerts = []
 
     status = 0
+    vnum = 0
     for line in fp:
         words = line.split()
 
@@ -410,6 +370,8 @@ def loadTextProxy(human, filepath, type="Clothes"):
             proxy.license.addStatement(words)
         elif key == 'tag':
             proxy.tags.append( " ".join(words[1:]).lower() )
+        elif key == 'version':
+            proxy.version = int(words[1])
         elif key == 'z_depth':
             proxy.z_depth = int(words[1])
         elif key == 'max_pole':
@@ -417,11 +379,6 @@ def loadTextProxy(human, filepath, type="Clothes"):
 
         elif key == 'verts':
             status = doRefVerts
-            vnum = 0
-        elif key in ['weighting_verts', 'weighting-verts']:
-            status = doWeightingVerts
-            proxy.vertWeights = {}       # Throw away old list
-            wvnum = 0
         elif key == 'weights':
             status = doWeights
             if proxy.weights == None:
@@ -434,14 +391,15 @@ def loadTextProxy(human, filepath, type="Clothes"):
         elif key == 'obj_file':
             proxy._obj_file = _getFileName(folder, words[1], ".obj")
 
-        elif key == 'vertexgroup_file':
-            proxy.vertexgroup_file = _getFileName(folder, words[1], ".json")
-            proxy.vertexGroups = io_json.loadJson(proxy.vertexgroup_file)
-
         elif key == 'material':
             matFile = _getFileName(folder, words[1], ".mhmat")
             proxy._material_file = matFile
             proxy.material.fromFile(proxy.material_file)
+
+        elif key == 'vertexboneweights_file':
+            from animation import VertexBoneWeights
+            proxy._vertexBoneWeights_file = _getFileName(folder, words[1], ".jsonw")
+            proxy.vertexBoneWeights = VertexBoneWeights.fromFile(proxy.vertexBoneWeights_file)
 
         elif key == 'backface_culling':
             # TODO remove in future
@@ -497,7 +455,7 @@ def loadTextProxy(human, filepath, type="Clothes"):
         elif key == 'basemesh':
             proxy.basemesh = words[1]
 
-        elif key in ['shapekey', 'subsurf', 'shrinkwrap', 'solidify', 'objfile_layer', 'uvtex_layer', 'use_projection', 'mask_uv_layer', 'texture_uv_layer', 'delete']:
+        elif key in ['shapekey', 'subsurf', 'shrinkwrap', 'solidify', 'objfile_layer', 'uvtex_layer', 'use_projection', 'mask_uv_layer', 'texture_uv_layer', 'delete', 'vertexgroup_file']:
             log.warning('Deprecated parameter "%s" used in proxy file. Please remove.', key)
 
 
@@ -509,15 +467,6 @@ def loadTextProxy(human, filepath, type="Clothes"):
             else:
                 refVert.fromTriple(words, vnum, proxy.vertWeights)
             vnum += 1
-
-        elif status == doWeightingVerts:
-            refVert = ProxyRefVert(human)
-            wrefVerts.append(refVert)
-            if len(words) == 1:
-                refVert.fromSingle(words, wvnum, proxy.vertWeights)
-            else:
-                refVert.fromTriple(words, wvnum, proxy.vertWeights)
-            wvnum += 1
 
         elif status == doWeights:
             v = int(words[0])
@@ -546,7 +495,7 @@ def loadTextProxy(human, filepath, type="Clothes"):
         log.warning('Proxy file %s does not specify a Z depth. Using 50.', filepath)
         proxy.z_depth = 50
 
-    proxy._finalize(refVerts, wrefVerts)
+    proxy._finalize(refVerts)
 
     return proxy
 
@@ -571,6 +520,7 @@ def saveBinaryProxy(proxy, path):
         uvLayers_str = uvStr,
         uvLayers_idx = uvIdx,
         obj_file = np.fromstring(_properPath(proxy.obj_file), dtype='S1'),
+        version = np.asarray(proxy.version, dtype=np.int32)
     )
 
     if proxy.material_file:
@@ -589,19 +539,17 @@ def saveBinaryProxy(proxy, path):
         # 3 ref verts used in this proxy
         num_refverts = 3
         vars_["ref_vIdxs"] = proxy.ref_vIdxs
-        vars_["ref_wvIdxs"] = proxy.ref_wvIdxs
         vars_["offsets"] = proxy.offsets
         vars_["weights"] = proxy.weights
     else:
         # Proxy uses exact fitting exclusively: store npz file more compactly
         num_refverts = 1
         vars_["ref_vIdxs"] = proxy.ref_vIdxs[:,0]
-        vars_["ref_wvIdxs"] = proxy.ref_wvIdxs[:,0]
         vars_["weights"] = proxy.weights[:,0]
     vars_['num_refverts'] = np.asarray(num_refverts, dtype=np.int32)
 
-    if proxy.vertexgroup_file:
-        vars_['vertexgroup_file'] = np.fromstring(_properPath(proxy.vertexgroup_file), dtype='S1')
+    if proxy.vertexBoneWeights_file:
+        vars_['vertexBoneWeights_file'] = np.fromstring(_properPath(proxy.vertexBoneWeights_file), dtype='S1')
 
     np.savez_compressed(fp, **vars_)
     fp.close()
@@ -621,6 +569,9 @@ def loadBinaryProxy(path, human, type):
     proxy.uuid = npzfile['uuid'].tostring()
     proxy.basemesh = npzfile['basemesh'].tostring()
 
+    if 'version' in npzfile:
+        proxy.version = int(npzfile['version'])
+
     proxy.tags = set(_unpackStringList(npzfile['tags_str'], npzfile['tags_idx']))
 
     if 'z_depth' in npzfile:
@@ -633,27 +584,15 @@ def loadBinaryProxy(path, human, type):
 
     if num_refverts == 3:
         proxy.ref_vIdxs = npzfile['ref_vIdxs']
-        try:
-            proxy.ref_wvIdxs = npzfile['ref_wvIdxs']
-        except KeyError:
-            proxy.ref_wvIdxs = []
         proxy.offsets = npzfile['offsets']
         proxy.weights = npzfile['weights']
     else:
         num_refs = npzfile['ref_vIdxs'].shape[0]
         proxy.ref_vIdxs = np.zeros((num_refs,3), dtype=np.uint32)
         proxy.ref_vIdxs[:,0] = npzfile['ref_vIdxs']
-        try:
-            proxy.ref_wvIdxs = np.zeros((num_refs,3), dtype=np.uint32)
-            proxy.ref_wvIdxs[:,0] = npzfile['ref_wvIdxs']
-        except KeyError:
-            proxy.ref_wvIdxs = []
         proxy.offsets = np.zeros((num_refs,3), dtype=np.float32)
         proxy.weights = np.zeros((num_refs,3), dtype=np.float32)
         proxy.weights[:,0] = npzfile['weights']
-
-    if len(proxy.ref_wvIdxs) == 0:
-        proxy.ref_wvIdxs = proxy.ref_vIdxs
 
     if "deleteVerts" in npzfile:
         proxy.deleteVerts = npzfile['deleteVerts']
@@ -675,10 +614,10 @@ def loadBinaryProxy(path, human, type):
 
     proxy._obj_file = npzfile['obj_file'].tostring()
 
-    if 'vertexgroup_file' in npzfile:
-        proxy._vertexgroup_file = npzfile['vertexgroup_file'].tostring()
-        if proxy.vertexgroup_file:
-            proxy.vertexGroups = io_json.loadJson(proxy.vertexgroup_file)
+    if 'vertexBoneWeights_file' in npzfile:
+        proxy._vertexBoneWeights_file = npzfile['vertexBoneWeights_file'].tostring()
+        if proxy.vertexBoneWeights_file:
+            proxy.vertexBoneWeights = VertexBoneWeights.fromFile(proxy.vertexBoneWeights_file)
 
 
     if proxy.z_depth == -1:
@@ -733,8 +672,9 @@ class ProxyRefVert:
         return self._weights
 
     def getCoord(self, matrix):
+        hcoord = self.human.getRestposeCoordinates()
         return (
-            np.dot(self.human.meshData.coord[self._verts], self._weights) +
+            np.dot(hcoord[self._verts], self._weights) +
             np.dot(matrix, self._offset)
             )
 
@@ -787,28 +727,28 @@ class TMatrix:
             self.shearData[idx] = bbdata
 
 
-    def getMatrix(self, hmesh):
+    def getMatrix(self, hcoord):
         if self.scaleData:
             matrix = np.identity(3, float)
             for n in range(3):
                 (vn1, vn2, den) = self.scaleData[n]
-                co1 = hmesh.coord[vn1]
-                co2 = hmesh.coord[vn2]
+                co1 = hcoord[vn1]
+                co2 = hcoord[vn2]
                 num = abs(co1[n] - co2[n])
                 matrix[n][n] = (num/den)
             return matrix
 
         elif self.shearData:
-            return self.matrixFromShear(self.shearData, hmesh)
+            return self.matrixFromShear(self.shearData, hcoord)
         elif self.lShearData:
-            return self.matrixFromShear(self.lShearData, hmesh)
+            return self.matrixFromShear(self.lShearData, hcoord)
         elif self.rShearData:
-            return self.matrixFromShear(self.rShearData, hmesh)
+            return self.matrixFromShear(self.rShearData, hcoord)
         else:
             return Unit3
 
 
-    def matrixFromShear(self, shear, obj):
+    def matrixFromShear(self, shear, hcoord):
         from transformations import affine_matrix_from_points
 
         # sfaces and tfaces are the face coordinates
@@ -816,8 +756,8 @@ class TMatrix:
         tfaces = np.zeros((3,2), float)
         for n in range(3):
             (vn1, vn2, sfaces[n,0], sfaces[n,1], side) = shear[n]
-            tfaces[n,0] = obj.coord[vn1][n]
-            tfaces[n,1] = obj.coord[vn2][n]
+            tfaces[n,0] = hcoord[vn1][n]
+            tfaces[n,1] = hcoord[vn2][n]
 
         # sverts and tverts are the vertex coordinates
         sverts = []
@@ -932,30 +872,33 @@ def peekMetadata(proxyFilePath):
     #if zipfile.is_zipfile(proxyFilePath):
     # Using the extension is faster (and will have to do):
     if os.path.splitext(proxyFilePath)[1][1:].lower() == 'mhpxy':
-        # Binary proxy file
-        npzfile = np.load(proxyFilePath)
+        try:
+            # Binary proxy file
+            npzfile = np.load(proxyFilePath)
 
-        uuid = npzfile['uuid'].tostring()
-        tags = set(_unpackStringList(npzfile['tags_str'], npzfile['tags_idx']))
-        return (uuid, tags)
-    else:
-        # ASCII proxy file
-        from codecs import open
-        fp = open(proxyFilePath, 'rU', encoding="utf-8")
-        uuid = None
-        tags = set()
-        for line in fp:
-            words = line.split()
-            if len(words) == 0:
-                pass
-            elif words[0] == 'uuid':
-                uuid = words[1]
-            elif words[0] == 'tag':
-                tags.add(words[1].lower())
-            elif words[0] == 'verts':
-                break
-        fp.close()
-        return (uuid, tags)
+            uuid = npzfile['uuid'].tostring()
+            tags = set(_unpackStringList(npzfile['tags_str'], npzfile['tags_idx']))
+            return (uuid, tags)
+        except Exception as e:
+            log.warning("Problem loading metadata from binary proxy, trying ASCII file: %s", e, exc_info=True)
+
+    # ASCII proxy file
+    from codecs import open
+    fp = open(proxyFilePath, 'rU', encoding="utf-8")
+    uuid = None
+    tags = set()
+    for line in fp:
+        words = line.split()
+        if len(words) == 0:
+            pass
+        elif words[0] == 'uuid':
+            uuid = words[1]
+        elif words[0] == 'tag':
+            tags.add(words[1].lower())
+        elif words[0] == 'verts':
+            break
+    fp.close()
+    return (uuid, tags)
 
 
 def _packStringList(strings):

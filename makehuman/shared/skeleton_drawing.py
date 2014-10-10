@@ -119,7 +119,8 @@ def meshFromSkeleton(skel, type="Prism"):
     return mesh
 
 def getVertBoneMapping(skel, skeletonMesh):
-    vertBoneMapping = {}    # Format: { boneName: (vertIdxs, weights) }
+    from animation import VertexBoneWeights
+    vertBoneMapping = {}    # Format: { boneName: [(vertIdx, weight), ...], ... }
     if not hasattr(skeletonMesh, "boneShape"):
         raise RuntimeError("Specified mesh object %s is not a skeleton mesh. Make sure it is created using meshFromSkeleton()" % skeletonMesh)
     type = skeletonMesh.boneShape
@@ -132,9 +133,9 @@ def getVertBoneMapping(skel, skeletonMesh):
     for bone in skel.getBones():    # We assume that skeleton mesh has bones in breadt-first order
         verts = range(offset, offset + nVertsPerBone)
         weights = np.repeat(1, nVertsPerBone)
-        vertBoneMapping[bone.name] = (verts, weights)
+        vertBoneMapping[bone.name] = zip(verts, weights)
         offset = offset + nVertsPerBone
-    return vertBoneMapping
+    return VertexBoneWeights(vertBoneMapping)# , nVertsPerBone*skel.getBoneCount())
 
 def updateSkeletonMeshPose(skeletonMesh, skeleton):
 # TODO do we need this method when we can simply construct a skeleton mesh from rest pose and then skin it with rigid weights (method above)?

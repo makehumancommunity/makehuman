@@ -1,0 +1,4156 @@
+{
+    "bones": {
+        "breast.L": {
+            "head": "breast.L_head",
+            "parent": "spine2",
+            "reference": null,
+            "roll": 2.8807735443115234,
+            "tail": "breast.L_tail"
+        },
+        "breast.R": {
+            "head": "breast.R_head",
+            "parent": "spine2",
+            "reference": null,
+            "roll": -2.8807735443115234,
+            "tail": "breast.R_tail"
+        },
+        "clavicle.L": {
+            "head": "clavicle.L_head",
+            "parent": "spine1",
+            "reference": null,
+            "roll": -1.3756952285766602,
+            "tail": "clavicle.L_tail"
+        },
+        "clavicle.R": {
+            "head": "clavicle.R_head",
+            "parent": "spine1",
+            "reference": null,
+            "roll": 1.3756952285766602,
+            "tail": "clavicle.R_tail"
+        },
+        "eye.L": {
+            "head": "eye.L_head",
+            "parent": "special05.L",
+            "reference": null,
+            "roll": -0.5664194822311401,
+            "tail": "eye.L_tail"
+        },
+        "eye.R": {
+            "head": "eye.R_head",
+            "parent": "special05.R",
+            "reference": null,
+            "roll": 0.5664194822311401,
+            "tail": "eye.R_tail"
+        },
+        "finger1-1.L": {
+            "head": "finger1-1.L_head",
+            "parent": "wrist.L",
+            "reference": null,
+            "roll": -0.9263502955436707,
+            "tail": "finger1-1.L_tail"
+        },
+        "finger1-1.R": {
+            "head": "finger1-1.R_head",
+            "parent": "wrist.R",
+            "reference": null,
+            "roll": 0.927350640296936,
+            "tail": "finger1-1.R_tail"
+        },
+        "finger1-2.L": {
+            "head": "finger1-2.L_head",
+            "parent": "finger1-1.L",
+            "reference": null,
+            "roll": -0.061334121972322464,
+            "tail": "finger1-2.L_tail"
+        },
+        "finger1-2.R": {
+            "head": "finger1-2.R_head",
+            "parent": "finger1-1.R",
+            "reference": null,
+            "roll": 0.061334121972322464,
+            "tail": "finger1-2.R_tail"
+        },
+        "finger1-3.L": {
+            "head": "finger1-3.L_head",
+            "parent": "finger1-2.L",
+            "reference": null,
+            "roll": -0.08036887645721436,
+            "tail": "finger1-3.L_tail"
+        },
+        "finger1-3.R": {
+            "head": "finger1-3.R_head",
+            "parent": "finger1-2.R",
+            "reference": null,
+            "roll": 0.08036887645721436,
+            "tail": "finger1-3.R_tail"
+        },
+        "finger2-1.L": {
+            "head": "finger2-1.L_head",
+            "parent": "metacarpal1.L",
+            "reference": null,
+            "roll": -0.49704819917678833,
+            "tail": "finger2-1.L_tail"
+        },
+        "finger2-1.R": {
+            "head": "finger2-1.R_head",
+            "parent": "metacarpal1.R",
+            "reference": null,
+            "roll": 0.49704819917678833,
+            "tail": "finger2-1.R_tail"
+        },
+        "finger2-2.L": {
+            "head": "finger2-2.L_head",
+            "parent": "finger2-1.L",
+            "reference": null,
+            "roll": -0.7223361730575562,
+            "tail": "finger2-2.L_tail"
+        },
+        "finger2-2.R": {
+            "head": "finger2-2.R_head",
+            "parent": "finger2-1.R",
+            "reference": null,
+            "roll": 0.7223361730575562,
+            "tail": "finger2-2.R_tail"
+        },
+        "finger2-3.L": {
+            "head": "finger2-3.L_head",
+            "parent": "finger2-2.L",
+            "reference": null,
+            "roll": -0.7996529340744019,
+            "tail": "finger2-3.L_tail"
+        },
+        "finger2-3.R": {
+            "head": "finger2-3.R_head",
+            "parent": "finger2-2.R",
+            "reference": null,
+            "roll": 0.7996529340744019,
+            "tail": "finger2-3.R_tail"
+        },
+        "finger3-1.L": {
+            "head": "finger3-1.L_head",
+            "parent": "metacarpal2.L",
+            "reference": null,
+            "roll": -0.47955581545829773,
+            "tail": "finger3-1.L_tail"
+        },
+        "finger3-1.R": {
+            "head": "finger3-1.R_head",
+            "parent": "metacarpal2.R",
+            "reference": null,
+            "roll": 0.47955581545829773,
+            "tail": "finger3-1.R_tail"
+        },
+        "finger3-2.L": {
+            "head": "finger3-2.L_head",
+            "parent": "finger3-1.L",
+            "reference": null,
+            "roll": -0.9147744178771973,
+            "tail": "finger3-2.L_tail"
+        },
+        "finger3-2.R": {
+            "head": "finger3-2.R_head",
+            "parent": "finger3-1.R",
+            "reference": null,
+            "roll": 0.9147744178771973,
+            "tail": "finger3-2.R_tail"
+        },
+        "finger3-3.L": {
+            "head": "finger3-3.L_head",
+            "parent": "finger3-2.L",
+            "reference": null,
+            "roll": -0.8571028709411621,
+            "tail": "finger3-3.L_tail"
+        },
+        "finger3-3.R": {
+            "head": "finger3-3.R_head",
+            "parent": "finger3-2.R",
+            "reference": null,
+            "roll": 0.8571028709411621,
+            "tail": "finger3-3.R_tail"
+        },
+        "finger4-1.L": {
+            "head": "finger4-1.L_head",
+            "parent": "metacarpal3.L",
+            "reference": null,
+            "roll": -0.11615023761987686,
+            "tail": "finger4-1.L_tail"
+        },
+        "finger4-1.R": {
+            "head": "finger4-1.R_head",
+            "parent": "metacarpal3.R",
+            "reference": null,
+            "roll": 0.11615023761987686,
+            "tail": "finger4-1.R_tail"
+        },
+        "finger4-2.L": {
+            "head": "finger4-2.L_head",
+            "parent": "finger4-1.L",
+            "reference": null,
+            "roll": -0.6591653823852539,
+            "tail": "finger4-2.L_tail"
+        },
+        "finger4-2.R": {
+            "head": "finger4-2.R_head",
+            "parent": "finger4-1.R",
+            "reference": null,
+            "roll": 0.6591653823852539,
+            "tail": "finger4-2.R_tail"
+        },
+        "finger4-3.L": {
+            "head": "finger4-3.L_head",
+            "parent": "finger4-2.L",
+            "reference": null,
+            "roll": -0.5037873387336731,
+            "tail": "finger4-3.L_tail"
+        },
+        "finger4-3.R": {
+            "head": "finger4-3.R_head",
+            "parent": "finger4-2.R",
+            "reference": null,
+            "roll": 0.5037873387336731,
+            "tail": "finger4-3.R_tail"
+        },
+        "finger5-1.L": {
+            "head": "finger5-1.L_head",
+            "parent": "metacarpal4.L",
+            "reference": null,
+            "roll": 0.0037048247177153826,
+            "tail": "finger5-1.L_tail"
+        },
+        "finger5-1.R": {
+            "head": "finger5-1.R_head",
+            "parent": "metacarpal4.R",
+            "reference": null,
+            "roll": -0.0037048247177153826,
+            "tail": "finger5-1.R_tail"
+        },
+        "finger5-2.L": {
+            "head": "finger5-2.L_head",
+            "parent": "finger5-1.L",
+            "reference": null,
+            "roll": -0.3797512948513031,
+            "tail": "finger5-2.L_tail"
+        },
+        "finger5-2.R": {
+            "head": "finger5-2.R_head",
+            "parent": "finger5-1.R",
+            "reference": null,
+            "roll": 0.3797512948513031,
+            "tail": "finger5-2.R_tail"
+        },
+        "finger5-3.L": {
+            "head": "finger5-3.L_head",
+            "parent": "finger5-2.L",
+            "reference": null,
+            "roll": -0.3714032769203186,
+            "tail": "finger5-3.L_tail"
+        },
+        "finger5-3.R": {
+            "head": "finger5-3.R_head",
+            "parent": "finger5-2.R",
+            "reference": null,
+            "roll": 0.3714032769203186,
+            "tail": "finger5-3.R_tail"
+        },
+        "foot.L": {
+            "head": "foot.L_head",
+            "parent": "lowerleg02.L",
+            "reference": null,
+            "roll": 0.20731236040592194,
+            "tail": "foot.L_tail"
+        },
+        "foot.R": {
+            "head": "foot.R_head",
+            "parent": "lowerleg02.R",
+            "reference": null,
+            "roll": -0.20731236040592194,
+            "tail": "foot.R_tail"
+        },
+        "head": {
+            "head": "head_head",
+            "parent": "neck2",
+            "reference": null,
+            "roll": 7.192499928976304e-10,
+            "tail": "head_tail"
+        },
+        "jaw": {
+            "head": "jaw_head",
+            "parent": "head",
+            "reference": null,
+            "roll": 5.324160056447281e-16,
+            "tail": "jaw_tail"
+        },
+        "levator02.L": {
+            "head": "levator02.L_head",
+            "parent": "head",
+            "reference": null,
+            "roll": -1.365777850151062,
+            "tail": "levator02.L_tail"
+        },
+        "levator02.R": {
+            "head": "levator02.R_head",
+            "parent": "head",
+            "reference": null,
+            "roll": 1.365777850151062,
+            "tail": "levator02.R_tail"
+        },
+        "levator03.L": {
+            "head": "levator03.L_head",
+            "parent": "levator02.L",
+            "reference": null,
+            "roll": -3.0443639755249023,
+            "tail": "levator03.L_tail"
+        },
+        "levator03.R": {
+            "head": "levator03.R_head",
+            "parent": "levator02.R",
+            "reference": null,
+            "roll": 3.0443639755249023,
+            "tail": "levator03.R_tail"
+        },
+        "levator04.L": {
+            "head": "levator04.L_head",
+            "parent": "levator03.L",
+            "reference": null,
+            "roll": -2.3414978981018066,
+            "tail": "levator04.L_tail"
+        },
+        "levator04.R": {
+            "head": "levator04.R_head",
+            "parent": "levator03.R",
+            "reference": null,
+            "roll": 2.3414978981018066,
+            "tail": "levator04.R_tail"
+        },
+        "levator05.L": {
+            "head": "levator05.L_head",
+            "parent": "levator04.L",
+            "reference": null,
+            "roll": 2.193681240081787,
+            "tail": "levator05.L_tail"
+        },
+        "levator05.R": {
+            "head": "levator05.R_head",
+            "parent": "levator04.R",
+            "reference": null,
+            "roll": -2.193681240081787,
+            "tail": "levator05.R_tail"
+        },
+        "levator06.L": {
+            "head": "levator06.L_head",
+            "parent": "special03",
+            "reference": null,
+            "roll": -1.0448840856552124,
+            "tail": "levator06.L_tail"
+        },
+        "levator06.R": {
+            "head": "levator06.R_head",
+            "parent": "special03",
+            "reference": null,
+            "roll": 1.0448840856552124,
+            "tail": "levator06.R_tail"
+        },
+        "lowerarm01.L": {
+            "head": "lowerarm01.L_head",
+            "parent": "upperarm02.L",
+            "reference": null,
+            "roll": -1.657183289527893,
+            "tail": "lowerarm01.L_tail"
+        },
+        "lowerarm01.R": {
+            "head": "lowerarm01.R_head",
+            "parent": "upperarm02.R",
+            "reference": null,
+            "roll": 1.657183289527893,
+            "tail": "lowerarm01.R_tail"
+        },
+        "lowerarm02.L": {
+            "head": "lowerarm02.L_head",
+            "parent": "lowerarm01.L",
+            "reference": null,
+            "roll": -1.6941756010055542,
+            "tail": "lowerarm02.L_tail"
+        },
+        "lowerarm02.R": {
+            "head": "lowerarm02.R_head",
+            "parent": "lowerarm01.R",
+            "reference": null,
+            "roll": 1.6941756010055542,
+            "tail": "lowerarm02.R_tail"
+        },
+        "lowerleg01.L": {
+            "head": "lowerleg01.L_head",
+            "parent": "upperleg02.L",
+            "reference": null,
+            "roll": -2.3840620517730713,
+            "tail": "lowerleg01.L_tail"
+        },
+        "lowerleg01.R": {
+            "head": "lowerleg01.R_head",
+            "parent": "upperleg02.R",
+            "reference": null,
+            "roll": 2.3840620517730713,
+            "tail": "lowerleg01.R_tail"
+        },
+        "lowerleg02.L": {
+            "head": "lowerleg02.L_head",
+            "parent": "lowerleg01.L",
+            "reference": null,
+            "roll": -2.3840739727020264,
+            "tail": "lowerleg02.L_tail"
+        },
+        "lowerleg02.R": {
+            "head": "lowerleg02.R_head",
+            "parent": "lowerleg01.R",
+            "reference": null,
+            "roll": 2.3840739727020264,
+            "tail": "lowerleg02.R_tail"
+        },
+        "metacarpal1.L": {
+            "head": "metacarpal1.L_head",
+            "parent": "wrist.L",
+            "reference": null,
+            "roll": -0.7299057841300964,
+            "tail": "metacarpal1.L_tail"
+        },
+        "metacarpal1.R": {
+            "head": "metacarpal1.R_head",
+            "parent": "wrist.R",
+            "reference": null,
+            "roll": 0.7299057841300964,
+            "tail": "metacarpal1.R_tail"
+        },
+        "metacarpal2.L": {
+            "head": "metacarpal2.L_head",
+            "parent": "wrist.L",
+            "reference": null,
+            "roll": -0.4998599886894226,
+            "tail": "metacarpal2.L_tail"
+        },
+        "metacarpal2.R": {
+            "head": "metacarpal2.R_head",
+            "parent": "wrist.R",
+            "reference": null,
+            "roll": 0.4998599886894226,
+            "tail": "metacarpal2.R_tail"
+        },
+        "metacarpal3.L": {
+            "head": "metacarpal3.L_head",
+            "parent": "wrist.L",
+            "reference": null,
+            "roll": -0.4073617160320282,
+            "tail": "metacarpal3.L_tail"
+        },
+        "metacarpal3.R": {
+            "head": "metacarpal3.R_head",
+            "parent": "wrist.R",
+            "reference": null,
+            "roll": 0.4073617160320282,
+            "tail": "metacarpal3.R_tail"
+        },
+        "metacarpal4.L": {
+            "head": "metacarpal4.L_head",
+            "parent": "wrist.L",
+            "reference": null,
+            "roll": 0.5513148307800293,
+            "tail": "metacarpal4.L_tail"
+        },
+        "metacarpal4.R": {
+            "head": "metacarpal4.R_head",
+            "parent": "wrist.R",
+            "reference": null,
+            "roll": -0.5513148307800293,
+            "tail": "metacarpal4.R_tail"
+        },
+        "metatarsal1.L": {
+            "head": "metatarsal1.L_head",
+            "parent": "foot.L",
+            "reference": null,
+            "roll": -0.8049107789993286,
+            "tail": "metatarsal1.L_tail"
+        },
+        "metatarsal1.R": {
+            "head": "metatarsal1.R_head",
+            "parent": "foot.R",
+            "reference": null,
+            "roll": 0.8049107789993286,
+            "tail": "metatarsal1.R_tail"
+        },
+        "metatarsal2.L": {
+            "head": "metatarsal2.L_head",
+            "parent": "foot.L",
+            "reference": null,
+            "roll": 0.014393733814358711,
+            "tail": "metatarsal2.L_tail"
+        },
+        "metatarsal2.R": {
+            "head": "metatarsal2.R_head",
+            "parent": "foot.R",
+            "reference": null,
+            "roll": -0.014393733814358711,
+            "tail": "metatarsal2.R_tail"
+        },
+        "metatarsal3.L": {
+            "head": "metatarsal3.L_head",
+            "parent": "foot.L",
+            "reference": null,
+            "roll": 0.09716732054948807,
+            "tail": "metatarsal3.L_tail"
+        },
+        "metatarsal3.R": {
+            "head": "metatarsal3.R_head",
+            "parent": "foot.R",
+            "reference": null,
+            "roll": -0.09716732054948807,
+            "tail": "metatarsal3.R_tail"
+        },
+        "metatarsal4.L": {
+            "head": "metatarsal4.L_head",
+            "parent": "foot.L",
+            "reference": null,
+            "roll": 0.19361206889152527,
+            "tail": "metatarsal4.L_tail"
+        },
+        "metatarsal4.R": {
+            "head": "metatarsal4.R_head",
+            "parent": "foot.R",
+            "reference": null,
+            "roll": -0.19361206889152527,
+            "tail": "metatarsal4.R_tail"
+        },
+        "metatarsal5.L": {
+            "head": "metatarsal5.L_head",
+            "parent": "foot.L",
+            "reference": null,
+            "roll": 0.43031638860702515,
+            "tail": "metatarsal5.L_tail"
+        },
+        "metatarsal5.R": {
+            "head": "metatarsal5.R_head",
+            "parent": "foot.R",
+            "reference": null,
+            "roll": -0.43031638860702515,
+            "tail": "metatarsal5.R_tail"
+        },
+        "neck": {
+            "head": "neck_head",
+            "parent": "spine1",
+            "reference": null,
+            "roll": 4.254961383232114e-10,
+            "tail": "neck_tail"
+        },
+        "neck2": {
+            "head": "neck2_head",
+            "parent": "neck",
+            "reference": null,
+            "roll": 4.2549014311887845e-10,
+            "tail": "neck2_tail"
+        },
+        "oculi01.L": {
+            "head": "oculi01.L_head",
+            "parent": "oculi02.L",
+            "reference": null,
+            "roll": 2.0303733348846436,
+            "tail": "oculi01.L_tail"
+        },
+        "oculi01.R": {
+            "head": "oculi01.R_head",
+            "parent": "oculi02.R",
+            "reference": null,
+            "roll": -2.0303733348846436,
+            "tail": "oculi01.R_tail"
+        },
+        "oculi02.L": {
+            "head": "oculi02.L_head",
+            "parent": "temporalis01.L",
+            "reference": null,
+            "roll": 1.8948988914489746,
+            "tail": "oculi02.L_tail"
+        },
+        "oculi02.R": {
+            "head": "oculi02.R_head",
+            "parent": "temporalis01.R",
+            "reference": null,
+            "roll": -1.8948988914489746,
+            "tail": "oculi02.R_tail"
+        },
+        "orbicularis03.L": {
+            "head": "orbicularis03.L_head",
+            "parent": "special05.L",
+            "reference": null,
+            "roll": 0.1966700255870819,
+            "tail": "orbicularis03.L_tail"
+        },
+        "orbicularis03.R": {
+            "head": "orbicularis03.R_head",
+            "parent": "special05.R",
+            "reference": null,
+            "roll": -0.1966700255870819,
+            "tail": "orbicularis03.R_tail"
+        },
+        "orbicularis04.L": {
+            "head": "orbicularis04.L_head",
+            "parent": "special05.L",
+            "reference": null,
+            "roll": 1.607170820236206,
+            "tail": "orbicularis04.L_tail"
+        },
+        "orbicularis04.R": {
+            "head": "orbicularis04.R_head",
+            "parent": "special05.R",
+            "reference": null,
+            "roll": -1.607170820236206,
+            "tail": "orbicularis04.R_tail"
+        },
+        "oris01": {
+            "head": "oris01_head",
+            "parent": "oris02",
+            "reference": null,
+            "roll": -1.7285835459003975e-16,
+            "tail": "oris01_tail"
+        },
+        "oris02": {
+            "head": "oris02_head",
+            "parent": "special04",
+            "reference": null,
+            "roll": -1.926542160165322e-16,
+            "tail": "oris02_tail"
+        },
+        "oris03.L": {
+            "head": "oris03.L_head",
+            "parent": "oris04.L",
+            "reference": null,
+            "roll": -2.083390235900879,
+            "tail": "oris03.L_tail"
+        },
+        "oris03.R": {
+            "head": "oris03.R_head",
+            "parent": "oris04.R",
+            "reference": null,
+            "roll": 2.083390235900879,
+            "tail": "oris03.R_tail"
+        },
+        "oris04.L": {
+            "head": "oris04.L_head",
+            "parent": "special01",
+            "reference": null,
+            "roll": -1.3702365159988403,
+            "tail": "oris04.L_tail"
+        },
+        "oris04.R": {
+            "head": "oris04.R_head",
+            "parent": "special01",
+            "reference": null,
+            "roll": 1.3702365159988403,
+            "tail": "oris04.R_tail"
+        },
+        "oris05": {
+            "head": "oris05_head",
+            "parent": "oris06",
+            "reference": null,
+            "roll": 1.3189997673034668,
+            "tail": "oris05_tail"
+        },
+        "oris06": {
+            "head": "oris06_head",
+            "parent": "special01",
+            "reference": null,
+            "roll": 1.3190016746520996,
+            "tail": "oris06_tail"
+        },
+        "oris06.L": {
+            "head": "oris06.L_head",
+            "parent": "special04",
+            "reference": null,
+            "roll": 2.61716365814209,
+            "tail": "oris06.L_tail"
+        },
+        "oris06.R": {
+            "head": "oris06.R_head",
+            "parent": "special04",
+            "reference": null,
+            "roll": -2.61716365814209,
+            "tail": "oris06.R_tail"
+        },
+        "oris07.L": {
+            "head": "oris07.L_head",
+            "parent": "oris06.L",
+            "reference": null,
+            "roll": -2.9123716354370117,
+            "tail": "oris07.L_tail"
+        },
+        "oris07.R": {
+            "head": "oris07.R_head",
+            "parent": "oris06.R",
+            "reference": null,
+            "roll": 2.9123716354370117,
+            "tail": "oris07.R_tail"
+        },
+        "pelvis.L": {
+            "head": "pelvis.L_head",
+            "parent": "root",
+            "reference": null,
+            "roll": -2.563573122024536,
+            "tail": "pelvis.L_tail"
+        },
+        "pelvis.R": {
+            "head": "pelvis.R_head",
+            "parent": "root",
+            "reference": null,
+            "roll": 2.563573122024536,
+            "tail": "pelvis.R_tail"
+        },
+        "risorius02.L": {
+            "head": "risorius02.L_head",
+            "parent": "temporalis02.L",
+            "reference": null,
+            "roll": -2.4836504459381104,
+            "tail": "risorius02.L_tail"
+        },
+        "risorius02.R": {
+            "head": "risorius02.R_head",
+            "parent": "temporalis02.R",
+            "reference": null,
+            "roll": 2.4836504459381104,
+            "tail": "risorius02.R_tail"
+        },
+        "risorius03.L": {
+            "head": "risorius03.L_head",
+            "parent": "risorius02.L",
+            "reference": null,
+            "roll": -0.48083144426345825,
+            "tail": "risorius03.L_tail"
+        },
+        "risorius03.R": {
+            "head": "risorius03.R_head",
+            "parent": "risorius02.R",
+            "reference": null,
+            "roll": 0.48083144426345825,
+            "tail": "risorius03.R_tail"
+        },
+        "root": {
+            "head": "root_head",
+            "parent": null,
+            "reference": null,
+            "roll": 0.0001386099320370704,
+            "tail": "root_tail"
+        },
+        "shoulder01.L": {
+            "head": "shoulder01.L_head",
+            "parent": "clavicle.L",
+            "reference": null,
+            "roll": -0.9491823315620422,
+            "tail": "shoulder01.L_tail"
+        },
+        "shoulder01.R": {
+            "head": "shoulder01.R_head",
+            "parent": "clavicle.R",
+            "reference": null,
+            "roll": 0.9491823315620422,
+            "tail": "shoulder01.R_tail"
+        },
+        "shoulder02.L": {
+            "head": "shoulder02.L_head",
+            "parent": "shoulder01.L",
+            "reference": null,
+            "roll": -0.0900556817650795,
+            "tail": "shoulder02.L_tail"
+        },
+        "shoulder02.R": {
+            "head": "shoulder02.R_head",
+            "parent": "shoulder01.R",
+            "reference": null,
+            "roll": 0.0900556817650795,
+            "tail": "shoulder02.R_tail"
+        },
+        "special01": {
+            "head": "special01_head",
+            "parent": "head",
+            "reference": null,
+            "roll": 2.650993565112003e-06,
+            "tail": "special01_tail"
+        },
+        "special03": {
+            "head": "special03_head",
+            "parent": "head",
+            "reference": null,
+            "roll": -0.049000006169080734,
+            "tail": "special03_tail"
+        },
+        "special04": {
+            "head": "special04_head",
+            "parent": "jaw",
+            "reference": null,
+            "roll": 2.1696419594263716e-07,
+            "tail": "special04_tail"
+        },
+        "special05.L": {
+            "head": "special05.L_head",
+            "parent": "special06.L",
+            "reference": null,
+            "roll": 0.699104368686676,
+            "tail": "special05.L_tail"
+        },
+        "special05.R": {
+            "head": "special05.R_head",
+            "parent": "special06.R",
+            "reference": null,
+            "roll": -0.699104368686676,
+            "tail": "special05.R_tail"
+        },
+        "special06.L": {
+            "head": "special06.L_head",
+            "parent": "head",
+            "reference": null,
+            "roll": -2.8717455863952637,
+            "tail": "special06.L_tail"
+        },
+        "special06.R": {
+            "head": "special06.R_head",
+            "parent": "head",
+            "reference": null,
+            "roll": 2.8717455863952637,
+            "tail": "special06.R_tail"
+        },
+        "spine1": {
+            "head": "spine1_head",
+            "parent": "spine2",
+            "reference": null,
+            "roll": -2.8179983346809934e-10,
+            "tail": "spine1_tail"
+        },
+        "spine2": {
+            "head": "spine2_head",
+            "parent": "spine3",
+            "reference": null,
+            "roll": -2.3035953032153275e-16,
+            "tail": "spine2_tail"
+        },
+        "spine3": {
+            "head": "spine3_head",
+            "parent": "spine4",
+            "reference": null,
+            "roll": -2.192008506233026e-16,
+            "tail": "spine3_tail"
+        },
+        "spine4": {
+            "head": "spine4_head",
+            "parent": "spine5",
+            "reference": null,
+            "roll": 7.760130871226067e-10,
+            "tail": "spine4_tail"
+        },
+        "spine5": {
+            "head": "spine5_head",
+            "parent": "root",
+            "reference": null,
+            "roll": -4.466459702090475e-10,
+            "tail": "spine5_tail"
+        },
+        "temporalis01.L": {
+            "head": "temporalis01.L_head",
+            "parent": "head",
+            "reference": null,
+            "roll": -1.381813406944275,
+            "tail": "temporalis01.L_tail"
+        },
+        "temporalis01.R": {
+            "head": "temporalis01.R_head",
+            "parent": "head",
+            "reference": null,
+            "roll": 1.381813406944275,
+            "tail": "temporalis01.R_tail"
+        },
+        "temporalis02.L": {
+            "head": "temporalis02.L_head",
+            "parent": "head",
+            "reference": null,
+            "roll": 1.4594956636428833,
+            "tail": "temporalis02.L_tail"
+        },
+        "temporalis02.R": {
+            "head": "temporalis02.R_head",
+            "parent": "head",
+            "reference": null,
+            "roll": -1.4594956636428833,
+            "tail": "temporalis02.R_tail"
+        },
+        "toe1-1.L": {
+            "head": "toe1-1.L_head",
+            "parent": "metatarsal1.L",
+            "reference": null,
+            "roll": -0.10158562660217285,
+            "tail": "toe1-1.L_tail"
+        },
+        "toe1-1.R": {
+            "head": "toe1-1.R_head",
+            "parent": "metatarsal1.R",
+            "reference": null,
+            "roll": 0.10158562660217285,
+            "tail": "toe1-1.R_tail"
+        },
+        "toe1-2.L": {
+            "head": "toe1-2.L_head",
+            "parent": "toe1-1.L",
+            "reference": null,
+            "roll": 0.3545359671115875,
+            "tail": "toe1-2.L_tail"
+        },
+        "toe1-2.R": {
+            "head": "toe1-2.R_head",
+            "parent": "toe1-1.R",
+            "reference": null,
+            "roll": -0.3545359671115875,
+            "tail": "toe1-2.R_tail"
+        },
+        "toe2-1.L": {
+            "head": "toe2-1.L_head",
+            "parent": "metatarsal2.L",
+            "reference": null,
+            "roll": 0.12327774614095688,
+            "tail": "toe2-1.L_tail"
+        },
+        "toe2-1.R": {
+            "head": "toe2-1.R_head",
+            "parent": "metatarsal2.R",
+            "reference": null,
+            "roll": -0.12327774614095688,
+            "tail": "toe2-1.R_tail"
+        },
+        "toe2-2.L": {
+            "head": "toe2-2.L_head",
+            "parent": "toe2-1.L",
+            "reference": null,
+            "roll": 2.9925363063812256,
+            "tail": "toe2-2.L_tail"
+        },
+        "toe2-2.R": {
+            "head": "toe2-2.R_head",
+            "parent": "toe2-1.R",
+            "reference": null,
+            "roll": -2.9925363063812256,
+            "tail": "toe2-2.R_tail"
+        },
+        "toe2-3.L": {
+            "head": "toe2-3.L_head",
+            "parent": "toe2-2.L",
+            "reference": null,
+            "roll": 0.690570592880249,
+            "tail": "toe2-3.L_tail"
+        },
+        "toe2-3.R": {
+            "head": "toe2-3.R_head",
+            "parent": "toe2-2.R",
+            "reference": null,
+            "roll": -0.690570592880249,
+            "tail": "toe2-3.R_tail"
+        },
+        "toe3-1.L": {
+            "head": "toe3-1.L_head",
+            "parent": "metatarsal3.L",
+            "reference": null,
+            "roll": 0.7696252465248108,
+            "tail": "toe3-1.L_tail"
+        },
+        "toe3-1.R": {
+            "head": "toe3-1.R_head",
+            "parent": "metatarsal3.R",
+            "reference": null,
+            "roll": -0.7696252465248108,
+            "tail": "toe3-1.R_tail"
+        },
+        "toe3-2.L": {
+            "head": "toe3-2.L_head",
+            "parent": "toe3-1.L",
+            "reference": null,
+            "roll": 1.6283074617385864,
+            "tail": "toe3-2.L_tail"
+        },
+        "toe3-2.R": {
+            "head": "toe3-2.R_head",
+            "parent": "toe3-1.R",
+            "reference": null,
+            "roll": -1.6283074617385864,
+            "tail": "toe3-2.R_tail"
+        },
+        "toe3-3.L": {
+            "head": "toe3-3.L_head",
+            "parent": "toe3-2.L",
+            "reference": null,
+            "roll": 0.06006990745663643,
+            "tail": "toe3-3.L_tail"
+        },
+        "toe3-3.R": {
+            "head": "toe3-3.R_head",
+            "parent": "toe3-2.R",
+            "reference": null,
+            "roll": -0.06006990745663643,
+            "tail": "toe3-3.R_tail"
+        },
+        "toe4-1.L": {
+            "head": "toe4-1.L_head",
+            "parent": "metatarsal4.L",
+            "reference": null,
+            "roll": 2.31238055229187,
+            "tail": "toe4-1.L_tail"
+        },
+        "toe4-1.R": {
+            "head": "toe4-1.R_head",
+            "parent": "metatarsal4.R",
+            "reference": null,
+            "roll": -2.31238055229187,
+            "tail": "toe4-1.R_tail"
+        },
+        "toe4-2.L": {
+            "head": "toe4-2.L_head",
+            "parent": "toe4-1.L",
+            "reference": null,
+            "roll": -0.19314520061016083,
+            "tail": "toe4-2.L_tail"
+        },
+        "toe4-2.R": {
+            "head": "toe4-2.R_head",
+            "parent": "toe4-1.R",
+            "reference": null,
+            "roll": 0.19314520061016083,
+            "tail": "toe4-2.R_tail"
+        },
+        "toe4-3.L": {
+            "head": "toe4-3.L_head",
+            "parent": "toe4-2.L",
+            "reference": null,
+            "roll": 0.4338553249835968,
+            "tail": "toe4-3.L_tail"
+        },
+        "toe4-3.R": {
+            "head": "toe4-3.R_head",
+            "parent": "toe4-2.R",
+            "reference": null,
+            "roll": -0.4338553249835968,
+            "tail": "toe4-3.R_tail"
+        },
+        "toe5-1.L": {
+            "head": "toe5-1.L_head",
+            "parent": "metatarsal5.L",
+            "reference": null,
+            "roll": 1.0362745523452759,
+            "tail": "toe5-1.L_tail"
+        },
+        "toe5-1.R": {
+            "head": "toe5-1.R_head",
+            "parent": "metatarsal5.R",
+            "reference": null,
+            "roll": -1.0362745523452759,
+            "tail": "toe5-1.R_tail"
+        },
+        "toe5-2.L": {
+            "head": "toe5-2.L_head",
+            "parent": "toe5-1.L",
+            "reference": null,
+            "roll": 1.3817880153656006,
+            "tail": "toe5-2.L_tail"
+        },
+        "toe5-2.R": {
+            "head": "toe5-2.R_head",
+            "parent": "toe5-1.R",
+            "reference": null,
+            "roll": -1.3817880153656006,
+            "tail": "toe5-2.R_tail"
+        },
+        "toe5-3.L": {
+            "head": "toe5-3.L_head",
+            "parent": "toe5-2.L",
+            "reference": null,
+            "roll": 0.9163839817047119,
+            "tail": "toe5-3.L_tail"
+        },
+        "toe5-3.R": {
+            "head": "toe5-3.R_head",
+            "parent": "toe5-2.R",
+            "reference": null,
+            "roll": -0.9163839817047119,
+            "tail": "toe5-3.R_tail"
+        },
+        "tongue00": {
+            "head": "tongue00_head",
+            "parent": "jaw",
+            "reference": null,
+            "roll": -3.0663717656238744e-16,
+            "tail": "tongue00_tail"
+        },
+        "tongue01": {
+            "head": "tongue01_head",
+            "parent": "tongue00",
+            "reference": null,
+            "roll": -2.004470217016677e-17,
+            "tail": "tongue01_tail"
+        },
+        "tongue02": {
+            "head": "tongue02_head",
+            "parent": "tongue01",
+            "reference": null,
+            "roll": 9.508845632616592e-18,
+            "tail": "tongue02_tail"
+        },
+        "tongue03": {
+            "head": "tongue03_head",
+            "parent": "tongue02",
+            "reference": null,
+            "roll": 1.6804904709931764e-16,
+            "tail": "tongue03_tail"
+        },
+        "tongue04": {
+            "head": "tongue04_head",
+            "parent": "tongue03",
+            "reference": null,
+            "roll": 1.6806446574593563e-16,
+            "tail": "tongue04_tail"
+        },
+        "upperarm02.L": {
+            "head": "upperarm02.L_head",
+            "parent": "shoulder02.L",
+            "reference": null,
+            "roll": -0.08971381187438965,
+            "tail": "upperarm02.L_tail"
+        },
+        "upperarm02.R": {
+            "head": "upperarm02.R_head",
+            "parent": "shoulder02.R",
+            "reference": null,
+            "roll": 0.08971381187438965,
+            "tail": "upperarm02.R_tail"
+        },
+        "upperleg01.L": {
+            "head": "upperleg01.L_head",
+            "parent": "pelvis.L",
+            "reference": null,
+            "roll": 1.5835429430007935,
+            "tail": "upperleg01.L_tail"
+        },
+        "upperleg01.R": {
+            "head": "upperleg01.R_head",
+            "parent": "pelvis.R",
+            "reference": null,
+            "roll": -1.5835429430007935,
+            "tail": "upperleg01.R_tail"
+        },
+        "upperleg02.L": {
+            "head": "upperleg02.L_head",
+            "parent": "upperleg01.L",
+            "reference": null,
+            "roll": 1.9113411903381348,
+            "tail": "upperleg02.L_tail"
+        },
+        "upperleg02.R": {
+            "head": "upperleg02.R_head",
+            "parent": "upperleg01.R",
+            "reference": null,
+            "roll": -1.9113411903381348,
+            "tail": "upperleg02.R_tail"
+        },
+        "wrist.L": {
+            "head": "wrist.L_head",
+            "parent": "lowerarm02.L",
+            "reference": null,
+            "roll": -0.5689927339553833,
+            "tail": "wrist.L_tail"
+        },
+        "wrist.R": {
+            "head": "wrist.R_head",
+            "parent": "lowerarm02.R",
+            "reference": null,
+            "roll": 0.5689927339553833,
+            "tail": "wrist.R_tail"
+        }
+    },
+    "copyright": "MakeHuman",
+    "description": "The standard general-purpose skeleton or master rig for MakeHuman",
+    "joints": {
+        "breast.L_head": [
+            13654,
+            13655,
+            13656,
+            13657,
+            13658,
+            13659,
+            13660,
+            13661
+        ],
+        "breast.L_tail": [
+            8451
+        ],
+        "breast.R_head": [
+            13654,
+            13655,
+            13656,
+            13657,
+            13658,
+            13659,
+            13660,
+            13661
+        ],
+        "breast.R_tail": [
+            1779
+        ],
+        "clavicle.L_head": [
+            14054,
+            14055,
+            14056,
+            14057,
+            14058,
+            14059,
+            14060,
+            14061
+        ],
+        "clavicle.L_tail": [
+            14062,
+            14063,
+            14064,
+            14065,
+            14066,
+            14067,
+            14068,
+            14069
+        ],
+        "clavicle.R_head": [
+            14494,
+            14495,
+            14496,
+            14497,
+            14498,
+            14499,
+            14500,
+            14501
+        ],
+        "clavicle.R_tail": [
+            14502,
+            14503,
+            14504,
+            14505,
+            14506,
+            14507,
+            14508,
+            14509
+        ],
+        "eye.L_head": [
+            13606,
+            13607,
+            13608,
+            13609,
+            13610,
+            13611,
+            13612,
+            13613
+        ],
+        "eye.L_tail": [
+            14086,
+            14087,
+            14088,
+            14089,
+            14090,
+            14091,
+            14092,
+            14093
+        ],
+        "eye.R_head": [
+            13614,
+            13615,
+            13616,
+            13617,
+            13618,
+            13619,
+            13620,
+            13621
+        ],
+        "eye.R_tail": [
+            14518,
+            14519,
+            14520,
+            14521,
+            14522,
+            14523,
+            14524,
+            14525
+        ],
+        "finger1-1.L_head": [
+            14006,
+            14007,
+            14008,
+            14009,
+            14010,
+            14011,
+            14012,
+            14013
+        ],
+        "finger1-1.L_tail": [
+            13998,
+            13999,
+            14000,
+            14001,
+            14002,
+            14003,
+            14004,
+            14005
+        ],
+        "finger1-1.R_head": [
+            14446,
+            14447,
+            14448,
+            14449,
+            14450,
+            14451,
+            14452,
+            14453
+        ],
+        "finger1-1.R_tail": [
+            14438,
+            14439,
+            14440,
+            14441,
+            14442,
+            14443,
+            14444,
+            14445
+        ],
+        "finger1-2.L_head": [
+            13998,
+            13999,
+            14000,
+            14001,
+            14002,
+            14003,
+            14004,
+            14005
+        ],
+        "finger1-2.L_tail": [
+            13990,
+            13991,
+            13992,
+            13993,
+            13994,
+            13995,
+            13996,
+            13997
+        ],
+        "finger1-2.R_head": [
+            14438,
+            14439,
+            14440,
+            14441,
+            14442,
+            14443,
+            14444,
+            14445
+        ],
+        "finger1-2.R_tail": [
+            14430,
+            14431,
+            14432,
+            14433,
+            14434,
+            14435,
+            14436,
+            14437
+        ],
+        "finger1-3.L_head": [
+            13990,
+            13991,
+            13992,
+            13993,
+            13994,
+            13995,
+            13996,
+            13997
+        ],
+        "finger1-3.L_tail": [
+            13982,
+            13983,
+            13984,
+            13985,
+            13986,
+            13987,
+            13988,
+            13989
+        ],
+        "finger1-3.R_head": [
+            14430,
+            14431,
+            14432,
+            14433,
+            14434,
+            14435,
+            14436,
+            14437
+        ],
+        "finger1-3.R_tail": [
+            14422,
+            14423,
+            14424,
+            14425,
+            14426,
+            14427,
+            14428,
+            14429
+        ],
+        "finger2-1.L_head": [
+            13974,
+            13975,
+            13976,
+            13977,
+            13978,
+            13979,
+            13980,
+            13981
+        ],
+        "finger2-1.L_tail": [
+            13918,
+            13919,
+            13920,
+            13921,
+            13922,
+            13923,
+            13924,
+            13925
+        ],
+        "finger2-1.R_head": [
+            14414,
+            14415,
+            14416,
+            14417,
+            14418,
+            14419,
+            14420,
+            14421
+        ],
+        "finger2-1.R_tail": [
+            14358,
+            14359,
+            14360,
+            14361,
+            14362,
+            14363,
+            14364,
+            14365
+        ],
+        "finger2-2.L_head": [
+            13918,
+            13919,
+            13920,
+            13921,
+            13922,
+            13923,
+            13924,
+            13925
+        ],
+        "finger2-2.L_tail": [
+            13910,
+            13911,
+            13912,
+            13913,
+            13914,
+            13915,
+            13916,
+            13917
+        ],
+        "finger2-2.R_head": [
+            14358,
+            14359,
+            14360,
+            14361,
+            14362,
+            14363,
+            14364,
+            14365
+        ],
+        "finger2-2.R_tail": [
+            14350,
+            14351,
+            14352,
+            14353,
+            14354,
+            14355,
+            14356,
+            14357
+        ],
+        "finger2-3.L_head": [
+            13910,
+            13911,
+            13912,
+            13913,
+            13914,
+            13915,
+            13916,
+            13917
+        ],
+        "finger2-3.L_tail": [
+            13854,
+            13855,
+            13856,
+            13857,
+            13858,
+            13859,
+            13860,
+            13861
+        ],
+        "finger2-3.R_head": [
+            14350,
+            14351,
+            14352,
+            14353,
+            14354,
+            14355,
+            14356,
+            14357
+        ],
+        "finger2-3.R_tail": [
+            14294,
+            14295,
+            14296,
+            14297,
+            14298,
+            14299,
+            14300,
+            14301
+        ],
+        "finger3-1.L_head": [
+            13966,
+            13967,
+            13968,
+            13969,
+            13970,
+            13971,
+            13972,
+            13973
+        ],
+        "finger3-1.L_tail": [
+            13926,
+            13927,
+            13928,
+            13929,
+            13930,
+            13931,
+            13932,
+            13933
+        ],
+        "finger3-1.R_head": [
+            14406,
+            14407,
+            14408,
+            14409,
+            14410,
+            14411,
+            14412,
+            14413
+        ],
+        "finger3-1.R_tail": [
+            14366,
+            14367,
+            14368,
+            14369,
+            14370,
+            14371,
+            14372,
+            14373
+        ],
+        "finger3-2.L_head": [
+            13926,
+            13927,
+            13928,
+            13929,
+            13930,
+            13931,
+            13932,
+            13933
+        ],
+        "finger3-2.L_tail": [
+            13902,
+            13903,
+            13904,
+            13905,
+            13906,
+            13907,
+            13908,
+            13909
+        ],
+        "finger3-2.R_head": [
+            14366,
+            14367,
+            14368,
+            14369,
+            14370,
+            14371,
+            14372,
+            14373
+        ],
+        "finger3-2.R_tail": [
+            14342,
+            14343,
+            14344,
+            14345,
+            14346,
+            14347,
+            14348,
+            14349
+        ],
+        "finger3-3.L_head": [
+            13902,
+            13903,
+            13904,
+            13905,
+            13906,
+            13907,
+            13908,
+            13909
+        ],
+        "finger3-3.L_tail": [
+            13862,
+            13863,
+            13864,
+            13865,
+            13866,
+            13867,
+            13868,
+            13869
+        ],
+        "finger3-3.R_head": [
+            14342,
+            14343,
+            14344,
+            14345,
+            14346,
+            14347,
+            14348,
+            14349
+        ],
+        "finger3-3.R_tail": [
+            14302,
+            14303,
+            14304,
+            14305,
+            14306,
+            14307,
+            14308,
+            14309
+        ],
+        "finger4-1.L_head": [
+            13958,
+            13959,
+            13960,
+            13961,
+            13962,
+            13963,
+            13964,
+            13965
+        ],
+        "finger4-1.L_tail": [
+            13934,
+            13935,
+            13936,
+            13937,
+            13938,
+            13939,
+            13940,
+            13941
+        ],
+        "finger4-1.R_head": [
+            14398,
+            14399,
+            14400,
+            14401,
+            14402,
+            14403,
+            14404,
+            14405
+        ],
+        "finger4-1.R_tail": [
+            14374,
+            14375,
+            14376,
+            14377,
+            14378,
+            14379,
+            14380,
+            14381
+        ],
+        "finger4-2.L_head": [
+            13934,
+            13935,
+            13936,
+            13937,
+            13938,
+            13939,
+            13940,
+            13941
+        ],
+        "finger4-2.L_tail": [
+            13894,
+            13895,
+            13896,
+            13897,
+            13898,
+            13899,
+            13900,
+            13901
+        ],
+        "finger4-2.R_head": [
+            14374,
+            14375,
+            14376,
+            14377,
+            14378,
+            14379,
+            14380,
+            14381
+        ],
+        "finger4-2.R_tail": [
+            14334,
+            14335,
+            14336,
+            14337,
+            14338,
+            14339,
+            14340,
+            14341
+        ],
+        "finger4-3.L_head": [
+            13894,
+            13895,
+            13896,
+            13897,
+            13898,
+            13899,
+            13900,
+            13901
+        ],
+        "finger4-3.L_tail": [
+            13870,
+            13871,
+            13872,
+            13873,
+            13874,
+            13875,
+            13876,
+            13877
+        ],
+        "finger4-3.R_head": [
+            14334,
+            14335,
+            14336,
+            14337,
+            14338,
+            14339,
+            14340,
+            14341
+        ],
+        "finger4-3.R_tail": [
+            14310,
+            14311,
+            14312,
+            14313,
+            14314,
+            14315,
+            14316,
+            14317
+        ],
+        "finger5-1.L_head": [
+            13950,
+            13951,
+            13952,
+            13953,
+            13954,
+            13955,
+            13956,
+            13957
+        ],
+        "finger5-1.L_tail": [
+            13942,
+            13943,
+            13944,
+            13945,
+            13946,
+            13947,
+            13948,
+            13949
+        ],
+        "finger5-1.R_head": [
+            14390,
+            14391,
+            14392,
+            14393,
+            14394,
+            14395,
+            14396,
+            14397
+        ],
+        "finger5-1.R_tail": [
+            14382,
+            14383,
+            14384,
+            14385,
+            14386,
+            14387,
+            14388,
+            14389
+        ],
+        "finger5-2.L_head": [
+            13942,
+            13943,
+            13944,
+            13945,
+            13946,
+            13947,
+            13948,
+            13949
+        ],
+        "finger5-2.L_tail": [
+            13886,
+            13887,
+            13888,
+            13889,
+            13890,
+            13891,
+            13892,
+            13893
+        ],
+        "finger5-2.R_head": [
+            14382,
+            14383,
+            14384,
+            14385,
+            14386,
+            14387,
+            14388,
+            14389
+        ],
+        "finger5-2.R_tail": [
+            14326,
+            14327,
+            14328,
+            14329,
+            14330,
+            14331,
+            14332,
+            14333
+        ],
+        "finger5-3.L_head": [
+            13886,
+            13887,
+            13888,
+            13889,
+            13890,
+            13891,
+            13892,
+            13893
+        ],
+        "finger5-3.L_tail": [
+            13878,
+            13879,
+            13880,
+            13881,
+            13882,
+            13883,
+            13884,
+            13885
+        ],
+        "finger5-3.R_head": [
+            14326,
+            14327,
+            14328,
+            14329,
+            14330,
+            14331,
+            14332,
+            14333
+        ],
+        "finger5-3.R_tail": [
+            14318,
+            14319,
+            14320,
+            14321,
+            14322,
+            14323,
+            14324,
+            14325
+        ],
+        "foot.L_head": [
+            13830,
+            13831,
+            13832,
+            13833,
+            13834,
+            13835,
+            13836,
+            13837
+        ],
+        "foot.L_tail": [
+            13670,
+            13671,
+            13672,
+            13673,
+            13674,
+            13675,
+            13676,
+            13677,
+            13830,
+            13831,
+            13832,
+            13833,
+            13834,
+            13835,
+            13836,
+            13837
+        ],
+        "foot.R_head": [
+            14270,
+            14271,
+            14272,
+            14273,
+            14274,
+            14275,
+            14276,
+            14277
+        ],
+        "foot.R_tail": [
+            14110,
+            14111,
+            14112,
+            14113,
+            14114,
+            14115,
+            14116,
+            14117,
+            14270,
+            14271,
+            14272,
+            14273,
+            14274,
+            14275,
+            14276,
+            14277
+        ],
+        "head_head": [
+            14070,
+            14071,
+            14072,
+            14073,
+            14074,
+            14075,
+            14076,
+            14077
+        ],
+        "head_tail": [
+            14566,
+            14567,
+            14568,
+            14569,
+            14570,
+            14571,
+            14572,
+            14573
+        ],
+        "jaw_head": [
+            14590,
+            14591,
+            14592,
+            14593,
+            14594,
+            14595,
+            14596,
+            14597
+        ],
+        "jaw_tail": [
+            991
+        ],
+        "levator02.L_head": [
+            11679
+        ],
+        "levator02.L_tail": [
+            6960
+        ],
+        "levator02.R_head": [
+            5062
+        ],
+        "levator02.R_tail": [
+            184
+        ],
+        "levator03.L_head": [
+            6960
+        ],
+        "levator03.L_tail": [
+            11925
+        ],
+        "levator03.R_head": [
+            184
+        ],
+        "levator03.R_tail": [
+            5321
+        ],
+        "levator04.L_head": [
+            11925
+        ],
+        "levator04.L_tail": [
+            10407
+        ],
+        "levator04.R_head": [
+            5321
+        ],
+        "levator04.R_tail": [
+            3739
+        ],
+        "levator05.L_head": [
+            10407
+        ],
+        "levator05.L_tail": [
+            7159
+        ],
+        "levator05.R_head": [
+            3739
+        ],
+        "levator05.R_tail": [
+            399
+        ],
+        "levator06.L_head": [
+            7062
+        ],
+        "levator06.L_tail": [
+            11685
+        ],
+        "levator06.R_head": [
+            295
+        ],
+        "levator06.R_tail": [
+            5069
+        ],
+        "lowerarm01.L_head": [
+            14038,
+            14039,
+            14040,
+            14041,
+            14042,
+            14043,
+            14044,
+            14045
+        ],
+        "lowerarm01.L_tail": [
+            14038,
+            14039,
+            14040,
+            14041,
+            14042,
+            14043,
+            14044,
+            14045,
+            14030,
+            14031,
+            14032,
+            14033,
+            14034,
+            14035,
+            14036,
+            14037
+        ],
+        "lowerarm01.R_head": [
+            14478,
+            14479,
+            14480,
+            14481,
+            14482,
+            14483,
+            14484,
+            14485
+        ],
+        "lowerarm01.R_tail": [
+            14478,
+            14479,
+            14480,
+            14481,
+            14482,
+            14483,
+            14484,
+            14485,
+            14470,
+            14471,
+            14472,
+            14473,
+            14474,
+            14475,
+            14476,
+            14477
+        ],
+        "lowerarm02.L_head": [
+            14030,
+            14031,
+            14032,
+            14033,
+            14034,
+            14035,
+            14036,
+            14037,
+            14038,
+            14039,
+            14040,
+            14041,
+            14042,
+            14043,
+            14044,
+            14045
+        ],
+        "lowerarm02.L_tail": [
+            14030,
+            14031,
+            14032,
+            14033,
+            14034,
+            14035,
+            14036,
+            14037
+        ],
+        "lowerarm02.R_head": [
+            14470,
+            14471,
+            14472,
+            14473,
+            14474,
+            14475,
+            14476,
+            14477,
+            14478,
+            14479,
+            14480,
+            14481,
+            14482,
+            14483,
+            14484,
+            14485
+        ],
+        "lowerarm02.R_tail": [
+            14470,
+            14471,
+            14472,
+            14473,
+            14474,
+            14475,
+            14476,
+            14477
+        ],
+        "lowerleg01.L_head": [
+            13838,
+            13839,
+            13840,
+            13841,
+            13842,
+            13843,
+            13844,
+            13845
+        ],
+        "lowerleg01.L_tail": [
+            13838,
+            13839,
+            13840,
+            13841,
+            13842,
+            13843,
+            13844,
+            13845,
+            13830,
+            13831,
+            13832,
+            13833,
+            13834,
+            13835,
+            13836,
+            13837
+        ],
+        "lowerleg01.R_head": [
+            14278,
+            14279,
+            14280,
+            14281,
+            14282,
+            14283,
+            14284,
+            14285
+        ],
+        "lowerleg01.R_tail": [
+            14278,
+            14279,
+            14280,
+            14281,
+            14282,
+            14283,
+            14284,
+            14285,
+            14270,
+            14271,
+            14272,
+            14273,
+            14274,
+            14275,
+            14276,
+            14277
+        ],
+        "lowerleg02.L_head": [
+            13830,
+            13831,
+            13832,
+            13833,
+            13834,
+            13835,
+            13836,
+            13837,
+            13838,
+            13839,
+            13840,
+            13841,
+            13842,
+            13843,
+            13844,
+            13845
+        ],
+        "lowerleg02.L_tail": [
+            13830,
+            13831,
+            13832,
+            13833,
+            13834,
+            13835,
+            13836,
+            13837
+        ],
+        "lowerleg02.R_head": [
+            14270,
+            14271,
+            14272,
+            14273,
+            14274,
+            14275,
+            14276,
+            14277,
+            14278,
+            14279,
+            14280,
+            14281,
+            14282,
+            14283,
+            14284,
+            14285
+        ],
+        "lowerleg02.R_tail": [
+            14270,
+            14271,
+            14272,
+            14273,
+            14274,
+            14275,
+            14276,
+            14277
+        ],
+        "metacarpal1.L_head": [
+            14014,
+            14015,
+            14016,
+            14017,
+            14018,
+            14019,
+            14020,
+            14021
+        ],
+        "metacarpal1.L_tail": [
+            13974,
+            13975,
+            13976,
+            13977,
+            13978,
+            13979,
+            13980,
+            13981
+        ],
+        "metacarpal1.R_head": [
+            14454,
+            14455,
+            14456,
+            14457,
+            14458,
+            14459,
+            14460,
+            14461
+        ],
+        "metacarpal1.R_tail": [
+            14414,
+            14415,
+            14416,
+            14417,
+            14418,
+            14419,
+            14420,
+            14421
+        ],
+        "metacarpal2.L_head": [
+            14014,
+            14015,
+            14016,
+            14017,
+            14018,
+            14019,
+            14020,
+            14021
+        ],
+        "metacarpal2.L_tail": [
+            13966,
+            13967,
+            13968,
+            13969,
+            13970,
+            13971,
+            13972,
+            13973
+        ],
+        "metacarpal2.R_head": [
+            14454,
+            14455,
+            14456,
+            14457,
+            14458,
+            14459,
+            14460,
+            14461
+        ],
+        "metacarpal2.R_tail": [
+            14406,
+            14407,
+            14408,
+            14409,
+            14410,
+            14411,
+            14412,
+            14413
+        ],
+        "metacarpal3.L_head": [
+            14022,
+            14023,
+            14024,
+            14025,
+            14026,
+            14027,
+            14028,
+            14029
+        ],
+        "metacarpal3.L_tail": [
+            13958,
+            13959,
+            13960,
+            13961,
+            13962,
+            13963,
+            13964,
+            13965
+        ],
+        "metacarpal3.R_head": [
+            14462,
+            14463,
+            14464,
+            14465,
+            14466,
+            14467,
+            14468,
+            14469
+        ],
+        "metacarpal3.R_tail": [
+            14398,
+            14399,
+            14400,
+            14401,
+            14402,
+            14403,
+            14404,
+            14405
+        ],
+        "metacarpal4.L_head": [
+            14022,
+            14023,
+            14024,
+            14025,
+            14026,
+            14027,
+            14028,
+            14029
+        ],
+        "metacarpal4.L_tail": [
+            13950,
+            13951,
+            13952,
+            13953,
+            13954,
+            13955,
+            13956,
+            13957
+        ],
+        "metacarpal4.R_head": [
+            14462,
+            14463,
+            14464,
+            14465,
+            14466,
+            14467,
+            14468,
+            14469
+        ],
+        "metacarpal4.R_tail": [
+            14390,
+            14391,
+            14392,
+            14393,
+            14394,
+            14395,
+            14396,
+            14397
+        ],
+        "metatarsal1.L_head": [
+            13822,
+            13823,
+            13824,
+            13825,
+            13826,
+            13827,
+            13828,
+            13829,
+            13830,
+            13831,
+            13832,
+            13833,
+            13834,
+            13835,
+            13836,
+            13837
+        ],
+        "metatarsal1.L_tail": [
+            13822,
+            13823,
+            13824,
+            13825,
+            13826,
+            13827,
+            13828,
+            13829
+        ],
+        "metatarsal1.R_head": [
+            14262,
+            14263,
+            14264,
+            14265,
+            14266,
+            14267,
+            14268,
+            14269,
+            14270,
+            14271,
+            14272,
+            14273,
+            14274,
+            14275,
+            14276,
+            14277
+        ],
+        "metatarsal1.R_tail": [
+            14262,
+            14263,
+            14264,
+            14265,
+            14266,
+            14267,
+            14268,
+            14269
+        ],
+        "metatarsal2.L_head": [
+            13798,
+            13799,
+            13800,
+            13801,
+            13802,
+            13803,
+            13804,
+            13805,
+            13830,
+            13831,
+            13832,
+            13833,
+            13834,
+            13835,
+            13836,
+            13837
+        ],
+        "metatarsal2.L_tail": [
+            13798,
+            13799,
+            13800,
+            13801,
+            13802,
+            13803,
+            13804,
+            13805
+        ],
+        "metatarsal2.R_head": [
+            14238,
+            14239,
+            14240,
+            14241,
+            14242,
+            14243,
+            14244,
+            14245,
+            14270,
+            14271,
+            14272,
+            14273,
+            14274,
+            14275,
+            14276,
+            14277
+        ],
+        "metatarsal2.R_tail": [
+            14238,
+            14239,
+            14240,
+            14241,
+            14242,
+            14243,
+            14244,
+            14245
+        ],
+        "metatarsal3.L_head": [
+            13790,
+            13791,
+            13792,
+            13793,
+            13794,
+            13795,
+            13796,
+            13797,
+            13830,
+            13831,
+            13832,
+            13833,
+            13834,
+            13835,
+            13836,
+            13837
+        ],
+        "metatarsal3.L_tail": [
+            13790,
+            13791,
+            13792,
+            13793,
+            13794,
+            13795,
+            13796,
+            13797
+        ],
+        "metatarsal3.R_head": [
+            14230,
+            14231,
+            14232,
+            14233,
+            14234,
+            14235,
+            14236,
+            14237,
+            14270,
+            14271,
+            14272,
+            14273,
+            14274,
+            14275,
+            14276,
+            14277
+        ],
+        "metatarsal3.R_tail": [
+            14230,
+            14231,
+            14232,
+            14233,
+            14234,
+            14235,
+            14236,
+            14237
+        ],
+        "metatarsal4.L_head": [
+            13782,
+            13783,
+            13784,
+            13785,
+            13786,
+            13787,
+            13788,
+            13789,
+            13830,
+            13831,
+            13832,
+            13833,
+            13834,
+            13835,
+            13836,
+            13837
+        ],
+        "metatarsal4.L_tail": [
+            13782,
+            13783,
+            13784,
+            13785,
+            13786,
+            13787,
+            13788,
+            13789
+        ],
+        "metatarsal4.R_head": [
+            14222,
+            14223,
+            14224,
+            14225,
+            14226,
+            14227,
+            14228,
+            14229,
+            14270,
+            14271,
+            14272,
+            14273,
+            14274,
+            14275,
+            14276,
+            14277
+        ],
+        "metatarsal4.R_tail": [
+            14222,
+            14223,
+            14224,
+            14225,
+            14226,
+            14227,
+            14228,
+            14229
+        ],
+        "metatarsal5.L_head": [
+            13774,
+            13775,
+            13776,
+            13777,
+            13778,
+            13779,
+            13780,
+            13781,
+            13830,
+            13831,
+            13832,
+            13833,
+            13834,
+            13835,
+            13836,
+            13837
+        ],
+        "metatarsal5.L_tail": [
+            13774,
+            13775,
+            13776,
+            13777,
+            13778,
+            13779,
+            13780,
+            13781
+        ],
+        "metatarsal5.R_head": [
+            14214,
+            14215,
+            14216,
+            14217,
+            14218,
+            14219,
+            14220,
+            14221,
+            14270,
+            14271,
+            14272,
+            14273,
+            14274,
+            14275,
+            14276,
+            14277
+        ],
+        "metatarsal5.R_tail": [
+            14214,
+            14215,
+            14216,
+            14217,
+            14218,
+            14219,
+            14220,
+            14221
+        ],
+        "neck2_head": [
+            14070,
+            14071,
+            14072,
+            14073,
+            14074,
+            14075,
+            14076,
+            14077,
+            14534,
+            14535,
+            14536,
+            14537,
+            14538,
+            14539,
+            14540,
+            14541
+        ],
+        "neck2_tail": [
+            14070,
+            14071,
+            14072,
+            14073,
+            14074,
+            14075,
+            14076,
+            14077
+        ],
+        "neck_head": [
+            14534,
+            14535,
+            14536,
+            14537,
+            14538,
+            14539,
+            14540,
+            14541
+        ],
+        "neck_tail": [
+            14534,
+            14535,
+            14536,
+            14537,
+            14538,
+            14539,
+            14540,
+            14541,
+            14070,
+            14071,
+            14072,
+            14073,
+            14074,
+            14075,
+            14076,
+            14077
+        ],
+        "oculi01.L_head": [
+            6996
+        ],
+        "oculi01.L_tail": [
+            7006
+        ],
+        "oculi01.R_head": [
+            222
+        ],
+        "oculi01.R_tail": [
+            233
+        ],
+        "oculi02.L_head": [
+            6986
+        ],
+        "oculi02.L_tail": [
+            6996
+        ],
+        "oculi02.R_head": [
+            211
+        ],
+        "oculi02.R_tail": [
+            222
+        ],
+        "orbicularis03.L_head": [
+            13606,
+            13607,
+            13608,
+            13609,
+            13610,
+            13611,
+            13612,
+            13613
+        ],
+        "orbicularis03.L_tail": [
+            14094,
+            14095,
+            14096,
+            14097,
+            14098,
+            14099,
+            14100,
+            14101
+        ],
+        "orbicularis03.R_head": [
+            13614,
+            13615,
+            13616,
+            13617,
+            13618,
+            13619,
+            13620,
+            13621
+        ],
+        "orbicularis03.R_tail": [
+            14526,
+            14527,
+            14528,
+            14529,
+            14530,
+            14531,
+            14532,
+            14533
+        ],
+        "orbicularis04.L_head": [
+            13606,
+            13607,
+            13608,
+            13609,
+            13610,
+            13611,
+            13612,
+            13613
+        ],
+        "orbicularis04.L_tail": [
+            14078,
+            14079,
+            14080,
+            14081,
+            14082,
+            14083,
+            14084,
+            14085
+        ],
+        "orbicularis04.R_head": [
+            13614,
+            13615,
+            13616,
+            13617,
+            13618,
+            13619,
+            13620,
+            13621
+        ],
+        "orbicularis04.R_tail": [
+            14510,
+            14511,
+            14512,
+            14513,
+            14514,
+            14515,
+            14516,
+            14517
+        ],
+        "oris01_head": [
+            491
+        ],
+        "oris01_tail": [
+            494
+        ],
+        "oris02_head": [
+            14542,
+            14543,
+            14544,
+            14545,
+            14546,
+            14547,
+            14548,
+            14549
+        ],
+        "oris02_tail": [
+            491
+        ],
+        "oris03.L_head": [
+            11965
+        ],
+        "oris03.L_tail": [
+            7170
+        ],
+        "oris03.R_head": [
+            5363
+        ],
+        "oris03.R_tail": [
+            410
+        ],
+        "oris04.L_head": [
+            343
+        ],
+        "oris04.L_tail": [
+            11965
+        ],
+        "oris04.R_head": [
+            343
+        ],
+        "oris04.R_tail": [
+            5363
+        ],
+        "oris05_head": [
+            5342
+        ],
+        "oris05_tail": [
+            466
+        ],
+        "oris06.L_head": [
+            14542,
+            14543,
+            14544,
+            14545,
+            14546,
+            14547,
+            14548,
+            14549
+        ],
+        "oris06.L_tail": [
+            7450
+        ],
+        "oris06.R_head": [
+            14542,
+            14543,
+            14544,
+            14545,
+            14546,
+            14547,
+            14548,
+            14549
+        ],
+        "oris06.R_tail": [
+            728
+        ],
+        "oris06_head": [
+            343
+        ],
+        "oris06_tail": [
+            5342
+        ],
+        "oris07.L_head": [
+            7450
+        ],
+        "oris07.L_tail": [
+            7166
+        ],
+        "oris07.R_head": [
+            728
+        ],
+        "oris07.R_tail": [
+            406
+        ],
+        "pelvis.L_head": [
+            13622,
+            13623,
+            13624,
+            13625,
+            13626,
+            13627,
+            13628,
+            13629
+        ],
+        "pelvis.L_tail": [
+            13846,
+            13847,
+            13848,
+            13849,
+            13850,
+            13851,
+            13852,
+            13853
+        ],
+        "pelvis.R_head": [
+            13622,
+            13623,
+            13624,
+            13625,
+            13626,
+            13627,
+            13628,
+            13629
+        ],
+        "pelvis.R_tail": [
+            14286,
+            14287,
+            14288,
+            14289,
+            14290,
+            14291,
+            14292,
+            14293
+        ],
+        "risorius02.L_head": [
+            11704
+        ],
+        "risorius02.L_tail": [
+            11927
+        ],
+        "risorius02.R_head": [
+            5089
+        ],
+        "risorius02.R_tail": [
+            5323
+        ],
+        "risorius03.L_head": [
+            11927
+        ],
+        "risorius03.L_tail": [
+            11819
+        ],
+        "risorius03.R_head": [
+            5323
+        ],
+        "risorius03.R_tail": [
+            5208
+        ],
+        "root_head": [
+            4223
+        ],
+        "root_tail": [
+            13622,
+            13623,
+            13624,
+            13625,
+            13626,
+            13627,
+            13628,
+            13629
+        ],
+        "shoulder01.L_head": [
+            14062,
+            14063,
+            14064,
+            14065,
+            14066,
+            14067,
+            14068,
+            14069
+        ],
+        "shoulder01.L_tail": [
+            14046,
+            14047,
+            14048,
+            14049,
+            14050,
+            14051,
+            14052,
+            14053
+        ],
+        "shoulder01.R_head": [
+            14502,
+            14503,
+            14504,
+            14505,
+            14506,
+            14507,
+            14508,
+            14509
+        ],
+        "shoulder01.R_tail": [
+            14486,
+            14487,
+            14488,
+            14489,
+            14490,
+            14491,
+            14492,
+            14493
+        ],
+        "shoulder02.L_head": [
+            14046,
+            14047,
+            14048,
+            14049,
+            14050,
+            14051,
+            14052,
+            14053
+        ],
+        "shoulder02.L_tail": [
+            8092,
+            8094,
+            8107,
+            8117,
+            8128,
+            8130,
+            8300,
+            8310,
+            8311,
+            8312,
+            8320,
+            8321,
+            8324,
+            8334,
+            10426,
+            10427
+        ],
+        "shoulder02.R_head": [
+            14486,
+            14487,
+            14488,
+            14489,
+            14490,
+            14491,
+            14492,
+            14493
+        ],
+        "shoulder02.R_tail": [
+            1404,
+            1406,
+            1419,
+            1429,
+            1440,
+            1442,
+            1628,
+            1638,
+            1639,
+            1640,
+            1648,
+            1649,
+            1652,
+            1662,
+            3759,
+            3760
+        ],
+        "special01_head": [
+            5266
+        ],
+        "special01_tail": [
+            343
+        ],
+        "special03_head": [
+            14590,
+            14591,
+            14592,
+            14593,
+            14594,
+            14595,
+            14596,
+            14597
+        ],
+        "special03_tail": [
+            5134
+        ],
+        "special04_head": [
+            991
+        ],
+        "special04_tail": [
+            14542,
+            14543,
+            14544,
+            14545,
+            14546,
+            14547,
+            14548,
+            14549
+        ],
+        "special05.L_head": [
+            7746
+        ],
+        "special05.L_tail": [
+            13606,
+            13607,
+            13608,
+            13609,
+            13610,
+            13611,
+            13612,
+            13613
+        ],
+        "special05.R_head": [
+            1054
+        ],
+        "special05.R_tail": [
+            13614,
+            13615,
+            13616,
+            13617,
+            13618,
+            13619,
+            13620,
+            13621
+        ],
+        "special06.L_head": [
+            14566,
+            14567,
+            14568,
+            14569,
+            14570,
+            14571,
+            14572,
+            14573
+        ],
+        "special06.L_tail": [
+            7746
+        ],
+        "special06.R_head": [
+            14566,
+            14567,
+            14568,
+            14569,
+            14570,
+            14571,
+            14572,
+            14573
+        ],
+        "special06.R_tail": [
+            1054
+        ],
+        "spine1_head": [
+            13654,
+            13655,
+            13656,
+            13657,
+            13658,
+            13659,
+            13660,
+            13661
+        ],
+        "spine1_tail": [
+            14534,
+            14535,
+            14536,
+            14537,
+            14538,
+            14539,
+            14540,
+            14541
+        ],
+        "spine2_head": [
+            13646,
+            13647,
+            13648,
+            13649,
+            13650,
+            13651,
+            13652,
+            13653
+        ],
+        "spine2_tail": [
+            13654,
+            13655,
+            13656,
+            13657,
+            13658,
+            13659,
+            13660,
+            13661
+        ],
+        "spine3_head": [
+            13638,
+            13639,
+            13640,
+            13641,
+            13642,
+            13643,
+            13644,
+            13645
+        ],
+        "spine3_tail": [
+            13646,
+            13647,
+            13648,
+            13649,
+            13650,
+            13651,
+            13652,
+            13653
+        ],
+        "spine4_head": [
+            13630,
+            13631,
+            13632,
+            13633,
+            13634,
+            13635,
+            13636,
+            13637
+        ],
+        "spine4_tail": [
+            13638,
+            13639,
+            13640,
+            13641,
+            13642,
+            13643,
+            13644,
+            13645
+        ],
+        "spine5_head": [
+            13622,
+            13623,
+            13624,
+            13625,
+            13626,
+            13627,
+            13628,
+            13629
+        ],
+        "spine5_tail": [
+            13630,
+            13631,
+            13632,
+            13633,
+            13634,
+            13635,
+            13636,
+            13637
+        ],
+        "temporalis01.L_head": [
+            10409
+        ],
+        "temporalis01.L_tail": [
+            6986
+        ],
+        "temporalis01.R_head": [
+            3741
+        ],
+        "temporalis01.R_tail": [
+            211
+        ],
+        "temporalis02.L_head": [
+            11797
+        ],
+        "temporalis02.L_tail": [
+            11704
+        ],
+        "temporalis02.R_head": [
+            5185
+        ],
+        "temporalis02.R_tail": [
+            5089
+        ],
+        "toe1-1.L_head": [
+            13822,
+            13823,
+            13824,
+            13825,
+            13826,
+            13827,
+            13828,
+            13829
+        ],
+        "toe1-1.L_tail": [
+            13814,
+            13815,
+            13816,
+            13817,
+            13818,
+            13819,
+            13820,
+            13821
+        ],
+        "toe1-1.R_head": [
+            14262,
+            14263,
+            14264,
+            14265,
+            14266,
+            14267,
+            14268,
+            14269
+        ],
+        "toe1-1.R_tail": [
+            14254,
+            14255,
+            14256,
+            14257,
+            14258,
+            14259,
+            14260,
+            14261
+        ],
+        "toe1-2.L_head": [
+            13814,
+            13815,
+            13816,
+            13817,
+            13818,
+            13819,
+            13820,
+            13821
+        ],
+        "toe1-2.L_tail": [
+            13806,
+            13807,
+            13808,
+            13809,
+            13810,
+            13811,
+            13812,
+            13813
+        ],
+        "toe1-2.R_head": [
+            14254,
+            14255,
+            14256,
+            14257,
+            14258,
+            14259,
+            14260,
+            14261
+        ],
+        "toe1-2.R_tail": [
+            14246,
+            14247,
+            14248,
+            14249,
+            14250,
+            14251,
+            14252,
+            14253
+        ],
+        "toe2-1.L_head": [
+            13798,
+            13799,
+            13800,
+            13801,
+            13802,
+            13803,
+            13804,
+            13805
+        ],
+        "toe2-1.L_tail": [
+            13742,
+            13743,
+            13744,
+            13745,
+            13746,
+            13747,
+            13748,
+            13749
+        ],
+        "toe2-1.R_head": [
+            14238,
+            14239,
+            14240,
+            14241,
+            14242,
+            14243,
+            14244,
+            14245
+        ],
+        "toe2-1.R_tail": [
+            14182,
+            14183,
+            14184,
+            14185,
+            14186,
+            14187,
+            14188,
+            14189
+        ],
+        "toe2-2.L_head": [
+            13742,
+            13743,
+            13744,
+            13745,
+            13746,
+            13747,
+            13748,
+            13749
+        ],
+        "toe2-2.L_tail": [
+            13734,
+            13735,
+            13736,
+            13737,
+            13738,
+            13739,
+            13740,
+            13741
+        ],
+        "toe2-2.R_head": [
+            14182,
+            14183,
+            14184,
+            14185,
+            14186,
+            14187,
+            14188,
+            14189
+        ],
+        "toe2-2.R_tail": [
+            14174,
+            14175,
+            14176,
+            14177,
+            14178,
+            14179,
+            14180,
+            14181
+        ],
+        "toe2-3.L_head": [
+            13734,
+            13735,
+            13736,
+            13737,
+            13738,
+            13739,
+            13740,
+            13741
+        ],
+        "toe2-3.L_tail": [
+            13726,
+            13727,
+            13728,
+            13729,
+            13730,
+            13731,
+            13732,
+            13733
+        ],
+        "toe2-3.R_head": [
+            14174,
+            14175,
+            14176,
+            14177,
+            14178,
+            14179,
+            14180,
+            14181
+        ],
+        "toe2-3.R_tail": [
+            14166,
+            14167,
+            14168,
+            14169,
+            14170,
+            14171,
+            14172,
+            14173
+        ],
+        "toe3-1.L_head": [
+            13790,
+            13791,
+            13792,
+            13793,
+            13794,
+            13795,
+            13796,
+            13797
+        ],
+        "toe3-1.L_tail": [
+            13750,
+            13751,
+            13752,
+            13753,
+            13754,
+            13755,
+            13756,
+            13757
+        ],
+        "toe3-1.R_head": [
+            14230,
+            14231,
+            14232,
+            14233,
+            14234,
+            14235,
+            14236,
+            14237
+        ],
+        "toe3-1.R_tail": [
+            14190,
+            14191,
+            14192,
+            14193,
+            14194,
+            14195,
+            14196,
+            14197
+        ],
+        "toe3-2.L_head": [
+            13750,
+            13751,
+            13752,
+            13753,
+            13754,
+            13755,
+            13756,
+            13757
+        ],
+        "toe3-2.L_tail": [
+            13710,
+            13711,
+            13712,
+            13713,
+            13714,
+            13715,
+            13716,
+            13717
+        ],
+        "toe3-2.R_head": [
+            14190,
+            14191,
+            14192,
+            14193,
+            14194,
+            14195,
+            14196,
+            14197
+        ],
+        "toe3-2.R_tail": [
+            14150,
+            14151,
+            14152,
+            14153,
+            14154,
+            14155,
+            14156,
+            14157
+        ],
+        "toe3-3.L_head": [
+            13710,
+            13711,
+            13712,
+            13713,
+            13714,
+            13715,
+            13716,
+            13717
+        ],
+        "toe3-3.L_tail": [
+            13718,
+            13719,
+            13720,
+            13721,
+            13722,
+            13723,
+            13724,
+            13725
+        ],
+        "toe3-3.R_head": [
+            14150,
+            14151,
+            14152,
+            14153,
+            14154,
+            14155,
+            14156,
+            14157
+        ],
+        "toe3-3.R_tail": [
+            14158,
+            14159,
+            14160,
+            14161,
+            14162,
+            14163,
+            14164,
+            14165
+        ],
+        "toe4-1.L_head": [
+            13782,
+            13783,
+            13784,
+            13785,
+            13786,
+            13787,
+            13788,
+            13789
+        ],
+        "toe4-1.L_tail": [
+            13758,
+            13759,
+            13760,
+            13761,
+            13762,
+            13763,
+            13764,
+            13765
+        ],
+        "toe4-1.R_head": [
+            14222,
+            14223,
+            14224,
+            14225,
+            14226,
+            14227,
+            14228,
+            14229
+        ],
+        "toe4-1.R_tail": [
+            14198,
+            14199,
+            14200,
+            14201,
+            14202,
+            14203,
+            14204,
+            14205
+        ],
+        "toe4-2.L_head": [
+            13758,
+            13759,
+            13760,
+            13761,
+            13762,
+            13763,
+            13764,
+            13765
+        ],
+        "toe4-2.L_tail": [
+            13694,
+            13695,
+            13696,
+            13697,
+            13698,
+            13699,
+            13700,
+            13701
+        ],
+        "toe4-2.R_head": [
+            14198,
+            14199,
+            14200,
+            14201,
+            14202,
+            14203,
+            14204,
+            14205
+        ],
+        "toe4-2.R_tail": [
+            14134,
+            14135,
+            14136,
+            14137,
+            14138,
+            14139,
+            14140,
+            14141
+        ],
+        "toe4-3.L_head": [
+            13694,
+            13695,
+            13696,
+            13697,
+            13698,
+            13699,
+            13700,
+            13701
+        ],
+        "toe4-3.L_tail": [
+            13702,
+            13703,
+            13704,
+            13705,
+            13706,
+            13707,
+            13708,
+            13709
+        ],
+        "toe4-3.R_head": [
+            14134,
+            14135,
+            14136,
+            14137,
+            14138,
+            14139,
+            14140,
+            14141
+        ],
+        "toe4-3.R_tail": [
+            14142,
+            14143,
+            14144,
+            14145,
+            14146,
+            14147,
+            14148,
+            14149
+        ],
+        "toe5-1.L_head": [
+            13774,
+            13775,
+            13776,
+            13777,
+            13778,
+            13779,
+            13780,
+            13781
+        ],
+        "toe5-1.L_tail": [
+            13766,
+            13767,
+            13768,
+            13769,
+            13770,
+            13771,
+            13772,
+            13773
+        ],
+        "toe5-1.R_head": [
+            14214,
+            14215,
+            14216,
+            14217,
+            14218,
+            14219,
+            14220,
+            14221
+        ],
+        "toe5-1.R_tail": [
+            14206,
+            14207,
+            14208,
+            14209,
+            14210,
+            14211,
+            14212,
+            14213
+        ],
+        "toe5-2.L_head": [
+            13766,
+            13767,
+            13768,
+            13769,
+            13770,
+            13771,
+            13772,
+            13773
+        ],
+        "toe5-2.L_tail": [
+            13678,
+            13679,
+            13680,
+            13681,
+            13682,
+            13683,
+            13684,
+            13685
+        ],
+        "toe5-2.R_head": [
+            14206,
+            14207,
+            14208,
+            14209,
+            14210,
+            14211,
+            14212,
+            14213
+        ],
+        "toe5-2.R_tail": [
+            14118,
+            14119,
+            14120,
+            14121,
+            14122,
+            14123,
+            14124,
+            14125
+        ],
+        "toe5-3.L_head": [
+            13678,
+            13679,
+            13680,
+            13681,
+            13682,
+            13683,
+            13684,
+            13685
+        ],
+        "toe5-3.L_tail": [
+            13686,
+            13687,
+            13688,
+            13689,
+            13690,
+            13691,
+            13692,
+            13693
+        ],
+        "toe5-3.R_head": [
+            14118,
+            14119,
+            14120,
+            14121,
+            14122,
+            14123,
+            14124,
+            14125
+        ],
+        "toe5-3.R_tail": [
+            14126,
+            14127,
+            14128,
+            14129,
+            14130,
+            14131,
+            14132,
+            14133
+        ],
+        "tongue00_head": [
+            991
+        ],
+        "tongue00_tail": [
+            14582,
+            14583,
+            14584,
+            14585,
+            14586,
+            14587,
+            14588,
+            14589
+        ],
+        "tongue01_head": [
+            14582,
+            14583,
+            14584,
+            14585,
+            14586,
+            14587,
+            14588,
+            14589
+        ],
+        "tongue01_tail": [
+            14574,
+            14575,
+            14576,
+            14577,
+            14578,
+            14579,
+            14580,
+            14581
+        ],
+        "tongue02_head": [
+            14574,
+            14575,
+            14576,
+            14577,
+            14578,
+            14579,
+            14580,
+            14581
+        ],
+        "tongue02_tail": [
+            14558,
+            14559,
+            14560,
+            14561,
+            14562,
+            14563,
+            14564,
+            14565
+        ],
+        "tongue03_head": [
+            14558,
+            14559,
+            14560,
+            14561,
+            14562,
+            14563,
+            14564,
+            14565
+        ],
+        "tongue03_tail": [
+            14558,
+            14559,
+            14560,
+            14561,
+            14562,
+            14563,
+            14564,
+            14565,
+            14550,
+            14551,
+            14552,
+            14553,
+            14554,
+            14555,
+            14556,
+            14557
+        ],
+        "tongue04_head": [
+            14550,
+            14551,
+            14552,
+            14553,
+            14554,
+            14555,
+            14556,
+            14557,
+            14558,
+            14559,
+            14560,
+            14561,
+            14562,
+            14563,
+            14564,
+            14565
+        ],
+        "tongue04_tail": [
+            14550,
+            14551,
+            14552,
+            14553,
+            14554,
+            14555,
+            14556,
+            14557
+        ],
+        "upperarm02.L_head": [
+            8092,
+            8094,
+            8107,
+            8117,
+            8128,
+            8130,
+            8300,
+            8310,
+            8311,
+            8312,
+            8320,
+            8321,
+            8324,
+            8334,
+            10426,
+            10427
+        ],
+        "upperarm02.L_tail": [
+            14038,
+            14039,
+            14040,
+            14041,
+            14042,
+            14043,
+            14044,
+            14045
+        ],
+        "upperarm02.R_head": [
+            1404,
+            1406,
+            1419,
+            1429,
+            1440,
+            1442,
+            1628,
+            1638,
+            1639,
+            1640,
+            1648,
+            1649,
+            1652,
+            1662,
+            3759,
+            3760
+        ],
+        "upperarm02.R_tail": [
+            14478,
+            14479,
+            14480,
+            14481,
+            14482,
+            14483,
+            14484,
+            14485
+        ],
+        "upperleg01.L_head": [
+            13846,
+            13847,
+            13848,
+            13849,
+            13850,
+            13851,
+            13852,
+            13853
+        ],
+        "upperleg01.L_tail": [
+            10891,
+            10938,
+            11025,
+            12991
+        ],
+        "upperleg01.R_head": [
+            14286,
+            14287,
+            14288,
+            14289,
+            14290,
+            14291,
+            14292,
+            14293
+        ],
+        "upperleg01.R_tail": [
+            4260,
+            4308,
+            4407,
+            6394
+        ],
+        "upperleg02.L_head": [
+            10891,
+            10938,
+            11025,
+            12991
+        ],
+        "upperleg02.L_tail": [
+            13838,
+            13839,
+            13840,
+            13841,
+            13842,
+            13843,
+            13844,
+            13845
+        ],
+        "upperleg02.R_head": [
+            4260,
+            4308,
+            4407,
+            6394
+        ],
+        "upperleg02.R_tail": [
+            14278,
+            14279,
+            14280,
+            14281,
+            14282,
+            14283,
+            14284,
+            14285
+        ],
+        "wrist.L_head": [
+            14030,
+            14031,
+            14032,
+            14033,
+            14034,
+            14035,
+            14036,
+            14037
+        ],
+        "wrist.L_tail": [
+            14014,
+            14015,
+            14016,
+            14017,
+            14018,
+            14019,
+            14020,
+            14021
+        ],
+        "wrist.R_head": [
+            14470,
+            14471,
+            14472,
+            14473,
+            14474,
+            14475,
+            14476,
+            14477
+        ],
+        "wrist.R_tail": [
+            14454,
+            14455,
+            14456,
+            14457,
+            14458,
+            14459,
+            14460,
+            14461
+        ]
+    },
+    "license": "AGPL3",
+    "name": "MakeHuman base skeleton",
+    "version": 102,
+    "weights_file": "default_weights.jsonw"
+}
