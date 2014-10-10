@@ -269,7 +269,12 @@ class Modifier(object):
         for target, old, new in zip(self.targets, old_detail, new_detail):
             if new == old:
                 continue
-            algos3d.loadTranslationTarget(self.human.meshData, target[0], new - old, None, 0, 0)
+            if self.human.isPosed():
+                # Apply target with pose transformation
+                animatedMesh = self.human
+            else:
+                animatedMesh = None
+            algos3d.loadTranslationTarget(self.human.meshData, target[0], new - old, None, 0, 0, animatedMesh=animatedMesh)
 
         if skipUpdate:
             # Used for dependency updates (avoid dependency loops and double updates to human)

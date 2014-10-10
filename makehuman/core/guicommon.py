@@ -344,9 +344,9 @@ class Object(events3d.EventHandler):
     def getProxyMesh(self):
         return self.__proxyMesh
 
-    def updateProxyMesh(self):
+    def updateProxyMesh(self, fit_to_posed=False):
         if self.proxy and self.__proxyMesh:
-            self.proxy.update(self.__proxyMesh)
+            self.proxy.update(self.__proxyMesh, fit_to_posed)
             self.__proxyMesh.update()
 
     def isProxied(self):
@@ -378,7 +378,7 @@ class Object(events3d.EventHandler):
             for attr in ('visibility', 'pickable', 'cameraMode'):
                 setattr(self.__proxyMesh, attr, getattr(self.mesh, attr))
 
-            self.proxy.update(self.__proxyMesh)
+            self.updateProxyMesh()
 
             # Attach to GL object if this object is attached to viewport
             if self.__seedMesh.object3d:
@@ -389,6 +389,9 @@ class Object(events3d.EventHandler):
             self.mesh.setVisibility(1)
 
         self.setSubdivided(isSubdivided)
+
+    def getProxy(self):
+        return self.proxy
 
     def getSubdivisionMesh(self, update=True):
         """

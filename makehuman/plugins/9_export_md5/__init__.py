@@ -40,14 +40,13 @@ TODO
 import mh2md5
 
 from progress import Progress
-from export import Exporter
-from exportutils.config import Config
+from export import Exporter, ExportConfig
 from core import G
 
-class MD5Config(Config):
+class MD5Config(ExportConfig):
 
     def __init__(self):
-        Config.__init__(self)
+        ExportConfig.__init__(self)
         self.useRelPaths = True
         self.feetOnGround = True
 
@@ -78,7 +77,6 @@ class ExporterMD5(Exporter):
 
     def getConfig(self):
         cfg = MD5Config()
-        cfg.useTPose          = False # self.useTPose.selected
         cfg.scale,cfg.unit    = self.taskview.getScale()
 
         return cfg

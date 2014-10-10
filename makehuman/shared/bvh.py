@@ -56,7 +56,8 @@ class BVH():
     A BVH skeleton. We assume a single root joint.
     This skeleton allows access to both joints and bones.
     """
-    def __init__(self):
+    def __init__(self, name="Untitled"):
+        self.name = name
         self.joints = {}    # Lookup dict to find joints by name
         self.bvhJoints = [] # List of joints in the order in which they were defined in the BVH file (important for MOTION data parsing)
         self.jointslist = []    # Cached breadth-first list of all joints
@@ -66,6 +67,7 @@ class BVH():
         self.frames = []
 
         self.convertFromZUp = False     # Set to true to convert the coordinates from a Z-is-up coordinate system. Most motion capture data uses Y-is-up, though.
+        self.allowTranslation = "onlyroot"  # Joints to accept translation animation data for
 
     def addRootJoint(self, name):
         self.rootJoint = self.__addJoint(name)
@@ -198,7 +200,7 @@ class BVH():
         nFrames = len(jointsData[0])
 
         # Interweave joints animation data, per frame with joints in breadth-first order
-        animData = np.hstack(jointsData).reshape(nJoints*nFrames,4,4)
+        animData = np.hstack(jointsData).reshape(nJoints*nFrames,3,4)
         framerate = 1.0/self.frameTime
         return animation.AnimationTrack(name, animData, nFrames, framerate)
 
@@ -229,6 +231,7 @@ class BVH():
     def getJoints(self):
         """
         Returns linear list of all joints in breadth-first order.
+        Requires __cacheGetJoints to be called first.
         """
         return self.jointslist
 
@@ -244,6 +247,16 @@ class BVH():
         Loads both the skeleton hierarchy and the animation track from the 
         specified BVH file.
         """
+        import os
+        self.name = os.path.splitext(os.path.basename(filepath))[0]
+        if self.convertFromZUp == "auto":
+            autoAxis = True
+            self.convertFromZUp = False
+        elif not isinstance(self.convertFromZUp, bool):
+            raise RuntimeError('Cannot load BVH, illegal option for "convertFromZUp" (%s)' % self.convertFromZUp)
+        else:
+            autoAxis = False
+
         fp = open(filepath, "rU")
 
         # Read hierarchy
@@ -252,6 +265,16 @@ class BVH():
         rootJoint = self.addRootJoint(words[1])        
 
         self.__readJoint(self.rootJoint, fp)
+
+        # Auto determine and adjust for up axis
+        if autoAxis:
+            self.convertFromZUp = self._autoGuessCoordinateSystem()
+            log.message("Automatically guessed coordinate system for BVH file %s (%s)" % (filepath, "Z-up" if self.convertFromZUp else "Y-up"))
+            if self.convertFromZUp:
+                # Conversion needed: convert from Z-up to Y-up
+                self.__cacheGetJoints()
+                for joint in self.jointslist:
+                    self.__calcPosition(joint, joint.offset)
 
         # Read motion
         self.__expectKeyword('MOTION', fp)
@@ -273,6 +296,41 @@ class BVH():
         # Transform frame data into transformation matrices for all joints
         for joint in self.getJoints():
             joint.calculateFrames()     # TODO we don't need to calculate pose matrices for end effectors
+
+    def _autoGuessCoordinateSystem(self):
+        """
+        Guesses whether this BVH rig uses a Y-up or Z-up axis system, using the
+        joint offsets of this rig (longest direction is expected to be the height).
+        Requires joints of this BVH skeleton to be initialized.
+        Returns False if no conversion is needed (BVH file uses Y-up coordinates),
+        returns True if BVH uses Z-up coordinates and conversion is needed.
+        Note that coordinate system is expected to be right-handed.
+        """
+        ref_joint = None
+        ref_names = ['head', 'spine3', 'spine2', 'spine1', 'upperleg02.L', 'lowerleg02.L']
+        while ref_joint is None and len(ref_names) != 0:
+            joint_name = ref_names.pop()
+            try:
+                ref_joint = self.joints[joint_name]
+            except:
+                try:
+                    ref_joint = self.joints[joint_name[0].capitalize()+joint_name[1:]]
+                except:
+                    ref_joint = None
+            if ref_joint != None and len(ref_joint.children) == 0:
+                log.debug("Cannot use reference joint %s for determining axis system, it is an end-effector (has no children)" % ref_joint.name)
+                ref_joint = None
+        if ref_joint is None:
+            log.warning("Could not auto guess axis system for BVH file %s because no known joint name is found. Using Y up as default axis orientation." % filepath)
+        else:
+            tail_joint = ref_joint.children[0]
+            direction = tail_joint.position - ref_joint.position
+            if abs(direction[1]) > abs(direction[2]):
+                # Y-up
+                return False
+            else:
+                # Z-up
+                return True
 
     def fromSkeleton(self, skel, animationTrack=None, dummyJoints=True):
         """
@@ -516,9 +574,6 @@ class BVH():
         """
         Scale the skeleton stored in this BVH data.
         """
-        oldZup = self.convertFromZUp
-        self.convertFromZUp = False     # Avoid converting again
-
         for joint in self.getJoints():
             # Rescale joint offset and recalculate positions and rest matrices
             self.__calcPosition(joint, scaleFactor * joint.offset)
@@ -533,8 +588,6 @@ class BVH():
 
             # Recalculate pose matrices
             joint.calculateFrames()
-
-        self.convertFromZUp = oldZup
 
 
 class BVHJoint():
@@ -632,7 +685,14 @@ class BVHJoint():
 
         # Add translations to pose matrices
         # Allow partial transformation channels too
-        if rXs != None or rYs != None or rZs != None:
+        allowTranslation = self.skeleton.allowTranslation
+        if allowTranslation == "all":
+            poseTranslate = True
+        elif allowTranslation == "onlyroot":
+            poseTranslate = (self.parent is None)
+        else:
+            poseTranslate = False
+        if poseTranslate and (rXs != None or rYs != None or rZs != None):
             if rXs == None:
                 rXs = np.zeros(nFrames, dtype=np.float32)
             if rYs == None:
@@ -662,9 +722,14 @@ class BVHJoint():
         return not self.hasChildren()
 
 
-def load(filename, convertFromZUp = False):
+def load(filename, convertFromZUp="auto", allowTranslation="onlyroot"):
+    """
+    allowTranslation    determine which should receive translation animation 
+                        (allowed values: "onlyroot", "all", "none")
+    """
     result = BVH()
     result.convertFromZUp = convertFromZUp
+    result.allowTranslation = allowTranslation
     result.fromFile(filename)
     return result
 

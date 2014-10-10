@@ -114,6 +114,7 @@ class ModifierSlider(gui.Slider):
 
     def onChanging(self, value):
         if self.changing is not None:
+            # Avoid concurrent updates
             self.changing = value
             return
         self.changing = value
@@ -134,7 +135,7 @@ class ModifierSlider(gui.Slider):
                         human.getSeedMesh().setVisibility(1)
                     human.getSubdivisionMesh(False).setVisibility(0)
             self.modifier.updateValue(value, G.app.settings.get('realtimeNormalUpdates', True))
-            human.updateProxyMesh()
+            human.updateProxyMesh(fit_to_posed=True)
 
 
     def onChange(self, value):
@@ -170,7 +171,6 @@ class ModifierSlider(gui.Slider):
 
     def onRelease(self, w):
         G.app.callAsync(self._onChange)
-        #self._onChange()
 
     def onFocus(self, event):
         if self.view:

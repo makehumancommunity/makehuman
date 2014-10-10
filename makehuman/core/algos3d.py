@@ -10,7 +10,7 @@ MakeHuman 3D Transformation functions.
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Manuel Bastioni, Marc Flerackers
+**Authors:**           Manuel Bastioni, Marc Flerackers, Jonas Hauquier
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
@@ -208,7 +208,7 @@ class Target(object):
             self._load_text(name)
         logger.debug('loaded target %s', name)
 
-    def apply(self, obj, morphFactor, update=True, calcNormals=True, faceGroupToUpdateName=None, scale=(1.0,1.0,1.0)):
+    def apply(self, obj, morphFactor, update=True, calcNormals=True, faceGroupToUpdateName=None, scale=(1.0,1.0,1.0), animatedMesh=None):
         self.morphFactor = morphFactor
 
         if len(self.verts):
@@ -235,7 +235,22 @@ class Target(object):
                 # Adding the translation vector
 
                 scale = np.array(scale) * morphFactor
-                obj.coord[dstVerts] += self.data[srcVerts] * scale[None,:]
+                if animatedMesh is not None:
+                    # Pose the direction in which the target is applied, for fast
+                    # approximate modeling of a posed model
+                    import animation
+                    vertBoneMapping = animatedMesh.getBoundMesh(obj.name)[1]
+                    if not vertBoneMapping.isCompiled(4):
+                        vertBoneMapping.compileData(animatedMesh.getSkeleton(), 4)
+                    animationTrack = animatedMesh.getActiveAnimation()
+                    if not animationTrack.isBaked():
+                        animationTrack.bake(animatedMesh.getSkeleton())
+                    poseData = animatedMesh.getPoseState()
+                    obj.coord[dstVerts] += animation.skinMesh( \
+                                  self.data[srcVerts] * scale[None,:], 
+                                  vertBoneMapping.compiled(4)[dstVerts], poseData )
+                else:
+                    obj.coord[dstVerts] += self.data[srcVerts] * scale[None,:]
                 obj.markCoords(dstVerts, coor=True)
 
             if calcNormals:
@@ -290,7 +305,7 @@ def getTarget(obj, targetPath):
     return target
 
 
-def loadTranslationTarget(obj, targetPath, morphFactor, faceGroupToUpdateName=None, update=1, calcNorm=1, scale=[1.0,1.0,1.0]):
+def loadTranslationTarget(obj, targetPath, morphFactor, faceGroupToUpdateName=None, update=1, calcNorm=1, scale=[1.0,1.0,1.0], animatedMesh=None):
     """
     This function retrieves a set of translation vectors and applies those
     translations to the specified vertices of the mesh object. This set of
@@ -337,6 +352,13 @@ def loadTranslationTarget(obj, targetPath, morphFactor, faceGroupToUpdateName=No
         *int flag*. A flag to indicate whether the normals are to be recalculated (1/true)
         or not (0/false).
 
+    scale:
+        *float*. Scale the target offsets with this vector. Defaults to unit vector.
+
+    animatedMesh:
+        *AnimatedMesh*. Posed state of the basemesh with which the target should 
+        be transformed before being applied.
+
     """
 
     if not (morphFactor or update):
@@ -344,7 +366,7 @@ def loadTranslationTarget(obj, targetPath, morphFactor, faceGroupToUpdateName=No
 
     target = getTarget(obj, targetPath)
 
-    target.apply(obj, morphFactor, update, calcNorm, faceGroupToUpdateName, scale)
+    target.apply(obj, morphFactor, update, calcNorm, faceGroupToUpdateName, scale, animatedMesh)
 
 def saveTranslationTarget(obj, targetPath, groupToSave=None, epsilon=0.001):
     """

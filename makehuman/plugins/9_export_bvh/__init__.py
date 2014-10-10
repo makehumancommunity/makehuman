@@ -40,8 +40,7 @@ Supports exporting of selected skeleton and animations in BVH format.
 
 import bvh
 
-from export import Exporter
-from exportutils.config import Config
+from export import Exporter, ExportConfig
 import log
 from core import G
 
@@ -49,10 +48,10 @@ import os
 
 # TODO add options such as z-up, feetonground, etc
 
-class BvhConfig(Config):
+class BvhConfig(ExportConfig):
 
     def __init__(self):
-        Config.__init__(self)
+        ExportConfig.__init__(self)
         self.useRelPaths = True
 
 class ExporterBVH(Exporter):

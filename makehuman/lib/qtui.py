@@ -162,6 +162,7 @@ g_mousewheel_t = None
 class Canvas(QtOpenGL.QGLWidget):
     def __init__(self, parent, app):
         self.app = app
+        self.blockRedraw = False
         format = QtOpenGL.QGLFormat()
         format.setAlpha(True)
         format.setDepthBufferSize(24)
@@ -277,6 +278,9 @@ class Canvas(QtOpenGL.QGLWidget):
         gl.OnInit()
 
     def paintGL(self):
+        if self.blockRedraw:
+            self.app.logger_redraw.debug('paintGL (blocked)')
+            return
         self.app.logger_redraw.debug('paintGL')
         gl.renderToCanvas()
 
