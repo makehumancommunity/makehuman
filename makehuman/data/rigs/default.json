@@ -4,42 +4,42 @@
             "head": "breast.L_head",
             "parent": "spine02",
             "reference": null,
-            "roll": 2.8807735443115234,
+            "roll": 0.6632251143455505,
             "tail": "breast.L_tail"
         },
         "breast.R": {
             "head": "breast.R_head",
             "parent": "spine02",
             "reference": null,
-            "roll": -2.8807735443115234,
+            "roll": -0.6632251143455505,
             "tail": "breast.R_tail"
         },
         "clavicle.L": {
             "head": "clavicle.L_head",
             "parent": "spine01",
             "reference": null,
-            "roll": -1.3756952285766602,
+            "roll": 3.1415927410125732,
             "tail": "clavicle.L_tail"
         },
         "clavicle.R": {
             "head": "clavicle.R_head",
             "parent": "spine01",
             "reference": null,
-            "roll": 1.3756952285766602,
+            "roll": -3.1415927410125732,
             "tail": "clavicle.R_tail"
         },
         "eye.L": {
             "head": "eye.L_head",
             "parent": "special05.L",
             "reference": null,
-            "roll": -0.5664194822311401,
+            "roll": 0.04707758128643036,
             "tail": "eye.L_tail"
         },
         "eye.R": {
             "head": "eye.R_head",
             "parent": "special05.R",
             "reference": null,
-            "roll": 0.5664194822311401,
+            "roll": -0.04707758128643036,
             "tail": "eye.R_tail"
         },
         "finger1-1.L": {
@@ -88,168 +88,168 @@
             "head": "finger2-1.L_head",
             "parent": "metacarpal1.L",
             "reference": null,
-            "roll": -0.49704819917678833,
+            "roll": -0.7064877152442932,
             "tail": "finger2-1.L_tail"
         },
         "finger2-1.R": {
             "head": "finger2-1.R_head",
             "parent": "metacarpal1.R",
             "reference": null,
-            "roll": 0.49704819917678833,
+            "roll": 0.7064877152442932,
             "tail": "finger2-1.R_tail"
         },
         "finger2-2.L": {
             "head": "finger2-2.L_head",
             "parent": "finger2-1.L",
             "reference": null,
-            "roll": -0.7223361730575562,
+            "roll": -1.0015888214111328,
             "tail": "finger2-2.L_tail"
         },
         "finger2-2.R": {
             "head": "finger2-2.R_head",
             "parent": "finger2-1.R",
             "reference": null,
-            "roll": 0.7223361730575562,
+            "roll": 1.0015888214111328,
             "tail": "finger2-2.R_tail"
         },
         "finger2-3.L": {
             "head": "finger2-3.L_head",
             "parent": "finger2-2.L",
             "reference": null,
-            "roll": -0.7996529340744019,
+            "roll": -1.0090924501419067,
             "tail": "finger2-3.L_tail"
         },
         "finger2-3.R": {
             "head": "finger2-3.R_head",
             "parent": "finger2-2.R",
             "reference": null,
-            "roll": 0.7996529340744019,
+            "roll": 1.0090924501419067,
             "tail": "finger2-3.R_tail"
         },
         "finger3-1.L": {
             "head": "finger3-1.L_head",
             "parent": "metacarpal2.L",
             "reference": null,
-            "roll": -0.47955581545829773,
+            "roll": -0.18284985423088074,
             "tail": "finger3-1.L_tail"
         },
         "finger3-1.R": {
             "head": "finger3-1.R_head",
             "parent": "metacarpal2.R",
             "reference": null,
-            "roll": 0.47955581545829773,
+            "roll": 0.18284985423088074,
             "tail": "finger3-1.R_tail"
         },
         "finger3-2.L": {
             "head": "finger3-2.L_head",
             "parent": "finger3-1.L",
             "reference": null,
-            "roll": -0.9147744178771973,
+            "roll": -0.6355217695236206,
             "tail": "finger3-2.L_tail"
         },
         "finger3-2.R": {
             "head": "finger3-2.R_head",
             "parent": "finger3-1.R",
             "reference": null,
-            "roll": 0.9147744178771973,
+            "roll": 0.6355217695236206,
             "tail": "finger3-2.R_tail"
         },
         "finger3-3.L": {
             "head": "finger3-3.L_head",
             "parent": "finger3-2.L",
             "reference": null,
-            "roll": -0.8571028709411621,
+            "roll": -0.595303475856781,
             "tail": "finger3-3.L_tail"
         },
         "finger3-3.R": {
             "head": "finger3-3.R_head",
             "parent": "finger3-2.R",
             "reference": null,
-            "roll": 0.8571028709411621,
+            "roll": 0.595303475856781,
             "tail": "finger3-3.R_tail"
         },
         "finger4-1.L": {
             "head": "finger4-1.L_head",
             "parent": "metacarpal3.L",
             "reference": null,
-            "roll": -0.11615023761987686,
+            "roll": 0.1281958520412445,
             "tail": "finger4-1.L_tail"
         },
         "finger4-1.R": {
             "head": "finger4-1.R_head",
             "parent": "metacarpal3.R",
             "reference": null,
-            "roll": 0.11615023761987686,
+            "roll": -0.1281958520412445,
             "tail": "finger4-1.R_tail"
         },
         "finger4-2.L": {
             "head": "finger4-2.L_head",
             "parent": "finger4-1.L",
             "reference": null,
-            "roll": -0.6591653823852539,
+            "roll": -0.4322725832462311,
             "tail": "finger4-2.L_tail"
         },
         "finger4-2.R": {
             "head": "finger4-2.R_head",
             "parent": "finger4-1.R",
             "reference": null,
-            "roll": 0.6591653823852539,
+            "roll": 0.4322725832462311,
             "tail": "finger4-2.R_tail"
         },
         "finger4-3.L": {
             "head": "finger4-3.L_head",
             "parent": "finger4-2.L",
             "reference": null,
-            "roll": -0.5037873387336731,
+            "roll": -0.3292544186115265,
             "tail": "finger4-3.L_tail"
         },
         "finger4-3.R": {
             "head": "finger4-3.R_head",
             "parent": "finger4-2.R",
             "reference": null,
-            "roll": 0.5037873387336731,
+            "roll": 0.3292544186115265,
             "tail": "finger4-3.R_tail"
         },
         "finger5-1.L": {
             "head": "finger5-1.L_head",
             "parent": "metacarpal4.L",
             "reference": null,
-            "roll": 0.0037048247177153826,
+            "roll": -0.17082808911800385,
             "tail": "finger5-1.L_tail"
         },
         "finger5-1.R": {
             "head": "finger5-1.R_head",
             "parent": "metacarpal4.R",
             "reference": null,
-            "roll": -0.0037048247177153826,
+            "roll": 0.17082808911800385,
             "tail": "finger5-1.R_tail"
         },
         "finger5-2.L": {
             "head": "finger5-2.L_head",
             "parent": "finger5-1.L",
             "reference": null,
-            "roll": -0.3797512948513031,
+            "roll": -0.5542842149734497,
             "tail": "finger5-2.L_tail"
         },
         "finger5-2.R": {
             "head": "finger5-2.R_head",
             "parent": "finger5-1.R",
             "reference": null,
-            "roll": 0.3797512948513031,
+            "roll": 0.5542842149734497,
             "tail": "finger5-2.R_tail"
         },
         "finger5-3.L": {
             "head": "finger5-3.L_head",
             "parent": "finger5-2.L",
             "reference": null,
-            "roll": -0.3714032769203186,
+            "roll": -0.5284829139709473,
             "tail": "finger5-3.L_tail"
         },
         "finger5-3.R": {
             "head": "finger5-3.R_head",
             "parent": "finger5-2.R",
             "reference": null,
-            "roll": 0.3714032769203186,
+            "roll": 0.5284829139709473,
             "tail": "finger5-3.R_tail"
         },
         "foot.L": {
@@ -270,14 +270,14 @@
             "head": "head_head",
             "parent": "neck03",
             "reference": null,
-            "roll": 7.192499928976304e-10,
+            "roll": -3.3251599390604625e-11,
             "tail": "head_tail"
         },
         "jaw": {
             "head": "jaw_head",
             "parent": "head",
             "reference": null,
-            "roll": 5.324160056447281e-16,
+            "roll": -3.141592502593994,
             "tail": "jaw_tail"
         },
         "levator02.L": {
@@ -354,28 +354,28 @@
             "head": "lowerarm01.L_head",
             "parent": "upperarm02.L",
             "reference": null,
-            "roll": -1.657183289527893,
+            "roll": 1.6184003353118896,
             "tail": "lowerarm01.L_tail"
         },
         "lowerarm01.R": {
             "head": "lowerarm01.R_head",
             "parent": "upperarm02.R",
             "reference": null,
-            "roll": 1.657183289527893,
+            "roll": -1.6184003353118896,
             "tail": "lowerarm01.R_tail"
         },
         "lowerarm02.L": {
             "head": "lowerarm02.L_head",
             "parent": "lowerarm01.L",
             "reference": null,
-            "roll": -1.6941756010055542,
+            "roll": 1.6184080839157104,
             "tail": "lowerarm02.L_tail"
         },
         "lowerarm02.R": {
             "head": "lowerarm02.R_head",
             "parent": "lowerarm01.R",
             "reference": null,
-            "roll": 1.6941756010055542,
+            "roll": -1.6184080839157104,
             "tail": "lowerarm02.R_tail"
         },
         "lowerleg01.L": {
@@ -466,91 +466,91 @@
             "head": "metatarsal1.L_head",
             "parent": "foot.L",
             "reference": null,
-            "roll": -0.8049107789993286,
+            "roll": -0.3088493347167969,
             "tail": "metatarsal1.L_tail"
         },
         "metatarsal1.R": {
             "head": "metatarsal1.R_head",
             "parent": "foot.R",
             "reference": null,
-            "roll": 0.8049107789993286,
+            "roll": 0.3088493347167969,
             "tail": "metatarsal1.R_tail"
         },
         "metatarsal2.L": {
             "head": "metatarsal2.L_head",
             "parent": "foot.L",
             "reference": null,
-            "roll": 0.014393733814358711,
+            "roll": -0.07281147688627243,
             "tail": "metatarsal2.L_tail"
         },
         "metatarsal2.R": {
             "head": "metatarsal2.R_head",
             "parent": "foot.R",
             "reference": null,
-            "roll": -0.014393733814358711,
+            "roll": 0.07281147688627243,
             "tail": "metatarsal2.R_tail"
         },
         "metatarsal3.L": {
             "head": "metatarsal3.L_head",
             "parent": "foot.L",
             "reference": null,
-            "roll": 0.09716732054948807,
+            "roll": 0.093455009162426,
             "tail": "metatarsal3.L_tail"
         },
         "metatarsal3.R": {
             "head": "metatarsal3.R_head",
             "parent": "foot.R",
             "reference": null,
-            "roll": -0.09716732054948807,
+            "roll": -0.093455009162426,
             "tail": "metatarsal3.R_tail"
         },
         "metatarsal4.L": {
             "head": "metatarsal4.L_head",
             "parent": "foot.L",
             "reference": null,
-            "roll": 0.19361206889152527,
+            "roll": 0.26428845524787903,
             "tail": "metatarsal4.L_tail"
         },
         "metatarsal4.R": {
             "head": "metatarsal4.R_head",
             "parent": "foot.R",
             "reference": null,
-            "roll": -0.19361206889152527,
+            "roll": -0.26428845524787903,
             "tail": "metatarsal4.R_tail"
         },
         "metatarsal5.L": {
             "head": "metatarsal5.L_head",
             "parent": "foot.L",
             "reference": null,
-            "roll": 0.43031638860702515,
+            "roll": 0.43031641840934753,
             "tail": "metatarsal5.L_tail"
         },
         "metatarsal5.R": {
             "head": "metatarsal5.R_head",
             "parent": "foot.R",
             "reference": null,
-            "roll": -0.43031638860702515,
+            "roll": -0.43031641840934753,
             "tail": "metatarsal5.R_tail"
         },
         "neck01": {
             "head": "neck01_head",
             "parent": "spine01",
             "reference": null,
-            "roll": 4.2549619383436266e-10,
+            "roll": -7.457600759153138e-09,
             "tail": "neck01_tail"
         },
         "neck02": {
             "head": "neck02_head",
             "parent": "neck01",
             "reference": null,
-            "roll": 4.2549011536330283e-10,
+            "roll": -1.1921271436676761e-07,
             "tail": "neck02_tail"
         },
         "neck03": {
             "head": "neck03_head",
             "parent": "neck02",
             "reference": null,
-            "roll": 4.2549011536330283e-10,
+            "roll": -4.638141433421783e-12,
             "tail": "neck03_tail"
         },
         "oculi01.L": {
@@ -585,28 +585,28 @@
             "head": "orbicularis03.L_head",
             "parent": "special05.L",
             "reference": null,
-            "roll": 0.1966700255870819,
+            "roll": 0.045111171901226044,
             "tail": "orbicularis03.L_tail"
         },
         "orbicularis03.R": {
             "head": "orbicularis03.R_head",
             "parent": "special05.R",
             "reference": null,
-            "roll": -0.1966700255870819,
+            "roll": -0.045111171901226044,
             "tail": "orbicularis03.R_tail"
         },
         "orbicularis04.L": {
             "head": "orbicularis04.L_head",
             "parent": "special05.L",
             "reference": null,
-            "roll": 1.607170820236206,
+            "roll": 0.051476847380399704,
             "tail": "orbicularis04.L_tail"
         },
         "orbicularis04.R": {
             "head": "orbicularis04.R_head",
             "parent": "special05.R",
             "reference": null,
-            "roll": -1.607170820236206,
+            "roll": -0.051476847380399704,
             "tail": "orbicularis04.R_tail"
         },
         "oris01": {
@@ -746,42 +746,42 @@
             "head": "shoulder01.L_head",
             "parent": "clavicle.L",
             "reference": null,
-            "roll": -0.9491823315620422,
+            "roll": -3.0669479370117188,
             "tail": "shoulder01.L_tail"
         },
         "shoulder01.R": {
             "head": "shoulder01.R_head",
             "parent": "clavicle.R",
             "reference": null,
-            "roll": 0.9491823315620422,
+            "roll": 3.0669479370117188,
             "tail": "shoulder01.R_tail"
         },
         "shoulder02.L": {
             "head": "shoulder02.L_head",
             "parent": "shoulder01.L",
             "reference": null,
-            "roll": -0.0900556817650795,
+            "roll": 3.1391799449920654,
             "tail": "shoulder02.L_tail"
         },
         "shoulder02.R": {
             "head": "shoulder02.R_head",
             "parent": "shoulder01.R",
             "reference": null,
-            "roll": 0.0900556817650795,
+            "roll": -3.1391799449920654,
             "tail": "shoulder02.R_tail"
         },
         "special01": {
             "head": "special01_head",
             "parent": "head",
             "reference": null,
-            "roll": 2.650993565112003e-06,
+            "roll": -3.141592025756836,
             "tail": "special01_tail"
         },
         "special03": {
             "head": "special03_head",
             "parent": "head",
             "reference": null,
-            "roll": -0.049000006169080734,
+            "roll": -1.695007085800171e-06,
             "tail": "special03_tail"
         },
         "special04": {
@@ -795,49 +795,49 @@
             "head": "special05.L_head",
             "parent": "special06.L",
             "reference": null,
-            "roll": 0.699104368686676,
+            "roll": 0.8899543285369873,
             "tail": "special05.L_tail"
         },
         "special05.R": {
             "head": "special05.R_head",
             "parent": "special06.R",
             "reference": null,
-            "roll": -0.699104368686676,
+            "roll": -0.8899543285369873,
             "tail": "special05.R_tail"
         },
         "special06.L": {
             "head": "special06.L_head",
             "parent": "head",
             "reference": null,
-            "roll": -2.8717455863952637,
+            "roll": 0.0,
             "tail": "special06.L_tail"
         },
         "special06.R": {
             "head": "special06.R_head",
             "parent": "head",
             "reference": null,
-            "roll": 2.8717455863952637,
+            "roll": -0.0,
             "tail": "special06.R_tail"
         },
         "spine01": {
             "head": "spine01_head",
             "parent": "spine02",
             "reference": null,
-            "roll": -2.8179983346809934e-10,
+            "roll": -1.097262385119091e-11,
             "tail": "spine01_tail"
         },
         "spine02": {
             "head": "spine02_head",
             "parent": "spine03",
             "reference": null,
-            "roll": -2.3035953032153275e-16,
+            "roll": -6.143906006172983e-08,
             "tail": "spine02_tail"
         },
         "spine03": {
             "head": "spine03_head",
             "parent": "spine04",
             "reference": null,
-            "roll": -2.192008506233026e-16,
+            "roll": -2.192008373884128e-16,
             "tail": "spine03_tail"
         },
         "spine04": {
@@ -886,231 +886,231 @@
             "head": "toe1-1.L_head",
             "parent": "metatarsal1.L",
             "reference": null,
-            "roll": -0.10158562660217285,
+            "roll": 0.07201562821865082,
             "tail": "toe1-1.L_tail"
         },
         "toe1-1.R": {
             "head": "toe1-1.R_head",
             "parent": "metatarsal1.R",
             "reference": null,
-            "roll": 0.10158562660217285,
+            "roll": -0.07201562821865082,
             "tail": "toe1-1.R_tail"
         },
         "toe1-2.L": {
             "head": "toe1-2.L_head",
             "parent": "toe1-1.L",
             "reference": null,
-            "roll": 0.3545359671115875,
+            "roll": 0.15680640935897827,
             "tail": "toe1-2.L_tail"
         },
         "toe1-2.R": {
             "head": "toe1-2.R_head",
             "parent": "toe1-1.R",
             "reference": null,
-            "roll": -0.3545359671115875,
+            "roll": -0.15680640935897827,
             "tail": "toe1-2.R_tail"
         },
         "toe2-1.L": {
             "head": "toe2-1.L_head",
             "parent": "metatarsal2.L",
             "reference": null,
-            "roll": 0.12327774614095688,
+            "roll": 0.06950243562459946,
             "tail": "toe2-1.L_tail"
         },
         "toe2-1.R": {
             "head": "toe2-1.R_head",
             "parent": "metatarsal2.R",
             "reference": null,
-            "roll": -0.12327774614095688,
+            "roll": -0.06950243562459946,
             "tail": "toe2-1.R_tail"
         },
         "toe2-2.L": {
             "head": "toe2-2.L_head",
             "parent": "toe2-1.L",
             "reference": null,
-            "roll": 2.9925363063812256,
+            "roll": 0.021458543837070465,
             "tail": "toe2-2.L_tail"
         },
         "toe2-2.R": {
             "head": "toe2-2.R_head",
             "parent": "toe2-1.R",
             "reference": null,
-            "roll": -2.9925363063812256,
+            "roll": -0.021458543837070465,
             "tail": "toe2-2.R_tail"
         },
         "toe2-3.L": {
             "head": "toe2-3.L_head",
             "parent": "toe2-2.L",
             "reference": null,
-            "roll": 0.690570592880249,
+            "roll": -0.013643646612763405,
             "tail": "toe2-3.L_tail"
         },
         "toe2-3.R": {
             "head": "toe2-3.R_head",
             "parent": "toe2-2.R",
             "reference": null,
-            "roll": -0.690570592880249,
+            "roll": 0.013643646612763405,
             "tail": "toe2-3.R_tail"
         },
         "toe3-1.L": {
             "head": "toe3-1.L_head",
             "parent": "metatarsal3.L",
             "reference": null,
-            "roll": 0.7696252465248108,
+            "roll": 0.07304878532886505,
             "tail": "toe3-1.L_tail"
         },
         "toe3-1.R": {
             "head": "toe3-1.R_head",
             "parent": "metatarsal3.R",
             "reference": null,
-            "roll": -0.7696252465248108,
+            "roll": -0.07304878532886505,
             "tail": "toe3-1.R_tail"
         },
         "toe3-2.L": {
             "head": "toe3-2.L_head",
             "parent": "toe3-1.L",
             "reference": null,
-            "roll": 1.6283074617385864,
+            "roll": -0.014187709428369999,
             "tail": "toe3-2.L_tail"
         },
         "toe3-2.R": {
             "head": "toe3-2.R_head",
             "parent": "toe3-1.R",
             "reference": null,
-            "roll": -1.6283074617385864,
+            "roll": 0.014187709428369999,
             "tail": "toe3-2.R_tail"
         },
         "toe3-3.L": {
             "head": "toe3-3.L_head",
             "parent": "toe3-2.L",
             "reference": null,
-            "roll": 0.06006990745663643,
+            "roll": -0.08659011125564575,
             "tail": "toe3-3.L_tail"
         },
         "toe3-3.R": {
             "head": "toe3-3.R_head",
             "parent": "toe3-2.R",
             "reference": null,
-            "roll": -0.06006990745663643,
+            "roll": 0.08659011125564575,
             "tail": "toe3-3.R_tail"
         },
         "toe4-1.L": {
             "head": "toe4-1.L_head",
             "parent": "metatarsal4.L",
             "reference": null,
-            "roll": 2.31238055229187,
+            "roll": 0.15866191685199738,
             "tail": "toe4-1.L_tail"
         },
         "toe4-1.R": {
             "head": "toe4-1.R_head",
             "parent": "metatarsal4.R",
             "reference": null,
-            "roll": -2.31238055229187,
+            "roll": -0.15866191685199738,
             "tail": "toe4-1.R_tail"
         },
         "toe4-2.L": {
             "head": "toe4-2.L_head",
             "parent": "toe4-1.L",
             "reference": null,
-            "roll": -0.19314520061016083,
+            "roll": -0.18422441184520721,
             "tail": "toe4-2.L_tail"
         },
         "toe4-2.R": {
             "head": "toe4-2.R_head",
             "parent": "toe4-1.R",
             "reference": null,
-            "roll": 0.19314520061016083,
+            "roll": 0.18422441184520721,
             "tail": "toe4-2.R_tail"
         },
         "toe4-3.L": {
             "head": "toe4-3.L_head",
             "parent": "toe4-2.L",
             "reference": null,
-            "roll": 0.4338553249835968,
+            "roll": 0.07685621827840805,
             "tail": "toe4-3.L_tail"
         },
         "toe4-3.R": {
             "head": "toe4-3.R_head",
             "parent": "toe4-2.R",
             "reference": null,
-            "roll": -0.4338553249835968,
+            "roll": -0.07685621827840805,
             "tail": "toe4-3.R_tail"
         },
         "toe5-1.L": {
             "head": "toe5-1.L_head",
             "parent": "metatarsal5.L",
             "reference": null,
-            "roll": 1.0362745523452759,
+            "roll": 0.118716299533844,
             "tail": "toe5-1.L_tail"
         },
         "toe5-1.R": {
             "head": "toe5-1.R_head",
             "parent": "metatarsal5.R",
             "reference": null,
-            "roll": -1.0362745523452759,
+            "roll": -0.118716299533844,
             "tail": "toe5-1.R_tail"
         },
         "toe5-2.L": {
             "head": "toe5-2.L_head",
             "parent": "toe5-1.L",
             "reference": null,
-            "roll": 1.3817880153656006,
+            "roll": -0.053430236876010895,
             "tail": "toe5-2.L_tail"
         },
         "toe5-2.R": {
             "head": "toe5-2.R_head",
             "parent": "toe5-1.R",
             "reference": null,
-            "roll": -1.3817880153656006,
+            "roll": 0.053430236876010895,
             "tail": "toe5-2.R_tail"
         },
         "toe5-3.L": {
             "head": "toe5-3.L_head",
             "parent": "toe5-2.L",
             "reference": null,
-            "roll": 0.9163839817047119,
+            "roll": 0.11353255063295364,
             "tail": "toe5-3.L_tail"
         },
         "toe5-3.R": {
             "head": "toe5-3.R_head",
             "parent": "toe5-2.R",
             "reference": null,
-            "roll": -0.9163839817047119,
+            "roll": -0.11353255063295364,
             "tail": "toe5-3.R_tail"
         },
         "tongue00": {
             "head": "tongue00_head",
             "parent": "jaw",
             "reference": null,
-            "roll": -3.0663717656238744e-16,
+            "roll": -8.429369557916289e-08,
             "tail": "tongue00_tail"
         },
         "tongue01": {
             "head": "tongue01_head",
             "parent": "tongue00",
             "reference": null,
-            "roll": -2.004470217016677e-17,
+            "roll": -1.1372817709798255e-07,
             "tail": "tongue01_tail"
         },
         "tongue02": {
             "head": "tongue02_head",
             "parent": "tongue01",
             "reference": null,
-            "roll": 9.508845632616592e-18,
+            "roll": -3.141590118408203,
             "tail": "tongue02_tail"
         },
         "tongue03": {
             "head": "tongue03_head",
             "parent": "tongue02",
             "reference": null,
-            "roll": 1.6804904709931764e-16,
+            "roll": -3.141592502593994,
             "tail": "tongue03_tail"
         },
         "tongue04": {
             "head": "tongue04_head",
             "parent": "tongue03",
             "reference": null,
-            "roll": 1.6806446574593563e-16,
+            "roll": -3.141592502593994,
             "tail": "tongue04_tail"
         },
         "tongue05.L": {
@@ -1159,14 +1159,14 @@
             "head": "upperarm02.L_head",
             "parent": "shoulder02.L",
             "reference": null,
-            "roll": -0.08971381187438965,
+            "roll": 3.138939619064331,
             "tail": "upperarm02.L_tail"
         },
         "upperarm02.R": {
             "head": "upperarm02.R_head",
             "parent": "shoulder02.R",
             "reference": null,
-            "roll": 0.08971381187438965,
+            "roll": -3.138939619064331,
             "tail": "upperarm02.R_tail"
         },
         "upperleg01.L": {
@@ -1212,7 +1212,7 @@
             "tail": "wrist.R_tail"
         }
     },
-    "copyright": "MakeHuman 2014, AGPL",
+    "copyright": "(c)Manuel Bastioni 2014",
     "description": "Very cool general-purpose skeleton",
     "joints": {
         "breast.L_head": [
@@ -4364,6 +4364,7 @@
             14461
         ]
     },
+    "license": "GNU Affero General Public License 3",
     "name": "MakeHuman skeleton",
     "version": 102,
     "weights_file": "default_weights.jsonw"
