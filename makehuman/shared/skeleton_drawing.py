@@ -82,8 +82,8 @@ SHAPE_VECTORS = {
 }
 
 SHAPE_FACES = {
-'Prism': [ (0,1,4,0), (0,4,3,0), (0,3,2,0), (0,2,1,0),
-           (5,4,1,5), (5,1,2,5), (5,2,3,5), (5,3,4,5) ],
+'Prism': [ (0,4,1,0), (0,3,4,0), (0,2,3,0), (0,1,2,0),
+           (5,1,4,5), (5,2,1,5), (5,3,2,5), (5,4,3,5) ],
 'Box' : [ (0,1,3,2), (4,6,7,5), (0,2,6,4), 
            (1,5,7,3), (1,0,4,5), (2,3,7,6) ],
 'Line' : [ (0,1,3,2), (4,6,7,5), (0,2,6,4), 
@@ -192,6 +192,7 @@ def _shapeFromBone(bone, type="Prism"):
     Returns vertices and face indices to be used for building a 3d mesh of the
     the skeleton.
     """
+    # TODO account for roll angle as well
     mat = bone.matPoseGlobal
     length = bone.getLength()
 
