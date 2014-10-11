@@ -307,7 +307,8 @@ class BVH():
         Note that coordinate system is expected to be right-handed.
         """
         ref_joint = None
-        ref_names = ['head', 'spine3', 'spine2', 'spine1', 'upperleg02.L', 'lowerleg02.L']
+        # TODO an alternative approach is to measure the length of all bones. For humanoids the bone length is always highest in the up direction
+        ref_names = ['head', 'spine03', 'spine02', 'spine01', 'upperleg02.L', 'lowerleg02.L']
         while ref_joint is None and len(ref_names) != 0:
             joint_name = ref_names.pop()
             try:
