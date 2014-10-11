@@ -174,7 +174,7 @@ class BVH():
                     jointName, angle = jointName
                 else:
                     angle = 0.0
-                if jointName:
+                if jointName and self.getJointByCanonicalName(jointName) is not None:
                     poseMats = self.getJointByCanonicalName(jointName).matrixPoses.copy()
                     if isinstance(angle, float):
                         if angle != 0.0:
