@@ -2,28 +2,28 @@
     "bones": {
         "breast.L": {
             "head": "breast.L_head",
-            "parent": "spine2",
+            "parent": "spine02",
             "reference": null,
             "roll": 2.8807735443115234,
             "tail": "breast.L_tail"
         },
         "breast.R": {
             "head": "breast.R_head",
-            "parent": "spine2",
+            "parent": "spine02",
             "reference": null,
             "roll": -2.8807735443115234,
             "tail": "breast.R_tail"
         },
         "clavicle.L": {
             "head": "clavicle.L_head",
-            "parent": "spine1",
+            "parent": "spine01",
             "reference": null,
             "roll": -1.3756952285766602,
             "tail": "clavicle.L_tail"
         },
         "clavicle.R": {
             "head": "clavicle.R_head",
-            "parent": "spine1",
+            "parent": "spine01",
             "reference": null,
             "roll": 1.3756952285766602,
             "tail": "clavicle.R_tail"
@@ -268,7 +268,7 @@
         },
         "head": {
             "head": "head_head",
-            "parent": "neck2",
+            "parent": "neck03",
             "reference": null,
             "roll": 7.192499928976304e-10,
             "tail": "head_tail"
@@ -532,19 +532,26 @@
             "roll": -0.43031638860702515,
             "tail": "metatarsal5.R_tail"
         },
-        "neck": {
-            "head": "neck_head",
-            "parent": "spine1",
+        "neck01": {
+            "head": "neck01_head",
+            "parent": "spine01",
             "reference": null,
-            "roll": 4.254961383232114e-10,
-            "tail": "neck_tail"
+            "roll": 4.2549619383436266e-10,
+            "tail": "neck01_tail"
         },
-        "neck2": {
-            "head": "neck2_head",
-            "parent": "neck",
+        "neck02": {
+            "head": "neck02_head",
+            "parent": "neck01",
             "reference": null,
-            "roll": 4.2549014311887845e-10,
-            "tail": "neck2_tail"
+            "roll": 4.2549011536330283e-10,
+            "tail": "neck02_tail"
+        },
+        "neck03": {
+            "head": "neck03_head",
+            "parent": "neck02",
+            "reference": null,
+            "roll": 4.2549011536330283e-10,
+            "tail": "neck03_tail"
         },
         "oculi01.L": {
             "head": "oculi01.L_head",
@@ -812,40 +819,40 @@
             "roll": 2.8717455863952637,
             "tail": "special06.R_tail"
         },
-        "spine1": {
-            "head": "spine1_head",
-            "parent": "spine2",
+        "spine01": {
+            "head": "spine01_head",
+            "parent": "spine02",
             "reference": null,
             "roll": -2.8179983346809934e-10,
-            "tail": "spine1_tail"
+            "tail": "spine01_tail"
         },
-        "spine2": {
-            "head": "spine2_head",
-            "parent": "spine3",
+        "spine02": {
+            "head": "spine02_head",
+            "parent": "spine03",
             "reference": null,
             "roll": -2.3035953032153275e-16,
-            "tail": "spine2_tail"
+            "tail": "spine02_tail"
         },
-        "spine3": {
-            "head": "spine3_head",
-            "parent": "spine4",
+        "spine03": {
+            "head": "spine03_head",
+            "parent": "spine04",
             "reference": null,
             "roll": -2.192008506233026e-16,
-            "tail": "spine3_tail"
+            "tail": "spine03_tail"
         },
-        "spine4": {
-            "head": "spine4_head",
-            "parent": "spine5",
+        "spine04": {
+            "head": "spine04_head",
+            "parent": "spine05",
             "reference": null,
             "roll": 7.760130871226067e-10,
-            "tail": "spine4_tail"
+            "tail": "spine04_tail"
         },
-        "spine5": {
-            "head": "spine5_head",
+        "spine05": {
+            "head": "spine05_head",
             "parent": "root",
             "reference": null,
             "roll": -4.466459702090475e-10,
-            "tail": "spine5_tail"
+            "tail": "spine05_tail"
         },
         "temporalis01.L": {
             "head": "temporalis01.L_head",
@@ -1106,6 +1113,48 @@
             "roll": 1.6806446574593563e-16,
             "tail": "tongue04_tail"
         },
+        "tongue05.L": {
+            "head": "tongue05.L_head",
+            "parent": "tongue01",
+            "reference": null,
+            "roll": -0.16523133218288422,
+            "tail": "tongue05.L_tail"
+        },
+        "tongue05.R": {
+            "head": "tongue05.R_head",
+            "parent": "tongue01",
+            "reference": null,
+            "roll": 0.16548776626586914,
+            "tail": "tongue05.R_tail"
+        },
+        "tongue06.L": {
+            "head": "tongue06.L_head",
+            "parent": "tongue02",
+            "reference": null,
+            "roll": -0.05068175867199898,
+            "tail": "tongue06.L_tail"
+        },
+        "tongue06.R": {
+            "head": "tongue06.R_head",
+            "parent": "tongue02",
+            "reference": null,
+            "roll": 0.03510366752743721,
+            "tail": "tongue06.R_tail"
+        },
+        "tongue07.L": {
+            "head": "tongue07.L_head",
+            "parent": "tongue03",
+            "reference": null,
+            "roll": 0.39353397488594055,
+            "tail": "tongue07.L_tail"
+        },
+        "tongue07.R": {
+            "head": "tongue07.R_head",
+            "parent": "tongue03",
+            "reference": null,
+            "roll": -0.39353397488594055,
+            "tail": "tongue07.R_tail"
+        },
         "upperarm02.L": {
             "head": "upperarm02.L_head",
             "parent": "shoulder02.L",
@@ -1163,8 +1212,8 @@
             "tail": "wrist.R_tail"
         }
     },
-    "copyright": "MakeHuman",
-    "description": "The standard general-purpose skeleton or master rig for MakeHuman",
+    "copyright": "MakeHuman 2014, AGPL",
+    "description": "Very cool general-purpose skeleton",
     "joints": {
         "breast.L_head": [
             13654,
@@ -2685,15 +2734,7 @@
             14220,
             14221
         ],
-        "neck2_head": [
-            14070,
-            14071,
-            14072,
-            14073,
-            14074,
-            14075,
-            14076,
-            14077,
+        "neck01_head": [
             14534,
             14535,
             14536,
@@ -2703,35 +2744,115 @@
             14540,
             14541
         ],
-        "neck2_tail": [
-            14070,
-            14071,
-            14072,
-            14073,
-            14074,
-            14075,
-            14076,
-            14077
+        "neck01_tail": [
+            818,
+            819,
+            820,
+            821,
+            824,
+            825,
+            826,
+            827,
+            830,
+            831,
+            832,
+            833,
+            836,
+            837,
+            838,
+            839,
+            7529,
+            7530,
+            7531,
+            7532,
+            7535,
+            7536,
+            7537,
+            7538,
+            7541,
+            7542,
+            7543,
+            7544,
+            7547,
+            7548,
+            7549,
+            7550
         ],
-        "neck_head": [
-            14534,
-            14535,
-            14536,
-            14537,
-            14538,
-            14539,
-            14540,
-            14541
+        "neck02_head": [
+            818,
+            819,
+            820,
+            821,
+            824,
+            825,
+            826,
+            827,
+            830,
+            831,
+            832,
+            833,
+            836,
+            837,
+            838,
+            839,
+            7529,
+            7530,
+            7531,
+            7532,
+            7535,
+            7536,
+            7537,
+            7538,
+            7541,
+            7542,
+            7543,
+            7544,
+            7547,
+            7548,
+            7549,
+            7550
         ],
-        "neck_tail": [
-            14534,
-            14535,
-            14536,
-            14537,
-            14538,
-            14539,
-            14540,
-            14541,
+        "neck02_tail": [
+            823,
+            829,
+            835,
+            886,
+            887,
+            888,
+            5278,
+            5279,
+            5285,
+            7534,
+            7540,
+            7546,
+            7588,
+            7589,
+            7590,
+            11885,
+            11886,
+            11891
+        ],
+        "neck03_head": [
+            823,
+            829,
+            835,
+            886,
+            887,
+            888,
+            5278,
+            5279,
+            5285,
+            7534,
+            7540,
+            7546,
+            7588,
+            7589,
+            7590,
+            11885,
+            11886,
+            11891
+        ],
+        "neck03_tail": [
             14070,
             14071,
             14072,
@@ -3195,7 +3316,7 @@
         "special06.R_tail": [
             1054
         ],
-        "spine1_head": [
+        "spine01_head": [
             13654,
             13655,
             13656,
@@ -3205,7 +3326,7 @@
             13660,
             13661
         ],
-        "spine1_tail": [
+        "spine01_tail": [
             14534,
             14535,
             14536,
@@ -3215,7 +3336,7 @@
             14540,
             14541
         ],
-        "spine2_head": [
+        "spine02_head": [
             13646,
             13647,
             13648,
@@ -3225,7 +3346,7 @@
             13652,
             13653
         ],
-        "spine2_tail": [
+        "spine02_tail": [
             13654,
             13655,
             13656,
@@ -3235,7 +3356,7 @@
             13660,
             13661
         ],
-        "spine3_head": [
+        "spine03_head": [
             13638,
             13639,
             13640,
@@ -3245,7 +3366,7 @@
             13644,
             13645
         ],
-        "spine3_tail": [
+        "spine03_tail": [
             13646,
             13647,
             13648,
@@ -3255,7 +3376,7 @@
             13652,
             13653
         ],
-        "spine4_head": [
+        "spine04_head": [
             13630,
             13631,
             13632,
@@ -3265,7 +3386,7 @@
             13636,
             13637
         ],
-        "spine4_tail": [
+        "spine04_tail": [
             13638,
             13639,
             13640,
@@ -3275,7 +3396,7 @@
             13644,
             13645
         ],
-        "spine5_head": [
+        "spine05_head": [
             13622,
             13623,
             13624,
@@ -3285,7 +3406,7 @@
             13628,
             13629
         ],
-        "spine5_tail": [
+        "spine05_tail": [
             13630,
             13631,
             13632,
@@ -3988,6 +4109,100 @@
             14556,
             14557
         ],
+        "tongue05.L_head": [
+            14574,
+            14575,
+            14576,
+            14577,
+            14578,
+            14579,
+            14580,
+            14581
+        ],
+        "tongue05.L_tail": [
+            13535
+        ],
+        "tongue05.R_head": [
+            14574,
+            14575,
+            14576,
+            14577,
+            14578,
+            14579,
+            14580,
+            14581
+        ],
+        "tongue05.R_tail": [
+            13435
+        ],
+        "tongue06.L_head": [
+            14558,
+            14559,
+            14560,
+            14561,
+            14562,
+            14563,
+            14564,
+            14565
+        ],
+        "tongue06.L_tail": [
+            13527
+        ],
+        "tongue06.R_head": [
+            14558,
+            14559,
+            14560,
+            14561,
+            14562,
+            14563,
+            14564,
+            14565
+        ],
+        "tongue06.R_tail": [
+            13427
+        ],
+        "tongue07.L_head": [
+            14558,
+            14559,
+            14560,
+            14561,
+            14562,
+            14563,
+            14564,
+            14565,
+            14550,
+            14551,
+            14552,
+            14553,
+            14554,
+            14555,
+            14556,
+            14557
+        ],
+        "tongue07.L_tail": [
+            13564
+        ],
+        "tongue07.R_head": [
+            14558,
+            14559,
+            14560,
+            14561,
+            14562,
+            14563,
+            14564,
+            14565,
+            14550,
+            14551,
+            14552,
+            14553,
+            14554,
+            14555,
+            14556,
+            14557
+        ],
+        "tongue07.R_tail": [
+            13464
+        ],
         "upperarm02.L_head": [
             8092,
             8094,
@@ -4149,8 +4364,7 @@
             14461
         ]
     },
-    "license": "AGPL3",
-    "name": "MakeHuman base skeleton",
+    "name": "MakeHuman skeleton",
     "version": 102,
     "weights_file": "default_weights.jsonw"
 }
