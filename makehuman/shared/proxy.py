@@ -136,7 +136,7 @@ class Proxy:
     @property
     def vertexBoneWeights_file(self):
         folder = os.path.dirname(self.file) if self.file else None
-        return _getFilePath(self.__vertexBoneWeights_file, folder)
+        return _getFilePath(self._vertexBoneWeights_file, folder)
 
     def __repr__(self):
         return ("<Proxy %s %s %s %s>" % (self.name, self.type, self.file, self.uuid))
