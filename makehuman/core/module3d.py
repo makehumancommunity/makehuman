@@ -709,7 +709,7 @@ class Object3D(object):
 
         from collections import OrderedDict
         weights = OrderedDict()
-        for bname, (verts,wghts) in parentWeights.data():
+        for bname, (verts,wghts) in parentWeights.data.items():
             vgroup = []
             empty = True
             for (v,wt) in zip(verts,wghts):
