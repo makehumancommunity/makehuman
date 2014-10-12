@@ -123,6 +123,8 @@ class ExportConfig(object):
 
     # TODO revise
     def setupTexFolder(self, filepath):
+        import os
+
         def _getSubFolder(path, name):
             folder = os.path.join(path, name)
             if not os.path.exists(folder):
@@ -144,6 +146,8 @@ class ExportConfig(object):
 
     # TODO revise
     def copyTextureToNewLocation(self, filepath):
+        import os
+
         srcDir = os.path.abspath(os.path.expanduser(os.path.dirname(filepath)))
         filename = os.path.basename(filepath)
 
