@@ -65,6 +65,7 @@ class Skeleton(object):
     def __init__(self, name="Skeleton"):
         self.name = name
         self._clear()
+        self.scale = 1.0
 
     def _clear(self):
         self.bones = {}     # Bone lookup list by name
@@ -191,12 +192,13 @@ class Skeleton(object):
         Create a scaled clone of this skeleton
         """
         result = type(self)(self.name)
+        result.joint_pos_idxs = dict(self.joint_pos_idxs)
+        result.vertexWeights = self.vertexWeights
+        result.scale = scale
 
         for bone in self.getBones():
-            scaledHead = scale * bone.getRestHeadPos()
-            scaledTail = scale * bone.getRestTailPos()
             parentName = bone.parent.name if bone.parent else None
-            result.addBone(bone.name, parentName, scaledHead, scaledTail, bone.roll, bone.reference_bones)
+            result.addBone(bone.name, parentName, bone.headJoint, bone.tailJoint, bone.roll, bone.reference_bones)
 
         result.build()
 
@@ -423,8 +425,8 @@ class Bone(object):
         if not human:
             from core import G
             human = G.app.selectedHuman
-        self.headPos[:] = self.skeleton.getJointPosition(self.headJoint, human)[:3]
-        self.tailPos[:] = self.skeleton.getJointPosition(self.tailJoint, human)[:3]
+        self.headPos[:] = self.skeleton.getJointPosition(self.headJoint, human)[:3] * self.skeleton.scale
+        self.tailPos[:] = self.skeleton.getJointPosition(self.tailJoint, human)[:3] * self.skeleton.scale
 
     def getRestMatrix(self, meshOrientation='yUpFaceZ', localBoneAxis='y', offsetVect=[0,0,0]):
         """
@@ -790,6 +792,9 @@ def _getHumanJointPosition(human, jointName, rest_coord=True):
     if not jointName.startswith("joint-"):
         jointName = "joint-" + jointName
     fg = human.meshData.getFaceGroup(jointName)
+    if fg is None:
+        log.warning('Cannot find position for joint %s', jointName)
+        return np.asarray([0,0,0], dtype=np.float32)
     v_idx = human.meshData.getVerticesForGroups([fg.name])
     if rest_coord:
         verts = human.getRestposeCoordinates()[v_idx]
