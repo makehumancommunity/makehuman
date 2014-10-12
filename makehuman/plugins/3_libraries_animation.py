@@ -45,7 +45,6 @@ from collections import OrderedDict
 import filechooser as fc
 
 import skeleton
-import skeleton_drawing
 import animation
 import getpath
 import material
