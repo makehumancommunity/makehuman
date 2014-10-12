@@ -669,6 +669,7 @@ class MHApplication(gui3d.Application, mh.Application):
         self.splash.hide()
         # self.splash.finish(self.mainwin)
         self.splash.close()
+        self.mainwin.show()
         self.splash = None
 
         # Restore main window size and position
@@ -1025,6 +1026,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         if self.splash:
             self.splash.setProgress(value)
+            self.splash.raise_()
 
         if self.progressBar is None:
             return
@@ -1575,6 +1577,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.createShortcuts()
 
+        self.mainwin.hide()
         self.splash = gui.SplashScreen(gui3d.app.getThemeResource('images', 'splash.png'), mh.getVersionDigitsStr())
         self.splash.show()
 
