@@ -823,11 +823,15 @@ class AnimatedMesh(object):
                 if self.onlyAnimateVisible and not mesh.visibility:
                     continue
 
-                if not self.__vertexToBoneMaps[idx].isCompiled(4):
-                    log.debug("Compiling vertex bone weights for %s", mesh.name)
-                    self.__vertexToBoneMaps[idx].compileData(self.getSkeleton(), 4)
+                if self.__vertexToBoneMaps[idx] is None:
+                    log.warning('No weights assigned to bound mesh %s, skip posing it.', mesh.name)
+                    continue
 
                 try:
+                    if not self.__vertexToBoneMaps[idx].isCompiled(4):
+                        log.debug("Compiling vertex bone weights for %s", mesh.name)
+                        self.__vertexToBoneMaps[idx].compileData(self.getSkeleton(), 4)
+
                     # Old slow way of skinning
                     #posedCoords = self.getSkeleton().skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx].data)
 
