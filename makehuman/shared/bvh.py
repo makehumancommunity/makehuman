@@ -170,28 +170,8 @@ class BVH():
 
             jointsData = []
             for jointName in jointsOrder:
-                if isinstance(jointName, tuple):
-                    jointName, angle = jointName
-                else:
-                    angle = 0.0
                 if jointName and self.getJointByCanonicalName(jointName) is not None:
                     poseMats = self.getJointByCanonicalName(jointName).matrixPoses.copy()
-                    if isinstance(angle, float):
-                        if angle != 0.0:
-                            # Rotate around global Z axis
-                            rot = tm.rotation_matrix(-angle*D, [0,0,1])
-                            # Roll around global Y axis (this is a limitation)
-                            roll = tm.rotation_matrix(angle*D, [0,1,0])
-                            for i in xrange(nFrames):
-                                # TODO make into numpy loop
-                                poseMats[i] = np.dot(poseMats[i], rot)
-                                poseMats[i] = np.dot(poseMats[i], roll)
-                    else:   # Compensation (angle) is a transformation matrix
-                        # Compensate animation frames
-                        for i in xrange(nFrames):
-                            # TODO make into numpy loop
-                            poseMats[i] = np.mat(poseMats[i]) * np.mat(angle)
-                            #poseMats[i] = np.mat(angle) # Test compensated rest pose
                     jointsData.append(poseMats)
                 else:
                     jointsData.append(animation.emptyTrack(nFrames))
