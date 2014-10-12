@@ -38,6 +38,7 @@ Common base class for all exporters.
 """
 
 from core import G
+import log
 
 
 class Exporter(object):
@@ -98,6 +99,7 @@ class ExportConfig(object):
 
     @property
     def offset(self):
+        import numpy as np
         if self.feetOnGround:
             yOffset = -self.scale * self.human.getJointPosition('ground')[1]
             return np.asarray([0.0, yOffset, 0.0], dtype=np.float32)
