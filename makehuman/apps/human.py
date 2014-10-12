@@ -227,10 +227,10 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         """
         # TODO avoid continually reposing when loading mhm file with many proxies
         if oldPxy:
-            self.removeBoundMesh(oldPxy.object.mesh.name)
+            self.removeBoundMesh(oldPxy.object.getSeedMesh().name)
         if newPxy:
             # Add new mesh and vertex weight assignments
-            self._updateMeshVertexWeights(newPxy.object.mesh)
+            self._updateMeshVertexWeights(newPxy.object.getSeedMesh())
             self.refreshPose()
 
     def maskFaces(self):
