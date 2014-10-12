@@ -330,7 +330,7 @@ class Modifier(object):
         """
         Retrieve the other modifiers of the same type on the human.
         """
-        return [m for m in self.human.getModiersByType(type(self)) if m != self]
+        return [m for m in self.human.getModifiersByType(type(self)) if m != self]
 
     def __str__(self):
         return "%s %s" % (type(self).__name__, self.fullName)

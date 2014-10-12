@@ -857,17 +857,37 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
     @property
     def modifiers(self):
+        """
+        All modifier objects attached to this human.
+        """
         return self._modifiers.values()
 
     @property
     def modifierNames(self):
+        """
+        The names of all modifiers available.
+        """
         return self._modifiers.keys()
 
+    def getModifierNames(self):
+        """
+        The names of all modifiers available.
+        """
+        return self.modifierNames
+
     def getModifier(self, name):
+        """
+        Retrieve a modifier by name.
+        Use '.modifierNames' to retrieve the names of all available modifiers.
+        """
         return self._modifiers[name]
 
     @property
     def modifierGroups(self):
+        """
+        The names of all groups in which the modifiers of this human are
+        classified.
+        """
         return self._modifier_groups.keys()
 
     def getModifiersByGroup(self, groupName):
@@ -881,7 +901,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             log.warning('Modifier group %s does not exist.', groupName)
             return []
 
-    def getModiersByType(self, classType):
+    def getModifiersByType(self, classType):
         """
         Retrieve all modifiers of a specified class type.
         """
@@ -894,6 +914,9 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         return self._modifier_type_cache[classType.__name__]
 
     def addModifier(self, modifier):
+        """
+        Attach a new modifier to this human.
+        """
         #log.debug("Adding modifier of type %s: %s", type(modifier), modifier.fullName)
 
         if modifier.fullName in self._modifiers:
@@ -941,6 +964,10 @@ class Human(guicommon.Object, animation.AnimatedMesh):
                 self._modifier_dependencyMapping[dep].append(modifier.groupName)
 
     def getModifierDependencies(self, modifier, filter = None):
+        """
+        Retrieve all modifiers that should be updated if the specified modifier
+        is updated. (forward dependency mapping)
+        """
         result = set()
 
         if len(modifier.macroDependencies) > 0:
@@ -963,7 +990,8 @@ class Human(guicommon.Object, animation.AnimatedMesh):
     def getModifiersAffectedBy(self, modifier, filter = None):
         """
         Reverse dependency search. Returns all modifier groups to update that
-        are affected by the change in the specified modifier.
+        are affected by the change in the specified modifier. (reverse 
+        dependency mapping)
         """
         result = self._modifier_dependencyMapping.get(modifier.macroVariable, [])
         if filter is None:
