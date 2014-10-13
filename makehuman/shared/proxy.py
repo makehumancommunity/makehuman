@@ -74,6 +74,7 @@ class Proxy:
         name = os.path.splitext(os.path.basename(file))[0]
         self.name = name.capitalize().replace(" ","_")
         self.license = makehuman.getAssetLicense()
+        self.description = ""
         self.type = type
         self.object = None
         self.human = human
@@ -360,6 +361,8 @@ def loadTextProxy(human, filepath, type="Clothes"):
             proxy.name = " ".join(words[1:])
         elif key == 'uuid':
             proxy.uuid = " ".join(words[1:])
+        elif key == 'description':
+            proxy.description = " ".join(words[1:])
         elif key in ['author', 'license', 'homepage']:
             proxy.license.addStatement(words)
         elif key == 'tag':
@@ -510,6 +513,7 @@ def saveBinaryProxy(proxy, path):
         #proxyType = np.fromstring(proxy.type, dtype='S1'),     # TODO store proxy type?
         name = np.fromstring(proxy.name, dtype='S1'),
         uuid = np.fromstring(proxy.uuid, dtype='S1'),
+        description = np.fromstring(proxy.description, dtype='S1'),
         basemesh = np.fromstring(proxy.basemesh, dtype='S1'),
         tags_str = tagStr,
         tags_idx = tagIdx,
@@ -566,6 +570,9 @@ def loadBinaryProxy(path, human, type):
     proxy.name = npzfile['name'].tostring()
     proxy.uuid = npzfile['uuid'].tostring()
     proxy.basemesh = npzfile['basemesh'].tostring()
+
+    if 'description' in npzfile:
+        proxy.description = npzfile['description'].tostring()
 
     if 'version' in npzfile:
         proxy.version = int(npzfile['version'])
