@@ -146,7 +146,6 @@ class BVH():
         return skel
 
     # TODO guess source armature from a BVH rig
-
     def createAnimationTrack(self, jointsOrder=None, name="BVHMotion"):
         """
         Create an animation track from the motion stored in this BHV file.
