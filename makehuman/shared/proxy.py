@@ -508,6 +508,8 @@ def saveBinaryProxy(proxy, path):
     tagStr, tagIdx = _packStringList(proxy.tags)
     uvStr,uvIdx = _packStringList([ _properPath(proxy.uvLayers[k]) for k in sorted(proxy.uvLayers.keys()) ])
 
+    licStr, licIdx = proxy.license.toNumpyString()
+
     folder = os.path.dirname(path)
 
     def _properPath(path):
@@ -520,6 +522,8 @@ def saveBinaryProxy(proxy, path):
         basemesh = np.fromstring(proxy.basemesh, dtype='S1'),
         tags_str = tagStr,
         tags_idx = tagIdx,
+        lic_str = licStr,
+        lic_idx = licIdx,
         uvLayers_str = uvStr,
         uvLayers_idx = uvIdx,
         obj_file = np.fromstring(_properPath(proxy.obj_file), dtype='S1'),
@@ -574,6 +578,9 @@ def loadBinaryProxy(path, human, type):
 
     if 'version' in npzfile:
         proxy.version = int(npzfile['version'])
+
+    if 'lic_str' in npzfile and 'lic_idx' in npzfile:
+        proxy.license.fromNumpyString(npzfile['lic_str'], npzfile['lic_idx'])
 
     proxy.tags = set(_unpackStringList(npzfile['tags_str'], npzfile['tags_idx']))
 
