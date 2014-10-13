@@ -351,16 +351,7 @@ def loadTextProxy(human, filepath, type="Clothes"):
         if words[0].startswith('#'):
             # Comment
             # Try interpreting comment attributes as license info
-            if len(words) > 1:
-                if len(words[0]) == 1:
-                    # Format: '# key value'
-                    key = words[1]
-                    value = " ".join(words[2:])
-                else:
-                    # Format: '#key value'
-                    key = words[0][1:]
-                    value = " ".join(words[1:])
-                proxy.license.setProperty(key, value)
+            proxy.license.updateFromComment(line)
             continue
 
         key = words[0]
