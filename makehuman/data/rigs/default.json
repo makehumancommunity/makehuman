@@ -1212,7 +1212,7 @@
             "tail": "wrist.R_tail"
         }
     },
-    "copyright": "(c)Manuel Bastioni 2014",
+    "copyright": "(c) Manuel Bastioni 2014",
     "description": "Very cool general-purpose skeleton",
     "joints": {
         "breast.L_head": [
