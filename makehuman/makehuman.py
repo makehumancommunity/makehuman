@@ -499,11 +499,17 @@ def getAssetLicense(properties=None):
         def __init__(self):
             self.author = "MakeHuman Team"
             self.license = "AGPL3 (see also http://www.makehuman.org/doc/node/external_tools_license.html)"
-            self.homepage = "http://www.makehuman.org/"
+            self.homepage = "http://www.makehuman.org"
 
         def setProperty(self, name, value):
             if name in ["author", "license", "homepage"]:
                 setattr(self, name, value)
+
+        def __str__(self):
+            return """MakeHuman asset license:
+    Author: %s
+    License: %s
+    Homepage: %s""" % (self.author, self.license, self.homepage)
 
     result = LicenseInfo()
     if properties is not None:
