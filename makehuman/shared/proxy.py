@@ -44,7 +44,6 @@ from core import G
 import getpath
 import log
 from collections import OrderedDict
-import makehuman
 
 import material
 import json
@@ -65,6 +64,17 @@ for name in SimpleProxyTypes:
 _A7converter = None
 Unit3 = np.identity(3,float)
 
+class License:
+    def __init__(self):
+        self.author = "MakeHuman Team"
+        self.license = "AGPL3 (see also http://www.makehuman.org/doc/node/external_tools_license.html)"
+        self.homepage = "http://www.makehuman.org/"
+
+    def addStatement(self, words):
+        key = words[0]
+        if key in ["author", "license", "homepage"]:
+            setattr(self, key, " ".join(words[1:]))
+
 
 class Proxy:
     def __init__(self, file, type, human):
@@ -73,7 +83,7 @@ class Proxy:
 
         name = os.path.splitext(os.path.basename(file))[0]
         self.name = name.capitalize().replace(" ","_")
-        self.license = makehuman.getAssetLicense()
+        self.license = License()
         self.type = type
         self.object = None
         self.human = human
@@ -347,19 +357,13 @@ def loadTextProxy(human, filepath, type="Clothes"):
             #status = 0
             continue
 
-        if words[0].startswith('#'):
+        if words[0].startswith('#') or words[0].startswith('//'):
             # Comment
-            # Try interpreting comment attributes as license info
             if len(words) > 1:
                 if len(words[0]) == 1:
-                    # Format: '# key value'
-                    key = words[1]
-                    value = " ".join(words[2:])
+                    proxy.license.addStatement(words[1:])
                 else:
-                    # Format: '#key value'
-                    key = words[0][1:]
-                    value = " ".join(words[1:])
-                proxy.license.setProperty(key, value)
+                    proxy.license.addStatement(words[0][1:] + words[1:])
             continue
 
         key = words[0]
