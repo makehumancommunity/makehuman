@@ -243,10 +243,6 @@ def buildDeb(dest = None):
   svgIcon = os.path.join(hgrootdir, 'makehuman/icons/makehuman.svg')
   shutil.copy(svgIcon, os.path.join(programdir,"makehuman.svg"))
 
-  # Copy bash wrapper executable
-  execFile = os.path.join(hgrootdir, 'makehuman/makehuman')
-  shutil.copy(execFile, execDest)
-
   # Copy files in src bin dir to dest bin dir
   _cp_files(srcbin, bindir)
 
@@ -257,7 +253,7 @@ def buildDeb(dest = None):
     print "ERROR did not find data/VERSION file (%s)! Your build is incomplete!! Verify your build_prepare settings." % os.path.join(programdir, 'data', 'VERSION')
     exit(1)
 
-  # Copy files in src bin dir to dest bin dir
+  # Copy files in src bin dir to dest bin dir (copy bash wrapper executable)
   _cp_files(srccontrol, controldir)
 
   hgrev = exportInfo.revision
