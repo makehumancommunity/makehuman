@@ -535,7 +535,7 @@ def getAssetLicense(properties=None):
 
             return _packStringDict(self.asDict())
 
-        def fromNumpyString(self, text, index):
+        def fromNumpyString(self, text, index=None):
             def _unpackStringDict(text, index):
                 stringDict = dict()
                 last = 0
@@ -550,6 +550,8 @@ def getAssetLicense(properties=None):
                     last += (l_key + l_val)
                 return stringDict
 
+            if index is None:
+                text, index = text
             return self.fromDict( _unpackStringDict(text, index) )
 
 
