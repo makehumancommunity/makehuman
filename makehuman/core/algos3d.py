@@ -107,6 +107,21 @@ class Target(object):
     def __repr__(self):
         return ( "<Target %s>" % (os.path.basename(self.name)) )
 
+    @property
+    def license(self):
+        if hasattr(self, '_license'):
+            return self._license
+        elif Target.npzfile is not None and 'targets/targets.license' in Target.npzfile:
+            import makehuman
+            license = makehuman.getAssetLicense()
+            return license.fromNumpyString(Target.npzfile['targets/targets.license'])
+        else:
+            import makehuman
+            return makehuman.getAssetLicense()
+
+    def setLicense(self, license):
+        self._license = license
+
     def _load_text(self, name):
         data = []
         with open(name, 'rU') as fd:
@@ -133,22 +148,28 @@ class Target(object):
         bname = os.path.splitext(name)[0]
         iname = '%s.index' % bname
         vname = '%s.vector' % bname
+        lname = '%s.license' % bname
         if os.path.isfile(name) and Target.npztime < os.path.getmtime(name):
             log.message('compiled file newer than archive: %s', name)
-            raise RuntimeError()
+            raise RuntimeError('compiled file newer than archive: %s' % name)
         if iname not in Target.npzfile:
             log.message('compiled file missing: %s', iname)
-            raise RuntimeError()
+            raise RuntimeError('compiled file missing: %s' % iname)
         if vname not in Target.npzfile:
             log.message('compiled file missing: %s', vname)
-            raise RuntimeError()
+            raise RuntimeError('compiled file missing: %s' % vname)
         self.verts = Target.npzfile[iname]
         self.data = Target.npzfile[vname] * 1e-3
+        if lname in Target.npzfile:
+            import makehuman
+            self._license = makehuman.getAssetLicense().fromNumpyString(Target.npzfile[lname])
+        print self.license
 
     def _load_binary_files(self, name):
         """
         Load target from individual .bin file
         """
+        # TODO no longer used, to be removed
         bname = os.path.splitext(name)[0]
         iname = '%s.index.npy' % bname
         vname = '%s.vector.npy' % bname
@@ -195,7 +216,12 @@ class Target(object):
             vector = np.ascontiguousarray(np.round(self.data * 1e3), dtype=np.int16)
             np.save(iname, index)
             np.save(vname, vector)
-            return iname, vname
+            if hasattr(self, '_license'):
+                lname = '%s.license.npy' % bname
+                license = np.ascontiguousarray(self._license.toNumpyString())
+                np.save(lname, license)
+                return iname, vname, lname
+            return iname, vname, None
         except StandardError, _:
             log.error('error saving %s', name)
 
