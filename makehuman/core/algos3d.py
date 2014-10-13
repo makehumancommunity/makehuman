@@ -97,9 +97,9 @@ class Target(object):
 
         try:
             self._load(self.name)
-        except:
+        except Exception as e:
             self.verts = []
-            log.error('Unable to open %s', name)
+            log.error('Unable to open %s (%s)', name, e)
             return
 
         self.faces = obj.getFacesForVertices(self.verts)
@@ -112,22 +112,23 @@ class Target(object):
         if hasattr(self, '_license'):
             return self._license
         elif Target.npzfile is not None and 'targets/targets.license' in Target.npzfile:
-            import makehuman
-            license = makehuman.getAssetLicense()
+            license = defaultTargetLicense()
             return license.fromNumpyString(Target.npzfile['targets/targets.license'])
         else:
-            import makehuman
-            return makehuman.getAssetLicense()
+            return defaultTargetLicense()
 
     def setLicense(self, license):
         self._license = license
 
     def _load_text(self, name):
+        import makehuman
         data = []
+        license = defaultTargetLicense()
         with open(name, 'rU') as fd:
             for line in fd:
                 line = line.strip()
                 if line.startswith('#'):
+                    license.updateFromComment(line)
                     continue
                 translationData = line.split()
                 if len(translationData) != 4:
@@ -139,6 +140,8 @@ class Target(object):
         raw = np.asarray(data, dtype=Target.dtype)
         self.verts = raw['index']
         self.data = raw['vector']
+        if license.isCustomized():
+            self.setLicense(license)
 
     def _load_binary_archive(self, name):
         """
@@ -162,8 +165,7 @@ class Target(object):
         self.data = Target.npzfile[vname] * 1e-3
         if lname in Target.npzfile:
             import makehuman
-            self._license = makehuman.getAssetLicense().fromNumpyString(Target.npzfile[lname])
-        print self.license
+            self._license = defaultTargetLicense().fromNumpyString(Target.npzfile[lname])
 
     def _load_binary_files(self, name):
         """
@@ -447,8 +449,8 @@ def saveTranslationTarget(obj, targetPath, groupToSave=None, epsilon=0.001):
 
         if nVertsExported == 0:
             log.warning('Zero verts exported in file %s', targetPath)
-    except:
-        log.error('Unable to open %s', targetPath)
+    except Exception as e:
+        log.error('Unable to open %s (%s)', targetPath, e)
         return None
 
 
@@ -476,3 +478,14 @@ def resetObj(obj, update=None, calcNorm=None):
         obj.update()
     if calcNorm:
         obj.calcNormals()
+
+def defaultTargetLicense():
+    """
+    Default license for targets, shared for all targets that do not specify
+    their own custom license, which is useful for saving storage space as this
+    license is globally referenced by and applies to the majority of targets.
+    """
+    import makehuman
+    return makehuman.getAssetLicense( {"license": "AGPL3 (http://www.makehuman.org/doc/node/makehuman_mesh_license.html)",
+                                       "author": "Manuel Bastioni",
+                                       "copyright": "2014 Manuel Bastioni (mb@makehuman.org)"} )

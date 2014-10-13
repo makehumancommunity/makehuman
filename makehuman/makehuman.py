@@ -493,24 +493,32 @@ def getAssetLicense(properties=None):
     CC0 exception clause applies.
     Assets created by third parties can be bound to different licensing conditions,
     which is why properties can be set as a dict of format:
-        {"author": ..., "license": ..., "homepage": ...}
+        {"author": ..., "license": ..., "copyright": ..., "homepage": ...}
     """
     class LicenseInfo:
         def __init__(self):
             self.author = "MakeHuman Team"
             self.license = "AGPL3 (see also http://www.makehuman.org/doc/node/external_tools_license.html)"
             self.homepage = "http://www.makehuman.org"
-            self._keys = ["author", "license", "homepage"]
+            self.copyright = "(c) MakeHuman.org 2011-2014"
+            self._keys = ["author", "license", "copyright", "homepage"]
+            self._customized = False
 
         def setProperty(self, name, value):
             if name in self._keys:
-                setattr(self, name, value)
+                if getattr(self, name) != value:
+                    self._customized = True
+                    setattr(self, name, value)
+
+        def isCustomized(self):
+            return self._customized
 
         def __str__(self):
             return """MakeHuman asset license:
     Author: %s
     License: %s
-    Homepage: %s""" % (self.author, self.license, self.homepage)
+    Copyright: %s
+    Homepage: %s""" % (self.author, self.license, self.copyright, self.homepage)
 
         def asDict(self):
             return dict( [(pname, getattr(self, pname)) for pname in self._keys] )
@@ -519,6 +527,23 @@ def getAssetLicense(properties=None):
             for prop,val in propDict.items():
                 self.setProperty(prop, val)
             return self
+
+        def updateFromComment(self, commentLine):
+            commentLine = commentLine.strip()
+            if commentLine.startswith('#'):
+                commentLine = commentLine[1:]
+            elif commentLine.startswith('//'):
+                commentLine = commentLine[2:]
+            commentLine = commentLine.strip()
+
+            words = commentLine.split()
+            if len(words) < 1:
+                return
+
+            key = words[0]
+            value = " ".join(words[1:])
+
+            self.setProperty(key,value)
 
         def toNumpyString(self):
             def _packStringDict(stringDict):
@@ -558,6 +583,7 @@ def getAssetLicense(properties=None):
     result = LicenseInfo()
     if properties is not None:
         result.fromDict(properties)
+        result._customized = False
     return result
 
 
