@@ -78,8 +78,8 @@ def compileProxy(path, human):
         proxy.saveBinaryProxy(proxy_, npzpath)
     except:
         print 'Unable to save compiled proxy for file %s' % path
-        #import traceback
-        #traceback.print_exc(file=sys.stdout)
+        import traceback
+        traceback.print_exc(file=sys.stdout)
         if os.path.isfile(npzpath):
             # Remove file again, in case an empty file is left
             try:

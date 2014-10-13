@@ -500,9 +500,10 @@ def getAssetLicense(properties=None):
             self.author = "MakeHuman Team"
             self.license = "AGPL3 (see also http://www.makehuman.org/doc/node/external_tools_license.html)"
             self.homepage = "http://www.makehuman.org"
+            self._keys = ["author", "license", "homepage"]
 
         def setProperty(self, name, value):
-            if name in ["author", "license", "homepage"]:
+            if name in self._keys:
                 setattr(self, name, value)
 
         def __str__(self):
@@ -511,10 +512,50 @@ def getAssetLicense(properties=None):
     License: %s
     Homepage: %s""" % (self.author, self.license, self.homepage)
 
+        def asDict(self):
+            return dict( [(pname, getattr(self, pname)) for pname in self._keys] )
+
+        def fromDict(self, propDict):
+            for prop,val in propDict.items():
+                self.setProperty(prop, val)
+            return self
+
+        def toNumpyString(self):
+            def _packStringDict(stringDict):
+                import numpy as np
+                text = ''
+                index = []
+                for key,value in stringDict.items():
+                    index.append(len(key))
+                    index.append(len(value))
+                    text += key + value
+                text = np.fromstring(text, dtype='S1')
+                index = np.array(index, dtype=np.uint32)
+                return text, index
+
+            return _packStringDict(self.asDict())
+
+        def fromNumpyString(self, text, index):
+            def _unpackStringDict(text, index):
+                stringDict = dict()
+                last = 0
+                for i in range(0,len(index), 2):
+                    l_key = index[i]
+                    l_val = index[i+1]
+
+                    key = text[last:last+l_key].tostring()
+                    val = text[last+l_key:last+l_key+l_val].tostring()
+                    stringDict[key] = val
+
+                    last += (l_key + l_val)
+                return stringDict
+
+            return self.fromDict( _unpackStringDict(text, index) )
+
+
     result = LicenseInfo()
     if properties is not None:
-        for name, val in properties.items():
-            result.setProperty(name, val)
+        result.fromDict(properties)
     return result
 
 
