@@ -221,25 +221,11 @@ class Pose(AnimationTrack):
         Pose(anim.name, anim.getAtFramePos(i))
     """
 
-    def __init__(self, name, poseData, baked=False):
+    def __init__(self, name, poseData):
         super(Pose, self).__init__(name, poseData, nFrames=1, framerate=1)
-        self._baked = baked
-        if baked:
-            self._data_baked = self._data
 
     def sparsify(self, newFrameRate):
         raise NotImplementedError("sparsify() does not exist for poses")
-
-    def isBaked(self):
-        print 'BAKED', self._baked
-        if self._baked:
-            return True
-        return super(Pose, self).isBaked()
-
-    def bake(self, skel):
-        if self._baked:
-            raise NotImplementedError("Cannot (re-)bake a pre-baked pose")
-        return super(Pose, self).bake(skel)
 
     def getData(self):
         """
@@ -304,54 +290,27 @@ class PoseUnit(AnimationTrack):
                 if not (frameData[b_idx] == IDENT).all():
                     self._affectedBones[f_idx].append(b_idx)
 
-'''
-    def getBlendedPose(self, poses, weights, name=None, weightPerBone=False):
-        import transformations as tm
-
+    def getBlendedPose(self, poses, weights):
+        # TODO normalize weights?
         if isinstance(poses[0], basestring):
             f_idxs = [self.getPoseNames().index(pname) for pname in poses]
         else:
             f_idxs = poses
 
         if not isinstance(weights, np.ndarray):
-            weights = np.asarray(weights+[0], dtype=np.float32)
-
-        # TODO should I even normalize at all?
-        if weightPerBone:
-        else:
-        # TODO we might want to do this per bone, and only take into account the weights for poses in which the bone is affected
-        # Normalize weights
-        t = np.sum(weights)
-        if t < 1:
-            # Assign remainder part to neutral pose
-            r = 1.0 - t
-        if r > 0: #r > 0.0001:
-            # 0 Is the neutral frame
-            f_idxs.append(0)
-            weights[-1] = r
-        else:
-            #weights /= float(len(weights))
-            weights /= t
-        
-
-        #print zip(f_idxs, weights[:len(f_idxs)])
-
-        if name is None:
-            name = self.name+'-blended'
+            weights = np.asarray(weights, dtype=np.float32)
 
         if len(f_idxs) == 1:
-            q = float(weights[0]) * tm.quaternion_from_matrix(self.getAtFramePos(f_idxs[0]))
-            return Pose(name, tm.matrix_from_quaternion( tm.unit_vector(q) ), baked=self.isBaked())
+            return float(weights[0]) * self.getAtFramePos(f_idxs[0])
         else:
-            result = tm.quaternion_multiply( float(weights[0]) * tm.quaternion_from_matrix(self.getAtFramePos(f_idxs[0])) + \
-                     float(weights[1]) * quaternion_from_matrix(self.getAtFramePos(f_idxs[1]))
+            result = float(weights[0]) * self.getAtFramePos(f_idxs[0]) + \
+                     float(weights[1]) * self.getAtFramePos(f_idxs[1])
 
         for i,f_idx in enumerate(f_idxs[2:]):
-            result = result + float(weights[i]) * quaternion_from_matrix(self.getAtFramePos(f_idx))
+            result = result + float(weights[i]) * self.getAtFramePos(f_idx)
 
-        # TODO runs risk of creating a baked animation, but marking it as unbaked
-        return Pose(name, result, baked=self.isBaked())
-'''
+        return result
+
 
 def poseFromUnitPose(name, unitPoseData):
     # TODO
