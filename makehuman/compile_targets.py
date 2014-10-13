@@ -38,8 +38,10 @@ TODO
 """
 
 import sys
-sys.path = ["./core", "./lib"] + sys.path
+sys.path = [".", "./core", "./lib"] + sys.path
+import makehuman
 import algos3d
+import numpy as np
 import os
 import zipfile
 import fnmatch
@@ -68,14 +70,22 @@ if __name__ == '__main__':
     with zipfile.ZipFile(npzPath, mode='w', compression=zipfile.ZIP_DEFLATED) as zip:
         npzdir = os.path.dirname(npzPath)
         allTargets = allFiles[0]
-        print len(allFiles)
+
+        # License for all official MH targets
+        lpath = 'data/targets/targets.license.npy'
+        np.save(lpath, makehuman.getAssetLicense().toNumpyString())
+        zip.write(lpath, os.path.relpath(lpath, npzdir))
+        os.remove(lpath)
+
         for (i, path) in enumerate(allTargets):
             try:
                 obj._load_text(path)
-                obj._save_binary(path)
-                iname, vname = obj._save_binary(path)
+                iname, vname, lname = obj._save_binary(path)
                 zip.write(iname, os.path.relpath(iname, npzdir))
                 zip.write(vname, os.path.relpath(vname, npzdir))
+                if lname:
+                    zip.write(lname, os.path.relpath(lname, npzdir))
+                    os.remove(lname)
                 os.remove(iname)
                 os.remove(vname)
                 print "[%.0f%% done] converted target %s" % (100*(float(i)/float(len(allTargets))), path)
