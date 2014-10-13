@@ -481,6 +481,36 @@ Bugs can be reported on the project's bug tracker
     http://bugtracker.makehuman.org
 """
 
+def getAssetLicense(properties=None):
+    """
+    Retrieve the license information for MakeHuman assets.
+    If no custom properties are specified, the license object retrieved specifies
+    the licensing information that applies to the assets included in the
+    official MakeHuman release.
+    We consider assets to be the basemesh, targets, proxy definitions and their
+    fitting data, in general all the files in the data folder with the exclusion
+    of the data in the form as retained by the official exporters to which the
+    CC0 exception clause applies.
+    Assets created by third parties can be bound to different licensing conditions,
+    which is why properties can be set as a dict of format:
+        {"author": ..., "license": ..., "homepage": ...}
+    """
+    class LicenseInfo:
+        def __init__(self):
+            self.author = "MakeHuman Team"
+            self.license = "AGPL3 (see also http://www.makehuman.org/doc/node/external_tools_license.html)"
+            self.homepage = "http://www.makehuman.org/"
+
+        def setProperty(self, name, value):
+            if name in ["author", "license", "homepage"]:
+                setattr(self, name, value)
+
+    result = LicenseInfo()
+    if properties is not None:
+        for name, val in properties.items():
+            result.setProperty(name, val)
+    return result
+
 
 def main():
     print getCopyrightMessage(short=True) + "\n"
