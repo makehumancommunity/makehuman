@@ -197,6 +197,8 @@ class ExprSlider(gui.Slider):
         self.callEvent('onChange', self)
 
     def _changing(self, value):
+        value = self._i2f(value)
+        self._sync(value)
         self.changingValue = value
         self.callEvent('onChanging', self)
 
@@ -209,7 +211,7 @@ class ExpressionTaskView(gui3d.TaskView):
         self.human = gui3d.app.selectedHuman
 
         # TODO defer loading to first onShow()
-        bvhfile = bvh.load(getpath.getSysDataPath('poses/mh-rigging351-full-animation.bvh'))
+        bvhfile = bvh.load(getpath.getSysDataPath('poses/mh-rigging351-full-animation.bvh'), allowTranslation="none")
         self.base_bvh = bvhfile
 
         from collections import OrderedDict
@@ -231,6 +233,13 @@ class ExpressionTaskView(gui3d.TaskView):
                 slider = event
                 self.modifiers[slider.posename] = slider.getValue()
                 self.updatePose()
+
+            @slider.mhEvent
+            def onChanging(event):
+                slider = event
+                self.modifiers[slider.posename] = slider.changingValue
+                self.updatePose()
+
             self.sliders.append(slider)
 
         for slider in self.sliders:
@@ -247,6 +256,7 @@ class ExpressionTaskView(gui3d.TaskView):
             return
 
         panim = self.base_poseunit.getBlendedPose(posenames, posevalues)
+        panim.disableBaking = True  # Faster for realtime updating a single pose
         self.human.addAnimation(panim)
         self.human.setActiveAnimation(panim.name)
         self.human.refreshPose()
