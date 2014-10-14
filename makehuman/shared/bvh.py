@@ -705,6 +705,10 @@ class BVHJoint():
 
 def load(filename, convertFromZUp="auto", allowTranslation="onlyroot"):
     """
+    convertFromZUp      determine whether to convert the joint structure from
+                        Z-up coordinates to MH's Y-up coordinate system, or
+                        import them unchanged
+                        (allowed values: "auto", True, False)
     allowTranslation    determine which should receive translation animation 
                         (allowed values: "onlyroot", "all", "none")
     """
