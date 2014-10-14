@@ -300,19 +300,19 @@ class PoseUnit(AnimationTrack):
         else:
             f_idxs = poses
 
+        t = sum(weights)
+        if t < 1:
+            # Fill up rest with neutral pose (neutral pose is first frame)
+            weights = np.asarray(weights + [1.0-t], dtype=np.float32)
+            f_idxs.append(0)
+
         if not additiveBlending:
             # normalize weights
             if not isinstance(weights, np.ndarray):
                 weights = np.asarray(weights, dtype=np.float32)
-            t = sum(weights)
-            if t < 1:
-                # Fill up rest with rest pose
-                weights = np.asarray(weights + [1.0-t], dtype=np.float32)
-                f_idxs.append(0)
-            else:
-                weights /= t
+            weights /= t
 
-        print zip(poses,weights)
+        #print zip([self.getPoseNames()[_f] for _f in f_idxs],weights)
 
         result = emptyPose(self.nBones)
         m = np.identity(4, dtype=np.float32)
