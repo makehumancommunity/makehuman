@@ -601,9 +601,6 @@ class MHApplication(gui3d.Application, mh.Application):
         #self.selectedHuman.callEvent('onChanged', events3d.HumanEvent(self.selectedHuman, 'reset'))
         self.selectedHuman.applyAllTargets()
 
-        self.prompt('Warning', 'MakeHuman is a character creation suite. It is designed for making anatomically correct humans.\nParts of this program may contain nudity.\nDo you want to proceed?', 'Yes', 'No', None, self.stop, 'nudityWarning')
-        # self.splash.hide()
-
         if not self.args.get('noshaders', False) and \
           ( not mh.Shader.supported() or mh.Shader.glslVersion() < (1,20) ):
             self.prompt('Warning', 'Your system does not support OpenGL shaders (GLSL v1.20 required).\nOnly simple shading will be available.', 'Ok', None, None, None, 'glslWarning')
@@ -666,11 +663,12 @@ class MHApplication(gui3d.Application, mh.Application):
         if sys.platform.startswith("darwin"):
             self.splash.resize(0,0) # work-around for mac splash-screen closing bug
 
-        self.mainwin.show()
         self.splash.hide()
         # self.splash.finish(self.mainwin)
         self.splash.close()
         self.splash = None
+
+        self.prompt('Warning', 'MakeHuman is a character creation suite. It is designed for making anatomically correct humans.\nParts of this program may contain nudity.\nDo you want to proceed?', 'Yes', 'No', None, self.stop, 'nudityWarning')
 
         # Restore main window size and position
         if self.settings.get('restoreWindowSize', False):
@@ -1576,7 +1574,6 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.createShortcuts()
 
-        self.mainwin.hide()
         self.splash = gui.SplashScreen(gui3d.app.getThemeResource('images', 'splash.png'), mh.getVersionDigitsStr())
         self.splash.show()
 
