@@ -661,15 +661,15 @@ class MHApplication(gui3d.Application, mh.Application):
 
         progress.step('Loading done')
 
-        log.message('')
+        log.message('') # Empty status indicator
 
         if sys.platform.startswith("darwin"):
             self.splash.resize(0,0) # work-around for mac splash-screen closing bug
 
+        self.mainwin.show()
         self.splash.hide()
         # self.splash.finish(self.mainwin)
         self.splash.close()
-        self.mainwin.show()
         self.splash = None
 
         # Restore main window size and position
@@ -715,7 +715,6 @@ class MHApplication(gui3d.Application, mh.Application):
         self.dumpMissingStrings()
 
     def onQuit(self, event):
-
         self.promptAndExit()
 
     def onMouseDown(self, event):
