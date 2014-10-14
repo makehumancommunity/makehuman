@@ -663,6 +663,7 @@ class MHApplication(gui3d.Application, mh.Application):
         if sys.platform.startswith("darwin"):
             self.splash.resize(0,0) # work-around for mac splash-screen closing bug
 
+        self.mainwin.show()
         self.splash.hide()
         # self.splash.finish(self.mainwin)
         self.splash.close()
@@ -1576,6 +1577,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.splash = gui.SplashScreen(gui3d.app.getThemeResource('images', 'splash.png'), mh.getVersionDigitsStr())
         self.splash.show()
+        self.mainwin.hide()
 
         self.tabs = self.mainwin.tabs
 
