@@ -1212,6 +1212,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
     def resetMeshValues(self):
         self.setSubdivided(False, update=False)
         self.setDefaultValues()
+        self.resetBoundMeshes()
         self.resetToRestPose(update=False)
 
         self.targetsDetailStack = {}
@@ -1248,6 +1249,14 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             else:
                 # Update proxy mesh weights
                 self._updateMeshVertexWeights(self.getBoundMesh(mName)[0], vertexWeights)
+
+    def resetBoundMeshes(self):
+        """
+        Remove all bound meshes except for the basemesh.
+        """
+        for mName in self.getBoundMeshes():
+            if mName != self.getSeedMesh().name:
+                self.removeBoundMesh(mName)
 
     def _updateMeshVertexWeights(self, mesh, bodyVertexWeights=None):
         obj = mesh.object
