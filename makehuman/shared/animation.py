@@ -326,18 +326,18 @@ class PoseUnit(AnimationTrack):
                 q = tm.quaternion_slerp(REST_QUAT, tm.quaternion_from_matrix(m, True), float(weights[0]))
                 result[b_idx] = tm.quaternion_matrix( q )[:3,:4]
         else:
-            quat = np.asarray([1,0,0,0], dtype=np.float32)
             for b_idx in xrange(self.nBones):
                 m1[:3, :4] = self.getAtFramePos(f_idxs[0], True)[b_idx]
                 m2[:3, :4] = self.getAtFramePos(f_idxs[1], True)[b_idx]
                 q1 = tm.quaternion_slerp(REST_QUAT, tm.quaternion_from_matrix(m1, True), float(weights[0]))
                 q2 = tm.quaternion_slerp(REST_QUAT, tm.quaternion_from_matrix(m2, True), float(weights[1]))
-                quat = tm.quaternion_multiply(q1, q2)
+                quat = tm.quaternion_multiply(q2, q1)
 
                 for i,f_idx in enumerate(f_idxs[2:]):
+                    i += 2
                     m[:3, :4] = self.getAtFramePos(f_idx, True)[b_idx]
                     q = tm.quaternion_slerp(REST_QUAT, tm.quaternion_from_matrix(m, True), float(weights[i]))
-                    quat = tm.quaternion_multiply(quat, q)
+                    quat = tm.quaternion_multiply(q, quat)
 
                 result[b_idx] = tm.quaternion_matrix( quat )[:3,:4]
 
