@@ -153,8 +153,10 @@ class AnimationTrack(object):
             # Logarithmic interpolation
             pass # TODO
 
-    def getAtFramePos(self, frame):
+    def getAtFramePos(self, frame, original=False):
         frame = int(frame)
+        if original:
+            return self._data[frame*self.nBones:(frame+1)*self.nBones]
         return self.data[frame*self.nBones:(frame+1)*self.nBones]
 
     def getFrameIndexAtTime(self, time):
@@ -290,26 +292,52 @@ class PoseUnit(AnimationTrack):
                 if not (frameData[b_idx] == IDENT).all():
                     self._affectedBones[f_idx].append(b_idx)
 
-    def getBlendedPose(self, poses, weights):
-        # TODO normalize weights?
+    def getBlendedPose(self, poses, weights, additiveBlending=True):
+        import transformations as tm
+
         if isinstance(poses[0], basestring):
             f_idxs = [self.getPoseNames().index(pname) for pname in poses]
         else:
             f_idxs = poses
 
-        if not isinstance(weights, np.ndarray):
-            weights = np.asarray(weights, dtype=np.float32)
+        if not additiveBlending:
+            # normalize weights
+            if not isinstance(weights, np.ndarray):
+                weights = np.asarray(weights, dtype=np.float32)
+            t = sum(weights)
+            if t < 1:
+                # Fill up rest with rest pose
+                weights = np.asarray(weights + [1.0-t], dtype=np.float32)
+                f_idxs.append(0)
+            else:
+                weights /= t
+
+        print zip(poses,weights)
+
+        result = emptyPose(self.nBones)
+        m = np.identity(4, dtype=np.float32)
+        m1 = np.identity(4, dtype=np.float32)
+        m2 = np.identity(4, dtype=np.float32)
 
         if len(f_idxs) == 1:
-            return float(weights[0]) * self.getAtFramePos(f_idxs[0])
+            for b_idx in xrange(self.nBones):
+                m[:3, :4] = self.getAtFramePos(f_idxs[0], True)[b_idx]
+                result[b_idx] = tm.quaternion_matrix( float(weights[0]) * tm.quaternion_from_matrix(m, True) )[:3,:4]
         else:
-            result = float(weights[0]) * self.getAtFramePos(f_idxs[0]) + \
-                     float(weights[1]) * self.getAtFramePos(f_idxs[1])
+            quat = np.asarray([1,0,0,0], dtype=np.float32)
+            for b_idx in xrange(self.nBones):
+                m1[:3, :4] = self.getAtFramePos(f_idxs[0], True)[b_idx]
+                m2[:3, :4] = self.getAtFramePos(f_idxs[1], True)[b_idx]
+                quat = tm.quaternion_multiply( float(weights[0]) * tm.quaternion_from_matrix(m1, True),
+                                               float(weights[1]) * tm.quaternion_from_matrix(m2, True) )
 
-        for i,f_idx in enumerate(f_idxs[2:]):
-            result = result + float(weights[i]) * self.getAtFramePos(f_idx)
+                for i,f_idx in enumerate(f_idxs[2:]):
+                    m[:3, :4] = self.getAtFramePos(f_idx, True)[b_idx]
+                    quat = tm.quaternion_multiply( quat, float(weights[i]) * tm.quaternion_from_matrix(m, True) )
 
-        return result
+                result[b_idx] = tm.quaternion_matrix( quat )[:3,:4]
+
+        return Pose(self.name+'-blended', result)
 
 
 def poseFromUnitPose(name, unitPoseData):
