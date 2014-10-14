@@ -593,6 +593,8 @@ class MHApplication(gui3d.Application, mh.Application):
         groundGridMesh.restrictVisibleAboveGround = True
         self.addObject(self.groundplaneGrid)
 
+        self.actions.grid.setChecked(True)
+
     def loadBackgroundGradient(self):
         import numpy as np
 
@@ -1350,6 +1352,13 @@ class MHApplication(gui3d.Application, mh.Application):
         self.selectedHuman.setPosed(self.actions.pose.isChecked())
         self.redraw()
 
+    def toggleGrid(self):
+        if self.backplaneGrid and self.groundplaneGrid:
+            print 'grid', self.actions.grid.isChecked()
+            self.backplaneGrid.setVisibility( self.actions.grid.isChecked() )
+            self.groundplaneGrid.setVisibility( self.actions.grid.isChecked() )
+            self.redraw()
+
     def symmetryRight(self):
         human = self.selectedHuman
         self.do( SymmetryAction(human, 'r') )
@@ -1584,6 +1593,7 @@ class MHApplication(gui3d.Application, mh.Application):
         self.actions.smooth    = action('smooth',    self.getLanguageString('Smooth'),        self.toggleSubdivision, toggle=True)
         self.actions.wireframe = action('wireframe', self.getLanguageString('Wireframe'),     self.toggleSolid, toggle=True)
         self.actions.pose      = action('pose', self.getLanguageString('Pose'),               self.togglePose,  toggle=True)
+        self.actions.grid      = action('grid', self.getLanguageString('Grid'),               self.toggleGrid,  toggle=True)
 
 
         # 4 - Symmetry toolbar
