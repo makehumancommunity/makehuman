@@ -295,24 +295,25 @@ class PoseUnit(AnimationTrack):
     def getBlendedPose(self, poses, weights, additiveBlending=True):
         import transformations as tm
 
+        REST_QUAT = np.asarray([1,0,0,0], dtype=np.float32)
+
         if isinstance(poses[0], basestring):
             f_idxs = [self.getPoseNames().index(pname) for pname in poses]
         else:
             f_idxs = poses
 
-        t = sum(weights)
-        if t < 1:
-            # Fill up rest with neutral pose (neutral pose is first frame)
-            weights = np.asarray(weights + [1.0-t], dtype=np.float32)
-            f_idxs.append(0)
-
         if not additiveBlending:
             # normalize weights
             if not isinstance(weights, np.ndarray):
                 weights = np.asarray(weights, dtype=np.float32)
+            t = sum(weights)
+            if t < 1:
+                # Fill up rest with neutral pose (neutral pose is assumed to be first frame)
+                weights = np.asarray(weights + [1.0-t], dtype=np.float32)
+                f_idxs.append(0)
             weights /= t
 
-        #print zip([self.getPoseNames()[_f] for _f in f_idxs],weights)
+        print zip([self.getPoseNames()[_f] for _f in f_idxs],weights)
 
         result = emptyPose(self.nBones)
         m = np.identity(4, dtype=np.float32)
@@ -322,18 +323,21 @@ class PoseUnit(AnimationTrack):
         if len(f_idxs) == 1:
             for b_idx in xrange(self.nBones):
                 m[:3, :4] = self.getAtFramePos(f_idxs[0], True)[b_idx]
-                result[b_idx] = tm.quaternion_matrix( float(weights[0]) * tm.quaternion_from_matrix(m, True) )[:3,:4]
+                q = tm.quaternion_slerp(REST_QUAT, tm.quaternion_from_matrix(m, True), float(weights[0]))
+                result[b_idx] = tm.quaternion_matrix( q )[:3,:4]
         else:
             quat = np.asarray([1,0,0,0], dtype=np.float32)
             for b_idx in xrange(self.nBones):
                 m1[:3, :4] = self.getAtFramePos(f_idxs[0], True)[b_idx]
                 m2[:3, :4] = self.getAtFramePos(f_idxs[1], True)[b_idx]
-                quat = tm.quaternion_multiply( float(weights[0]) * tm.quaternion_from_matrix(m1, True),
-                                               float(weights[1]) * tm.quaternion_from_matrix(m2, True) )
+                q1 = tm.quaternion_slerp(REST_QUAT, tm.quaternion_from_matrix(m1, True), float(weights[0]))
+                q2 = tm.quaternion_slerp(REST_QUAT, tm.quaternion_from_matrix(m2, True), float(weights[1]))
+                quat = tm.quaternion_multiply(q1, q2)
 
                 for i,f_idx in enumerate(f_idxs[2:]):
                     m[:3, :4] = self.getAtFramePos(f_idx, True)[b_idx]
-                    quat = tm.quaternion_multiply( quat, float(weights[i]) * tm.quaternion_from_matrix(m, True) )
+                    q = tm.quaternion_slerp(REST_QUAT, tm.quaternion_from_matrix(m, True), float(weights[i]))
+                    quat = tm.quaternion_multiply(quat, q)
 
                 result[b_idx] = tm.quaternion_matrix( quat )[:3,:4]
 
