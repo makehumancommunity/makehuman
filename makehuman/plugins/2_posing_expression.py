@@ -318,29 +318,10 @@ class ExpressionTaskView(gui3d.TaskView):
 
 
     def saveHandler(self, human, file):
-        for name, modifier in self.modifiers.iteritems():
-            value = modifier.getValue()
-            if value:
-                file.write('expression %s %f\n' % (name, value))
-
+        pass
 
     def loadExpression(self, filename, include):
-        human = gui3d.app.selectedHuman
-        warpmodifier.resetWarpBuffer()
-
-        if filename:
-            from codecs import open
-            f = open(filename, 'rU', encoding="utf-8")
-            for data in f.readlines():
-                lineData = data.split()
-                if len(lineData) > 0 and not lineData[0] == '#':
-                    if lineData[0] == 'expression':
-                        modifier = self.modifiers.get(lineData[1], None)
-                        if modifier:
-                            value = float(lineData[2])
-                            modifier.setValue(value)
-                            modifier.updateValue(value)  # Force recompilation
-
+        pass
 
 
 # This method is called when the plugin is loaded into makehuman
