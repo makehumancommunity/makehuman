@@ -873,7 +873,7 @@ class Object3D(object):
 
     def setColor(self, color):
         """
-        Sets the color for the entire object.
+        Sets the vertex colors for the entire object.
 
         :param color: The color in rgba.
         :type color: [byte, byte, byte, byte]

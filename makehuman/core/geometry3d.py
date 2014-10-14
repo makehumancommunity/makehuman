@@ -154,6 +154,19 @@ class RectangleMesh(module3d.Object3D):
         self.changeCoords(self._rotatedVerts(v))
         self.update()
 
+    def setColors(self, bottomLeft, bottomRight, topRight, topLeft):
+        def _toNpArray(arr):
+            if len(arr) == 3:
+                return np.asarray(arr+[1.0], dtype=np.float32)
+            else:
+                return np.asarray(arr, dtype=np.float32)
+
+        color = np.asarray([255 * _toNpArray(bottomLeft), 
+                            255 * _toNpArray(bottomRight), 
+                            255 * _toNpArray(topRight), 
+                            255 * _toNpArray(topLeft)     ], dtype=np.uint8)
+        self.setColor(color)
+
     def _bbox(self, ignore_rotation=True):
         if ignore_rotation:
             coord = self._originalVerts(self.coord)

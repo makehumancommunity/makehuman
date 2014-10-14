@@ -600,11 +600,9 @@ class MHApplication(gui3d.Application, mh.Application):
             self.removeObject(self.backgroundGradient)
 
         mesh = geometry3d.RectangleMesh(10, 10, centered=True)
-        bottomLeft = [26,26,26,255]
-        bottomRight = [26,26,26,255]
-        topRight = [76,76,76,255]
-        topLeft = [76,76,76,255]
-        mesh.setColor(np.asarray([bottomLeft, bottomRight, topRight, topLeft], dtype=np.uint8))
+
+        mesh.setColors(self.bgBottomLeftColor, self.bgBottomRightColor, 
+                       self.bgTopRightColor, self.bgTopLeftColor)
 
         self.backgroundGradient = gui3d.Object(mesh)
         self.backgroundGradient.excludeFromProduction = True
@@ -915,7 +913,6 @@ class MHApplication(gui3d.Application, mh.Application):
 
     # Themes
     def setTheme(self, theme):
-
         # Disabling this check allows faster testing of a skin by reloading it.
         #if self.theme == theme:
         #    return
@@ -929,6 +926,10 @@ class MHApplication(gui3d.Application, mh.Application):
         log._logLevelColors[log.WARNING] = 'darkorange'
         log._logLevelColors[log.ERROR] = 'red'
         log._logLevelColors[log.CRITICAL] = 'red'
+        self.bgBottomLeftColor = [0.101, 0.101, 0.101]
+        self.bgBottomRightColor = [0.101, 0.101, 0.101]
+        self.bgTopLeftColor = [0.312, 0.312, 0.312]
+        self.bgTopRightColor = [0.312, 0.312, 0.312]
 
         f = open(os.path.join(mh.getSysDataPath("themes/"), theme + ".mht"), 'rU')
 
@@ -946,6 +947,14 @@ class MHApplication(gui3d.Application, mh.Application):
                         self.gridColor[:] = [float(val) for val in lineData[2:5]]
                     elif lineData[1] == "subgrid":
                         self.gridSubColor[:] = [float(val) for val in lineData[2:5]]
+                    elif lineData[1] == "bgbottomleft":
+                        self.bgBottomLeftColor[:] = [float(val) for val in lineData[2:5]]
+                    elif lineData[1] == "bgbottomright":
+                        self.bgBottomRightColor[:] = [float(val) for val in lineData[2:5]]
+                    elif lineData[1] == "bgtopleft":
+                        self.bgTopLeftColor[:] = [float(val) for val in lineData[2:5]]
+                    elif lineData[1] == "bgtopright":
+                        self.bgTopRightColor[:] = [float(val) for val in lineData[2:5]]
                 elif lineData[0] == "logwindow_color":
                     logLevel = lineData[1]
                     if hasattr(log, logLevel) and isinstance(getattr(log, logLevel), int):
@@ -959,6 +968,11 @@ class MHApplication(gui3d.Application, mh.Application):
         if self.backplaneGrid:
             self.backplaneGrid.mesh.setMainColor(self.gridColor)
             self.backplaneGrid.mesh.setSubColor(self.gridSubColor)
+        if self.backgroundGradient:
+            self.backgroundGradient.mesh.setColors(self.bgBottomLeftColor, 
+                                                   self.bgBottomRightColor, 
+                                                   self.bgTopRightColor, 
+                                                   self.bgTopLeftColor)
         mh.setClearColor(self.clearColor[0], self.clearColor[1], self.clearColor[2], 1.0)
 
         if update_log:
