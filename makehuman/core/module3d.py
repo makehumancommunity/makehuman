@@ -1094,6 +1094,13 @@ class Object3D(object):
 
         self.cameraMode = cameraMode
 
+    def getCamera(self):
+        """
+        The camera with which this mesh is rendered.
+        """
+        from core import G
+        return G.cameras[self.cameraMode]
+
     def update(self):
         """
         This method is used to call the update methods on each of a list of vertices or all vertices that form part of this object.
