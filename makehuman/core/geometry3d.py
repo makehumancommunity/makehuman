@@ -442,6 +442,9 @@ class GridMesh(module3d.Object3D):
 
     @module3d.Object3D.visibility.getter
     def visibility(self):
+        if not self._visibility:
+            return False
+
         from core import G
         camera = G.cameras[self.cameraMode]
 
