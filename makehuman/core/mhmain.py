@@ -267,6 +267,7 @@ class MHApplication(gui3d.Application, mh.Application):
         self._scene = None
         self.backplaneGrid = None
         self.groundplaneGrid = None
+        self.backgroundGradient = None
 
         self.theme = None
 
@@ -291,6 +292,8 @@ class MHApplication(gui3d.Application, mh.Application):
         #self.guiCamera._fovAngle = 45
         #self.guiCamera._eyeZ = 10
         #self.guiCamera._projection = 0
+
+        # TODO use simpler camera for gui
         self.guiCamera = mh.OrbitalCamera()
 
         mh.cameras.append(self.guiCamera)
@@ -521,7 +524,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def loadGui(self):
 
-        progress = Progress(4)
+        progress = Progress(5)
 
         category = self.getCategory('Settings')
         category.addTask(PluginsTaskView(category))
@@ -535,6 +538,10 @@ class MHApplication(gui3d.Application, mh.Application):
 
         # Create viewport grid
         self.loadGrid()
+        progress.step()
+
+        # Create background gradient
+        self.loadBackgroundGradient()
         progress.step()
 
         # self.progressBar.hide()
@@ -585,6 +592,45 @@ class MHApplication(gui3d.Application, mh.Application):
         #self.groundplaneGrid.setPosition([0,offset,0])
         groundGridMesh.restrictVisibleAboveGround = True
         self.addObject(self.groundplaneGrid)
+
+    def loadBackgroundGradient(self):
+        import numpy as np
+
+        if self.backgroundGradient:
+            self.removeObject(self.backgroundGradient)
+
+        mesh = geometry3d.RectangleMesh(10, 10, centered=True)
+        mesh.setColor(255*np.asarray([[1, 0, 0, 1], [0, 1, 0, 1], [0, 0, 1, 1], [1, 1, 1, 1]], dtype=np.float32))
+
+        self.backgroundGradient = gui3d.Object(mesh)
+        self.backgroundGradient.excludeFromProduction = True
+        self.backgroundGradient.setShadeless(1)
+        self.backgroundGradient.material.configureShading(vertexColors=True)
+
+        self.addObject(self.backgroundGradient)
+
+        self._updateBackgroundDimensions()
+
+    def onResizedCallback(self, event):
+        gui3d.Application.onResizedCallback(self, event)
+        self._updateBackgroundDimensions()
+
+    def _updateBackgroundDimensions(self, width=G.windowWidth, height=G.windowHeight):
+        if self.backgroundGradient is None:
+            return
+
+        cam = self.backgroundGradient.mesh.getCamera()
+        #minX,minY,_ = cam.convertToWorld2D(0,0)
+        #maxX,maxY,_ = cam.convertToWorld2D(width, height)
+        #self.backgroundGradient.mesh.resize(abs(maxX - minX), abs(maxY - minY))
+
+        # TODO hack for orbital camera, properly clean this up some day
+        height = cam.getScale()
+        aspect = cam.getAspect()
+        width = height * aspect
+        self.backgroundGradient.mesh.resize(2.1*width, 2.1*height)
+
+        self.backgroundGradient.setPosition([0, 0, -0.85*cam.farPlane])
 
     def loadMacroTargets(self):
         """
