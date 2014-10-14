@@ -90,6 +90,8 @@ class AnimationTrack(object):
         #   2  logarithmic   # TODO!
         self.interpolationType = 0
 
+        self.disableBaking = False  # Set to true to avoid animation being baked
+
     @property
     def data(self):
         if self.isBaked():
@@ -98,6 +100,8 @@ class AnimationTrack(object):
             return self._data
 
     def isBaked(self):
+        if self.disableBaking:
+            return False
         return self._data_baked is not None
 
     def resetBaked(self):
@@ -110,6 +114,9 @@ class AnimationTrack(object):
         We do skinning with 3x4 matrixes, as suggested in http://graphics.ucsd.edu/courses/cse169_w05/2-Skeleton.htm
         Section 2.3 (We assume the 4th row contains [0 0 0 1])
         """
+        if self.disableBaking:
+            return
+
         from progress import Progress
 
         log.debug('Updating baked animation %s (%s frames)', self.name, self.nFrames)
@@ -361,7 +368,7 @@ def blendPoses(poses, weights):
     poseData = weights[0] * poses[0]
     for pIdx, pose in poses[1:]:
         w = weights[pIdx]
-        poseData += w * pose
+        poseData += w * pose    # TODO does not work as it adds a scale transformation too
 
     return poseData
 
@@ -842,8 +849,6 @@ class AnimatedMesh(object):
                 return
 
             if not self.__currentAnim.isBaked():
-                #self.getSkeleton().setPose(poseState)  # Old slow way of skinning
-
                 # Ensure animation is baked for fast skinning
                 self.__currentAnim.bake(self.getSkeleton())
 
@@ -860,15 +865,17 @@ class AnimatedMesh(object):
                     continue
 
                 try:
-                    if not self.__vertexToBoneMaps[idx].isCompiled(4):
-                        log.debug("Compiling vertex bone weights for %s", mesh.name)
-                        self.__vertexToBoneMaps[idx].compileData(self.getSkeleton(), 4)
+                    if not self.__currentAnim.isBaked():
+                        # Old slow way of skinning
+                        self.getSkeleton().setPose(poseState)
+                        posedCoords = self.getSkeleton().skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx].data)
+                    else:
+                        if not self.__vertexToBoneMaps[idx].isCompiled(4):
+                            log.debug("Compiling vertex bone weights for %s", mesh.name)
+                            self.__vertexToBoneMaps[idx].compileData(self.getSkeleton(), 4)
 
-                    # Old slow way of skinning
-                    #posedCoords = self.getSkeleton().skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx].data)
-
-                    # New fast skinnig approach
-                    posedCoords = skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx].compiled(4), poseState)
+                        # New fast skinnig approach
+                        posedCoords = skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx].compiled(4), poseState)
                 except Exception as e:
                     log.error("Error skinning mesh %s", mesh.name, exc_info=True)
                     raise e
