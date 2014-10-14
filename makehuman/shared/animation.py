@@ -289,7 +289,7 @@ class PoseUnit(AnimationTrack):
             frameData = self.getAtFramePos(f_idx)
             self._affectedBones.append( [] )
             for b_idx in xrange(self.nBones):
-                if not (frameData[b_idx] == IDENT).all():
+                if not np.allclose(frameData[b_idx], IDENT, atol=1e-05):
                     self._affectedBones[f_idx].append(b_idx)
 
     def getBlendedPose(self, poses, weights, additiveBlending=True):
