@@ -600,7 +600,11 @@ class MHApplication(gui3d.Application, mh.Application):
             self.removeObject(self.backgroundGradient)
 
         mesh = geometry3d.RectangleMesh(10, 10, centered=True)
-        mesh.setColor(255*np.asarray([[1, 0, 0, 1], [0, 1, 0, 1], [0, 0, 1, 1], [1, 1, 1, 1]], dtype=np.float32))
+        bottomLeft = [26,26,26,255]
+        bottomRight = [26,26,26,255]
+        topRight = [76,76,76,255]
+        topLeft = [76,76,76,255]
+        mesh.setColor(np.asarray([bottomLeft, bottomRight, topRight, topLeft], dtype=np.uint8))
 
         self.backgroundGradient = gui3d.Object(mesh)
         self.backgroundGradient.excludeFromProduction = True
