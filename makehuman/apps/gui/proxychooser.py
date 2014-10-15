@@ -530,7 +530,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
                     f.close()
             except:
                 log.debug("Failed to restore proxy list cache from file %s", cacheFile)
-        self._proxyFileCache = proxy.updateProxyFileCache(self.paths, self.getFileExtension(), self._proxyFileCache)
+        self._proxyFileCache = proxy.updateProxyFileCache(self.paths, self.getFileExtension(), self._proxyFileCache, proxytype=self.proxyName.capitalize())
 
     def updateProxyFileCache(self):
         """

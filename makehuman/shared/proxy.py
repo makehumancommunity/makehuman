@@ -294,7 +294,7 @@ doDeleteVerts = 3
 def loadProxy(human, path, type="Clothes"):
     try:
         npzpath = os.path.splitext(path)[0] + '.mhpxy'
-        asciipath = os.path.splitext(path)[0] + ('.proxy' if type=='proxymeshes' else '.mhclo')
+        asciipath = os.path.splitext(path)[0] + ('.proxy' if type=='Proxymeshes' else '.mhclo')
         try:
             if not os.path.isfile(npzpath):
                 log.message('compiled proxy file missing: %s', npzpath)
@@ -832,7 +832,7 @@ def transferVertexMaskToProxy(vertsMask, proxy):
 # Caching of proxy files in data folders
 #
 
-def updateProxyFileCache(paths, fileExts, cache = None):
+def updateProxyFileCache(paths, fileExts, cache=None, proxytype="Clothes"):
     """
     Update cache of proxy files in the specified paths. If no cache is given as
     parameter, a new cache is created.
@@ -851,6 +851,11 @@ def updateProxyFileCache(paths, fileExts, cache = None):
         proxyId = getpath.canonicalPath(proxyFile)
 
         mtime = os.path.getmtime(proxyFile)
+        asciipath = None
+        if os.path.splitext(proxyFile)[1] == '.mhpxy':
+            asciipath = os.path.splitext(proxyFile)[0] + ('.proxy' if proxytype=='Proxymeshes' else '.mhclo')
+            if os.path.isfile(asciipath):
+                mtime = max(mtime, os.path.getmtime(asciipath))
         if proxyId in cache:
             try: # Guard against doubles
                 del entries[proxyId]    # Mark that old cache entry is still valid
@@ -860,7 +865,7 @@ def updateProxyFileCache(paths, fileExts, cache = None):
             if not (mtime > cached_mtime):
                 continue
 
-        (uuid, tags) = peekMetadata(proxyFile)
+        (uuid, tags) = peekMetadata(proxyFile, asciipath)
         cache[proxyId] = (mtime, uuid, tags)
     # Remove entries from cache that no longer exist
     for key in entries.keys():
@@ -871,7 +876,7 @@ def updateProxyFileCache(paths, fileExts, cache = None):
     return cache
 
 
-def peekMetadata(proxyFilePath):
+def peekMetadata(proxyFilePath, asciipath=None):
     """
     Read UUID and tags from proxy file, and return as soon as vertex data
     begins. Reads only the necessary lines of the proxy file from disk, not the
@@ -879,9 +884,15 @@ def peekMetadata(proxyFilePath):
     """
     #import zipfile
     #if zipfile.is_zipfile(proxyFilePath):
-    # Using the extension is faster (and will have to do):
+    # Using the filename extension is faster (and will have to do):
     if os.path.splitext(proxyFilePath)[1][1:].lower() == 'mhpxy':
         try:
+            if asciipath:
+                if os.path.isfile(asciipath) and os.path.getmtime(asciipath) > os.path.getmtime(proxyFilePath):
+                    _npzpath = proxyFilePath
+                    proxyFilePath = asciipath
+                    raise RuntimeError('compiled file out of date: %s', _npzpath)
+
             # Binary proxy file
             npzfile = np.load(proxyFilePath)
 
@@ -889,7 +900,8 @@ def peekMetadata(proxyFilePath):
             tags = set(_unpackStringList(npzfile['tags_str'], npzfile['tags_idx']))
             return (uuid, tags)
         except Exception as e:
-            log.warning("Problem loading metadata from binary proxy, trying ASCII file: %s", e, exc_info=True)
+            showTrace = not isinstance(e, RuntimeError)
+            log.warning("Problem loading metadata from binary proxy, trying ASCII file: %s", e, exc_info=showTrace)
 
     # ASCII proxy file
     from codecs import open
