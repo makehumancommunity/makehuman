@@ -114,7 +114,6 @@ class ProxyChooserTaskView(gui3d.TaskView):
 
         self.human = gui3d.app.selectedHuman
 
-        self._proxyCache = dict()
         self._proxyFileCache = None
         self._proxyFilePerUuid = None
 
@@ -274,16 +273,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
         log.message('Selecting proxy file "%s" from %s library.', mhclofile, self.proxyName)
         human = self.human
 
-        pxy = None
-        mhcloId = getpath.canonicalPath(mhclofile)
-        if mhcloId in self._proxyCache:
-            pxy = self._proxyCache[mhcloId]
-            if pxy.mtime < os.path.getmtime(mhclofile):
-                pxy = None
-
-        if not pxy:
-            pxy = proxy.loadProxy(human, mhclofile, type=self.proxyName.capitalize())
-            self._proxyCache[mhcloId] = pxy
+        pxy = proxy.loadProxy(human, mhclofile, type=self.proxyName.capitalize())
 
         if pxy.uuid in [p.uuid for p in self.getSelection() if p is not None]:
             log.debug("Proxy with UUID %s (%s) already loaded in %s library. Skipping.", pxy.uuid, pxy.file, self.proxyName)
