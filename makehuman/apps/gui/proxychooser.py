@@ -620,11 +620,9 @@ class ProxyChooserTaskView(gui3d.TaskView):
         elif filename:
             pxymetadata = self.findProxyMetadataByFilename(filename)
             if pxymetadata is not None:
-                print 'IS NOT NONE', filename
                 _, _, tags = pxymetadata
                 result = result.union(tags)
             else:
-                print 'IS NONE'
                 log.warning('Could not get tags for proxy with filename %s. Does not exist in %s library.', filename, self.proxyName)
             return result
         else:
