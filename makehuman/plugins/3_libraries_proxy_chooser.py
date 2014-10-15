@@ -115,13 +115,9 @@ class ProxyTaskView(proxychooser.ProxyChooserTaskView):
             self.signalChange()
             return
 
-        if mhclofile not in self._proxyCache:
-            pxy = proxy.loadProxy(self.human,
-                                  mhclofile,
-                                  type=self.proxyName.capitalize())
-            self._proxyCache[mhclofile] = pxy
-        else:
-            pxy = self._proxyCache[mhclofile]
+        pxy = proxy.loadProxy(self.human,
+                              mhclofile,
+                              type=self.proxyName.capitalize())
 
         mesh,obj = pxy.loadMeshAndObject(self.human)
 
