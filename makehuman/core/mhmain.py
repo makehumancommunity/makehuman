@@ -739,10 +739,10 @@ class MHApplication(gui3d.Application, mh.Application):
 
         else: # After application is loaded
             if self.args.get('mhmFile', None):
-                mhmFile = self.args.get('mhmFile')
+                import getpath
+                mhmFile = getpath.pathToUnicode( self.args.get('mhmFile') )
                 log.message("Loading MHM file %s (as specified by commandline argument)", mhmFile)
                 if not os.path.isfile(mhmFile):
-                    import getpath
                     mhmFile = getpath.findFile(mhmFile, mh.getPath("models"))
                 if os.path.isfile(mhmFile):
                     self.loadHumanMHM(mhmFile)
