@@ -248,6 +248,7 @@ def thoroughFindFile(filename, searchPaths=[], searchDefaultPaths=True):
     if not isinstance(searchPaths, list):
         searchPaths = [searchPaths]
 
+    # TODO there is one scenario where this might not find a path 'data/some/folder/file.txt': where sysDataPath is not in sysPath. The fix would be to try and strip off a leading 'data/' component and try the search again
     if searchDefaultPaths:
         # Search in user / sys data, and user / sys root folders
         searchPaths.extend([getDataPath(), getSysDataPath(), getPath(), getSysPath()])
