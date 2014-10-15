@@ -41,6 +41,7 @@ TODO
 import gui3d
 import mh
 import humanmodifier
+import material
 import gui
 import log
 import os
@@ -107,6 +108,7 @@ class ScriptingView(gui3d.TaskView):
         testlist = [ 
             'applyTarget()', 
             'incrementingFilename()',
+            'getHeightCm()',
             'getPositionX()',
             'getPositionY()',
             'getPositionZ()',
@@ -137,9 +139,11 @@ class ScriptingView(gui3d.TaskView):
             'setRotationZ()',
             'setZoom()',
             'setWeight()',
+            'setMaterial()',
             'setHeadSquareness()',
             'getModelingParameters()',
             'updateModelingParameter()',
+            'updateModelingParameters()',
             'saveObj()'
         ]
 
@@ -261,6 +265,22 @@ class ScriptingView(gui3d.TaskView):
                 text = text + "MHScript.setHeadSquareness(0.5)\n\n"
                 self.scriptText.addText(text)
 
+            if(item == 'setMaterial()'):
+                text = "# setMaterial(mhmat_filename)\n"
+                text = text + "#\n"
+                text = text + "# Sets the skin material of the 3D model\n"
+                text = text + "# The filename must be realtive to the App Resources directory\n\n"
+                text = text + "MHScript.setMaterial('data/skins/young_caucasian_female/young_caucasian_female.mhmat')\n\n"
+                self.scriptText.addText(text)
+
+            if(item == 'getHeightCm()'):
+                text = "# getHeightCm()\n"
+                text = text + "#\n"
+                text = text + "# Gets the current height of the model, in cm.\n\n"
+                text = text + "height = MHScript.getHeightCm()\n"
+                text = text + "print('height='+str(height))\n\n"
+                self.scriptText.addText(text)
+
             if(item == 'getModelingParameters()'):
                 text = "# getModelingParameters()\n"
                 text = text + "#\n"
@@ -274,6 +294,15 @@ class ScriptingView(gui3d.TaskView):
                 text = text + "# Sets the modeling parameter with specified name of the model to the specified value.\n"
                 text = text + "# The value is a float between 0 and 1, where 0 means nothing at all or minimal, and 1 is the maximum value.\n\n"
                 text = text + "MHScript.updateModelingParameter('macrodetails/Age', 0.7)\n\n"
+                self.scriptText.addText(text)
+
+            if(item == 'updateModelingParameters()'):
+                text = "# updateModelingParameters(dictOfParameterNameAndValue)\n"
+                text = text + "#\n"
+                text = text + "# Sets more modeling parameters with specified names of the model to the specified values.\n"
+                text = text + "# Faster than setting parameters one by one because the 3D mesh is updated only once.\n"
+                text = text + "# The values are a float between 0 and 1, where 0 means nothing at all or minimal, and 1 is the maximum value.\n\n"
+                text = text + "MHScript.updateModelingParameters({'macrodetails/Caucasian': 1.000,'macrodetails/Gender': 1.000,'macrodetails/Age': 0.250})\n\n"
                 self.scriptText.addText(text)
 
             if(item == 'setPositionX()'):
@@ -589,6 +618,16 @@ class Scripting():
         self.human.setWeight(weight)
         mh.redraw()
 
+    def setMaterial(self, mhmat_filename):
+        log.message("SCRIPT: setMaterial(" + mhmat_filename + ")")
+        # The file must be realtive to the App Resources directory,
+        # e.g.: 'data/skins/young_caucasian_female/young_caucasian_female.mhmat'
+        mat = material.fromFile(mhmat_filename)
+        self.human.material = mat
+
+    def getHeightCm(self):
+        return gui3d.app.selectedHuman.getHeightCm()
+
     def getModelingParameters(self):
         log.message("SCRIPT: getModelingParameters()")
         modifierNamesList = sorted( self.human.modifierNames )
@@ -599,6 +638,14 @@ class Scripting():
         log.message("SCRIPT: updateModelingParameter(parameterName, value)")
         modifier = self.human.getModifier(parameterName)
         modifier.setValue(value)
+        self.human.applyAllTargets()
+        mh.redraw()
+
+    def updateModelingParameters(self, dictOfParameterNameAndValue):
+        log.message("SCRIPT: updateModelingParameters("+str(dictOfParameterNameAndValue)+")")
+        for key, value in dictOfParameterNameAndValue.iteritems():
+            modifier = self.human.getModifier(key)
+            modifier.setValue(value)
         self.human.applyAllTargets()
         mh.redraw()
 
