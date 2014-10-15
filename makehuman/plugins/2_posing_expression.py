@@ -330,7 +330,7 @@ class ExpressionTaskView(gui3d.TaskView):
 def load(app):
     category = app.getCategory('Pose/Animate')
     expressionChooser = ExpressionTaskView(category)
-    expressionChooser.sortOrder = 8.5
+    expressionChooser.sortOrder = 4
     category.addTask(expressionChooser)
 
     app.addLoadHandler('expression', expressionChooser.loadHandler)

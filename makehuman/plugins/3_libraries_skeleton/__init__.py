@@ -52,7 +52,7 @@ def load(app):
     import mh
     category = app.getCategory('Pose/Animate')
     maintask = skeletonlibrary.SkeletonLibrary(category)
-    maintask.sortOrder = 3
+    maintask.sortOrder = -0.5
     category.addTask(maintask)
 
     human = gui3d.app.selectedHuman
