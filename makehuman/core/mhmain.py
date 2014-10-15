@@ -218,16 +218,17 @@ class MHApplication(gui3d.Application, mh.Application):
                 'cameraAutoZoom': False,
                 'language': 'english',
                 'highspeed': 5,
-                'realtimeNormalUpdates': True,
+                'realtimeNormalUpdates': False,
                 'units': 'metric',
                 'guiTheme': 'makehuman',
-                'restoreWindowSize': True
+                'restoreWindowSize': True,
+                'version': mh.getVersionDigitsStr()
             }
         else:
             self.settings = {
                 'realtimeUpdates': True,
                 'realtimeFitting': True,
-                'realtimeNormalUpdates': True,
+                'realtimeNormalUpdates': False,
                 'cameraAutoZoom': False,
                 'lowspeed': 1,
                 'highspeed': 5,
@@ -239,7 +240,8 @@ class MHApplication(gui3d.Application, mh.Application):
                 'sliderImages': True,
                 'guiTheme': 'makehuman',
                 'preloadTargets': False,
-                'restoreWindowSize': False
+                'restoreWindowSize': True,
+                'version': mh.getVersionDigitsStr()
             }
 
         self.loadHandlers = {}
@@ -851,7 +853,10 @@ class MHApplication(gui3d.Application, mh.Application):
         with inFile("settings.ini") as f:
             if f:
                 settings = mh.parseINI(f.read())
-                self.settings.update(settings)
+
+                if 'version' in settings and settings['version'] == mh.getVersionDigitsStr():
+                    # Only load settings for this specific version
+                    self.settings.update(settings)
 
         if 'language' in self.settings:
             self.setLanguage(self.settings['language'])
