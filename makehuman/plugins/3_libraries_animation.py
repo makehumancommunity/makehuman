@@ -106,7 +106,7 @@ class AnimationLibrary(gui3d.TaskView):
 def load(app):
     category = app.getCategory('Pose/Animate')
     maintask = AnimationLibrary(category)
-    maintask.sortOrder = 4
+    maintask.sortOrder = 8
     category.addTask(maintask)
 
 
