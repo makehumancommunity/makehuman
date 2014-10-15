@@ -538,6 +538,30 @@ class ProxyChooserTaskView(gui3d.TaskView):
         """
         self.loadProxyFileCache(restoreFromFile = False)
 
+    def findProxyMetadataByFilename(self, path):
+        """
+        Retrieve proxy metadata by canonical path from metadata cache.
+        Returns None or metadata in the form: (mtime, uuid, tags)
+        """
+        proxyId = getpath.canonicalPath(path)
+
+        if self._proxyFileCache is None:
+            self.loadProxyFileCache()
+
+        if self._proxyFilePerUuid is None:
+            self._loadUuidLookup()
+
+        if proxyId not in self._proxyFileCache:
+            # Try again once more, but update the metadata cache first (lazy cache for performance reasons)
+            self.updateProxyFileCache()
+            self._loadUuidLookup()
+
+            if proxyId not in self._proxyFileCache:
+                log.warning('Could not get metadata for proxy with filename %s. Does not exist in %s library.', proxyId, self.proxyName)
+                return None
+
+        return self._proxyFileCache[proxyId]
+
     def findProxyByUuid(self, uuid):
         """
         Find proxy file in this library by UUID.
@@ -594,12 +618,15 @@ class ProxyChooserTaskView(gui3d.TaskView):
                 log.warning('Could not get tags for proxy with UUID %s. Does not exist in %s library.', uuid, self.proxyName)
                 return result
         elif filename:
-            proxyId = getpath.canonicalPath(filename)
-            if proxyId not in self._proxyFileCache:
+            pxymetadata = self.findProxyMetadataByFilename(filename)
+            if pxymetadata is not None:
+                print 'IS NOT NONE', filename
+                _, _, tags = pxymetadata
+                result = result.union(tags)
+            else:
+                print 'IS NONE'
                 log.warning('Could not get tags for proxy with filename %s. Does not exist in %s library.', filename, self.proxyName)
-                return result
-            _, _, tags = self._proxyFileCache[proxyId]
-            result = result.union(tags)
+            return result
         else:
             for (path, values) in self._proxyFileCache.items():
                 _, uuid, tags = values
