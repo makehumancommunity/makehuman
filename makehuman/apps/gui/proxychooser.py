@@ -384,8 +384,15 @@ class ProxyChooserTaskView(gui3d.TaskView):
         Get the index of specified mhclopath within the list returned by getSelection()
         Returns None if the proxy of specified path is not in selection.
         """
+        if os.path.splitext(mhcloFile)[1] == '.mhpxy':
+            altFile = os.path.splitext(mhcloFile)[0] + ('.proxy' if self.proxyName.capitalize() == 'Proxymeshes' else '.mhclo')
+        else:
+            altFile = os.path.splitext(mhcloFile)[0] + '.mhpxy'
+
+        mhcloFile = getpath.canonicalPath(mhcloFile)
+        altFile = getpath.canonicalPath(altFile)
         for pIdx, p in enumerate(self.getSelection()):
-            if getpath.canonicalPath(p.file) == getpath.canonicalPath(mhcloFile):
+            if getpath.canonicalPath(p.file) in [mhcloFile, altFile]:
                 return pIdx
         return None
 
