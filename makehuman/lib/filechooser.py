@@ -822,15 +822,16 @@ class IconListFileChooser(ListFileChooser):
     def addItem(self, file, label, preview, tags=[], pos = None):
         item = super(IconListFileChooser, self).addItem(file, label, preview, tags, pos)
         preview = getpath.pathToUnicode(preview)
-        if preview not in self._iconCache:
+        mtime = os.path.getmtime(preview) if os.path.isfile(preview) else 0
+        if preview not in self._iconCache or mtime > self._iconCache[preview][1]:
             pixmap = QtGui.QPixmap(preview)
             size = pixmap.size()
             if size.width() > 128 or size.height() > 128:
                 pixmap = pixmap.scaled(128, 128, QtCore.Qt.KeepAspectRatio)
             icon = QtGui.QIcon(pixmap)
             icon.addPixmap(pixmap, QtGui.QIcon.Selected)    # make sure that the icon does not change color when item is highlighted
-            self._iconCache[preview] = icon
-        icon = self._iconCache[preview]
+            self._iconCache[preview] = (icon, mtime)
+        icon = self._iconCache[preview][0]
         item.setIcon(icon)
         return item
 
