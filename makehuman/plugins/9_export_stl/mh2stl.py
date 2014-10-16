@@ -50,6 +50,7 @@ __docformat__ = 'restructuredtext'
 import os
 import struct
 import numpy as np
+import math
 from progress import Progress
 
 # TODO perhaps add scale option
@@ -86,24 +87,34 @@ def exportStlAscii(filepath, config, exportJoints = False):
 
     progress(0.3, 0.99, "Writing Objects")
     objprog = Progress(len(meshes))
+
+    def chunked_enumerate(chunk_size, offs, list_):
+        return zip(range(offs,offs+chunk_size), list_[offs:offs+chunk_size])
+
     for mesh in meshes:
         coord = config.scale*mesh.coord + config.offset
-        fp.write("".join( [(
-            'facet normal %f %f %f\n' % tuple(mesh.fnorm[fn]) +
-            '\touter loop\n' +
-            '\t\tvertex %f %f %f\n' % tuple(coord[fv[0]]) +
-            '\t\tvertex %f %f %f\n' % tuple(coord[fv[1]]) +
-            '\t\tvertex %f %f %f\n' % tuple(coord[fv[2]]) +
-            '\tendloop\n' +
-            '\tendfacet\n' +
-            'facet normal %f %f %f\n' % tuple(mesh.fnorm[fn]) +
-            '\touter loop\n' +
-            '\t\tvertex %f %f %f\n' % tuple(coord[fv[2]]) +
-            '\t\tvertex %f %f %f\n' % tuple(coord[fv[3]]) +
-            '\t\tvertex %f %f %f\n' % tuple(coord[fv[0]]) +
-            '\tendloop\n' +
-            '\tendfacet\n'
-            ) for fn,fv in enumerate(mesh.fvert)] ))
+        offs = 0
+        chunk_size = 2000   # The higher the chunk size, the faster, but setting this too high can run into memory errors on some machines
+        meshprog = Progress(math.ceil( float(len(mesh.fvert)) / chunk_size ))
+        while(offs < len(mesh.fvert)):
+            fp.write("".join( [(
+                'facet normal %f %f %f\n' % tuple(mesh.fnorm[fn]) +
+                '\touter loop\n' +
+                '\t\tvertex %f %f %f\n' % tuple(coord[fv[0]]) +
+                '\t\tvertex %f %f %f\n' % tuple(coord[fv[1]]) +
+                '\t\tvertex %f %f %f\n' % tuple(coord[fv[2]]) +
+                '\tendloop\n' +
+                '\tendfacet\n' +
+                'facet normal %f %f %f\n' % tuple(mesh.fnorm[fn]) +
+                '\touter loop\n' +
+                '\t\tvertex %f %f %f\n' % tuple(coord[fv[2]]) +
+                '\t\tvertex %f %f %f\n' % tuple(coord[fv[3]]) +
+                '\t\tvertex %f %f %f\n' % tuple(coord[fv[0]]) +
+                '\tendloop\n' +
+                '\tendfacet\n'
+                ) for fn,fv in chunked_enumerate(offs, chunk_size, mesh.fvert)] ))
+            offs += chunk_size
+            meshprog.step()
         objprog.step()
 
     fp.write('endsolid %s\n' % solid)
