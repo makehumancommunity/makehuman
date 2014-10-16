@@ -64,7 +64,7 @@ g_primitiveMap = [GL_POINTS, GL_LINES, GL_TRIANGLES, GL_QUADS]
 TEX_NOT_FOUND = False
 MAX_TEXTURE_UNITS = 0
 
-def grabScreen(x, y, width, height, filename = None, productionRender = True):
+def grabScreen(x, y, width, height, filename = None, productionRender=False):
     if width <= 0 or height <= 0:
         raise RuntimeError("width or height is 0")
 
