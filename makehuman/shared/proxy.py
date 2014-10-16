@@ -294,7 +294,7 @@ doDeleteVerts = 3
 def loadProxy(human, path, type="Clothes"):
     try:
         npzpath = os.path.splitext(path)[0] + '.mhpxy'
-        asciipath = os.path.splitext(path)[0] + ('.proxy' if type=='Proxymeshes' else '.mhclo')
+        asciipath = os.path.splitext(path)[0] + getAsciiFileExtension(type)
         try:
             if not os.path.isfile(npzpath):
                 log.message('compiled proxy file missing: %s', npzpath)
@@ -828,6 +828,14 @@ def transferVertexMaskToProxy(vertsMask, proxy):
     return proxyVertMask
 
 
+def getAsciiFileExtension(proxyType):
+    """
+    The file extension used for ASCII (non-compiled) proxy source files
+    for the proxies of specified type.
+    """
+    return '.proxy' if proxyType == 'Proxymeshes' else '.mhclo'
+
+
 #
 # Caching of proxy files in data folders
 #
@@ -853,7 +861,7 @@ def updateProxyFileCache(paths, fileExts, cache=None, proxytype="Clothes"):
         mtime = os.path.getmtime(proxyFile)
         asciipath = None
         if os.path.splitext(proxyFile)[1] == '.mhpxy':
-            asciipath = os.path.splitext(proxyFile)[0] + ('.proxy' if proxytype=='Proxymeshes' else '.mhclo')
+            asciipath = os.path.splitext(proxyFile)[0] + getAsciiFileExtension(proxytype)
             if os.path.isfile(asciipath):
                 mtime = max(mtime, os.path.getmtime(asciipath))
         if proxyId in cache:
