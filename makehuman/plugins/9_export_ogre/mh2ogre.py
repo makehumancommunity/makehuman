@@ -184,7 +184,7 @@ def writeMeshFile(human, filepath, objects, config):
 
             lines.append('            <boneassignments>')
             boneNames = [ bone.name for bone in human.getSkeleton().getBones() ]
-            for (boneName, (verts,ws)) in weights.items():
+            for (boneName, (verts,ws)) in weights.data.items():
                 bIdx = boneNames.index(boneName)
                 for i, vIdx in enumerate(verts):
                     w = ws[i]

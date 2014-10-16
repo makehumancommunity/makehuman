@@ -55,7 +55,7 @@ def getObjectCounts(meshes):
     """
     nVertexGroups = 0
     for mesh in meshes:
-        for weights in mesh.vertexWeights:
+        for weights in mesh.vertexWeights.data:
             if weights:
                 nVertexGroups += 1
 
@@ -117,7 +117,7 @@ def writeObjectProps(fp, meshes, skel, config):
             writeDeformer(fp, mesh.name)
             for bone in skel.getBones():
                 try:
-                    weights = mesh.vertexWeights[bone.name]
+                    weights = mesh.vertexWeights.data[bone.name]
                 except KeyError:
                     continue
                 writeSubDeformer(fp, mesh.name, bone, weights, config)
