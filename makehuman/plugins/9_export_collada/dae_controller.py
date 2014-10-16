@@ -87,14 +87,13 @@ def writeSkinController(fp, human, mesh, skel, config):
         parentWeights = rawWeights
     weights = mesh.getVertexWeights(parentWeights)
 
-
     vertexWeights = [list() for _ in xrange(nVerts)]
     skinWeights = []
     wn = 0
     boneNames = [ bone.name for bone in skel.getBones() ]
     for bIdx, boneName in enumerate(boneNames):
         try:
-            (verts,ws) = weights[boneName]
+            (verts,ws) = weights.data[boneName]
         except:
             (verts,ws) = ([], [])
         wts = zip(verts, ws)
