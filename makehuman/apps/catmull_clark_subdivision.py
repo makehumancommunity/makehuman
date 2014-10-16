@@ -371,6 +371,7 @@ class SubdivisionObject(Object3D):
         etexc[...] = (ta + tb) / 2
         del iva, ivb, ta, tb
 
+        # TODO these UVs should be averaged in the same way as bvert in update_coords
         btexc[...] = ptexco
 
         self.markUVs()
