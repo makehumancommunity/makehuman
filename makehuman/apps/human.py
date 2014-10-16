@@ -111,7 +111,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         super(Human, self).setProxy(proxy)
 
         if oldPxyMesh:
-            self.removeBoundMesh(oldPxyMesh)
+            self.removeBoundMesh(oldPxyMesh.name)
         if self.proxy:
             # Add new mesh and vertex weight assignments
             self._updateMeshVertexWeights(self.getProxyMesh())

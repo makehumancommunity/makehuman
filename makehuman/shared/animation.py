@@ -750,7 +750,7 @@ class AnimatedMesh(object):
             del self.__originalMeshCoords[rIdx]
             del self.__vertexToBoneMaps[rIdx]
         except:
-            pass
+            log.warning('Cannot remove bound mesh %s, no such mesh bound.', name)
 
     def getRestCoordinates(self, name):
         rIdx = self._getBoundMeshIndex(name)
