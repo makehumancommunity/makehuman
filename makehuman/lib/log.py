@@ -72,6 +72,12 @@ def _toUnicode(msg, *args):
             return msg_.decode(sys.getfilesystemencoding())
         except UnicodeError:
             pass
+        try:
+            import locale
+            return msg_.decode(locale.getpreferredencoding())
+        except UnicodeError:
+            pass
+
         return msg_.decode('UTF-8', 'replace')
     else:
         return msg_
