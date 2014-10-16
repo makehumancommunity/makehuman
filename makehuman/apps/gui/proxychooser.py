@@ -178,6 +178,12 @@ class ProxyChooserTaskView(gui3d.TaskView):
         """
         return ['mhpxy', 'mhclo']
 
+    def getProxyType(self):
+        """
+        The type name of the proxies this library manages.
+        """
+        return self.proxyName.capitalize()
+
     def getNotFoundIcon(self):
         """
         The default icon to show when no icon is found for a proxy in this
@@ -273,7 +279,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
         log.message('Selecting proxy file "%s" from %s library.', mhclofile, self.proxyName)
         human = self.human
 
-        pxy = proxy.loadProxy(human, mhclofile, type=self.proxyName.capitalize())
+        pxy = proxy.loadProxy(human, mhclofile, type=self.getProxyType())
 
         if pxy.uuid in [p.uuid for p in self.getSelection() if p is not None]:
             log.debug("Proxy with UUID %s (%s) already loaded in %s library. Skipping.", pxy.uuid, pxy.file, self.proxyName)
@@ -384,17 +390,30 @@ class ProxyChooserTaskView(gui3d.TaskView):
         Get the index of specified mhclopath within the list returned by getSelection()
         Returns None if the proxy of specified path is not in selection.
         """
-        if os.path.splitext(mhcloFile)[1] == '.mhpxy':
-            altFile = os.path.splitext(mhcloFile)[0] + ('.proxy' if self.proxyName.capitalize() == 'Proxymeshes' else '.mhclo')
-        else:
-            altFile = os.path.splitext(mhcloFile)[0] + '.mhpxy'
-
         mhcloFile = getpath.canonicalPath(mhcloFile)
-        altFile = getpath.canonicalPath(altFile)
+        altFile = getpath.canonicalPath(self.getAlternativeFile(mhcloFile))
         for pIdx, p in enumerate(self.getSelection()):
             if getpath.canonicalPath(p.file) in [mhcloFile, altFile]:
                 return pIdx
         return None
+
+    def getAlternativeFile(self, filename):
+        """
+        If a path to a compiled proxy file is given, returns the ascii version,
+        if the ascii version path is given, returns the path to the compiled
+        binary proxy file.
+        """
+        if os.path.splitext(filename)[1] == '.mhpxy':
+            return os.path.splitext(filename)[0] + self.getAsciiFileExtension()
+        else:
+            return os.path.splitext(filename)[0] + '.mhpxy'
+
+    def getAsciiFileExtension(self):
+        """
+        The file extension used for ASCII (non-compiled) proxy source files
+        for the proxies managed by this library.
+        """
+        return proxy.getAsciiFileExtension(self.getProxyType())
 
     def resetSelection(self):
         """
@@ -429,9 +448,15 @@ class ProxyChooserTaskView(gui3d.TaskView):
         self.filechooser.refresh()
         selectedProxies = self.getSelection()
         if len(selectedProxies) > 1:
-            self.filechooser.setSelections( [p.file for p in selectedProxies] )
+            fnames = [p.file for p in selectedProxies] + \
+                     [self.getAlternativeFile(p.file) for p in selectedProxies]
+            self.filechooser.setSelections(fnames)
         elif len(selectedProxies) > 0:
-            self.filechooser.selectItem(selectedProxies[0].file)
+            proxypath = selectedProxies[0].file
+            if self.filechooser.contains(proxypath):
+                self.filechooser.selectItem(proxypath)
+            else:
+                self.filechooser.selectItem(self.getAlternativeFile(proxypath))
         elif not self.multiProxy:
             # Select "None" item in list
             self.filechooser.selectItem(None)
@@ -537,7 +562,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
                     f.close()
             except:
                 log.debug("Failed to restore proxy list cache from file %s", cacheFile)
-        self._proxyFileCache = proxy.updateProxyFileCache(self.paths, self.getFileExtension(), self._proxyFileCache, proxytype=self.proxyName.capitalize())
+        self._proxyFileCache = proxy.updateProxyFileCache(self.paths, self.getFileExtension(), self._proxyFileCache, proxytype=self.getProxyType())
 
     def updateProxyFileCache(self):
         """
