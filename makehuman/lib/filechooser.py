@@ -751,6 +751,12 @@ class ListFileChooser(FileChooserBase):
                 self.children.setCurrentItem(listItem)
                 return
 
+    def contains(self, item):
+        for listItem in self.children.getItems():
+            if self.loadHandler.matchesItem(listItem, item):
+                return True
+        return False
+
     def setSelections(self, items):
         if not self.multiSelect:
             return
