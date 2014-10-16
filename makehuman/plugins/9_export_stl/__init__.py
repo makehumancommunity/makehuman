@@ -75,7 +75,10 @@ class ExporterSTL(Exporter):
         cfg = self.getConfig()
         cfg.setHuman(human)
         if self.stlAscii.selected:
-            mh2stl.exportStlAscii(filename("stl"), cfg)
+            try:
+                mh2stl.exportStlAscii(filename("stl"), cfg)
+            except MemoryError:
+                log.error("Not enough memory to export the mesh. Try exporting a binary STL or disable mesh smoothing.")
         else:
             mh2stl.exportStlBinary(filename("stl"), cfg)
 
