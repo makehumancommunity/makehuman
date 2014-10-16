@@ -113,8 +113,11 @@ def exportStlAscii(filepath, config, exportJoints = False):
                 '\tendloop\n' +
                 '\tendfacet\n'
                 ) for fn,fv in chunked_enumerate(offs, chunk_size, mesh.fvert)] ))
+            fp.flush()
+            os.fsync(fp.fileno())
             offs += chunk_size
             meshprog.step()
+        meshprog.finish()
         objprog.step()
 
     fp.write('endsolid %s\n' % solid)
