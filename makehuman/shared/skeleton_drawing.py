@@ -175,7 +175,7 @@ def _shapeFromSkeleton(skel, type="Prism"):
 
     for bone in bones:
         v, f = _shapeFromBone(bone, type)
-        if verts == None:
+        if verts is None:
             verts = np.zeros((len(v)*len(bones), 3), np.float32)
             faces = np.zeros((len(f)*len(bones), 4), np.uint16)
         verts[vertCount:vertCount+len(v)] = v              # verts.extend(v)

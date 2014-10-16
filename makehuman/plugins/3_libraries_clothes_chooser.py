@@ -141,7 +141,7 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
             # Apply accumulated mask from previous clothes layers on this clothing piece
             obj.changeVertexMask(proxyVertMask)
 
-            if pxy.deleteVerts != None and len(pxy.deleteVerts > 0):
+            if pxy.deleteVerts is not None and len(pxy.deleteVerts > 0):
                 log.debug("Loaded %s deleted verts (%s faces) from %s proxy.", np.count_nonzero(pxy.deleteVerts), len(human.meshData.getFacesForVertices(np.argwhere(pxy.deleteVerts)[...,0])),pxy.name)
 
                 # Modify accumulated (basemesh) verts mask
