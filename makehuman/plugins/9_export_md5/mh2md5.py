@@ -159,7 +159,7 @@ def exportMd5(filepath, config):
             # Remap vertex weights to the unwelded vertices of the object (mesh.coord to mesh.r_coord)
             originalToUnweldedMap = mesh.inverse_vmap
 
-            # Build a weights list indexed per vertex
+            # Build a weights list indexed per vertex  # TODO this can be done easier by compiling VertexBoneWeights data
             jointIndexes = {}
             jointIndexes['origin'] = 0
             joints = [None] + human.getSkeleton().getBones() # origin joint is None
@@ -167,7 +167,7 @@ def exportMd5(filepath, config):
                 if bone:
                     jointIndexes[bone.name] = idx
             vertWeights = {}    # = dict( vertIdx: [ (jointIdx1, weight1), ...])
-            for (jointName, (verts,ws)) in weights.items():
+            for (jointName, (verts,ws)) in weights.data.items():
                 jointIdx = jointIndexes[jointName]
                 for idx,v in enumerate(verts):
                     try:

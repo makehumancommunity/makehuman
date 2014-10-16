@@ -72,14 +72,12 @@ def exportFbx(filepath, config):
     skel = human.getSkeleton()
     if skel:
         skel = skel.scaled(config.scale)
-        useAnim = config.useFaceRig
-    else:
-        useAnim = False
 
     # Set mesh names
     for mesh in meshes:
         mesh.name = fbx_utils.getMeshName(mesh, skel)
 
+    useAnim = False
     if useAnim:
         # TODO allow exporting poseunits
         action = None
