@@ -556,6 +556,7 @@ def saveBinaryProxy(proxy, path):
 
     np.savez_compressed(fp, **vars_)
     fp.close()
+    os.utime(path)  # Ensure modification time is updated
 
 def loadBinaryProxy(path, human, type):
     log.debug("Loading binary proxy %s.", path)
