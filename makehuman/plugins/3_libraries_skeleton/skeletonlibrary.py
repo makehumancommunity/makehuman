@@ -136,11 +136,11 @@ class SkeletonLibrary(gui3d.TaskView):
         self.showJointsTggl.setSelected(True)
         '''
 
-        self.sysDataPath = mh.getSysDataPath('rigs')
-        self.homeDataPath = mh.getPath('data/rigs')
-        if not os.path.exists(self.homeDataPath):
-            os.makedirs(self.homeDataPath)
-        self.paths = [self.homeDataPath, self.sysDataPath]
+        self.sysDataPath = getpath.getSysDataPath('rigs')
+        self.userDataPath = getpath.getDataPath('rigs')
+        if not os.path.exists(self.userDataPath):
+            os.makedirs(self.userDataPath)
+        self.paths = [self.userDataPath, self.sysDataPath]
 
         #
         #   Preset box
