@@ -441,7 +441,7 @@ class BackgroundChooser(gui3d.TaskView):
                 while img_filename and not any( [img_filename.lower().endswith(ex) for ex in self.extensions] ) and (len(values) - (i+2)) >= 5:
                     i += 1
                     img_filename = img_filename + ' ' + values[2+i]
-                img_filename = getpath.findFile(img_filename, self.backgroundsFolders, strict=True)
+                img_filename = getpath.thoroughFindFile(img_filename, self.backgroundsFolders)
                 aspect = float(values[3+i])
                 trans = (float(values[4+i]), float(values[5+i]))
                 scale = float(values[6+i])
