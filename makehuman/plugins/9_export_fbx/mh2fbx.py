@@ -109,7 +109,7 @@ def exportFbx(filepath, config):
     else:
         # Attach trivial weights to the meshes
         for mesh in meshes:
-            mesh.vertexWeights = dict()
+            mesh.vertexWeights = None
 
     # TODO if "shapes" need to be exported, attach them to meshes in a similar way
 
