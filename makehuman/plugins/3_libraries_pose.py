@@ -217,7 +217,7 @@ class PoseLibraryTaskView(gui3d.TaskView):
     def loadHandler(self, human, values):
         if values[0] == "pose":
             poseFile = values[1]
-            poseFile = getpath.findFile(poseFile, self.paths)
+            poseFile = getpath.thoroughFindFile(poseFile, self.paths)
             if not os.path.isfile(poseFile):
                 log.warning("Could not load pose %s, file does not exist." % poseFile)
             else:
