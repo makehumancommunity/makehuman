@@ -222,6 +222,8 @@ def findFile(relPath, searchPaths = [getDataPath(), getSysDataPath()], strict=Fa
     Inverse of getRelativePath: find an absolute path from specified relative
     path in one of the search paths.
     First occurence is returned, so order in which search paths are given matters.
+    Note: does NOT treat the path as relative to the current working dir, unless
+    you explicitly specify '.' as one of the searchpaths.
     """
     if not isinstance(searchPaths, list):
         searchPaths = [searchPaths]
@@ -254,11 +256,11 @@ def thoroughFindFile(filename, searchPaths=[], searchDefaultPaths=True):
 
     path = findFile(filename, searchPaths, strict=True)
     if path:
-        return os.path.abspath(path)
+        return canonicalPath(path)
 
     # Treat as absolute path or search relative to application path
     if os.path.isfile(filename):
-        return os.path.abspath(filename)
+        return canonicalPath(filename)
 
     # Strip leading data/ folder if present (for the scenario where sysDataPath is not in sysPath)
     if filename.startswith('data/'):
@@ -267,7 +269,7 @@ def thoroughFindFile(filename, searchPaths=[], searchDefaultPaths=True):
             return result
 
     # Nothing found
-    return os.path.normpath(filename)
+    return formatPath(filename)
 
 def search(paths, extensions, recursive=True, mutexExtensions=False):
     """
