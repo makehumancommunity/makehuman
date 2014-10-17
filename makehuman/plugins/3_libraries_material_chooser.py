@@ -73,10 +73,6 @@ class MaterialTaskView(gui3d.TaskView):
         gui3d.TaskView.__init__(self, category, 'Material', label='Skin/Material')
         self.human = gui3d.app.selectedHuman
 
-        # Paths, in order, in which relative material filepaths will be searched
-        self.searchPaths = [mh.getPath(), mh.getSysDataPath()]
-        self.searchPaths = [os.path.abspath(p) for p in self.searchPaths]
-
         self.materials = None
 
         self.filechooser = self.addRightWidget(fc.IconListFileChooser(self.materials, 'mhmat', ['thumb', 'png'], mh.getSysDataPath('skins/notfound.thumb'), name='Material'))
@@ -189,7 +185,7 @@ class MaterialTaskView(gui3d.TaskView):
                 human.material = mat
                 return
             else:
-                absP = getpath.findFile(path, [mh.getPath('data'), mh.getSysDataPath()])
+                absP = getpath.thoroughFindFile(path)
                 if not os.path.isfile(absP):
                     log.warning('Could not find material %s for skinMaterial parameter.', values[1])
                     return
@@ -237,25 +233,25 @@ class MaterialTaskView(gui3d.TaskView):
         """
         # TODO move as helper func to material module
         if objFile:
-            objFile = os.path.abspath(objFile)
-            if os.path.isdir(objFile):
-                objFile = os.path.dirname(objFile)[0]
-            searchPaths = [ objFile ] + self.searchPaths
+            objFile = getpath.canonicalPath(objFile)
+            if os.path.isfile(objFile):
+                objFile = os.path.dirname(objFile)
+            searchPaths = [ objFile ]
         else:
-            searchPaths = self.searchPaths
+            searchPaths = []
 
-        return getpath.getRelativePath(filepath, searchPaths)
+        return getpath.getJailedPath(filepath, searchPaths)
 
     def getMaterialPath(self, relPath, objFile = None):
         if objFile:
             objFile = os.path.abspath(objFile)
-            if os.path.isdir(objFile):
-                objFile = os.path.split(objFile)[0]
-            searchPaths = [ objFile ] + self.searchPaths
+            if os.path.isfile(objFile):
+                objFile = os.path.dirname(objFile)
+            searchPaths = [ objFile ]
         else:
-            searchPaths = self.searchPaths
+            searchPaths = []
 
-        return getpath.findFile(relPath, searchPaths)
+        return getpath.thoroughFindFile(relPath, searchPaths)
 
     def onHumanChanged(self, event):
         if event.change == 'reset':
