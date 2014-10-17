@@ -298,7 +298,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
         gui3d.app.addObject(obj)
 
         self.filechooser.selectItem(mhclofile)
-
+        self.filechooser.selectItem( self.getAlternativeFile(mhclofile) )  # In case an ascii or binary file was loaded instead
 
         self.adaptProxyToHuman(pxy, obj)
         obj.setSubdivided(human.isSubdivided()) # Copy subdivided state of human
@@ -333,6 +333,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
         gui3d.app.removeObject(obj)
         del self.selectedProxies[idx]
         self.filechooser.deselectItem(mhclofile)
+        self.filechooser.deselectItem( self.getAlternativeFile(mhclofile) )  # In case an ascii or binary file was loaded instead
 
         self.proxyDeselected(pxy, suppressSignal)
         pxy.object = None   # Drop pointer to object
