@@ -55,6 +55,8 @@ def getObjectCounts(meshes):
     """
     nVertexGroups = 0
     for mesh in meshes:
+        if mesh.vertexWeights is None:
+            continue
         for weights in mesh.vertexWeights.data:
             if weights:
                 nVertexGroups += 1
