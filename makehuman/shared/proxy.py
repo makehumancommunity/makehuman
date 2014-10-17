@@ -310,6 +310,7 @@ def loadProxy(human, path, type="Clothes"):
             if getpath.isSubPath(npzpath, getpath.getPath()):
                 # Only write compiled binary proxies to user data path
                 try:
+                    log.message('Compiling binary proxy file %s', npzpath)
                     saveBinaryProxy(proxy, npzpath)
                 except StandardError:
                     log.notice('unable to save compiled proxy: %s', npzpath, exc_info=True)
