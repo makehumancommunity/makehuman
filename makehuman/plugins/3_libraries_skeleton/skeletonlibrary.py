@@ -396,7 +396,7 @@ class SkeletonLibrary(gui3d.TaskView):
         if values[0] == "skeleton":
             skelFile = values[1]
 
-            skelFile = getpath.findFile(skelFile, self.paths)
+            skelFile = getpath.thoroughFindFile(skelFile, self.paths)
             if not os.path.isfile(skelFile):
                 log.warning("Could not load rig %s, file does not exist." % skelFile)
             else:
