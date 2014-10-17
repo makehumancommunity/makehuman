@@ -955,6 +955,7 @@ def _unpackStringList(text, index):
     return strings
 
 def _getFilePath(filename, folder = None, altExtensions=None):
+    import getpath
     if altExtensions is not None:
         # Search for existing path with alternative file extension
         for aExt in altExtensions:
@@ -966,13 +967,10 @@ def _getFilePath(filename, folder = None, altExtensions=None):
                 # Path found, return result with original extension
                 orgExt = os.path.splitext(filename)[1]
                 path = os.path.splitext(aPath)[0]+orgExt
-                return os.path.normpath(path)
+                return getpath.formatPath(path)
 
     if not filename or not isinstance(filename, basestring):
         return filename
-
-    # Ensure unix style path
-    filename.replace('\\', '/')
 
     searchPaths = []
 
@@ -980,17 +978,4 @@ def _getFilePath(filename, folder = None, altExtensions=None):
     if folder:
         searchPaths.append(folder)
 
-    from getpath import findFile, getPath, getSysDataPath, getSysPath, getDataPath
-    searchPaths.extend([getDataPath(), getSysDataPath(), getPath(), getSysPath()])
-
-    # Search in user / sys data, and user / sys root folders
-    path = findFile(filename, searchPaths, strict=True)
-    if path:
-        return os.path.abspath(path)
-
-    # Treat as absolute path or search relative to application path
-    if os.path.isfile(filename):
-        return os.path.abspath(filename)
-
-    # Nothing found
-    return os.path.normpath(filename)
+    return getpath.thoroughFindFile(filename, searchPaths)
