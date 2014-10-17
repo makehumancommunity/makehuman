@@ -325,7 +325,6 @@ def loadProxy(human, path, type="Clothes"):
         log.error('Unable to load proxy file: %s', path, exc_info=True)
         return None
 
-    log.message("License for %s:\n%s", proxy.name, proxy.license)
     return proxy
 
 def loadTextProxy(human, filepath, type="Clothes"):
