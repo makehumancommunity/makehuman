@@ -122,7 +122,8 @@ class Skeleton(object):
         self.vertexWeights = VertexBoneWeights.fromFile(weights_file, mesh.getVertexCount() if mesh else None)
         return self.vertexWeights
 
-    def getVertexWeights(referenceWeights=None):
+    def getVertexWeights(self, referenceWeights=None):
+        from collections import OrderedDict
         if referenceWeights is None:
             return self.vertexWeights
 
