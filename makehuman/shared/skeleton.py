@@ -123,8 +123,16 @@ class Skeleton(object):
         return self.vertexWeights
 
     def getVertexWeights(self, referenceWeights=None):
+        """
+        Get the vertex weights of this skeleton. If this is called for the first
+        time, and referenceWeights is specified (weight of the mh reference rig), 
+        and the weights for this skeleton were not explicitly defined, the
+        weights will be initialized as a remapping of the reference weights
+        through specified reference bones.
+        Returns the vertex weights for this skeleton.
+        """
         from collections import OrderedDict
-        if referenceWeights is None:
+        if referenceWeights is None or self.vertexWeights is not None:
             return self.vertexWeights
 
         # Remap vertex weights from reference bones

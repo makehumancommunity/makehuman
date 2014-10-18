@@ -1237,7 +1237,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
         self.callEvent('onChanging', events3d.HumanEvent(self, 'skeleton'))
         animation.AnimatedMesh.setSkeleton(self, skel)
-        self.updateVertexWeights(skel.vertexWeights if skel else None)  # TODO call getVertexWeights
+        self.updateVertexWeights(skel.getVertexWeights() if skel else None)
         self.callEvent('onChanged', events3d.HumanEvent(self, 'skeleton'))
         self.refreshPose()
 

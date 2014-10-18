@@ -93,6 +93,8 @@ class SkeletonLibrary(gui3d.TaskView):
 
         self.human = gui3d.app.selectedHuman
 
+        self.referenceRig = None
+
         self.selectedRig = None
         self.selectedBone = None
 
@@ -207,6 +209,10 @@ class SkeletonLibrary(gui3d.TaskView):
         log.debug("Loading skeleton from %s", filename)
         self.selectedRig = filename
 
+        if self.referenceRig is None:
+            log.message("Loading reference skeleton for weights remapping.")
+            self.referenceRig = skeleton.load(getpath.getSysDataPath('rigs/default.json'), self.human.meshData)
+
         if not filename:
             if self.human.getSkeleton():
                 # Unload current skeleton
@@ -226,7 +232,10 @@ class SkeletonLibrary(gui3d.TaskView):
 
         # Load skeleton definition from options
         skel = skeleton.load(filename, self.human.meshData)
-        log.message("Skeleton %s has %s weights per vertex.", skel.name, skel.getVertexWeights().getMaxNumberVertexWeights())
+
+        # Ensure vertex weights of skel are initialized
+        vertexWeights = skel.getVertexWeights(self.referenceRig.getVertexWeights())
+        log.message("Skeleton %s has %s weights per vertex.", skel.name, vertexWeights.getMaxNumberVertexWeights())
 
         # Update description
         descr = skel.description
