@@ -226,6 +226,7 @@ class SkeletonLibrary(gui3d.TaskView):
 
         # Load skeleton definition from options
         skel = skeleton.load(filename, self.human.meshData)
+        log.message("Skeleton %s has %s weights per vertex.", skel.name, skel.getVertexWeights().getMaxNumberVertexWeights())
 
         # Update description
         descr = skel.description
