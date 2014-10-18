@@ -412,6 +412,9 @@ class VertexBoneWeights(object):
     @property
     def data(self):
         return self._data
+
+    def getMaxNumberVertexWeights(self):
+        return self._nWeights
     
     def compiled(self, nWeights=None, skel=None):
         if nWeights is None:
@@ -566,6 +569,11 @@ class VertexBoneWeights(object):
         elif nWeights == 4:
             dtype = [('b_idx1', np.uint32), ('b_idx2', np.uint32), ('b_idx3', np.uint32), ('b_idx4', np.uint32),
                      ('wght1', np.float32), ('wght2', np.float32), ('wght3', np.float32), ('wght4', np.float32)]
+        elif nWeights == 6:
+            dtype = [('b_idx1', np.uint32), ('b_idx2', np.uint32), ('b_idx3', np.uint32), 
+                     ('b_idx4', np.uint32), ('b_idx5', np.uint32), ('b_idx6', np.uint32), 
+                     ('wght1', np.float32), ('wght2', np.float32), ('wght3', np.float32), 
+                     ('wght4', np.float32), ('wght5', np.float32), ('wght6', np.float32)]
         elif nWeights == 13:
             dtype = [('b_idx1', np.uint32), ('b_idx2', np.uint32), ('b_idx3', np.uint32), 
                      ('b_idx4', np.uint32), ('b_idx5', np.uint32), ('b_idx6', np.uint32), 
@@ -870,12 +878,12 @@ class AnimatedMesh(object):
                         self.getSkeleton().setPose(poseState)
                         posedCoords = self.getSkeleton().skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx].data)
                     else:
-                        if not self.__vertexToBoneMaps[idx].isCompiled(4):
+                        if not self.__vertexToBoneMaps[idx].isCompiled(6):
                             log.debug("Compiling vertex bone weights for %s", mesh.name)
-                            self.__vertexToBoneMaps[idx].compileData(self.getSkeleton(), 4)
+                            self.__vertexToBoneMaps[idx].compileData(self.getSkeleton(), 6)
 
                         # New fast skinnig approach
-                        posedCoords = skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx].compiled(4), poseState)
+                        posedCoords = skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx].compiled(6), poseState)
                 except Exception as e:
                     log.error("Error skinning mesh %s", mesh.name, exc_info=True)
                     raise e
@@ -955,6 +963,14 @@ def skinMesh(coords, compiledVertWeights, poseData):
     elif len(compiledVertWeights.dtype) == 2:
         # nWeights = 1
         accum = W['wght1'][:,None,None] * P[W['b_idx1']][:,:3,:c]
+    elif len(compiledVertWeights.dtype) == 6*2:
+        # nWeights = 13
+        accum = W['wght1'][:,None,None] * P[W['b_idx1']][:,:3,:c] + \
+                W['wght2'][:,None,None] * P[W['b_idx2']][:,:3,:c] + \
+                W['wght3'][:,None,None] * P[W['b_idx3']][:,:3,:c] + \
+                W['wght4'][:,None,None] * P[W['b_idx4']][:,:3,:c] + \
+                W['wght5'][:,None,None] * P[W['b_idx5']][:,:3,:c] + \
+                W['wght6'][:,None,None] * P[W['b_idx6']][:,:3,:c]
     elif len(compiledVertWeights.dtype) == 13*2:
         # nWeights = 13
         accum = W['wght1'][:,None,None] * P[W['b_idx1']][:,:3,:c] + \
