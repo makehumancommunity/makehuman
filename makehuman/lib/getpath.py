@@ -8,7 +8,7 @@
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Manuel Bastioni, Marc Flerackers, Glynn Clements
+**Authors:**           Jonas Hauquier, Glynn Clements, Manuel Bastioni, Marc Flerackers
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
@@ -74,9 +74,7 @@ def canonicalPath(path):
 def localPath(path):
     """
     Returns the path relative to the MH program directory,
-    i.e. the inverse of canonicalPath. Needed to get
-    human.targetsDetailStack keys from algos3d.targetBuffer keys.
-    If all buffers use the same keys, this becomes obsolete.
+    i.e. the inverse of canonicalPath.
     """
     path = os.path.realpath(path)
     root = os.path.realpath( getSysPath() )
