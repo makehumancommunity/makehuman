@@ -138,7 +138,7 @@ def exportCollada(filepath, config):
         dae_geometry.writeLibraryGeometry(fp, meshes, config)
 
         progress(0.9, 0.99, "Exporting scene")
-        dae_node.writeLibraryVisualScenes(fp, meshes, skel, config)
+        dae_node.writeLibraryVisualScenes(fp, meshes, skel, config, name)
 
         fp.write(
             '  <scene>\n' +
