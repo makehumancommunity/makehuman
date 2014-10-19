@@ -412,6 +412,8 @@ class ProxyChooserTaskView(gui3d.TaskView):
         if the ascii version path is given, returns the path to the compiled
         binary proxy file.
         """
+        if not filename:
+            return filename 
         if os.path.splitext(filename)[1] == '.mhpxy':
             return os.path.splitext(filename)[0] + self.getAsciiFileExtension()
         else:
