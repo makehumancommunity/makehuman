@@ -113,7 +113,7 @@ def saveBinaryMesh(obj, path):
         vars_['fuvs']  = obj.fuvs
 
     np.savez_compressed(path, **vars_)
-    os.utime(path)  # Ensure modification time is updated
+    os.utime(path, None)  # Ensure modification time is updated
 
 def loadBinaryMesh(obj, path):
     log.debug("Loading binary mesh %s.", path)
