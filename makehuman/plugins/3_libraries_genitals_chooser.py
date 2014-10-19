@@ -44,7 +44,7 @@ import proxychooser
 class GenitalsTaskView(proxychooser.ProxyChooserTaskView):
 
     def __init__(self, category):
-        super(GenitalsTaskView, self).__init__(category, 'genitals', tagFilter = True)
+        super(GenitalsTaskView, self).__init__(category, 'genitals', tagFilter = True, descriptionWidget = False)
 
     def getObjectLayer(self):
         #return 3
