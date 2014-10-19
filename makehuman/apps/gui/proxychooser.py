@@ -93,7 +93,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
     Common base class for all proxy chooser libraries.
     """
 
-    def __init__(self, category, proxyName, tabLabel = None, multiProxy = False, tagFilter = False):
+    def __init__(self, category, proxyName, tabLabel = None, multiProxy = False, tagFilter = False, descriptionWidget = False):
         if not tabLabel:
             tabLabel = proxyName.capitalize()
         proxyName = proxyName.lower().replace(" ", "_")
@@ -103,6 +103,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
         self.label = tabLabel
         self.multiProxy = multiProxy
         self.tagFilter = tagFilter
+        self.descriptionWidget = descriptionWidget
 
         self.homeProxyDir = getpath.getPath(os.path.join('data', proxyName))
         self.sysProxyDir = mh.getSysDataPath(proxyName)
@@ -151,6 +152,10 @@ class ProxyChooserTaskView(gui3d.TaskView):
         if self.tagFilter:
             self.filechooser.setFileLoadHandler(fc.TaggedFileLoader(self))
             self.addLeftWidget(self.filechooser.createTagFilter())
+
+        if self.descriptionWidget:
+            descBox = self.addLeftWidget(gui.GroupBox('Description'))
+            self.descrLbl = descBox.addWidget(gui.TextView(''))
 
         @self.filechooser.mhEvent
         def onFileSelected(filename):
@@ -307,6 +312,9 @@ class ProxyChooserTaskView(gui3d.TaskView):
         self.selectedProxies.append(pxy)
 
         self.filechooser.selectItem(mhclofile)
+
+        if self.descriptionWidget:
+            self.descrLbl.setText(pxy.description)
 
         self.proxySelected(pxy)
 
