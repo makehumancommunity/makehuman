@@ -54,8 +54,6 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
     def __init__(self, category):
         super(ClothesTaskView, self).__init__(category, 'clothes', multiProxy = True, tagFilter = True)
 
-        #self.taggedClothes = {}
-
         self.faceHidingTggl = self.optionsBox.addWidget(FaceHideCheckbox("Hide faces under clothes"))
         @self.faceHidingTggl.mhEvent
         def onClicked(event):

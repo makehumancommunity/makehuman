@@ -44,7 +44,7 @@ import proxychooser
 class TeethTaskView(proxychooser.ProxyChooserTaskView):
 
     def __init__(self, category):
-        super(TeethTaskView, self).__init__(category, 'teeth')
+        super(TeethTaskView, self).__init__(category, 'teeth', tagFilter = True)
 
     def getObjectLayer(self):
         return 5
