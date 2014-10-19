@@ -462,76 +462,6 @@
             "roll": -0.5513148307800293,
             "tail": "metacarpal4.R_tail"
         },
-        "metatarsal1.L": {
-            "head": "metatarsal1.L_head",
-            "parent": "foot.L",
-            "reference": null,
-            "roll": -0.3088493347167969,
-            "tail": "metatarsal1.L_tail"
-        },
-        "metatarsal1.R": {
-            "head": "metatarsal1.R_head",
-            "parent": "foot.R",
-            "reference": null,
-            "roll": 0.3088493347167969,
-            "tail": "metatarsal1.R_tail"
-        },
-        "metatarsal2.L": {
-            "head": "metatarsal2.L_head",
-            "parent": "foot.L",
-            "reference": null,
-            "roll": -0.07281147688627243,
-            "tail": "metatarsal2.L_tail"
-        },
-        "metatarsal2.R": {
-            "head": "metatarsal2.R_head",
-            "parent": "foot.R",
-            "reference": null,
-            "roll": 0.07281147688627243,
-            "tail": "metatarsal2.R_tail"
-        },
-        "metatarsal3.L": {
-            "head": "metatarsal3.L_head",
-            "parent": "foot.L",
-            "reference": null,
-            "roll": 0.093455009162426,
-            "tail": "metatarsal3.L_tail"
-        },
-        "metatarsal3.R": {
-            "head": "metatarsal3.R_head",
-            "parent": "foot.R",
-            "reference": null,
-            "roll": -0.093455009162426,
-            "tail": "metatarsal3.R_tail"
-        },
-        "metatarsal4.L": {
-            "head": "metatarsal4.L_head",
-            "parent": "foot.L",
-            "reference": null,
-            "roll": 0.26428845524787903,
-            "tail": "metatarsal4.L_tail"
-        },
-        "metatarsal4.R": {
-            "head": "metatarsal4.R_head",
-            "parent": "foot.R",
-            "reference": null,
-            "roll": -0.26428845524787903,
-            "tail": "metatarsal4.R_tail"
-        },
-        "metatarsal5.L": {
-            "head": "metatarsal5.L_head",
-            "parent": "foot.L",
-            "reference": null,
-            "roll": 0.43031641840934753,
-            "tail": "metatarsal5.L_tail"
-        },
-        "metatarsal5.R": {
-            "head": "metatarsal5.R_head",
-            "parent": "foot.R",
-            "reference": null,
-            "roll": -0.43031641840934753,
-            "tail": "metatarsal5.R_tail"
-        },
         "neck01": {
             "head": "neck01_head",
             "parent": "spine01",
@@ -884,14 +814,14 @@
         },
         "toe1-1.L": {
             "head": "toe1-1.L_head",
-            "parent": "metatarsal1.L",
+            "parent": "foot.L",
             "reference": null,
             "roll": 0.07201562821865082,
             "tail": "toe1-1.L_tail"
         },
         "toe1-1.R": {
             "head": "toe1-1.R_head",
-            "parent": "metatarsal1.R",
+            "parent": "foot.R",
             "reference": null,
             "roll": -0.07201562821865082,
             "tail": "toe1-1.R_tail"
@@ -912,14 +842,14 @@
         },
         "toe2-1.L": {
             "head": "toe2-1.L_head",
-            "parent": "metatarsal2.L",
+            "parent": "foot.L",
             "reference": null,
             "roll": 0.06950243562459946,
             "tail": "toe2-1.L_tail"
         },
         "toe2-1.R": {
             "head": "toe2-1.R_head",
-            "parent": "metatarsal2.R",
+            "parent": "foot.R",
             "reference": null,
             "roll": -0.06950243562459946,
             "tail": "toe2-1.R_tail"
@@ -954,14 +884,14 @@
         },
         "toe3-1.L": {
             "head": "toe3-1.L_head",
-            "parent": "metatarsal3.L",
+            "parent": "foot.L",
             "reference": null,
             "roll": 0.07304878532886505,
             "tail": "toe3-1.L_tail"
         },
         "toe3-1.R": {
             "head": "toe3-1.R_head",
-            "parent": "metatarsal3.R",
+            "parent": "foot.R",
             "reference": null,
             "roll": -0.07304878532886505,
             "tail": "toe3-1.R_tail"
@@ -996,14 +926,14 @@
         },
         "toe4-1.L": {
             "head": "toe4-1.L_head",
-            "parent": "metatarsal4.L",
+            "parent": "foot.L",
             "reference": null,
             "roll": 0.15866191685199738,
             "tail": "toe4-1.L_tail"
         },
         "toe4-1.R": {
             "head": "toe4-1.R_head",
-            "parent": "metatarsal4.R",
+            "parent": "foot.R",
             "reference": null,
             "roll": -0.15866191685199738,
             "tail": "toe4-1.R_tail"
@@ -1038,14 +968,14 @@
         },
         "toe5-1.L": {
             "head": "toe5-1.L_head",
-            "parent": "metatarsal5.L",
+            "parent": "foot.L",
             "reference": null,
             "roll": 0.118716299533844,
             "tail": "toe5-1.L_tail"
         },
         "toe5-1.R": {
             "head": "toe5-1.R_head",
-            "parent": "metatarsal5.R",
+            "parent": "foot.R",
             "reference": null,
             "roll": -0.118716299533844,
             "tail": "toe5-1.R_tail"
@@ -2453,286 +2383,6 @@
             14395,
             14396,
             14397
-        ],
-        "metatarsal1.L_head": [
-            13822,
-            13823,
-            13824,
-            13825,
-            13826,
-            13827,
-            13828,
-            13829,
-            13830,
-            13831,
-            13832,
-            13833,
-            13834,
-            13835,
-            13836,
-            13837
-        ],
-        "metatarsal1.L_tail": [
-            13822,
-            13823,
-            13824,
-            13825,
-            13826,
-            13827,
-            13828,
-            13829
-        ],
-        "metatarsal1.R_head": [
-            14262,
-            14263,
-            14264,
-            14265,
-            14266,
-            14267,
-            14268,
-            14269,
-            14270,
-            14271,
-            14272,
-            14273,
-            14274,
-            14275,
-            14276,
-            14277
-        ],
-        "metatarsal1.R_tail": [
-            14262,
-            14263,
-            14264,
-            14265,
-            14266,
-            14267,
-            14268,
-            14269
-        ],
-        "metatarsal2.L_head": [
-            13798,
-            13799,
-            13800,
-            13801,
-            13802,
-            13803,
-            13804,
-            13805,
-            13830,
-            13831,
-            13832,
-            13833,
-            13834,
-            13835,
-            13836,
-            13837
-        ],
-        "metatarsal2.L_tail": [
-            13798,
-            13799,
-            13800,
-            13801,
-            13802,
-            13803,
-            13804,
-            13805
-        ],
-        "metatarsal2.R_head": [
-            14238,
-            14239,
-            14240,
-            14241,
-            14242,
-            14243,
-            14244,
-            14245,
-            14270,
-            14271,
-            14272,
-            14273,
-            14274,
-            14275,
-            14276,
-            14277
-        ],
-        "metatarsal2.R_tail": [
-            14238,
-            14239,
-            14240,
-            14241,
-            14242,
-            14243,
-            14244,
-            14245
-        ],
-        "metatarsal3.L_head": [
-            13790,
-            13791,
-            13792,
-            13793,
-            13794,
-            13795,
-            13796,
-            13797,
-            13830,
-            13831,
-            13832,
-            13833,
-            13834,
-            13835,
-            13836,
-            13837
-        ],
-        "metatarsal3.L_tail": [
-            13790,
-            13791,
-            13792,
-            13793,
-            13794,
-            13795,
-            13796,
-            13797
-        ],
-        "metatarsal3.R_head": [
-            14230,
-            14231,
-            14232,
-            14233,
-            14234,
-            14235,
-            14236,
-            14237,
-            14270,
-            14271,
-            14272,
-            14273,
-            14274,
-            14275,
-            14276,
-            14277
-        ],
-        "metatarsal3.R_tail": [
-            14230,
-            14231,
-            14232,
-            14233,
-            14234,
-            14235,
-            14236,
-            14237
-        ],
-        "metatarsal4.L_head": [
-            13782,
-            13783,
-            13784,
-            13785,
-            13786,
-            13787,
-            13788,
-            13789,
-            13830,
-            13831,
-            13832,
-            13833,
-            13834,
-            13835,
-            13836,
-            13837
-        ],
-        "metatarsal4.L_tail": [
-            13782,
-            13783,
-            13784,
-            13785,
-            13786,
-            13787,
-            13788,
-            13789
-        ],
-        "metatarsal4.R_head": [
-            14222,
-            14223,
-            14224,
-            14225,
-            14226,
-            14227,
-            14228,
-            14229,
-            14270,
-            14271,
-            14272,
-            14273,
-            14274,
-            14275,
-            14276,
-            14277
-        ],
-        "metatarsal4.R_tail": [
-            14222,
-            14223,
-            14224,
-            14225,
-            14226,
-            14227,
-            14228,
-            14229
-        ],
-        "metatarsal5.L_head": [
-            13774,
-            13775,
-            13776,
-            13777,
-            13778,
-            13779,
-            13780,
-            13781,
-            13830,
-            13831,
-            13832,
-            13833,
-            13834,
-            13835,
-            13836,
-            13837
-        ],
-        "metatarsal5.L_tail": [
-            13774,
-            13775,
-            13776,
-            13777,
-            13778,
-            13779,
-            13780,
-            13781
-        ],
-        "metatarsal5.R_head": [
-            14214,
-            14215,
-            14216,
-            14217,
-            14218,
-            14219,
-            14220,
-            14221,
-            14270,
-            14271,
-            14272,
-            14273,
-            14274,
-            14275,
-            14276,
-            14277
-        ],
-        "metatarsal5.R_tail": [
-            14214,
-            14215,
-            14216,
-            14217,
-            14218,
-            14219,
-            14220,
-            14221
         ],
         "neck01_head": [
             14534,
