@@ -44,7 +44,7 @@ import proxychooser
 class EyesTaskView(proxychooser.ProxyChooserTaskView):
 
     def __init__(self, category):
-        super(EyesTaskView, self).__init__(category, 'eyes', tagFilter = True)
+        super(EyesTaskView, self).__init__(category, 'eyes', tagFilter = True, descriptionWidget = False)
 
     def getObjectLayer(self):
         #return 3

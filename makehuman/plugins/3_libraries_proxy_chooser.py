@@ -74,7 +74,7 @@ class ProxyFileSort(fc.FileSort):
 class ProxyTaskView(proxychooser.ProxyChooserTaskView):
 
     def __init__(self, category):
-        super(ProxyTaskView, self).__init__(category, 'proxymeshes', tabLabel = 'Topologies', tagFilter = True)
+        super(ProxyTaskView, self).__init__(category, 'proxymeshes', tabLabel = 'Topologies', tagFilter = True, descriptionWidget = True)
 
     def getObjectLayer(self):
         return 4
@@ -84,14 +84,6 @@ class ProxyTaskView(proxychooser.ProxyChooserTaskView):
 
     def getFileExtension(self):
         return ['mhpxy', 'proxy']
-
-    def proxySelected(self, pxy, obj):
-        self.human.setProxy(pxy)
-        self.human.genitalsProxy = pxy
-
-    def proxyDeselected(self, pxy, obj):
-        self.human.genitalsObj = None
-        self.human.genitalsProxy = None
 
     def onShow(self, event):
         super(ProxyTaskView, self).onShow(event)
@@ -122,6 +114,9 @@ class ProxyTaskView(proxychooser.ProxyChooserTaskView):
         mesh,obj = pxy.loadMeshAndObject(self.human)
 
         self.human.setProxy(pxy)
+
+        if self.descriptionWidget:
+            self.descrLbl.setText(pxy.description)
 
         # Add to selection
         self.selectedProxies.append(pxy)
