@@ -51,17 +51,17 @@ _Identity = np.identity(4, float)
 #   library_visual_scenes
 #----------------------------------------------------------------------
 
-def writeLibraryVisualScenes(fp, meshes, skel, config):
+def writeLibraryVisualScenes(fp, meshes, skel, config, name):
     if skel:
-        writeSceneWithArmature(fp, meshes, skel, config)
+        writeSceneWithArmature(fp, meshes, skel, config, name)
     else:
-        writeSceneWithoutArmature(fp, meshes, config)
+        writeSceneWithoutArmature(fp, meshes, config, name)
 
 
-def writeSceneWithoutArmature(fp, meshes, config):
+def writeSceneWithoutArmature(fp, meshes, config, name):
     fp.write(
         '\n  <library_visual_scenes>\n' +
-        '    <visual_scene id="Scene" name="Scene">\n')
+        '    <visual_scene id="Scene" name="%s_Scene">\n' % name)
     for mesh in meshes:
         writeMeshNode(fp, mesh, config, 8)
     fp.write(
@@ -69,12 +69,12 @@ def writeSceneWithoutArmature(fp, meshes, config):
         '  </library_visual_scenes>\n')
 
 
-def writeSceneWithArmature(fp, meshes, skel, config):
+def writeSceneWithArmature(fp, meshes, skel, config, name):
     fp.write(
         '\n  <library_visual_scenes>\n' +
-        '    <visual_scene id="Scene" name="Scene">\n')
+        '    <visual_scene id="Scene" name="%s_Scene">\n' % name)
 
-    fp.write('      <node id="%s">\n' % skel.name)
+    fp.write('      <node id="%s" name="%s">\n' % (skel.name,name))
     writeMatrix(fp, _Identity, "transform", 8)
     for rootBone in skel.roots:
         writeBone(fp, rootBone, config, 'layer="L1"', 1)
@@ -90,7 +90,7 @@ def writeSceneWithArmature(fp, meshes, skel, config):
 
 def writeMeshArmatureNode(fp, mesh, skel, config):
     padding = 8*" "
-    fp.write('\n%s<node id="%sObject" name="%s_%s">\n' % (padding, mesh.name, skel.name, mesh.name))
+    fp.write('\n%s<node id="%sObject" name="%s">\n' % (padding, mesh.name, mesh.name))
     writeMatrix(fp, _Identity, "transform", 8+2)
     fp.write(
         '%s  <instance_controller url="#%s-skin">\n' % (padding, mesh.name) +
