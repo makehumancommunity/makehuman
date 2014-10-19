@@ -74,7 +74,7 @@ class ProxyFileSort(fc.FileSort):
 class ProxyTaskView(proxychooser.ProxyChooserTaskView):
 
     def __init__(self, category):
-        super(ProxyTaskView, self).__init__(category, 'proxymeshes', tabLabel = 'Topologies')
+        super(ProxyTaskView, self).__init__(category, 'proxymeshes', tabLabel = 'Topologies', tagFilter = True)
 
     def getObjectLayer(self):
         return 4
