@@ -250,6 +250,7 @@ def thoroughFindFile(filename, searchPaths=[], searchDefaultPaths=True):
 
     if searchDefaultPaths:
         # Search in user / sys data, and user / sys root folders
+        searchPaths = list(searchPaths)
         searchPaths.extend([getDataPath(), getSysDataPath(), getPath(), getSysPath()])
 
     path = findFile(filename, searchPaths, strict=True)
