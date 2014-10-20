@@ -100,6 +100,9 @@ class Object(events3d.EventHandler):
 
         self.setUVMap(mesh.material.uvMap)
 
+    def __str__(self):
+        return "<guicommon.Object %s>" % self.name
+
     # TODO
     def clone(self):
         pass
