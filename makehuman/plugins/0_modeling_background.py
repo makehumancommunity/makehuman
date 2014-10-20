@@ -153,6 +153,7 @@ class BackgroundChooser(gui3d.TaskView):
                 m = None
 
             mesh = geometry3d.RectangleMesh(20, 20, centered=True, rotation=m)
+            mesh.name = "Background_%s" % viewName
             obj = gui3d.app.addObject(gui3d.Object(mesh, [0, 0, 0], visible=False))
             obj.setShadeless(True)
             obj.setDepthless(True)
