@@ -381,6 +381,8 @@ class FileHandler(object):
 class TaggedFileLoader(FileHandler):
     """
     Load files with tags, allowing to filter them with a tag filter.
+    Requires a pointer to the library that handles items in the filechooser.
+    This library object needs to implement a getTags(filename) method.
     """
 
     def __init__(self, library):
