@@ -1359,7 +1359,6 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def toggleGrid(self):
         if self.backplaneGrid and self.groundplaneGrid:
-            print 'grid', self.actions.grid.isChecked()
             self.backplaneGrid.setVisibility( self.actions.grid.isChecked() )
             self.groundplaneGrid.setVisibility( self.actions.grid.isChecked() )
             self.redraw()
