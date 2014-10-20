@@ -197,6 +197,8 @@ class Material(object):
         self.filename = None
         self.filepath = None
 
+        self.tags = set()
+
         self._ambientColor = Color(1.0, 1.0, 1.0)
         self._diffuseColor = Color(1.0, 1.0, 1.0)
         self._specularColor = Color(1.0, 1.0, 1.0)
@@ -354,6 +356,8 @@ class Material(object):
 
             if words[0] == "name":
                 self.name = words[1]
+            elif words[0] == "tag":
+                self.addTag(" ".join(words[1:]))
             elif words[0] == "ambientColor":
                 self._ambientColor.copyFrom([float(w) for w in words[1:4]])
             elif words[0] == "diffuseColor":
@@ -596,6 +600,13 @@ class Material(object):
             f.write("shaderConfig %s %s\n" % (name, value) )
 
         f.close()
+
+    def addTag(self, tag):
+        self.tags = self.tags.add(tag)
+
+    def removeTag(self, tag):
+        if tag in self.tags:
+            self.tags.remove(tag)
 
     def getUVMap(self):
         return self._uvMap
@@ -1438,3 +1449,32 @@ def loadUvObjFile(filepath):
             fuvs.append( [(int(word.split("/")[1]) - 1) for word in words[1:]] )
     fp.close()
     return uvs,fuvs
+
+def peekMetadata(filename):
+    from codecs import open
+    try:
+        f = open(filename, "rU", encoding="utf-8")
+    except:
+        f = None
+    if f == None:
+        log.error("Failed to load metadata from material file %s.", filename)
+        return
+
+    name = "UnnamedMaterial"
+    tags = set()
+
+    for line in f:
+        words = line.split()
+        if len(words) == 0:
+            continue
+        if words[0] in ["#", "//"]:
+            continue
+
+        if words[0] == "name":
+            name = words[1]
+        elif words[0] == "tag":
+            tags.add(" ".join(words[1:]))
+        else:
+            pass
+
+    return (name, tags)
