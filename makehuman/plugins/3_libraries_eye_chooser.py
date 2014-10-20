@@ -62,13 +62,12 @@ class EyesTaskView(proxychooser.ProxyChooserTaskView):
             gui3d.app.setFaceCamera()
 
     def onHumanChanged(self, event):
+        super(EyesTaskView, self).onHumanChanged(event)
         if event.change == 'reset':
             # Load initial eyes
             self.selectProxy(mh.getSysDataPath("eyes/high-poly/high-poly.mhclo"))
             # Reset default material on eyes (in case it was changed)
             self.getObjects()[0].material = self.getSelection()[0].material
-            return
-        super(EyesTaskView, self).onHumanChanged(event)
 
 
 # This method is called when the plugin is loaded into makehuman
