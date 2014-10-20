@@ -209,6 +209,8 @@ class Object3D(object):
     def sz(self):
         return self.object.sz
 
+    def __str__(self):
+        return "<Object3D %s>" % self.name
 
     def getShaderChanged(self):
         return self.shader_mtime != self.material.shaderChanged
