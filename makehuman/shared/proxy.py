@@ -850,42 +850,16 @@ def updateProxyFileCache(paths, fileExts, cache=None, proxytype="Clothes"):
     Cache entries are invalidated if their modification time has changed, or no
     longer exist on disk.
     """
-    if cache is None:
-        cache = dict()
-    proxyFiles = []
-    entries = dict((key, True) for key in cache.keys()) # lookup dict for old entries in cache
-    for folder in paths:
-        proxyFiles.extend(getpath.search(folder, fileExts, recursive=True, mutexExtensions=True))
-    for proxyFile in proxyFiles:
-        proxyId = getpath.canonicalPath(proxyFile)
+    import filecache
 
-        mtime = os.path.getmtime(proxyFile)
-        asciipath = None
-        if os.path.splitext(proxyFile)[1] == '.mhpxy':
-            asciipath = os.path.splitext(proxyFile)[0] + getAsciiFileExtension(proxytype)
-            if os.path.isfile(asciipath):
-                mtime = max(mtime, os.path.getmtime(asciipath))
-        if proxyId in cache:
-            try: # Guard against doubles
-                del entries[proxyId]    # Mark that old cache entry is still valid
-            except:
-                pass
-            cached_mtime = cache[proxyId][0]
-            if not (mtime > cached_mtime):
-                continue
+    if proxytype == 'Proxymeshes':
+        fileExts = ['.mhpxy', '.proxy']
+    else:
+        fileExts = ['.mhpxy', '.mhclo']
 
-        (uuid, tags) = peekMetadata(proxyFile, asciipath)
-        cache[proxyId] = (mtime, uuid, tags)
-    # Remove entries from cache that no longer exist
-    for key in entries.keys():
-        try:
-            del cache[key]
-        except:
-            pass
-    return cache
+    return filecache.updateFileCache(paths, fileExts, peekMetadata, cache)
 
-
-def peekMetadata(proxyFilePath, asciipath=None):
+def peekMetadata(proxyFilePath, proxyType=None):
     """
     Read UUID and tags from proxy file, and return as soon as vertex data
     begins. Reads only the necessary lines of the proxy file from disk, not the
@@ -896,7 +870,8 @@ def peekMetadata(proxyFilePath, asciipath=None):
     # Using the filename extension is faster (and will have to do):
     if os.path.splitext(proxyFilePath)[1][1:].lower() == 'mhpxy':
         try:
-            if asciipath:
+            if proxyType is not None:
+                asciipath = os.path.splitext(proxyFilePath)[0] + getAsciiFileExtension(proxyType)
                 if os.path.isfile(asciipath) and os.path.getmtime(asciipath) > os.path.getmtime(proxyFilePath):
                     _npzpath = proxyFilePath
                     proxyFilePath = asciipath
