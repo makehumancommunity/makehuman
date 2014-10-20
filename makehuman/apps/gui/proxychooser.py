@@ -47,7 +47,6 @@ import proxy
 import filechooser as fc
 import log
 import getpath
-import cPickle as pickle
 
 
 class ProxyAction(gui3d.Action):
@@ -549,28 +548,26 @@ class ProxyChooserTaskView(gui3d.TaskView):
         """
         Save MH cache file for the proxy files managed by this library.
         """
+        import filecache
         if self._proxyFileCache == None or len(self._proxyFileCache) == 0:
             return
         saveDir = getpath.getPath('cache')
         if not os.path.isdir(saveDir):
             os.makedirs(saveDir)
-        f = open( os.path.join(saveDir, self.proxyName + '_filecache.mhc'), "wb")
-        pickle.dump(self._proxyFileCache, f, protocol=2)
-        f.close()
+        filecache.saveCache(self._proxyFileCache, os.path.join(saveDir, self.proxyName + '_filecache.mhc'))
 
     def loadProxyFileCache(self, restoreFromFile = True):
         """
         Initialize or update the proxy file cache for this proxy library.
         Will attempt to load a previous cache from file if restoreFromFile is true.
         """
+        import filecache
         self._proxyFilePerUuid = None
         if restoreFromFile:
             try:
                 cacheFile = getpath.getPath(os.path.join('cache', self.proxyName + '_filecache.mhc'))
                 if os.path.isfile(cacheFile):
-                    f = open(cacheFile, "rb")
-                    self._proxyFileCache = pickle.load(f)
-                    f.close()
+                    self._proxyFileCache = filecache.loadCache(cacheFile)
             except:
                 log.debug("Failed to restore proxy list cache from file %s", cacheFile)
         self._proxyFileCache = proxy.updateProxyFileCache(self.paths, self.getFileExtension(), self._proxyFileCache, proxytype=self.getProxyType())
@@ -603,7 +600,15 @@ class ProxyChooserTaskView(gui3d.TaskView):
                 log.warning('Could not get metadata for proxy with filename %s. Does not exist in %s library.', proxyId, self.proxyName)
                 return None
 
-        return self._proxyFileCache[proxyId]
+        metadata = self._proxyFileCache[proxyId]
+        mtime = metadata[0]
+        if mtime < os.path.getmtime(proxyId):
+            # Queried file was updated, update stale cache
+            self.updateProxyFileCache()
+            self._loadUuidLookup()
+            metadata = self._proxyFileCache[proxyId]
+
+        return metadata
 
     def findProxyByUuid(self, uuid):
         """
