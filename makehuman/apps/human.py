@@ -70,15 +70,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
         self.maskFaces()
 
-        self._hairProxy = None
-        self._eyesProxy = None
-        self._genitalsProxy = None
-        self._eyebrowsProxy = None
-        self._eyelashesProxy = None
-        self._teethProxy = None
-        self._tongueProxy = None
-
-        self._clothesProxies = {}
+        self._resetProxies()
 
         self.targetsDetailStack = {}  # All details targets applied, with their values
         self.symmetryModeEnabled = False
@@ -1213,6 +1205,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         self.setSubdivided(False, update=False)
         self.setDefaultValues()
         self.resetBoundMeshes()
+        self._resetProxies()
         self.resetToRestPose(update=False)
 
         self.targetsDetailStack = {}
@@ -1221,6 +1214,21 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
         self.callEvent('onChanging', events3d.HumanEvent(self, 'reset'))
         self.callEvent('onChanged', events3d.HumanEvent(self, 'reset'))
+
+    def _resetProxies(self):
+        """
+        Remove all attached proxies.
+        For internal use only: does not emit events
+        """
+        self._hairProxy = None
+        self._eyesProxy = None
+        self._genitalsProxy = None
+        self._eyebrowsProxy = None
+        self._eyelashesProxy = None
+        self._teethProxy = None
+        self._tongueProxy = None
+
+        self._clothesProxies = {}
 
     def getMaterial(self):
         return super(Human, self).getMaterial()
