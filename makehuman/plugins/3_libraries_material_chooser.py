@@ -109,6 +109,7 @@ class MaterialTaskView(gui3d.TaskView):
             self._matFileCache = filecache.updateFileCache(self.materials, 'mhmat', _getMaterialTags,self._matFileCache, False)
 
         result = set()
+        # TODO move most of this (duplicated) logic inside a class in filecache
 
         if filename:
             fileId = getpath.canonicalPath(filename)
@@ -147,7 +148,7 @@ class MaterialTaskView(gui3d.TaskView):
 
     def storeCache(self):
         import filecache
-        if self._matFileCache == None or len(self._matFileCache) == 0:
+        if self._matFileCache is None or len(self._matFileCache) == 0:
             return
 
         filecache.cleanupCache(self._matFileCache)
@@ -155,11 +156,11 @@ class MaterialTaskView(gui3d.TaskView):
         cachedir = getpath.getPath('cache')
         if not os.path.isdir(cachedir):
             os.makedirs(cachedir)
-        filecache.saveCache(self._matFileCache, os.path.join(cachedir, 'Material_filecache.mhc'))
+        filecache.saveCache(self._matFileCache, os.path.join(cachedir, 'material_filecache.mhc'))
 
     def loadCache(self):
         import filecache
-        filename = getpath.getPath('cache/Material_filecache.mhc')
+        filename = getpath.getPath('cache/material_filecache.mhc')
         if os.path.isfile(filename):
             self._matFileCache = filecache.loadCache(filename)
 
@@ -356,6 +357,7 @@ class MaterialTaskView(gui3d.TaskView):
 
 
 def load(app):
+    global taskview
     category = app.getCategory('Materials')
     taskview = MaterialTaskView(category)
     taskview.sortOrder = 0
@@ -371,4 +373,4 @@ def load(app):
 
 
 def unload(app):
-    pass
+    taskview.onUnload()
