@@ -876,3 +876,11 @@ def load(filename, mesh=None):
     skel = Skeleton()
     skel.fromFile(filename, mesh)
     return skel
+
+def peekMetadata(filename):
+    import json
+    skelData = json.load(open(filename, 'rb'))
+    desc = skelData.get("description", "")
+    name = skelData.get("name", "Skeleton")
+    tags = set(skelData.get("tags", []))
+    return (name, desc, tags)
