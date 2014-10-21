@@ -48,6 +48,7 @@ from . import skeletonlibrary
 #------------------------------------------------------------------------------------------
 
 def load(app):
+    global maintask
     import gui3d
     import mh
     category = app.getCategory('Pose/Animate')
@@ -71,5 +72,5 @@ def load(app):
 # This method is called when the plugin is unloaded from makehuman
 # At the moment this is not used, but in the future it will remove the added GUI elements
 def unload(app):
-    pass
+    maintask.onUnload()
 

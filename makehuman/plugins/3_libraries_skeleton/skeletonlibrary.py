@@ -84,6 +84,8 @@ class SkeletonLibrary(gui3d.TaskView):
         self.debugLib = None
         self.optionsSelector = None
 
+        self._skelFileCache = None
+
         self.systemRigs = mh.getSysDataPath('rigs')
         self.userRigs = os.path.join(mh.getPath(''), 'data', 'rigs')
         self.rigPaths = [self.userRigs, self.systemRigs]
@@ -166,9 +168,14 @@ class SkeletonLibrary(gui3d.TaskView):
                 msg = "Clear skeleton"
             gui3d.app.do(SkeletonAction(msg, self, self.selectedRig, filename))
 
+        self.filechooser.setFileLoadHandler(fc.TaggedFileLoader(self))
+        self.addLeftWidget(self.filechooser.createTagFilter())
+
         self.infoBox = self.addLeftWidget(gui.GroupBox('Rig info'))
         self.boneCountLbl = self.infoBox.addWidget(gui.TextView('Bones: '))
-        self.descrLbl = self.infoBox.addWidget(gui.TextView('Description: '))
+
+        descBox = self.addLeftWidget(gui.GroupBox('Description'))
+        self.descrLbl = descBox.addWidget(gui.TextView(''))
         self.descrLbl.setSizePolicy(gui.QtGui.QSizePolicy.Ignored, gui.QtGui.QSizePolicy.Preferred)
         self.descrLbl.setWordWrap(True)
 
@@ -239,7 +246,7 @@ class SkeletonLibrary(gui3d.TaskView):
 
         # Update description
         descr = skel.description
-        self.descrLbl.setTextFormat(["Description",": %s"], gui.getLanguageString(descr))
+        self.descrLbl.setText(descr)
         self.boneCountLbl.setTextFormat(["Bones",": %s"], skel.getBoneCount())
 
         # (Re-)draw the skeleton (before setting skeleton on human so it is automatically re-posed)
@@ -284,6 +291,71 @@ class SkeletonLibrary(gui3d.TaskView):
 
         mh.redraw()
 
+    def getTags(self, filename=None):
+        import filecache
+        def _getSkeletonTags(filename):
+            return skeleton.peekMetadata(filename)
+
+        if self._skelFileCache is None:
+            # Init cache
+            self.loadCache()
+            self._skelFileCache = filecache.updateFileCache(self.paths, 'mhmat', _getSkeletonTags,self._skelFileCache, False)
+
+        # TODO move most of this (duplicated) logic inside a class in filecache
+        result = set()
+
+        if filename:
+            fileId = getpath.canonicalPath(filename)
+            if fileId not in self._skelFileCache:
+                # Lazily update cache
+                self._skelFileCache = filecache.updateFileCache(self.paths + [os.path.dirname(fileId)], 'json', _getSkeletonTags,self._skelFileCache, False)
+
+            if fileId in self._skelFileCache:
+                metadata = self._skelFileCache[fileId]
+                if metadata is not None:
+                    mtime, name, desc, tags = metadata
+
+                    if mtime < os.path.getmtime(fileId):
+                        # Queried file was updated, update stale cache
+                        self._skelFileCache = filecache.updateFileCache(self.paths + [os.path.dirname(fileId)], 'json', _getSkeletonTags,self._skelFileCache, False)
+                        metadata = self._skelFileCache[fileId]
+                        mtime, name, desc, tags = metadata
+
+                    result = result.union(tags)
+            else:
+                log.warning('Could not get tags for material file %s. Does not exist in Material library.', filename)
+            return result
+        else:
+            for (path, values) in self._skelFileCache.items():
+                _, name, desc, tags = values
+                result = result.union(tags)
+        return result
+
+    def onUnload(self):
+        """
+        Called when this library taskview is being unloaded (usually when MH
+        is exited).
+        Note: make sure you connect the plugin's unload() method to this one!
+        """
+        self.storeCache()
+
+    def storeCache(self):
+        import filecache
+        if self._skelFileCache is None or len(self._skelFileCache) == 0:
+            return
+
+        filecache.cleanupCache(self._skelFileCache)
+
+        cachedir = getpath.getPath('cache')
+        if not os.path.isdir(cachedir):
+            os.makedirs(cachedir)
+        filecache.saveCache(self._skelFileCache, os.path.join(cachedir, 'skeleton_filecache.mhc'))
+
+    def loadCache(self):
+        import filecache
+        filename = getpath.getPath('cache/skeleton_filecache.mhc')
+        if os.path.isfile(filename):
+            self._skelFileCache = filecache.loadCache(filename)
 
     def drawJointHelpers(self):
         """
