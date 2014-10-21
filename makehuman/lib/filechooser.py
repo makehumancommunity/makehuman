@@ -340,7 +340,7 @@ class FileHandler(object):
     def refresh(self, files):
         for file in files:
             label = getpath.pathToUnicode( os.path.basename(file) )
-            if isinstance(self.fileChooser.extensions, str):
+            if len(self.fileChooser.extensions) > 0:
                 label = os.path.splitext(label)[0]
             self.fileChooser.addItem(file, label, self.getPreview(file))
 
