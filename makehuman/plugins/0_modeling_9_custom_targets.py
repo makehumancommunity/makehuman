@@ -10,7 +10,7 @@ Plugin to apply custom targets.
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Eduardo Menezes de Morais
+**Authors:**           Eduardo Menezes de Morais, Jonas Hauquier
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
@@ -48,6 +48,7 @@ import os
 import humanmodifier
 import modifierslider
 import gui
+import algos3d
 from core import G
 
 class FolderButton(gui.RadioButton):
@@ -75,9 +76,10 @@ class CustomTargetsTaskView(gui3d.TaskView):
         self.folderBox = self.addRightWidget(gui.GroupBox('Folders'))
         self.targetsBox = self.addLeftWidget(gui.StackedBox())
 
+        self.human = app.selectedHuman
+
         @rescanButton.mhEvent
         def onClicked(event):
-            #TODO: undo any applied change here
             self.searchTargets()
 
         self.folders = []
@@ -123,33 +125,36 @@ class CustomTargetsTaskView(gui3d.TaskView):
                 visible.append(child)
         if selectOther and len(visible) > 0:
             visible[0].setSelected(True)
-            
+
 
         self.syncVisibility()
 
         self.syncStatus()
 
     def unloadTargets(self):
-        self.sliders = []
+        # Invalidate any cached targets
+        for m in self.modifiers.values():
+            for tpath,_ in m.targets:
+                algos3d.refreshCachedTarget(tpath)
 
-        for folder in self.folders:
-            self.targetsBox.removeWidget(folder)
-            folder.destroy()
+        for b in self.folders:
+            self.targetsBox.removeWidget(b)
+            b.destroy()
+
+        self.sliders = []
+        self.folders = []
 
         for child in self.folderBox.children[:]:
-            if child.selected:
-                active = child.getLabel()
             self.folderBox.removeWidget(child)
             child.destroy()
 
-        self.folders = []
-
-        human = G.app.selectedHuman
         for mod in self.modifiers.values():
-            human.removeModifier(mod)
+            self.human.removeModifier(mod)
             
         self.modifiers = {}
 
+        # Apply changes to human (of unloaded modifiers)
+        self.human.applyAllTargets()
 
     def syncStatus(self):
         if not self.isVisible():
@@ -167,7 +172,7 @@ class CustomTargetsTaskView(gui3d.TaskView):
         targetFile = os.path.relpath(targetFile, self.targetsPath)
 
         modifier = humanmodifier.SimpleModifier('custom', self.targetsPath, targetFile)
-        modifier.setHuman(G.app.selectedHuman)
+        modifier.setHuman(self.human)
         self.modifiers[modifier.name] = modifier
 
         label = modifier.name.replace('-',' ').capitalize()
