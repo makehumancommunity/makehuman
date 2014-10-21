@@ -149,6 +149,7 @@ class ExportConfig(object):
     # TODO revise
     def copyTextureToNewLocation(self, filepath):
         import os
+        import shutil
 
         srcDir = os.path.abspath(os.path.expanduser(os.path.dirname(filepath)))
         filename = os.path.basename(filepath)
