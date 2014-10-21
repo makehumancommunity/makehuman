@@ -332,6 +332,16 @@ def getTarget(obj, targetPath):
     _targetBuffer[targetPath] = target
     return target
 
+def refreshCachedTarget(targetPath):
+    """
+    Invalidate the cache for the specified target, so that it will be reloaded
+    next time it is requested.
+    Generally this only has effect if the target was loaded from an ascii file,
+    not from npz archive.
+    """
+    targetPath = canonicalPath(targetPath)
+    if targetPath in _targetBuffer:
+        del _targetBuffer[targetPath]
 
 def loadTranslationTarget(obj, targetPath, morphFactor, faceGroupToUpdateName=None, update=1, calcNorm=1, scale=[1.0,1.0,1.0], animatedMesh=None):
     """
