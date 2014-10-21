@@ -341,7 +341,8 @@ class FileHandler(object):
         for file in files:
             label = getpath.pathToUnicode( os.path.basename(file) )
             if len(self.fileChooser.extensions) > 0:
-                label = os.path.splitext(label)[0]
+                label = os.path.splitext(label)[0].replace('_', ' ').capitalize()
+            label = label[0].capitalize() + label[1:]
             self.fileChooser.addItem(file, label, self.getPreview(file))
 
     def getSelection(self, item):
@@ -396,7 +397,8 @@ class TaggedFileLoader(FileHandler):
         for file in files:
             label = getpath.pathToUnicode( os.path.basename(file) )
             if len(self.fileChooser.extensions) > 0:
-                label = os.path.splitext(label)[0]
+                label = os.path.splitext(label)[0].replace('_', ' ')
+            label = label[0].capitalize() + label[1:]
             tags = self.library.getTags(filename = file)
             self.fileChooser.addItem(file, label, self.getPreview(file), tags)
 
