@@ -128,16 +128,19 @@ class PoseLibraryTaskView(gui3d.TaskView):
         """
         Auto scale BVH translations by comparing upper leg length
         """
-        import numpy as np
         import numpy.linalg as la
-        if "upperleg02.L" not in bvh_file.joints:
-            raise RuntimeError('Failed to auto scale BVH file %s, it does not contain a joint for "upperleg02.L"' % bvh_file.name)
-        bvh_joint = bvh_file.joints["upperleg02.L"]
-        bone = self.human.getSkeleton().getBone("upperleg02.L")
-        joint_length = la.norm(bvh_joint.children[0].position - bvh_joint.position)
-        scale_factor = bone.length / joint_length
-        log.message("Scaling BVH file %s with factor %s" % (bvh_file.name, scale_factor))
-        bvh_file.scale(scale_factor)
+        COMPARE_BONE = "upperleg02.L"
+        if COMPARE_BONE not in bvh_file.joints:
+            raise RuntimeError('Failed to auto scale BVH file %s, it does not contain a joint for "%s"' % (bvh_file.name, COMPARE_BONE))
+        bvh_joint = bvh_file.joints[COMPARE_BONE]
+        bone = self.human.getSkeleton().getBoneByReference(COMPARE_BONE)
+        if bone is not None:
+            joint_length = la.norm(bvh_joint.children[0].position - bvh_joint.position)
+            scale_factor = bone.length / joint_length
+            log.message("Scaling BVH file %s with factor %s" % (bvh_file.name, scale_factor))
+            bvh_file.scale(scale_factor)
+        else:
+            log.warning("Could not find bone or bone reference with name %s in skeleton %s, cannot auto resize BVH file %s", COMPARE_BONE, self.human.getSkeleton().name, bvh_file.name)
 
     def onShow(self, event):
         self.filechooser.refresh()
