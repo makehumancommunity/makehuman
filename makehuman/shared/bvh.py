@@ -147,7 +147,7 @@ class BVH():
 
     # TODO guess source armature from a BVH rig
 
-    def createAnimationTrack(self, jointsOrder=None, name="BVHMotion"):
+    def createAnimationTrack(self, jointsOrder=None, name=None):
         """
         Create an animation track from the motion stored in this BHV file.
         """
@@ -182,6 +182,8 @@ class BVH():
         # Interweave joints animation data, per frame with joints in breadth-first order
         animData = np.hstack(jointsData).reshape(nJoints*nFrames,3,4)
         framerate = 1.0/self.frameTime
+        if name is None:
+            name = self.name
         return animation.AnimationTrack(name, animData, nFrames, framerate)
 
     def getJoint(self, name):
