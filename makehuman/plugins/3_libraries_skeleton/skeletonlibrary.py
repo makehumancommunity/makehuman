@@ -179,20 +179,23 @@ class SkeletonLibrary(gui3d.TaskView):
         self.descrLbl.setSizePolicy(gui.QtGui.QSizePolicy.Ignored, gui.QtGui.QSizePolicy.Preferred)
         self.descrLbl.setWordWrap(True)
 
+        self.xray_mat = None
+
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
         if gui3d.app.settings.get('cameraAutoZoom', True):
             gui3d.app.setGlobalCamera()
 
         # Set X-ray material
+        if self.xray_mat is None:
+            self.xray_mat = material.fromFile(mh.getSysDataPath('materials/xray.mhmat'))
         self.oldHumanMat = self.human.material.clone()
         self.oldPxyMats = dict()
-        xray_mat = material.fromFile(mh.getSysDataPath('materials/xray.mhmat'))
-        self.human.material = xray_mat
+        self.human.material = self.xray_mat
         for pxy in self.human.getProxies(includeHumanProxy=False):
             obj = pxy.object
             self.oldPxyMats[pxy.uuid] = obj.material.clone()
-            obj.material = xray_mat
+            obj.material = self.xray_mat
 
         # Make sure skeleton is updated if human has changed
         if self.human.getSkeleton():
