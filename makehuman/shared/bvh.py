@@ -151,7 +151,7 @@ class BVH():
         """
         Create an animation track from the motion stored in this BHV file.
         """
-        if jointsOrder == None:
+        if jointsOrder is None:
             jointsData = [joint.matrixPoses for joint in self.getJoints() if not joint.isEndConnector()]
             # We leave out end effectors as they should not have animation data
         else:
@@ -160,8 +160,6 @@ class BVH():
             # Remove the tail from duplicate bone names
             for idx,jName in enumerate(jointsOrder):
                 # Joint mappings can contain a rotation compensation
-                if isinstance(jName, tuple):
-                    jName, _ = jName
                 if not jName:
                     continue
                 r = re.search("(.*)_\d+$",jName)
