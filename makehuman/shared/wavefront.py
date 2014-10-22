@@ -200,7 +200,7 @@ def writeObjFile(path, objects, writeMTL=True, config=None, filterMaskedFaces=Tr
     # UV vertices
     for mesh in meshes:
         if mesh.has_uv:
-            fp.write("".join( ["vt %.4f %.4f\n" % tuple(uv) for uv in mesh.texco] ))
+            fp.write("".join( ["vt %.6f %.6f\n" % tuple(uv) for uv in mesh.texco] ))
 
     # Faces
     nVerts = 1
