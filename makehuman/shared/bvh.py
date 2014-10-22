@@ -147,24 +147,39 @@ class BVH():
 
     # TODO guess source armature from a BVH rig
 
-    def createAnimationTrack(self, jointsOrder=None, name=None):
+    def createAnimationTrack(self, skel=None, name=None):
         """
         Create an animation track from the motion stored in this BHV file.
         """
-        if jointsOrder is None:
+        import re
+        jointsOrder = []
+        jointsData = None
+        if skel is None:
             jointsData = [joint.matrixPoses for joint in self.getJoints() if not joint.isEndConnector()]
             # We leave out end effectors as they should not have animation data
+        elif isinstance(skel, list):
+            # skel parameter is a list of joint or bone names
+            jointsOrder = skel
         else:
-            nFrames = self.frameCount
-            import re
-            # Remove the tail from duplicate bone names
-            for idx,jName in enumerate(jointsOrder):
-                if not jName:
-                    continue
-                r = re.search("(.*)_\d+$",jName)
-                if r:
-                    jointsOrder[idx] = r.group(1)
+            # skel parameter is a Skeleton
+            for bone in skel.getBones():
+                if len(bone.reference_bones) > 0:
+                    bonename = bone.reference_bones[0]
+                else:
+                    bonename = bone.name
+                jointsOrder.append(bonename)
 
+        # Remove the tail from duplicate bone names
+        for idx,jName in enumerate(jointsOrder):
+            if not jName:
+                continue
+            r = re.search("(.*)_\d+$",jName)
+            if r:
+                jointsOrder[idx] = r.group(1)
+
+        nFrames = self.frameCount
+
+        if jointsData is None:
             jointsData = []
             for jointName in jointsOrder:
                 if jointName and self.getJointByCanonicalName(jointName) is not None:
@@ -174,7 +189,6 @@ class BVH():
                     jointsData.append(animation.emptyTrack(nFrames))
 
         nJoints = len(jointsData)
-        nFrames = len(jointsData[0])
 
         # Interweave joints animation data, per frame with joints in breadth-first order
         animData = np.hstack(jointsData).reshape(nJoints*nFrames,3,4)
@@ -188,7 +202,7 @@ class BVH():
 
     def getJointByCanonicalName(self, canonicalName):
         canonicalName = canonicalName.lower().replace(' ','_').replace('-','_')
-        for jointName in [ name for name in self.joints.keys()]:
+        for jointName in self.joints.keys():
             if canonicalName == jointName.lower().replace(' ','_').replace('-','_'):
                 return self.getJoint(jointName)
         return None
