@@ -364,6 +364,22 @@ class Skeleton(object):
     def containsBone(self, name):
         return name in self.bones
 
+    def getBoneByReference(self, referenceBoneName):
+        """
+        Retrieve a bone by name, and if not present in the skeleton
+        retrieves a bone that references this bone name as reference bone.
+        :param referenceBoneName: bone name
+        :return: Bone matching the query, None if no such bone is found
+        """
+        if self.containsBone(referenceBoneName):
+            return self.getBone(referenceBoneName)
+
+        for bone in self.getBones():
+            if referenceBoneName in bone.reference_bones:
+                return bone
+
+        return None
+
     def getBoneToIdxMapping(self):
         result = {}
         boneNames = [ bone.name for bone in self.getBones() ]
