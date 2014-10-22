@@ -377,7 +377,7 @@ class VertexBoneWeights(object):
     """
     Weighted vertex to bone assignments.
     """
-    def __init__(self, data, vertexCount=None):
+    def __init__(self, data, vertexCount=None, rootBone="root"):
         """
         Note: specifiying vertexCount is just for speeding up loading, if not 
         specified, vertexCount will be calculated automatically (taking a little
@@ -387,13 +387,15 @@ class VertexBoneWeights(object):
         self._wCounts = None        # Per vertex, the number of weights attached
         self._nWeights = None       # The maximum number of weights per vertex
 
-        self._data = self._build_vertex_weights_data(data, vertexCount)
+        self.rootBone = rootBone
+
+        self._data = self._build_vertex_weights_data(data, vertexCount, rootBone)
         self._calculate_num_weights()
 
         self._compiled = {}
 
     @staticmethod
-    def fromFile(filename, vertexCount=None):
+    def fromFile(filename, vertexCount=None, rootBone="root"):
         """
         Load vertex to bone weights from file
         """
@@ -401,13 +403,15 @@ class VertexBoneWeights(object):
         import json
         weightsData = json.load(open(filename, 'rb'), object_pairs_hook=OrderedDict)
         log.message("Loaded vertex weights %s from file %s", weightsData.get('name', 'unnamed'), filename)
-        return VertexBoneWeights(weightsData['weights'], vertexCount)
+        return VertexBoneWeights(weightsData['weights'], vertexCount, rootBone)
 
-    def create(self, data, vertexCount=None):
+    def create(self, data, vertexCount=None, rootBone=None):
         """
         Create new VertexBoneWeights object with specified weights data
         """
-        return type(self)(data, vertexCount)
+        if rootBone is None:
+            rootBone = self.rootBone
+        return type(self)(data, vertexCount, rootBone)
 
     @property
     def data(self):
@@ -542,9 +546,9 @@ class VertexBoneWeights(object):
         if len(rw_i) > 0:
             if len(rw_i) < 100:
                 # To avoid spamming the log, only print vertex indices if there's less than 100
-                log.debug("Adding trivial bone weights to bone %s for %s unweighted vertices. [%s]", rootBone, len(rw_i), ', '.join([str(s) for s in rw_i]))
+                log.debug("Adding trivial bone weights to root bone %s for %s unweighted vertices. [%s]", rootBone, len(rw_i), ', '.join([str(s) for s in rw_i]))
             else:
-                log.debug("Adding trivial bone weights to bone %s for %s unweighted vertices.", rootBone, len(rw_i))
+                log.debug("Adding trivial bone weights to root bone %s for %s unweighted vertices.", rootBone, len(rw_i))
         if len(vs) > 0:
             boneWeights[rootBone] = (np.asarray(vs, dtype=np.uint32), np.asarray(ws, dtype=np.float32))
 
