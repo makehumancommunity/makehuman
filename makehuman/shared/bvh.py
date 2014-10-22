@@ -159,7 +159,6 @@ class BVH():
             import re
             # Remove the tail from duplicate bone names
             for idx,jName in enumerate(jointsOrder):
-                # Joint mappings can contain a rotation compensation
                 if not jName:
                     continue
                 r = re.search("(.*)_\d+$",jName)
