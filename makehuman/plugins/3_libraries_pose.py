@@ -121,8 +121,7 @@ class PoseLibraryTaskView(gui3d.TaskView):
     def loadBvh(self, filepath, convertFromZUp="auto"):
         bvh_file = bvh.load(filepath, convertFromZUp)
         self.autoScaleBVH(bvh_file)
-        jointNames = [bone.name for bone in self.human.getSkeleton().getBones()]
-        return bvh_file.createAnimationTrack(jointNames)
+        return bvh_file.createAnimationTrack(self.human.getSkeleton())
 
     def autoScaleBVH(self, bvh_file):
         """
