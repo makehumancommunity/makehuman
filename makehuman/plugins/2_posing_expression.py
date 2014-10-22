@@ -42,11 +42,8 @@ import gui3d
 import animation
 import bvh
 import modifierslider
-import os
-import mh
+from core import G
 import gui
-import filechooser as fc
-import log
 import getpath
 import json
 
@@ -59,7 +56,7 @@ class ExpressionSlider(gui.Slider):
 
     def mousePressEvent(self, event):
         if self._handleMousePress(event):
-            super(ModifierSlider, self).mousePressEvent(event)
+            super(modifierslider.ModifierSlider, self).mousePressEvent(event)
 
     def sliderMousePressEvent(self, event):
         return self._handleMousePress(event)
@@ -267,8 +264,7 @@ class ExpressionTaskView(gui3d.TaskView):
         if not self.human.getSkeleton():
             return
 
-        boneNames = [b.name for b in self.human.getSkeleton().getBones() ]
-        anim = self.base_bvh.createAnimationTrack(boneNames, name="Expression-Face-PoseUnits")
+        anim = self.base_bvh.createAnimationTrack(self.human.getSkeleton(), name="Expression-Face-PoseUnits")
         print 'unit pose frame count:', len(self.poseunit_names)
         self.base_poseunit = animation.PoseUnit(anim.name, anim.data[:anim.nBones*len(self.poseunit_names)], self.poseunit_names)
 
