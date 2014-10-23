@@ -196,6 +196,9 @@ class Skeleton(object):
             newBones[bone.name] = bone
         self.bones = newBones
 
+    def clone(self):
+        return self.scaled(self.scale)
+
     def scaled(self, scale):
         """
         Create a scaled clone of this skeleton
