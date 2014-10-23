@@ -96,6 +96,7 @@ class SkeletonDebugLibrary(gui3d.TaskView):
         # Create a mesh from the skeleton in rest pose
         skel.setToRestPose() # Make sure skeleton is in rest pose when constructing the skeleton mesh
         self.skelMesh = skeleton_drawing.meshFromSkeleton(skel, "Prism")
+        self.skelMesh.name = self.skelMesh.name + '-skeletonDebug'
         self.skelMesh.priority = 100
         self.skelMesh.setPickable(False)
         self.skelObj = self.addObject(gui3d.Object(self.skelMesh, self.human.getPosition()) )
@@ -106,8 +107,6 @@ class SkeletonDebugLibrary(gui3d.TaskView):
         # Add the skeleton mesh to the human AnimatedMesh so it animates together with the skeleton
         # The skeleton mesh is supposed to be constructed from the skeleton in rest and receives
         # rigid vertex-bone weights (for each vertex exactly one weight of 1 to one bone)
-        skel = skel.clone()  # Create a clone so that the pose of the original is not modified
-        skel.setToRestPose()
         mapping = skeleton_drawing.getVertBoneMapping(skel, self.skelMesh)
         self.human.addBoundMesh(self.skelMesh, mapping)
 
