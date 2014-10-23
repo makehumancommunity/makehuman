@@ -81,7 +81,6 @@ class SkeletonLibrary(gui3d.TaskView):
 
     def __init__(self, category):
         gui3d.TaskView.__init__(self, category, 'Skeleton')
-        self.debugLib = None
         self.optionsSelector = None
 
         self._skelFileCache = None
@@ -98,7 +97,6 @@ class SkeletonLibrary(gui3d.TaskView):
         self.referenceRig = None
 
         self.selectedRig = None
-        self.selectedBone = None
 
         self.humanChanged = False   # Used for determining when joints need to be redrawn
 
@@ -235,7 +233,6 @@ class SkeletonLibrary(gui3d.TaskView):
                 self.skelObj = None
                 self.skelMesh = None
             self.boneCountLbl.setTextFormat(["Bones",": %s"], "")
-            #self.selectedBone = None
             self.descrLbl.setText("")
             self.filechooser.selectItem(None)
             return
@@ -260,9 +257,6 @@ class SkeletonLibrary(gui3d.TaskView):
 
         self.filechooser.selectItem(filename)
 
-        if self.debugLib:
-            self.debugLib.reloadBoneExplorer()
-
 
     def drawSkeleton(self, skel):
         if self.skelObj:
@@ -271,7 +265,6 @@ class SkeletonLibrary(gui3d.TaskView):
             self.human.removeBoundMesh(self.skelObj.name)
             self.skelObj = None
             self.skelMesh = None
-            self.selectedBone = None
 
         if not skel:
             return
@@ -395,62 +388,6 @@ class SkeletonLibrary(gui3d.TaskView):
 
         mh.redraw()
 
-
-    def showBoneWeights(self, boneName, boneWeights):
-        mesh = self.human.meshData
-        try:
-            weights = np.asarray(boneWeights[boneName][1], dtype=np.float32)
-            verts = boneWeights[boneName][0]
-        except:
-            return
-        red = np.maximum(weights, 0)
-        green = 1.0 - red
-        blue = np.zeros_like(red)
-        alpha = np.ones_like(red)
-        color = np.array([red,green,blue,alpha]).T
-        color = (color * 255.99).astype(np.uint8)
-        mesh.color[verts,:] = color
-        mesh.markCoords(verts, colr = True)
-        mesh.sync_all()
-
-
-    def highlightBone(self, name):
-        if self.debugLib is None:
-            return
-
-        # Highlight bones
-        self.selectedBone = name
-        setColorForFaceGroup(self.skelMesh, self.selectedBone, [216, 110, 39, 255])
-        gui3d.app.statusPersist(name)
-
-        # Draw bone weights
-        boneWeights = self.human.getVertexWeights()
-        self.showBoneWeights(name, boneWeights)
-
-        gui3d.app.redraw()
-
-
-    def removeBoneHighlights(self):
-        if self.debugLib is None:
-            return
-
-        # Disable highlight on bone
-        if self.selectedBone:
-            setColorForFaceGroup(self.skelMesh, self.selectedBone, [255,255,255,255])
-            gui3d.app.statusPersist('')
-
-            self.clearBoneWeights()
-            self.selectedBone = None
-
-            gui3d.app.redraw()
-
-
-    def clearBoneWeights(self):
-        mesh = self.human.meshData
-        mesh.color[...] = (255,255,255,255)
-        mesh.markCoords(colr = True)
-        mesh.sync_all()
-
     def onHumanChanged(self, event):
         human = event.human
         if event.change == 'reset':
@@ -492,17 +429,3 @@ class SkeletonLibrary(gui3d.TaskView):
         if human.getSkeleton():
             rigFile = getpath.getRelativePath(self.selectedRig, self.paths)
             file.write('skeleton %s\n' % rigFile)
-
-
-
-def setColorForFaceGroup(mesh, fgName, color):
-    if mesh is None:
-        return
-    color = np.asarray(color, dtype=np.uint8)
-    try:
-        groupVerts = mesh.getVerticesForGroups([fgName])
-        mesh.color[groupVerts] = color[None,:]
-    except KeyError:
-        return
-    mesh.markCoords(colr=True)
-    mesh.sync_color()
