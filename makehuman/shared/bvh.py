@@ -45,7 +45,6 @@ import log
 
 import numpy as np
 import transformations as tm
-import numpy.linalg as la
 
 from math import pi
 D = pi/180
@@ -78,7 +77,7 @@ class BVH():
         i = 1
         while name in self.joints.keys():
             name = "%s_%s" % (origName, i)
-            i = i+1
+            i += 1
         parent = self.getJoint(parentName)
         joint = self.__addJoint(name)
         parent.addChild(joint)
@@ -122,7 +121,7 @@ class BVH():
                     postIdx = 1
                     while skel.containsBone(boneName):
                         boneName = "%s_%s" % (parent.name, postIdx)
-                        postIdx = postIdx + 1
+                        postIdx += 1
 
                 # TODO this code would be simpler if we assigned joint objects to bones
                 if parent.parent:
@@ -145,57 +144,98 @@ class BVH():
         skel.update()
         return skel
 
-    # TODO guess source armature from a BVH rig
-
     def createAnimationTrack(self, skel=None, name=None):
         """
         Create an animation track from the motion stored in this BHV file.
         """
-        import re
-        jointsOrder = []
-        jointsData = None
+        def _bvhJointName(boneName):
+            # Remove the tail from duplicate bone names (added by the BVH parser)
+            import re
+            if not boneName:
+                return boneName
+            r = re.search("(.*)_\d+$", boneName)
+            if r:
+                return r.group(1)
+            return boneName
+
+        def _createAnimation(jointsData, name, frameTime, nFrames):
+            nJoints = len(jointsData)
+            #nFrames = len(jointsData[0])
+
+            # Interweave joints animation data, per frame with joints in breadth-first order
+            animData = np.hstack(jointsData).reshape(nJoints*nFrames,3,4)
+            framerate = 1.0/frameTime
+            return animation.AnimationTrack(name, animData, nFrames, framerate)
+
+        if name is None:
+            name = self.name
+
         if skel is None:
             jointsData = [joint.matrixPoses for joint in self.getJoints() if not joint.isEndConnector()]
             # We leave out end effectors as they should not have animation data
+
+            return _createAnimation(jointsData, name, self.frameTime, self.frameCount)
         elif isinstance(skel, list):
             # skel parameter is a list of joint or bone names
             jointsOrder = skel
-        else:
-            # skel parameter is a Skeleton
-            for bone in skel.getBones():
-                if len(bone.reference_bones) > 0:
-                    bonename = bone.reference_bones[0]
-                else:
-                    bonename = bone.name
-                jointsOrder.append(bonename)
 
-        # Remove the tail from duplicate bone names
-        for idx,jName in enumerate(jointsOrder):
-            if not jName:
-                continue
-            r = re.search("(.*)_\d+$",jName)
-            if r:
-                jointsOrder[idx] = r.group(1)
-
-        nFrames = self.frameCount
-
-        if jointsData is None:
             jointsData = []
             for jointName in jointsOrder:
+                jointName = _bvhJointName(jointName)
                 if jointName and self.getJointByCanonicalName(jointName) is not None:
                     poseMats = self.getJointByCanonicalName(jointName).matrixPoses.copy()
                     jointsData.append(poseMats)
                 else:
-                    jointsData.append(animation.emptyTrack(nFrames))
+                    jointsData.append(animation.emptyTrack(self.frameCount))
 
-        nJoints = len(jointsData)
+            return _createAnimation(jointsData, name, self.frameTime, self.frameCount)
+        else:
+            # skel parameter is a Skeleton
+            jointsData = []
+            for bone in skel.getBones():
+                if len(bone.reference_bones) > 0:
+                    # Combine the rotations of reference bones to influence this bone
+                    bvhJoints = []
+                    for bonename in bone.reference_bones:
+                        jointname = _bvhJointName(bonename)
+                        joint = self.getJointByCanonicalName(jointname)
+                        if joint:
+                            bvhJoints.append(joint)
 
-        # Interweave joints animation data, per frame with joints in breadth-first order
-        animData = np.hstack(jointsData).reshape(nJoints*nFrames,3,4)
-        framerate = 1.0/self.frameTime
-        if name is None:
-            name = self.name
-        return animation.AnimationTrack(name, animData, nFrames, framerate)
+                    if len(bvhJoints) == 0:
+                        poseMats = animation.emptyTrack(self.frameCount)
+                    elif len(bvhJoints) == 1:
+                        poseMats = bvhJoints[0].matrixPoses.copy()
+                    else:  # len(bvhJoints) >= 2:
+                        # Combine the rotations using quaternions to simplify math and normalizing (rotations only)
+                        poseMats = animation.emptyTrack(self.frameCount)
+                        m = np.identity(4, dtype=np.float32)
+                        for f_idx in xrange(self.frameCount):
+                            m[:3,:4] = bvhJoints[0].matrixPoses[f_idx]
+                            q1 = tm.quaternion_from_matrix(m, True)
+                            m[:3,:4] = bvhJoints[1].matrixPoses[f_idx]
+                            q2 = tm.quaternion_from_matrix(m, True)
+
+                            quat = tm.quaternion_multiply(q2, q1)
+
+                            for bvhJoint in bvhJoints[2:]:
+                                m[:3,:4] = bvhJoint.matrixPoses[f_idx]
+                                q = tm.quaternion_from_matrix(m, True)
+                                quat = tm.quaternion_multiply(q, quat)
+
+                            poseMats[f_idx] = tm.quaternion_matrix( quat )[:3,:4]
+
+                    jointsData.append(poseMats)
+                else:
+                    # Map bone to joint by bone name
+                    jointName = _bvhJointName(bone.name)
+                    joint = self.getJointByCanonicalName(jointName)
+                    if joint:
+                        jointsData.append( joint.matrixPoses.copy() )
+                    else:
+                        jointsData.append(animation.emptyTrack(self.frameCount))
+
+            return _createAnimation(jointsData, name, self.frameTime, self.frameCount)
 
     def getJoint(self, name):
         return self.joints[name]
