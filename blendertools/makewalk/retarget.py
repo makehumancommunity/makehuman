@@ -544,6 +544,10 @@ class VIEW3D_OT_LoadAndRetargetButton(bpy.types.Operator, ImportHelper):
     filter_glob = StringProperty(default="*.bvh", options={'HIDDEN'})
     filepath = StringProperty(name="File Path", description="Filepath used for importing the BVH file", maxlen=1024, default="")
 
+    @classmethod
+    def poll(self, context):
+        return (context.object and context.object.type == 'ARMATURE')
+
     def execute(self, context):
         if self.problems:
             return{'FINISHED'}
