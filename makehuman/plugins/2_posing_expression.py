@@ -46,6 +46,7 @@ from core import G
 import gui
 import getpath
 import json
+import log
 
 # TODO extract a common base class from this and modifierslider (and probably humanmodifier)
 class ExpressionSlider(gui.Slider):
@@ -265,7 +266,7 @@ class ExpressionTaskView(gui3d.TaskView):
             return
 
         anim = self.base_bvh.createAnimationTrack(self.human.getSkeleton(), name="Expression-Face-PoseUnits")
-        print 'unit pose frame count:', len(self.poseunit_names)
+        log.message('unit pose frame count:%s', len(self.poseunit_names))
         self.base_poseunit = animation.PoseUnit(anim.name, anim.data[:anim.nBones*len(self.poseunit_names)], self.poseunit_names)
 
         self.updateGui()
