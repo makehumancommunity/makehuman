@@ -116,11 +116,11 @@ class Skeleton(object):
 
         self.build()
 
-        weights_file = skelData["weights_file"]
-        weights_file = getpath.thoroughFindFile(weights_file, os.path.dirname(getpath.canonicalPath(filepath)), True)
+        if "weights_file" in skelData and skelData["weights_file"]:
+            weights_file = skelData["weights_file"]
+            weights_file = getpath.thoroughFindFile(weights_file, os.path.dirname(getpath.canonicalPath(filepath)), True)
 
-        self.vertexWeights = VertexBoneWeights.fromFile(weights_file, mesh.getVertexCount() if mesh else None, rootBone=self.roots[0].name)
-        return self.vertexWeights
+            self.vertexWeights = VertexBoneWeights.fromFile(weights_file, mesh.getVertexCount() if mesh else None, rootBone=self.roots[0].name)
 
     def getVertexWeights(self, referenceWeights=None):
         """
@@ -159,7 +159,8 @@ class Skeleton(object):
             if len(b_weights) > 0:
                 weights[bone.name] = b_weights
         
-        return referenceWeights.create(weights, rootBone=self.roots[0].name)
+        self.vertexWeights = referenceWeights.create(weights, rootBone=self.roots[0].name)
+        return self.vertexWeights
 
 
     def getJointPosition(self, joint_name, human, rest_coord=True):
