@@ -175,6 +175,11 @@ def getIkBoneList(rig):
             hips = rig.pose.bones["root"]
         elif isRigify(rig):
             hips = rig.pose.bones["hips"]
+        else:
+            for bone in rig.data.bones:
+                if bone.parent is None:
+                    hips = bone
+                    break
     blist = [hips]
     for bname in ['hand.ik.L', 'hand.ik.R', 'foot.ik.L', 'foot.ik.R']:
         try:
