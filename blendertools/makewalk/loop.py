@@ -111,6 +111,7 @@ def loopFCurves(context):
                 pb.location = restInv * diff
                 pb.keyframe_insert("location", group=pb.name)
 
+    return
     for fcu in fcurves:
         (name, mode) = fCurveIdentity(fcu)
         if isLocation(mode):
