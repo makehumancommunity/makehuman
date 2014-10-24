@@ -110,16 +110,16 @@ class MainPanel(bpy.types.Panel):
         layout = self.layout
         ob = context.object
         scn = context.scene
-        if ob and ob.type == 'ARMATURE':
-            layout.operator("mcp.load_and_retarget")
-            layout.separator()
-            layout.prop(scn, "McpStartFrame")
-            layout.prop(scn, "McpEndFrame")
-            layout.separator()
-            layout.prop(scn, "McpShowDetailSteps")
-            if scn.McpShowDetailSteps:
-                ins = inset(layout)
-                ins.operator("mcp.load_bvh")
+        layout.operator("mcp.load_and_retarget")
+        layout.separator()
+        layout.prop(scn, "McpStartFrame")
+        layout.prop(scn, "McpEndFrame")
+        layout.separator()
+        layout.prop(scn, "McpShowDetailSteps")
+        if scn.McpShowDetailSteps:
+            ins = inset(layout)
+            ins.operator("mcp.load_bvh")
+            if ob and ob.type == 'ARMATURE':
                 ins.operator("mcp.rename_bvh")
                 ins.operator("mcp.load_and_rename_bvh")
 
@@ -129,12 +129,6 @@ class MainPanel(bpy.types.Panel):
                 ins.separator()
                 ins.operator("mcp.simplify_fcurves")
                 ins.operator("mcp.rescale_fcurves")
-
-        else:
-            layout.operator("mcp.load_bvh")
-            layout.separator()
-            layout.prop(scn, "McpStartFrame")
-            layout.prop(scn, "McpEndFrame")
 
 ########################################################################
 #
@@ -426,12 +420,15 @@ class MhxTargetBonesPanel(bpy.types.Panel):
                     box.separator()
                     continue
                 (mhx, text) = boneText
-                bone = target.findTargetKey(mhx, bones)
-                row = box.row()
-                row.label(text)
-                if bone:
-                    row.label(bone)
+                bnames = target.findTargetKeys(mhx, bones)
+                if bnames:
+                    for bname in bnames:
+                        row = box.row()
+                        row.label(text)
+                        row.label(bname)
                 else:
+                    row = box.row()
+                    row.label(text)
                     row.label("-")
 
             if ikBones:

@@ -167,14 +167,15 @@ def testTargetRig(name, rig, rigBones):
     return True
 
 #
-#   findTargetKey(mhx, list):
+#   findTargetKeys(mhx, list):
 #
 
-def findTargetKey(mhx, list):
+def findTargetKeys(mhx, list):
+    bones = []
     for (bone, mhx1) in list:
         if mhx1 == mhx:
-            return bone
-    return None
+            bones.append(bone)
+    return bones
 
 ###############################################################################
 #
