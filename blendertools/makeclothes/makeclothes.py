@@ -1194,6 +1194,14 @@ def checkObjectOK(ob, context, isClothing):
         word = "parent"
         ob.parent = None
 
+    word = rightVGroupOnLeftSide(ob, -1, "LEFT", [".L", "_L"])
+    if word:
+        err = True
+
+    word = rightVGroupOnLeftSide(ob, 1, "RIGHT", [".R", "_R"])
+    if word:
+        err = True
+
     if isClothing:
         try:
             ob.data.uv_layers[scn.MCTextureLayer]
@@ -1224,6 +1232,21 @@ def checkObjectOK(ob, context, isClothing):
             print("Fixed automatically")
     context.scene.objects.active = old
     return
+
+
+def rightVGroupOnLeftSide(ob, sign, gname, suffixes):
+    for vgrp in ob.vertex_groups:
+        uname = vgrp.name.upper()
+        if (uname == gname or uname[-2:] in suffixes):
+            gn = vgrp.index
+            for v in ob.data.vertices:
+                if v.co[0]*sign > 1.0:  # 1 dm into wrong territory. Should maybe be smaller.
+                    for g in v.groups:
+                        if g.group == gn:
+                            print(ob, sign, gname, suffixes)
+                            print(vgrp.name, v.index, v.co)
+                            return ("%s vertex on wrong side in vertex group %s" % (gname, vgrp.name))
+    return ""
 
 #
 #   checkSingleVertexGroups(clo, scn):
