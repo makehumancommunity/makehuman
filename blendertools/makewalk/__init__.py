@@ -41,7 +41,7 @@ bl_info = {
     "name": "MakeWalk",
     "author": "Thomas Larsson",
     "version": (1,1,0),
-    "blender": (2,7,1),
+    "blender": (2,7,2),
     "location": "View3D > Tools > MakeWalk",
     "description": "Mocap tool for MakeHuman character",
     "warning": "",
@@ -409,18 +409,18 @@ class MhxTargetBonesPanel(bpy.types.Panel):
         layout.separator()
 
         if scn.McpTargetRig:
-            from .target import getTargetInfo
+            from .target import getTargetInfo, TargetBoneNames, findTargetKeys
 
             (bones, ikBones, tpose) = getTargetInfo(scn.McpTargetRig)
 
             layout.label("FK bones")
             box = layout.box()
-            for boneText in target.TargetBoneNames:
+            for boneText in TargetBoneNames:
                 if not boneText:
                     box.separator()
                     continue
                 (mhx, text) = boneText
-                bnames = target.findTargetKeys(mhx, bones)
+                bnames = findTargetKeys(mhx, bones)
                 if bnames:
                     for bname in bnames:
                         row = box.row()

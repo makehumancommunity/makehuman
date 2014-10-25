@@ -235,7 +235,7 @@ class CArmature:
             hand = hands[0]
             print("  hand%s:" % suffix, hand.name)
             if upperarm.bone.length < hand.bone.length:
-                bnames = ["shoulder"+suffix] + bnames
+                bnames = ["shoulder"+suffix, ""] + bnames[1:]
         self.findTerminal(shoulder, bnames)
 
 
