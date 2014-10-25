@@ -176,7 +176,6 @@ class Skeleton(object):
         :param referenceSkel: Reference skeleton to obtain structure from.
          This is the default or master skeleton.
         """
-        reverse_ref_map = dict()
         included = dict()
         for bone in self.getBones():
             if bone._weight_reference_bones is None:
@@ -184,39 +183,53 @@ class Skeleton(object):
                 bone._weight_reference_bones = list(bone.reference_bones)
             else:
                 included[bone.name] = False
-            for ref in bone.reference_bones:
-                if ref not in reverse_ref_map:
-                    reverse_ref_map[ref] = []
-                reverse_ref_map[ref].append(bone.name)
+
+        def _update_reverse_ref_map(skel):
+            result = dict()
+            for bone in skel.getBones():
+                for ref in bone.weight_reference_bones:
+                    if ref not in result:
+                        result[ref] = []
+                    result[ref].append(bone.name)
+            return result
+
+        reverse_ref_map = _update_reverse_ref_map(self)
 
         def _hasUnreferencedTail(bone, reverse_ref_map, first_bone=False):
             # TODO perhaps relax the unreferenced criterium if the bone referrer bone is the same that references the first bone
             if not first_bone and (bone.name in reverse_ref_map and len(reverse_ref_map) > 0):
                 return False
+            #if first_bone and not bone.hasChildren():
+            #    return False  # Exclude trivial case
             if bone.hasChildren():
-                return all( [_hasUnreferencedTail(child, reverse_ref_map) for child in bone.children] )
+                return any( [_hasUnreferencedTail(child, reverse_ref_map) for child in bone.children] )
             else:
                 # This is an end-connector
                 return True
 
-        def _getAllChildren(bone):
+        def _getAllChildren(bone, reverse_ref_map):
             result = []
             for child in bone.children:
-                result.append(child.name)
-                result.extend( _getAllChildren(child) )
+                result.append(child)
+                result.extend( _getAllChildren(child, reverse_ref_map) )
             return result
 
-        for rbone in referenceSkel.getBones():
+        def _getUnreferencedChildren(bone, reverse_ref_map):
+            result = _getAllChildren(bone, reverse_ref_map)
+            return [ b.name for b in result if _hasUnreferencedTail(b, reverse_ref_map) ]
+
+        for rbone in reversed(referenceSkel.getBones()):  # Traverse from children to parent
             if rbone.name not in reverse_ref_map:
                 continue
             if _hasUnreferencedTail(rbone, reverse_ref_map, first_bone=True):
-                extra_vertweight_refs = _getAllChildren(rbone)
-                print reverse_ref_map[rbone.name], '->', extra_vertweight_refs
+                extra_vertweight_refs = _getUnreferencedChildren(rbone, reverse_ref_map)
+                #log.debug("%s -> %s", reverse_ref_map[rbone.name], extra_vertweight_refs)
                 for bone_name in reverse_ref_map[rbone.name]:
                     bone = self.getBone(bone_name)
                     if included[bone.name]:
                         bone._weight_reference_bones.extend(extra_vertweight_refs)
                         bone._weight_reference_bones = list(set(bone._weight_reference_bones))
+                reverse_ref_map = _update_reverse_ref_map(self)  # Make sure that another parent bone cannot be weighted to these again
 
     def getJointPosition(self, joint_name, human, rest_coord=True):
         """

@@ -158,7 +158,7 @@ class SkeletonDebugLibrary(gui3d.TaskView):
         blue = np.zeros_like(red)
         alpha = np.ones_like(red)
         color = np.array([red,green,blue,alpha]).T
-        color = (color * 255.99).astype(np.uint8)
+        color = (color * 255).astype(np.uint8)
         mesh.color[verts,:] = color
         mesh.markCoords(verts, colr = True)
         mesh.sync_all()
