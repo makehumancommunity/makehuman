@@ -241,6 +241,7 @@ class SkeletonLibrary(gui3d.TaskView):
         skel = skeleton.load(filename, self.human.meshData)
 
         # Ensure vertex weights of skel are initialized
+        skel.autoBuildWeightReferences(self.referenceRig)  # correct weights references if only (pose) references were defined
         vertexWeights = skel.getVertexWeights(self.referenceRig.getVertexWeights())
         log.message("Skeleton %s has %s weights per vertex.", skel.name, vertexWeights.getMaxNumberVertexWeights())
 

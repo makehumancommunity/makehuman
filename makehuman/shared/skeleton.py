@@ -112,7 +112,7 @@ class Skeleton(object):
 
         for bone_name in breadthfirst_bones:
             bone_defs = skelData["bones"][bone_name]
-            self.addBone(bone_name, bone_defs.get("parent", None), bone_defs["head"], bone_defs["tail"], bone_defs["roll"], bone_defs.get("reference",None))
+            self.addBone(bone_name, bone_defs.get("parent", None), bone_defs["head"], bone_defs["tail"], bone_defs["roll"], bone_defs.get("reference",None), bone_defs.get("weights_reference",None))
 
         self.build()
 
@@ -140,8 +140,8 @@ class Skeleton(object):
 
         for bone in self.getBones():
             b_weights = []
-            if len(bone.reference_bones) > 0:
-                for rbname in bone.reference_bones:
+            if len(bone.weight_reference_bones) > 0:
+                for rbname in bone.weight_reference_bones:
                     if rbname in referenceWeights.data:
                         vrts,wghs = referenceWeights.data[rbname]
                         b_weights.extend( zip(vrts,wghs) )
@@ -162,6 +162,61 @@ class Skeleton(object):
         self.vertexWeights = referenceWeights.create(weights, rootBone=self.roots[0].name)
         return self.vertexWeights
 
+    def autoBuildWeightReferences(self, referenceSkel):
+        """
+        Complete the vertex reference weights by taking the (pose) reference
+        weights defined on this skeleton, and potentially complete them with
+        extra bones from there reference skeleton.
+        If a bone of this skeleton references a bone in the reference skeleton,
+        and that referenced bone has a chain or chains of bones until an end
+        connector (a bone with no children) that are all unreferenced by this
+        skeleton, then all those bones are added as vertex weight reference
+        bones. Only affects bones that have not explicitly defined weight
+        reference bones.
+        :param referenceSkel: Reference skeleton to obtain structure from.
+         This is the default or master skeleton.
+        """
+        reverse_ref_map = dict()
+        included = dict()
+        for bone in self.getBones():
+            if bone._weight_reference_bones is None:
+                included[bone.name] = True
+                bone._weight_reference_bones = list(bone.reference_bones)
+            else:
+                included[bone.name] = False
+            for ref in bone.reference_bones:
+                if ref not in reverse_ref_map:
+                    reverse_ref_map[ref] = []
+                reverse_ref_map[ref].append(bone.name)
+
+        def _hasUnreferencedTail(bone, reverse_ref_map, first_bone=False):
+            # TODO perhaps relax the unreferenced criterium if the bone referrer bone is the same that references the first bone
+            if not first_bone and (bone.name in reverse_ref_map and len(reverse_ref_map) > 0):
+                return False
+            if bone.hasChildren():
+                return all( [_hasUnreferencedTail(child, reverse_ref_map) for child in bone.children] )
+            else:
+                # This is an end-connector
+                return True
+
+        def _getAllChildren(bone):
+            result = []
+            for child in bone.children:
+                result.append(child.name)
+                result.extend( _getAllChildren(child) )
+            return result
+
+        for rbone in referenceSkel.getBones():
+            if rbone.name not in reverse_ref_map:
+                continue
+            if _hasUnreferencedTail(rbone, reverse_ref_map, first_bone=True):
+                extra_vertweight_refs = _getAllChildren(rbone)
+                print reverse_ref_map[rbone.name], '->', extra_vertweight_refs
+                for bone_name in reverse_ref_map[rbone.name]:
+                    bone = self.getBone(bone_name)
+                    if included[bone.name]:
+                        bone._weight_reference_bones.extend(extra_vertweight_refs)
+                        bone._weight_reference_bones = list(set(bone._weight_reference_bones))
 
     def getJointPosition(self, joint_name, human, rest_coord=True):
         """
@@ -217,10 +272,10 @@ class Skeleton(object):
 
         return result
 
-    def addBone(self, name, parentName, headJoint, tailJoint, roll=0, reference_bones=None):
+    def addBone(self, name, parentName, headJoint, tailJoint, roll=0, reference_bones=None, weight_reference_bones=None):
         if name in self.bones.keys():
             raise RuntimeError("The skeleton %s already contains a bone named %s." % (self.__repr__(), name))
-        bone = Bone(self, name, parentName, headJoint, tailJoint, roll, reference_bones)
+        bone = Bone(self, name, parentName, headJoint, tailJoint, roll, reference_bones, weight_reference_bones)
         self.bones[name] = bone
         if not parentName:
             self.roots.append(bone)
@@ -398,7 +453,7 @@ class Skeleton(object):
 
 class Bone(object):
 
-    def __init__(self, skel, name, parentName, headJoint, tailJoint, roll=0, reference_bones=None):
+    def __init__(self, skel, name, parentName, headJoint, tailJoint, roll=0, reference_bones=None, weight_reference_bones=None):
         """
         Construct a new bone for specified skeleton.
         headPos and tailPos should be in world space coordinates (relative to root).
@@ -429,11 +484,17 @@ class Bone(object):
 
         self.index = None   # The index of this bone in the breadth-first bone list
 
-        self.reference_bones = []  # Used for mapping animations and vertex weights
+        self.reference_bones = []  # Used for mapping animations and poses
         if reference_bones is not None:
             if not isinstance(reference_bones, list):
                 reference_bones = [ reference_bones ]
-            self.reference_bones.extend( reference_bones )
+            self.reference_bones.extend( set(reference_bones) )
+
+        self._weight_reference_bones = None  # For mapping vertex weights (can be automatically set by calling autoBuildWeightReferences())
+        if weight_reference_bones is not None:
+            if not isinstance(weight_reference_bones, list):
+                weight_reference_bones = [ weight_reference_bones ]
+            self._weight_reference_bones.extend( set(weight_reference_bones) )
 
         # Matrices:
         # static
@@ -470,6 +531,13 @@ class Bone(object):
         """
         #self.calcRestMatrix()  # TODO perhaps interesting method to replace the current
         return transformBoneMatrix(self.matRestGlobal, meshOrientation, localBoneAxis, offsetVect)
+
+    @property
+    def weight_reference_bones(self):
+        if self._weight_reference_bones is None:
+            return self.reference_bones
+        else:
+            return self._weight_reference_bones
 
     def getRelativeMatrix(self, meshOrientation='yUpFaceZ', localBoneAxis='y', offsetVect=[0,0,0]):
         restmat = self.getRestMatrix(meshOrientation, localBoneAxis, offsetVect)
