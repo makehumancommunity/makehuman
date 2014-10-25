@@ -178,7 +178,7 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
     def onHumanChanged(self, event):
         super(ClothesTaskView, self).onHumanChanged(event)
         if event.change == 'reset':
-            self.faceHidingTggl.setSelected(True)
+            self.faceHidingTggl.setSelected(True)  # TODO super already reapplies masking before this is reset
         elif event.change == 'proxy' and \
              (event.pxy == 'genitals' or event.pxy == 'proxymeshes') and \
              self.faceHidingTggl.selected:
