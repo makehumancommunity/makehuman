@@ -209,7 +209,8 @@ class Human(guicommon.Object, animation.AnimatedMesh):
     def removeClothesProxy(self, uuid):
         self._swapProxies(self._clothesProxies.get(uuid, None), None)
         event = events3d.HumanEvent(self, 'proxyChange')
-        del self._clothesProxies[uuid]
+        if uuid in self._clothesProxies:
+            del self._clothesProxies[uuid]
         event.proxy = 'clothes'
         self.callEvent('onChanged', event)
 
@@ -1205,7 +1206,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         self.setSubdivided(False, update=False)
         self.setDefaultValues()
         self.resetBoundMeshes()
-        self._resetProxies()
+        self._resetProxies()  # TODO does not properly take care of calling removeObject
         self.resetToRestPose(update=False)
 
         self.targetsDetailStack = {}
