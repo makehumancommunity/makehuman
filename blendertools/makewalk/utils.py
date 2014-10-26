@@ -469,8 +469,6 @@ def getObjectProblems(self, context):
 
 def checkObjectProblems(self, context):
     problems = getObjectProblems(self, context)
-    print("PROB", problems)
-    halt
     if problems:
         return problems
     else:
