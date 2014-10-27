@@ -1655,7 +1655,8 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.splash = gui.SplashScreen(gui3d.app.getThemeResource('images', 'splash.png'), mh.getVersionDigitsStr())
         self.splash.show()
-        self.mainwin.hide()
+        if sys.platform != 'darwin':
+            self.mainwin.hide()  # Fix for OSX crash thanks to Francois (issue #593)
 
         self.tabs = self.mainwin.tabs
 
