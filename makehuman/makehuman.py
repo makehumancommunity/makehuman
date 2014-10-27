@@ -56,7 +56,7 @@ def getVersionDigitsStr():
     """
     String representation of the version number only (no additional info)
     """
-    return ".".join( [str(v) for v in version] )
+    return __version__
 
 def _versionStr():
     if versionSub:
