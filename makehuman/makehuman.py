@@ -46,7 +46,7 @@ import re
 import subprocess
 
 ## Version information #########################################################
-version = [1, 1, 0]                     # Major, minor and patch version number
+__version__ = "1.1.0"                   # Major, minor and patch version number
 release = False                         # False for nightly
 versionSub = ""                         # Short version description
 meshVersion = "hm08"                    # Version identifier of the basemesh
@@ -56,7 +56,7 @@ def getVersionDigitsStr():
     """
     String representation of the version number only (no additional info)
     """
-    return ".".join( [str(v) for v in version] )
+    return __version__
 
 def _versionStr():
     if versionSub:
@@ -82,7 +82,9 @@ def getVersion():
     """
     Comparable version as list of ints
     """
-    return version
+    return __version__.split('.')
+
+version = getVersion()  # For backward compat.
 
 def getVersionStr(verbose=True):
     """
