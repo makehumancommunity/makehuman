@@ -653,10 +653,6 @@ class MHApplication(gui3d.Application, mh.Application):
         #self.selectedHuman.callEvent('onChanged', events3d.HumanEvent(self.selectedHuman, 'reset'))
         self.selectedHuman.applyAllTargets()
 
-        if not self.args.get('noshaders', False) and \
-          ( not mh.Shader.supported() or mh.Shader.glslVersion() < (1,20) ):
-            self.prompt('Warning', 'Your system does not support OpenGL shaders (GLSL v1.20 required).\nOnly simple shading will be available.', 'Ok', None, None, None, 'glslWarning')
-
         self.currentFile.modified = False
 
         #printtree(self)
@@ -722,6 +718,10 @@ class MHApplication(gui3d.Application, mh.Application):
         self.splash = None
 
         self.prompt('Warning', 'MakeHuman is a character creation suite. It is designed for making anatomically correct humans.\nParts of this program may contain nudity.\nDo you want to proceed?', 'Yes', 'No', None, self.stop, 'nudityWarning')
+
+        if not self.args.get('noshaders', False) and \
+          ( not mh.Shader.supported() or mh.Shader.glslVersion() < (1,20) ):
+            self.prompt('Warning', 'Your system does not support OpenGL shaders (GLSL v1.20 required).\nOnly simple shading will be available.', 'Ok', None, None, None, 'glslWarning')
 
         # Restore main window size and position
         if self.settings.get('restoreWindowSize', False):
@@ -1655,7 +1655,8 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.splash = gui.SplashScreen(gui3d.app.getThemeResource('images', 'splash.png'), mh.getVersionDigitsStr())
         self.splash.show()
-        self.mainwin.hide()
+        if sys.platform != 'darwin':
+            self.mainwin.hide()  # Fix for OSX crash thanks to Francois (issue #593)
 
         self.tabs = self.mainwin.tabs
 
