@@ -155,6 +155,8 @@ class ProxyChooserTaskView(gui3d.TaskView):
         if self.descriptionWidget:
             descBox = self.addLeftWidget(gui.GroupBox('Description'))
             self.descrLbl = descBox.addWidget(gui.TextView(''))
+            self.descrLbl.setSizePolicy(gui.QtGui.QSizePolicy.Ignored, gui.QtGui.QSizePolicy.Preferred)
+            self.descrLbl.setWordWrap(True)
 
         @self.filechooser.mhEvent
         def onFileSelected(filename):
