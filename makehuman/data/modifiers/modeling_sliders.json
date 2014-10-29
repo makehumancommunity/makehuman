@@ -230,6 +230,12 @@
           {"mod": "armslegs/l-foot-trans-in|out", "cam": "leftFootFrontCamera", "label": "Move horizontally"},          
           {"mod": "armslegs/l-foot-trans-forward|backward", "cam": "leftFootLeftCamera", "label": "Move depth"}
         ],
+      "left shoulder": [
+          {"mod": "armslegs/l-upperarm-shoulder-muscle-decr|incr", "cam": "leftArmTopCamera", "label": "Increase muscle of shoulder"}          
+        ],
+      "right shoulder": [
+          {"mod": "armslegs/r-upperarm-shoulder-muscle-decr|incr", "cam": "rightArmTopCamera", "label": "Increase muscle of shoulder"}          
+        ],
       "right arm": [
           {"mod": "armslegs/r-lowerarm-scale-depth-decr|incr", "cam": "rightArmTopCamera", "label": "Lowerarm thickness 1"},
           {"mod": "armslegs/r-lowerarm-scale-horiz-decr|incr", "cam": "rightArmFrontCamera", "label": "Lowerarm length"},
