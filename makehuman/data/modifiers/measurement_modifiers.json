@@ -25,7 +25,7 @@
 
       {"target": "measure-lowerlegheight", "min": "decrease", "max": "increase"},
       {"target": "measure-calf", "min": "decrease", "max": "increase"},
-
+      {"target": "measure-kneecirc", "min": "decrease", "max": "increase"},
       {"target": "measure-ankle", "min": "decrease", "max": "increase"}
     ]
   }
