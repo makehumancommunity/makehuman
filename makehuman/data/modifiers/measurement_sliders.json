@@ -34,9 +34,11 @@
 
       "Upper leg": [
           {"mod": "measure/measure-upperlegheight-decrease|increase", "label": "Upperleg height"},
-          {"mod": "measure/measure-thighcirc-decrease|increase", "label": "Thigh circ."}
+          {"mod": "measure/measure-thighcirc-decrease|increase", "label": "Thigh circ."}          
         ],
-
+      "Knee": [          
+          {"mod": "measure/measure-kneecirc-decrease|increase", "label": "Knee circ."}
+        ],
       "Lower leg": [
           {"mod": "measure/measure-lowerlegheight-decrease|increase", "label": "Lowerleg height"},
           {"mod": "measure/measure-calf-decrease|increase", "label": "Calf circum"}
