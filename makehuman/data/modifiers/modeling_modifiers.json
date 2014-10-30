@@ -252,7 +252,8 @@
         {"target": "r-upperarm-scale-horiz", "min": "decr", "max": "incr"},
         {"target": "r-upperarm-scale-vert", "min": "decr", "max": "incr"},
         {"target": "r-upperarm", "min": "skinny", "max": "fat"},
-        {"target": "r-upperarm-shoulder-muscle", "min": "decr", "max": "incr"},        
+        {"target": "r-upperarm-shoulder-muscle", "min": "decr", "max": "incr"}, 
+        {"target": "r-upperarm-muscle", "min": "decr", "max": "incr"},       
 
         {"target": "l-lowerarm-scale-depth", "min": "decr", "max": "incr"},
         {"target": "l-lowerarm-scale-horiz", "min": "decr", "max": "incr"},
@@ -263,6 +264,7 @@
         {"target": "l-upperarm-scale-vert", "min": "decr", "max": "incr"},
         {"target": "l-upperarm", "min": "skinny", "max": "fat"},
         {"target": "l-upperarm-shoulder-muscle", "min": "decr", "max": "incr"},
+        {"target": "l-upperarm-muscle", "min": "decr", "max": "incr"},
 
         {"target": "r-leg-genu", "min": "varun", "max": "valgus"},
         {"target": "r-lowerleg-scale-depth", "min": "decr", "max": "incr"},
