@@ -189,7 +189,9 @@
       {"target": "torso-trans-horiz", "min": "in", "max": "out"},
       {"target": "torso-trans-vert", "min": "down", "max": "up"},
       {"target": "torso-trans-depth", "min": "forward", "max": "backward"},
-      {"target": "torso-vshape", "min": "less", "max": "more"}
+      {"target": "torso-vshape", "min": "less", "max": "more"},
+      {"target": "torso-muscle-dorsi", "min": "decr", "max": "incr"},
+      {"target": "torso-muscle-pectoral", "min": "decr", "max": "incr"}
     ]
   },
 

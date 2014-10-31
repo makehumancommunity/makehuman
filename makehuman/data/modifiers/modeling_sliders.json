@@ -179,7 +179,9 @@
           {"mod": "torso/torso-trans-horiz-in|out", "cam": "globalCamera", "label": "Move horizontally"},
           {"mod": "torso/torso-trans-vert-down|up", "cam": "globalCamera", "label": "Move depth"},
           {"mod": "torso/torso-trans-depth-forward|backward", "cam": "leftView", "label": "Move vertically"},
-          {"mod": "torso/torso-vshape-less|more", "cam": "globalCamera", "label": "Scale cone-shape"}
+          {"mod": "torso/torso-vshape-less|more", "cam": "globalCamera", "label": "Scale cone-shape"},
+          {"mod": "torso/torso-muscle-dorsi-decr|incr", "cam": "globalCamera", "label": "Dorsi muscle"},
+          {"mod": "torso/torso-muscle-pectoral-decr|incr", "cam": "globalCamera", "label": "Pectoral muscle"}
         ],
       "Hip": [
           {"mod": "hip/hip-scale-depth-decr|incr", "cam": "globalCamera", "label": "Scale depth"},
@@ -231,10 +233,10 @@
           {"mod": "armslegs/l-foot-trans-forward|backward", "cam": "leftFootLeftCamera", "label": "Move depth"}
         ],
       "left shoulder": [
-          {"mod": "armslegs/l-upperarm-shoulder-muscle-decr|incr", "cam": "leftArmTopCamera", "label": "Increase muscle of shoulder"}          
+          {"mod": "armslegs/l-upperarm-shoulder-muscle-decr|incr", "cam": "leftArmTopCamera", "label": "Shoulder muscle mass"}          
         ],
       "right shoulder": [
-          {"mod": "armslegs/r-upperarm-shoulder-muscle-decr|incr", "cam": "rightArmTopCamera", "label": "Increase muscle of shoulder"}          
+          {"mod": "armslegs/r-upperarm-shoulder-muscle-decr|incr", "cam": "rightArmTopCamera", "label": "Shoulder muscle mass"}          
         ],
       "right arm": [
           {"mod": "armslegs/r-lowerarm-scale-depth-decr|incr", "cam": "rightArmTopCamera", "label": "Lowerarm thickness 1"},
