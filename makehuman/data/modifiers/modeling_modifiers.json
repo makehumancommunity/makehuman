@@ -277,6 +277,7 @@
         {"target": "r-upperleg-scale-horiz", "min": "decr", "max": "incr"},
         {"target": "r-upperleg-scale-vert", "min": "decr", "max": "incr"},
         {"target": "r-upperleg", "min": "skinny", "max": "fat"},
+        {"target": "r-upperleg-muscle", "min": "decr", "max": "incr"},
 
         {"target": "l-leg-genu", "min": "varun", "max": "valgus"},
         {"target": "l-lowerleg-scale-depth", "min": "decr", "max": "incr"},
@@ -286,7 +287,8 @@
         {"target": "l-upperleg-scale-depth", "min": "decr", "max": "incr"},
         {"target": "l-upperleg-scale-horiz", "min": "decr", "max": "incr"},
         {"target": "l-upperleg-scale-vert", "min": "decr", "max": "incr"},
-        {"target": "l-upperleg", "min": "skinny", "max": "fat"}        
+        {"target": "l-upperleg", "min": "skinny", "max": "fat"},
+        {"target": "l-upperleg-muscle", "min": "decr", "max": "incr"}        
     ]       
   },
 
