@@ -132,7 +132,7 @@ class Skeleton(object):
         Returns the vertex weights for this skeleton.
         """
         from collections import OrderedDict
-        if referenceWeights is None or self.vertexWeights is not None:
+        if referenceWeights is None:
             return self.vertexWeights
 
         # Remap vertex weights from reference bones
@@ -158,9 +158,11 @@ class Skeleton(object):
 
             if len(b_weights) > 0:
                 weights[bone.name] = b_weights
-        
-        self.vertexWeights = referenceWeights.create(weights, rootBone=self.roots[0].name)
-        return self.vertexWeights
+
+        vertWeights = referenceWeights.create(weights, rootBone=self.roots[0].name)
+        if self.vertexWeights is None:
+            self.vertexWeights = vertWeights
+        return vertWeights
 
     def autoBuildWeightReferences(self, referenceSkel):
         """

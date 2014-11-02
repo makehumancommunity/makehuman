@@ -251,19 +251,14 @@ class Proxy:
         confused with getWeights() which returns the weights of the proxy 
         mapping to the basemesh.
         """
-        if self.getMesh():
-            vertexCount = self.getMesh().getVertexCount()
-        else:
-            vertexCount = None
-
-        # Override proxy weights mapping behaviour if this proxy has its own 
+        # Override proxy weights mapping behaviour if this proxy has its own
         # bone weights defined explicitly.
         # This requires remapping the vertex weights of the proxy, defined on
         # the bones of the reference skeleton, to those of the current skeleton.
         # The current skeleton is retrieved from the human object linked to this
         # proxy.
         if self.hasCustomVertexWeights():
-            return self.human.getSkeleton().getVertexWeights(self.vertexBoneWeights, vertexCount)
+            return self.human.getSkeleton().getVertexWeights(self.vertexBoneWeights)
 
         WEIGHT_THRESHOLD = 1e-4  # Threshold for including bone weight
         weights = OrderedDict()
