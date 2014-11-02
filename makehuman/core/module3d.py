@@ -704,6 +704,9 @@ class Object3D(object):
         smoothed in their posed state if required. Vertices are not removed 
         within MH when faces are hidden, either.
         """
+        if not hasattr(self, 'parent') or not self.parent:
+            return parentWeights
+
         vmap = self.inverse_parent_map
         vwmap = self.parent_map_weights
 
