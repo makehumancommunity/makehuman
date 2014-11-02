@@ -115,8 +115,6 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
             human.changeVertexMask(None)
 
             proxies = self.getSelection()
-            if self.human.genitalsProxy:
-                proxies.append(self.human.genitalsProxy)
             for pxy in proxies:
                 obj = pxy.object
                 obj.changeVertexMask(None)
@@ -126,9 +124,6 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
         vertsMask = np.ones(human.meshData.getVertexCount(), dtype=bool)
 
         stackedProxies = [human.clothesProxies[uuid] for uuid in reversed(self.getClothesByRenderOrder())]
-        # Mask genitals too
-        if self.human.genitalsProxy:
-            stackedProxies.append( self.human.genitalsProxy )
 
         for pxy in stackedProxies:
             obj = pxy.object
@@ -179,10 +174,9 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
         super(ClothesTaskView, self).onHumanChanged(event)
         if event.change == 'reset':
             self.faceHidingTggl.setSelected(True)  # TODO super already reapplies masking before this is reset
-        elif event.change == 'proxy' and \
-             (event.pxy == 'genitals' or event.pxy == 'proxymeshes') and \
+        elif event.change == 'proxy' and event.pxy == 'proxymeshes' and \
              self.faceHidingTggl.selected:
-            # Update face masks if genital proxy was changed
+            # Update face masks if topology was changed
             self.updateFaceMasks(self.faceHidingTggl.selected)
 
     def saveHandler(self, human, file):

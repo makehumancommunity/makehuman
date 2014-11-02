@@ -136,17 +136,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
     eyesProxy = property(getEyesProxy, setEyesProxy)
 
-    def setGenitalsProxy(self, proxy):
-        self._swapProxies(self._genitalsProxy, proxy)
-        self._genitalsProxy = proxy
-        event = events3d.HumanEvent(self, 'proxyChange')
-        event.proxy = 'genitals'
-        self.callEvent('onChanged', event)
-    def getGenitalsProxy(self):
-        return self._genitalsProxy
-
-    genitalsProxy = property(getGenitalsProxy, setGenitalsProxy)
-
     def setEyebrowsProxy(self, proxy):
         self._swapProxies(self._eyebrowsProxy, proxy)
         self._eyebrowsProxy = proxy
@@ -282,7 +271,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         for obj in [
             self.hairObj,
             self.eyesObj,
-            self.genitalsObj,
             self.eyebrowsObj,
             self.eyelashesObj,
             self.teethObj,
@@ -300,7 +288,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         for pxy in [
             self.hairProxy,
             self.eyesProxy,
-            self.genitalsProxy,
             self.eyebrowsProxy,
             self.eyelashesProxy,
             self.teethProxy,
@@ -319,7 +306,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         table = {
             'Hair' :     self.hairProxy,
             'Eyes' :     self.eyesProxy,
-            'Genitals' : self.genitalsProxy,
             'Eyebrows' : self.eyebrowsProxy,
             'Eyelashes': self.eyelashesProxy,
             'Teeth':     self.teethProxy,
@@ -1223,7 +1209,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         """
         self._hairProxy = None
         self._eyesProxy = None
-        self._genitalsProxy = None
         self._eyebrowsProxy = None
         self._eyelashesProxy = None
         self._teethProxy = None
