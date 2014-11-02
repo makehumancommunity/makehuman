@@ -140,14 +140,23 @@ class SkeletonDebugLibrary(gui3d.TaskView):
         gui3d.app.statusPersist(name)
 
         # Draw bone weights
-        boneWeights = self.human.getVertexWeights()
-        self.showBoneWeights(name, boneWeights)
+        rawWeights = self.human.getVertexWeights()
+
+        objects = self.human.getObjects(excludeZeroFaceObjs=True)
+        for obj in objects:
+            # Remap vertex weights to mesh
+            if obj.proxy:
+                parentWeights = obj.proxy.getVertexWeights(rawWeights)
+            else:
+                parentWeights = rawWeights
+            weights = obj.mesh.getVertexWeights(parentWeights)
+
+            self.showBoneWeights(name, weights, obj.mesh)
 
         gui3d.app.redraw()
 
-    def showBoneWeights(self, boneName, boneWeights):
+    def showBoneWeights(self, boneName, boneWeights, mesh):
         # TODO also allow coloring subdivided and proxy meshes
-        mesh = self.human.meshData
         try:
             weights = np.asarray(boneWeights.data[boneName][1], dtype=np.float32)
             verts = boneWeights.data[boneName][0]
@@ -177,10 +186,13 @@ class SkeletonDebugLibrary(gui3d.TaskView):
 
 
     def clearBoneWeights(self):
-        mesh = self.human.meshData
-        mesh.color[...] = (255,255,255,255)
-        mesh.markCoords(colr = True)
-        mesh.sync_all()
+        objects = self.human.getObjects(excludeZeroFaceObjs=True)
+        for obj in objects:
+            # TODO this will go wrong when toggling between subdivided/unsubdivided state
+            mesh = obj.mesh
+            mesh.color[...] = (255,255,255,255)
+            mesh.markCoords(colr = True)
+            mesh.sync_all()
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
