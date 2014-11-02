@@ -728,8 +728,8 @@ class ListFileChooser(FileChooserBase):
 
     def selectItem(self, item):
         if self.multiSelect:
-            selections = self.getSelectedItems()
             if not self.isSelected(item):
+                selections = self.getSelectedItems()
                 selections.append(item)
                 self.setSelections(selections)
         else:
