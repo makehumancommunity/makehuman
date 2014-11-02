@@ -55,7 +55,7 @@ import json
 #   Some code use lowercase proxy types instead.
 #
 
-SimpleProxyTypes = ['Hair', 'Eyes', 'Genitals', 'Eyebrows', 'Eyelashes', 'Teeth', 'Tongue']
+SimpleProxyTypes = ['Hair', 'Eyes', 'Eyebrows', 'Eyelashes', 'Teeth', 'Tongue']
 ProxyTypes = ['Proxymeshes', 'Clothes'] + SimpleProxyTypes
 
 SimpleProxyTypesLower = []
