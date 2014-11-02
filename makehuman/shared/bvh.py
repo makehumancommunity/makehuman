@@ -727,11 +727,11 @@ class BVHJoint():
         else:
             poseTranslate = False
         if poseTranslate and (rXs != None or rYs != None or rZs != None):
-            if rXs == None:
+            if rXs is None:
                 rXs = np.zeros(nFrames, dtype=np.float32)
-            if rYs == None:
+            if rYs is None:
                 rYs = np.zeros(nFrames, dtype=np.float32)
-            if rZs == None:
+            if rZs is None:
                 rZs = np.zeros(nFrames, dtype=np.float32)
 
             self.matrixPoses[:,:3,3] = np.column_stack([rXs,rYs,rZs])[:,:]
