@@ -280,11 +280,6 @@ class MaterialTaskView(gui3d.TaskView):
                 filepath = self.getMaterialPath(filepath, proxy.file)
                 proxy.object.material = material.fromFile(filepath)
                 return
-            elif human.genitalsProxy and human.genitalsProxy.getUuid() == uuid:
-                proxy = human.genitalsProxy
-                filepath = self.getMaterialPath(filepath, proxy.file)
-                proxy.object.material = material.fromFile(filepath)
-                return
             elif not uuid in human.clothesProxies.keys():
                 log.error("Could not load material for proxy with uuid %s (%s)! No such proxy." % (uuid, name))
                 return
@@ -344,11 +339,6 @@ class MaterialTaskView(gui3d.TaskView):
             proxy = human.eyesProxy
             eyesObj = proxy.object
             materialPath = self.getRelativeMaterialPath(eyesObj.material.filename, proxy.file)
-            file.write('material %s %s %s\n' % (proxy.name, proxy.getUuid(), materialPath))
-        if human.genitalsProxy:
-            proxy = human.genitalsProxy
-            genitalsObj = proxy.object
-            materialPath = self.getRelativeMaterialPath(genitalsObj.material.filename, proxy.file)
             file.write('material %s %s %s\n' % (proxy.name, proxy.getUuid(), materialPath))
 
 
