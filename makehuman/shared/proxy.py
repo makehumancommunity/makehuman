@@ -258,6 +258,7 @@ class Proxy:
         # The current skeleton is retrieved from the human object linked to this
         # proxy.
         if self.hasCustomVertexWeights():
+            # TODO we could introduce caching of weights here as long as the skeleton is not changed
             return self.human.getSkeleton().getVertexWeights(self.vertexBoneWeights)
 
         WEIGHT_THRESHOLD = 1e-4  # Threshold for including bone weight
