@@ -15,7 +15,8 @@
           {"mod": "head/head-square", "cam": "frontView"},
           {"mod": "head/head-triangular", "cam": "frontView"},
           {"mod": "head/head-invertedtriangular", "cam": "frontView"},
-          {"mod": "head/head-diamond", "cam": "frontView"}
+          {"mod": "head/head-diamond", "cam": "frontView"},
+          {"mod": "head/head-back-scale-depth-less|more", "cam": "leftView", "label": "Scale depth of parietal side"}
         ],
       "head size": [
           {"mod": "head/head-scale-depth-less|more", "cam": "leftView", "label": "Scale depth"},
@@ -23,7 +24,7 @@
           {"mod": "head/head-scale-vert-more|less", "cam": "frontView", "label": "Scale vertically"},
           {"mod": "head/head-trans-in|out", "cam": "frontView", "label": "Move horizontally"},
           {"mod": "head/head-trans-down|up", "cam": "frontView", "label": "Move vertically"},
-          {"mod": "head/head-trans-forward|backward", "cam": "leftView", "label": "Move depth"}
+          {"mod": "head/head-trans-forward|backward", "cam": "leftView", "label": "Move depth"}          
         ],
       "forehead": [
           {"mod": "forehead/forehead-trans-depth-forward|backward", "cam": "leftView", "label": "Move depth"},
@@ -42,7 +43,8 @@
           {"mod": "neck/neck-scale-vert-more|less", "cam": "frontView", "label": "Scale vertically"},
           {"mod": "neck/neck-trans-horiz-in|out", "cam": "frontView", "label": "Move horizontally."},
           {"mod": "neck/neck-trans-vert-down|up", "cam": "frontView", "label": "Move vertically"},
-          {"mod": "neck/neck-trans-depth-forward|backward", "cam": "leftView", "label": "Move depth"}
+          {"mod": "neck/neck-trans-depth-forward|backward", "cam": "leftView", "label": "Move depth"},
+          {"mod": "neck/neck-back-scale-depth-less|more", "cam": "leftView", "label": "Scale depth of nape"}
         ],
       "right eye": [
           {"mod": "eyes/r-eye-height1-min|max", "cam": "frontView", "label": "Scale height 1"},
