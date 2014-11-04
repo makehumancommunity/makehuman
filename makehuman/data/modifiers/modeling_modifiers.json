@@ -17,7 +17,8 @@
       {"target": "head-scale-vert", "min": "more", "max": "less"},
       {"target": "head-trans", "min": "in", "max": "out"},
       {"target": "head-trans", "min": "down", "max": "up"},
-      {"target": "head-trans", "min": "forward", "max": "backward"}
+      {"target": "head-trans", "min": "forward", "max": "backward"},
+      {"target": "head-back-scale-depth", "min": "less", "max": "more"}
     ]
   },
 
@@ -45,7 +46,8 @@
       {"target": "neck-scale-vert", "min": "more", "max": "less"},
       {"target": "neck-trans-horiz", "min": "in", "max": "out"},
       {"target": "neck-trans-vert", "min": "down", "max": "up"},
-      {"target": "neck-trans-depth", "min": "forward", "max": "backward"}
+      {"target": "neck-trans-depth", "min": "forward", "max": "backward"},
+      {"target": "neck-back-scale-depth", "min": "less", "max": "more"}
     ]
   },
 
