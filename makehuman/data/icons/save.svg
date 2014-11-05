@@ -14,7 +14,10 @@
    id="svg4744"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="save.svg">
+   sodipodi:docname="save.svg"
+   inkscape:export-filename="save.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <defs
      id="defs4746">
     <linearGradient
@@ -37,8 +40,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="15.839192"
-     inkscape:cx="10.358901"
-     inkscape:cy="10.909917"
+     inkscape:cx="11.305919"
+     inkscape:cy="11.833329"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -68,12 +71,19 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(0,-1028.3622)">
+    <g
+       id="g4242-2"
+       transform="matrix(1.3504546,0,0,1.3504546,-35.318691,569.30911)"
+       inkscape:export-filename="savetgt.png"
+       inkscape:export-xdpi="93"
+       inkscape:export-ydpi="93"
+       style="fill:none;stroke:#b3b3b3;stroke-opacity:1" />
     <rect
-       style="fill:#999999;fill-opacity:1;stroke:#000000;stroke-width:1.35045457;stroke-opacity:1"
-       id="rect4186-0"
+       style="fill:none;stroke:#000000;stroke-width:1.35045456999999991;stroke-opacity:1"
+       id="rect4186-0-6"
        width="17.052063"
        height="16.540503"
-       x="3.4739642"
+       x="3.4739647"
        y="1032.0919"
        ry="2.1344621"
        inkscape:export-filename="save.png"
@@ -85,18 +95,18 @@
        x="-23.52"
        height="23.039999"
        width="23.039999"
-       id="rect2996-9-2-7-9-4-68-5-86"
+       id="rect2996-9-2-7-9-4-68-5-86-0"
        style="fill:none;stroke:none"
        inkscape:export-filename="save.png"
        inkscape:export-xdpi="93.75"
        inkscape:export-ydpi="93.75"
        transform="scale(-1,1)" />
     <rect
-       style="fill:#e6e6e6;fill-opacity:1;stroke:#000000;stroke-width:0.73282093;stroke-opacity:1"
-       id="rect4186-9-24"
+       style="fill:#000000;fill-opacity:1;stroke:#b3b3b3;stroke-width:0.73282093;stroke-opacity:1"
+       id="rect4186-9-24-6"
        width="11.395883"
        height="7.288085"
-       x="6.3593249"
+       x="6.3593264"
        y="1031.8077"
        ry="0.94048786"
        inkscape:export-filename="save.png"
