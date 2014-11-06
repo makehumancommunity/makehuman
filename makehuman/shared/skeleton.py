@@ -93,7 +93,8 @@ class Skeleton(object):
         self.description = skelData.get("description", "")
 
         for joint_name, v_idxs in skelData.get("joints", dict()).items():
-            self.joint_pos_idxs[joint_name] = v_idxs
+            if isinstance(v_idxs, list) and len(v_idxs) > 0:
+                self.joint_pos_idxs[joint_name] = v_idxs
 
         # Order bones breadth-first
         breadthfirst_bones = []
