@@ -390,9 +390,8 @@ def supportsSVG():
     Determines whether Qt supports SVG image files.
     """
     qtVersion = getQtVersion()
-    # TODO
-    # pyinstaller windows builds appear to cause issues with this
-    # py2app on OSX appears not to include qt svg libs either...
+    # Care needs to be taken that pyinstaller windows builds and
+    # OSX py2app builds include the qt svg lib and plugin
     return qtVersion[0] >= 4 and qtVersion[1] >= 2 and \
         'svg' in [ str(s).lower() for s in QtGui.QImageReader.supportedImageFormats() ]
 
