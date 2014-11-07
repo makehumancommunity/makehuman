@@ -121,8 +121,7 @@ if os.path.exists(exportPath()):
 i = exportInfo = build_prepare.export(sourcePath = hgRootPath(), exportFolder = exportPath())
 
 # Copy extra windows-specific files to export folder
-shutil.copy(hgRootPath('makehuman/icons/makehuman.ico'), i.applicationPath('makehuman.ico'))
-exportInfo.datas.append(os.path.join(i.rootSubpath, 'makehuman.ico'))
+## no extra files needed
 
 # Create config file for the Qt libraries to be able to load plugins
 # (such as for loading jpg and svg images)
@@ -214,7 +213,7 @@ elif sys.platform == 'win32':
         a.scripts,
         exclude_binaries=True,
         name='makehuman.exe',
-        icon=i.applicationPath('makehuman.ico'),
+        icon=hgRootPath('makehuman/icons/makehuman.ico'),
         debug=False,
         strip=None,
         upx=True,
