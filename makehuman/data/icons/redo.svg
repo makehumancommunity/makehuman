@@ -14,10 +14,7 @@
    id="svg4744"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="redo.svg"
-   inkscape:export-filename="redo.png"
-   inkscape:export-xdpi="90"
-   inkscape:export-ydpi="90">
+   sodipodi:docname="redo.svg">
   <defs
      id="defs4746">
     <linearGradient
@@ -62,7 +59,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -91,8 +88,8 @@
        inkscape:export-ydpi="93"
        transform="scale(-1,1)" />
     <path
-       style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#000000;fill-opacity:1;stroke:none;stroke-width:3;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
-       d="m 10.534115,1033.6296 c 3.4969,0 6.45029,2.3344 7.40625,5.5312 l -2.84375,0.9063 c -0.56184,-1.997 -2.37542,-3.4375 -4.5625,-3.4375 -2.1512002,0 -3.9381902,1.3975 -4.5312502,3.3437 l -2.875,-0.8437 c 0.96714,-3.1789 3.92212,-5.5 7.4062502,-5.5 z"
+       style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#e78d22;fill-opacity:1;stroke:none;stroke-width:3;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
+       d="m 10.08062,1032.4932 c 4.654007,0 8.584659,3.1069 9.856943,7.3615 l -3.784735,1.2062 c -0.74775,-2.6578 -3.161435,-4.575 -6.072208,-4.575 -2.8630225,0 -5.241319,1.8599 -6.0306198,4.4501 l -3.82632395,-1.1229 c 1.28716205,-4.2307 5.21993095,-7.3199 9.85694375,-7.3199 z"
        id="path3883-5-6-5-8-2-8"
        inkscape:connector-curvature="0"
        inkscape:export-filename="redo.png"
@@ -100,7 +97,7 @@
        inkscape:export-ydpi="93.750015" />
     <path
        sodipodi:type="star"
-       style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       style="fill:#e78d22;fill-opacity:1;stroke:#e78d22;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="path3911-8-4-8-4-1"
        sodipodi:sides="3"
        sodipodi:cx="-82.8125"
@@ -113,9 +110,9 @@
        inkscape:rounded="0"
        inkscape:randomized="0"
        d="m -81.290873,146.85677 -1.521627,0 -1.521627,0 0.760813,-1.31777 0.760814,-1.31777 0.760814,1.31777 z"
-       inkscape:transform-center-y="-0.4244378"
-       transform="matrix(2.322784,-0.78318755,-0.78318755,-2.322784,324.0969,1316.6191)"
-       inkscape:transform-center-x="0.68803933"
+       inkscape:transform-center-y="-0.56486402"
+       transform="matrix(3.0913822,-1.0423406,-1.0423406,-3.0913822,427.39984,1409.1226)"
+       inkscape:transform-center-x="0.91570952"
        inkscape:export-filename="redo.png"
        inkscape:export-xdpi="93.750015"
        inkscape:export-ydpi="93.750015" />
