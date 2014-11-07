@@ -14,8 +14,8 @@
    id="svg4744"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="undo.svg"
-   inkscape:export-filename="undo.png"
+   sodipodi:docname="redo.svg"
+   inkscape:export-filename="redo.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
   <defs
@@ -80,27 +80,27 @@
        style="fill:none;stroke:#b3b3b3;stroke-opacity:1" />
     <rect
        style="fill:none;stroke:none"
-       id="rect2996-9-4-7-5-8"
+       id="rect2996-9-4-7-2"
        width="23.039999"
        height="23.039999"
-       x="0.4800005"
+       x="0.54318225"
        y="1028.8422"
        ry="3.7271249"
-       inkscape:export-filename="undo.png"
+       inkscape:export-filename="redo.png"
        inkscape:export-xdpi="93"
        inkscape:export-ydpi="93" />
     <path
-       style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#000000;fill-opacity:1;stroke:none;stroke-width:3;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
-       d="m 13.465916,1033.6296 c -3.4969061,0 -6.4502951,2.3345 -7.4062501,5.5312 l 2.84375,0.9063 c 0.56184,-1.997 2.3754121,-3.4375 4.5625001,-3.4375 2.1512,0 3.938185,1.3976 4.53125,3.3437 l 2.875,-0.8437 c -0.967147,-3.1789 -3.922123,-5.5 -7.40625,-5.5 z"
-       id="path3883-5-6-5-8-2-1-6"
+       style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#e78d22;fill-opacity:1;stroke:none;stroke-width:3;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
+       d="m 13.982563,1032.4932 c -4.6540073,0 -8.5846593,3.1069 -9.8569433,7.3615 l 3.784735,1.2062 c 0.74775,-2.6578 3.1614353,-4.575 6.0722083,-4.575 2.863022,0 5.241319,1.8599 6.03062,4.4501 l 3.826323,-1.1229 c -1.287162,-4.2307 -5.21993,-7.3199 -9.856943,-7.3199 z"
+       id="path3883-5-6-5-8-2-8"
        inkscape:connector-curvature="0"
-       inkscape:export-filename="undo.png"
+       inkscape:export-filename="redo.png"
        inkscape:export-xdpi="93.750015"
        inkscape:export-ydpi="93.750015" />
     <path
        sodipodi:type="star"
-       style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.50000000000000000;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
-       id="path3911-8-4-8-4-7-6"
+       style="fill:#e78d22;fill-opacity:1;stroke:#e78d22;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="path3911-8-4-8-4-1"
        sodipodi:sides="3"
        sodipodi:cx="-82.8125"
        sodipodi:cy="145.97826"
@@ -112,10 +112,10 @@
        inkscape:rounded="0"
        inkscape:randomized="0"
        d="m -81.290873,146.85677 -1.521627,0 -1.521627,0 0.760813,-1.31777 0.760814,-1.31777 0.760814,1.31777 z"
-       inkscape:transform-center-y="-0.4244378"
-       transform="matrix(-2.322784,-0.78318755,0.78318755,-2.322784,-300.09686,1316.6191)"
-       inkscape:transform-center-x="0.68803933"
-       inkscape:export-filename="undo.png"
+       inkscape:transform-center-y="-0.56486402"
+       transform="matrix(-3.0913822,-1.0423406,1.0423406,-3.0913822,-403.33666,1409.1226)"
+       inkscape:transform-center-x="-0.91570682"
+       inkscape:export-filename="redo.png"
        inkscape:export-xdpi="93.750015"
        inkscape:export-ydpi="93.750015" />
   </g>
