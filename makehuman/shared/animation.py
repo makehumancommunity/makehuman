@@ -417,6 +417,10 @@ class VertexBoneWeights(object):
     def data(self):
         return self._data
 
+    @property
+    def vertexCount(self):
+        return self._vertexCount
+
     def getMaxNumberVertexWeights(self):
         return self._nWeights
     

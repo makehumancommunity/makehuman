@@ -160,7 +160,7 @@ class Skeleton(object):
             if len(b_weights) > 0:
                 weights[bone.name] = b_weights
 
-        vertWeights = referenceWeights.create(weights, rootBone=self.roots[0].name)
+        vertWeights = referenceWeights.create(weights, vertexCount=referenceWeights.vertexCount, rootBone=self.roots[0].name)
         if self.vertexWeights is None:
             self.vertexWeights = vertWeights
         return vertWeights
