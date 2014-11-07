@@ -59,7 +59,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -99,7 +99,7 @@
        inkscape:export-ydpi="93.75"
        transform="scale(-1,1)" />
     <rect
-       style="fill:#000000;fill-opacity:1;stroke:#b3b3b3;stroke-width:0.73282093;stroke-opacity:1"
+       style="fill:#666666;fill-opacity:1;stroke:#b3b3b3;stroke-width:0.73282093000000004;stroke-opacity:1"
        id="rect4186-9-24-6"
        width="11.395883"
        height="7.288085"
