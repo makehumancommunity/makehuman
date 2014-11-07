@@ -746,6 +746,9 @@ class AnimatedMesh(object):
                 log.warning("Attempt to add the same bound mesh %s twice" % mesh.name)
             self.removeBoundMesh(mesh.name)
 
+        if vertexToBoneMapping and mesh.getVertexCount() != vertexToBoneMapping.vertexCount:
+            log.warning('Vertex count of bound mesh %s (%s) and vertex its weights (%s) differs, this might cause errors when skinning.', mesh.name, mesh.getVertexCount(), vertexToBoneMapping.vertexCount)
+
         # allows multiple meshes (also to allow to animate one model consisting of multiple meshes)
         originalMeshCoords = np.zeros((mesh.getVertexCount(),4), np.float32)
         originalMeshCoords[:,:3] = mesh.coord[:,:3]
