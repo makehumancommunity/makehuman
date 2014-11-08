@@ -510,7 +510,7 @@ class Bone(object):
         if weight_reference_bones is not None:
             if not isinstance(weight_reference_bones, list):
                 weight_reference_bones = [ weight_reference_bones ]
-            self._weight_reference_bones.extend( set(weight_reference_bones) )
+            self._weight_reference_bones = list( set(weight_reference_bones) )
 
         # Matrices:
         # static
