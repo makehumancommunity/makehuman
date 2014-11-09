@@ -47,6 +47,7 @@ class FbxConfig(ExportConfig):
 
         self.useRelPaths     = False
         self.useMaterials    = True # for debugging  # TODO what is the function of this?
+        self.binary = True
 
         self.yUpFaceZ = True
         self.yUpFaceX = False
@@ -93,6 +94,7 @@ class ExporterFBX(Exporter):
     def build(self, options, taskview):
         import gui
         Exporter.build(self, options, taskview)
+        self.binary   = options.addWidget(gui.CheckBox("Binary FBX", True))
 
     def export(self, human, filename):
         from . import mh2fbx
@@ -104,6 +106,7 @@ class ExporterFBX(Exporter):
         cfg = FbxConfig()
         cfg.feetOnGround      = self.feetOnGround.selected
         cfg.scale,cfg.unit    = self.taskview.getScale()
+        cfg.binary            = self.binary.selected
 
         return cfg
 

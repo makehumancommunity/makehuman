@@ -8,7 +8,7 @@
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Thomas Larsson
+**Authors:**           Thomas Larsson, Jonas Hauquier
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
@@ -83,27 +83,30 @@ def countObjects(meshes, skel):
         return 2*nShapes
 
 
-def writeObjectDefs(fp, meshes, skel):
+def writeObjectDefs(fp, meshes, skel, config):
     nVertexGroups, nShapes = getObjectCounts(meshes)
+    count = countObjects(meshes, skel)
 
-    if skel:
-        fp.write(
+    if config.binary:
+        from . import fbx_binary
+        elem = fbx_binary.get_child_element(fp, 'Definitions')
+        fbx_binary.fbx_template_generate(elem, "Deformer", count)
+        if skel:
+            fbx_binary.fbx_template_generate(elem, "Pose", 1)
+        return
+
+    fp.write(
 '    ObjectType: "Deformer" {\n' +
-'       Count: %d' % (nVertexGroups + 1 + 2*nShapes) +
+'       Count: %d' % count +
 """
-    }
-
-    ObjectType: "Pose" {
-        Count: 1
     }
 """)
 
-    else:
-        fp.write(
-'    ObjectType: "Deformer" {\n' +
-'       Count: %d' % (2*nShapes) +
-"""
-}
+    if skel:
+        fp.write("""
+    ObjectType: "Pose" {
+        Count: 1
+    }
 """)
 
 
@@ -116,7 +119,7 @@ def writeObjectProps(fp, meshes, skel, config):
         writeBindPose(fp, meshes, skel, config)
 
         for mesh in meshes:
-            writeDeformer(fp, mesh.name)
+            writeDeformer(fp, mesh.name, config)
             for bone in skel.getBones():
                 try:
                     weights = mesh.vertexWeights.data[bone.name]
@@ -125,6 +128,7 @@ def writeObjectProps(fp, meshes, skel, config):
                 writeSubDeformer(fp, mesh.name, bone, weights, config)
 
     for mesh in meshes:
+        # TODO support binary FBX shapekey export
         if hasattr(mesh, 'shapes') and mesh.shapes is not None:
             for sname,shape in mesh.shapes:
                 writeShapeGeometry(fp, mesh.name, sname, shape, config)
@@ -189,17 +193,27 @@ def writeShapeSubDeformer(fp, name, sname, shape):
 """)
 
 
-def writeDeformer(fp, name):
+def writeDeformer(fp, name, config):
     id,key = getId("Deformer::%s" % name)
+
+    properties = [
+        ("MHName", "p_string", "%sSkin" % name, False, True)
+    ]
+
+    if config.binary:
+        from . import fbx_binary
+        elem = fbx_binary.get_child_element(fp, 'Objects')
+        fbx_binary.fbx_data_deformer(elem, key, id, properties)
+        return
+
+    import fbx_utils
 
     fp.write(
 '    Deformer: %d, "%s", "Skin" {' % (id, key) +
 """
         Version: 101
         Properties70:  {
-""" +
-'            P: "MHName", "KString", "", "", "%sSkin"' % name +
-"""
+""" + fbx_utils.get_ascii_properties(properties, indent=3) + """
         }
         Link_DeformAcuracy: 50
     }
@@ -208,6 +222,14 @@ def writeDeformer(fp, name):
 
 def writeSubDeformer(fp, name, bone, weights, config):
     id,key = getId("SubDeformer::%s_%s" % (bone.name, name))
+
+    bindmat,bindinv = bone.getBindMatrix(config.offset)
+
+    if config.binary:
+        from . import fbx_binary
+        elem = fbx_binary.get_child_element(fp, 'Objects')
+        fbx_binary.fbx_data_subdeformer(elem, key, id, weights[0], weights[1], bindmat, bindinv)
+        return
 
     nVertexWeights = len(weights[0])
     indexString = ','.join(["%d" % vn for vn in weights[0]])
@@ -224,7 +246,6 @@ def writeSubDeformer(fp, name, bone, weights, config):
         '            a: %s\n' % weightString +
         '        }\n')
 
-    bindmat,bindinv = bone.getBindMatrix(config.offset)
     writeMatrix(fp, 'Transform', bindmat)
     writeMatrix(fp, 'TransformLink', bindinv)
     fp.write('    }\n')
@@ -235,27 +256,52 @@ def writeBindPose(fp, meshes, skel, config):
     nBones = skel.getBoneCount()
     nMeshes = len(meshes)
 
-    fp.write(
-        '    Pose: %d, "%s", "BindPose" {\n' % (id, key)+
-        '        Type: "BindPose"\n' +
-        '        Version: 100\n' +
-        '        NbPoseNodes: %d\n' % (1+nMeshes+nBones))
+    # Skeleton bind matrix
+    skelbindmat = tm.rotation_matrix(math.pi/2, (1,0,0))
+
+    count = 1 + nMeshes + nBones
+
+    if config.binary:
+        from . import fbx_binary
+        elem = fbx_binary.get_child_element(fp, 'Objects')
+        pelem = fbx_binary.fbx_data_bindpose_element(elem, key, id, count)
+    else:
+        fp.write(
+            '    Pose: %d, "%s", "BindPose" {\n' % (id, key)+
+            '        Type: "BindPose"\n' +
+            '        Version: 100\n' +
+            '        NbPoseNodes: %d\n' % count)
 
     startLinking()
 
-    # Skeleton bind matrix
-    skelbindmat = tm.rotation_matrix(math.pi/2, (1,0,0))
-    poseNode(fp, "Model::%s" % skel.name, skelbindmat)
+    key = "Model::%s" % skel.name
+    if config.binary:
+        id,_ = getId(key)
+        fbx_binary.fbx_data_pose_node_element(pelem, key, id, skelbindmat)
+    else:
+        poseNode(fp, key, skelbindmat)
 
     for mesh in meshes:
-        poseNode(fp, "Model::%sMesh" % mesh.name, skelbindmat)
+        key = "Model::%sMesh" % mesh.name
+        if config.binary:
+            id,_ = getId(key)
+            fbx_binary.fbx_data_pose_node_element(pelem, key, id, skelbindmat)
+        else:
+            poseNode(fp, key, skelbindmat)
 
     for bone in skel.getBones():
+        key = "Model::%s" % bone.name
         bindmat,_ = bone.getBindMatrix(config.offset)
-        poseNode(fp, "Model::%s" % bone.name, bindmat)
+        if config.binary:
+            id,_ = getId(key)
+            fbx_binary.fbx_data_pose_node_element(pelem, key, id, bindmat)
+        else:
+            poseNode(fp, key, bindmat)
 
     stopLinking()
-    fp.write('    }\n')
+
+    if not config.binary:
+        fp.write('    }\n')
 
 
 def poseNode(fp, key, matrix):
@@ -271,19 +317,19 @@ def poseNode(fp, key, matrix):
 #   Links
 #--------------------------------------------------------------------
 
-def writeLinks(fp, meshes, skel):
+def writeLinks(fp, meshes, skel, config):
 
     if skel:
         for mesh in meshes:
-            ooLink(fp, 'Deformer::%s' % mesh.name, 'Geometry::%s' % mesh.name)
+            ooLink(fp, 'Deformer::%s' % mesh.name, 'Geometry::%s' % mesh.name, config)
             for bone in skel.getBones():
                 subdef = 'SubDeformer::%s_%s' % (bone.name, mesh.name)
                 try:
                     getId(subdef)
                 except NameError:
                     continue
-                ooLink(fp, subdef, 'Deformer::%s' % mesh.name)
-                ooLink(fp, 'Model::%s' % bone.name, subdef)
+                ooLink(fp, subdef, 'Deformer::%s' % mesh.name, config)
+                ooLink(fp, 'Model::%s' % bone.name, subdef, config)
 
     for mesh in meshes:
         if hasattr(mesh, 'shapes') and mesh.shapes is not None:
