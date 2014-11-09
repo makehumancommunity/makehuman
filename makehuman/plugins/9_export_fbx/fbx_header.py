@@ -8,7 +8,7 @@
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Thomas Larsson
+**Authors:**           Thomas Larsson, Jonas Hauquier
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
@@ -43,9 +43,25 @@ from . import fbx_material
 from . import fbx_anim
 
 
-def writeHeader(fp, filepath):
+def writeHeader(fp, filepath, config):
     import datetime
     today = datetime.datetime.now()
+
+    id = 39112896
+
+    if config.binary:
+        from . import fbx_binary
+        import os
+        root = fp
+        fbx_binary.fbx_header_elements(root, config, today)
+        name = os.path.splitext(os.path.basename(filepath))[0]
+        fbx_binary.fbx_documents_elements(root, name, id)
+        fbx_binary.fbx_references_elements(root)
+        return
+
+    import fbx_utils
+    mesh_orientation = fbx_utils.getMeshOrientation(config)
+    up_axis, front_axis, coord_axis = fbx_utils.RIGHT_HAND_AXES[mesh_orientation]
 
     fp.write("""; FBX 7.3.0 project file
 ; Exported from MakeHuman TM (www.makehuman.org)
@@ -103,12 +119,12 @@ FBXHeaderExtension:  {
 GlobalSettings:  {
     Version: 1000
     Properties70:  {
-        P: "UpAxis", "int", "Integer", "",1
-        P: "UpAxisSign", "int", "Integer", "",1
-        P: "FrontAxis", "int", "Integer", "",2
-        P: "FrontAxisSign", "int", "Integer", "",1
-        P: "CoordAxis", "int", "Integer", "",0
-        P: "CoordAxisSign", "int", "Integer", "",1
+        P: "UpAxis", "int", "Integer", "",%s
+        P: "UpAxisSign", "int", "Integer", "",%s
+        P: "FrontAxis", "int", "Integer", "",%s
+        P: "FrontAxisSign", "int", "Integer", "",%s
+        P: "CoordAxis", "int", "Integer", "",%s
+        P: "CoordAxisSign", "int", "Integer", "",%s
         P: "OriginalUpAxis", "int", "Integer", "",-1
         P: "OriginalUpAxisSign", "int", "Integer", "",1
         P: "UnitScaleFactor", "double", "Number", "",10
@@ -120,14 +136,14 @@ GlobalSettings:  {
         P: "TimeSpanStop", "KTime", "Time", "",46186158000
         P: "CustomFrameRate", "double", "Number", "",-1
     }
-}
+}""" % (up_axis[0], up_axis[0], front_axis[0], front_axis[1], coord_axis[0], coord_axis[1]) + """
 
 ; Documents Description
 ;------------------------------------------------------------------
 
 Documents:  {
     Count: 1
-    Document: 39112896, "Scene", "Scene" {
+    Document: %s, "Scene", "Scene" {""" % id + """
         Properties70:  {
             P: "SourceObject", "object", "", ""
             P: "ActiveAnimStackName", "KString", "", "", ""
@@ -158,6 +174,11 @@ def writeObjectDefs(fp, meshes, skel, action, config):
     if action:
         count += fbx_anim.countObjects(action)
 
+    if config.binary:
+        from . import fbx_binary
+        fbx_binary.fbx_definitions_elements(fp, count)
+        return
+
     fp.write(
 """
 ; Object definitions
@@ -175,7 +196,12 @@ Definitions:  {
 """)
 
 
-def writeObjectProps(fp):
+def writeObjectProps(fp, config):
+    if config.binary:
+        from . import fbx_binary
+        objects = fbx_binary.elem_empty(fp, b"Objects")
+        return
+
     fp.write(
 """
 ; Object properties
@@ -185,7 +211,12 @@ Objects:  {
 """)
 
 
-def writeLinks(fp):
+def writeLinks(fp, config):
+    if config.binary:
+        from . import fbx_binary
+        fbx_binary.fbx_connections_element(fp)
+        return
+
     fp.write(
 """
 ; Object connections

@@ -8,7 +8,7 @@
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Thomas Larsson
+**Authors:**           Thomas Larsson, Jonas Hauquier
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
@@ -86,10 +86,18 @@ def exportFbx(filepath, config):
 
     G.app.progress(0.5, text="Exporting %s" % filepath)
 
-    fp = codecs.open(filepath, "w", encoding="utf-8")
+    if config.binary:
+        import fbx_binary
+        root = fbx_binary.elem_empty(None, b"")
+        fp = root
+    else:
+        fp = codecs.open(filepath, "w", encoding="utf-8")
+
     fbx_utils.resetId()  # Reset global ID generator
-    fbx_utils.setAbsolutePath(filepath)
-    fbx_header.writeHeader(fp, filepath)
+    fbx_utils.setAbsolutePath(filepath)  # TODO fix this
+
+    # 1) FBX Header, documents and references
+    fbx_header.writeHeader(fp, filepath, config)
 
     # Generate bone weights for all meshes up front so they can be reused for all
     if skel:
@@ -114,17 +122,26 @@ def exportFbx(filepath, config):
     # TODO if "shapes" need to be exported, attach them to meshes in a similar way
 
     nVertexGroups, nShapes = fbx_deformer.getObjectCounts(meshes)
-    fbx_header.writeObjectDefs(fp, meshes, skel, action, config)
-    fbx_skeleton.writeObjectDefs(fp, meshes, skel)
-    fbx_mesh.writeObjectDefs(fp, meshes, nShapes)
-    fbx_deformer.writeObjectDefs(fp, meshes, skel)
-    if config.useMaterials:
-        fbx_material.writeObjectDefs(fp, meshes)
-    if useAnim:
-        fbx_anim.writeObjectDefs(fp, action)
-    fp.write('}\n\n')
 
-    fbx_header.writeObjectProps(fp)
+    # 2) FBX template definitions
+    # GlobalSettings template definition
+    fbx_header.writeObjectDefs(fp, meshes, skel, action, config)
+    # Skeleton template definition
+    fbx_skeleton.writeObjectDefs(fp, meshes, skel, config)
+    # Objects template definition
+    fbx_mesh.writeObjectDefs(fp, meshes, nShapes, config)
+    # Skin deformer template definition
+    fbx_deformer.writeObjectDefs(fp, meshes, skel, config)
+    # Material template definition
+    if config.useMaterials:
+        fbx_material.writeObjectDefs(fp, meshes, config)
+    # Animation template definition
+    if useAnim:
+        fbx_anim.writeObjectDefs(fp, action, config)
+    if not config.binary: fp.write('}\n\n')
+
+    # 3) FBX object properties (the actual data)
+    fbx_header.writeObjectProps(fp, config)
     if skel:
         fbx_skeleton.writeObjectProps(fp, skel, config)
     fbx_mesh.writeObjectProps(fp, meshes, config)
@@ -132,25 +149,32 @@ def exportFbx(filepath, config):
     if config.useMaterials:
         fbx_material.writeObjectProps(fp, meshes, config)
     if useAnim:
+        # TODO support binary FBX animations export
         fbx_anim.writeObjectProps(fp, action, skel, config)
-    fp.write('}\n\n')
+    if not config.binary: fp.write('}\n\n')
 
+    # 4) FBX node links
     fbx_utils.startLinking()
-    fbx_header.writeLinks(fp)
+    fbx_header.writeLinks(fp, config)
     if skel:
-        fbx_skeleton.writeLinks(fp, skel)
-    fbx_mesh.writeLinks(fp, meshes)
-    fbx_deformer.writeLinks(fp, meshes, skel)
+        fbx_skeleton.writeLinks(fp, skel, config)
+    fbx_mesh.writeLinks(fp, meshes, config)
+    fbx_deformer.writeLinks(fp, meshes, skel, config)
     if config.useMaterials:
-        fbx_material.writeLinks(fp, meshes)
+        fbx_material.writeLinks(fp, meshes, config)
     if useAnim:
-        fbx_anim.writeLinks(fp, action)
-    fp.write('}\n\n')
+        fbx_anim.writeLinks(fp, action, config, config)
+    if not config.binary: fp.write('}\n\n')
 
-    fbx_anim.writeTakes(fp, action)
-    fp.close()
+    # 5) FBX animations (takes)
+    # TODO support binary FBX export
+    fbx_anim.writeTakes(fp, action, config)
+    if config.binary:
+        import encode_bin
+        root = fp
+        encode_bin.write(filepath, root)
+    else:
+        fp.close()
 
     G.app.progress(1)
     log.message("%s written" % filepath)
-
-

@@ -8,7 +8,7 @@
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Thomas Larsson
+**Authors:**           Thomas Larsson, Jonas Hauquier
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
@@ -50,21 +50,32 @@ def countObjects(meshes):
     return (nMeshes + 1)
 
 
-def writeObjectDefs(fp, meshes, nShapes):
+def writeObjectDefs(fp, meshes, nShapes, config):
     nMeshes = len(meshes)
 
+    properties = [
+        ("Color",   "p_color_rgb",      [0.8,0.8,0.8]),
+        ("BBoxMin", "p_vector_3d",      [0,0,0]),
+        ("BBoxMax", "p_vector_3d",      [0,0,0]),
+        ("Primary Visibility", "p_bool", True),
+        ("Casts Shadows", "p_bool",     True),
+        ("Receive Shadows", "p_bool",   True)
+    ]
+
+    if config.binary:
+        from . import fbx_binary
+        elem = fbx_binary.get_child_element(fp, 'Definitions')
+        fbx_binary.fbx_template_generate(elem, "Geometry", (nMeshes + nShapes), "FbxMesh", properties)
+        return
+
+    import fbx_utils
     fp.write(
 '    ObjectType: "Geometry" {\n' +
 '       Count: %d' % (nMeshes + nShapes) +
 """
         PropertyTemplate: "FbxMesh" {
             Properties70:  {
-                P: "Color", "ColorRGB", "Color", "",0.8,0.8,0.8
-                P: "BBoxMin", "Vector3D", "Vector", "",0,0,0
-                P: "BBoxMax", "Vector3D", "Vector", "",0,0,0
-                P: "Primary Visibility", "bool", "", "",1
-                P: "Casts Shadows", "bool", "", "",1
-                P: "Receive Shadows", "bool", "", "",1
+""" + fbx_utils.get_ascii_properties(properties, indent=4) + """
             }
         }
     }
@@ -77,7 +88,7 @@ def writeObjectDefs(fp, meshes, nShapes):
 def writeObjectProps(fp, meshes, config):
     for mesh in meshes:
         writeGeometryProp(fp, mesh, config)
-        writeMeshProp(fp, mesh)
+        writeMeshProp(fp, mesh, config)
 
 
 def writeGeometryProp(fp, mesh, config):
@@ -86,37 +97,55 @@ def writeGeometryProp(fp, mesh, config):
     nFaces = len(mesh.fvert)
 
     coord = mesh.coord + config.offset
-    vertString = ",".join( ["%.4f,%.4f,%.4f" % tuple(co) for co in coord] )
-    indexString = ",".join( ['%d,%d,%d,%d' % (fv[0],fv[1],fv[2],-1-fv[3]) for fv in mesh.fvert] )
 
+    properties = [
+        ("MHName", "p_string", "%sMesh" % mesh.name, False, True)
+    ]
+
+    if config.binary:
+        from . import fbx_binary
+        elem = fbx_binary.get_child_element(fp, 'Objects')
+        fbx_binary.fbx_data_mesh_element(elem, key, id, properties, coord, mesh.fvert, mesh.vnorm, mesh.texco, mesh.fuvs)
+        return
+
+    vertString = ",".join( ["%.4f,%.4f,%.4f" % tuple(co) for co in coord] )
+    if mesh.vertsPerPrimitive == 4:
+        indexString = ",".join( ['%d,%d,%d,%d' % (fv[0],fv[1],fv[2],-1-fv[3]) for fv in mesh.fvert] )
+    else:
+        indexString = ",".join( ['%d,%d,%d' % (fv[0],fv[1],-1-fv[2]) for fv in mesh.fvert] )
+
+    import fbx_utils
     fp.write(
         '    Geometry: %d, "%s", "Mesh" {\n' % (id, key) +
         '        Properties70:  {\n' +
-        '            P: "MHName", "KString", "", "", "%sMesh"\n' % mesh.name +
+        fbx_utils.get_ascii_properties(properties, indent=4) + '\n' +
         '        }\n' +
         '        Vertices: *%d {\n' % (3*nVerts) +
         '            a: %s\n' % vertString +
         '        } \n' +
-        '        PolygonVertexIndex: *%d {\n' % (4*nFaces) +
+        '        PolygonVertexIndex: *%d {\n' % (mesh.vertsPerPrimitive*nFaces) +
         '            a: %s\n' % indexString +
         '        } \n')
 
     # Must use normals for shapekeys
     nNormals = len(mesh.vnorm)
     normalString = ",".join( ["%.4f,%.4f,%.4f" % tuple(no) for no in mesh.vnorm] )
-    normalIndexString = ",".join( ['%d,%d,%d,%d' % (fv[0],fv[1],fv[2],fv[3]) for fv in mesh.fvert] )
+    if mesh.vertsPerPrimitive == 4:
+        normalIndexString = ",".join( ['%d,%d,%d,%d' % (fv[0],fv[1],fv[2],fv[3]) for fv in mesh.fvert] )
+    else:
+        normalIndexString = ",".join( ['%d,%d,%d' % (fv[0],fv[1],fv[2]) for fv in mesh.fvert] )
 
     fp.write(
         '        GeometryVersion: 124\n' +
         '        LayerElementNormal: 0 {\n' +
         '            Version: 101\n' +
-        '            Name: "%s_Normal"' % mesh.name +
+        '            Name: "%s_Normal"\n' % mesh.name +
         '            MappingInformationType: "ByPolygonVertex"\n' +
         '            ReferenceInformationType: "IndexToDirect"\n' +
         '            Normals: *%d {\n' % (3*nNormals) +
         '                a: %s\n' % normalString +
         '            }\n' +
-        '            NormalsIndex: *%d {\n' % (4*len(mesh.fvert)) +
+        '            NormalsIndex: *%d {\n' % (mesh.vertsPerPrimitive*len(mesh.fvert)) +
         '                a: %s\n' % normalIndexString +
         '            } \n')
 
@@ -206,8 +235,11 @@ def writeUvs2(fp, mesh):
 
     uvString = ""
     for fuv in mesh.fuvs:
-        uvString += "".join( ['%.4f,%.4f,' % (tuple(mesh.texco[vt])) for vt in fuv] )
-    indexString = ",".join( ['%d,%d,%d,%d' % (4*n,4*n+1,4*n+2,4*n+3) for n in range(nUvFaces)] )
+        uvString += ",".join( ['%.4f,%.4f' % (tuple(mesh.texco[vt])) for vt in fuv] )
+    if mesh.vertsPerPrimitive == 4:
+        indexString = ",".join( ['%d,%d,%d,%d' % (4*n,4*n+1,4*n+2,4*n+3) for n in xrange(nUvFaces)] )
+    else:
+        indexString = ",".join( ['%d,%d,%d' % (4*n,4*n+1,4*n+2) for n in xrange(nUvFaces)] )
 
     fp.write(
         '        LayerElementUV: 0 {\n' +
@@ -215,10 +247,10 @@ def writeUvs2(fp, mesh):
         '            Name: "%s_UV"\n' % mesh.name +
         '            MappingInformationType: "ByPolygonVertex"\n' +
         '            ReferenceInformationType: "IndexToDirect"\n' +
-        '            UV: *%d {\n' % (8*nUvFaces) +
+        '            UV: *%d {\n' % (2*mesh.vertsPerPrimitive*nUvFaces) +
         '                a: %s\n' % uvString[:-1] +
         '            } \n'
-        '            UVIndex: *%d {\n' % (4*nUvFaces) +
+        '            UVIndex: *%d {\n' % (mesh.vertsPerPrimitive*nUvFaces) +
         '                a: %s\n' % indexString +
         '            }\n' +
         '        }\n')
@@ -228,20 +260,30 @@ def writeUvs2(fp, mesh):
 #
 #--------------------------------------------------------------------
 
-def writeMeshProp(fp, mesh):
+def writeMeshProp(fp, mesh, config):
     id,key = getId("Model::%sMesh" % mesh.name)
+
+    properties = [
+        ("RotationActive", "p_bool", 1),
+        ("InheritType", "p_enum", 1),
+        ("ScalingMax", "p_vector_3d", [0,0,0]),
+        ("DefaultAttributeIndex", "p_integer", 0),
+        ("MHName", "p_string", mesh.name, False, True)
+    ]
+
+    if config.binary:
+        from . import fbx_binary
+        elem = fbx_binary.get_child_element(fp, 'Objects')
+        fbx_binary.fbx_data_model_element(elem, key, id, properties)
+        return
+
+    import fbx_utils
     fp.write(
 '    Model: %d, "%s", "Mesh" {' % (id, key) +
 """
         Version: 232
         Properties70:  {
-            P: "RotationActive", "bool", "", "",1
-            P: "InheritType", "enum", "", "",1
-            P: "ScalingMax", "Vector3D", "Vector", "",0,0,0
-            P: "DefaultAttributeIndex", "int", "Integer", "",0
-""" +
-'            P: "MHName", "KString", "", "", "%s"' % mesh.name +
-"""
+""" + fbx_utils.get_ascii_properties(properties, indent=4) + """
         }
         Shading: Y
         Culling: "CullingOff"
@@ -252,11 +294,11 @@ def writeMeshProp(fp, mesh):
 #   Links
 #--------------------------------------------------------------------
 
-def writeLinks(fp, meshes):
+def writeLinks(fp, meshes, config):
     for mesh in meshes:
-        ooLink(fp, 'Model::%sMesh' % mesh.name, 'Model::RootNode')
+        ooLink(fp, 'Model::%sMesh' % mesh.name, 'Model::RootNode', config)
         #if skel:
         #    ooLink(fp, 'Model::%sMesh' % name, 'Model::%s' % skel.name)
-        ooLink(fp, 'Geometry::%s' % mesh.name, 'Model::%sMesh' % mesh.name)
+        ooLink(fp, 'Geometry::%s' % mesh.name, 'Model::%sMesh' % mesh.name, config)
 
 
