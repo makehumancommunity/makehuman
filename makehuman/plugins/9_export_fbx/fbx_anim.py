@@ -8,7 +8,7 @@
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Thomas Larsson
+**Authors:**           Thomas Larsson, Jonas Hauquier
 
 **Copyright(c):**      MakeHuman Team 2001-2014
 
@@ -53,8 +53,43 @@ def countObjects(action):
     return 2 + 3*len(action.keys())
 
 
-def writeObjectDefs(fp, action):
+def writeObjectDefs(fp, action, config):
     ncurves = len(action.keys())
+
+    properties_stack = [
+        ("Description", "p_string", ""),
+        ("LocalStart", "p_timestamp", 0),
+        ("LocalStop", "p_timestamp", 0),
+        ("ReferenceStart", "p_timestamp", 0),
+        ("ReferenceStop", "p_timestamp", 0)
+    ]
+
+    properties_layer = [
+        ("Weight", "p_number", 100, True),
+        ("Mute", "p_bool", 0),
+        ("Solo", "p_bool", 0),
+        ("Lock", "p_bool", 0),
+        ("Color", "p_color_rgb", [0.8,0.8,0.8]),
+        ("BlendMode", "p_enum", 0),
+        ("RotationAccumulationMode", "p_enum", 0),
+        ("ScaleAccumulationMode", "p_enum", 0),
+        ("BlendModeBypass", "p_ulonglong", 0)
+    ]
+
+    properties_curvenode = [
+        ("d", "p_compound", "")
+    ]
+
+    if config.binary:
+        from . import fbx_binary
+        elem = fbx_binary.get_child_element(fp, 'Definitions')
+        fbx_binary.fbx_template_generate(elem, "AnimationStack", 1, "FbxAnimStack", properties_stack)
+        fbx_binary.fbx_template_generate(elem, "AnimationLayer", 1, "FbxAnimLayer", properties_layer)
+        fbx_binary.fbx_template_generate(elem, "AnimationCurveNode", ncurves, "FbxAnimCurveNode", properties_curvenode)
+        fbx_binary.fbx_template_generate(elem, "AnimationCurve", 3*ncurves)
+        return
+
+    import fbx_utils
 
     fp.write(
 """
@@ -62,11 +97,7 @@ def writeObjectDefs(fp, action):
         Count: 1
         PropertyTemplate: "FbxAnimStack" {
             Properties70:  {
-                P: "Description", "KString", "", "", ""
-                P: "LocalStart", "KTime", "Time", "",0
-                P: "LocalStop", "KTime", "Time", "",0
-                P: "ReferenceStart", "KTime", "Time", "",0
-                P: "ReferenceStop", "KTime", "Time", "",0
+""" + fbx_utils.get_ascii_properties(properties_stack, indent=4) + """
             }
         }
     }
@@ -74,15 +105,7 @@ def writeObjectDefs(fp, action):
         Count: 1
         PropertyTemplate: "FbxAnimLayer" {
             Properties70:  {
-                P: "Weight", "Number", "", "A",100
-                P: "Mute", "bool", "", "",0
-                P: "Solo", "bool", "", "",0
-                P: "Lock", "bool", "", "",0
-                P: "Color", "ColorRGB", "Color", "",0.8,0.8,0.8
-                P: "BlendMode", "enum", "", "",0
-                P: "RotationAccumulationMode", "enum", "", "",0
-                P: "ScaleAccumulationMode", "enum", "", "",0
-                P: "BlendModeBypass", "ULongLong", "", "",0
+""" + fbx_utils.get_ascii_properties(properties_layer, indent=4) + """
             }
         }
     }
@@ -92,7 +115,7 @@ def writeObjectDefs(fp, action):
 """
         PropertyTemplate: "FbxAnimCurveNode" {
             Properties70:  {
-                P: "d", "Compound", "", ""
+""" + fbx_utils.get_ascii_properties(properties_curvenode, indent=4) + """
             }
         }
     }
@@ -202,8 +225,8 @@ def writeAnimationCurve(fp, idx, coord, bone, channel, data):
 #   Links
 #--------------------------------------------------------------------
 
-def writeLinks(fp, action):
-    ooLink(fp, 'AnimLayer::Layer0', 'AnimStack::Take_001')
+def writeLinks(fp, action, config):
+    ooLink(fp, 'AnimLayer::Layer0', 'AnimStack::Take_001', config)
 
     for bname in action.keys():
         for channel,type in [
@@ -213,18 +236,23 @@ def writeLinks(fp, action):
             ]:
             acnode = "%s:AnimCurveNode:%s" % (bname, channel)
             model = "Model::%s" % bname
-            ooLink(fp, acnode, 'AnimLayer::Layer0')
-            opLink(fp, acnode, model, type)
+            ooLink(fp, acnode, 'AnimLayer::Layer0', config)
+            opLink(fp, acnode, model, type, config)
             for n,coord in enumerate(["X", "Y", "Z"]):
                 acurve = "%s:%s:AnimCurve:%s" % (bname, channel, coord)
-                opLink(fp, acurve, acnode, "d|%s" % coord)
+                opLink(fp, acurve, acnode, "d|%s" % coord, config)
 
 
 #--------------------------------------------------------------------
 #   Takes
 #--------------------------------------------------------------------
 
-def writeTakes(fp, action):
+def writeTakes(fp, action, config):
+    if config.binary:
+        import fbx_binary
+        fbx_binary.fbx_takes_element(fp)
+        return
+
     fp.write(
 """
 ;Takes section
