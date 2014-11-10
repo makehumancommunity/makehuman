@@ -305,9 +305,9 @@
           {"mod": "breast/breast-volume-vert-up|down", "label": "Breast Volume"}
         ],
       "Genitals": [
-          {"mod": "genitals/penis-length-min|max", "label": "Penis length"},
-          {"mod": "genitals/penis-circ-min|max", "label": "Penis circumference"},
-          {"mod": "genitals/penis-testicles-min|max", "label": "Testicles size"}
+          {"mod": "genitals/penis-length-min|max", "label": "Penis length", "enabledCondition": "hasGenitals"},
+          {"mod": "genitals/penis-circ-min|max", "label": "Penis circumference", "enabledCondition": "hasGenitals"},
+          {"mod": "genitals/penis-testicles-min|max", "label": "Testicles size", "enabledCondition": "hasGenitals"}
         ]
     }
   },

@@ -231,8 +231,23 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         self.meshData.changeFaceMask(self.staticFaceMask)
         self.meshData.updateIndexBufferFaces()
 
+    def hasGenitals(self):
+        """
+        Determines whether the human model has genitals geometry.
+        Genitals geometry is present if the proxy (alt. topology)
+        has the tag "genitals" assinged (convention).
+        """
+        if self.isProxied():
+            if 'genitals' in self.proxy.tags or 'Genitals' in self.proxy.tags:
+                return True
+        return False
 
     def traceStack(self, all=True):
+        """
+        Debug helper
+        :param all:
+        :return:
+        """
         import warpmodifier
         log.debug("human.targetsDetailStack:")
         for path,value in self.targetsDetailStack.items():
@@ -250,6 +265,12 @@ class Human(guicommon.Object, animation.AnimatedMesh):
                 log.debug("  %s%s: %s" % (stars, path, value))
 
     def traceBuffer(self, all=True, vertsToList=0):
+        """
+        Debug helper
+        :param all:
+        :param vertsToList:
+        :return:
+        """
         import warpmodifier
         log.debug("algos3d.targetBuffer:")
         for path,target in algos3d._targetBuffer.items():
