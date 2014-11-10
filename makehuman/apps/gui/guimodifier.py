@@ -74,7 +74,7 @@ class ModifierTaskView(gui3d.TaskView):
 
         self.showMacroStats = False
 
-    def addSlider(self, sliderCategory, slider):
+    def addSlider(self, sliderCategory, slider, enabledCondition=None):
         # Get category groupbox
         categoryName = sliderCategory.capitalize()
         if categoryName not in self.groupBoxes:
@@ -93,6 +93,7 @@ class ModifierTaskView(gui3d.TaskView):
         # Add slider to groupbox
         self.modifiers[slider.modifier.name.replace('|','-')] = slider.modifier # TODO this strange naming scheme is legacy for MHM compatibility
         box.addWidget(slider)
+        slider.enabledCondition = enabledCondition
         self.sliders.append(slider)
 
         self.updateMacro()
@@ -122,6 +123,9 @@ class ModifierTaskView(gui3d.TaskView):
     def syncSliders(self):
         for slider in self.sliders:
             slider.update()
+            if slider.enabledCondition:
+                enabled = getattr(slider.modifier.human, slider.enabledCondition)()
+                slider.setEnabled(enabled)
 
     def onHide(self, event):
         super(ModifierTaskView, self).onHide(event)
@@ -240,7 +244,8 @@ def loadModifierTaskViews(filename, human, category, taskviewClass=None):
                 label = sDef.get('label', None)
                 camFunc = _getCamFunc( sDef.get('cam', None) )
                 slider = modifierslider.ModifierSlider(modifier, label=label, cameraView=camFunc)
-                taskView.addSlider(sliderCategory, slider)
+                enabledCondition = sDef.get("enabledCondition", None)
+                taskView.addSlider(sliderCategory, slider, enabledCondition)
 
         if taskView.saveName is not None:
             gui3d.app.addLoadHandler(taskView.saveName, taskView.loadHandler)
