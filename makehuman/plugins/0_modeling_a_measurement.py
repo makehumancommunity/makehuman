@@ -74,8 +74,8 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
         self.uk = self.braBox.addWidget(gui.TextView('UK: '))
         '''
 
-    def addSlider(self, sliderCategory, slider):
-        super(MeasureTaskView, self).addSlider(sliderCategory, slider)
+    def addSlider(self, sliderCategory, slider, enabledCondition):
+        super(MeasureTaskView, self).addSlider(sliderCategory, slider, enabledCondition)
 
         slider.valueConverter = MeasurementValueConverter(self, slider.modifier)
 
@@ -90,7 +90,6 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
         @slider.mhEvent
         def onChange(event):
             self.syncGUIStats()
-        self.sliders.append(slider)
 
     def _createMeasureMesh(self):
         self.measureMesh = module3d.Object3D('measure', 2)
