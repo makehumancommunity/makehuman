@@ -75,7 +75,7 @@ def exportFbx(filepath, config):
 
     # Set mesh names
     for mesh in meshes:
-        mesh.name = fbx_utils.getMeshName(mesh, skel)
+        mesh.name = fbx_utils.getMeshName(mesh, name)
 
     useAnim = False
     if useAnim:

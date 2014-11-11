@@ -186,7 +186,6 @@ def writeObjectProps(fp, skel, config):
     if skel is None:
         return
 
-    #fbx_binary.fbx_template_generate(elem, "NodeAttribute", )
     for bone in skel.getBones():
         writeNodeAttributeProp(fp, bone, config)
     writeNodeProp(fp, skel, config)
@@ -210,8 +209,8 @@ def writeNodeAttributeProp(fp, bone, config):
 
     import fbx_utils
     fp.write(
-'    NodeAttribute: %d, "%s", "LimbNode" {\n' % (id, key) +
-"""        Properties70:  {
+'    NodeAttribute: %d, "%s", "LimbNode" {' % (id, key) + """
+        Properties70:  {
 """+ fbx_utils.get_ascii_properties(properties, indent=3) + """
         }
         TypeFlags: "Skeleton"

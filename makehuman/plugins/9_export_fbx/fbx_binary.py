@@ -505,7 +505,7 @@ def fbx_data_skeleton_bone_model(objectsParent, key, id, properties):
     fbx_bo.add_string(fbx_name_class(key.encode()))
     #fbx_bo.add_string(fbx_name_class(boneName.encode(), b"NodeAttribute"))
     fbx_bo.add_string(b"LimbNode")
-    elem_data_single_int32(fbx_bo, b"Version", 232)
+    elem_data_single_int32(fbx_bo, b"Version", FBX_MODELS_VERSION)
     elem_data_single_bool(fbx_bo, b"Shading", True)
     elem_data_single_string(fbx_bo, b"Culling", "CullingOff")
 
@@ -535,7 +535,7 @@ def fbx_data_skeleton_model(objectsParent, key, id, properties):
     fbx_bo = elem_data_single_int64(objectsParent, b"Model", id)
     fbx_bo.add_string(fbx_name_class(key.encode()))
     fbx_bo.add_string(b"Null")
-    elem_data_single_int32(fbx_bo, b"Version", 232)
+    elem_data_single_int32(fbx_bo, b"Version", FBX_MODELS_VERSION)
     elem_data_single_bool(fbx_bo, b"Shading", True)
     elem_data_single_string(fbx_bo, b"Culling", "CullingOff")
 

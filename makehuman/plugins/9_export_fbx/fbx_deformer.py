@@ -36,11 +36,7 @@ Abstract
 Fbx mesh
 """
 
-import math
-import numpy as np
-import numpy.linalg as la
 import transformations as tm
-import log
 
 from .fbx_utils import *
 
