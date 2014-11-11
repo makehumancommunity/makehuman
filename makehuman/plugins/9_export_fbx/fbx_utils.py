@@ -108,9 +108,9 @@ def getTextureName(filepath):
     return texfile.replace(".","_")
 
 
-def getMeshName(mesh, skel):
-    if skel and mesh.name == "base.obj":
-        return skel.name
+def getMeshName(mesh, exportname):
+    if mesh.name == "base.obj":
+        return exportname
     else:
         return os.path.splitext(mesh.name)[0]
 
