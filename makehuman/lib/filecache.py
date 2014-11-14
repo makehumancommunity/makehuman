@@ -121,20 +121,13 @@ def cleanupCache(cache):
     :param cache:
     :return: pointer to modified cache (input cache is modified in place)
     """
-    oldEntries = dict((key, True) for key in cache.keys()) # lookup dict for old entries in cache
+    for fileId in cache.keys():
+        if not os.path.exists(fileId):
+            try:
+                del cache[fileId]
+            except:
+                pass
 
-    for fileId in oldEntries.keys():
-        if os.path.exists(fileId):
-           try:
-               del oldEntries[fileId]    # Mark that old cache entry is still valid
-           except:
-               pass
-
-    for key in oldEntries.keys():
-        try:
-            del cache[key]
-        except:
-            pass
     return cache
 
 def saveCache(cache, filename):
