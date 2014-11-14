@@ -986,5 +986,5 @@ def peekMetadata(filename):
     skelData = json.load(open(filename, 'rb'))
     desc = skelData.get("description", "")
     name = skelData.get("name", "Skeleton")
-    tags = set(skelData.get("tags", []))
+    tags = set( map(lambda s: s.lower(), skelData.get("tags", [])) )
     return (name, desc, tags)
