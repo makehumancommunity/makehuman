@@ -612,7 +612,7 @@ def loadBinaryProxy(path, human, type):
 
     proxy.uvLayers = {}
     for uvIdx, uvName in enumerate(_unpackStringList(npzfile['uvLayers_str'], npzfile['uvLayers_idx'])):
-        uvLayers[uvIdx] = uvName
+        proxy.uvLayers[uvIdx] = uvName
 
     proxy.material = material.Material(proxy.name)
     if 'material_file' in npzfile:
