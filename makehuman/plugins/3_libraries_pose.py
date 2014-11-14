@@ -49,7 +49,6 @@ from core import G
 import getpath
 
 import skeleton_drawing
-import material
 
 class PoseAction(gui3d.Action):
     def __init__(self, name, library, before, after):
@@ -147,25 +146,8 @@ class PoseLibraryTaskView(gui3d.TaskView):
         self.drawSkeleton(self.human.getSkeleton())
         self.human.refreshPose()
 
-        # Set X-ray material
-        self.oldHumanMat = self.human.material.clone()
-        self.oldPxyMats = dict()
-        xray_mat = material.fromFile(mh.getSysDataPath('materials/xray.mhmat'))
-        self.human.material = xray_mat
-        for pxy in self.human.getProxies(includeHumanProxy=False):
-            obj = pxy.object
-            self.oldPxyMats[pxy.uuid] = obj.material.clone()
-            obj.material = xray_mat
-        mh.redraw()
-
     def onHide(self, event):
         gui3d.app.statusPersist('')
-
-        # Restore material
-        self.human.material = self.oldHumanMat
-        for pxy in self.human.getProxies(includeHumanProxy=False):
-            if pxy.uuid in self.oldPxyMats:
-                pxy.object.material = self.oldPxyMats[pxy.uuid]
 
     def drawSkeleton(self, skel):
         if self.skelObj:
