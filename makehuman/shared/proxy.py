@@ -495,6 +495,9 @@ def loadTextProxy(human, filepath, type="Clothes"):
 
 
 def saveBinaryProxy(proxy, path):
+    def _properPath(path):
+        return getpath.getJailedPath(path, folder)
+
     fp = open(path, 'wb')
     tagStr, tagIdx = _packStringList(proxy.tags)
     uvStr,uvIdx = _packStringList([ _properPath(proxy.uvLayers[k]) for k in sorted(proxy.uvLayers.keys()) ])
@@ -503,8 +506,6 @@ def saveBinaryProxy(proxy, path):
 
     folder = os.path.dirname(path)
 
-    def _properPath(path):
-        return getpath.getJailedPath(path, folder)
 
     vars_ = dict(
         #proxyType = np.fromstring(proxy.type, dtype='S1'),     # TODO store proxy type?
