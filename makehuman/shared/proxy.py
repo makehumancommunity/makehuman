@@ -103,7 +103,7 @@ class Proxy:
         self.z_depth = -1       # Render order depth for the proxy object. Also used to determine which proxy object should mask others (delete faces)
         self.max_pole = None    # Signifies the maximum number of faces per vertex on the mesh topology. Set to none for default.
 
-        self.uvLayers = {}
+        self.uvLayers = {}  # TODO what is this used for?
 
         self.material = material.Material(self.name)
 
@@ -403,6 +403,7 @@ def loadTextProxy(human, filepath, type="Clothes"):
             log.warning('Deprecated parameter "transparent" used in proxy file. Set property in material file instead.')
 
         elif key == 'uvLayer':
+            # TODO is this still used?
             if len(words) > 2:
                 layer = int(words[1])
                 uvFile = words[2]
