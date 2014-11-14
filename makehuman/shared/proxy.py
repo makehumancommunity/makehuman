@@ -625,6 +625,7 @@ def loadBinaryProxy(path, human, type):
     if 'vertexBoneWeights_file' in npzfile:
         proxy._vertexBoneWeights_file = npzfile['vertexBoneWeights_file'].tostring()
         if proxy.vertexBoneWeights_file:
+            from animation import VertexBoneWeights
             proxy.vertexBoneWeights = VertexBoneWeights.fromFile(proxy.vertexBoneWeights_file)
 
 
