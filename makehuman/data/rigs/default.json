@@ -1143,7 +1143,7 @@
         }
     },
     "copyright": "(c) Manuel Bastioni 2014",
-    "description": "Very cool general-purpose skeleton",
+    "description": "MakeHuman default skeleton. A complex skeleton with detailed fingers, toes and facial bones for advanced animations.",
     "joints": {
         "breast.L_head": [
             13654,
@@ -4015,7 +4015,8 @@
         ]
     },
     "license": "GNU Affero General Public License 3",
-    "name": "MakeHuman skeleton",
+    "name": "MakeHuman default skeleton",
     "version": 102,
+    "tags": ["facial bones", "detailed hands"],
     "weights_file": "default_weights.jsonw"
 }
