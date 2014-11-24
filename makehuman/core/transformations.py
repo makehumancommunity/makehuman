@@ -1266,6 +1266,25 @@ def quaternion_about_axis(angle, axis):
     q[0] = math.cos(angle/2.0)
     return q
 
+def rotation_from_quaternion(quaternion):
+    axis = numpy.zeros(3, dtype=numpy.float32)
+    w,x,y,z = quaternion[:4]
+    if w > 1:
+        quaternion.normalise()
+        w,x,y,z = quaternion[:4]
+    angle = 2 * math.acos(w)
+    s = math.sqrt(1 - w * w)
+    if s < 0.001:
+        # if s close to zero then direction of axis not important
+        axis[0] = x  # if it is important that axis is normalised then replace with x=1; y=z=0;
+        axis[1] = y
+        axis[2] = z
+    else:
+        axis[0] = x / s  # normalize axis
+        axis[1] = y / s
+        axis[2] = z / s
+
+    return angle, axis
 
 def quaternion_matrix(quaternion):
     """Return homogeneous rotation matrix from quaternion.
