@@ -726,7 +726,7 @@ class BVHJoint():
             poseTranslate = (self.parent is None)
         else:
             poseTranslate = False
-        if poseTranslate and (rXs != None or rYs != None or rZs != None):
+        if poseTranslate and (rXs is not None or rYs is not None or rZs is not None):
             if rXs is None:
                 rXs = np.zeros(nFrames, dtype=np.float32)
             if rYs is None:
