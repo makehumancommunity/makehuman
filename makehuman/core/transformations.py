@@ -376,13 +376,13 @@ def rotation_from_matrix(matrix):
     R33 = R[:3, :3]
     # direction: unit eigenvector of R33 corresponding to eigenvalue of 1
     w, W = numpy.linalg.eig(R33.T)
-    i = numpy.where(abs(numpy.real(w) - 1.0) < 1e-8)[0]
+    i = numpy.where(abs(numpy.real(w) - 1.0) < 1e-7)[0]
     if not len(i):
         raise ValueError("no unit eigenvector corresponding to eigenvalue 1")
     direction = numpy.real(W[:, i[-1]]).squeeze()
     # point: unit eigenvector of R33 corresponding to eigenvalue of 1
     w, Q = numpy.linalg.eig(R)
-    i = numpy.where(abs(numpy.real(w) - 1.0) < 1e-8)[0]
+    i = numpy.where(abs(numpy.real(w) - 1.0) < 1e-7)[0]
     if not len(i):
         raise ValueError("no unit eigenvector corresponding to eigenvalue 1")
     point = numpy.real(Q[:, i[-1]]).squeeze()
