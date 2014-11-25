@@ -541,19 +541,12 @@ class Bone(object):
             allowed values: yUpFaceZ (0), yUpFaceX (1), zUpFaceNegY (2), zUpFaceX (3)
 
         localBoneAxis: How to orient the local axes around the bone, which axis
-                       points along the length of the bone. Global (g )assumes the 
+                       points along the length of the bone. Global (g) assumes the
                        same axes as the global coordinate space used for the model.
             allowed values: y, x, g
         """
         #self.calcRestMatrix()  # TODO perhaps interesting method to replace the current
         return transformBoneMatrix(self.matRestGlobal, meshOrientation, localBoneAxis, offsetVect)
-
-    @property
-    def weight_reference_bones(self):
-        if self._weight_reference_bones is None:
-            return self.reference_bones
-        else:
-            return self._weight_reference_bones
 
     def getRelativeMatrix(self, meshOrientation='yUpFaceZ', localBoneAxis='y', offsetVect=[0,0,0]):
         restmat = self.getRestMatrix(meshOrientation, localBoneAxis, offsetVect)
@@ -574,6 +567,13 @@ class Bone(object):
         bindinv = np.transpose(restmat)
         bindmat = la.inv(bindinv)
         return bindmat,bindinv
+
+    @property
+    def weight_reference_bones(self):
+        if self._weight_reference_bones is None:
+            return self.reference_bones
+        else:
+            return self._weight_reference_bones
 
     def __repr__(self):
         return ("  <Bone %s>" % self.name)
@@ -645,15 +645,18 @@ class Bone(object):
         return self.tailPos.copy()
 
     def getRestOffset(self):
+        # TODO make configurable like getRestMatrix
         if self.parent:
             return self.getRestHeadPos() - self.parent.getRestHeadPos()
         else:
             return self.getRestHeadPos()
 
     def getRestDirection(self):
+        # TODO make configurable like getRestMatrix
         return matrix.normalize(self.getRestOffset())
 
     def getRestOrientationQuat(self):
+        # TODO make configurable like getRestMatrix
         return tm.quaternion_from_matrix(self.matRestGlobal)
 
     def getRoll(self):
@@ -934,7 +937,7 @@ def transformBoneMatrix(mat, meshOrientation='yUpFaceZ', localBoneAxis='y', offs
         allowed values: yUpFaceZ (0), yUpFaceX (1), zUpFaceNegY (2), zUpFaceX (3)
 
     localBoneAxis: How to orient the local axes around the bone, which axis
-                   points along the length of the bone. Global (g )assumes the 
+                   points along the length of the bone. Global (g) assumes the
                    same axes as the global coordinate space used for the model.
         allowed values: y, x, g
     """
