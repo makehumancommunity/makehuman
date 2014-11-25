@@ -48,9 +48,7 @@ import os
 from progress import Progress
 import codecs
 import transformations
-import skeleton
 import log
-import proxy
 
 def exportOgreMesh(filepath, config):
     progress = Progress.begin()
@@ -60,8 +58,6 @@ def exportOgreMesh(filepath, config):
 
     # TODO account for config.scale in skeleton
     config.setupTexFolder(filepath) # TODO unused
-    filename = os.path.basename(filepath)
-    name = formatName(os.path.splitext(filename)[0])
 
     progress(0.05, 0.2, "Collecting Objects")
     objects = human.getObjects(excludeZeroFaceObjs=True)
@@ -111,7 +107,7 @@ def writeMeshFile(human, filepath, objects, config):
 
         loopprog(0.1, 0.3, "Writing faces of %s.", obj.name)
         # TODO add proxy type name in material name as well
-        lines.append('        <submesh material="%s_%s_%s" usesharedvertices="false" use32bitindexes="false" operationtype="triangle_list">' % (formatName(name), objIdx, formatName(obj.name) if formatName(obj.name) != name else "human"))
+        lines.append('        <submesh material="%s_%s_%s" usesharedvertices="false" use32bitindexes="false" operationtype="triangle_list">' % (name, objIdx, formatName(obj.name) if formatName(obj.name) != name else "human"))
 
         # Faces
         lines.append('            <faces count="%s">' % numFaces)
@@ -150,6 +146,7 @@ def writeMeshFile(human, filepath, objects, config):
             uvs = mesh.r_texco.copy()
             uvs[:,1] = 1-uvs[:,1]  # v = 1 - v
         else:
+            import numpy as np
             uvs = np.zeros((numVerts,2), dtype=np.float32)
 
         lines.extend( ['''\
@@ -166,7 +163,6 @@ def writeMeshFile(human, filepath, objects, config):
 
         # Skeleton bone assignments
         if human.getSkeleton():
-            # TODO getVertexWeights is the best name for this, use it consistently in proxy/module3d
             bodyWeights = human.getVertexWeights()
             if pxy:
                 # Determine vertex weights for proxy (map to unfiltered proxy mesh)
@@ -206,7 +202,7 @@ def writeMeshFile(human, filepath, objects, config):
     lines.append('    </submeshnames>')
 
     if human.getSkeleton():
-        lines.append('    <skeletonlink name="%s.skeleton" />' % name)
+        lines.append('    <skeletonlink name="%s.skeleton" />' % getbasefilename(filename))
     lines.append('</mesh>')
 
     f.write("\n".join(lines))
@@ -214,10 +210,12 @@ def writeMeshFile(human, filepath, objects, config):
 
 
 def writeSkeletonFile(human, filepath, config):
+    import numpy as np
+    import transformations as tm
     Pprogress = Progress(3)  # Parent.
     filename = os.path.basename(filepath)
-    name = formatName(os.path.splitext(filename)[0])
-    filename = name + ".skeleton.xml"
+    filename = getbasefilename(filename)
+    filename = filename + ".skeleton.xml"
     filepath = os.path.join(os.path.dirname(filepath), filename)
 
     skel = human.getSkeleton()
@@ -227,17 +225,24 @@ def writeSkeletonFile(human, filepath, config):
 
     lines.append('<?xml version="1.0" encoding="UTF-8"?>')
     lines.append('<!-- Exported from MakeHuman (www.makehuman.org) -->')
+    lines.append('<!-- Skeleton: %s -->' % skel.name)
     lines.append('<skeleton>')
     lines.append('    <bones>')
     progress = Progress(len(skel.getBones()))
     for bIdx, bone in enumerate(skel.getBones()):
-        pos = config.scale * bone.getRestOffset()
-        if config.feetOnGround and not bone.parent:
-            pos[1] += getFeetOnGroundOffset(config)
+        offset = [ 0.0, getFeetOnGroundOffset(config), 0.0]  # TODO adapt if mesh orientation is different
+
+        mat = bone.getRelativeMatrix(offsetVect=offset)
+
+        # Bone positions are in parent bone space
+        pos = mat[:3,3] * config.scale
+
+        angle, axis, _ = tm.rotation_from_matrix(mat)
+
         lines.append('        <bone id="%s" name="%s">' % (bIdx, bone.name))
         lines.append('            <position x="%s" y="%s" z="%s" />' % (pos[0], pos[1], pos[2]))
-        lines.append('            <rotation angle="0">')
-        lines.append('                <axis x="1" y="0" z="0" />')
+        lines.append('            <rotation angle="%s">' % angle)
+        lines.append('                <axis x="%s" y="%s" z="%s" />' % (axis[0], axis[1], axis[2]))
         lines.append('            </rotation>')
         lines.append('        </bone>')
         progress.step()
@@ -269,20 +274,19 @@ def writeSkeletonFile(human, filepath, config):
 def writeMaterialFile(human, filepath, objects, config):
     progress = Progress(len(objects))
     folderpath = os.path.dirname(filepath)
-    name = formatName(os.path.splitext(os.path.basename(filepath))[0])
-    filename = name + ".material"
+    filename = getbasefilename(os.path.basename(filepath))
+    name = formatName(filename)
+    filename = filename + ".material"
     filepath = os.path.join(folderpath, filename)
 
     f = codecs.open(filepath, 'w', encoding="utf-8")
     lines = []
 
     for objIdx, obj in enumerate(objects):
-        mesh = obj.mesh
-
         mat = obj.material
         if objIdx > 0:
             lines.append('')
-        lines.append('material %s_%s_%s' % (formatName(name), objIdx, formatName(obj.name) if formatName(obj.name) != name else "human"))
+        lines.append('material %s_%s_%s' % (name, objIdx, formatName(obj.name) if formatName(obj.name) != name else "human"))
         lines.append('{')
         lines.append('    receive_shadows %s\n' % ("on" if mat.receiveShadows else "off"))
         lines.append('    technique')
@@ -323,6 +327,7 @@ def writeMaterialFile(human, filepath, objects, config):
     f.close()
 
 def writeAnimation(human, linebuffer, animTrack):
+    import numpy as np
     progress = Progress(len(human.getSkeleton().getBones()))
     log.message("Exporting animation %s.", animTrack.name)
     linebuffer.append('        <animation name="%s" length="%s">' % (animTrack.name, animTrack.getPlaytime()))
@@ -336,6 +341,7 @@ def writeAnimation(human, linebuffer, animTrack):
             poseMat = animTrack.getAtFramePos(frameIdx)[bIdx]
             translation = poseMat[:3,3]
             angle, axis, _ = transformations.rotation_from_matrix(poseMat)
+            axis = np.asarray(axis * np.matrix(bone.getRestMatrix(offsetVect=getFeetOnGroundOffset(config))))[0]
             linebuffer.append('                        <keyframe time="%s">' % (float(frameIdx) * frameTime))
             linebuffer.append('                            <translate x="%s" y="%s" z="%s" />' % (translation[0], translation[1], translation[2]))
             # TODO account for scale
@@ -357,11 +363,21 @@ def formatName(name):
 
     if name.endswith('.mesh'):
         return _goodName(name[:-5])
+    elif name.endswith('.mesh.xml'):
+        return _goodName(name[:-9])
+    elif name.endswith('.xml'):
+        return _goodName(name[:-4])
     elif name.endswith('.obj'):
         return _goodName(name[:-4])
     else:
         return _goodName(name)
 
+def getbasefilename(filename):
+    if filename.endswith('.mesh.xml'):
+        return filename[:-9]
+    elif filename.endswith('.mesh'):
+        return filename[:-5]
+    return filename
 
 def getFeetOnGroundOffset(config):
     return -config.scale * config.human.getJointPosition('ground')[1]
