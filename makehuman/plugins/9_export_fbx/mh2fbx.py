@@ -68,7 +68,11 @@ def exportFbx(filepath, config):
     meshes = [obj.mesh.clone(config.scale, True) for obj in objects]
     skel = human.getSkeleton()
     if skel:
-        skel = skel.scaled(config.scale)
+        if config.scale != 1:
+            skel = skel.scaled(config.scale)
+        if not skel.isInRestPose():
+            # Export skeleton with the current pose as rest pose
+            skel = skel.createFromPose()
 
     # Set mesh names
     for mesh in meshes:
