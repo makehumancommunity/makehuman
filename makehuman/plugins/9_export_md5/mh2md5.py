@@ -52,12 +52,10 @@ import codecs
 import numpy as np
 import numpy.linalg as la
 import transformations as tm
-import skeleton
 import log
 from progress import Progress
 
 ZYRotation = np.array(((1,0,0,0),(0,0,-1,0),(0,1,0,0),(0,0,0,1)), dtype=np.float32)
-
 
 def exportMd5(filepath, config):
     """
@@ -272,7 +270,7 @@ def exportMd5(filepath, config):
 
 def writeBone(f, bone, human, config):
     """
-    This function writes out information describing one joint in MD5 format.
+    This function writes out information describing one joint in MD5 format and bind pose of bones.
 
     Parameters
     ----------
@@ -286,26 +284,12 @@ def writeBone(f, bone, human, config):
         parentIndex = bone.parent.index + 1
     else:
         parentIndex = 0 # Refers to the hard-coded root joint
-    pos = bone.getRestHeadPos() * config.scale
 
-    if config.feetOnGround:
-        pos += config.offset
+    # Bind pose joint orientation is in world space
+    mat = bone.getRestMatrix(offsetVect=config.offset)
+    pos = mat[:3,3]
 
-    if config.zUp:
-        #transformationMat = bone.matRestGlobal.copy()
-        #transformationMat = np.dot(ZYRotation, np.dot(transformationMat,la.inv(ZYRotation)))
-        #orientationQuat = aljabr.matrix2Quaternion(transformationMat)
-        pos = pos[[0,2,1]] * [1,-1,1]
-    #else:
-    #    orientationQuat = bone.getRestOrientationQuat()
-
-    #qx = orientationQuat[0]
-    #qy = orientationQuat[1]
-    #qz = orientationQuat[2]
-    #w = orientationQuat[3]
-
-    # TODO currently all bones have a global z-up orientation, maybe orient them along y axis
-    qx = qy = qz = 0.0
+    w, qx, qy, qz = tm.quaternion_from_matrix(mat)
 
     # "[boneName]"   [parentIndex] ( [xPos] [yPos] [zPos] ) ( [xOrient] [yOrient] [zOrient] )
     f.write('\t"%s" %d ( %f %f %f ) ( %f %f %f )\n' % (bone.name, parentIndex,
@@ -329,6 +313,13 @@ def writeAnimation(filepath, human, humanBBox, config, animTrack):
     f.write('numAnimatedComponents %d\n\n' % (numJoints * 6))
 
     skel = human.getSkeleton()
+    if skel:
+        if config.scale != 1:
+            skel = skel.scaled(config.scale)
+        if not skel.isInRestPose():
+            # Export skeleton with the current pose as rest pose
+            skel = skel.createFromPose()
+
     flags = 63
     f.write('hierarchy {\n')
     f.write('\t"origin" -1 %d 0\n' % flags)
@@ -360,21 +351,10 @@ def writeAnimation(filepath, human, humanBBox, config, animTrack):
     f.write('\t( %f %f %f ) ( %f %f %f )\n' % (0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
     bases = []
     for bone in skel.getBones():
-        pos = bone.getRestOffset() * config.scale
-        if config.feetOnGround and not bone.parent:
-            pos[1] += config.offset
+        mat = bone.getRelativeMatrix(offsetVect=config.offset)
+        pos = mat[:3,3]
 
-        # TODO reuse bone.getRestMatrix() for this
-        transformationMat = bone.matRestRelative.copy()
-        if config.zUp:
-            transformationMat = np.dot(ZYRotation, np.dot(transformationMat,la.inv(ZYRotation)))
-            pos = pos[[0,2,1]] * [1,-1,1]
-        orientationQuat = tm.quaternion_from_matrix(transformationMat)
-
-        qx = orientationQuat[0]
-        qy = orientationQuat[1]
-        qz = orientationQuat[2]
-        w = orientationQuat[3]
+        w, qx, qy, qz = tm.quaternion_from_matrix(mat)
 
         #( vec3:position ) ( vec3:orientation )
         f.write('\t( %f %f %f ) ( %f %f %f )\n' % (pos[0], pos[1], pos[2], qx, qy, qz))
