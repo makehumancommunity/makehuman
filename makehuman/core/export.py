@@ -90,6 +90,8 @@ class ExportConfig(object):
         self.customPrefix       = ""
         self.human              = None
 
+        # TODO integrate meshOrientation and localBoneAxis properties in this config
+
 
     def selectedOptions(self, exporter):
         self.feetOnGround =         exporter.feetOnGround.selected
@@ -99,6 +101,7 @@ class ExportConfig(object):
 
     @property
     def offset(self):
+        # TODO if meshOrientation property is integrated in this config, adapt this property to the orientation
         import numpy as np
         if self.feetOnGround:
             yOffset = -self.scale * self.human.getJointPosition('ground')[1]
