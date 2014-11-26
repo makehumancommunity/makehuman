@@ -48,8 +48,6 @@ import os
 from core import G
 import getpath
 
-import skeleton_drawing
-
 class PoseAction(gui3d.Action):
     def __init__(self, name, library, before, after):
         super(PoseAction, self).__init__(name)
@@ -160,27 +158,6 @@ class PoseLibraryTaskView(gui3d.TaskView):
 
         if not skel:
             return
-
-        # Create a mesh from the skeleton in rest pose
-        skel.setToRestPose() # Make sure skeleton is in rest pose when constructing the skeleton mesh
-        self.skelMesh = skeleton_drawing.meshFromSkeleton(skel, "Prism")
-        self.skelMesh.name = 'SkeletonMesh-poseLibrary'
-        self.skelMesh.priority = 100
-        self.skelMesh.setPickable(False)
-        self.skelObj = self.addObject(gui3d.Object(self.skelMesh, self.human.getPosition()) )
-        self.skelObj.setShadeless(0)
-        self.skelObj.setSolid(0)
-        self.skelObj.setRotation(self.human.getRotation())
-
-        # Add the skeleton mesh to the human AnimatedMesh so it animates together with the skeleton
-        # The skeleton mesh is supposed to be constructed from the skeleton in rest and receives
-        # rigid vertex-bone weights (for each vertex exactly one weight of 1 to one bone)
-        mapping = skeleton_drawing.getVertBoneMapping(skel, self.skelMesh)
-        self.human.addBoundMesh(self.skelMesh, mapping)
-
-        # Store a reference to the skeleton mesh object for other plugins
-        self.human.getSkeleton().object = self.skelObj
-        mh.redraw()
 
     def onHumanChanging(self, event):
         if event.change == 'reset':
