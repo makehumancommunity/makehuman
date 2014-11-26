@@ -38,7 +38,6 @@ Fbx exporter
 """
 
 import os.path
-import sys
 import codecs
 
 from core import G
@@ -51,8 +50,6 @@ from . import fbx_mesh
 from . import fbx_deformer
 from . import fbx_material
 from . import fbx_anim
-
-import skeleton
 
 
 def exportFbx(filepath, config):
