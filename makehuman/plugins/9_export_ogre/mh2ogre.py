@@ -127,7 +127,7 @@ def writeMeshFile(human, filepath, objects, config):
         lines.append('                <vertexbuffer positions="true" normals="true">')
         coords = mesh.r_coord.copy()
         if config.feetOnGround:
-            coords[:,1] += getFeetOnGroundOffset(config)
+            coords[:] += config.offset
         # Note: Ogre3d uses a y-up coordinate system (just like MH)
         lines.extend(['''\
                     <vertex>
@@ -210,7 +210,6 @@ def writeMeshFile(human, filepath, objects, config):
 
 
 def writeSkeletonFile(human, filepath, config):
-    import numpy as np
     import transformations as tm
     Pprogress = Progress(3)  # Parent.
     filename = os.path.basename(filepath)
@@ -219,6 +218,11 @@ def writeSkeletonFile(human, filepath, config):
     filepath = os.path.join(os.path.dirname(filepath), filename)
 
     skel = human.getSkeleton()
+    if config.scale != 1:
+        skel = skel.scaled(config.scale)
+    if not skel.isInRestPose():
+        # Export skeleton with the current pose as rest pose
+        skel = skel.createFromPose()
 
     f = codecs.open(filepath, 'w', encoding="utf-8")
     lines = []
@@ -230,12 +234,10 @@ def writeSkeletonFile(human, filepath, config):
     lines.append('    <bones>')
     progress = Progress(len(skel.getBones()))
     for bIdx, bone in enumerate(skel.getBones()):
-        offset = [ 0.0, getFeetOnGroundOffset(config), 0.0]  # TODO adapt if mesh orientation is different
-
-        mat = bone.getRelativeMatrix(offsetVect=offset)
+        mat = bone.getRelativeMatrix(offsetVect=config.offset)  # TODO adapt offset if mesh orientation is different
 
         # Bone positions are in parent bone space
-        pos = mat[:3,3] * config.scale
+        pos = mat[:3,3]
 
         angle, axis, _ = tm.rotation_from_matrix(mat)
 
@@ -261,7 +263,7 @@ def writeSkeletonFile(human, filepath, config):
     if hasattr(human, 'animations'):
         lines.append('    <animations>')
         for anim in human.animations:
-            writeAnimation(human, lines, anim.getAnimationTrack())
+            writeAnimation(human, lines, anim.getAnimationTrack(), config)
         lines.append('    </animations>')
 
     lines.append('</skeleton>')
@@ -326,7 +328,7 @@ def writeMaterialFile(human, filepath, objects, config):
     f.write("\n".join(lines))
     f.close()
 
-def writeAnimation(human, linebuffer, animTrack):
+def writeAnimation(human, linebuffer, animTrack, config):
     import numpy as np
     progress = Progress(len(human.getSkeleton().getBones()))
     log.message("Exporting animation %s.", animTrack.name)
@@ -341,7 +343,7 @@ def writeAnimation(human, linebuffer, animTrack):
             poseMat = animTrack.getAtFramePos(frameIdx)[bIdx]
             translation = poseMat[:3,3]
             angle, axis, _ = transformations.rotation_from_matrix(poseMat)
-            axis = np.asarray(axis * np.matrix(bone.getRestMatrix(offsetVect=getFeetOnGroundOffset(config))))[0]
+            axis = np.asarray(axis * np.matrix(bone.getRestMatrix(offsetVect=config.offset)))[0]
             linebuffer.append('                        <keyframe time="%s">' % (float(frameIdx) * frameTime))
             linebuffer.append('                            <translate x="%s" y="%s" z="%s" />' % (translation[0], translation[1], translation[2]))
             # TODO account for scale
@@ -378,6 +380,3 @@ def getbasefilename(filename):
     elif filename.endswith('.mesh'):
         return filename[:-5]
     return filename
-
-def getFeetOnGroundOffset(config):
-    return -config.scale * config.human.getJointPosition('ground')[1]
