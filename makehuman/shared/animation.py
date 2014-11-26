@@ -41,7 +41,6 @@ Data handlers for skeletal animation.
 
 import math
 import numpy as np
-import numpy.linalg as la
 import log
 
 
@@ -139,30 +138,44 @@ class AnimationTrack(object):
 
         skel.setPose(old_pose)
 
-    def getAtTime(self, time):
+    def getAtTime(self, time, noBake=False):
         """
         Returns the animation state at the specified time.
         When time is between two stored frames the animation values will be
         interpolated.
+
+        If noBake is True will always return the original non-baked data.
+        Else, if baked data is available, it will be used, and will fall back
+        to non-baked animation data otherwise.
         """
+        if noBake:
+            data = self._data
+        else:
+            data = self.data
+
         frameIdx, fraction = self.getFrameIndexAtTime(time)
         if fraction == 0 or self.interpolationType == 0:
             # Discrete animation
             idx = frameIdx*self.nBones
-            return self.data[idx:idx+self.nBones]
+            return data[idx:idx+self.nBones]
         elif self.interpolationType == 1:
             # Linear interpolation
             idx1 = frameIdx*self.nBones
             idx2 = ((frameIdx+1) % self.nFrames) * self.nBones
-            return self.data[idx1:idx1+self.nBones] * (1-fraction) + \
-                   self.data[idx2:idx2+self.nBones] * fraction
+            return data[idx1:idx1+self.nBones] * (1-fraction) + \
+                   data[idx2:idx2+self.nBones] * fraction
         elif self.interpolationType == 2:
             # Logarithmic interpolation
             pass # TODO
 
-    def getAtFramePos(self, frame, original=False):
+    def getAtFramePos(self, frame, noBake=False):
+        """
+        If noBake is True will always return the original non-baked data.
+        Else, if baked data is available, it will be used, and will fall back
+        to non-baked animation data otherwise.
+        """
         frame = int(frame)
-        if original:
+        if noBake:
             return self._data[frame*self.nBones:(frame+1)*self.nBones]
         return self.data[frame*self.nBones:(frame+1)*self.nBones]
 
@@ -290,13 +303,12 @@ class PoseUnit(AnimationTrack):
 
     def _cacheAffectedBones(self):
         self._affectedBones = []
-        IDENT = emptyPose()
 
         for f_idx in xrange(self.nFrames):
             frameData = self.getAtFramePos(f_idx)
             self._affectedBones.append( [] )
             for b_idx in xrange(self.nBones):
-                if not np.allclose(frameData[b_idx], IDENT, atol=1e-05):
+                if not isRest(frameData[b_idx]):
                     self._affectedBones[f_idx].append(b_idx)
 
     def getBlendedPose(self, poses, weights, additiveBlending=True):
@@ -827,7 +839,7 @@ class AnimatedMesh(object):
         Set mesh posed (True) or set to rest pose (False), changes pose state.
         """
         self._posed = posed
-        self.refreshPose(True)
+        self.refreshPose(updateIfInRest=True)
 
     def isPosed(self):
         return self._posed and self.isPoseable()
@@ -853,21 +865,27 @@ class AnimatedMesh(object):
     def getTime(self):
         return self.__playTime
 
-    def getPoseState(self):
+    def getPoseState(self, noBake=False):
         """
         Get the pose matrices of the active animation at the current play time.
         Returned matrices are baked (they are skin matrices, relative to bone 
         rest pose in object space) if the active animation is baked, otherwise
         they are plain pose matrices in local bone space.
         """
-        poseState = self.__currentAnim.getAtTime(self.__playTime)
+        poseState = self.__currentAnim.getAtTime(self.__playTime, noBake)
         if self.__inPlace:
-            poseState = poseState.copy()
+            poseState = poseState.copy()  # TODO this probably doesntt work with baked skinning matrices
             # Remove translation from matrix
             poseState[:,:3,3] = np.zeros((poseState.shape[0],3), dtype=np.float32)
         return poseState
 
-    def _pose(self):
+    def _pose(self, syncSkeleton=True):
+        """
+        If syncSkeleton is True, even when baked animations are used, that do not require
+        applying motion to the skeleton to calculate the skinning matrices, the pose
+        state of the skeleton is updated. Thus setting this to True is slower and
+        is advised for static poses only.
+        """
         if self.isPosed():
             if not self.getSkeleton():
                 return
@@ -905,9 +923,13 @@ class AnimatedMesh(object):
                     raise e
                 # TODO you could avoid an array copy by passing the mesh.coord list directly and modifying it in place
                 self._updateMeshVerts(mesh, posedCoords[:,:3])
+
+            # Adapt the bones of the skeleton to match current skinned pose (slower, should only be used for static poses)
+            if syncSkeleton and self.__currentAnim.isBaked():
+                self.getSkeleton().setPose(self.getPoseState(noBake=True))
         else:
-            if self.getSkeleton():
-                self.getSkeleton().setToRestPose() # TODO not strictly necessary if you only want to skin the mesh
+            if self.getSkeleton() and syncSkeleton:
+                self.getSkeleton().setToRestPose()
             for idx,mesh in enumerate(self.__meshes):
                 self._updateMeshVerts(mesh, self.__originalMeshCoords[idx])
 
@@ -936,11 +958,15 @@ class AnimatedMesh(object):
         rIdx = self._getBoundMeshIndex(name)
         self.__originalMeshCoords[rIdx][:,:3] = coord[:,:3]
 
-    def refreshPose(self, updateIfInRest=False):
+    def refreshPose(self, updateIfInRest=False, syncSkeleton=True):
         if not self.getSkeleton():
             self.resetToRestPose()
         if updateIfInRest or self.isPosed():
-            self._pose()
+            self._pose(syncSkeleton=syncSkeleton)
+        elif syncSkeleton and self.getSkeleton():
+            # Do not do the skinning (which is trivial), but nonetheless ensure that the skeleton's
+            # pose state is restored to rest
+            self.getSkeleton().setToRestPose()
 
 def skinMesh(coords, compiledVertWeights, poseData):
     """
@@ -1028,7 +1054,6 @@ def skinMesh(coords, compiledVertWeights, poseData):
     # slightly faster
     return np.einsum('ijk,ikl -> ij', accum[:,:3,:c], coords[:,:c,None])
 
-
 def emptyTrack(nFrames, nBones=1):
     """
     Create an empty (rest pose) animation track pose data array.
@@ -1043,6 +1068,23 @@ def emptyPose(nBones=1):
     Create an empty animation containing one frame. 
     """
     return emptyTrack(1, nBones)
+
+IDENT_POSE = emptyPose()
+IDENT_4 = np.identity(4, dtype=np.float32)
+def isRest(poseMat):
+    """
+    Determine whether specified pose matrix is a trivial rest pose (identity)
+    """
+    global IDENT_POSE
+    global IDENT_4
+    delta = 1e-05
+
+    if poseMat.shape == IDENT_POSE.shape:
+        return np.allclose(poseMat, IDENT_POSE, atol=delta)
+    elif poseMat.shape == (4,4):
+        return np.allclose(poseMat, IDENT_4, atol=delta)
+    else:
+        return np.allclose(poseMat, IDENT_4[:3,:4], atol=delta)
 
 def animationRelativeToPose(animation, restpose):
     # TODO create animation track copy that is relative to restpose
