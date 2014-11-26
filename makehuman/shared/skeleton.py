@@ -53,6 +53,7 @@ import numpy as np
 import numpy.linalg as la
 import transformations as tm
 import matrix
+import animation
 from animation import VertexBoneWeights
 
 import log
@@ -282,9 +283,34 @@ class Skeleton(object):
 
         for bone in self.getBones():
             parentName = bone.parent.name if bone.parent else None
+            rbone = result.addBone(bone.name, parentName, bone.headJoint, bone.tailJoint, bone.roll, bone.reference_bones)
+            rbone.matPose = bone.matPose.copy()
+            rbone.matPose[:3,3] *= scale
+
+        result.build()
+
+        return result
+
+    def createFromPose(self):
+        """
+        Create a clone of this skeleton with its current pose applied as rest pose.
+
+        Note: this pose is undone when self.updateJointPositions() is called on this
+        skeleton
+        """
+        result = type(self)(self.name)
+        result.joint_pos_idxs = dict(self.joint_pos_idxs)
+        result.vertexWeights = self.vertexWeights
+        result.scale = self.scale
+
+        for bone in self.getBones():
+            parentName = bone.parent.name if bone.parent else None
             result.addBone(bone.name, parentName, bone.headJoint, bone.tailJoint, bone.roll, bone.reference_bones)
 
         result.build()
+
+        for bone in result.getBones():
+            bone.rotateRest( self.getBone(bone.name).matPose )
 
         return result
 
@@ -295,6 +321,7 @@ class Skeleton(object):
         self.bones[name] = bone
         if not parentName:
             self.roots.append(bone)
+        return bone
 
     def build(self):
         self.__cacheGetBones()
@@ -523,7 +550,7 @@ class Bone(object):
 
         self.matRestGlobal = None
         self.matRestRelative = None
-        self.matPose = None
+        self.matPose = np.identity(4, np.float32)  # Set pose matrix to rest pose
         self.matPoseGlobal = None
         self.matPoseVerts = None
 
@@ -583,23 +610,20 @@ class Bone(object):
         Set matPoseVerts, matPoseGlobal and matRestRelative... TODO
         needs to happen after changing skeleton structure
         """
-        # Set pose matrix to rest pose
-        self.matPose = np.identity(4, np.float32)
+        head3 = np.array(self.headPos[:3], dtype=np.float32)
+        head4 = np.append(head3, 1.0)
 
-        self.head3 = np.array(self.headPos[:3], dtype=np.float32)
-        self.head4 = np.append(self.head3, 1.0)
-
-        self.tail3 = np.array(self.tailPos[:3], dtype=np.float32)
-        self.tail4 = np.append(self.head3, 1.0)
+        tail3 = np.array(self.tailPos[:3], dtype=np.float32)
+        tail4 = np.append(head3, 1.0)
 
         # Update rest matrices
-        self.length, self.matRestGlobal = getMatrix(self.head3, self.tail3, self.roll)
+        self.length, self.matRestGlobal = getMatrix(head3, tail3, self.roll)
         if self.parent:
             self.matRestRelative = np.dot(la.inv(self.parent.matRestGlobal), self.matRestGlobal)
         else:
             self.matRestRelative = self.matRestGlobal
 
-        self.vector4 = self.tail4 - self.head4
+        #vector4 = tail4 - head4
         self.yvector4 = np.array((0, self.length, 0, 1))
 
         # Update pose matrices
@@ -624,13 +648,13 @@ class Bone(object):
 
     def getHead(self):
         """
-        The head position of this bone in world space.
+        The current head position of this bone (posed) in world space.
         """
         return self.matPoseGlobal[:3,3].copy()
 
     def getTail(self):
         """
-        The tail position of this bone in world space.
+        The current tail position of this bone (posed) in world space.
         """
         tail4 = np.dot(self.matPoseGlobal, self.yvector4)
         return tail4[:3].copy()
@@ -639,9 +663,17 @@ class Bone(object):
         return self.yvector4[1]
 
     def getRestHeadPos(self):
+        """
+        The head position of this bone in world space.
+        """
+        # TODO allow repose (is not affected by createFromPose)
         return self.headPos.copy()
 
     def getRestTailPos(self):
+        """
+        The head position of this bone in world space.
+        """
+        # TODO allow repose (is not affected by createFromPose)
         return self.tailPos.copy()
 
     def getRestOffset(self):
@@ -693,7 +725,7 @@ class Bone(object):
         self.update()
 
     def isInRestPose(self):
-        return (self.matPose == np.identity(4, np.float32)).all()
+        return animation.isRest(self.matPose)
 
     def setRotationIndex(self, index, angle, useQuat):
         """
@@ -773,6 +805,37 @@ class Bone(object):
         Set orientation of this bone in local space as quaternion.
         """
         self.matPose = tm.quaternion_matrix(quat)
+
+    def rotateRest(self, rotMat):
+        """
+        Apply a rotation to this bone and set it as new rest orientation.
+        :param rotMat: Rotation matrix
+        """
+        self.matRestRelative = np.dot(self.matRestRelative, rotMat)
+        if self.parent:
+            self.matRestGlobal = np.dot(self.parent.matRestGlobal, self.matRestRelative)
+        else:
+            self.matRestGlobal = self.matRestRelative
+
+        '''
+        # Update rest matrices
+        self.length, self.matRestGlobal = getMatrix(head3, tail3, self.roll)
+        if self.parent:
+            self.matRestRelative = np.dot(la.inv(self.parent.matRestGlobal), self.matRestGlobal)
+        else:
+            self.matRestRelative = self.matRestGlobal
+        '''
+
+        '''
+        if self.parent:
+            self.matPoseGlobal = np.dot(self.parent.matPoseGlobal, np.dot(self.matRestRelative, self.matPose))
+        else:
+            self.matPoseGlobal = np.dot(self.matRestRelative, self.matPose)
+        '''
+
+        # Update pose matrices
+        self.update()
+
 
     def stretchTo(self, goal, doStretch):
         """
