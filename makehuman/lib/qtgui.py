@@ -1748,8 +1748,10 @@ class BrowseButton(Button):
                 path = os.getcwd()
         return pathToUnicode(os.path.normpath(path))
 
-    def __init__(self, mode = 'open'):
-        super(BrowseButton, self).__init__("...")
+    def __init__(self, mode = 'open', label=None):
+        if label is None:
+            label = '...'
+        super(BrowseButton, self).__init__(label)
         self._directory = self.getExistingPath("")
         self.filename = ""
         self._filter = ''
