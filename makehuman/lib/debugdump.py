@@ -100,7 +100,7 @@ class DebugDump(object):
         self.write("IS RELEASE VERSION: %s", os.environ['MH_RELEASE'])
         self.write("WORKING DIRECTORY: %s", getpath.pathToUnicode(os.getcwd()))
         self.write("HOME LOCATION: %s", getpath.pathToUnicode(self.home))
-        syspath = ':'.join( [getpath.pathToUnicode(p) for p in sys.path] )
+        syspath = os.path.pathsep.join( [getpath.pathToUnicode(p) for p in sys.path] )
         self.write("PYTHON PATH: %s", syspath)
         self.write("DLL PATH: %s", os.environ['PATH'])
         version = re.sub(r"[\r\n]"," ", sys.version)
