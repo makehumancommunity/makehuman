@@ -102,6 +102,7 @@ class DebugDump(object):
         self.write("HOME LOCATION: %s", getpath.pathToUnicode(self.home))
         syspath = ':'.join( [getpath.pathToUnicode(p) for p in sys.path] )
         self.write("PYTHON PATH: %s", syspath)
+        self.write("DLL PATH: %s", os.environ['PATH'])
         version = re.sub(r"[\r\n]"," ", sys.version)
         self.write("SYS.VERSION: %s", version)
         self.write("SYS.PLATFORM: %s", sys.platform)
