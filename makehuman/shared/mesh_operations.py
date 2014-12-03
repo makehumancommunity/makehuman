@@ -40,14 +40,14 @@ Mesh operations such as calculating volume and surface measures.
 import numpy as np
 import math
 
-def calculateSurface(mesh, vertGroups = None, faceMask = None):
+def calculateSurface(mesh, vertGroups=None, faceMask=None):
     """
     Calculate surface area of a mesh. Specify vertGroups or faceMask to
     calculate area of a subset of the mesh and filter out other faces.
     """
-    if vertGroups != None:
+    if vertGroups is not None:
         fvert = mesh.getFacesForGroups(vertGroups)
-    elif faceMask != None:
+    elif faceMask is not None:
         f_idx = np.argwhere(faceMask)[...,0]
         fvert = mesh.fvert[f_idx]
     else:
@@ -72,14 +72,14 @@ def calculateSurface(mesh, vertGroups = None, faceMask = None):
     else:
         raise RuntimeError("Only supports meshes with triangle or quad primitives.")
 
-def calculateVolume(mesh, vertGroups = None, faceMask = None):
+def calculateVolume(mesh, vertGroups=None, faceMask=None):
     """
     Calculate the volume of a mesh.
     Mesh is expected to be closed.
     """
-    if vertGroups != None:
+    if vertGroups is not None:
         fvert = mesh.getFacesForGroups(vertGroups)
-    elif faceMask != None:
+    elif faceMask is not None:
         f_idx = np.argwhere(faceMask)[...,0]
         fvert = mesh.fvert[f_idx]
     else:
