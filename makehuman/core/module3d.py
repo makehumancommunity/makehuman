@@ -274,7 +274,7 @@ class Object3D(object):
         # Reverse vertex mapping:
         # _inverse_parent_map[idx] = mIdx: self.coord[idx] -> other.coord[mIdx]
         other._inverse_parent_map = - np.ones(self.getVertexCount(), dtype=np.int32)
-        other._inverse_parent_map[other.parent_map] = np.arange(self.getVertexCount(), dtype=np.int32)
+        other._inverse_parent_map.flat[other.parent_map] = np.arange(self.getVertexCount(), dtype=np.int32)
         #other._inverse_parent_map = np.ma.masked_less(other._inverse_parent_map, 0)  # TODO might be useful
 
         other.setCoords(self.coord[other.parent_map])
