@@ -105,6 +105,7 @@ class DebugDump(object):
         version = re.sub(r"[\r\n]"," ", sys.version)
         self.write("SYS.VERSION: %s", version)
         self.write("SYS.PLATFORM: %s", sys.platform)
+        self.write("SYS.EXECUTABLE: %s", sys.executable)
         self.write("PLATFORM.MACHINE: %s", platform.machine())
         self.write("PLATFORM.PROCESSOR: %s", platform.processor())
         self.write("PLATFORM.UNAME.RELEASE: %s", platform.uname()[2])
