@@ -347,7 +347,7 @@ def set_sys_path():
 
     if isBuild():
         # Make sure we load packaged DLLs instead of those present on the system
-        os.environ["PATH"] = '.' + os.path.pathsep + os.environ["PATH"]
+        os.environ["PATH"] = '.' + os.path.pathsep + getCwd() + os.path.pathsep + os.environ["PATH"]
 
 stdout_filename = None
 stderr_filename = None
