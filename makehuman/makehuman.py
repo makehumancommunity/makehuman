@@ -356,6 +356,12 @@ def set_sys_path():
     if isBuild():
         # Make sure we load packaged DLLs instead of those present on the system
         os.environ["PATH"] = '.' + os.path.pathsep + getCwd() + os.path.pathsep + os.environ["PATH"]
+        if sys.platform == 'win32':
+            import codecs
+            # Hack for windows to get around crash when frozen and (py)Qt is installed on the system
+            qt_conf = os.path.join(getCwd(), 'qt.conf')
+            f = codecs.open(qt_conf, "w", encoding=sys.getfilesystemencoding(), errors="replace")
+            f.write('[Paths]\nPrefix = %s\nPlugins = qt4_plugins' % getCwd())
 
 stdout_filename = None
 stderr_filename = None
