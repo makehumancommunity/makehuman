@@ -161,10 +161,12 @@ def getCwd():
     This is not necessarily the CWD (current working directory), but it is what
     the CWD should be.
     """
+    import getpath
     if isBuild():
-        return os.path.dirname(sys.executable)
+        path = os.path.dirname(sys.executable)
     else:
-        return os.path.dirname(os.path.realpath(__file__))
+        path = os.path.dirname(os.path.realpath(__file__))
+    return getpath.pathToUnicode(path)
 
 def getHgRoot(subpath=''):
     cwd = getCwd()
