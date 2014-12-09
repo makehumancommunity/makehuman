@@ -143,6 +143,12 @@ def unicode(msg):
     except:
         pass
     try:
+        # Attempt using filesystem encoding
+        import sys
+        return __builtins__.unicode(msg, encoding=sys.getfilesystemencoding)
+    except:
+        pass
+    try:
         # Attempt to decode object's __str__ into unicode
         return str(msg).decode("utf-8", errors="replace")
     except:
