@@ -161,12 +161,10 @@ def getCwd():
     This is not necessarily the CWD (current working directory), but it is what
     the CWD should be.
     """
-    import getpath
     if isBuild():
-        path = os.path.dirname(sys.executable)
+        return os.path.dirname(sys.executable)
     else:
-        path = os.path.dirname(os.path.realpath(__file__))
-    return getpath.pathToUnicode(path)
+        return os.path.dirname(os.path.realpath(__file__))
 
 def getHgRoot(subpath=''):
     cwd = getCwd()
@@ -359,7 +357,9 @@ def set_sys_path():
         if sys.platform == 'win32':
             import codecs
             # Hack for windows to get around crash when frozen and (py)Qt is installed on the system
-            qt_conf = os.path.join(getCwd(), 'qt.conf')
+            import getpath
+            path = getpath.pathToUnicode(getCwd())
+            qt_conf = os.path.join(path, 'qt.conf')
             f = codecs.open(qt_conf, "w", encoding=sys.getfilesystemencoding(), errors="replace")
             f.write('[Paths]\nPrefix = %s\nPlugins = qt4_plugins' % getCwd())
 
