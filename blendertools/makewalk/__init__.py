@@ -485,8 +485,6 @@ class UtilityPanel(bpy.types.Panel):
         layout.prop(scn, "McpShowPosing")
         if scn.McpShowPosing:
             ins = inset(layout)
-            if not rig.McpTPoseDefined:
-                ins.prop(scn, "McpMakeHumanTPose")
             ins.operator("mcp.set_t_pose")
             ins.separator()
             ins.operator("mcp.define_t_pose")

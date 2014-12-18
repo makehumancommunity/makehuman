@@ -361,11 +361,6 @@ def initInterface(context):
         description = "Detect target rig automatically",
         default = True)
 
-    bpy.types.Scene.McpMakeHumanTPose = BoolProperty(
-        name = "MakeHuman T-pose",
-        description = "Use MakeHuman T-pose for MakeHuman characters",
-        default = True)
-
     bpy.types.Object.MhReverseHip = BoolProperty(
         name = "Reverse Hip",
         description = "The rig has a reverse hip",
