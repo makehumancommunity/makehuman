@@ -169,12 +169,7 @@ def autoTPose(rig, scn):
 
 def setTPose(rig, scn, filename=None, reload=False):
     if reload or not rig.McpTPoseDefined:
-        if isMakeHumanRig(rig) and scn.McpMakeHumanTPose:
-            if isMhOfficialRig(rig):
-                filename = "target_rigs/mh_official_tpose.json"
-            else:
-                filename = "target_rigs/makehuman_tpose.json"
-        elif filename is None:
+        if filename is None:
             filename = rig.McpTPoseFile
         hasFile = loadPose(rig, filename)
         if not hasFile:
