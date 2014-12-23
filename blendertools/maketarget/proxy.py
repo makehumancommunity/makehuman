@@ -201,6 +201,7 @@ class CProxy:
             elif status == doWeightingVerts:
                 pass
             else:
+                print("OTH", key, status)
                 try:
                     n = int(key)
                 except:
