@@ -1,7 +1,7 @@
 #!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
-"""
+""" 
 **Project Name:**      MakeHuman
 
 **Product Home Page:** http://www.makehuman.org/
@@ -53,13 +53,13 @@ class FaceGroup(object):
 
     The FaceGroup object contains a list of the faces in the group and must be
     kept in sync with the FaceGroup references stored by the individual faces.
-
+    
     .. py:attribute:: name
-
+    
         The name. str
-
+        
     .. py:attribute:: parent
-
+    
         The parent. :py:class:`module3d.Object3D`
 
     :param name: The name of the group.
@@ -100,7 +100,7 @@ class FaceGroup(object):
         else:
             # Ensure link to gui3d.object is weak to avoid circular references (which break garbage collection)
             self.__object = weakref.ref(value)
-
+    
     object = property(getObject, setObject)
 
     @property
@@ -146,7 +146,7 @@ class Object3D(object):
 
         other = type(self)(self.name, self.vertsPerPrimitive)
 
-        for prop in ['cameraMode', 'visibility', 'pickable',
+        for prop in ['cameraMode', 'visibility', 'pickable', 
                      'calculateTangents', 'priority', 'MAX_FACES', 'object']:
             setattr(other, prop, getattr(self, prop))
 
@@ -176,7 +176,7 @@ class Object3D(object):
     @property
     def parent_map(self):
         """
-        Maps vertex indices from this mesh to its original parent mesh
+        Maps vertex indices from this mesh to its original parent mesh 
         (self.parent). This happens recursively to the topmost parent.
 
         Forward vertex mapping (self -> self.parent):
@@ -211,7 +211,7 @@ class Object3D(object):
     @property
     def inverse_parent_map(self):
         """
-        Maps vertex indices from original parent mesh (self.parent) to
+        Maps vertex indices from original parent mesh (self.parent) to 
         this mesh (-1 if vertex is removed in this mesh).
         This happens recursively to the topmost parent.
 
@@ -316,8 +316,8 @@ class Object3D(object):
         which requires mesh faces to be defined with counter clock-wise vertex order.
         Face normals are not normalized.
 
-        Faces are treated as if they were triangles (using only the 3 first verts),
-        so for quads with non co-planar points, inaccuracies may occur (even though
+        Faces are treated as if they were triangles (using only the 3 first verts), 
+        so for quads with non co-planar points, inaccuracies may occur (even though 
         those have a high change of being corrected by neighbouring faces).
         """
         # We assume counter clock-wise winding order
@@ -433,20 +433,20 @@ class Object3D(object):
             return self.__object()
         else:
             return None
-
+        
     def setObject(self, value):
         if value is None:
             self.__object = None
         else:
             # Ensure link to gui3d.object is weak to avoid circular references (which break garbage collection)
             self.__object = weakref.ref(value)
-
+    
     object = property(getObject, setObject)
-
+    
     @property
     def faceGroups(self):
         return iter(self._faceGroups)
-
+        
     @property
     def faceGroupCount(self):
         return len(self._faceGroups)
@@ -455,7 +455,7 @@ class Object3D(object):
         """
         Clears both local and remote data to repurpose this object
         """
-
+    
         # Clear remote data
         self._faceGroups = []
 
@@ -653,8 +653,8 @@ class Object3D(object):
     @property
     def inverse_vmap(self):
         """
-        The inverse of vmap: a mapping of original welded (relating to UVs)
-        vertex (coord indices) to a set of unwelded vertices that represent the
+        The inverse of vmap: a mapping of original welded (relating to UVs) 
+        vertex (coord indices) to a set of unwelded vertices that represent the 
         same coordinate (r_coord indices).
         """
         if self._inverse_vmap is None:
@@ -696,12 +696,12 @@ class Object3D(object):
         """
         Map armature weights mapped to the root parent (original mesh) to this
         child mesh. Returns parentWeights unaltered if this mesh has no parent.
-        If this is a proxy mesh, parentWeights should be the weights mapped
+        If this is a proxy mesh, parentWeights should be the weights mapped 
         through the proxy.getVertexWeights() method first.
 
         This particular vertex weights mapping is only used for exporting rigged
         meshes, as in MakeHuman only unsubdivided meshes are posed, and then
-        smoothed in their posed state if required. Vertices are not removed
+        smoothed in their posed state if required. Vertices are not removed 
         within MH when faces are hidden, either.
         """
         if not hasattr(self, 'parent') or not self.parent:
@@ -980,7 +980,7 @@ class Object3D(object):
         if not self.object and hasattr(self, 'parent'):
             return self.parent.material
         return self.object.material
-
+            
     def setTransparentPrimitives(self, transparentPrimitives):
         """
         This method is used to specify the amount of transparent faces.
@@ -992,7 +992,7 @@ class Object3D(object):
         self._transparentPrimitives = transparentPrimitives
 
     def getTransparentPrimitives(self):
-        # Object allows transparency rendering of only a subset (starting from
+        # Object allows transparency rendering of only a subset (starting from 
         # the first face) of faces of the mesh, but material property transparent
         # set to True overrides this and makes all faces render with transparency technique
         if self.material.transparent:
@@ -1113,7 +1113,7 @@ class Object3D(object):
     def calcNormals(self, recalcVertexNormals=1, recalcFaceNormals=1, verticesToUpdate=None, facesToUpdate=None):
         """
         Updates the given vertex and/or face normals.
-
+        
         :param recalcVertexNormals: A flag to indicate whether or not the vertex normals should be recalculated.
         :type recalcVertexNormals: Boolean
         :param recalcFaceNormals: A flag to indicate whether or not the face normals should be recalculated.
@@ -1132,10 +1132,10 @@ class Object3D(object):
 
         if recalcFaceNormals or recalcVertexNormals and self.calculateTangents:
             self.calcVertexTangents(verticesToUpdate)
-
+                
     def calcBBox(self, ix=None, onlyVisible = True, fixedFaceMask = None):
         """
-        Calculates the axis aligned bounding box of this object in the object's coordinate system.
+        Calculates the axis aligned bounding box of this object in the object's coordinate system. 
         """
         # TODO maybe cache bounding box
         if ix is None:
@@ -1159,7 +1159,7 @@ class Object3D(object):
 
 def dot_v3(v3_arr1, v3_arr2):
     """
-    Numpy Ufunc'ed implementation of a series of dot products of two vector3
+    Numpy Ufunc'ed implementation of a series of dot products of two vector3 
     objects.
     """
     return (v3_arr1[:,0] * v3_arr2[:,0]) + \
