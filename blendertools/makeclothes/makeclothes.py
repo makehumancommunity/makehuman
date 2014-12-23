@@ -564,7 +564,6 @@ def cornerWeights(pv, v0, v1, v2, hum, clo):
 #
 
 def midWeights(pv, bindex, v0, v1, v2, hum, clo):
-    print("Mid", pv.index, bindex)
     pv.select = True
     if isInGroup(v0, bindex):
         v0.select = True
@@ -580,7 +579,6 @@ def midWeights(pv, bindex, v0, v1, v2, hum, clo):
         v1.select = True
         v2.select = True
         return (w0, w1, w2)
-    print("  Failed mid")
     return cornerWeights(pv, v0, v1, v2, hum, clo)
 
 
@@ -1121,9 +1119,14 @@ def checkNoTriangles(scn, ob):
         strayVerts[vn] = True
         nPoles[vn] = 0
 
+    nfv = len(ob.data.polygons[0].vertices)
+    if nfv not in [3,4]:
+        msg = "Object %s\ncan not be used for clothes creation\nbecause it has a face with %d vertices.\n" % (ob.name, nfv)
+        raise MHError(msg)
+
     for f in ob.data.polygons:
-        if len(f.vertices) != 4:
-            msg = "Object %s\ncan not be used for clothes creation\nbecause it has non-quad faces.\n" % (ob.name)
+        if len(f.vertices) != nfv:
+            msg = "Object %s\ncan not be used for clothes creation\nbecause it has both quads and tris.\n" % (ob.name)
             raise MHError(msg)
         for vn in f.vertices:
             strayVerts[vn] = False
