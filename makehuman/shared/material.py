@@ -602,7 +602,7 @@ class Material(object):
         f.close()
 
     def addTag(self, tag):
-        self.tags = self.tags.add(tag.lower())
+        self.tags.add(tag.lower())
 
     def removeTag(self, tag):
         tag = tag.lower()
