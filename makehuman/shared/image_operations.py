@@ -11,7 +11,7 @@
 **Authors:**           Jonas Hauquier, Glynn Clements,
                        Thanasis Papoutsidakis
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
