@@ -12,7 +12,7 @@ MakeHuman python entry-point.
 
 **Authors:**           Manuel Bastioni, Glynn Clements, Jonas Hauquier, Joel Palmius
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -454,14 +454,14 @@ def parse_arguments():
 
 def getCopyrightMessage(short=False):
     if short:
-        return """MakeHuman Copyright (C) 2001-2014 http://www.makehuman.org
+        return """MakeHuman Copyright (C) 2001-2015 http://www.makehuman.org
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it
 under certain conditions. For details use the option --license"""
 
     return """Makehuman is a completely free, open source, innovative and 
 professional software for the modelling of 3-Dimensional humanoid characters
-Copyright (C) 2001-2014  www.makehuman.org
+Copyright (C) 2001-2015  www.makehuman.org
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -520,7 +520,7 @@ def getAssetLicense(properties=None):
             self.author = "MakeHuman Team"
             self.license = "AGPL3 (see also http://www.makehuman.org/doc/node/external_tools_license.html)"
             self.homepage = "http://www.makehuman.org"
-            self.copyright = "(c) MakeHuman.org 2011-2014"
+            self.copyright = "(c) MakeHuman.org 2001-2015"
             self._keys = ["author", "license", "copyright", "homepage"]
             self._customized = False
 

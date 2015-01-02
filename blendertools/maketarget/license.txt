@@ -3,7 +3,7 @@
 MakeHuman Tools License
 ======================================
 
-Copyright (C) 2001-2014  MakeHuman Team (makehuman.org)
+Copyright (C) 2001-2015  MakeHuman Team (makehuman.org)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
