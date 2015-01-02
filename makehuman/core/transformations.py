@@ -44,7 +44,7 @@ Homogeneous Transformation Matrices and Quaternions.
 **Authors:**           `Christoph Gohlke <http://www.lfd.uci.edu/~gohlke/>`__,
   Laboratory for Fluorescence Dynamics, University of California, Irvine
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
