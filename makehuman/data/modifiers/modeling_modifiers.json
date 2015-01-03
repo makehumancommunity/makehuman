@@ -204,14 +204,16 @@
       {"target": "hip-scale-vert", "min": "decr", "max": "incr"},
       {"target": "hip-trans", "min": "in", "max": "out"},
       {"target": "hip-trans", "min": "down", "max": "up"},
-      {"target": "hip-trans", "min": "forward", "max": "backward"}
+      {"target": "hip-trans", "min": "forward", "max": "backward"},
+      {"target": "hip-waist", "min": "down", "max": "up"}
     ]
   },
 
   { "group": "stomach",
     "modifiers": [
       {"target": "stomach-tone", "min": "decr", "max": "incr"},
-      {"target": "stomach-pregnant", "min": "decr", "max": "incr"}
+      {"target": "stomach-pregnant", "min": "decr", "max": "incr"},
+      {"target": "stomach-navel", "min": "down", "max": "up"}
     ]
   },
 
@@ -342,6 +344,12 @@
   { "group": "macrodetails-proportions",
     "modifiers": [
         {"macrovar": "BodyProportions"}
+    ]
+  },
+  { "group": "legs",
+    "modifiers": [      
+      {"target": "legs-upperlegheight", "min": "decr", "max": "incr"},
+      {"target": "legs-lowerlegheight", "min": "decr", "max": "incr"}
     ]
   }
 
