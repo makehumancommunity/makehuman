@@ -26,7 +26,7 @@ $langDir = $ARGV[1];
 
 if(!$sourceFile) 
 {
-  $sourceFile = "english.json";
+  $sourceFile = "next_planned_master_for_transifex.json";
 }
 
 if(!$langDir)
