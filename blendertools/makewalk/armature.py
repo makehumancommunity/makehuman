@@ -129,7 +129,12 @@ class CArmature:
             _,terminal = self.chainEnd(pb)
             _,tail,_ = getHeadTailDir(terminal)
             limbs.append((tail[0], pb))
-        limbs.sort()
+        try:
+            limbs.sort()
+        except TypeError:
+            string = "Children of hips incorrectly located. X-coordinates:\n"
+            string += "".join(["  %s: %f\n" % (pb.name, x) for (x,pb) in limbs])
+            raise MocapError(string)
         _,rightLeg = limbs[0]
         _,spine = limbs[1]
         _,leftLeg = limbs[2]
