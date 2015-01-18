@@ -219,7 +219,7 @@ def loadHuman(context):
     ob.name = "Human"
     ob.MhHuman = True
     if helpers:
-        autoVertexGroups(ob, 'Helpers', 'Tights')
+        autoVertexGroups(ob, 'Helpers', 'Default')
     else:
         autoVertexGroups(ob, 'Body', None)
     clearSelection()
@@ -1521,7 +1521,7 @@ def deleteHelpers(context):
 #   autoVertexGroups(ob):
 #
 
-def autoVertexGroupsIfNecessary(ob, type='Selected', htype='Tights'):
+def autoVertexGroupsIfNecessary(ob, type='Selected', htype='Default'):
     if len(ob.vertex_groups) == 0:
         print("Found no vertex groups for %s." % ob)
         autoVertexGroups(ob, type, htype)
@@ -1587,6 +1587,10 @@ def getHelperVerts(me, htype):
         checkEnoughVerts(me, htype, vnums[htype][0])
         for vn in range(vnums[htype][0], vnums[htype][1]):
             verts[vn] = me.vertices[vn]
+    elif htype == 'Default':
+        checkEnoughVerts(me, htype, vnums["Tights"][0])
+        for vn in range(vnums["Tights"][0], vnums["Skirt"][1]):
+            verts[vn] = me.vertices[vn]
     elif htype == 'Coat':
         checkEnoughVerts(me, htype, vnums["Tights"][0])
         zmax = -1e6
@@ -1598,7 +1602,7 @@ def getHelperVerts(me, htype):
             verts[vn] = me.vertices[vn]
         for vn in range(vnums["Tights"][0], vnums["Tights"][1]):
             zn = me.vertices[vn].co[2]
-            if zn > zmax:
+            if zn > zmax or vn in theSettings.bottomOfCoatTop:
                 verts[vn] = me.vertices[vn]
     else:
         raise MHError("Unknown helper type %s" % htype)
