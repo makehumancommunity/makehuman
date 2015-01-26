@@ -609,6 +609,7 @@ class MHApplication(gui3d.Application, mh.Application):
                        self.bgTopRightColor, self.bgTopLeftColor)
 
         self.backgroundGradient = gui3d.Object(mesh)
+        self.backgroundGradient.priority = -200
         self.backgroundGradient.excludeFromProduction = True
         self.backgroundGradient.setShadeless(1)
         self.backgroundGradient.material.configureShading(vertexColors=True)
