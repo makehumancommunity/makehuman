@@ -857,10 +857,11 @@ class AnimatedMesh(object):
         Does not affect posed state.
         """
         self.setActiveAnimation(None)
-        if update:
+        self.__playTime = 0.0
+        if self.getSkeleton():
+            self.refreshPose(updateIfInRest=update)
+        elif update:
             self.resetTime()
-        else:
-            self.__playTime = 0.0
 
     def getTime(self):
         return self.__playTime
