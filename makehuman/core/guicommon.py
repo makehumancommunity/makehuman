@@ -169,6 +169,14 @@ class Object(events3d.EventHandler):
         else:
             self.mesh.setVisibility(0)
 
+    def getPriority(self):
+        return self.mesh.priority
+
+    def setPriority(self, priority):
+        self.mesh.priority = priority
+
+    priority = property(getPriority, setPriority)
+
     ##
     # Orientation properties
     ##
