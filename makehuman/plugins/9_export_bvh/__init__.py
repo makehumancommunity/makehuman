@@ -82,12 +82,12 @@ class ExporterBVH(Exporter):
         cfg = self.getConfig()
         cfg.setHuman(human)
 
-        if self.exportAnimations and len(human.animated.getAnimations()) > 0:
+        if self.exportAnimations and len(human.getAnimations()) > 0:
             baseFilename = os.path.splitext(filename("bvh"))[0]
-            for animName in human.animated.getAnimations():
+            for animName in human.getAnimations():
                 fn = baseFilename + "_%s.bvh" % animName
                 log.message("Exporting file %s.", fn)
-                bvhData = bvh.createFromSkeleton(skel, human.animated.getAnimation(animName))
+                bvhData = bvh.createFromSkeleton(skel, human.getAnimation(animName))
                 if cfg.scale != 1:
                     bvhData.scale(cfg.scale)
                 bvhData.writeToFile(fn)
