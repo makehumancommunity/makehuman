@@ -432,7 +432,9 @@ def get_ascii_properties(properties, indent=0):
     return '\n'.join(result)
 
 def get_ascii_property(name, ptype, value, animatable=False, custom=False):
-    if not isinstance(value, list):
+    if isinstance(value, tuple):
+        value = list(value)
+    elif not isinstance(value, list):
         value = [value]
 
     flags = _elem_props_flags(animatable, custom)
