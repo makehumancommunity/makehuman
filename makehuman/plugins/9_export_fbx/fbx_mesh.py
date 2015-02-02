@@ -233,9 +233,10 @@ def writeUvs2(fp, mesh):
     nUvVerts = len(mesh.texco)
     nUvFaces = len(mesh.fuvs)
 
-    uvString = ""
+    uvString = list()
     for fuv in mesh.fuvs:
-        uvString += ",".join( ['%.4f,%.4f' % (tuple(mesh.texco[vt])) for vt in fuv] )
+        uvString.append(",".join( ['%.4f,%.4f' % (tuple(mesh.texco[vt])) for vt in fuv] ))
+    uvString = ",".join(uvString)
     if mesh.vertsPerPrimitive == 4:
         indexString = ",".join( ['%d,%d,%d,%d' % (4*n,4*n+1,4*n+2,4*n+3) for n in xrange(nUvFaces)] )
     else:
