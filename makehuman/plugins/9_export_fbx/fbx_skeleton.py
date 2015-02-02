@@ -214,7 +214,8 @@ def writeNodeAttributeProp(fp, bone, config):
 """+ fbx_utils.get_ascii_properties(properties, indent=3) + """
         }
         TypeFlags: "Skeleton"
-    }""")
+    }
+""")
 
 
 def writeNodeProp(fp, skel, config):
