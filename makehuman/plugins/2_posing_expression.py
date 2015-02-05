@@ -49,6 +49,7 @@ import json
 import log
 
 # TODO extract a common base class from this and modifierslider (and probably humanmodifier)
+'''
 class ExpressionSlider(gui.Slider):
 
     def __init__(self, name):
@@ -142,6 +143,7 @@ class ExpressionSlider(gui.Slider):
             # Only update slider position when it is not being clicked or dragged
             self.setValue(self.modifier.getValue())
         self.blockSignals(False)
+'''
 
 
 
@@ -183,6 +185,7 @@ class ExpressionAction(gui3d.Action):
             slider.update()
         return True
 
+# TODO make right click reset slider to 0
 class ExprSlider(gui.Slider):
 
     def __init__(self, posename):
@@ -193,6 +196,9 @@ class ExprSlider(gui.Slider):
     def _changed(self, value):
         #print 'caller', self
         self.callEvent('onChange', self)
+        # TODO temporary
+        taskView = gui3d.app.getTask(0, 'Expressions')
+        print json.dumps(dict([(m,v) for m, v in taskView.modifiers.iteritems() if v != 0]))
 
     def _changing(self, value):
         value = self._i2f(value)
@@ -209,12 +215,12 @@ class ExpressionTaskView(gui3d.TaskView):
         self.human = gui3d.app.selectedHuman
 
         # TODO defer loading to first onShow()
-        bvhfile = bvh.load(getpath.getSysDataPath('poses/mh-rigging351-full-animation.bvh'), allowTranslation="none")
+        bvhfile = bvh.load(getpath.getSysDataPath('poseunits/face-poseunits.bvh'), allowTranslation="none")
         self.base_bvh = bvhfile
 
         from collections import OrderedDict
         poseunit_json = json.load(open(getpath.getSysDataPath('poseunits/face-poseunits.json'),'rb'), object_pairs_hook=OrderedDict)
-        self.poseunit_names = poseunit_json['poses'].keys()
+        self.poseunit_names = poseunit_json['framemapping']
 
         self.sliders = []
         self.modifiers = dict(zip(self.poseunit_names, len(self.poseunit_names)*[0.0]))
