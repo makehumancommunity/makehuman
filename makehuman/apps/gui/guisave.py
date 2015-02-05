@@ -73,6 +73,9 @@ def saveMHM(path):
     G.app.selectedHuman.save(path, name)
     #G.app.clearUndoRedo()
 
+    # Remember last save folder
+    gui3d.app.settings['savedir'] = os.path.dirname(path)
+
     G.app.status('Your model has been saved to %s.', path)
 
 
@@ -114,7 +117,7 @@ class SaveTaskView(gui3d.TaskView):
 
         modelPath = G.app.currentFile.dir
         if modelPath is None:
-            modelPath = mh.getPath("models")
+            modelPath = self.settings.get('savedir', mh.getPath("models"))
         self.fileentry.directory = modelPath
 
         name = G.app.currentFile.title
