@@ -83,8 +83,11 @@ class LoadTaskView(gui3d.TaskView):
         def onFileSelected(event):
             self.filechooser.setPaths([event.path])
             self.filechooser.refresh()
+            # Remember load folder
+            gui3d.app.settings['loaddir'] = event.path
 
-        self.filechooser = fc.IconListFileChooser(mh.getPath("models"), 'mhm', 'thumb', mh.getSysDataPath('notfound.thumb'), sort=HumanFileSort())
+        loadpath = gui3d.app.settings.get('loaddir', mh.getPath("models"))
+        self.filechooser = fc.IconListFileChooser(loadpath, 'mhm', 'thumb', mh.getSysDataPath('notfound.thumb'), sort=HumanFileSort())
         self.addRightWidget(self.filechooser)
         self.addLeftWidget(self.filechooser.createSortBox())
 
@@ -101,7 +104,7 @@ class LoadTaskView(gui3d.TaskView):
 
         self.modelPath = gui3d.app.currentFile.dir
         if self.modelPath is None:
-            self.modelPath = mh.getPath("models")
+            self.modelPath = gui3d.app.settings.get('loaddir', mh.getPath("models"))
 
         self.fileentry.directory = self.modelPath
         self.filechooser.setPaths(self.modelPath)
