@@ -218,10 +218,9 @@ def writeMaterial(fp, mesh, config):
     properties = [
         ("TransparentColor", "p_color", tuple(3*[1.0 - mat.opacity]), True),
         ("TransparencyFactor", "p_number", mat.transparencyMapIntensity, True),
-        ("SpecularColor", "p_color", mat.specularColor.asTuple(), True),
-        ("ShininessExponent", "p_number", mat.shininess, True),
-        ("EmissiveColor", "p_vector_3d", mat.emissiveColor.asTuple()),
-        ("AmbientColor", "p_vector_3d", mat.ambientColor.asTuple()),
+        #("ShininessExponent", "p_number", mat.shininess, True),
+        #("EmissiveColor", "p_vector_3d", mat.emissiveColor.asTuple()),
+        #("AmbientColor", "p_vector_3d", mat.ambientColor.asTuple()),
         ("DiffuseColor", "p_vector_3d", mat.diffuseColor.asTuple()),
         ("DiffuseFactor", "p_number", 1.0, True),
         ("SpecularColor", "p_vector_3d", mat.specularColor.asTuple()),
