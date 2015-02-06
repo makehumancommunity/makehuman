@@ -117,7 +117,7 @@ class SaveTaskView(gui3d.TaskView):
 
         modelPath = G.app.currentFile.dir
         if modelPath is None:
-            modelPath = self.settings.get('savedir', mh.getPath("models"))
+            modelPath = gui3d.app.settings.get('savedir', mh.getPath("models"))
         self.fileentry.directory = modelPath
 
         name = G.app.currentFile.title
