@@ -224,7 +224,8 @@ def writeSubDeformer(fp, name, bone, weights, config):
     if config.binary:
         from . import fbx_binary
         elem = fbx_binary.get_child_element(fp, 'Objects')
-        fbx_binary.fbx_data_subdeformer(elem, key, id, weights[0], weights[1], bindmat, bindinv)
+        import numpy as np
+        fbx_binary.fbx_data_subdeformer(elem, key, id, weights[0], weights[1], bindmat, np.transpose(bindinv))
         return
 
     nVertexWeights = len(weights[0])
