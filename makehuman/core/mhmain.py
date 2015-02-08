@@ -556,13 +556,13 @@ class MHApplication(gui3d.Application, mh.Application):
             self.removeObject(self.groundplaneGrid)
 
         offset = self.selectedHuman.getJointPosition('ground')[1]
-        spacing = 1 if self.settings['units'] == 'metric' else 3.048
+        spacing = 1 if self.settings.get('units', 'metric') == 'metric' else 3.048
 
         # Background grid
         gridSize = int(200/spacing)
         if gridSize % 2 != 0:
             gridSize += 1
-        if self.settings['units'] == 'metric':
+        if self.settings.get('units', 'metric') == 'metric':
             subgrids = 10
         else:
             subgrids = 12
