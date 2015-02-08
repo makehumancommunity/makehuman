@@ -43,71 +43,117 @@ import gui3d
 import gui
 import log
 
-class ThemeRadioButton(gui.RadioButton):
+class SettingCheckbox(gui.CheckBox):
+    def __init__(self, label, settingName, defaultValue, postAction=None):
+        super(SettingCheckbox, self).__init__(label, defaultValue)
+        self.setting_name = settingName
+        self.default_value = defaultValue
+        self.postAction = postAction
 
+    def onClicked(self, event):
+        self.updated()
+
+    def update(self, value):
+        if value is None:
+            self.setChecked(self.default_value)
+        else:
+            self.setChecked(value)
+        self.updated()
+
+    def updated(self):
+        gui3d.app.settings[self.setting_name] = self.selected
+        if self.postAction is not None:
+            self.postAction(self.selected)
+
+class ThemeRadioButton(gui.RadioButton):
     def __init__(self, group, label, theme):
         self.theme = theme
         checked = (gui3d.app.settings.get('guiTheme', 'makehuman') == self.theme)
         super(ThemeRadioButton, self).__init__(group, label, checked)
-        
+
     def onClicked(self, event):
-        gui3d.app.settings['guiTheme'] = self.theme
-        gui3d.app.setTheme(self.theme)
+        self.updated()
+
+    def update(self, value):
+        self.setChecked(value)
+        self.updated()
+
+    def updated(self):
+        if self.selected:
+            gui3d.app.settings['guiTheme'] = self.theme
+            gui3d.app.setTheme(self.theme)
 
 class PlatformRadioButton(gui.RadioButton):
-
     def __init__(self, group, looknfeel):
         super(PlatformRadioButton, self).__init__(group, looknfeel, gui3d.app.getLookAndFeel().lower() == looknfeel.lower())
         self.looknfeel = looknfeel
-        
+
     def onClicked(self, event):
         gui3d.app.setLookAndFeel(self.looknfeel)
-        
-class LanguageRadioButton(gui.RadioButton):
 
+class LanguageRadioButton(gui.RadioButton):
     def __init__(self, group, language):
         super(LanguageRadioButton, self).__init__(group, language.capitalize(), gui3d.app.settings.get('language', 'english') == language)
         self.language = language
         
     def onClicked(self, event):
-    
-        gui3d.app.settings['language'] = self.language
-        gui3d.app.setLanguage(self.language)
-        gui3d.app.prompt('Info', 'You need to restart for your language changes to be applied.', 'OK', helpId='languageHelp')  
+        self.updated()
+        gui3d.app.prompt('Info', 'You need to restart for your language changes to be applied.', 'OK', helpId='languageHelp')
+
+    def update(self, value):
+        self.setChecked(value)
+        self.updated()
+
+    def updated(self):
+        if self.selected:
+            gui3d.app.settings['language'] = self.language
+            gui3d.app.setLanguage(self.language)
 
 class SettingsTaskView(gui3d.TaskView):
 
     def __init__(self, category):
         gui3d.TaskView.__init__(self, category, 'General')
+        self.checkboxes = []
 
         sliderBox = self.addLeftWidget(gui.GroupBox('Slider behavior'))
-        self.realtimeUpdates = sliderBox.addWidget(gui.CheckBox("Update real-time",
-            gui3d.app.settings.get('realtimeUpdates', True)))
-        self.realtimeNormalUpdates = sliderBox.addWidget(gui.CheckBox("Update normals real-time",
-            gui3d.app.settings.get('realtimeNormalUpdates', True)))
-        self.realtimeFitting = sliderBox.addWidget(gui.CheckBox("Fit objects real-time",
-            gui3d.app.settings.get('realtimeFitting', True)))
-        self.cameraAutoZoom = sliderBox.addWidget(gui.CheckBox("Auto-zoom camera",
-            gui3d.app.settings.get('cameraAutoZoom', False)))
-        self.sliderImages = sliderBox.addWidget(gui.CheckBox("Slider images",
-            gui3d.app.settings.get('sliderImages', True)))
+        self.realtimeUpdates = sliderBox.addWidget(SettingCheckbox("Update real-time", 'realtimeUpdates', True))
+
+        self.realtimeNormalUpdates = sliderBox.addWidget(SettingCheckbox("Update normals real-time", 'realtimeNormalUpdates', True))
+
+        self.realtimeFitting = sliderBox.addWidget(SettingCheckbox("Fit objects real-time", 'realtimeFitting', True))
+
+        self.cameraAutoZoom = sliderBox.addWidget(SettingCheckbox("Auto-zoom camera", 'cameraAutoZoom', False))
+
+        def updateSliderImages(selected):
+            gui.Slider.showImages(selected)
+            mh.refreshLayout()
+        self.sliderImages = sliderBox.addWidget(SettingCheckbox("Slider images", 'sliderImages', True, updateSliderImages))
             
-        modes = [] 
+        modes = []
         unitBox = self.unitsBox = self.addLeftWidget(gui.GroupBox('Units'))
-        metric = unitBox.addWidget(gui.RadioButton(modes, 'Metric', gui3d.app.settings.get('units', 'metric') == 'metric'))
-        imperial = unitBox.addWidget(gui.RadioButton(modes, 'Imperial', gui3d.app.settings.get('units', 'metric') == 'imperial'))
+        self.metric = unitBox.addWidget(gui.RadioButton(modes, 'Metric', gui3d.app.settings.get('units', 'metric') == 'metric'))
+        self.imperial = unitBox.addWidget(gui.RadioButton(modes, 'Imperial', gui3d.app.settings.get('units', 'metric') == 'imperial'))
 
         startupBox = self.addLeftWidget(gui.GroupBox('Startup'))
-        self.preload = startupBox.addWidget(gui.CheckBox("Preload macro targets",
-            gui3d.app.settings.get('preloadTargets', False)))
-        self.saveScreenSize = startupBox.addWidget(gui.CheckBox("Restore window size",
-            gui3d.app.settings.get('restoreWindowSize', False)))
-        
-        themes = []
-        themesBox = self.themesBox = self.addRightWidget(gui.GroupBox('Theme'))
-        self.themeNative = themesBox.addWidget(ThemeRadioButton(themes, "Native look", "default"))
-        self.themeMH = themesBox.addWidget(ThemeRadioButton(themes, "MakeHuman", "makehuman"))
+        self.preload = startupBox.addWidget(SettingCheckbox("Preload macro targets", 'preloadTargets', False))
 
+        self.saveScreenSize = startupBox.addWidget(SettingCheckbox("Restore window size", 'restoreWindowSize', False))
+
+        resetBox = self.addLeftWidget(gui.GroupBox('Restore settings'))
+        self.resetButton = resetBox.addWidget(gui.Button("Restore to defaults"))
+        @self.resetButton.mhEvent
+        def onClicked(event):
+            gui3d.app.settings = dict()
+            self.updateGui()
+
+        self.checkboxes.extend([self.realtimeUpdates, self.realtimeNormalUpdates,
+            self.realtimeFitting, self.cameraAutoZoom, self.sliderImages,
+            self.preload, self.saveScreenSize])
+
+        themes = []
+        self.themesBox = self.addRightWidget(gui.GroupBox('Theme'))
+        self.themeNative = self.themesBox.addWidget(ThemeRadioButton(themes, "Native look", "default"))
+        self.themeMH = self.themesBox.addWidget(ThemeRadioButton(themes, "MakeHuman", "makehuman"))
 
         # For debugging themes on multiple platforms
         '''
@@ -118,55 +164,50 @@ class SettingsTaskView(gui3d.TaskView):
         '''
 
         languages = []
-        languageBox = self.languageBox = self.addRightWidget(gui.GroupBox('Language'))
+        self.languageBox = self.addRightWidget(gui.GroupBox('Language'))
         
         languageFiles = gui3d.app.getLanguages()
         for language in languageFiles:
-            languageBox.addWidget(LanguageRadioButton(languages, language))
-        
-        @self.realtimeUpdates.mhEvent
-        def onClicked(event):
-            gui3d.app.settings['realtimeUpdates'] = self.realtimeUpdates.selected
-            
-        @self.realtimeNormalUpdates.mhEvent
-        def onClicked(event):
-            gui3d.app.settings['realtimeNormalUpdates'] = self.realtimeNormalUpdates.selected
+            self.languageBox.addWidget(LanguageRadioButton(languages, language))
 
-        @self.realtimeFitting.mhEvent
-        def onClicked(event):
-            gui3d.app.settings['realtimeFitting'] = self.realtimeFitting.selected
- 
-        @self.cameraAutoZoom.mhEvent
-        def onClicked(event):
-            gui3d.app.settings['cameraAutoZoom'] = self.cameraAutoZoom.selected
-
-        @self.sliderImages.mhEvent
-        def onClicked(event):
-            gui3d.app.settings['sliderImages'] = self.sliderImages.selected
-            gui.Slider.showImages(self.sliderImages.selected)
-            mh.refreshLayout()
-
-        @metric.mhEvent
+        @self.metric.mhEvent
         def onClicked(event):
             gui3d.app.settings['units'] = 'metric'
             gui3d.app.loadGrid()
-            
-        @imperial.mhEvent
+
+        @self.imperial.mhEvent
         def onClicked(event):
             gui3d.app.settings['units'] = 'imperial'
             gui3d.app.loadGrid()
 
-        @self.preload.mhEvent
-        def onClicked(event):
-            gui3d.app.settings['preloadTargets'] = self.preload.selected
+        self.updateGui()
 
-        @self.saveScreenSize.mhEvent
-        def onClicked(event):
-            gui3d.app.settings['restoreWindowSize'] = self.saveScreenSize.selected
+    def updateGui(self):
+        for checkbox in self.checkboxes:
+            checkbox.update(None)
+
+        use_metric = gui3d.app.settings.get('units', 'metric') == 'metric'
+        if use_metric:
+            self.metric.setChecked(True)
+            gui3d.app.settings['units'] = 'metric'
+        else:
+            self.imperial.setChecked(True)
+            gui3d.app.settings['units'] = 'imperial'
+        gui3d.app.loadGrid()
+
+        lang = gui3d.app.settings.get('language', 'english')
+        for radioBtn in self.languageBox.children:
+            if radioBtn.language == lang:
+                radioBtn.update(True)
+
+        theme = gui3d.app.settings.get('guiTheme', 'makehuman')
+        for radioBtn in self.themesBox.children:
+            if radioBtn.theme == theme:
+                radioBtn.update(True)
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
-    
+
     def onHide(self, event):
         gui3d.TaskView.onHide(self, event)
         gui3d.app.saveSettings()
