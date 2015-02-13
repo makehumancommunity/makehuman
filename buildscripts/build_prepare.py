@@ -50,7 +50,7 @@ EXCLUDES = ['.hgignore', '.hgtags', '.hgeol', '*.target', '*.obj', '*.pyc', '*.m
 EXCLUDES_RELEASE = ['testsuite']
 
 # Include filter for additional asset files (not on hg) to copy (glob syntax)
-ASSET_INCLUDES = ['*.npz', '*.mhpxy', '*.list', '*.thumb', '*.png', '*.json', '*.mhmat', '*.mhclo', '*.proxy', 'glsl/*.txt', 'languages/*.ini', "*.mhp", "*.mhm", "*.qss", "*.mht", "*.svg", "icons/makehuman_bg.svg", "icons/makehuman.png"]
+ASSET_INCLUDES = ['*.npz', '*.mhpxy', '*.list', '*.thumb', '*.png', '*.json', '*.jsonw', '*.mhmat', '*.mhclo', '*.proxy', 'glsl/*.txt', 'languages/*.ini', "*.mhp", "*.mhm", "*.qss", "*.mht", "*.svg", "icons/makehuman_bg.svg", "icons/makehuman.png"]
 
 # Even if empty, create these folders (relative to export path)
 CREATE_FOLDERS = ['makehuman/data/backgrounds', 'makehuman/data/clothes', 'makehuman/data/teeth', 'makehuman/data/eyelashes', 'makehuman/data/tongue']
