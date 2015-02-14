@@ -4017,6 +4017,6 @@
     "license": "GNU Affero General Public License 3",
     "name": "MakeHuman default skeleton",
     "version": 102,
-    "tags": ["facial bones", "detailed hands"],
+    "tags": ["facial bones", "detailed hands", "detailed feet"],
     "weights_file": "default_weights.jsonw"
 }
