@@ -171,6 +171,7 @@ class SkeletonLibrary(gui3d.TaskView):
 
         self.infoBox = self.addLeftWidget(gui.GroupBox('Rig info'))
         self.boneCountLbl = self.infoBox.addWidget(gui.TextView('Bones: '))
+        self.infoBox.setSizePolicy(gui.QtGui.QSizePolicy.Preferred, gui.QtGui.QSizePolicy.Maximum)
 
         descBox = self.addLeftWidget(gui.GroupBox('Description'))
         self.descrLbl = descBox.addWidget(gui.TextView(''))
