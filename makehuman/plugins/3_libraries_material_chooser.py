@@ -233,6 +233,7 @@ class MaterialTaskView(gui3d.TaskView):
 
         # Reload filechooser
         self.filechooser.deselectAll()
+        self.filechooser.tagFilter.clearAll()
         self.filechooser.setPaths(self.materials)
         self.filechooser.refresh()
         if selectedMat:

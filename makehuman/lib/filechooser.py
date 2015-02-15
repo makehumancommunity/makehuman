@@ -282,6 +282,7 @@ class TagFilter(gui.GroupBox):
         self.tags.add(tag)
         toggle = self.addWidget(gui.CheckBox(tag.capitalize()))
         toggle.tag = tag
+        self.tagToggles.append(toggle)
 
         @toggle.mhEvent
         def onClicked(event):
