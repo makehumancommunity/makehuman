@@ -111,6 +111,8 @@ class ProxyTaskView(proxychooser.ProxyChooserTaskView):
                               mhclofile,
                               type=self.proxyName.capitalize())
 
+        # Override z_depth and mesh priority to the same as human mesh
+        pxy.z_depth = self.human.getSeedMesh().priority
         mesh,obj = pxy.loadMeshAndObject(self.human)
 
         self.human.setProxy(pxy)

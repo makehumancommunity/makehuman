@@ -943,6 +943,7 @@ class Object3D(object):
         Common priorities used:
         file                                 description       2D/3D priority
 
+        core/mhmain.py                       background-gradient 2D   -200
         0_modeling_background.py             background          2D    -90
         core/mhmain.py                       human               3D      0
         3_libraries_clothes_chooser.py       clothing            3D     10
