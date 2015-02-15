@@ -55,6 +55,7 @@ import transformations as tm
 import matrix
 import animation
 from animation import VertexBoneWeights
+import makehuman
 
 import log
 
@@ -148,7 +149,8 @@ class Skeleton(object):
                         vrts,wghs = referenceWeights.data[rbname]
                         b_weights.extend( zip(vrts,wghs) )
                     else:
-                        log.warning("Reference bone %s is not present in reference weights", rbname)
+                        if not makehuman.isRelease():
+                            log.warning("Reference bone %s is not present in reference weights", rbname)
             else:
                 # Try to map by bone name
                 if bone.name in referenceWeights.data:
@@ -156,7 +158,8 @@ class Skeleton(object):
                     vrts,wghs = referenceWeights.data[bone.name]
                     b_weights = zip(vrts,wghs)
                 else:
-                    log.warning("No explicit reference bone mapping for bone %s, and cannot implicitly map by name", bone.name)
+                    if not makehuman.isRelease():
+                        log.warning("No explicit reference bone mapping for bone %s, and cannot implicitly map by name", bone.name)
 
             if len(b_weights) > 0:
                 weights[bone.name] = b_weights
@@ -423,7 +426,8 @@ class Skeleton(object):
                 vec *= weights
                 coords[verts] += vec.transpose()[:,:3]
             except KeyError as e:
-                log.warning("Could not skin bone %s: no such bone in skeleton (%s)" % (bname, e))
+                if not makehuman.isRelease():
+                    log.warning("Could not skin bone %s: no such bone in skeleton (%s)" % (bname, e))
 
         return coords
 
