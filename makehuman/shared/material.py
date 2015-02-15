@@ -1474,7 +1474,7 @@ def peekMetadata(filename):
         if words[0] == "name":
             name = words[1]
         elif words[0] == "tag":
-            tags.add(" ".join(words[1:]))
+            tags.add((" ".join(words[1:])).lower())
         else:
             pass
 
