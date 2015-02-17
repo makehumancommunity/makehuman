@@ -139,6 +139,18 @@ class DebugDump(object):
         self.open()
         self.write("PYQT.VERSION: %s", qtui.getQtVersionString())
         self.write("PYQT.SVG_SUPPORT: %s", "supported" if qtui.supportsSVG() else "not supported")
+        py_plugin_path = os.path.pathsep.join( [getpath.pathToUnicode(str(p)) for p in qtui.QtCore.QCoreApplication.libraryPaths()] )
+        self.write("QT.PLUGIN_PATH: %s" % py_plugin_path)
+        qt_conf_present = os.path.isfile(getpath.getSysPath('qt.conf'))
+        if qt_conf_present:
+            from codecs import open
+            f = open(getpath.getSysPath('qt.conf'), "r", encoding="utf-8", errors="replace")
+            qt_conf_content = f.read()
+            qt_conf_content = qt_conf_content.replace('\n', '\n'+(' '*len('QT.CONF: '))).strip()
+            f.close()
+            self.write("QT.CONF: %s" % qt_conf_content)
+        else:
+            self.write("QT.CONF: NOT PRESENT")
         self.close()
 
     def appendMessage(self,message):
