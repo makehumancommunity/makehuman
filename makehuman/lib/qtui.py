@@ -38,6 +38,7 @@ TODO
 """
 
 import sys
+import os
 import log
 
 from PyQt4 import QtCore, QtGui, QtOpenGL
@@ -49,6 +50,19 @@ import qtgui
 import queue
 import time
 import getpath
+
+import makehuman
+import getpath
+if makehuman.isBuild():
+    # Set absolute Qt plugin path programatically on frozen deployment to fix
+    # crashes when Qt is on DLL PATH in windows.
+    # No qt.conf file should be present in the application folder!
+    deployment_path = getpath.canonicalPath(getpath.getSysPath())
+    QtCore.QCoreApplication.addLibraryPath(os.path.join(deployment_path,'qt4_plugins'))
+    # Plugins will be loaded when QCoreApplication object is constructed. Some
+    # Qt deployments are known to prepend new library paths at this time, such
+    # as /usr/lib/qt4/plugins on some linux platforms, but this is not a likely
+    # case on windows platforms.
 
 # Timeout in seconds after which moving the mousewheel will pick a new mouse pos
 # TODO make this configureable in settings?
