@@ -407,7 +407,17 @@ def supportsSVG():
     # Care needs to be taken that pyinstaller windows builds and
     # OSX py2app builds include the qt svg lib and plugin
     return qtVersion[0] >= 4 and qtVersion[1] >= 2 and \
-        'svg' in [ str(s).lower() for s in QtGui.QImageReader.supportedImageFormats() ]
+        'svg' in supportedImageFormats()
+
+def supportsJPG():
+    return 'jpg' in supportedImageFormats()
+
+def supportedImageFormats():
+    """
+    The image formats supported by MakeHuman. This is determined by the plugins
+    that were loaded into the Qt libraries.
+    """
+    return [ str(s).lower() for s in QtGui.QImageReader.supportedImageFormats() ]
 
 class Frame(QtGui.QMainWindow):
     title = "MakeHuman"

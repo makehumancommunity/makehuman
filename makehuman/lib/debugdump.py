@@ -138,6 +138,7 @@ class DebugDump(object):
         import qtui
         self.open()
         self.write("PYQT.VERSION: %s", qtui.getQtVersionString())
+        self.write("PYQT.JPG_SUPPORT: %s", "supported" if qtui.supportsJPG() else "not supported")
         self.write("PYQT.SVG_SUPPORT: %s", "supported" if qtui.supportsSVG() else "not supported")
         py_plugin_path = os.path.pathsep.join( [getpath.pathToUnicode(str(p)) for p in qtui.QtCore.QCoreApplication.libraryPaths()] )
         self.write("QT.PLUGIN_PATH: %s" % py_plugin_path)
