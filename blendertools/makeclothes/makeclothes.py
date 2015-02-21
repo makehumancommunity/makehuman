@@ -834,6 +834,7 @@ def writeStuff(fp, clo, context, matfile):
     scn = context.scene
     fp.write("z_depth %d\n" % scn.MCZDepth)
 
+    '''
     for mod in clo.modifiers:
         if mod.type == 'SHRINKWRAP':
             fp.write("shrinkwrap %.3f\n" % (mod.offset))
@@ -841,6 +842,7 @@ def writeStuff(fp, clo, context, matfile):
             fp.write("subsurf %d %d\n" % (mod.levels, mod.render_levels))
         elif mod.type == 'SOLIDIFY':
             fp.write("solidify %.3f %.3f\n" % (mod.thickness, mod.offset))
+    '''
 
     if matfile:
         fp.write("material %s\n" % matfile)
