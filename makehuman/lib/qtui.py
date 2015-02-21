@@ -53,7 +53,7 @@ import getpath
 
 import makehuman
 import getpath
-if makehuman.isBuild():
+if False and makehuman.isBuild():
     # Set absolute Qt plugin path programatically on frozen deployment to fix
     # crashes when Qt is on DLL PATH in windows.
     # No qt.conf file should be present in the application folder!
