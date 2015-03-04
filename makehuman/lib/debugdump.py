@@ -142,7 +142,8 @@ class DebugDump(object):
         self.write("PYQT.SVG_SUPPORT: %s", "supported" if qtui.supportsSVG() else "not supported")
         py_plugin_path = os.path.pathsep.join( [getpath.pathToUnicode(str(p)) for p in qtui.QtCore.QCoreApplication.libraryPaths()] )
         self.write("QT.PLUGIN_PATH: %s" % py_plugin_path)
-        self.write("QT.PLUGIN_PATH_ENV: %s" % os.environ['QT_PLUGIN_PATH'])
+        qt_plugin_path_env = os.environ['QT_PLUGIN_PATH'] if 'QT_PLUGIN_PATH' in os.environ else ""
+        self.write("QT.PLUGIN_PATH_ENV: %s" % qt_plugin_path_env)
         qt_conf_present = os.path.isfile(getpath.getSysPath('qt.conf'))
         if qt_conf_present:
             from codecs import open
