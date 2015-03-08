@@ -94,7 +94,7 @@ HEAD_VEC = np.array((0,0,0,1))
 
 
 def meshFromSkeleton(skel, type="Prism"):
-    verts, faces, vertsPerBone, facesPerBone, boneNames = _shapeFromSkeleton(skel, type)
+    verts, faces, vcolors, vertsPerBone, facesPerBone, boneNames = _shapeFromSkeleton(skel, type)
 
     mesh = module3d.Object3D("SkeletonMesh")
     mesh.boneShape = type   # Append a custom attribute to skeleton meshes
@@ -106,6 +106,7 @@ def meshFromSkeleton(skel, type="Prism"):
         fgroups[offset:offset+facesPerBone] = np.repeat(np.array(fg.idx, dtype=np.uint16), facesPerBone)
 
     mesh.setCoords(verts)
+    mesh.setColor(vcolors)
     mesh.setUVs(np.zeros((1, 2), dtype=np.float32)) # Set trivial UV coordinates
     mesh.setFaces(faces, None, fgroups)
     
@@ -124,7 +125,14 @@ def getVertBoneMapping(skel, skeletonMesh):
     if not hasattr(skeletonMesh, "boneShape"):
         raise RuntimeError("Specified mesh object %s is not a skeleton mesh. Make sure it is created using meshFromSkeleton()" % skeletonMesh)
     type = skeletonMesh.boneShape
-    nVertsPerBone = len(SHAPE_VECTORS[type])
+    if type == 'axis':
+        global _axismesh_
+        if _axismesh_ is None:
+            import geometry3d
+            _axismesh_ = geometry3d.AxisMesh(scale=0.5)
+        nVertsPerBone = _axismesh_.getVertexCount()
+    else:
+        nVertsPerBone = len(SHAPE_VECTORS[type])
 
     #nBones = len(skel.getBones())
     #nVertsPerBone = int(mesh.getVertexCount()/nBones)
@@ -137,29 +145,6 @@ def getVertBoneMapping(skel, skeletonMesh):
         offset = offset + nVertsPerBone
     return VertexBoneWeights(vertBoneMapping)# , nVertsPerBone*skel.getBoneCount())
 
-def updateSkeletonMeshPose(skeletonMesh, skeleton):
-# TODO do we need this method when we can simply construct a skeleton mesh from rest pose and then skin it with rigid weights (method above)?
-    if not hasattr(skeletonMesh, "boneShape"):
-        raise RuntimeError("Specified mesh object %s is not a skeleton mesh. Make sure it is created using meshFromSkeleton()" % skeletonMesh)
-    type = skeletonMesh.boneShape
-
-    coords = np.zeros((skeletonMesh.getVertexCount(),3), dtype=np.float32)
-
-    # TODO add method to skeleton to get numpy array of all mats in breadth first order? try to reduce python loops
-    for bIdx, bone in enumerate(skeleton.getBones()):
-        mat = bone.matPoseGlobal
-        length = bone.yvector4[1]
-
-        nVec = len(SHAPE_VECTORS)
-        for i, vec in enumerate(SHAPE_VECTORS[type]):    # TODO avoid for loop with numpy
-            p = np.dot(mat, (vec*length + HEAD_VEC))
-            coords[bIdx*nVec +i] = p[:3]
-
-    # TODO maybe update only the bones that changed position for performance
-    skeletonMesh.changeCoords(coords)
-    skeletonMesh.calcNormals()
-    skeletonMesh.update()
-
 def _shapeFromSkeleton(skel, type="Prism"):
     """
     For updating the mesh we assume that bones are always retrieved from skeleton in the same
@@ -170,21 +155,26 @@ def _shapeFromSkeleton(skel, type="Prism"):
     faceCount = 0
     verts = None
     faces = None
+    vcolors = None
     bones = skel.getBones()
     boneNames = []
 
     for bone in bones:
-        v, f = _shapeFromBone(bone, type)
+        v, f, c = _shapeFromBone(bone, type)
         if verts is None:
             verts = np.zeros((len(v)*len(bones), 3), np.float32)
             faces = np.zeros((len(f)*len(bones), 4), np.uint16)
+            vcolors = 255*np.ones((len(v)*len(bones), 4), np.uint8)
         verts[vertCount:vertCount+len(v)] = v              # verts.extend(v)
         faces[faceCount:faceCount+len(f)] = f + vertCount  # faces.extend(f)
+        vcolors[vertCount:vertCount+len(v)] = c
         vertCount = vertCount + len(v)
         faceCount = faceCount + len(f)
         boneNames.append(bone.name)
 
-    return verts, faces, len(v), len(f), boneNames
+    return verts, faces, vcolors, len(v), len(f), boneNames
+
+_axismesh_ = None
 
 def _shapeFromBone(bone, type="Prism"):
     """
@@ -192,9 +182,19 @@ def _shapeFromBone(bone, type="Prism"):
     Returns vertices and face indices to be used for building a 3d mesh of the
     the skeleton.
     """
-    # TODO account for roll angle as well
     mat = bone.matPoseGlobal
     length = bone.getLength()
+
+    if type == "axis":
+        global _axismesh_
+        if _axismesh_ is None:
+            import geometry3d
+            _axismesh_ = geometry3d.AxisMesh(scale=0.5)
+
+        coords = np.ones((_axismesh_.getVertexCount(), 4), dtype=np.float32)
+        coords[:,:3] = max(0.1, min(1.0, length)) * _axismesh_.coord
+        coords = np.dot(mat, coords.transpose()).transpose()[:,:3]
+        return coords, _axismesh_.fvert, _axismesh_.color
 
     # TODO optimise with numpy?
     points = np.zeros((len(SHAPE_VECTORS[type]), 3), dtype=np.float32)
@@ -202,7 +202,9 @@ def _shapeFromBone(bone, type="Prism"):
         p = np.dot(mat, (vec*length + HEAD_VEC))
         points[vIdx] = p[:3]
 
-    return points, np.asarray(SHAPE_FACES[type], dtype=np.uint16)
+    vcolors = 255 * np.ones((len(points), 4), dtype=np.uint8)
+
+    return points, np.asarray(SHAPE_FACES[type], dtype=np.uint16), vcolors
 
 DIAMOND_SHAPE_VECTORS = [
     np.array((0, -0.14, 0, 0)),
