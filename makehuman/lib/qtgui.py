@@ -40,7 +40,7 @@ TODO
 import sys
 import os
 
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore, QtGui, QtSvg
 
 from core import G
 import events3d
@@ -48,7 +48,10 @@ import language
 #import log
 from getpath import getSysDataPath, getPath, isSubPath, pathToUnicode
 
-
+def dummySvgCall():
+    """Code which is here just so pyinstaller can discover we need SVG support"""
+    dummy = QtSvg.QGraphicsSvgItem("some_svg.svg")
+    
 def getLanguageString(text, appendData=None, appendFormat=None):
     """Function to get the translation of a text according to the selected
     language.
