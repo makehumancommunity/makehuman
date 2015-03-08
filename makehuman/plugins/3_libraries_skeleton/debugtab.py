@@ -65,6 +65,8 @@ class SkeletonDebugLibrary(gui3d.TaskView):
 
         self.skelMesh = None
         self.skelObj = None
+        self.axisMesh = None
+        self.axisObj = None
 
         self.showWeightsTggl = self.displayBox.addWidget(gui.CheckBox("Show bone weights"))
         @self.showWeightsTggl.mhEvent
@@ -78,13 +80,24 @@ class SkeletonDebugLibrary(gui3d.TaskView):
                 self.clearBoneWeights()
         self.showWeightsTggl.setSelected(True)
 
+        self.showAxisTggl = self.displayBox.addWidget(gui.CheckBox("Show bone axis"))
+        @self.showAxisTggl.mhEvent
+        def onClicked(event):
+            if self.axisObj:
+                self.axisObj.setVisibility(self.showAxisTggl.selected)
+        self.showAxisTggl.setSelected(True)
+
     def _unloadSkeletonMesh(self):
         if self.skelObj:
             # Remove old skeleton mesh
             self.removeObject(self.skelObj)
+            self.removeObject(self.axisObj)
             self.human.removeBoundMesh(self.skelObj.name)
+            self.human.removeBoundMesh(self.axisObj.name)
             self.skelObj = None
             self.skelMesh = None
+            self.axisMesh = None
+            self.axisObj = None
 
     def drawSkeleton(self):
         self._unloadSkeletonMesh()
@@ -104,11 +117,23 @@ class SkeletonDebugLibrary(gui3d.TaskView):
         self.skelObj.setSolid(0)
         self.skelObj.setRotation(self.human.getRotation())
 
+        self.axisMesh = skeleton_drawing.meshFromSkeleton(skel, "axis")
+        self.axisMesh.name = self.axisMesh.name + '-axis-skeletonDebug'
+        self.axisMesh.priority = 100
+        self.axisMesh.setPickable(False)
+        self.axisObj = self.addObject(gui3d.Object(self.axisMesh, self.human.getPosition()) )
+        self.axisObj.material.ambientColor = [0.2, 0.2, 0.2]
+        self.axisObj.material.configureShading(vertexColors=True)
+        self.axisObj.material.depthless = True
+        self.axisObj.setRotation(self.human.getRotation())
+
         # Add the skeleton mesh to the human AnimatedMesh so it animates together with the skeleton
         # The skeleton mesh is supposed to be constructed from the skeleton in rest and receives
         # rigid vertex-bone weights (for each vertex exactly one weight of 1 to one bone)
         mapping = skeleton_drawing.getVertBoneMapping(skel, self.skelMesh)
         self.human.addBoundMesh(self.skelMesh, mapping)
+        mapping = skeleton_drawing.getVertBoneMapping(skel, self.axisMesh)
+        self.human.addBoundMesh(self.axisMesh, mapping)
 
         self.human.refreshPose()  # Pose drawn skeleton if human is posed
         mh.redraw()
@@ -134,6 +159,8 @@ class SkeletonDebugLibrary(gui3d.TaskView):
                         self.highlightBone(str(rdio.text()))
 
     def highlightBone(self, name):
+        if not self.showWeightsTggl.selected:
+            return
         # Highlight bones
         self.selectedBone = name
         setColorForFaceGroup(self.skelMesh, self.selectedBone, [216, 110, 39, 255])
