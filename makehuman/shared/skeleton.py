@@ -414,7 +414,7 @@ class Skeleton(object):
         nVerts = len(meshCoords)
         coords = np.zeros((nVerts,3), float)
         if meshCoords.shape[1] != 4:
-            meshCoords_ = np.ones((nVerts, 4), float)   # TODO also allow skinning vectors (normals)? -- in this case you need to renormalize normals, unless you only multiply each normal with the transformation with largest weight
+            meshCoords_ = np.ones((nVerts, 4), dtype=np.float32)   # TODO also allow skinning vectors (normals)? -- in this case you need to renormalize normals, unless you only multiply each normal with the transformation with largest weight
             meshCoords_[:,:3] = meshCoords
             meshCoords = meshCoords_
             log.debug("Unoptimized data structure passed to skinMesh, this will incur performance penalty when used for animation.")
@@ -940,20 +940,6 @@ def getMatrix(head, tail, roll):
     mat = fromZisUp4(mat)
     mat[:3,3] = head
     return length, mat
-
-## TODO unused?  this is used by constraints.py, maybe should be moved there
-def quatAngles(quat):
-    """
-    Convert a quaternion to euler angles.
-    """
-    qw = quat[0]
-    if abs(qw) < 1e-4:
-        return (0,0,0)
-    else:
-        return ( 2*math.atan(quat[1]/qw),
-                 2*math.atan(quat[2]/qw),
-                 2*math.atan(quat[3]/qw)
-               )
 
 def _normalizeQuaternion(quat):
     r2 = quat[1]*quat[1] + quat[2]*quat[2] + quat[3]*quat[3]
