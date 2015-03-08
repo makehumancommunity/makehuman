@@ -42,7 +42,6 @@ import numpy as np
 import transformations as tm
 
 class RectangleMesh(module3d.Object3D):
-
     """
     A filled rectangle.
     
@@ -192,7 +191,34 @@ class RectangleMesh(module3d.Object3D):
             dx = x0
             dy = y1
         return dx, dy
-       
+
+class AxisMesh(module3d.Object3D):
+    def __init__(self, scale=1.0):
+        import wavefront
+        import getpath
+        module3d.Object3D.__init__(self, 'axis', 4)
+        wavefront.loadObjFile(getpath.getSysDataPath('3dobjs/axis.obj'), self)
+
+        for fg_name in self.getFaceGroups():
+            if 'red' in fg_name.lower():
+                self.color[self.getVerticesForGroups([fg_name])] = [255, 0, 0, 255]
+            elif 'green' in fg_name.lower():
+                self.color[self.getVerticesForGroups([fg_name])] = [0, 255, 0, 255]
+            elif 'blue' in fg_name.lower():
+                self.color[self.getVerticesForGroups([fg_name])] = [0, 0, 255, 255]
+
+        self.markCoords(colr=True)
+        self.sync_color()
+
+        if scale != 1.0:
+            self.coord[:] *= float(scale)
+            self.markCoords(coor=True)
+            self.sync_coord()
+
+        # These are recommended, but cannot be assigned until this mesh is attached to an Object
+        #self.material.ambientColor=[0.2,0.2,0.2]
+        #self.material.configureShading(vertexColors=True)
+
 class FrameMesh(module3d.Object3D):
     """
     A wire rectangle.
@@ -204,7 +230,6 @@ class FrameMesh(module3d.Object3D):
     """
             
     def __init__(self, width, height):
-
         module3d.Object3D.__init__(self, 'frame', 2)
         
         # create group
