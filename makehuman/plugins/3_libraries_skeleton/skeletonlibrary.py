@@ -53,6 +53,8 @@ import material
 import numpy as np
 import os
 
+REF_RIG_PATH = getpath.getSysDataPath('rigs/default.json')
+
 #------------------------------------------------------------------------------------------
 #   class SkeletonAction
 #------------------------------------------------------------------------------------------
@@ -220,7 +222,7 @@ class SkeletonLibrary(gui3d.TaskView):
 
         if self.referenceRig is None:
             log.message("Loading reference skeleton for weights remapping.")
-            self.referenceRig = skeleton.load(getpath.getSysDataPath('rigs/default.json'), self.human.meshData)
+            self.referenceRig = skeleton.load(REF_RIG_PATH, self.human.meshData)
 
         if not filename:
             if self.human.getSkeleton():
@@ -238,13 +240,17 @@ class SkeletonLibrary(gui3d.TaskView):
             self.filechooser.selectItem(None)
             return
 
-        # Load skeleton definition from options
-        skel = skeleton.load(filename, self.human.meshData)
+        if getpath.isSamePath(filename, REF_RIG_PATH):
+            skel = self.referenceRig.clone()
+            vertexWeights = self.referenceRig.getVertexWeights()
+        else:
+            # Load skeleton definition from options
+            skel = skeleton.load(filename, self.human.meshData)
 
-        # Ensure vertex weights of skel are initialized
-        skel.autoBuildWeightReferences(self.referenceRig)  # correct weights references if only (pose) references were defined
-        vertexWeights = skel.getVertexWeights(self.referenceRig.getVertexWeights())
-        log.message("Skeleton %s has %s weights per vertex.", skel.name, vertexWeights.getMaxNumberVertexWeights())
+            # Ensure vertex weights of skel are initialized
+            skel.autoBuildWeightReferences(self.referenceRig)  # correct weights references if only (pose) references were defined
+            vertexWeights = skel.getVertexWeights(self.referenceRig.getVertexWeights())
+            log.message("Skeleton %s has %s weights per vertex.", skel.name, vertexWeights.getMaxNumberVertexWeights())
 
         # Update description
         descr = skel.description

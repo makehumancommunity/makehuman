@@ -195,6 +195,12 @@ def isSubPath(subpath, path):
     path = canonicalPath(path)
     return commonprefix([subpath, path]) == path
 
+def isSamePath(path1, path2):
+    """
+    Determines whether two paths point to the same location.
+    """
+    return canonicalPath(path1) == canonicalPath(path2)
+
 def getRelativePath(path, relativeTo = [getDataPath(), getSysDataPath()], strict=False):
     """
     Return a relative file path, relative to one of the specified search paths.
