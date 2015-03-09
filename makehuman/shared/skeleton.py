@@ -283,6 +283,9 @@ class Skeleton(object):
         result.joint_pos_idxs = dict(self.joint_pos_idxs)
         result.vertexWeights = self.vertexWeights
         result.scale = scale
+        result.version = self.version
+        result.copyright = self.copyright
+        result.description = self.description
 
         for bone in self.getBones():
             parentName = bone.parent.name if bone.parent else None
