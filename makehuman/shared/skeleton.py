@@ -75,6 +75,7 @@ class Skeleton(object):
         self.roots = []     # Root bones of this skeleton, a skeleton can have multiple root bones.
 
         self.joint_pos_idxs = {}  # Lookup by joint name referencing vertex indices on the human, to determine joint position
+        self.planes = {}    # Named planes defined between joints, used for calculating bone roll angle
 
         self.vertexWeights = None  # Source vertex weights, defined on the basemesh, for this skeleton
 
@@ -98,6 +99,8 @@ class Skeleton(object):
             if isinstance(v_idxs, list) and len(v_idxs) > 0:
                 self.joint_pos_idxs[joint_name] = v_idxs
 
+        self.planes = skelData.get("planes", dict())
+
         # Order bones breadth-first
         breadthfirst_bones = []
         prev_len = -1   # anti-deadlock
@@ -115,7 +118,7 @@ class Skeleton(object):
 
         for bone_name in breadthfirst_bones:
             bone_defs = skelData["bones"][bone_name]
-            self.addBone(bone_name, bone_defs.get("parent", None), bone_defs["head"], bone_defs["tail"], bone_defs["roll"], bone_defs.get("reference",None), bone_defs.get("weights_reference",None))
+            self.addBone(bone_name, bone_defs.get("parent", None), bone_defs["head"], bone_defs["tail"], bone_defs.get("rotation_plane", 0), bone_defs.get("reference",None), bone_defs.get("weights_reference",None))
 
         self.build()
 
@@ -286,6 +289,7 @@ class Skeleton(object):
         result.version = self.version
         result.copyright = self.copyright
         result.description = self.description
+        result.planes = dict(self.planes)
 
         for bone in self.getBones():
             parentName = bone.parent.name if bone.parent else None
@@ -346,15 +350,6 @@ class Skeleton(object):
         Update skeleton rest matrices to new joint positions after modifying
         human.
         """
-        '''
-        self._amt.updateJoints()
-        for amtBone in self._amt.bones.values():
-            bone = self.getBone(amtBone.name)
-            bone.headPos[:] = amtBone.head
-            bone.tailPos[:] = amtBone.tail
-            bone.roll = amtBone.roll
-        '''
-
         for bone in self.getBones():
             bone.updateJointPositions()
 
@@ -518,7 +513,7 @@ class Bone(object):
         self.headPos = np.zeros(3,dtype=np.float32)
         self.tailPos = np.zeros(3,dtype=np.float32)
 
-        self.roll = float(roll)
+        self.roll = roll
         self.length = 0
         self.yvector4 = None    # Direction vector of this bone
 
@@ -561,12 +556,23 @@ class Bone(object):
         self.matPoseGlobal = None
         self.matPoseVerts = None
 
+    @property
+    def planes(self):
+        return self.skeleton.planes
+
     def updateJointPositions(self, human=None):
         if not human:
             from core import G
             human = G.app.selectedHuman
         self.headPos[:] = self.skeleton.getJointPosition(self.headJoint, human)[:3] * self.skeleton.scale
         self.tailPos[:] = self.skeleton.getJointPosition(self.tailJoint, human)[:3] * self.skeleton.scale
+
+        if isinstance(self.roll, basestring):  # TODO this is not very nice
+            # Update roll angle based on plane
+            plane_name = self.roll
+            self.roll_angle = get_roll_to(self.headPos, self.tailPos, get_normal(self.skeleton, plane_name, self.planes, human))
+        else:
+            self.roll_angle = self.roll
 
     def getRestMatrix(self, meshOrientation='yUpFaceZ', localBoneAxis='y', offsetVect=[0,0,0]):
         """
@@ -624,7 +630,7 @@ class Bone(object):
         tail4 = np.append(head3, 1.0)
 
         # Update rest matrices
-        self.length, self.matRestGlobal = getMatrix(head3, tail3, self.roll)
+        self.length, self.matRestGlobal = getMatrix(head3, tail3, self.roll_angle)
         if self.parent:
             self.matRestRelative = np.dot(la.inv(self.parent.matRestGlobal), self.matRestGlobal)
         else:
@@ -824,22 +830,6 @@ class Bone(object):
         else:
             self.matRestGlobal = self.matRestRelative
 
-        '''
-        # Update rest matrices
-        self.length, self.matRestGlobal = getMatrix(head3, tail3, self.roll)
-        if self.parent:
-            self.matRestRelative = np.dot(la.inv(self.parent.matRestGlobal), self.matRestGlobal)
-        else:
-            self.matRestRelative = self.matRestGlobal
-        '''
-
-        '''
-        if self.parent:
-            self.matPoseGlobal = np.dot(self.parent.matPoseGlobal, np.dot(self.matRestRelative, self.matPose))
-        else:
-            self.matPoseGlobal = np.dot(self.matRestRelative, self.matPose)
-        '''
-
         # Update pose matrices
         self.update()
 
@@ -856,7 +846,7 @@ class Bone(object):
         pose = self.getPoseFromGlobal()
 
         az,ay,ax = tm.euler_from_matrix(pose, axes='szyx')
-        rot = tm.rotation_matrix(-ay + self.roll, Bone.Axes[1])
+        rot = tm.rotation_matrix(-ay + self.roll_angle, Bone.Axes[1])
         self.matPoseGlobal[:3,:3] = np.dot(self.matPoseGlobal[:3,:3], rot[:3,:3])
         #pose2 = self.getPoseFromGlobal()
 
@@ -944,7 +934,73 @@ def getMatrix(head, tail, roll):
     mat[:3,3] = head
     return length, mat
 
+def get_roll_to(head, tail, normal):
+    """
+    Compute the roll angle for a bone to make the bone's local x axis align with
+    the specified normal.
+    """
+    p1 = toZisUp3(head)
+    p2 = toZisUp3(tail)
+    xvec = normal
+
+    pvec = matrix.normalize(p2-p1)
+    xy = np.dot(xvec,pvec)
+    yvec = matrix.normalize(pvec-xy*xvec)
+    zvec = matrix.normalize(np.cross(xvec, yvec))
+    mat = np.asarray((xvec,yvec,zvec), dtype=np.float32)
+
+    try:
+        assertOrthogonal(mat)
+    except Exception as e:
+        print e
+    quat = tm.quaternion_from_matrix(mat)
+    if abs(quat[0]) < 1e-4:
+        return 0
+    else:
+        roll = math.pi - 2*math.atan(quat[2]/quat[0])
+
+    if roll < -math.pi:
+        roll += 2*math.pi
+    elif roll > math.pi:
+        roll -= 2*math.pi
+    return roll
+
+def get_normal(skel, plane_name, plane_defs, human=None):
+    """
+    Return the normal of a triangle plane defined between three joint positions,
+    using counter-clockwise winding order (right-handed).
+    """
+    if plane_name not in plane_defs:
+        log.warning("No plane with name %s defined for skeleton.", plane_name)
+        return np.asarray([1,0,0], dtype=np.float32)
+
+    if not human:
+        from core import G
+        human = G.app.selectedHuman
+
+    joint_names = plane_defs[plane_name]
+
+    j1,j2,j3 = joint_names
+    p1 = skel.getJointPosition(j1, human)[:3] * skel.scale
+    p2 = skel.getJointPosition(j2, human)[:3] * skel.scale
+    p3 = skel.getJointPosition(j3, human)[:3] * skel.scale
+    pvec = matrix.normalize(p2-p1)
+    yvec = matrix.normalize(p3-p2)
+    return matrix.normalize(np.cross(yvec, pvec))
+
+def assertOrthogonal(mat):
+    prod = np.dot(mat, mat.transpose())
+    diff = prod - np.identity(3,float)
+    sum = 0
+    for i in range(3):
+        for j in range(3):
+            if abs(diff[i,j]) > 1e-5:
+                raise AssertionError("Not orthogonal: diff[%d,%d] = %g\n%s\n\%s" % (i, j, diff[i,j], mat, prod))
+    return True
+
+
 def _normalizeQuaternion(quat):
+    # TODO transformations.py already contains these
     r2 = quat[1]*quat[1] + quat[2]*quat[2] + quat[3]*quat[3]
     if r2 > 1:
         r2 = 1
