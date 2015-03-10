@@ -518,7 +518,6 @@ class Bone(object):
         self.yvector4 = None    # Direction vector of this bone
 
         self.updateJointPositions()
-        # TODO calculate roll angle (after updating joint positions)
 
         self.children = []
         if parentName:
@@ -561,18 +560,25 @@ class Bone(object):
         return self.skeleton.planes
 
     def updateJointPositions(self, human=None):
+        """
+        Update the joint positions of this skeleton based on the current state
+        of the human mesh.
+        Remember to call build() after calling this method.
+        """
         if not human:
             from core import G
             human = G.app.selectedHuman
         self.headPos[:] = self.skeleton.getJointPosition(self.headJoint, human)[:3] * self.skeleton.scale
         self.tailPos[:] = self.skeleton.getJointPosition(self.tailJoint, human)[:3] * self.skeleton.scale
 
+        '''
         if isinstance(self.roll, basestring):  # TODO this is not very nice
             # Update roll angle based on plane
             plane_name = self.roll
             self.roll_angle = get_roll_to(self.headPos, self.tailPos, get_normal(self.skeleton, plane_name, self.planes, human))
         else:
             self.roll_angle = self.roll
+        '''
 
     def getRestMatrix(self, meshOrientation='yUpFaceZ', localBoneAxis='y', offsetVect=[0,0,0]):
         """
@@ -630,7 +636,16 @@ class Bone(object):
         tail4 = np.append(head3, 1.0)
 
         # Update rest matrices
-        self.length, self.matRestGlobal = getMatrix(head3, tail3, self.roll_angle)
+        plane_name = self.roll  # TODO ugly..
+        if not isinstance(plane_name, basestring):
+            normal = np.asarray([0.0, 1.0, 0.0], dtype=np.float32)
+        else:
+            normal = get_normal(self.skeleton, plane_name, self.planes)
+            if np.allclose(normal, np.zeros(3), atol=1e-05):
+                normal = np.asarray([0.0, 1.0, 0.0], dtype=np.float32)
+        self.matRestGlobal = getMatrix(head3, tail3, normal)
+        self.length = matrix.magnitude(tail3 - head3)
+        #print self.matRestGlobal, self.length
         if self.parent:
             self.matRestRelative = np.dot(la.inv(self.parent.matRestGlobal), self.matRestGlobal)
         else:
@@ -839,7 +854,7 @@ class Bone(object):
         Orient bone to point to goal position. Set doStretch to true to
         position the tail joint at goal, false to maintain length of this bone.
         """
-        length, self.matPoseGlobal = getMatrix(self.getHead(), goal, 0)
+        length, self.matPoseGlobal = _getMatrix(self.getHead(), goal, 0)
         if doStretch:
             factor = length/self.length
             self.matPoseGlobal[:3,1] *= factor
@@ -902,13 +917,33 @@ def fromZisUp4(mat):
 
 YUnit = np.array((0,1,0))
 
+def getMatrix(head, tail, normal):
+    mat = np.identity(4, dtype=np.float32)
+    bone_direction = tail - head
+    bone_direction = matrix.normalize(bone_direction[:3])
+    normal = matrix.normalize(normal[:3])
+
+    # Construct a base with orthonormal vectors
+    mat[:3,0] = normal[:3]          # bone local X axis
+    mat[:3,1] = bone_direction[:3]  # bone local Y axis
+    # Create a Z vector perpendicular on X and Y axes
+    z_axis = matrix.normalize(np.cross(normal, bone_direction))
+    mat[:3,2] = z_axis[:3]          # bone local Z axis
+
+    # Add head position as translation
+    mat[:3,3] = head[:3]
+
+    return mat
+
 ## TODO do y-z conversion inside this method or require caller to do it?
-def getMatrix(head, tail, roll):
+def _getMatrix(head, tail, roll):
     """
     Calculate an orientation (rest) matrix for a bone between specified head
     and tail positions with given bone roll angle.
     Returns length of the bone and rest orientation matrix in global coordinates.
     """
+    # TODO validate, or replace
+
     vector = toZisUp3(tail - head)
     length = math.sqrt(np.dot(vector, vector))
     if length == 0:
