@@ -1808,7 +1808,7 @@ def random_vector(size):
 
 
 def vector_product(v0, v1, axis=0):
-    """Return vector perpendicular to vectors.
+    """Return vector perpendicular to vectors (cross product).
 
     >>> v = vector_product([2, 0, 0], [0, 3, 0])
     >>> numpy.allclose(v, [0, 0, 6])
