@@ -271,7 +271,7 @@ ROOT root
 							{
 								OFFSET 0.772427 0.167220 0.004012
 								CHANNELS 3 Xrotation Yrotation Zrotation
-								JOINT shoulder02.L
+								JOINT upperarm01.L
 								{
 									OFFSET 0.715400 -0.390460 -0.033024
 									CHANNELS 3 Xrotation Yrotation Zrotation
@@ -421,7 +421,7 @@ ROOT root
 							{
 								OFFSET -0.772427 0.167220 0.004012
 								CHANNELS 3 Xrotation Yrotation Zrotation
-								JOINT shoulder02.R
+								JOINT upperarm01.R
 								{
 									OFFSET -0.715400 -0.390460 -0.033024
 									CHANNELS 3 Xrotation Yrotation Zrotation
