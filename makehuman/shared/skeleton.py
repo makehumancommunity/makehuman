@@ -923,11 +923,30 @@ def getMatrix(head, tail, normal):
     bone_direction = matrix.normalize(bone_direction[:3])
     normal = matrix.normalize(normal[:3])
 
+    # This would be the ideal case, where normal is always perpendicular to 
+    # bone_direction, which in practice will often not be the case
+    '''
     # Construct a base with orthonormal vectors
     mat[:3,0] = normal[:3]          # bone local X axis
     mat[:3,1] = bone_direction[:3]  # bone local Y axis
     # Create a Z vector perpendicular on X and Y axes
     z_axis = matrix.normalize(np.cross(normal, bone_direction))
+    mat[:3,2] = z_axis[:3]          # bone local Z axis
+    '''
+
+    # We want an orthonormal base, so...
+    # Take Z as perpendicular to normal and bone_direction
+    # We want a right handed axis system so use cross product order X * Y * Z 
+    z_axis = matrix.normalize(np.cross(normal, bone_direction))
+
+    # We now have two vertices that are orthogonal, we still need Y
+    # Calculate Y as orthogonal on the other two, it should approximate the
+    # normal specified as argument to this function
+    x_axis = matrix.normalize(np.cross(bone_direction, z_axis))
+
+    # Now we construct our orthonormal base
+    mat[:3,0] = x_axis[:3]          # bone local X axis
+    mat[:3,1] = bone_direction[:3]  # bone local Y axis
     mat[:3,2] = z_axis[:3]          # bone local Z axis
 
     # Add head position as translation
