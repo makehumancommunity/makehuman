@@ -205,6 +205,51 @@ class Skeleton(object):
 
         reverse_ref_map = _update_reverse_ref_map(self)
 
+        def addReferencePlanes(self, skel):
+            """
+            Add bone rotation reference planes to map from a reference rig to
+            this skeleton, using specified reference bones.
+            """
+            def _add_plane_from_ref(ref_bone, bone):
+                self.planes[bone.roll] = []
+                for joint in skel.planes[bone.roll]:
+                    if joint not in transferred_joints:
+                        if joint in self.joint_pos_idxs:
+                            # Create new joint name, so we don't override the 
+                            # original one in this skeleton (which might have a 
+                            # different position)
+                            idx = 1
+                            while "%s_%s" % (joint, idx) in self.joint_pos_idxs:
+                                idx += 1
+                            transferred_joints[joint] = "%s_%s" % (joint, idx)
+                            log.info("Renaming plane joint %s from ref skeleton to %s" % (joint, transferred_joints[joint]))
+                        else:
+                            transferred_joints[joint] = joint
+                    new_joint = transferred_joints[joint]
+                    self.joint_pos_idxs[new_joint] = skel.joint_pos_idxs[joint]
+                    self.planes[bone.roll].append(new_joint)
+
+            transferred_joints = dict()
+            for bone in self.getBones():
+                if not isinstance(bone.roll, basestring) and len(bone.reference_bones) > 0:
+                    '''
+                    # Strategy 1: use the first bone only
+                    ref_bone = skel.getBone(bone.reference_bones[0])
+                    bone.roll = ref_bone.roll
+                    _add_plane_from_ref(ref_bone, bone)
+
+                    # Strategy 2: use the last bone only
+                    ref_bone = skel.getBone(bone.reference_bones[-1])
+                    bone.roll = ref_bone.roll
+                    _add_plane_from_ref(ref_bone, bone)
+
+                    '''
+                    # Strategy 3: average the normal of all the planes
+                    bone.roll = list()  # TODO matrix calculation needs to be able to work with a list of planes
+                    for ref_bone in bone.reference_bones:
+                        bone.roll.append(ref_bone.roll)
+                        _add_plane_from_ref(ref_bone, bone)
+
         def _hasUnreferencedTail(bone, reverse_ref_map, first_bone=False):
             # TODO perhaps relax the unreferenced criterium if the bone referrer bone is the same that references the first bone
             if not first_bone and (bone.name in reverse_ref_map and len(reverse_ref_map) > 0):
@@ -571,15 +616,6 @@ class Bone(object):
         self.headPos[:] = self.skeleton.getJointPosition(self.headJoint, human)[:3] * self.skeleton.scale
         self.tailPos[:] = self.skeleton.getJointPosition(self.tailJoint, human)[:3] * self.skeleton.scale
 
-        '''
-        if isinstance(self.roll, basestring):  # TODO this is not very nice
-            # Update roll angle based on plane
-            plane_name = self.roll
-            self.roll_angle = get_roll_to(self.headPos, self.tailPos, get_normal(self.skeleton, plane_name, self.planes, human))
-        else:
-            self.roll_angle = self.roll
-        '''
-
     def getRestMatrix(self, meshOrientation='yUpFaceZ', localBoneAxis='y', offsetVect=[0,0,0]):
         """
         meshOrientation: What axis points up along the model, and which direction
@@ -636,13 +672,26 @@ class Bone(object):
         tail4 = np.append(head3, 1.0)
 
         # Update rest matrices
-        plane_name = self.roll  # TODO ugly..
-        if not isinstance(plane_name, basestring):
-            normal = np.asarray([0.0, 1.0, 0.0], dtype=np.float32)
-        else:
+        if isinstance(self.roll, list):
+            # Average the normal over multiple planes
+            count = 0
+            normal = np.zeros(3, dtype=np.float32)
+            for plane_name in self.roll:
+                norm = get_normal(self.skeleton, plane_name, self.planes)
+                if not np.allclose(norm, np.zeros(3), atol=1e-05):
+                    count += 1
+                    normal += norm
+            if count > 0 and not np.allclose(normal, np.zeros(3), atol=1e-05):
+                normal /= count
+            else:
+                normal = np.asarray([0.0, 1.0, 0.0], dtype=np.float32)
+        elif isinstance(self.roll, basestring):
+            plane_name = self.roll  # TODO ugly..
             normal = get_normal(self.skeleton, plane_name, self.planes)
             if np.allclose(normal, np.zeros(3), atol=1e-05):
                 normal = np.asarray([0.0, 1.0, 0.0], dtype=np.float32)
+        else:
+            normal = np.asarray([0.0, 1.0, 0.0], dtype=np.float32)
         self.matRestGlobal = getMatrix(head3, tail3, normal)
         self.length = matrix.magnitude(tail3 - head3)
         #print self.matRestGlobal, self.length
