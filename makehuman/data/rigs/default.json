@@ -4028,14 +4028,14 @@
             "spine01____tail"
         ],
         "clavicle.L____plane": [
-            "shoulder01.L____tail",
-            "shoulder01.L____head",
-            "clavicle.L____head"        
+            "lowerarm01.L____tail",
+            "lowerarm01.L____head",
+            "upperarm02.L____head"       
         ],
         "clavicle.R____plane": [
-            "shoulder01.R____tail",
-            "shoulder01.R____head",
-            "clavicle.R____head"
+            "lowerarm01.R____tail",
+            "lowerarm01.R____head",
+            "upperarm02.R____head"
         ],
         "eye.L____plane": [
             "orbicularis03.L____tail",
@@ -4498,14 +4498,14 @@
             "spine05____tail"
         ],
         "shoulder01.L____plane": [
-            "shoulder01.L____tail",
-            "shoulder01.L____head",
-            "clavicle.L____head"
+            "lowerarm01.L____tail",
+            "lowerarm01.L____head",
+            "upperarm02.L____head"
         ],
         "shoulder01.R____plane": [
-            "shoulder01.R____tail",
-            "shoulder01.R____head",
-            "clavicle.R____head"
+            "lowerarm01.R____tail",
+            "lowerarm01.R____head",
+            "upperarm02.R____head"
         ],        
         "special01____plane": [
             "special01____tail",
@@ -4783,24 +4783,24 @@
             "tongue07.R____tail"
         ],
         "upperarm01.L____plane": [
-            "upperarm02.L____tail",
-            "upperarm02.L____head",
-            "clavicle.L____tail"
+            "lowerarm01.L____tail",
+            "lowerarm01.L____head",
+            "upperarm02.L____head"
         ],
         "upperarm01.R____plane": [
-            "upperarm02.R____tail",
-            "upperarm02.R____head",
-            "clavicle.R____tail"
+            "lowerarm01.R____tail",
+            "lowerarm01.R____head",
+            "upperarm02.R____head"
         ],
         "upperarm02.L____plane": [
-            "upperarm02.L____tail",
-            "upperarm02.L____head",
-            "clavicle.L____tail"
+            "lowerarm01.L____tail",
+            "lowerarm01.L____head",
+            "upperarm02.L____head"
         ],
         "upperarm02.R____plane": [
-            "upperarm02.R____tail",
-            "upperarm02.R____head",
-            "clavicle.R____tail"
+            "lowerarm01.R____tail",
+            "lowerarm01.R____head",
+            "upperarm02.R____head"
         ],
         "upperleg01.L____plane": [
             "upperleg01.L____head",
