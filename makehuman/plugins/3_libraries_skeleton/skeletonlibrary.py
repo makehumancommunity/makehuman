@@ -252,6 +252,9 @@ class SkeletonLibrary(gui3d.TaskView):
             vertexWeights = skel.getVertexWeights(self.referenceRig.getVertexWeights())
             log.message("Skeleton %s has %s weights per vertex.", skel.name, vertexWeights.getMaxNumberVertexWeights())
 
+            # Remap bone orientation planes from reference rig
+            skel.addReferencePlanes(self.referenceRig)
+
         # Update description
         descr = skel.description
         self.descrLbl.setText(descr)

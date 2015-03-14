@@ -76,6 +76,7 @@ class Skeleton(object):
 
         self.joint_pos_idxs = {}  # Lookup by joint name referencing vertex indices on the human, to determine joint position
         self.planes = {}    # Named planes defined between joints, used for calculating bone roll angle
+        self.plane_map_strategy = 3  # The remapping strategy used by addReferencePlanes() for remapping orientation planes from a reference skeleton
 
         self.vertexWeights = None  # Source vertex weights, defined on the basemesh, for this skeleton
 
@@ -94,6 +95,7 @@ class Skeleton(object):
         self.version = int(skelData.get("version", 1))
         self.copyright = skelData.get("copyright", "")
         self.description = skelData.get("description", "")
+        self.plane_map_strategy = int(skelData.get("plane_map_strategy", 3))
 
         for joint_name, v_idxs in skelData.get("joints", dict()).items():
             if isinstance(v_idxs, list) and len(v_idxs) > 0:
@@ -205,51 +207,6 @@ class Skeleton(object):
 
         reverse_ref_map = _update_reverse_ref_map(self)
 
-        def addReferencePlanes(self, skel):
-            """
-            Add bone rotation reference planes to map from a reference rig to
-            this skeleton, using specified reference bones.
-            """
-            def _add_plane_from_ref(ref_bone, bone):
-                self.planes[bone.roll] = []
-                for joint in skel.planes[bone.roll]:
-                    if joint not in transferred_joints:
-                        if joint in self.joint_pos_idxs:
-                            # Create new joint name, so we don't override the 
-                            # original one in this skeleton (which might have a 
-                            # different position)
-                            idx = 1
-                            while "%s_%s" % (joint, idx) in self.joint_pos_idxs:
-                                idx += 1
-                            transferred_joints[joint] = "%s_%s" % (joint, idx)
-                            log.info("Renaming plane joint %s from ref skeleton to %s" % (joint, transferred_joints[joint]))
-                        else:
-                            transferred_joints[joint] = joint
-                    new_joint = transferred_joints[joint]
-                    self.joint_pos_idxs[new_joint] = skel.joint_pos_idxs[joint]
-                    self.planes[bone.roll].append(new_joint)
-
-            transferred_joints = dict()
-            for bone in self.getBones():
-                if not isinstance(bone.roll, basestring) and len(bone.reference_bones) > 0:
-                    '''
-                    # Strategy 1: use the first bone only
-                    ref_bone = skel.getBone(bone.reference_bones[0])
-                    bone.roll = ref_bone.roll
-                    _add_plane_from_ref(ref_bone, bone)
-
-                    # Strategy 2: use the last bone only
-                    ref_bone = skel.getBone(bone.reference_bones[-1])
-                    bone.roll = ref_bone.roll
-                    _add_plane_from_ref(ref_bone, bone)
-
-                    '''
-                    # Strategy 3: average the normal of all the planes
-                    bone.roll = list()  # TODO matrix calculation needs to be able to work with a list of planes
-                    for ref_bone in bone.reference_bones:
-                        bone.roll.append(ref_bone.roll)
-                        _add_plane_from_ref(ref_bone, bone)
-
         def _hasUnreferencedTail(bone, reverse_ref_map, first_bone=False):
             # TODO perhaps relax the unreferenced criterium if the bone referrer bone is the same that references the first bone
             if not first_bone and (bone.name in reverse_ref_map and len(reverse_ref_map) > 0):
@@ -285,6 +242,86 @@ class Skeleton(object):
                         bone._weight_reference_bones.extend(extra_vertweight_refs)
                         bone._weight_reference_bones = list(set(bone._weight_reference_bones))
                 reverse_ref_map = _update_reverse_ref_map(self)  # Make sure that another parent bone cannot be weighted to these again
+
+    def addReferencePlanes(self, referenceSkel):
+        """
+        Add bone rotation reference planes to map from a reference rig to
+        this skeleton, using specified reference bones.
+        """
+        def _add_plane_from_ref(plane_name):
+            self.planes[plane_name] = []
+            for joint in referenceSkel.planes[plane_name]:
+                if joint not in transferred_joints:
+                    if joint in self.joint_pos_idxs:
+                        # Create new joint name, so we don't override the 
+                        # original one in this skeleton (which might have a 
+                        # different position)
+                        idx = 1
+                        while "%s_%s" % (joint, idx) in self.joint_pos_idxs:
+                            idx += 1
+                        transferred_joints[joint] = "%s_%s" % (joint, idx)
+                        #log.message("Renaming plane joint %s from ref skeleton to %s" % (joint, transferred_joints[joint]))
+                    else:
+                        transferred_joints[joint] = joint
+                new_joint = transferred_joints[joint]
+                self.joint_pos_idxs[new_joint] = referenceSkel.joint_pos_idxs[joint]
+                self.planes[plane_name].append(new_joint)
+
+        def _remap_plane_strategy_1(bone, ref_bone_names):
+            # Strategy 1: use the first ref bone only
+            try:
+                ref_bone = referenceSkel.getBone(ref_bone_names[0])
+            except KeyError:
+                log.warning("Bone %s has an unresolved reference %s, cannot remap an orientation plane" % (bone.name, ref_bone_names[0]))
+                return
+            bone.roll = ref_bone.roll
+            _add_plane_from_ref(bone.roll)
+
+        def _remap_plane_strategy_2(bone, ref_bone_names):
+            # Strategy 2: use the last ref bone only
+            try:
+                ref_bone = referenceSkel.getBone(ref_bone_names[-1])
+            except KeyError:
+                log.warning("Bone %s has an unresolved reference %s, cannot remap an orientation plane" % (bone.name, ref_bone_names[-1]))
+                return
+            bone.roll = ref_bone.roll
+            _add_plane_from_ref(bone.roll)
+
+        def _remap_plane_strategy_3(bone, ref_bone_names):
+            # Strategy 3: average the normal of all the planes
+            bone.roll = list()
+            remaps = 0
+            for ref_bone in ref_bone_names:
+                try:
+                    ref_bone = referenceSkel.getBone(ref_bone)
+                except KeyError:
+                    continue
+                bone.roll.append(ref_bone.roll)
+                _add_plane_from_ref(ref_bone.roll)
+                remaps += 1
+            if remaps == 0 and len(ref_bone_names) > 0:
+                log.warning("Bone %s has no resolved references %s, cannot remap an orientation plane" % (bone.name, ref_bone_names))
+
+        if self.plane_map_strategy == 1:
+            _remap_plane = _remap_plane_strategy_1
+        elif self.plane_map_strategy == 2:
+            _remap_plane = _remap_plane_strategy_2
+        else:
+            _remap_plane = _remap_plane_strategy_3
+
+        transferred_joints = dict()
+        for bone in self.getBones():
+            if not isinstance(bone.roll, basestring):
+                if len(bone.reference_bones) > 0:
+                    ref_bones = bone.reference_bones
+                else:
+                    # Try to map bones by name
+                    ref_bones = [bone.name]
+
+                _remap_plane(bone, ref_bones)
+
+        # Rebuild skeleton matrices with new bone orientations
+        self.build()
 
     def getJointPosition(self, joint_name, human, rest_coord=True):
         """
@@ -694,7 +731,6 @@ class Bone(object):
             normal = np.asarray([0.0, 1.0, 0.0], dtype=np.float32)
         self.matRestGlobal = getMatrix(head3, tail3, normal)
         self.length = matrix.magnitude(tail3 - head3)
-        #print self.matRestGlobal, self.length
         if self.parent:
             self.matRestRelative = np.dot(la.inv(self.parent.matRestGlobal), self.matRestGlobal)
         else:
@@ -1055,7 +1091,7 @@ def get_roll_to(head, tail, normal):
     try:
         assertOrthogonal(mat)
     except Exception as e:
-        print e
+        log.warning("Calculated matrix is not orthogonal (%s)" % e)
     quat = tm.quaternion_from_matrix(mat)
     if abs(quat[0]) < 1e-4:
         return 0
