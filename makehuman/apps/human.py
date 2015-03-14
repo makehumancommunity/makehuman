@@ -1356,6 +1356,13 @@ class Human(guicommon.Object, animation.AnimatedMesh):
                 elif lineData[0] == 'tags':
                     for tag in lineData[1:]:
                         log.debug('Tag %s', tag)
+                elif lineData[0] == 'camera':
+                    rot = map(float, lineData[1:3]) + [0.0]
+                    trans = map(float, lineData[3:6])
+                    zoom = float(lineData[6])
+                    G.app.modelCamera.setRotation(rot)
+                    G.app.modelCamera.translation[:3] = trans[:3]
+                    G.app.modelCamera.setZoomFactor(zoom)
                 elif lineData[0] == 'subdivide':
                     subdivide = lineData[1].lower() in ['true', 'yes']
                 elif lineData[0] in G.app.loadHandlers:
@@ -1396,6 +1403,10 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         f.write('# Written by MakeHuman %s\n' % getVersionStr())
         f.write('version %s\n' % getShortVersion())
         f.write('tags %s\n' % tags)
+        cam_rot = list(G.app.modelCamera.getRotation()[:2])
+        cam_trans = list(G.app.modelCamera.translation[:3])
+        cam_zoom = [G.app.modelCamera.zoomFactor]
+        f.write('camera %s %s %s %s %s %s\n' % tuple(cam_rot + cam_trans + cam_zoom))
 
         class SaveWriter(object):
             def __init__(self, file_obj):
