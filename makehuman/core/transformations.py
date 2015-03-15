@@ -301,13 +301,13 @@ def reflection_from_matrix(matrix):
     M = numpy.array(matrix, dtype=numpy.float64, copy=False)
     # normal: unit eigenvector corresponding to eigenvalue -1
     w, V = numpy.linalg.eig(M[:3, :3])
-    i = numpy.where(abs(numpy.real(w) + 1.0) < 1e-8)[0]
+    i = numpy.where(abs(numpy.real(w) + 1.0) < 1e-6)[0]
     if not len(i):
         raise ValueError("no unit eigenvector corresponding to eigenvalue -1")
     normal = numpy.real(V[:, i[0]]).squeeze()
     # point: any unit eigenvector corresponding to eigenvalue 1
     w, V = numpy.linalg.eig(M)
-    i = numpy.where(abs(numpy.real(w) - 1.0) < 1e-8)[0]
+    i = numpy.where(abs(numpy.real(w) - 1.0) < 1e-6)[0]
     if not len(i):
         raise ValueError("no unit eigenvector corresponding to eigenvalue 1")
     point = numpy.real(V[:, i[-1]]).squeeze()
@@ -376,13 +376,13 @@ def rotation_from_matrix(matrix):
     R33 = R[:3, :3]
     # direction: unit eigenvector of R33 corresponding to eigenvalue of 1
     w, W = numpy.linalg.eig(R33.T)
-    i = numpy.where(abs(numpy.real(w) - 1.0) < 1e-7)[0]
+    i = numpy.where(abs(numpy.real(w) - 1.0) < 1e-6)[0]
     if not len(i):
         raise ValueError("no unit eigenvector corresponding to eigenvalue 1")
     direction = numpy.real(W[:, i[-1]]).squeeze()
     # point: unit eigenvector of R33 corresponding to eigenvalue of 1
     w, Q = numpy.linalg.eig(R)
-    i = numpy.where(abs(numpy.real(w) - 1.0) < 1e-7)[0]
+    i = numpy.where(abs(numpy.real(w) - 1.0) < 1e-6)[0]
     if not len(i):
         raise ValueError("no unit eigenvector corresponding to eigenvalue 1")
     point = numpy.real(Q[:, i[-1]]).squeeze()
@@ -457,7 +457,7 @@ def scale_from_matrix(matrix):
     try:
         # direction: unit eigenvector corresponding to eigenvalue factor
         w, V = numpy.linalg.eig(M33)
-        i = numpy.where(abs(numpy.real(w) - factor) < 1e-8)[0][0]
+        i = numpy.where(abs(numpy.real(w) - factor) < 1e-6)[0][0]
         direction = numpy.real(V[:, i]).squeeze()
         direction /= vector_norm(direction)
     except IndexError:
@@ -466,7 +466,7 @@ def scale_from_matrix(matrix):
         direction = None
     # origin: any eigenvector corresponding to eigenvalue 1
     w, V = numpy.linalg.eig(M)
-    i = numpy.where(abs(numpy.real(w) - 1.0) < 1e-8)[0]
+    i = numpy.where(abs(numpy.real(w) - 1.0) < 1e-6)[0]
     if not len(i):
         raise ValueError("no eigenvector corresponding to eigenvalue 1")
     origin = numpy.real(V[:, i[-1]]).squeeze()
@@ -571,21 +571,21 @@ def projection_from_matrix(matrix, pseudo=False):
     M = numpy.array(matrix, dtype=numpy.float64, copy=False)
     M33 = M[:3, :3]
     w, V = numpy.linalg.eig(M)
-    i = numpy.where(abs(numpy.real(w) - 1.0) < 1e-8)[0]
+    i = numpy.where(abs(numpy.real(w) - 1.0) < 1e-6)[0]
     if not pseudo and len(i):
         # point: any eigenvector corresponding to eigenvalue 1
         point = numpy.real(V[:, i[-1]]).squeeze()
         point /= point[3]
         # direction: unit eigenvector corresponding to eigenvalue 0
         w, V = numpy.linalg.eig(M33)
-        i = numpy.where(abs(numpy.real(w)) < 1e-8)[0]
+        i = numpy.where(abs(numpy.real(w)) < 1e-6)[0]
         if not len(i):
             raise ValueError("no eigenvector corresponding to eigenvalue 0")
         direction = numpy.real(V[:, i[0]]).squeeze()
         direction /= vector_norm(direction)
         # normal: unit eigenvector of M33.T corresponding to eigenvalue 0
         w, V = numpy.linalg.eig(M33.T)
-        i = numpy.where(abs(numpy.real(w)) < 1e-8)[0]
+        i = numpy.where(abs(numpy.real(w)) < 1e-6)[0]
         if len(i):
             # parallel projection
             normal = numpy.real(V[:, i[0]]).squeeze()
@@ -729,7 +729,7 @@ def shear_from_matrix(matrix):
     angle = math.atan(angle)
     # point: eigenvector corresponding to eigenvalue 1
     w, V = numpy.linalg.eig(M)
-    i = numpy.where(abs(numpy.real(w) - 1.0) < 1e-8)[0]
+    i = numpy.where(abs(numpy.real(w) - 1.0) < 1e-6)[0]
     if not len(i):
         raise ValueError("no eigenvector corresponding to eigenvalue 1")
     point = numpy.real(V[:, i[-1]]).squeeze()
