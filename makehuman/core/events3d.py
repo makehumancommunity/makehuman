@@ -212,8 +212,7 @@ class EventHandler(object):
                 method(event)
         except Exception, _:
             log.warning('Exception during event %s', eventType, exc_info=True)
-            if topLevel:
-                self.eventFailed()
+            self.eventFailed(EventHandler._depth)
         EventHandler._depth -= 1
         if topLevel:
             self._logger.debug('callEvent: done')
@@ -222,7 +221,7 @@ class EventHandler(object):
             return True
         return False
 
-    def eventFailed(self):
+    def eventFailed(self, level):
         # Reset progress
         if G.app:
             G.app.progress(1)
