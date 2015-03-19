@@ -194,6 +194,10 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
             self.oldPxyMats = dict()
             xray_mat = material.fromFile(getpath.getSysDataPath('materials/xray.mhmat'))
             for pxy in self.human.getProxies(includeHumanProxy=False):
+                print pxy.type
+                if pxy.type == 'Eyes':
+                    # Don't X-ray the eyes, it looks weird
+                    continue
                 self.oldPxyMats[pxy.uuid] = pxy.object.material.clone()
                 pxy.object.material = xray_mat
         else:
