@@ -56,6 +56,8 @@ class DaeConfig(ExportConfig):
         self.localX = False
         self.localG = False
 
+        self.facePoseUnits = False
+
     # TODO preferably these are used (perhaps as enum) instead of the bools above
     # TODO move these to export Config super class
     @property
@@ -113,6 +115,8 @@ class ExporterCollada(Exporter):
         self.zUpFaceNegY = options.addWidget(gui.RadioButton(orients, "Z up, face -Y", False))
         self.zUpFaceX = options.addWidget(gui.RadioButton(orients, "Z up, face X", False))
 
+        self.facePoseUnits = options.addWidget(gui.CheckBox("Facial pose-units", False))
+
         #csyses = []
         #self.localY = options.addWidget(gui.RadioButton(csyses, "Local Y along bone", True))
         #self.localX = options.addWidget(gui.RadioButton(csyses, "Local X along bone", False))
@@ -133,6 +137,8 @@ class ExporterCollada(Exporter):
         cfg.yUpFaceX = self.yUpFaceX.selected
         cfg.zUpFaceNegY = self.zUpFaceNegY.selected
         cfg.zUpFaceX = self.zUpFaceX.selected
+
+        cfg.facePoseUnits = self.facePoseUnits.selected
 
         return cfg
 
