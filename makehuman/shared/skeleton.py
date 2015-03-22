@@ -390,16 +390,7 @@ class Skeleton(object):
         Note: this pose is undone when self.updateJointPositions() is called on this
         skeleton
         """
-        result = type(self)(self.name)
-        result.joint_pos_idxs = dict(self.joint_pos_idxs)
-        result.vertexWeights = self.vertexWeights
-        result.scale = self.scale
-
-        for bone in self.getBones():
-            parentName = bone.parent.name if bone.parent else None
-            result.addBone(bone.name, parentName, bone.headJoint, bone.tailJoint, bone.roll, bone.reference_bones)
-
-        result.build()
+        result = self.clone()
 
         for bone in result.getBones():
             bone.rotateRest( self.getBone(bone.name).matPose )
@@ -1111,7 +1102,7 @@ def get_normal(skel, plane_name, plane_defs, human=None):
     """
     if plane_name not in plane_defs:
         log.warning("No plane with name %s defined for skeleton.", plane_name)
-        return np.asarray([1,0,0], dtype=np.float32)
+        return np.asarray([0,1,0], dtype=np.float32)
 
     if not human:
         from core import G
