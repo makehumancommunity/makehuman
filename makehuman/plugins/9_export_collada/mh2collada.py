@@ -44,6 +44,8 @@ import os.path
 import time
 import codecs
 import log
+import getpath
+import bvh
 
 import gui3d
 
@@ -136,7 +138,13 @@ def exportCollada(filepath, config):
         dae_controller.writeLibraryControllers(fp, human, meshes, skel, config)
 
         progress(0.75, 0.8, "Exporting animations")
-        dae_animation.writeLibraryAnimations(fp, human, config)
+        #animations = [human.getAnimation(name) for name in human.getAnimations()]  # TODO distinguish poses from animations
+        if skel and config.facePoseUnits:
+            bvhfile = bvh.load(getpath.getSysDataPath('poseunits/face-poseunits.bvh'), allowTranslation="none")
+            # TODO compensate for rest pose
+            faceunit_anim = bvhfile.createAnimationTrack(skel, name="Expression-Face-PoseUnits")
+            animations = [faceunit_anim]
+            dae_animation.writeLibraryAnimations(fp, human, skel, animations, config)
 
         progress(0.75, 0.9, "Exporting geometry")
         dae_geometry.writeLibraryGeometry(fp, meshes, config)
