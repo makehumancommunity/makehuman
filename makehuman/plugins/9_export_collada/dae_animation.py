@@ -48,51 +48,73 @@ from .dae_node import goodBoneName
 #   library_animations
 #----------------------------------------------------------------------
 
-def writeLibraryAnimations(fp, human, config):
-    return
-
-    # TODO allow exporting poseunits
-    skel = human.getSkeleton()
-    if (skel is None or
-        not config.useFaceRig):
+def writeLibraryAnimations(fp, human, skel, animations, config):
+    if skel is None:
         return
 
+    # Use pose matrices, not skinning matrices
+    for anim in animations:
+        anim.resetBaked()
+
+    joined_anim = animations[0]
+    for anim in animations[1:]:
+        joined_anim = animation.joinAnimations(joined_anim, anim)
+
     fp.write('\n  <library_animations>\n')
-    action,_ = loadAction()
-    for bname in action.keys():
-        bone = skel.getBone(bname)
-        writeAnimation(fp, bone, action, config)
+    writeAnimation(fp, skel, joined_anim, config)
     fp.write('  </library_animations>\n')
 
+    # Write animation clips (not supported by all importers)
+    fp.write('\n  <library_animation_clips>\n')
+    timeOffset = 0.0
+    for anim in animations:
+        fp.write('    <animation_clip id="AnimationClip_%s" name="%s" start="%.3f" end="%.3f">\n' % (anim.name, anim.name, timeOffset, timeOffset+anim.getPlaytime()))
+        for bone in skel.getBones():
+            aname = "Anim_%s_%s" % (joined_anim.name, goodBoneName(bone.name))
+            fp.write('      <instance_animation url="#%s_pose_matrix"/>\n' % aname)
+        fp.write('    </animation_clip>\n')
+        # TODO it's also possible to export animations to separate files:
+        #    <animation_clip="name" name="name">
+        #      <instance_animation url="file://animation_file.dae#animationName"/>
+        #    </animation_clip>
+        timeOffset += anim.getPlaytime()
+    fp.write('\n  </library_animation_clips>\n')
 
-def writeAnimation(fp, bone, action, config):
-    aname = "Action_%s" % goodBoneName(bone.name)
-    points = action[bone.name]
-    npoints = len(points)
+def writeAnimation(fp, skel, anim, config):
+    for bIdx, bone in enumerate(skel.getBones()):
+        writeAnimationBone(fp, bone, anim, config)
+
+def writeAnimationBone(fp, bone, anim, config):
+    aname = "Anim_%s_%s" % (anim.name, goodBoneName(bone.name))
 
     fp.write(
         '    <animation id="%s_pose_matrix">\n' % aname +
         '      <source id="%s_pose_matrix-input">\n' % aname +
-        '        <float_array id="%s_pose_matrix-input-array" count="%d">' % (aname, npoints))
+        '        <float_array id="%s_pose_matrix-input-array" count="%d">' % (aname, anim.nFrames))
 
-    fp.write(''.join([" %g" % (0.04*(t+1)) for t in range(npoints)]))
+    # TIME POINTS
+    timepoints = np.asarray(range(anim.nFrames), dtype=np.float32) * (1.0/anim.frameRate)
+    fp.write(' '.join(["%g" % t for t in timepoints]))
 
     fp.write(
         '</float_array>\n' +
         '        <technique_common>\n' +
-        '          <accessor source="#%s_pose_matrix-input-array" count="%d" stride="1">\n' % (aname, npoints) +
+        '          <accessor source="#%s_pose_matrix-input-array" count="%d" stride="1">\n' % (aname, anim.nFrames) +
         '            <param name="TIME" type="float"/>\n' +
         '          </accessor>\n' +
         '        </technique_common>\n' +
         '      </source>\n' +
         '      <source id="%s_pose_matrix-output">\n' % aname +
-        '        <float_array id="%s_pose_matrix-output-array" count="%d">\n' % (aname, 16*npoints))
+        '        <float_array id="%s_pose_matrix-output-array" count="%d">\n' % (aname, 16*anim.nFrames))
 
     string = '          '
     relmat = bone.getRelativeMatrix(config.meshOrientation, config.localBoneAxis, config.offset)
-    for quat in points:
-        mat0 = tm.quaternion_matrix(quat)
-        mat = np.dot(relmat, mat0)
+    mats = anim.data[bone.index::anim.nBones]  # Get all pose matrices for this bone
+    I = np.identity(4, dtype=np.float32)
+    for mat0 in mats:
+        # TODO poses currently only work for default local bone axis
+        I[:3,:4] = mat0[:3,:4]
+        mat = np.dot(relmat, I)
         string += ''.join(['%g %g %g %g  ' % tuple(mat[i,:]) for i in range(4)])
         string += '\n          '
     fp.write(string)
@@ -100,20 +122,20 @@ def writeAnimation(fp, bone, action, config):
     fp.write(
         '</float_array>\n' +
         '        <technique_common>\n' +
-        '          <accessor source="#%s_pose_matrix-output-array" count="%d" stride="16">\n' % (aname, npoints) +
+        '          <accessor source="#%s_pose_matrix-output-array" count="%d" stride="16">\n' % (aname, anim.nFrames) +
         '            <param name="TRANSFORM" type="float4x4"/>\n' +
         '          </accessor>\n' +
         '        </technique_common>\n' +
         '      </source>\n' +
         '      <source id="%s_pose_matrix-interpolation">\n' % aname +
-        '        <Name_array id="%s_pose_matrix-interpolation-array" count="%d">' % (aname, npoints))
+        '        <Name_array id="%s_pose_matrix-interpolation-array" count="%d">' % (aname, anim.nFrames))
 
-    fp.write(npoints * 'LINEAR ')
+    fp.write(anim.nFrames * 'LINEAR ')
 
     fp.write(
         '</Name_array>\n' +
         '        <technique_common>\n' +
-        '          <accessor source="#%s_pose_matrix-interpolation-array" count="%d" stride="1">\n' % (aname, npoints) +
+        '          <accessor source="#%s_pose_matrix-interpolation-array" count="%d" stride="1">\n' % (aname, anim.nFrames) +
         '            <param name="INTERPOLATION" type="name"/>\n' +
         '          </accessor>\n' +
         '        </technique_common>\n' +
