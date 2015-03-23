@@ -384,6 +384,30 @@ def blendPoses(poses, weights):
 
     return poseData
 
+def joinAnimations(anim1, anim2):
+    """
+    Create a new animation by appending anim2 at the end of anim1.
+    Missing channels get filled with identity matrices.
+    Data such as framerate is taken from the first animation, the framerate of
+    both animations is expected to be identical.
+    """
+    if anim1.nBones != anim2.nBones:
+        raise RuntimeError("Cannot join animations %s and %s, they don't have the same bone count." % (anim1.nBones, anim2.nBones))
+    if anim1.data.shape[1] != anim2.data.shape[1] or anim1.data.shape[2] != anim2.data.shape[2]:
+        raise RuntimeError("Cannot join animations %s (%sx%s) and %s (%sx%s). Ensure that you are not joining baked and unbaked animations." % (anim1.name, anim1.data.shape[1], anim1.data.shape[2], anim2.name, anim2.data.shape[1], anim2.data.shape[2]))
+
+    if anim1.frameRate != anim2.frameRate:
+        log.warning("Joining animations %s (%.2fFPS) and %s (%.2fFPS) together but their framerates differ!" % (anim1.name, anim1.frameRate, anim2.name, anim2.frameRate))
+    # TODO would be more efficient if this method allowed to join multiple animations at once
+    nFrames = anim1.nFrames + anim2.nFrames
+    framerate = anim1.frameRate
+    name = anim1.name + '_' + anim2.name
+    shape = anim1.data.shape
+    dataLen = anim1.dataLen + anim2.dataLen
+
+    poseData = np.concatenate((anim1.data,anim2.data)).reshape((dataLen,shape[1],shape[2]))
+
+    return AnimationTrack(name, poseData, nFrames, framerate)
 
 class VertexBoneWeights(object):
     """
