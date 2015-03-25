@@ -260,10 +260,15 @@ def writeSkeletonFile(human, filepath, config):
     lines.append('    </bonehierarchy>')
     Pprogress.step()
 
-    if hasattr(human, 'animations'):
+    animations = [human.getAnimation(name) for name in human.getAnimations()]
+    # TODO compensate animations for alternate rest pose
+    if len(animations) > 0:
         lines.append('    <animations>')
-        for anim in human.animations:
-            writeAnimation(human, lines, anim.getAnimationTrack(), config)
+        for anim in animations:
+            # Use pose matrices, not skinning matrices
+            anim.resetBaked()
+            #anim = bvhanim.getAnimationTrack()
+            writeAnimation(human, lines, anim, config)
         lines.append('    </animations>')
 
     lines.append('</skeleton>')
@@ -334,6 +339,8 @@ def writeAnimation(human, linebuffer, animTrack, config):
     log.message("Exporting animation %s.", animTrack.name)
     linebuffer.append('        <animation name="%s" length="%s">' % (animTrack.name, animTrack.getPlaytime()))
     linebuffer.append('            <tracks>')
+    I = np.identity(4, dtype=np.float32)
+    axis_ = np.asarray([0,0,0,1], dtype=np.float32)
     for bIdx, bone in enumerate(human.getSkeleton().getBones()):
         # Note: OgreXMLConverter will optimize out unused (not moving) animation tracks
         linebuffer.append('                <track bone="%s">' % bone.name)
@@ -341,9 +348,12 @@ def writeAnimation(human, linebuffer, animTrack, config):
         frameTime = 1.0/float(animTrack.frameRate)
         for frameIdx in xrange(animTrack.nFrames):
             poseMat = animTrack.getAtFramePos(frameIdx)[bIdx]
+            I[:3,:4] = poseMat[:3,:4]
+            poseMat = I
             translation = poseMat[:3,3]
             angle, axis, _ = transformations.rotation_from_matrix(poseMat)
-            axis = np.asarray(axis * np.matrix(bone.getRestMatrix(offsetVect=config.offset)))[0]
+            axis_[:3] = axis[:3]
+            axis = np.asarray(axis_ * np.matrix(bone.getRestMatrix(offsetVect=config.offset)))[0]
             linebuffer.append('                        <keyframe time="%s">' % (float(frameIdx) * frameTime))
             linebuffer.append('                            <translate x="%s" y="%s" z="%s" />' % (translation[0], translation[1], translation[2]))
             # TODO account for scale
