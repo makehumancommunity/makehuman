@@ -827,7 +827,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         if self.getAsian() > self.getAfrican():
             if self.getAsian() > self.getCaucasian():
                 return 'asian'
-            elif getCaucasian() > self.getAsian():
+            elif self.getCaucasian() > self.getAsian():
                 return 'caucasian'
             else:
                 return None
