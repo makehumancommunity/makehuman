@@ -54,9 +54,9 @@ def exportObj(filepath, config=None):
     name = config.goodName(os.path.splitext(filename)[0])
 
     progress(0, 0.3, "Collecting Objects")
-    objects = human.getObjects(excludeZeroFaceObjs=True)
+    objects = human.getObjects(excludeZeroFaceObjs=not config.helperGeom)
 
     progress(0.3, 0.99, "Writing Objects")
-    wavefront.writeObjFile(filepath, objects, True, config)
+    wavefront.writeObjFile(filepath, objects, True, config, filterMaskedFaces=not config.helperGeom)
 
     progress(1.0, None, "OBJ Export finished. Output file: %s" % filepath)
