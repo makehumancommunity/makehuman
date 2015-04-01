@@ -40,7 +40,7 @@ Exports proxy mesh to obj
 import wavefront
 import os
 from progress import Progress
-import proxy
+import numpy as np
 
 #
 #    exportObj(human, filepath, config):
@@ -55,8 +55,22 @@ def exportObj(filepath, config=None):
 
     progress(0, 0.3, "Collecting Objects")
     objects = human.getObjects(excludeZeroFaceObjs=not config.helperGeom)
+    meshes = [o.mesh for o in objects]
+
+    if config.helperGeom:
+        # Disable the face masking on copies of the input meshes
+        meshes = [m.clone(filterMaskedVerts=False) for m in meshes]
+        for m in meshes:
+            # Would be faster if we could tell clone() to do this, but it would 
+            # make the interface more complex.
+            # We could also let the wavefront module do this, but this would 
+            # introduce unwanted "magic" behaviour into the export function.
+            face_mask = np.ones(m.face_mask.shape, dtype=bool)
+            m.changeFaceMask(face_mask)
+            m.calcNormals()
+            m.updateIndexBuffer()
 
     progress(0.3, 0.99, "Writing Objects")
-    wavefront.writeObjFile(filepath, objects, True, config, filterMaskedFaces=not config.helperGeom)
+    wavefront.writeObjFile(filepath, meshes, True, config, filterMaskedFaces=not config.helperGeom)
 
     progress(1.0, None, "OBJ Export finished. Output file: %s" % filepath)
