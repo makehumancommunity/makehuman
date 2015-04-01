@@ -154,9 +154,9 @@ def loadObjFile(path, obj = None):
     return obj
 
 
-def writeObjFile(path, objects, writeMTL=True, config=None, filterMaskedFaces=True):
-    if not isinstance(objects, list):
-        objects = [objects]
+def writeObjFile(path, meshes, writeMTL=True, config=None, filterMaskedFaces=True):
+    if not isinstance(meshes, list):
+        meshes = [meshes]
 
     if isinstance(path, file):
         fp = path
@@ -171,8 +171,6 @@ def writeObjFile(path, objects, writeMTL=True, config=None, filterMaskedFaces=Tr
     if writeMTL:
         mtlfile = path.replace(".obj",".mtl")
         fp.write("mtllib %s\n" % os.path.basename(mtlfile))
-
-    meshes = [obj.mesh for obj in objects]
 
     scale = config.scale if config is not None else 1.0
 
