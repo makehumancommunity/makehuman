@@ -45,6 +45,7 @@ class ObjConfig(ExportConfig):
         ExportConfig.__init__(self)
         self.useRelPaths = True
         self.useNormals = False
+        self.hiddenGeom = False
 
 
 class ExporterOBJ(Exporter):
@@ -59,6 +60,7 @@ class ExporterOBJ(Exporter):
         import gui
         Exporter.build(self, options, taskview)
         self.useNormals = options.addWidget(gui.CheckBox("Normals", False))
+        self.helperGeom = options.addWidget(gui.CheckBox("Helper geometry", False))
 
     def export(self, human, filename):
         from progress import Progress
@@ -75,6 +77,7 @@ class ExporterOBJ(Exporter):
 
         cfg.feetOnGround      = self.feetOnGround.selected
         cfg.scale,cfg.unit    = self.taskview.getScale()
+        cfg.helperGeom        = self.helperGeom.selected
 
         return cfg
 
