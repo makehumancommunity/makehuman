@@ -105,7 +105,7 @@ class Object(events3d.EventHandler):
 
     # TODO
     def clone(self):
-        pass
+        raise NotImplementedError("You probably want to do object.mesh.clone()")
 
     def _attach(self):
         if self.view.isVisible() and self.visible:
