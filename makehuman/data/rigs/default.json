@@ -4050,152 +4050,152 @@
         "finger1-1.L____plane": [
             "finger1-3.L____tail",
             "finger1-2.L____tail",
-            "finger1-1.L____head"
+            "wrist.L____head"
         ],
         "finger1-1.R____plane": [
             "finger1-3.R____tail",
             "finger1-2.R____tail",
-            "finger1-1.R____head"
+            "wrist.R____head"
         ],
         "finger1-2.L____plane": [
             "finger1-3.L____tail",
             "finger1-2.L____tail",
-            "finger1-1.L____head"
+            "wrist.L____head"
         ],
         "finger1-2.R____plane": [
             "finger1-3.R____tail",
             "finger1-2.R____tail",
-            "finger1-1.R____head"
+            "wrist.R____head"
         ],
         "finger1-3.L____plane": [
             "finger1-3.L____tail",
             "finger1-2.L____tail",
-            "finger1-1.L____head"
+            "wrist.L____head"
         ],
         "finger1-3.R____plane": [
             "finger1-3.R____tail",
             "finger1-2.R____tail",
-            "finger1-1.R____head"
+            "wrist.R____head"
         ],
         "finger2-1.L____plane": [
             "finger2-3.L____tail",
             "finger2-1.L____tail",
-            "metacarpal1.L____head"
+            "wrist.L____head"
         ],
         "finger2-1.R____plane": [
             "finger2-3.R____tail",
             "finger2-1.R____tail",
-            "metacarpal1.R____head"
+            "wrist.R____head"
         ],
         "finger2-2.L____plane": [
             "finger2-3.L____tail",
             "finger2-1.L____tail",
-            "metacarpal1.L____head"
+            "wrist.L____head"
         ],
         "finger2-2.R____plane": [
             "finger2-3.R____tail",
             "finger2-1.R____tail",
-            "metacarpal1.R____head"
+            "wrist.R____head"
         ],
         "finger2-3.L____plane": [
             "finger2-3.L____tail",
             "finger2-1.L____tail",
-            "metacarpal1.L____head"
+            "wrist.L____head"
         ],
         "finger2-3.R____plane": [
             "finger2-3.R____tail",
             "finger2-1.R____tail",
-            "metacarpal1.R____head"
+            "wrist.R____head"
         ],
         "finger3-1.L____plane": [
             "finger3-3.L____tail",
             "finger3-1.L____tail",
-            "metacarpal2.L____head"
+            "wrist.L____head"
         ],
         "finger3-1.R____plane": [
             "finger3-3.R____tail",
             "finger3-1.R____tail",
-            "metacarpal2.R____head"
+            "wrist.R____head"
         ],
         "finger3-2.L____plane": [
             "finger3-3.L____tail",
             "finger3-1.L____tail",
-            "metacarpal2.L____head"
+            "wrist.L____head"
         ],
         "finger3-2.R____plane": [
             "finger3-3.R____tail",
             "finger3-1.R____tail",
-            "metacarpal2.R____head"
+            "wrist.R____head"
         ],
         "finger3-3.L____plane": [
             "finger3-3.L____tail",
             "finger3-1.L____tail",
-            "metacarpal2.L____head"
+            "wrist.L____head"
         ],
         "finger3-3.R____plane": [
             "finger3-3.R____tail",
             "finger3-1.R____tail",
-            "metacarpal2.R____head"
+            "wrist.R____head"
         ],
         "finger4-1.L____plane": [
             "finger4-3.L____tail",
             "finger4-1.L____tail",
-            "metacarpal3.L____head"
+            "wrist.L____head"
         ],
         "finger4-1.R____plane": [
             "finger4-3.R____tail",
             "finger4-1.R____tail",
-            "metacarpal3.R____head"
+            "wrist.R____head"
         ],
         "finger4-2.L____plane": [
             "finger4-3.L____tail",
             "finger4-1.L____tail",
-            "metacarpal3.L____head"
+            "wrist.L____head"
         ],
         "finger4-2.R____plane": [
             "finger4-3.R____tail",
             "finger4-1.R____tail",
-            "metacarpal3.R____head"
+            "wrist.R____head"
         ],
         "finger4-3.L____plane": [
             "finger4-3.L____tail",
             "finger4-1.L____tail",
-            "metacarpal3.L____head"
+            "wrist.L____head"
         ],
         "finger4-3.R____plane": [
             "finger4-3.R____tail",
             "finger4-1.R____tail",
-            "metacarpal3.R____head"
+            "wrist.R____head"
         ],
         "finger5-1.L____plane": [
             "finger5-3.L____tail",
             "finger5-1.L____tail",
-            "metacarpal4.L____head"
+            "wrist.L____head"
         ],
         "finger5-1.R____plane": [
             "finger5-3.R____tail",
             "finger5-1.R____tail",
-            "metacarpal4.R____head"
+            "wrist.R____head"
         ],
         "finger5-2.L____plane": [
             "finger5-3.L____tail",
             "finger5-1.L____tail",
-            "metacarpal4.L____head"
+            "wrist.L____head"
         ],
         "finger5-2.R____plane": [
             "finger5-3.R____tail",
             "finger5-1.R____tail",
-            "metacarpal4.R____head"
+            "wrist.R____head"
         ],
         "finger5-3.L____plane": [
             "finger5-3.L____tail",
             "finger5-1.L____tail",
-            "metacarpal4.L____head"
+            "wrist.L____head"
         ],
         "finger5-3.R____plane": [
             "finger5-3.R____tail",
             "finger5-1.R____tail",
-            "metacarpal4.R____head"
+            "wrist.R____head"
         ],
         "foot.L____plane": [
             "lowerleg02.L____head",
