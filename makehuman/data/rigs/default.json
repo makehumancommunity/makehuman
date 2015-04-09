@@ -4827,10 +4827,10 @@
             "finger5-1.L____head",
             "wrist.L____head"
         ],
-        "wrist.R____plane": [
-            "wrist.R____head",
+        "wrist.R____plane": [            
+            "finger2-1.R____head",
             "finger5-1.R____head",
-            "finger2-1.R____head"
+            "wrist.R____head"
         ]
     },
     "version": 102,
