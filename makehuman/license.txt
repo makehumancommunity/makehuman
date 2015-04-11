@@ -13,7 +13,7 @@ D. CC0 1.0 Universal
 A. The MakeHuman Source code and data
 ======================================
 
-MakeHuman source (all files that include code) and data (3d models and 3d morphings) are relased under AGPL.
+MakeHuman source (all files that include code) and data (3d models, 3d morphings, images, other binary data and so forth) are relased under AGPL.
 
 Copyright (C) 2001-2015  MakeHuman Team (makehuman.org)
 
@@ -256,10 +256,22 @@ From time to time the MakeHuman Team may release other application code in vario
 C. MakeHuman output GPL exception
 ==================================
 
-Exporting characters from MH application is making a combined work 
-based on the MH data (base mesh and targets). Thus, the terms and 
-conditions of the Affero GNU General Public License cover the whole combination.
-As a special exception, the copyright holders of the data (MHteam) states that the output is under the terms of CC0 1.0 Universal.
+All MakeHuman assets (such as source code, mesh data, plugins, images, other binary data and so forth) are relased under AGPL unless explicitly stated otherwise. 
+
+Copyright (C) 2001-2014 MakeHuman Team (makehuman.org) This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details. You should receive a copy of the GNU Affero General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+See also long version of AGPL: http://www.gnu.org/licenses/agpl-3.0.html
+
+As a special and limited exception, the copyright holders of the MakeHuman assets grants the option to use CC0 as a license for the same assets under the condition that a) The assets were bundled in an export that was made using the file export functionality inside an OFFICIAL and UNMODIFIED version of MakeHuman and/or b) the asset solely consists of a 2D binary image in PNG, BMP or JPG format.
+
+The short version of CC0 is as follows:
+
+The person who associated a work with this deed has dedicated the work to the public domain by waiving all of his or her rights to the work worldwide under copyright law, including all related and neighboring rights, to the extent allowed by law. You can copy, modify, distribute and perform the work, even for commercial purposes, all without asking permission.
+
+See alo long version of CC0: http://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+For an elaboration and clarification on our intention and interpretation of these license terms see the License Explanation: http://www.makehuman.org/content/license_explanation.html
+
 
 ====================
 D. CC0 1.0 Universal
