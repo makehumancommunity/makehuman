@@ -13,7 +13,7 @@ D. CC0 1.0 Universal
 A. The MakeHuman Source code and data
 ======================================
 
-MakeHuman source (all files that include code) and data (3d models, 3d morphings, images, other binary data and so forth) are relased under AGPL with the exception described in section C.
+MakeHuman source (all files that include code) and data (3d models, 3d morphings, images, other binary data and so forth) are released under AGPL with the exception described in section C.
 
 Copyright (C) 2001-2015  MakeHuman Team (makehuman.org)
 
