@@ -194,10 +194,10 @@ class RectangleMesh(module3d.Object3D):
 
 class AxisMesh(module3d.Object3D):
     def __init__(self, scale=1.0):
-        import wavefront
+        import files3d
         import getpath
         module3d.Object3D.__init__(self, 'axis', 4)
-        wavefront.loadObjFile(getpath.getSysDataPath('3dobjs/axis.obj'), self)
+        files3d.loadMesh(getpath.getSysDataPath('3dobjs/axis.obj'), maxFaces=4, obj=self)
 
         for fg_name in self.getFaceGroups():
             if 'red' in fg_name.lower():
