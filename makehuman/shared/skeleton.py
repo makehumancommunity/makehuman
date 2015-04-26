@@ -600,6 +600,11 @@ class Bone(object):
             self.parent = None
 
         self.index = None   # The index of this bone in the breadth-first bone list
+        self.level = None   # The level in the hierarchy (number of parent levels)
+        if self.parent:
+            self.level = self.parent.level + 1
+        else:
+            self.level = 0
 
         self.reference_bones = []  # Used for mapping animations and poses
         if reference_bones is not None:
@@ -615,7 +620,7 @@ class Bone(object):
 
         # Matrices:
         # static
-        #  matRestGlobal:     4x4 rest matrix, relative world
+        #  matRestGlobal:     4x4 rest matrix, relative world (bind pose matrix)
         #  matRestRelative:   4x4 rest matrix, relative parent
         # posed
         #  matPose:           4x4 pose matrix, relative parent and own rest pose
@@ -646,6 +651,8 @@ class Bone(object):
 
     def getRestMatrix(self, meshOrientation='yUpFaceZ', localBoneAxis='y', offsetVect=[0,0,0]):
         """
+        Global rest matrix for this bone
+
         meshOrientation: What axis points up along the model, and which direction
                          the model is facing.
             allowed values: yUpFaceZ (0), yUpFaceX (1), zUpFaceNegY (2), zUpFaceX (3)
