@@ -401,8 +401,7 @@ def findBestVerts(scn, humanGroup, pExactIndex, hum, clo):
             vfaces[vn0] = vfaces[vn1] = vfaces[vn2] = [t]
             rigid[vn0] = rigid[vn1] = rigid[vn2] = True
 
-    baseFaces = getFaces(hum.data)
-    for f in baseFaces:
+    for f in hum.data.polygons:
         vn0,vn1,vn2,vn3 = f.vertices
         if not (rigid[vn0] or rigid[vn1] or rigid[vn2] or rigid[vn3]):
             t0 = [vn0,vn1,vn2]
@@ -456,12 +455,6 @@ def findBestFaces(scn, bestVerts, vfaces, hum, clo):
                 minmax = w
                 bWts = wts
                 bVerts = fverts
-        if False and minmax < scn.MCThreshold:
-            badVerts.append(pv.index)
-            pv.select = True
-            (mv, mdist) = bestVert.mverts[0]
-            bVerts = [mv.index,0,1]
-            bWts = (1,0,0)
 
         v0 = hum.data.vertices[bVerts[0]]
         v1 = hum.data.vertices[bVerts[1]]
@@ -734,8 +727,7 @@ def printMhcloUvLayers(fp, clo, scn, hasObj, offset=0):
                 vt = texVerts[vtn]
                 fp.write("%.4f %.4f\n" % (vt[0], vt[1]))
             fp.write("texFaces %d\n" % printLayer)
-            meFaces = getFaces(me)
-            for f in meFaces:
+            for f in me.polygons:
                 uvVerts = uvFaceVerts[f.index]
                 uvLine = []
                 for n,v in enumerate(f.vertices):
@@ -860,8 +852,7 @@ def deleteStrayVerts(context, ob):
     onFaces = {}
     for v in verts:
         onFaces[v.index] = False
-    faces = getFaces(ob.data)
-    for f in faces:
+    for f in ob.data.polygons:
         for vn in f.vertices:
             onFaces[vn] = True
     for v in verts:
@@ -891,9 +882,8 @@ def exportObjFile(context):
         layer = scn.MCTextureLayer
         writeObjTextureData(fp, me, texVertsList[layer], uvFaceVertsList[layer])
     else:
-        meFaces = getFaces(me)
         flist = []
-        for f in meFaces:
+        for f in me.polygons:
             l = ["f"]
             for vn in f.vertices:
                 l.append("%d" % (vn+1))
@@ -919,9 +909,8 @@ def writeObjTextureData(fp, me, texVerts, uvFaceVerts):
         vlist.append("vt %.4f %.4f" % (vt[0], vt[1]))
     fp.write("\n".join(vlist) + "\n")
 
-    meFaces = getFaces(me)
     flist = []
-    for f in meFaces:
+    for f in me.polygons:
         uvVerts = uvFaceVerts[f.index]
         l = ["f"]
         for n,v in enumerate(f.vertices):
@@ -951,8 +940,7 @@ def setupTexVerts(ob):
     for e in me.edges:
         for vn in e.vertices:
             vertEdges[vn].append(e)
-    meFaces = getFaces(me)
-    for f in meFaces:
+    for f in me.polygons:
         for vn in f.vertices:
             vertFaces[vn].append(f)
 
@@ -960,9 +948,9 @@ def setupTexVerts(ob):
     for e in me.edges:
         edgeFaces[e.index] = []
     faceEdges = {}
-    for f in meFaces:
+    for f in me.polygons:
         faceEdges[f.index] = []
-    for f in meFaces:
+    for f in me.polygons:
         for vn in f.vertices:
             for e in vertEdges[vn]:
                 v0 = e.vertices[0]
@@ -974,9 +962,9 @@ def setupTexVerts(ob):
                         faceEdges[f.index].append(e)
 
     faceNeighbors = {}
-    for f in meFaces:
+    for f in me.polygons:
         faceNeighbors[f.index] = []
-    for f in meFaces:
+    for f in me.polygons:
         for e in faceEdges[f.index]:
             for f1 in edgeFaces[e.index]:
                 if f1 != f:
@@ -987,7 +975,7 @@ def setupTexVerts(ob):
     for index,uvtex in enumerate(me.uv_textures):
         uvFaceVerts = {}
         uvFaceVertsList.append(uvFaceVerts)
-        for f in meFaces:
+        for f in me.polygons:
             uvFaceVerts[f.index] = []
         vtn = 0
         texVerts = {}
@@ -1285,8 +1273,7 @@ def checkSingleVertexGroups(clo, scn):
 
 def writeFaces(clo, fp):
     fp.write("faces\n")
-    meFaces = getFaces(clo.data)
-    for f in meFaces:
+    for f in clo.data.polygons:
         for v in f.vertices:
             fp.write(" %d" % (v+1))
         fp.write("\n")
@@ -1618,8 +1605,7 @@ def checkEnoughVerts(me, htype, first):
 
 
 def addBodyVerts(me, verts):
-    meFaces = getFaces(me)
-    for f in meFaces:
+    for f in me.polygons:
         if len(f.vertices) < 4:
             continue
         for vn in f.vertices:
@@ -1788,20 +1774,6 @@ class VIEW3D_OT_TestClothesButton(bpy.types.Operator):
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
-
-#
-#   BMesh
-#
-
-
-def getFaces(me):
-    global BMeshAware
-    try:
-        BMeshAware = True
-        return me.polygons
-    except:
-        BMeshAware = False
-        return me.faces
 
 #
 #   init():
