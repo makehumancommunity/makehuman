@@ -204,6 +204,8 @@ class SkeletonLibrary(gui3d.TaskView):
             self.human.refreshPose()
             mh.redraw()
 
+        self.filechooser.selectItem(self.selectedRig)
+
 
     def onHide(self, event):
         gui3d.TaskView.onHide(self, event)
