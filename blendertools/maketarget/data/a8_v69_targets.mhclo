@@ -19,7 +19,7 @@ uuid 14342908-7a67-4e26-8ccd-b2ffceacc1a8
 basemesh alpha7
 
 name A8_v74_targets
-obj_file a8_v74.obj
+obj_file base.obj
 objfile_layer 0
 verts 0
     7     0     1 1.00000 0.00000 0.00000 -0.03230 0.03650 0.14490
