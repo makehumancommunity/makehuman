@@ -394,6 +394,7 @@ class Skeleton(object):
 
         for bone in result.getBones():
             bone.rotateRest( self.getBone(bone.name).matPose )
+            bone.setToRestPose()
 
         return result
 
