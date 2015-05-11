@@ -43,6 +43,7 @@ import numpy as np
 import numpy.linalg as la
 import transformations as tm
 from .dae_node import goodBoneName
+import animation
 
 #----------------------------------------------------------------------
 #   library_animations
@@ -58,6 +59,7 @@ def writeLibraryAnimations(fp, human, skel, animations, config):
 
     joined_anim = animations[0]
     for anim in animations[1:]:
+        print 'join anims'
         joined_anim = animation.joinAnimations(joined_anim, anim)
 
     fp.write('\n  <library_animations>\n')
@@ -109,15 +111,67 @@ def writeAnimationBone(fp, bone, anim, config):
 
     string = '          '
     relmat = bone.getRelativeMatrix(config.meshOrientation, config.localBoneAxis, config.offset)
+    restmat = bone.getRestMatrix(config.meshOrientation, config.localBoneAxis, config.offset)
+    #print bone.index, anim.nBones
     mats = anim.data[bone.index::anim.nBones]  # Get all pose matrices for this bone
     I = np.identity(4, dtype=np.float32)
-    for mat0 in mats:
+    parents = []
+    bone_ = bone
+    while bone_.parent:
+        relmat = bone_.parent.getRelativeMatrix(config.meshOrientation, config.localBoneAxis, config.offset)
+        parents.append((bone_.parent.index, relmat))
+        bone_ = bone_.parent
+    for f_idx, mat0 in enumerate(mats):
         # TODO poses currently only work for default local bone axis
+        #I[:3,:4] = mat0[:3,:4]
+        #relmat[:3,:3] = np.identity(3, dtype=np.float32)
+        #if 'clavicle' in bone.name or 'shoulder' in bone.name:
+        #if bone.level < 6:
+        #    I = np.identity(4, dtype=np.float32)
+        #mat = np.dot(relmat, I)
+        '''
+        mat = I.copy()
+        for b_idx in reversed(parents):
+            I[:3,:4] = anim.data[f_idx * anim.nBones + b_idx]
+            #mat = np.dot(np.dot(relmat, I), mat)
+            mat = np.dot(mat,la.inv(I))
+        mat = np.dot(relmat, mat)
+        '''
+
+        mat = np.identity(4, dtype=np.float32)
+        for b_idx, rel in reversed(parents):
+            #rel = parent.getRelativeMatrix(config.meshOrientation, config.localBoneAxis, config.offset)
+            #b_idx = parent.index
+            I[:3,:4] = anim.data[f_idx * anim.nBones + b_idx]
+            #mat = np.dot(la.inv(rel), np.dot(mat, np.dot(rel, I)))
+            #mat = np.dot(mat, I)
+            mat = np.dot(I, mat)
+
         I[:3,:4] = mat0[:3,:4]
+        mat = np.dot(mat, np.dot(relmat, I))
+
+        '''
+        if self.parent:
+            self.matPoseGlobal = np.dot(self.parent.matPoseGlobal, np.dot(self.matRestRelative, self.matPose))
+        else:
+            self.matPoseGlobal = np.dot(self.matRestRelative, self.matPose)
+        '''
+
+        '''
+        # R * K * iR * R_dae = M
+        mat = np.dot(la.inv(relmat), restmat)
+        mat = np.dot(I, mat)
         mat = np.dot(relmat, I)
+        '''
+
         string += ''.join(['%g %g %g %g  ' % tuple(mat[i,:]) for i in range(4)])
         string += '\n          '
     fp.write(string)
+    def _to_degrees(rad):
+        return 180*rad/3.14
+    I = np.identity(4, dtype=np.float32)
+    I[:3,:3] = mats[0,:3,:3]
+    print bone.name, map(_to_degrees, tm.euler_from_matrix(I))
 
     fp.write(
         '</float_array>\n' +

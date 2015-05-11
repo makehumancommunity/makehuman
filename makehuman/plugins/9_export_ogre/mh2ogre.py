@@ -85,6 +85,9 @@ def writeMeshFile(human, filepath, objects, config):
     lines.append('<mesh>')
     lines.append('    <submeshes>')
 
+    if human.getSkeleton():
+        bodyWeights = human.getVertexWeights(human.getSkeleton())
+
     for objIdx, obj in enumerate(objects):
         loopprog = Progress()
 
@@ -163,7 +166,6 @@ def writeMeshFile(human, filepath, objects, config):
 
         # Skeleton bone assignments
         if human.getSkeleton():
-            bodyWeights = human.getVertexWeights()
             if pxy:
                 # Determine vertex weights for proxy (map to unfiltered proxy mesh)
                 weights = pxy.getVertexWeights(bodyWeights)

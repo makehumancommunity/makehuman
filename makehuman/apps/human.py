@@ -83,6 +83,9 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         self.material = material.fromFile(getSysDataPath('skins/default.mhmat'))
         self._defaultMaterial = material.Material().copyFrom(self.material)
 
+        # Init with no user-selected skeleton
+        self.skeleton = None
+
         self._modifiers = dict()
         self._modifier_varMapping = dict()              # Maps macro variable to the modifier group that modifies it
         self._modifier_dependencyMapping = dict()       # Maps a macro variable to all the modifiers that depend on it
@@ -94,7 +97,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         animation.AnimatedMesh.__init__(self, skel=None, mesh=self.meshData, vertexToBoneMapping=None)
         # Make sure that shadow vertices are copied
         self.refreshStaticMeshes()
-
 
     def setProxy(self, proxy):
         oldPxy = self.getProxy()
@@ -1053,8 +1055,8 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         This position is determined by the center of the joint helper with the
         specified name.
         """
-        if self.getSkeleton():
-            return self.getSkeleton().getJointPosition(jointName, self, rest_coord)
+        if self.getBaseSkeleton():
+            return self.getBaseSkeleton().getJointPosition(jointName, self, rest_coord)
         else:
             import skeleton
             return skeleton._getHumanJointPosition(self, jointName, rest_coord)
@@ -1095,10 +1097,10 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         #self.traceStack(all=True)
         #self.traceBuffer(all=True, vertsToList=0)
 
-        # Update skeleton joint positions
-        if self.getSkeleton():
+        # Update skeleton joint positions (before human is posed)
+        if self.getBaseSkeleton():
             log.debug("Updating skeleton joint positions")
-            self.getSkeleton().updateJoints(self.meshData)
+            self.getBaseSkeleton().updateJoints(self.meshData, in_rest=True)
             self.resetBakedAnimations()    # TODO decide whether we require calling this manually, or whether animatedMesh automatically tracks updates of skeleton and updates accordingly
 
         self.callEvent('onChanged', events3d.HumanEvent(self, 'targets'))
@@ -1248,10 +1250,26 @@ class Human(guicommon.Object, animation.AnimatedMesh):
     material = property(getMaterial, setMaterial)
 
     def setSkeleton(self, skel):
-        prev_skel = self.getSkeleton()
+        """Change user-selected skeleton.
+        """
+        self.callEvent('onChanging', events3d.HumanEvent(self, 'user-skeleton'))
+        self.skeleton = skel
+        self.callEvent('onChanged', events3d.HumanEvent(self, 'user-skeleton'))
 
+    def getSkeleton(self):
+        """The user-selected skeleton. The skeleton that is shown on the human
+        and that will be used for exporting.
+        """
+        if self.skeleton:
+            self.skeleton.updateJoints(self.meshData, in_rest=False)
+        return self.skeleton
+
+    def setBaseSkeleton(self, skel):
+        """Set the reference skeleton, used for poses and weighting vertices.
+        Generally this skeleton is initialized once and does not change.
+        """
         self.callEvent('onChanging', events3d.HumanEvent(self, 'skeleton'))
-        animation.AnimatedMesh.setSkeleton(self, skel)
+        animation.AnimatedMesh.setBaseSkeleton(self, skel)
         self.updateVertexWeights(skel.getVertexWeights() if skel else None)
         self.callEvent('onChanged', events3d.HumanEvent(self, 'skeleton'))
         self.refreshPose()
@@ -1281,7 +1299,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             self.removeBoundMesh(mesh.name)
             return
 
-        if self.getSkeleton():
+        if self.getBaseSkeleton():
             if bodyVertexWeights is None:
                 bodyVertexWeights = self.getVertexWeights()
 
@@ -1303,11 +1321,21 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             animation.AnimatedMesh.updateVertexWeights(self, mesh.name, weights)
 
 
-    def getVertexWeights(self):
-        if not self.getSkeleton():
+    def getVertexWeights(self, skel=None):
+        """Get vertex weights for human body. Optionally remap them to fit a
+        user-selected skeleton. If no skel argument is provided, the weights
+        for the base skeleton are returned."""
+        if not self.getBaseSkeleton():
             return None
 
         _, bodyWeights = self.getBoundMesh(self.meshData.name)
+
+        if skel and skel.name != self.getBaseSkeleton().name:
+            if skel.vertexWeights:
+                # This is an optimalisation: if skeleton already has weights loaded, don't remap them again
+                return skel.getVertexWeights()
+            else:
+                return skel.getVertexWeights(bodyWeights)
         return bodyWeights
 
     def setPosed(self, posed):

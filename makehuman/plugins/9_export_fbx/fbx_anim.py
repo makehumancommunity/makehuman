@@ -49,6 +49,8 @@ import transformations as tm
 TimeStep = 1847446320
 TimeStep = 1528921092
 
+# TODO write an AnimationLayer for each animation!
+
 def countObjects(action):
     return 2 + 3*len(action.keys())
 

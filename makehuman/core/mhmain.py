@@ -51,6 +51,7 @@ import gui3d
 import geometry3d
 import animation3d
 import human
+import skeleton
 import guifiles
 import managed_file
 import algos3d
@@ -314,16 +315,18 @@ class MHApplication(gui3d.Application, mh.Application):
         # Reset mesh is never forced to wireframe
         self.actions.wireframe.setChecked(False)
 
-    # TO THINK: Maybe move guiload's saveMHM here as saveHumanMHM?
+    # TO THINK: Maybe move guisave's saveMHM here as saveHumanMHM?
 
     def loadHuman(self):
-
         # Set a lower than default MAX_FACES value because we know the human has a good topology (will make it a little faster)
         # (we do not lower the global limit because that would limit the selection of meshes that MH would accept too much)
         self.selectedHuman = self.addObject(human.Human(files3d.loadMesh(mh.getSysDataPath("3dobjs/base.obj"), maxFaces = 5)))
 
-    def loadScene(self):
+        # Set the base skeleton
+        base_skel = skeleton.load(mh.getSysDataPath('rigs/default.json'), self.selectedHuman.meshData)
+        self.selectedHuman.setBaseSkeleton(base_skel)
 
+    def loadScene(self):
         userSceneDir = mh.getDataPath("scenes")
         if not os.path.exists(userSceneDir):
             os.makedirs(userSceneDir)
@@ -333,7 +336,6 @@ class MHApplication(gui3d.Application, mh.Application):
         self.setScene( Scene(findFile("scenes/default.mhscene")) )
 
     def loadMainGui(self):
-
         @self.selectedHuman.mhEvent
         def onMouseDown(event):
           if self.tool:
