@@ -269,10 +269,10 @@ class Target(object):
                     import animation
                     vertBoneMapping = animatedMesh.getBoundMesh(obj.name)[1]
                     if not vertBoneMapping.isCompiled(4):
-                        vertBoneMapping.compileData(animatedMesh.getSkeleton(), 4)
+                        vertBoneMapping.compileData(animatedMesh.getBaseSkeleton(), 4)
                     animationTrack = animatedMesh.getActiveAnimation()
                     if not animationTrack.isBaked():
-                        animationTrack.bake(animatedMesh.getSkeleton())
+                        animationTrack.bake(animatedMesh.getBaseSkeleton())
                     poseData = animatedMesh.getPoseState()
                     obj.coord[dstVerts] += animation.skinMesh( \
                                   self.data[srcVerts] * scale[None,:], 

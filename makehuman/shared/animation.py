@@ -711,7 +711,7 @@ class AnimatedMesh(object):
         self.__inPlace = False  # Animate in place (ignore translation component of animation)
         self.onlyAnimateVisible = False  # Only animate visible meshes (note: enabling this can have undesired consequences!)
 
-    def setSkeleton(self, skel):
+    def setBaseSkeleton(self, skel):
         self.__skeleton = skel
         self.removeAnimations(update=False)
         self.resetCompiledWeights()
@@ -771,7 +771,7 @@ class AnimatedMesh(object):
     def setAnimateInPlace(self, enable):
         self.__inPlace = enable
 
-    def getSkeleton(self):
+    def getBaseSkeleton(self):
         return self.__skeleton
 
     def addBoundMesh(self, mesh, vertexToBoneMapping):
@@ -869,7 +869,7 @@ class AnimatedMesh(object):
         return self._posed and self.isPoseable()
 
     def isPoseable(self):
-        return bool(self.__currentAnim and self.getSkeleton())
+        return bool(self.__currentAnim and self.getBaseSkeleton())
 
     @property
     def posed(self):
@@ -882,7 +882,7 @@ class AnimatedMesh(object):
         """
         self.setActiveAnimation(None)
         self.__playTime = 0.0
-        if self.getSkeleton():
+        if self.getBaseSkeleton():
             self.refreshPose(updateIfInRest=update)
         elif update:
             self.resetTime()
@@ -912,12 +912,12 @@ class AnimatedMesh(object):
         is advised for static poses only.
         """
         if self.isPosed():
-            if not self.getSkeleton():
+            if not self.getBaseSkeleton():
                 return
 
             if not self.__currentAnim.isBaked():
                 # Ensure animation is baked for fast skinning
-                self.__currentAnim.bake(self.getSkeleton())
+                self.__currentAnim.bake(self.getBaseSkeleton())
 
             poseState = self.getPoseState()
 
@@ -934,12 +934,12 @@ class AnimatedMesh(object):
                 try:
                     if not self.__currentAnim.isBaked():
                         # Old slow way of skinning
-                        self.getSkeleton().setPose(poseState)
-                        posedCoords = self.getSkeleton().skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx].data)
+                        self.getBaseSkeleton().setPose(poseState)
+                        posedCoords = self.getBaseSkeleton().skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx].data)
                     else:
                         if not self.__vertexToBoneMaps[idx].isCompiled(6):
                             log.debug("Compiling vertex bone weights for %s", mesh.name)
-                            self.__vertexToBoneMaps[idx].compileData(self.getSkeleton(), 6)
+                            self.__vertexToBoneMaps[idx].compileData(self.getBaseSkeleton(), 6)
 
                         # New fast skinnig approach
                         posedCoords = skinMesh(self.__originalMeshCoords[idx], self.__vertexToBoneMaps[idx].compiled(6), poseState)
@@ -951,10 +951,10 @@ class AnimatedMesh(object):
 
             # Adapt the bones of the skeleton to match current skinned pose (slower, should only be used for static poses)
             if syncSkeleton and self.__currentAnim.isBaked():
-                self.getSkeleton().setPose(self.getPoseState(noBake=True))
+                self.getBaseSkeleton().setPose(self.getPoseState(noBake=True))
         else:
-            if self.getSkeleton() and syncSkeleton:
-                self.getSkeleton().setToRestPose()
+            if self.getBaseSkeleton() and syncSkeleton:
+                self.getBaseSkeleton().setToRestPose()
             for idx,mesh in enumerate(self.__meshes):
                 self._updateMeshVerts(mesh, self.__originalMeshCoords[idx])
 
@@ -984,14 +984,14 @@ class AnimatedMesh(object):
         self.__originalMeshCoords[rIdx][:,:3] = coord[:,:3]
 
     def refreshPose(self, updateIfInRest=False, syncSkeleton=True):
-        if not self.getSkeleton():
+        if not self.getBaseSkeleton():
             self.resetToRestPose()
         if updateIfInRest or self.isPosed():
             self._pose(syncSkeleton=syncSkeleton)
-        elif syncSkeleton and self.getSkeleton():
+        elif syncSkeleton and self.getBaseSkeleton():
             # Do not do the skinning (which is trivial), but nonetheless ensure that the skeleton's
             # pose state is restored to rest
-            self.getSkeleton().setToRestPose()
+            self.getBaseSkeleton().setToRestPose()
 
 def skinMesh(coords, compiledVertWeights, poseData):
     """
