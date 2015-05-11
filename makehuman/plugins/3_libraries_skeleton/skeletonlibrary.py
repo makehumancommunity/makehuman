@@ -182,6 +182,10 @@ class SkeletonLibrary(gui3d.TaskView):
 
         self.xray_mat = None
 
+        # the reference skeleton
+        log.message("Loading base reference skeleton.")
+        self.referenceRig = self.human.getBaseSkeleton()
+
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
         if gui3d.app.settings.get('cameraAutoZoom', True):
@@ -199,10 +203,8 @@ class SkeletonLibrary(gui3d.TaskView):
             obj.material = self.xray_mat
 
         # Make sure skeleton is updated if human has changed
-        if self.human.getSkeleton():
-            self.drawSkeleton(self.human.getSkeleton())
-            self.human.refreshPose()
-            mh.redraw()
+        if self.human.skeleton:
+            self.drawSkeleton()
 
         self.filechooser.selectItem(self.selectedRig)
 
@@ -222,10 +224,6 @@ class SkeletonLibrary(gui3d.TaskView):
         log.debug("Loading skeleton from %s", filename)
         self.selectedRig = filename
 
-        if self.referenceRig is None:
-            log.message("Loading reference skeleton for weights remapping.")
-            self.referenceRig = skeleton.load(REF_RIG_PATH, self.human.meshData)
-
         if not filename:
             if self.human.getSkeleton():
                 # Unload current skeleton
@@ -243,8 +241,7 @@ class SkeletonLibrary(gui3d.TaskView):
             return
 
         if getpath.isSamePath(filename, REF_RIG_PATH):
-            skel = self.referenceRig.clone()
-            vertexWeights = self.referenceRig.getVertexWeights()
+            skel = self.referenceRig.createFromPose()
         else:
             # Load skeleton definition from options
             skel = skeleton.load(filename, self.human.meshData)
@@ -262,28 +259,27 @@ class SkeletonLibrary(gui3d.TaskView):
         self.descrLbl.setText(descr)
         self.boneCountLbl.setTextFormat(["Bones",": %s"], skel.getBoneCount())
 
-        # (Re-)draw the skeleton (before setting skeleton on human so it is automatically re-posed)
-        self.drawSkeleton(skel)
-
         # Assign to human
         self.human.setSkeleton(skel)
+
+        # (Re-)draw the skeleton
+        self.drawSkeleton()
 
         self.filechooser.selectItem(filename)
 
 
-    def drawSkeleton(self, skel):
+    def drawSkeleton(self):
         if self.skelObj:
             # Remove old skeleton mesh
             self.removeObject(self.skelObj)
-            self.human.removeBoundMesh(self.skelObj.name)
             self.skelObj = None
             self.skelMesh = None
 
+        skel = self.human.getSkeleton()
         if not skel:
             return
 
-        # Create a mesh from the skeleton in rest pose
-        skel.setToRestPose() # Make sure skeleton is in rest pose when constructing the skeleton mesh
+        # Create a mesh from the skeleton
         self.skelMesh = skeleton_drawing.meshFromSkeleton(skel, "Prism")
         self.skelMesh.priority = 100
         self.skelMesh.setPickable(False)
@@ -291,12 +287,6 @@ class SkeletonLibrary(gui3d.TaskView):
         self.skelObj.setShadeless(0)
         self.skelObj.setSolid(0)
         self.skelObj.setRotation(self.human.getRotation())
-
-        # Add the skeleton mesh to the human AnimatedMesh so it animates together with the skeleton
-        # The skeleton mesh is supposed to be constructed from the skeleton in rest and receives
-        # rigid vertex-bone weights (for each vertex exactly one weight of 1 to one bone)
-        mapping = skeleton_drawing.getVertBoneMapping(skel, self.skelMesh)
-        self.human.addBoundMesh(self.skelMesh, mapping)
 
         mh.redraw()
 

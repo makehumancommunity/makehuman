@@ -375,7 +375,7 @@ class Skeleton(object):
 
         for bone in self.getBones():
             parentName = bone.parent.name if bone.parent else None
-            rbone = result.addBone(bone.name, parentName, bone.headJoint, bone.tailJoint, bone.roll, bone.reference_bones)
+            rbone = result.addBone(bone.name, parentName, bone.headJoint, bone.tailJoint, bone.roll, bone.reference_bones, bone._weight_reference_bones)
             rbone.matPose = bone.matPose.copy()
             rbone.matPose[:3,3] *= scale
 
@@ -418,13 +418,15 @@ class Skeleton(object):
         for bone in self.getBones():
             bone.update()
 
-    def updateJoints(self, humanMesh):
+    def updateJoints(self, humanMesh, in_rest=False):
         """
         Update skeleton rest matrices to new joint positions after modifying
-        human.
+        human. For a base skeleton this should happen when the mesh is in rest
+        pose (but nothing prevents you from doing otherwise), for user-selected 
+        export skeletons this can be done in any pose.
         """
         for bone in self.getBones():
-            bone.updateJointPositions()
+            bone.updateJointPositions(in_rest=in_rest)
 
         self.build()
 
@@ -637,7 +639,7 @@ class Bone(object):
     def planes(self):
         return self.skeleton.planes
 
-    def updateJointPositions(self, human=None):
+    def updateJointPositions(self, human=None, in_rest=False):
         """
         Update the joint positions of this skeleton based on the current state
         of the human mesh.
@@ -646,8 +648,8 @@ class Bone(object):
         if not human:
             from core import G
             human = G.app.selectedHuman
-        self.headPos[:] = self.skeleton.getJointPosition(self.headJoint, human)[:3] * self.skeleton.scale
-        self.tailPos[:] = self.skeleton.getJointPosition(self.tailJoint, human)[:3] * self.skeleton.scale
+        self.headPos[:] = self.skeleton.getJointPosition(self.headJoint, human, in_rest)[:3] * self.skeleton.scale
+        self.tailPos[:] = self.skeleton.getJointPosition(self.tailJoint, human, in_rest)[:3] * self.skeleton.scale
 
     def getRestMatrix(self, meshOrientation='yUpFaceZ', localBoneAxis='y', offsetVect=[0,0,0]):
         """
@@ -695,7 +697,7 @@ class Bone(object):
     def __repr__(self):
         return ("  <Bone %s>" % self.name)
 
-    def build(self):
+    def build(self, in_rest=False):
         """
         Set matPoseVerts, matPoseGlobal and matRestRelative... TODO
         needs to happen after changing skeleton structure
@@ -712,7 +714,7 @@ class Bone(object):
             count = 0
             normal = np.zeros(3, dtype=np.float32)
             for plane_name in self.roll:
-                norm = get_normal(self.skeleton, plane_name, self.planes)
+                norm = get_normal(self.skeleton, plane_name, self.planes, in_rest=in_rest)
                 if not np.allclose(norm, np.zeros(3), atol=1e-05):
                     count += 1
                     normal += norm
@@ -722,7 +724,7 @@ class Bone(object):
                 normal = np.asarray([0.0, 1.0, 0.0], dtype=np.float32)
         elif isinstance(self.roll, basestring):
             plane_name = self.roll  # TODO ugly..
-            normal = get_normal(self.skeleton, plane_name, self.planes)
+            normal = get_normal(self.skeleton, plane_name, self.planes, in_rest=in_rest)
             if np.allclose(normal, np.zeros(3), atol=1e-05):
                 normal = np.asarray([0.0, 1.0, 0.0], dtype=np.float32)
         else:
@@ -1102,7 +1104,7 @@ def get_roll_to(head, tail, normal):
         roll -= 2*math.pi
     return roll
 
-def get_normal(skel, plane_name, plane_defs, human=None):
+def get_normal(skel, plane_name, plane_defs, human=None, in_rest=False):
     """
     Return the normal of a triangle plane defined between three joint positions,
     using counter-clockwise winding order (right-handed).
@@ -1118,9 +1120,9 @@ def get_normal(skel, plane_name, plane_defs, human=None):
     joint_names = plane_defs[plane_name]
 
     j1,j2,j3 = joint_names
-    p1 = skel.getJointPosition(j1, human)[:3] * skel.scale
-    p2 = skel.getJointPosition(j2, human)[:3] * skel.scale
-    p3 = skel.getJointPosition(j3, human)[:3] * skel.scale
+    p1 = skel.getJointPosition(j1, human, in_rest)[:3] * skel.scale
+    p2 = skel.getJointPosition(j2, human, in_rest)[:3] * skel.scale
+    p3 = skel.getJointPosition(j3, human, in_rest)[:3] * skel.scale
     pvec = matrix.normalize(p2-p1)
     yvec = matrix.normalize(p3-p2)
     return matrix.normalize(np.cross(yvec, pvec))

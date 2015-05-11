@@ -106,8 +106,7 @@ class SkeletonDebugLibrary(gui3d.TaskView):
         if not skel:
             return
 
-        # Create a mesh from the skeleton in rest pose
-        skel.setToRestPose() # Make sure skeleton is in rest pose when constructing the skeleton mesh
+        # Create a mesh from the user-selected skeleton in its current pose (so we use the base skeleton for actually posing)
         self.skelMesh = skeleton_drawing.meshFromSkeleton(skel, "Prism")
         self.skelMesh.name = self.skelMesh.name + '-skeletonDebug'
         self.skelMesh.priority = 100
@@ -127,15 +126,6 @@ class SkeletonDebugLibrary(gui3d.TaskView):
         self.axisObj.material.depthless = True
         self.axisObj.setRotation(self.human.getRotation())
 
-        # Add the skeleton mesh to the human AnimatedMesh so it animates together with the skeleton
-        # The skeleton mesh is supposed to be constructed from the skeleton in rest and receives
-        # rigid vertex-bone weights (for each vertex exactly one weight of 1 to one bone)
-        mapping = skeleton_drawing.getVertBoneMapping(skel, self.skelMesh)
-        self.human.addBoundMesh(self.skelMesh, mapping)
-        mapping = skeleton_drawing.getVertBoneMapping(skel, self.axisMesh)
-        self.human.addBoundMesh(self.axisMesh, mapping)
-
-        self.human.refreshPose()  # Pose drawn skeleton if human is posed
         mh.redraw()
 
     def reloadBoneExplorer(self):
@@ -145,7 +135,8 @@ class SkeletonDebugLibrary(gui3d.TaskView):
             radioBtn.destroy()
         self.boneSelector = []
 
-        skel = self.human.getSkeleton()
+        #skel = self.human.getSkeleton()
+        skel = self.human.skeleton  # We do this because we do not need updated joint positions
         if not skel:
             return
 
@@ -224,8 +215,7 @@ class SkeletonDebugLibrary(gui3d.TaskView):
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
 
-        if self.skelObj is None:
-            self.drawSkeleton()
+        self.drawSkeleton()
 
         # Set X-ray material
         if self.xray_mat is None:
@@ -256,7 +246,7 @@ class SkeletonDebugLibrary(gui3d.TaskView):
             if self.isShown():
                 # Refresh onShow status
                 self.onShow(event)
-        elif event.change == 'skeleton':
+        elif event.change == 'user-skeleton':
             self._unloadSkeletonMesh()
             self.reloadBoneExplorer()
 
