@@ -159,6 +159,7 @@ class SkeletonLibrary(gui3d.TaskView):
                                                     noneItem = True, 
                                                     doNotRecurse = True))
         self.filechooser.setIconSize(50,50)
+        self.filechooser.enableAutoRefresh(False)
 
         @self.filechooser.mhEvent
         def onFileSelected(filename):
@@ -206,8 +207,8 @@ class SkeletonLibrary(gui3d.TaskView):
         if self.human.skeleton:
             self.drawSkeleton()
 
+        self.filechooser.refresh()
         self.filechooser.selectItem(self.selectedRig)
-
 
     def onHide(self, event):
         gui3d.TaskView.onHide(self, event)
