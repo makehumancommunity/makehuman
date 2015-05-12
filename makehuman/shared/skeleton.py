@@ -379,7 +379,7 @@ class Skeleton(object):
             rbone.matPose = bone.matPose.copy()
             rbone.matPose[:3,3] *= scale
 
-        result.build()
+        result.build(ref_skel=self)  # copy bone normals from self
 
         return result
 
@@ -407,10 +407,14 @@ class Skeleton(object):
             self.roots.append(bone)
         return bone
 
-    def build(self):
+    def build(self, ref_skel=None):
+        """Rebuild bone rest matrices and determine local bone orientation
+        (roll or bone normal). Pass a ref_skel to copy the bone orientation from
+        the reference skeleton to the bones of this skeleton.
+        """
         self.__cacheGetBones()
         for bone in self.getBones():
-            bone.build()
+            bone.build(ref_skel)
 
     def update(self):
         """
@@ -419,17 +423,20 @@ class Skeleton(object):
         for bone in self.getBones():
             bone.update()
 
-    def updateJoints(self, humanMesh, in_rest=False):
+    def updateJoints(self, humanMesh, ref_skel=None):
         """
         Update skeleton rest matrices to new joint positions after modifying
         human. For a base skeleton this should happen when the mesh is in rest
         pose (but nothing prevents you from doing otherwise), for user-selected 
         export skeletons this can be done in any pose.
+        Pass a ref_skel to copy its bone normals (see build).
+        When a reference skeleton is passed, we assume we don't need to fit the
+        joints to the basemesh rest pose coordinates, but to the posed ones.
         """
         for bone in self.getBones():
-            bone.updateJointPositions(in_rest=in_rest)
+            bone.updateJointPositions(in_rest=not ref_skel)
 
-        self.build()
+        self.build(ref_skel)
 
     def getBoneCount(self):
         return len(self.getBones())
@@ -640,7 +647,7 @@ class Bone(object):
     def planes(self):
         return self.skeleton.planes
 
-    def updateJointPositions(self, human=None, in_rest=False):
+    def updateJointPositions(self, human=None, in_rest=True):
         """
         Update the joint positions of this skeleton based on the current state
         of the human mesh.
@@ -698,10 +705,16 @@ class Bone(object):
     def __repr__(self):
         return ("  <Bone %s>" % self.name)
 
-    def build(self, in_rest=False):
+    def build(self, ref_skel=None):
         """
-        Set matPoseVerts, matPoseGlobal and matRestRelative... TODO
-        needs to happen after changing skeleton structure
+        Calculate this bone's rest matrices and determine its local axis (roll
+        or bone normal).
+        Sets matPoseVerts, matPoseGlobal and matRestRelative.
+        This method needs to be called everytime the skeleton structure is
+        changed, the rest pose is changed or joint positions are updated.
+        Pass a ref_skel to copy the bone normals from a reference skeleton
+        instead of recalculating them (Recalculating bone normals generally
+        only works if the skeleton is in rest pose).
         """
         head3 = np.array(self.headPos[:3], dtype=np.float32)
         head4 = np.append(head3, 1.0)
@@ -710,26 +723,12 @@ class Bone(object):
         tail4 = np.append(head3, 1.0)
 
         # Update rest matrices
-        if isinstance(self.roll, list):
-            # Average the normal over multiple planes
-            count = 0
-            normal = np.zeros(3, dtype=np.float32)
-            for plane_name in self.roll:
-                norm = get_normal(self.skeleton, plane_name, self.planes, in_rest=in_rest)
-                if not np.allclose(norm, np.zeros(3), atol=1e-05):
-                    count += 1
-                    normal += norm
-            if count > 0 and not np.allclose(normal, np.zeros(3), atol=1e-05):
-                normal /= count
-            else:
-                normal = np.asarray([0.0, 1.0, 0.0], dtype=np.float32)
-        elif isinstance(self.roll, basestring):
-            plane_name = self.roll  # TODO ugly..
-            normal = get_normal(self.skeleton, plane_name, self.planes, in_rest=in_rest)
-            if np.allclose(normal, np.zeros(3), atol=1e-05):
-                normal = np.asarray([0.0, 1.0, 0.0], dtype=np.float32)
+        if ref_skel:
+            # Direct or reference bone-mapped copy of ref_skel's normals
+            normal = copy_normal(self, ref_skel)
         else:
-            normal = np.asarray([0.0, 1.0, 0.0], dtype=np.float32)
+            # Calculate normal from bone's plane definition
+            normal = self.get_normal()
         self.matRestGlobal = getMatrix(head3, tail3, normal)
         self.length = matrix.magnitude(tail3 - head3)
         if self.parent:
@@ -742,6 +741,42 @@ class Bone(object):
 
         # Update pose matrices
         self.update()
+
+    def get_normal(self):
+        """The normal calculated for this bone. The normal is used as one of
+        the local axis for the bone to determine the local coordinate system 
+        for the bone (see getMatrix for details).
+        This normal is derived from the normal of a plane that is defined 
+        between three predefined joint positions. These joint positions are 
+        updated as the human is modified.
+        This approach generally works only for the human in rest pose, for bone
+        orientation in other poses, the normals should be first calculated in
+        rest pose, then the pose applied (on the base skeleton), which rotates
+        the calculated normals accordingly (createFromPose()). Then, if need be, 
+        this normal can be grabbed from the global rest matrix and remapped to
+        the bones of a different skeleton (see copy_normal).
+        """
+        if isinstance(self.roll, list):
+            # Average the normal over multiple planes
+            count = 0
+            normal = np.zeros(3, dtype=np.float32)
+            for plane_name in self.roll:
+                norm = get_normal(self.skeleton, plane_name, self.planes)
+                if not np.allclose(norm, np.zeros(3), atol=1e-05):
+                    count += 1
+                    normal += norm
+            if count > 0 and not np.allclose(normal, np.zeros(3), atol=1e-05):
+                normal /= count
+            else:
+                normal = np.asarray([0.0, 1.0, 0.0], dtype=np.float32)
+        elif isinstance(self.roll, basestring):
+            plane_name = self.roll  # TODO ugly.. why not call this something else than "roll"?
+            normal = get_normal(self.skeleton, plane_name, self.planes)
+            if np.allclose(normal, np.zeros(3), atol=1e-05):
+                normal = np.asarray([0.0, 1.0, 0.0], dtype=np.float32)
+        else:
+            normal = np.asarray([0.0, 1.0, 0.0], dtype=np.float32)
+        return normal
 
     def update(self):
         """
@@ -1004,6 +1039,15 @@ def fromZisUp4(mat):
 YUnit = np.array((0,1,0))
 
 def getMatrix(head, tail, normal):
+    """Generate a bone local rest matrix. The Y axis of the bone is the vector
+    between head and tail, the normal specified is used as X axis (or at least, 
+    a vector similar to the direction of normal, but perpendicular to Y).
+    Z is calculated as perpendicular on X and Y.
+    This method generates a local orthogonal base for the bone, originating in
+    the bone's head position, with Y axis along the length of the bone.
+    X is usually seen as the main rotation axis of the bone, Y indicates the 
+    main direction towards which the bone is rotated along the X axis.
+    """
     mat = np.identity(4, dtype=np.float32)
     bone_direction = tail - head
     bone_direction = matrix.normalize(bone_direction[:3])
@@ -1105,7 +1149,7 @@ def get_roll_to(head, tail, normal):
         roll -= 2*math.pi
     return roll
 
-def get_normal(skel, plane_name, plane_defs, human=None, in_rest=False):
+def get_normal(skel, plane_name, plane_defs, human=None):
     """
     Return the normal of a triangle plane defined between three joint positions,
     using counter-clockwise winding order (right-handed).
@@ -1121,12 +1165,65 @@ def get_normal(skel, plane_name, plane_defs, human=None, in_rest=False):
     joint_names = plane_defs[plane_name]
 
     j1,j2,j3 = joint_names
-    p1 = skel.getJointPosition(j1, human, in_rest)[:3] * skel.scale
-    p2 = skel.getJointPosition(j2, human, in_rest)[:3] * skel.scale
-    p3 = skel.getJointPosition(j3, human, in_rest)[:3] * skel.scale
+    p1 = skel.getJointPosition(j1, human)[:3] * skel.scale
+    p2 = skel.getJointPosition(j2, human)[:3] * skel.scale
+    p3 = skel.getJointPosition(j3, human)[:3] * skel.scale
     pvec = matrix.normalize(p2-p1)
     yvec = matrix.normalize(p3-p2)
     return matrix.normalize(np.cross(yvec, pvec))
+
+def copy_normal(target_bone, ref_skel):
+    """Copy a normal (bone orientation) from a reference skeleton and map it to
+    the target_bone. This is used in the following scenario: calculate the
+    normals/orientations of the base skeleton in rest, apply a pose to the
+    base skeleton. Then, using this base skeleton with the pose transformed
+    into its rest pose (createFromPose) as ref_skel, the orientations can be
+    mapped/copied onto a different skeleton that is fit into the same pose
+    (With fitting we mean updating the rest pose joint positions so that they
+    fit inside a posed human mesh, posed by the base skeleton).
+
+    The reference bones defined for the target bone are used for getting to the
+    correct bone (or bones) of the base skeleton to copy the normal from. If
+    no reference bones are specified, it looks for a bone in the base skeleton
+    with the same name as the target bone (implicit mapping).
+    """
+
+    def _get_normal(bone):
+        """Grab the normal from a bone's global rest matrix. We assume that
+        this bone is in the same rest pose as the bone we want to map it to.
+        """
+        return bone.matRestGlobal[:3, 0].reshape(3)  # X axis
+
+    if ref_skel.name == target_bone.skeleton.name:
+        direct_copy = True  # No remapping is needed, the skeletons are the same
+    else:
+        direct_copy = False
+
+    if not direct_copy and len(target_bone.reference_bones) > 0:
+        if len(target_bone.reference_bones) == 1:
+            rbone = ref_skel.getBone(target_bone.reference_bones[0])
+            return _get_normal(rbone)
+        else:
+            normal = np.zeros(3, dtype=np.float32)
+            count = 0
+            for rbname in target_bone.reference_bones:
+                rbone = ref_skel.getBone(rbname)
+                norm = _get_normal(rbone)
+                if not np.allclose(norm, np.zeros(3), atol=1e-05):
+                    count += 1
+                    normal += norm
+            if count > 0 and not np.allclose(normal, np.zeros(3), atol=1e-05):
+                normal /= count
+            else:
+                normal = np.asarray([0.0, 1.0, 0.0], dtype=np.float32)
+            return normal
+    else:
+        # Direct mapping: Try to map by bone name
+        if ref_skel.containsBone(target_bone.name):
+            return _get_normal(ref_skel.getBone(target_bone.name))
+        else:
+            log.warning("No normal found for bone %s: no reference bones and could not map implicitly by name", target_bone.name)
+            return np.asarray([0.0, 1.0, 0.0], dtype=np.float32)
 
 def assertOrthogonal(mat):
     prod = np.dot(mat, mat.transpose())

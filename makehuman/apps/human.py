@@ -1100,7 +1100,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         # Update skeleton joint positions (before human is posed)
         if self.getBaseSkeleton():
             log.debug("Updating skeleton joint positions")
-            self.getBaseSkeleton().updateJoints(self.meshData, in_rest=True)
+            self.getBaseSkeleton().updateJoints(self.meshData)
             self.resetBakedAnimations()    # TODO decide whether we require calling this manually, or whether animatedMesh automatically tracks updates of skeleton and updates accordingly
 
         self.callEvent('onChanged', events3d.HumanEvent(self, 'targets'))
@@ -1261,7 +1261,8 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         and that will be used for exporting.
         """
         if self.skeleton:
-            self.skeleton.updateJoints(self.meshData, in_rest=False)
+            # Update joint positions and copy bone orientations (normals) from base skeleton
+            self.skeleton.updateJoints(self.meshData, ref_skel=self.getBaseSkeleton())
         return self.skeleton
 
     def setBaseSkeleton(self, skel):
