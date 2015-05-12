@@ -1103,6 +1103,9 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             self.getBaseSkeleton().updateJoints(self.meshData)
             self.resetBakedAnimations()    # TODO decide whether we require calling this manually, or whether animatedMesh automatically tracks updates of skeleton and updates accordingly
 
+        if self.skeleton:
+            self.skeleton.dirty = True
+
         self.callEvent('onChanged', events3d.HumanEvent(self, 'targets'))
 
         # Restore pose, and shadow copy of vertex positions 
@@ -1254,6 +1257,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         """
         self.callEvent('onChanging', events3d.HumanEvent(self, 'user-skeleton'))
         self.skeleton = skel
+        self.skeleton.dirty = True
         self.callEvent('onChanged', events3d.HumanEvent(self, 'user-skeleton'))
 
     def getSkeleton(self):
@@ -1261,8 +1265,10 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         and that will be used for exporting.
         """
         if self.skeleton:
-            # Update joint positions and copy bone orientations (normals) from base skeleton
-            self.skeleton.updateJoints(self.meshData, ref_skel=self.getBaseSkeleton())
+            if not hasattr(self.skeleton, 'dirty') or self.skeleton.dirty:
+                # Update joint positions and copy bone orientations (normals) from base skeleton
+                self.skeleton.updateJoints(self.meshData, ref_skel=self.getBaseSkeleton())
+                self.skeleton.dirty = False
         return self.skeleton
 
     def setBaseSkeleton(self, skel):
