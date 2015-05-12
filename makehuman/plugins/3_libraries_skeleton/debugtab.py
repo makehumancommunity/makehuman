@@ -67,6 +67,8 @@ class SkeletonDebugLibrary(gui3d.TaskView):
         self.skelObj = None
         self.axisMesh = None
         self.axisObj = None
+        self.planesObj = None
+        self.planesMesh = None
 
         self.showWeightsTggl = self.displayBox.addWidget(gui.CheckBox("Show bone weights"))
         @self.showWeightsTggl.mhEvent
@@ -106,12 +108,13 @@ class SkeletonDebugLibrary(gui3d.TaskView):
             # Remove old skeleton mesh
             self.removeObject(self.skelObj)
             self.removeObject(self.axisObj)
-            self.human.removeBoundMesh(self.skelObj.name)
-            self.human.removeBoundMesh(self.axisObj.name)
+            self.removeObject(self.planesObj)
             self.skelObj = None
             self.skelMesh = None
             self.axisMesh = None
             self.axisObj = None
+            self.planesObj = None
+            self.planesMesh = None
 
     def drawSkeleton(self):
         self._unloadSkeletonMesh()
