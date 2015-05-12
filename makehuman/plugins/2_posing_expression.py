@@ -268,10 +268,7 @@ class ExpressionTaskView(gui3d.TaskView):
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
 
-        if not self.human.getSkeleton():
-            return
-
-        anim = self.base_bvh.createAnimationTrack(self.human.getSkeleton(), name="Expression-Face-PoseUnits")
+        anim = self.base_bvh.createAnimationTrack(self.human.getBaseSkeleton(), name="Expression-Face-PoseUnits")
         log.message('unit pose frame count:%s', len(self.poseunit_names))
         self.base_poseunit = animation.PoseUnit(anim.name, anim.data[:anim.nBones*len(self.poseunit_names)], self.poseunit_names)
 
