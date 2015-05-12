@@ -86,9 +86,6 @@ def exportCollada(filepath, config):
     if skel:
         if config.scale != 1:
             skel = skel.scaled(config.scale)
-        if not skel.isInRestPose():
-            # Export skeleton with the current pose as rest pose
-            skel = skel.createFromPose()
 
     # TODO a shared method for properly naming meshes would be a good idea
     for mesh in meshes:

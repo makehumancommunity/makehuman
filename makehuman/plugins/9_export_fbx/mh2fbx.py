@@ -70,9 +70,6 @@ def exportFbx(filepath, config):
     if skel:
         if config.scale != 1:
             skel = skel.scaled(config.scale)
-        if not skel.isInRestPose():
-            # Export skeleton with the current pose as rest pose
-            skel = skel.createFromPose()
 
     # Set mesh names
     for mesh in meshes:
