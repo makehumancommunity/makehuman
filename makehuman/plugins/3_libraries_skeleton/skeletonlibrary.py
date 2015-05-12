@@ -226,7 +226,7 @@ class SkeletonLibrary(gui3d.TaskView):
         self.selectedRig = filename
 
         if not filename:
-            if self.human.getSkeleton():
+            if self.human.skeleton:
                 # Unload current skeleton
                 self.human.setSkeleton(None)
 
