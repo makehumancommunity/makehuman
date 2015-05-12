@@ -1257,7 +1257,8 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         """
         self.callEvent('onChanging', events3d.HumanEvent(self, 'user-skeleton'))
         self.skeleton = skel
-        self.skeleton.dirty = True
+        if self.skeleton:
+            self.skeleton.dirty = True
         self.callEvent('onChanged', events3d.HumanEvent(self, 'user-skeleton'))
 
     def getSkeleton(self):
@@ -1349,12 +1350,22 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         event = events3d.HumanEvent(self, 'poseState')
         event.state = posed
         self.callEvent('onChanging', event)
+        if self.skeleton:
+            self.skeleton.dirty = True
         animation.AnimatedMesh.setPosed(self, posed)
         self.callEvent('onChanged', event)
+
+    def setActiveAnimation(self, anim_name):
+        # TODO emit pose change event?
+        if self.skeleton:
+            self.skeleton.dirty = True
+        super(Human, self).setActiveAnimation(anim_name)
 
     def refreshPose(self, updateIfInRest=False):
         event = events3d.HumanEvent(self, 'poseRefresh')
         self.callEvent('onChanging', event)
+        if self.skeleton:
+            self.skeleton.dirty = True
         super(Human, self).refreshPose(updateIfInRest)
         if self.isSubdivided():
             self.updateSubdivisionMesh()
