@@ -195,6 +195,7 @@ class BVH():
             for bone in skel.getBones():
                 if len(bone.reference_bones) > 0:
                     # Combine the rotations of reference bones to influence this bone
+                    # TODO combining poses like this does not work, works with one reference bone only
                     bvhJoints = []
                     for bonename in bone.reference_bones:
                         jointname = _bvhJointName(bonename)

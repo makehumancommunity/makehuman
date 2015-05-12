@@ -253,7 +253,7 @@ class SkeletonLibrary(gui3d.TaskView):
             log.message("Skeleton %s has %s weights per vertex.", skel.name, vertexWeights.getMaxNumberVertexWeights())
 
             # Remap bone orientation planes from reference rig
-            skel.addReferencePlanes(self.referenceRig)
+            skel.addReferencePlanes(self.referenceRig)  # Not strictly needed for the new way in which we determine bone normals
 
         # Update description
         descr = skel.description
