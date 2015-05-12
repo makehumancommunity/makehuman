@@ -222,9 +222,6 @@ def writeSkeletonFile(human, filepath, config):
     skel = human.getSkeleton()
     if config.scale != 1:
         skel = skel.scaled(config.scale)
-    if not skel.isInRestPose():
-        # Export skeleton with the current pose as rest pose
-        skel = skel.createFromPose()
 
     f = codecs.open(filepath, 'w', encoding="utf-8")
     lines = []
@@ -336,6 +333,7 @@ def writeMaterialFile(human, filepath, objects, config):
     f.close()
 
 def writeAnimation(human, linebuffer, animTrack, config):
+    # TODO animations need to be adapted to rest pose and retargeted to user skeleton
     import numpy as np
     progress = Progress(len(human.getSkeleton().getBones()))
     log.message("Exporting animation %s.", animTrack.name)
