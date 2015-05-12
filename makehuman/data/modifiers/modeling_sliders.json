@@ -107,7 +107,7 @@
         ],
       "mouth size details": [
           {"mod": "mouth/mouth-lowerlip-height-min|max", "cam": "frontView", "label": "Scale lowerlip height"},
-          {"mod": "mouth/mouth-lowerlip-width-min|max", "cam": "frontView", "label": "Scale loverlip width"},
+          {"mod": "mouth/mouth-lowerlip-width-min|max", "cam": "frontView", "label": "Scale lowerlip width"},
           {"mod": "mouth/mouth-upperlip-height-min|max", "cam": "frontView", "label": "Scale upperlip height"},
           {"mod": "mouth/mouth-upperlip-width-min|max", "cam": "frontView", "label": "Scale upperlip width"},
           {"mod": "mouth/mouth-cupidsbow-width-min|max", "cam": "frontView", "label": "Cupid's bow width"}
