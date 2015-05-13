@@ -247,7 +247,7 @@ def isRotationMatrix(mat):
     diff = prod - Matrix().to_3x3()
     for i in range(3):
         for j in range(3):
-            if abs(diff[i][j]) > 1e-4:
+            if abs(diff[i][j]) > 1e-3:
                 print("Not a rotation matrix")
                 print(mat)
                 print(prod)
@@ -403,12 +403,40 @@ def setRotation(pb, rot, frame, group):
 #
 
 def selectAndSetRestPose(rig, scn):
-    scn.objects.active = rig
+    reallySelect(rig, scn)
     bpy.ops.object.mode_set(mode='POSE')
     bpy.ops.pose.select_all(action='SELECT')
     bpy.ops.pose.rot_clear()
     bpy.ops.pose.loc_clear()
     bpy.ops.pose.scale_clear()
+
+#
+#  reallySelect(ob, scn)
+#  Make sure that selecting an object really takes.
+#
+
+def reallySelect(ob, scn):
+    ob.hide = False
+    visible = False
+    for n,vis in enumerate(ob.layers):
+        if vis and scn.layers[n]:
+            visible = True
+            break
+    if not visible:
+        for n,vis in enumerate(ob.layers):
+            if vis:
+                scn.layers[n] = True
+                visible = True
+                break
+    if not visible:
+        for n,vis in enumerate(scn.layers):
+            if vis:
+                ob.layers[n] = True
+                visible = True
+                break
+    if not visible:
+        ob.layers[0] = scn.layers[0] = True
+    scn.objects.active = ob
 
 
 #

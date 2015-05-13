@@ -170,7 +170,7 @@ def readBvhFile(context, filepath, scn, scan):
             amt = bpy.data.armatures.new("BvhAmt")
             rig = bpy.data.objects.new("BvhRig", amt)
             scn.objects.link(rig)
-            scn.objects.active = rig
+            reallySelect(rig, scn)
             scn.update()
             bpy.ops.object.mode_set(mode='EDIT')
             bpy.ops.object.mode_set(mode='EDIT')
@@ -371,7 +371,7 @@ def renameBones(srcRig, scn):
     srcBones = []
     trgBones = {}
 
-    scn.objects.active = srcRig
+    reallySelect(srcRig, scn)
     scn.update()
     bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.object.mode_set(mode='EDIT')
@@ -442,9 +442,9 @@ def renameBvhRig(srcRig, filepath):
 def deleteSourceRig(context, rig, prefix):
     ob = context.object
     scn = context.scene
-    scn.objects.active = rig
+    reallySelect(rig, scn)
     bpy.ops.object.mode_set(mode='OBJECT')
-    scn.objects.active = ob
+    reallySelect(ob, scn)
     scn.objects.unlink(rig)
     if rig.users == 0:
         bpy.data.objects.remove(rig)
@@ -510,7 +510,7 @@ def renameAndRescaleBvh(context, srcRig, trgRig):
 
     from . import t_pose
     scn = context.scene
-    scn.objects.active = srcRig
+    reallySelect(srcRig, scn)
     scn.update()
     #(srcRig, srcBones, action) =  renameBvhRig(rig, filepath)
     target.getTargetArmature(trgRig, scn)
