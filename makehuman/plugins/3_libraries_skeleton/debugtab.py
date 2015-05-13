@@ -262,7 +262,7 @@ class SkeletonDebugLibrary(gui3d.TaskView):
         gui3d.app.statusPersist(name)
 
         # Draw bone weights
-        rawWeights = self.human.getVertexWeights()
+        rawWeights = self.human.getVertexWeights(self.human.getSkeleton())
 
         objects = self.human.getObjects(excludeZeroFaceObjs=True)
         for obj in objects:
