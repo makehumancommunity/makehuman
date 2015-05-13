@@ -179,8 +179,8 @@
           {"mod": "torso/torso-scale-horiz-decr|incr", "cam": "globalCamera", "label": "Scale horizontally"},
           {"mod": "torso/torso-scale-vert-decr|incr", "cam": "globalCamera", "label": "Scale vertically"},
           {"mod": "torso/torso-trans-horiz-in|out", "cam": "globalCamera", "label": "Move horizontally"},
-          {"mod": "torso/torso-trans-vert-down|up", "cam": "globalCamera", "label": "Move depth"},
-          {"mod": "torso/torso-trans-depth-forward|backward", "cam": "leftView", "label": "Move vertically"},
+          {"mod": "torso/torso-trans-vert-down|up", "cam": "globalCamera", "label": "Move vertically"},
+          {"mod": "torso/torso-trans-depth-forward|backward", "cam": "leftView", "label": "Move depth"},
           {"mod": "torso/torso-vshape-less|more", "cam": "globalCamera", "label": "Scale cone-shape"},
           {"mod": "torso/torso-muscle-dorsi-decr|incr", "cam": "globalCamera", "label": "Dorsi muscle"},
           {"mod": "torso/torso-muscle-pectoral-decr|incr", "cam": "globalCamera", "label": "Pectoral muscle"}
