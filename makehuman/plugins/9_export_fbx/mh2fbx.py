@@ -99,7 +99,7 @@ def exportFbx(filepath, config):
 
     # Generate bone weights for all meshes up front so they can be reused for all
     if skel:
-        rawWeights = human.getVertexWeights()  # Basemesh weights
+        rawWeights = human.getVertexWeights(human.getSkeleton())  # Basemesh weights
         for mesh in meshes:
             if mesh.object.proxy:
                 # Transfer weights to proxy

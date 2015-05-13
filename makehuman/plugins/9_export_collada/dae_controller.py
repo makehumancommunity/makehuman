@@ -76,7 +76,7 @@ def writeSkinController(fp, human, mesh, skel, config):
     nVerts = len(mesh.coord)
     nBones = len(skel.getBones())
 
-    rawWeights = human.getVertexWeights()
+    rawWeights = human.getVertexWeights(human.getSkeleton())
 
     obj = mesh.object
 
