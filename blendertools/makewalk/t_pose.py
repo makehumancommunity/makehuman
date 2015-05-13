@@ -48,7 +48,7 @@ def applyRestPose(context, value):
         if ob.type != 'MESH':
             continue
 
-        scn.objects.active = ob
+        reallySelect(ob, scn)
         if ob != context.object:
             raise StandardError("Context switch did not take:\nob = %s\nc.ob = %s\nc.aob = %s" %
                 (ob, context.object, context.active_object))
@@ -70,19 +70,19 @@ def applyRestPose(context, value):
                     ob.McpArmatureModifier = mod.name
                     break
 
-    scn.objects.active = rig
+    reallySelect(rig, scn)
     bpy.ops.object.mode_set(mode='POSE')
     bpy.ops.pose.armature_apply()
     for ob in children:
         name = ob.McpArmatureModifier
-        scn.objects.active = ob
+        reallySelect(ob, scn)
         mod = ob.modifiers.new(name, 'ARMATURE')
         mod.object = rig
         mod.use_vertex_groups = True
         bpy.ops.object.modifier_move_up(modifier=name)
         #setShapeKey(ob, name, value)
 
-    scn.objects.active = rig
+    reallySelect(rig, scn)
     print("Applied pose as rest pose")
 
 
