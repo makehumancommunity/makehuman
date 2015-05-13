@@ -187,11 +187,11 @@ class CBoneAnim:
     def getTPoseMatrix(self):
         self.aMatrix =  self.srcBone.matrix.inverted() * self.trgBone.matrix
         if not isRotationMatrix(self.trgBone.matrix):
-            raise RuntimeError("Target %s not rotation matrix %s" % (self.trgBone.name, self.trgBone.matrix))
+            print("* WARNING *\nTarget %s not rotation matrix:\n%s" % (self.trgBone.name, self.trgBone.matrix))
         if not isRotationMatrix(self.srcBone.matrix):
-            raise RuntimeError("Source %s not rotation matrix %s" % (self.srcBone.name, self.srcBone.matrix))
+            print("* WARNING *\nSource %s not rotation matrix:\n%s" % (self.srcBone.name, self.srcBone.matrix))
         if not isRotationMatrix(self.aMatrix):
-            raise RuntimeError("A %s not rotation matrix %s" % (self.trgBone.name, self.aMatrix.matrix))
+            print("* WARNING *\nA %s not rotation matrix:\n%s" % (self.trgBone.name, self.aMatrix.matrix))
 
 
     def retarget(self, frame):
@@ -329,7 +329,7 @@ def retargetAnimation(context, srcRig, trgRig):
     setMhxIk(trgRig, True, True, 0.0)
     frames = getActiveFrames(srcRig)
     nFrames = len(frames)
-    scn.objects.active = trgRig
+    reallySelect(trgRig, scn)
     if trgRig.animation_data:
         trgRig.animation_data.action = None
     scn.update()
