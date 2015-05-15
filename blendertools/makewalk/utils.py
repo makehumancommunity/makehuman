@@ -82,44 +82,31 @@ RigifyLayers = 27*[True] + 5*[False]
 #   Identify rig type
 #
 
+def allBonesInList(list, rig):
+    for bname in list:
+        if bname not in rig.pose.bones.keys():
+            return False
+    return True
+
+
 def isMhxRig(rig):
-    try:
-        rig.pose.bones['foot.rev.L']
-        return True
-    except KeyError:
-        return False
+    return ('foot.rev.L' in rig.pose.bones.keys())
 
+def isDefaultRig(rig):
+    return allBonesInList(['risorius03.L', 'shoulder01.R'], rig)
 
-def isMhOfficialRig(rig):
-    try:
-        rig.pose.bones['risorius03.R']
-        return True
-    except KeyError:
-        return False
-
+def isMbRig(rig):
+    return allBonesInList(["LeftArm", "LeftArmRoll"], rig)
 
 def isMhx7Rig(rig):
-    try:
-        rig.pose.bones['FootRev_L']
-        return True
-    except KeyError:
-        return False
-
+    return ('FootRev_L' in rig.pose.bones.keys())
 
 def isRigify(rig):
-    try:
-        rig.pose.bones['MCH-spine.flex']
-        return True
-    except KeyError:
-        return False
+    return ('MCH-spine.flex' in rig.pose.bones.keys())
 
 
 def isMakeHumanRig(rig):
-    try:
-        rig["MhAlpha8"]
-        return True
-    except KeyError:
-        return False
+    return ("MhAlpha8" in rig.keys())
 
 #
 #   nameOrNone(string):

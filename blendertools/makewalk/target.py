@@ -137,15 +137,17 @@ def guessTargetArmatureFromList(rig, bones, scn):
 
     if isMhxRig(rig):
         return "MHX"
-    elif isMhOfficialRig(rig):
-        return "MH-Official"
+    elif isDefaultRig(rig):
+        return "Default"
+    elif isMbRig(rig):
+        return "MB"
     elif isRigify(rig):
         return "Rigify"
     elif isMhx7Rig(rig):
         return "MH-alpha7"
     elif False:
         for name in _targetInfo.keys():
-            if name not in ["MHX", "MH-Official", "Rigify", "MH-alpha7"]:
+            if name not in ["MHX", "Default", "MB", "Rigify", "MH-alpha7"]:
                 (boneAssoc, _ikBones, _tpose) = _targetInfo[name]
                 if testTargetRig(name, rig, boneAssoc):
                     return name
