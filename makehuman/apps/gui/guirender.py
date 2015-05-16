@@ -61,7 +61,7 @@ class RenderTaskView(gui3d.TaskView):
 
         human = G.app.selectedHuman
         self.oldShader = human.material.shader
-        human.material.shader = getpath.getSysDataPath(self.taskViewShader)
+        human.material.shader = getpath.getSysDataPath(self.taskViewShader) if self.taskViewShader else None
 
     def onHide(self, event):
         human = G.app.selectedHuman
