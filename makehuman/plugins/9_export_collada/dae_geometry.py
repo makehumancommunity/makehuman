@@ -60,6 +60,7 @@ def writeLibraryGeometry(fp, meshes, config, shapes=None):
     fp.write('  </library_geometries>\n')
 
 
+# TODO make shared function, config.getTransform() and mesh.clone(transform)
 def rotateCoord(coord, config):
     if config.meshOrientation == 'yUpFaceZ':
         pass

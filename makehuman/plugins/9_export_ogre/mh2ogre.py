@@ -50,10 +50,12 @@ import codecs
 import transformations
 import log
 
+# TODO support different mesh orientations, scale and different bone local axis
+
 def exportOgreMesh(filepath, config):
     progress = Progress.begin()
 
-    progress(0, 0.05, "Setting properties")  # TODO this leads to a disastrous amount of confusion among translators 
+    progress(0, 0.05, "Preparing export")
     human = config.human
 
     # TODO account for config.scale in skeleton

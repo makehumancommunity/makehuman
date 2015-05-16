@@ -8,7 +8,7 @@
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Thomas Larsson
+**Authors:**           Thomas Larsson, Jonas Hauquier
 
 **Copyright(c):**      MakeHuman Team 2001-2015
 
@@ -109,18 +109,20 @@ class ExporterCollada(Exporter):
         import gui
         Exporter.build(self, options, taskview)
 
-        orients = []
-        self.yUpFaceZ = options.addWidget(gui.RadioButton(orients, "Y up, face Z", True))
-        self.yUpFaceX = options.addWidget(gui.RadioButton(orients, "Y up, face X", False))
-        self.zUpFaceNegY = options.addWidget(gui.RadioButton(orients, "Z up, face -Y", False))
-        self.zUpFaceX = options.addWidget(gui.RadioButton(orients, "Z up, face X", False))
-
         self.facePoseUnits = options.addWidget(gui.CheckBox("Facial pose-units", False))
 
-        #csyses = []
-        #self.localY = options.addWidget(gui.RadioButton(csyses, "Local Y along bone", True))
-        #self.localX = options.addWidget(gui.RadioButton(csyses, "Local X along bone", False))
-        #self.localG = options.addWidget(gui.RadioButton(csyses, "Local = Global", False))
+        orients = []
+        box = options.addWidget(gui.GroupBox("Orientation"))
+        self.yUpFaceZ = box.addWidget(gui.RadioButton(orients, "Y up, face Z", True))
+        self.yUpFaceX = box.addWidget(gui.RadioButton(orients, "Y up, face X", False))
+        self.zUpFaceNegY = box.addWidget(gui.RadioButton(orients, "Z up, face -Y", False))
+        self.zUpFaceX = box.addWidget(gui.RadioButton(orients, "Z up, face X", False))
+
+        csyses = []
+        box = options.addWidget(gui.GroupBox("Bone orientation"))
+        self.localY = box.addWidget(gui.RadioButton(csyses, "Along local Y", True))
+        self.localX = box.addWidget(gui.RadioButton(csyses, "Along local X", False))
+        self.localG = box.addWidget(gui.RadioButton(csyses, "Local = Global", False))
 
     def export(self, human, filename):
         from .mh2collada import exportCollada
@@ -137,6 +139,10 @@ class ExporterCollada(Exporter):
         cfg.yUpFaceX = self.yUpFaceX.selected
         cfg.zUpFaceNegY = self.zUpFaceNegY.selected
         cfg.zUpFaceX = self.zUpFaceX.selected
+
+        cfg.localY = self.localY.selected
+        cfg.localX = self.localX.selected
+        cfg.localG = self.localG.selected
 
         cfg.facePoseUnits = self.facePoseUnits.selected
 
