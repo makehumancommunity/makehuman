@@ -361,6 +361,11 @@ def initInterface(context):
         description = "Detect target rig automatically",
         default = True)
 
+    bpy.types.Scene.McpApplyObjectTransforms = BoolProperty(
+        name = "Apply Object Transforms",
+        description = "Apply object transformations instead of reporting error",
+        default = True)
+
     bpy.types.Object.MhReverseHip = BoolProperty(
         name = "Reverse Hip",
         description = "The rig has a reverse hip",
