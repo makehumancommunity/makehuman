@@ -617,6 +617,9 @@ class ListItem(QtGui.QListWidgetItem):
         if not self.tooltip:
             return
 
+        if not self.listWidget():
+            return
+
         metrics = QtGui.QFontMetrics(self.font())
 
         labelWidth = self.listWidget().width()
@@ -624,7 +627,7 @@ class ListItem(QtGui.QListWidgetItem):
             labelWidth -= self.listWidget().iconSize().width() + 10
             # pad size with 10px to account for margin between icon and text (this is an approximation)
 
-        if metrics.width(self.text) > labelWidth:
+        if metrics.width(self.text)/2 > labelWidth:
             self.setToolTip(self.text)
         else:
             self.setToolTip("")
@@ -641,6 +644,7 @@ class ListItem(QtGui.QListWidgetItem):
 
     def setText(self, text):
         super(ListItem, self).setText(text)
+        self.updateTooltip()
 
     @property
     def text(self):

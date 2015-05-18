@@ -158,6 +158,7 @@ class OptionsPanel(bpy.types.Panel):
         layout.prop(scn, "McpClearLocks")
         layout.prop(scn, 'McpAutoSourceRig')
         layout.prop(scn, 'McpAutoTargetRig')
+        layout.prop(scn, 'McpApplyObjectTransforms')
         layout.prop(scn, "McpIgnoreHiddenLayers")
         layout.prop(scn, "McpDoBendPositive")
 
