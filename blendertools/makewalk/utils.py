@@ -464,16 +464,23 @@ def getObjectProblems(self, context):
     self.problems = ""
     epsilon = 1e-2
     rig = context.object
+    scn = context.scene
 
     eu = rig.rotation_euler
     print(eu)
     if abs(eu.x) + abs(eu.y) + abs(eu.z) > epsilon:
-        self.problems += "object rotation\n"
+        if scn.McpApplyObjectTransforms:
+            bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+        else:
+            self.problems += "object rotation\n"
 
     vec = rig.scale - Vector((1,1,1))
     print(vec, vec.length)
     if vec.length > epsilon:
-        self.problems += "object scaling\n"
+        if scn.McpApplyObjectTransforms:
+            bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        else:
+            self.problems += "object scaling\n"
 
     if self.problems:
         wm = context.window_manager
