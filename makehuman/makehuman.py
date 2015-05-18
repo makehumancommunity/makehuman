@@ -115,7 +115,7 @@ def getBasemeshVersion():
     """
     return meshVersion
 
-def unicode(msg):
+def unicode(msg, *args, **kwargs):
     """
     Override default unicode constructor to try and resolve some issues with
     mismatched string codecs.
@@ -123,7 +123,7 @@ def unicode(msg):
     """
     try:
         # First attempt the builtin unicode() function without interference
-        return __builtins__.unicode(msg)
+        return __builtins__.unicode(msg, *args, **kwargs)
     except:
         pass
     try:
@@ -145,7 +145,7 @@ def unicode(msg):
     try:
         # Attempt using filesystem encoding
         import sys
-        return __builtins__.unicode(msg, encoding=sys.getfilesystemencoding)
+        return __builtins__.unicode(msg, encoding=sys.getfilesystemencoding())
     except:
         pass
     try:
