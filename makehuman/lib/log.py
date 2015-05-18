@@ -59,7 +59,14 @@ def _toUnicode(msg, *args):
     String is decoded with the codeset used by the filesystem of the operating
     system.
     """
-    msg_ = msg % args
+    try:
+        msg_ = msg % args
+    except TypeError:
+        # Also allow dict with keywords in format string, passed as first arg
+        if len(args) == 1 and isinstance(args[0], dict):
+            msg_ = msg % args[0]
+        else:
+            raise
 
     if isinstance(msg_, unicode):
         return msg_
