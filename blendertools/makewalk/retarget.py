@@ -349,6 +349,7 @@ def retargetAnimation(context, srcRig, trgRig):
 
     target.ensureTargetInited(scn)
     boneAssoc = target.getTargetArmature(trgRig, scn)
+    disconnectHips(trgRig, boneAssoc)
     anim = CAnimation(srcRig, trgRig, boneAssoc, scn)
     anim.setTPose(scn)
 
@@ -375,6 +376,14 @@ def retargetAnimation(context, srcRig, trgRig):
     clearCategory()
     endProgress("Retargeted %s --> %s" % (srcRig.name, trgRig.name))
 
+
+def disconnectHips(rig, boneAssoc):
+    for bname,mname in boneAssoc:
+        if mname == "hips":
+            bpy.ops.object.mode_set(mode='EDIT')
+            rig.data.edit_bones[bname].use_connect = False
+            bpy.ops.object.mode_set(mode='POSE')
+            return
 
 #
 #   changeTargetData(rig, scn):
