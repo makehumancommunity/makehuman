@@ -415,7 +415,7 @@ class Slider(QtGui.QWidget, Widget):
         type(self)._instances.remove(self)
 
     def _enter(self):
-        text = str(self.edit.text())
+        text = unicode(self.edit.text())
         if not text:
             return
         oldValue = self.getValue()
@@ -485,7 +485,7 @@ class Slider(QtGui.QWidget, Widget):
         if self.edit is not None:
             self.edit.setText('%.2f' % self.toDisplay(value))
         if hasattr(self.valueConverter, 'units') and \
-           self.valueConverter.units != str(self.units.text()):
+           self.valueConverter.units != unicode(self.units.text()):
             self.units.setText(self.valueConverter.units)
 
     def _f2i(self, x):
@@ -608,10 +608,6 @@ class ListItem(QtGui.QListWidgetItem):
         super(ListItem, self).__init__(label)
         self.__hasCheckbox = False
         self.tooltip = tooltip
-
-    def setText(self, text):
-        super(ListItem, self).setText(text)
-        self.updateTooltip(self)
 
     def updateTooltip(self):
         """
@@ -772,7 +768,7 @@ class ListView(QtGui.QListWidget, Widget):
     def getSelectedItem(self):
         items = self.selectedItems()
         if len(items) > 0:
-            return str(items[0].text)
+            return items[0].text
         return None
 
     def getSelectedItems(self):
@@ -814,11 +810,11 @@ class TextView(QtGui.QLabel, Widget):
         Widget.__init__(self)
 
     def setText(self, text):
-        text = getLanguageString(text) if text else ''
+        text = getLanguageString(text)
         super(TextView,self).setText(text)
 
     def setTextFormat(self, text, *values):
-        text = getLanguageString(text) if text else ''
+        text = getLanguageString(text)
         super(TextView,self).setText(text % values)
 
 class SliderBox(GroupBox):
@@ -1206,7 +1202,7 @@ class FileEntryView(QtGui.QWidget, Widget):
             clicked."""
 
             events3d.Event.__init__(self)
-            self.path = path
+            self.path = pathToUnicode(path)
             self.source = source
 
         def __repr__(self):
@@ -1269,7 +1265,7 @@ class FileEntryView(QtGui.QWidget, Widget):
             the line edit and confirm the entry.
             """
             if path:
-                self.path = path
+                self.path = pathToUnicode(path)
                 self._confirm('browse')
 
         self.connect(self.edit, QtCore.SIGNAL(' returnPressed()'),
@@ -1311,14 +1307,14 @@ class FileEntryView(QtGui.QWidget, Widget):
 
     def getDirectory(self):
         """Get the FileEntryView's current directory."""
-        return self._directory
+        return pathToUnicode(self._directory)
 
     def setDirectory(self, directory):
         """Set the directory that the widget will use for saving or
         opening the filename, and as an initial path for browsing in
         the dialog. If the mode is 'dir', the given path is written
         in the line edit."""
-        self._directory = directory
+        self._directory = pathToUnicode(directory)
         if self.mode == 'dir':
             self.text = self.directory
 
@@ -1329,13 +1325,13 @@ class FileEntryView(QtGui.QWidget, Widget):
         if self.mode == 'dir':
             return self.directory
         else:
-            return pathToUnicode(os.path.normpath(os.path.join(
-                self.directory, self.text)))
+            return os.path.normpath(os.path.join(self.directory, self.text))
 
     def setPath(self, path):
         """Set the path of the FileEntryView.
         This will update the widget's current directory,
         as well as the file name in the text edit."""
+        path = pathToUnicode(path)
         if self.mode == 'dir':
             self.directory = path
         else:
@@ -1345,10 +1341,10 @@ class FileEntryView(QtGui.QWidget, Widget):
     path = property(getPath, setPath)
 
     def getText(self):
-        return pathToUnicode(str(self.edit.text()))
+        return unicode(self.edit.text())
 
     def setText(self, text):
-        self.edit.setText(pathToUnicode(text))
+        self.edit.setText(text)
 
     text = property(getText, setText)
 
@@ -1368,7 +1364,7 @@ class FileEntryView(QtGui.QWidget, Widget):
         button in the line edit, or by using the browser.
         It emits an onFileSelected event if the path is not empty."""
         if self.mode == 'dir' and source in ('return', 'button'):
-            self.directory = self.text
+            self.directory = pathToUnicode(self.text)
 
         if len(self.text):
             self.callEvent('onFileSelected',
@@ -1740,6 +1736,7 @@ class BrowseButton(Button):
 
     @staticmethod
     def getExistingPath(path):
+        path = pathToUnicode(path)
         if not os.path.isdir(path) and not os.path.isfile(path):
             path = os.path.split(path)[0]
             homePath = os.path.abspath(getPath(''))
@@ -1749,7 +1746,7 @@ class BrowseButton(Button):
                     path = os.path.split(path)[0]
             if not os.path.isdir(path):
                 path = os.getcwd()
-        return pathToUnicode(os.path.normpath(path))
+        return os.path.normpath(path)
 
     def __init__(self, mode = 'open', label=None):
         if label is None:
@@ -1784,13 +1781,12 @@ class BrowseButton(Button):
     directory = property(getDirectory, setDirectory)
 
     def getPath(self):
-        return pathToUnicode(os.path.normpath(os.path.join(
-            self.directory, self.filename)))
+        return os.path.normpath(os.path.join(self.directory, self.filename))
 
     def setPath(self, path):
         """WARNING: Use only with complete file paths that include filename."""
-        self.directory = pathToUnicode(os.path.dirname(path))
-        self.filename = pathToUnicode(os.path.basename(path))
+        self.directory = os.path.dirname(pathToUnicode(path))
+        self.filename = os.path.basename(pathToUnicode(path))
 
     path = property(getPath, setPath)
 
@@ -1811,16 +1807,16 @@ class BrowseButton(Button):
             path = os.path.join(path, self.filename)
 
         if self.mode == 'open':
-            path = str(QtGui.QFileDialog.getOpenFileName(G.app.mainwin, directory=path, filter=self.filter))
+            path = pathToUnicode(unicode(QtGui.QFileDialog.getOpenFileName(G.app.mainwin, directory=path, filter=self.filter)))
         elif self.mode == 'save':
-            path = str(QtGui.QFileDialog.getSaveFileName(G.app.mainwin, directory=path, filter=self.filter))
+            path = pathToUnicode(unicode(QtGui.QFileDialog.getSaveFileName(G.app.mainwin, directory=path, filter=self.filter)))
         elif self.mode == 'dir':
-            path = str(QtGui.QFileDialog.getExistingDirectory(G.app.mainwin, directory=path))
+            path = pathToUnicode(unicode(QtGui.QFileDialog.getExistingDirectory(G.app.mainwin, directory=path)))
 
         if path:
             if self.mode == 'dir': self.directory = path
             else: self.path = path
-        self.callEvent('onClicked', pathToUnicode(path))
+        self.callEvent('onClicked', path)
 
 
 class ColorPickButton(Button):
@@ -1914,7 +1910,7 @@ class Action(QtGui.QAction, Widget):
 
     @property
     def text(self):
-        return str(super(Action, self).text())
+        return unicode(super(Action, self).text())
 
     def setActionGroup(self, group):
         self.setCheckable(True)
@@ -1957,7 +1953,7 @@ class TableItem(QtGui.QTableWidgetItem):
 
     @property
     def text(self):
-        return unicode(self.text())
+        return unicode(super(TableItem, self).text())
 
 class TableView(QtGui.QTableWidget, Widget):
     def __init__(self):
