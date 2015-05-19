@@ -364,6 +364,8 @@ class Skeleton(object):
         """
         Create a scaled clone of this skeleton
         """
+        from core import G
+
         result = type(self)(self.name)
         result.joint_pos_idxs = dict(self.joint_pos_idxs)
         result.vertexWeights = self.vertexWeights
@@ -378,6 +380,10 @@ class Skeleton(object):
             rbone = result.addBone(bone.name, parentName, bone.headJoint, bone.tailJoint, bone.roll, bone.reference_bones, bone._weight_reference_bones)
             rbone.matPose = bone.matPose.copy()
             rbone.matPose[:3,3] *= scale
+
+        # Fit joint positions to that of original skeleton
+        human = G.app.selectedHuman
+        result.updateJoints(human.meshData, ref_skel=self)
 
         result.build(ref_skel=self)  # copy bone normals from self
 
@@ -649,7 +655,7 @@ class Bone(object):
 
     def updateJointPositions(self, human=None, in_rest=True):
         """
-        Update the joint positions of this skeleton based on the current state
+        Update the joint positions of this bone based on the current state
         of the human mesh.
         Remember to call build() after calling this method.
         """
