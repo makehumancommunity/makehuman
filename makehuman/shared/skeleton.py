@@ -389,6 +389,13 @@ class Skeleton(object):
 
         return result
 
+    def transformed(self, transform_mat):
+        """Create a clone of this skeleton with its joint locations transformed
+        with the specified transformation matrix.
+        """
+        # TODO perhaps use this instead of using scaled() and the "meshOrientation" arg in all getters used by exporters?
+        raise NotImplementedError()
+
     def createFromPose(self):
         """
         Create a clone of this skeleton with its current pose applied as rest pose.

@@ -69,7 +69,7 @@ def exportFbx(filepath, config):
     skel = human.getSkeleton()
     if skel:
         if config.scale != 1:
-            skel = skel.scaled(config.scale)
+            skel = skel.scaled(config.scale)  # TODO perhaps create a skeleton.transformed() just like for mesh
 
     # Set mesh names
     for mesh in meshes:
