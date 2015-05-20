@@ -71,7 +71,7 @@ class Skeleton(object):
 
     def _clear(self):
         self.bones = {}     # Bone lookup list by name
-        self.boneslist = []  # Breadth-first ordered list of all bones
+        self.boneslist = None  # Breadth-first ordered list of all bones
         self.roots = []     # Root bones of this skeleton, a skeleton can have multiple root bones.
 
         self.joint_pos_idxs = {}  # Lookup by joint name referencing vertex indices on the human, to determine joint position
@@ -383,9 +383,7 @@ class Skeleton(object):
 
         # Fit joint positions to that of original skeleton
         human = G.app.selectedHuman
-        result.updateJoints(human.meshData, ref_skel=self)
-
-        result.build(ref_skel=self)  # copy bone normals from self
+        result.updateJoints(human.meshData, ref_skel=self)  # copy bone normals from self
 
         return result
 
@@ -529,6 +527,8 @@ class Skeleton(object):
         """
         Returns linear list of all bones in breadth-first order.
         """
+        if self.boneslist is None:
+            self.__cacheGetBones()
         return self.boneslist
 
     def __cacheGetBones(self):
