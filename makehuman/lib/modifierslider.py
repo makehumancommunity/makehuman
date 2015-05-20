@@ -153,14 +153,14 @@ class ModifierSlider(gui.Slider):
         human = self.modifier.human
         if self.value is None:
             self.value = self.modifier.getValue()
+        action = humanmodifier.ModifierAction(self.modifier, self.value, value, self.update)
         if self.value != value:
-            G.app.do(humanmodifier.ModifierAction(self.modifier, self.value, value, self.update))
+            G.app.do(action)
         else:
-            # Indicate that onChanging event is ended with onChanged event (type == 'modifier', not 'targets')
-            import events3d
-            event = events3d.HumanEvent(human, self.modifier.eventType)
-            event.modifier = self.modifier.fullName
-            human.callEvent('onChanged', event)
+            # Apply the change anyway, to make sure everything's updated
+            # Perform the action without adding it to the undo stack
+            action.do()
+
         if human.isSubdivided():
             if human.isProxied():
                 human.getProxyMesh().setVisibility(0)
