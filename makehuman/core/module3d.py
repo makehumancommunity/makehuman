@@ -173,6 +173,26 @@ class Object3D(object):
 
         return other
 
+    def transformed(self, transform_mat, filterMaskedVerts=False):
+        """Create a clone of this mesh with its coordinates transformed
+        with the specified transformation matrix. filterMaskedVerts works the
+        same is for clone()
+        """
+        if transform_mat.shape == (4,4):
+            translation = transform_mat[:3, 3]
+            transform_mat = transform_mat[:3,:3]
+        else:
+            translation = np.zeros(3, dtype=np.float32)
+
+        result = self.clone(filterMaskedVerts=filterMaskedVerts)
+
+        coords = np.dot(transform_mat, result.getCoords().T).T
+        coords += translation
+        result.changeCoords(coords)
+        result.calcNormals()
+        result.update()
+        return result
+
     @property
     def parent_map(self):
         """
