@@ -4304,44 +4304,44 @@
             "foot.R____tail"
         ],
         "metacarpal1.L____plane": [
-            "finger3-1.L____tail",
-            "finger3-1.L____head",
-            "metacarpal2.L____head"
+            "finger2-3.L____tail",
+            "finger2-1.L____tail",
+            "wrist.L____head"
         ],
         "metacarpal1.R____plane": [
-            "finger3-1.R____tail",
-            "finger3-1.R____head",
-            "metacarpal2.R____head"
+            "finger2-3.R____tail",
+            "finger2-1.R____tail",
+            "wrist.R____head"
         ],
         "metacarpal2.L____plane": [
+            "finger3-3.L____tail",
             "finger3-1.L____tail",
-            "finger3-1.L____head",
-            "metacarpal2.L____head"
+            "wrist.L____head"
         ],
         "metacarpal2.R____plane": [
+            "finger3-3.R____tail",
             "finger3-1.R____tail",
-            "finger3-1.R____head",
-            "metacarpal2.R____head"
+            "wrist.R____head"
         ],
         "metacarpal3.L____plane": [
-            "finger3-1.L____tail",
-            "finger3-1.L____head",
-            "metacarpal2.L____head"
+            "finger4-3.L____tail",
+            "finger4-1.L____tail",
+            "wrist.L____head"
         ],
         "metacarpal3.R____plane": [
-            "finger3-1.R____tail",
-            "finger3-1.R____head",
-            "metacarpal2.R____head"
+            "finger4-3.R____tail",
+            "finger4-1.R____tail",
+            "wrist.R____head"
         ],
         "metacarpal4.L____plane": [
-            "finger3-1.L____tail",
-            "finger3-1.L____head",
-            "metacarpal2.L____head"
+            "finger5-3.L____tail",
+            "finger5-1.L____tail",
+            "wrist.L____head"
         ],
         "metacarpal4.R____plane": [
-            "finger3-1.R____tail",
-            "finger3-1.R____head",
-            "metacarpal2.R____head"
+            "finger5-3.R____tail",
+            "finger5-1.R____tail",
+            "wrist.R____head"
         ],
         "neck01____plane": [
             "special01____tail",            
