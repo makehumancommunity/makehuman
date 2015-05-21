@@ -52,6 +52,15 @@ versionSub = ""                         # Short version description
 meshVersion = "hm08"                    # Version identifier of the basemesh
 ################################################################################
 
+__author__ = "Manuel Bastioni, Jonas Hauquier, Joel Palmius, Glynn Clements, Thomas Larsson et al."
+__copyright__ = "Copyright 2001-2015, MakeHuman Project"
+__credits__ = ["See http://www.makehuman.org/halloffame"]
+__license__ = "AGPLv3"
+__maintainer__ = "Joel Palmius, Jonas Hauquier"
+__email__ = "dev@makehuman.org"
+__status__ = "Production" if release else "Development"
+
+
 def getVersionDigitsStr():
     """
     String representation of the version number only (no additional info)
@@ -486,7 +495,7 @@ Frequently asked questions are found at
     http://www.makehuman.org/faq
 
 
-The MakeHuman team can be contacted at http://www.makehuman.org
+The MakeHuman team can be contacted at dev@makehuman.org
 If you have other questions, feel free to ask them on our forums at 
     http://www.makehuman.org/forum/
 Bugs can be reported on the project's bug tracker
