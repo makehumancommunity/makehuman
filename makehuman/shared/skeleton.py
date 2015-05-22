@@ -135,12 +135,56 @@ class Skeleton(object):
 
             self.vertexWeights = VertexBoneWeights.fromFile(weights_file, mesh.getVertexCount() if mesh else None, rootBone=self.roots[0].name)
 
-    def toFile(self, filename):
+    def toFile(self, filename, ref_weights=None):
         """
-        Export to JSON
+        Export skeleton and its weights to JSON.
+        Specify ref_weights (the weights of the default or reference rig
+        for vertices of the basemesh) if this is an arbitrary skeleton
+        and its weights were not mapped yet.
         """
-        # TODO implement
-        raise NotImplementedError()
+        import json
+        from collections import OrderedDict
+        import os
+
+        fn = os.path.splitext(os.path.basename(filename))[0]
+        weights_file = "%s_weights.jsonw" % fn
+
+        jsondata = OrderedDict({ "name": self.name,
+                                 "version": self.version,
+                                 "description": self.description,
+                                 "plane_map_strategy": self.plane_map_strategy,
+                               })
+        jsondata.update(self.license.asDict())
+
+        jsondata["weights_file"] = weights_file
+
+        bones = OrderedDict()
+        for bone in self.getBones():
+            bonedef = {"head": bone.headJoint,
+                       "tail": bone.tailJoint,
+                      }
+            if bone.reference_bones:
+                bonedef["reference"] = bone.reference_bones
+            if bone.parent:
+                bonedef["parent"] = bone.parent.name
+            if bone.roll:
+                bonedef["rotation_plane"] = bone.roll
+            if bone.weight_reference_bones != bone.reference_bones:
+                bonedef["weights_reference"] = bone.weight_reference_bones
+
+            bones[bone.name] = bonedef
+        jsondata["bones"] = bones
+
+        jsondata["joints"] = self.joint_pos_idxs
+        jsondata["planes"] = self.planes
+
+        f = open(filename, 'w')
+        json.dump(jsondata, f, indent=4, separators=(',', ': '))
+        f.close()
+
+        # Save weights
+        weights = self.getVertexWeights(ref_weights)
+        weights.toFile(os.path.join(os.path.dirname(filename), weights_file))
 
     def getVertexWeights(self, referenceWeights=None):
         """
