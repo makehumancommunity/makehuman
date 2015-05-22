@@ -101,7 +101,6 @@ class Skeleton(object):
         self.plane_map_strategy = int(skelData.get("plane_map_strategy", self.plane_map_strategy))
 
         self.license.fromJson(skelData)
-        self.copyright = skelData.get("copyright", "")
 
         for joint_name, v_idxs in skelData.get("joints", dict()).items():
             if isinstance(v_idxs, list) and len(v_idxs) > 0:
