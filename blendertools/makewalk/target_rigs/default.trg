@@ -19,7 +19,7 @@ Bones:
     wrist.R			hand.R
 
 	pelvis.L		hip.L
-    upperleg02.L  	thigh.L
+    upperleg01.L  	thigh.L
     lowerleg01.L   	shin.L
     foot.L		foot.L
     toe1-1.L		toe.L
@@ -29,7 +29,7 @@ Bones:
     toe5-1.L		toe.L
 
 	pelvis.R		hip.R	
-    upperleg02.R  	thigh.R
+    upperleg01.R  	thigh.R
     lowerleg01.R   	shin.R
     foot.R		foot.R
     toe1-1.R		toe.R
