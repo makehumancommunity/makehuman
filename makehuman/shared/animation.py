@@ -42,6 +42,7 @@ Data handlers for skeletal animation.
 import math
 import numpy as np
 import log
+import makehuman
 
 
 INTERPOLATION = {
@@ -430,6 +431,11 @@ class VertexBoneWeights(object):
 
         self._compiled = {}
 
+        self.name = ""
+        self.version = ""
+        self.license = makehuman.getAssetLicense()
+        self.description = ""
+
     @staticmethod
     def fromFile(filename, vertexCount=None, rootBone="root"):
         """
@@ -439,7 +445,46 @@ class VertexBoneWeights(object):
         import json
         weightsData = json.load(open(filename, 'rb'), object_pairs_hook=OrderedDict)
         log.message("Loaded vertex weights %s from file %s", weightsData.get('name', 'unnamed'), filename)
-        return VertexBoneWeights(weightsData['weights'], vertexCount, rootBone)
+        result = VertexBoneWeights(weightsData['weights'], vertexCount, rootBone)
+        result.license.fromJson(weightsData)
+        result.name = weightsData.get('name', result.name)
+        result.version = weightsData.get('version', result.version)
+        result.description = weightsData.get('description', result.description)
+        return result
+
+    def toFile(self, filename):
+        """
+        Save vertex to bone weights to a file.
+        """
+        import json
+
+        def _format_output(data):
+            """
+            Conversion from internal dict format to the format used in the JSON
+            data files, the opposite transformation of _build_vertex_weights_data
+
+            Input format:
+                { "bone_name": ([v_idx, ...], [v_weight, ...]), ... }
+
+            Output format:
+                { "bone_name": [(v_idx, v_weight), ...], ... }
+            """
+            from collections import OrderedDict
+            result = OrderedDict()
+            for bone_name, (v_idxs, v_wghts) in data.items():
+                result[bone_name] = zip(v_idxs.tolist(), v_wghts.tolist())
+            return result
+
+        jsondata = {'weights': _format_output(self.data),
+                    'name': self.name,
+                    'description': self.description,
+                    'version': self.version
+                   }
+        jsondata.update(self.license.asDict())
+
+        f = open(filename, 'w')
+        json.dump(jsondata, f, indent=4, separators=(',', ': '))
+        f.close()
 
     def create(self, data, vertexCount=None, rootBone=None):
         """
