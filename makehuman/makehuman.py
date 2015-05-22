@@ -525,6 +525,10 @@ def getAssetLicense(properties=None):
             self._keys = ["author", "license", "copyright", "homepage"]
             self._customized = False
 
+        @property
+        def properties(self):
+            return list(self._keys)
+
         def setProperty(self, name, value):
             if name in self._keys:
                 if getattr(self, name) != value:
@@ -548,6 +552,18 @@ def getAssetLicense(properties=None):
             for prop,val in propDict.items():
                 self.setProperty(prop, val)
             return self
+
+        def fromJson(self, json_data):
+            for prop in self.properties:
+                if prop in json_data:
+                    self.setProperty(prop, json_data[prop])
+            return self
+
+        def copy(self):
+            result = LicenseInfo()
+            result.fromDict(self.asDict())
+            result._customized = self.isCustomized()
+            return result
 
         def updateFromComment(self, commentLine):
             commentLine = commentLine.strip()
