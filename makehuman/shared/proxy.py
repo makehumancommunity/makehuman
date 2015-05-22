@@ -361,7 +361,7 @@ def loadTextProxy(human, filepath, type="Clothes"):
         elif key == 'description':
             proxy.description = " ".join(words[1:])
         elif key in ['author', 'license', 'homepage']:
-            proxy.license.addStatement(words)
+            proxy.license.updateFromComment(words)
         elif key == 'tag':
             proxy.tags.append( " ".join(words[1:]).lower() )
         elif key == 'version':
