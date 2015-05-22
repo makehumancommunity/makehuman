@@ -1,0 +1,43 @@
+varying vec3 normal, lightDir, halfVector;
+varying vec4 ambient_color, diffuse_color, specular_color;
+uniform sampler2D unit0;
+uniform sampler2D ambientOcclusionMap;
+uniform sampler1D gradientMap;
+
+void main (void)
+{
+	// Get the texture color
+	vec4 tex_color = texture2D(unit0, gl_TexCoord[0].st);
+	
+	// Get the ao color
+	vec4 ao_color = texture2D(ambientOcclusionMap, gl_TexCoord[0].st);
+	
+	// Ambient * texture color
+	vec4 final_color = ambient_color * tex_color;
+							
+	vec3 N = normalize(normal);
+	vec3 L = normalize(lightDir);
+	
+	float NdotL = max(dot(N, L), 0.0);
+	
+	if(NdotL > 0.0)
+	{
+		// Color temperature
+		float s = max(0.01, min(NdotL * ao_color.b, 0.99)); // Make sure we don't wrap around, strange since we clamp our texture
+		vec4 light_color = texture1D(gradientMap, s); // Take the color temperature from the gradient
+		
+		// Diffuse * texture color
+		final_color += NdotL * ao_color.b * light_color * tex_color;	// diffuse_color makes it too dark
+		
+		// Specular
+		vec3 H = normalize(halfVector);
+		float NdotH = max(dot(N, H), 0.0);
+		float specular = pow(NdotH, gl_FrontMaterial.shininess);
+		final_color += specular_color * specular;	
+	}
+	
+	// Make sure we use the alpha from the texture
+	// otherwise the eyelashes and eyebrows are not tranparent
+	final_color.a = tex_color.a;
+	gl_FragColor = final_color;
+}
