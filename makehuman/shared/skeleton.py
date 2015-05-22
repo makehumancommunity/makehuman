@@ -70,6 +70,10 @@ class Skeleton(object):
         self.scale = 1.0
 
     def _clear(self):
+        self.description = ""
+        self.version = "1"
+        self.license = makehuman.getAssetLicense()
+
         self.bones = {}     # Bone lookup list by name
         self.boneslist = None  # Breadth-first ordered list of all bones
         self.roots = []     # Root bones of this skeleton, a skeleton can have multiple root bones.
@@ -92,10 +96,12 @@ class Skeleton(object):
         skelData = json.load(open(filepath, 'rb'), object_pairs_hook=OrderedDict)
 
         self.name = skelData.get("name", self.name)
-        self.version = int(skelData.get("version", 1))
+        self.version = int(skelData.get("version", self.version))
+        self.description = skelData.get("description", self.description)
+        self.plane_map_strategy = int(skelData.get("plane_map_strategy", self.plane_map_strategy))
+
+        self.license.fromJson(skelData)
         self.copyright = skelData.get("copyright", "")
-        self.description = skelData.get("description", "")
-        self.plane_map_strategy = int(skelData.get("plane_map_strategy", 3))
 
         for joint_name, v_idxs in skelData.get("joints", dict()).items():
             if isinstance(v_idxs, list) and len(v_idxs) > 0:
@@ -129,6 +135,13 @@ class Skeleton(object):
             weights_file = getpath.thoroughFindFile(weights_file, os.path.dirname(getpath.canonicalPath(filepath)), True)
 
             self.vertexWeights = VertexBoneWeights.fromFile(weights_file, mesh.getVertexCount() if mesh else None, rootBone=self.roots[0].name)
+
+    def toFile(self, filename):
+        """
+        Export to JSON
+        """
+        # TODO implement
+        raise NotImplementedError()
 
     def getVertexWeights(self, referenceWeights=None):
         """
@@ -371,7 +384,7 @@ class Skeleton(object):
         result.vertexWeights = self.vertexWeights
         result.scale = scale
         result.version = self.version
-        result.copyright = self.copyright
+        result.license = self.license.copy()
         result.description = self.description
         result.planes = dict(self.planes)
 
