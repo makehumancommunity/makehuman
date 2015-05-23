@@ -18,6 +18,7 @@ makehuman/data/eyelashes
 makehuman/data/genitals
 makehuman/data/hair
 makehuman/data/eyes
+makehuman/data/poses
 makehuman/data/litspheres
 makehuman/data/skins
 makehuman/data/teeth
@@ -35,4 +36,6 @@ docs/odt/data
 docs/odt/docexport.xml
 docs/odt/unescaped.xml
 docs/odt/analyze.txt
-
+maketarget-standalone/resources/base.obj
+.build_prepare.out
+.idea
