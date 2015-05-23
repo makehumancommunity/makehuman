@@ -147,7 +147,7 @@ class Skeleton(object):
         import os
 
         fn = os.path.splitext(os.path.basename(filename))[0]
-        weights_file = "%s_weights.jsonw" % fn
+        weights_file = "%s_weights.mhw" % fn
 
         jsondata = OrderedDict({ "name": self.name,
                                  "version": self.version,
