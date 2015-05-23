@@ -323,7 +323,7 @@ class MHApplication(gui3d.Application, mh.Application):
         self.selectedHuman = self.addObject(human.Human(files3d.loadMesh(mh.getSysDataPath("3dobjs/base.obj"), maxFaces = 5)))
 
         # Set the base skeleton
-        base_skel = skeleton.load(mh.getSysDataPath('rigs/default.json'), self.selectedHuman.meshData)
+        base_skel = skeleton.load(mh.getSysDataPath('rigs/default.mhskel'), self.selectedHuman.meshData)
         self.selectedHuman.setBaseSkeleton(base_skel)
 
     def loadScene(self):

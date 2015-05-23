@@ -53,7 +53,7 @@ import material
 import numpy as np
 import os
 
-REF_RIG_PATH = getpath.getSysDataPath('rigs/default.json')
+REF_RIG_PATH = getpath.getSysDataPath('rigs/default.mhskel')
 
 #------------------------------------------------------------------------------------------
 #   class SkeletonAction
@@ -152,7 +152,7 @@ class SkeletonLibrary(gui3d.TaskView):
 
         self.filechooser = self.addRightWidget(fc.IconListFileChooser( \
                                                     self.paths,
-                                                    'json',
+                                                    'mhskel',
                                                     'thumb',
                                                     name='Rig presets',
                                                     notFoundImage = mh.getSysDataPath('notfound.thumb'), 
@@ -308,7 +308,7 @@ class SkeletonLibrary(gui3d.TaskView):
             fileId = getpath.canonicalPath(filename)
             if fileId not in self._skelFileCache:
                 # Lazily update cache
-                self._skelFileCache = filecache.updateFileCache(self.paths + [os.path.dirname(fileId)], 'json', _getSkeletonTags,self._skelFileCache, False)
+                self._skelFileCache = filecache.updateFileCache(self.paths + [os.path.dirname(fileId)], 'mhskel', _getSkeletonTags,self._skelFileCache, False)
 
             if fileId in self._skelFileCache:
                 metadata = self._skelFileCache[fileId]
@@ -317,7 +317,7 @@ class SkeletonLibrary(gui3d.TaskView):
 
                     if mtime < os.path.getmtime(fileId):
                         # Queried file was updated, update stale cache
-                        self._skelFileCache = filecache.updateFileCache(self.paths + [os.path.dirname(fileId)], 'json', _getSkeletonTags,self._skelFileCache, False)
+                        self._skelFileCache = filecache.updateFileCache(self.paths + [os.path.dirname(fileId)], 'mhskel', _getSkeletonTags,self._skelFileCache, False)
                         metadata = self._skelFileCache[fileId]
                         mtime, name, desc, tags = metadata
 
