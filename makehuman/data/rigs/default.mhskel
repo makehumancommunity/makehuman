@@ -4831,5 +4831,5 @@
     },
     "version": 102,
     "tags": ["facial bones", "detailed hands", "detailed feet"],
-    "weights_file": "default_weights.jsonw"
+    "weights_file": "default_weights.mhw"
 }
