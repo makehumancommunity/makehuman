@@ -103,7 +103,7 @@ def exportFbx(filepath, config):
         for mesh in meshes:
             if mesh.object.proxy:
                 # Transfer weights to proxy
-                parentWeights = mesh.object.proxy.getVertexWeights(rawWeights)
+                parentWeights = mesh.object.proxy.getVertexWeights(rawWeights, human.getSkeleton())
             else:
                 parentWeights = rawWeights
             # Transfer weights to face/vert masked and/or subdivided mesh

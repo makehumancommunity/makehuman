@@ -241,11 +241,16 @@ class Proxy:
         return self.vertexBoneWeights is not None
 
 
-    def getVertexWeights(self, humanWeights):
+    def getVertexWeights(self, humanWeights, skel=None):
         """
         Map armature weights mapped to the human to the proxy mesh through the
         proxy mapping.
-        humanWeights is expected to be an animation.VertexBoneWeights object
+        humanWeights is expected to be an animation.VertexBoneWeights object.
+
+        Only when this proxy has custom weights:
+        Optionally remaps the weights to fit a user-selected skeleton when a
+        skel is supplied as argument. If no skel argument is provided, the 
+        weights for the base skeleton are returned.
 
         Note: these vertex weights are intended for rigging and are not to be 
         confused with getWeights() which returns the weights of the proxy 
@@ -259,7 +264,10 @@ class Proxy:
         # proxy.
         if self.hasCustomVertexWeights():
             # TODO we could introduce caching of weights here as long as the skeleton is not changed
-            return self.human.getSkeleton().getVertexWeights(self.vertexBoneWeights)
+            if skel is None:
+                return self.human.getBaseSkeleton().getVertexWeights(self.vertexBoneWeights)
+            else:
+                return skel.getVertexWeights(self.vertexBoneWeights)
 
         WEIGHT_THRESHOLD = 1e-4  # Threshold for including bone weight
         weights = OrderedDict()
