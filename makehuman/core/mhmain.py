@@ -860,6 +860,8 @@ class MHApplication(gui3d.Application, mh.Application):
                 if 'version' in settings and settings['version'] == mh.getVersionDigitsStr():
                     # Only load settings for this specific version
                     self.settings.update(settings)
+                else:
+                    log.warning("Incompatible MakeHuman settings (version %s) detected (expected %s). Loading default settings." % (settings['version'], mh.getVersionDigitsStr()))
 
         if 'language' in self.settings:
             self.setLanguage(self.settings['language'])
