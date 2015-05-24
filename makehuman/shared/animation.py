@@ -51,6 +51,9 @@ INTERPOLATION = {
     'LOG':    2
 }
 
+# TODO allow saving AnimationTrack to binary file
+# TODO allow saving VertexBoneWeights to binary file
+
 class AnimationTrack(object):
 
     def __init__(self, name, poseData, nFrames, framerate):
@@ -69,6 +72,8 @@ class AnimationTrack(object):
             ordered in breadth-first fashion.
         """
         self.name = name
+        self.description = "%s animation" % name
+        self.license = makehuman.getAssetLicense()
         self.dataLen = len(poseData)
         self.nFrames = nFrames
         self.nBones = self.dataLen/nFrames
