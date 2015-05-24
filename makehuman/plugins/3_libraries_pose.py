@@ -163,6 +163,7 @@ class PoseLibraryTaskView(gui3d.TaskView, filecache.MetadataCacher):
         anim = bvh_file.createAnimationTrack(self.human.getBaseSkeleton())
         _, _, _, license = self.getMetadata(filepath)
         anim.license = license
+        return anim
 
     def autoScaleBVH(self, bvh_file):
         """
