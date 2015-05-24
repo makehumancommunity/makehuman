@@ -46,8 +46,6 @@ import cPickle as pickle
 
 CACHE_FORMAT_VERSION = 1  # You can use any type, strings or ints, only equality test is done on these
 
-# TODO create a class for filecache and have a method to query the cache (that updates the entry if stale mtime is detected)
-
 
 class FileCache(object):
     def __init__(self, filepath, version=None):
