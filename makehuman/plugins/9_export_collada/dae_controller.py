@@ -82,7 +82,7 @@ def writeSkinController(fp, human, mesh, skel, config):
 
     # Remap vertex weights to mesh
     if obj.proxy:
-        parentWeights = obj.proxy.getVertexWeights(rawWeights)
+        parentWeights = obj.proxy.getVertexWeights(rawWeights, human.getSkeleton())
     else:
         parentWeights = rawWeights
     weights = mesh.getVertexWeights(parentWeights)
