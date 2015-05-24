@@ -44,16 +44,19 @@ import getpath
 import log
 import cPickle as pickle
 
-CACHE_FORMAT_VERSION = 1
+CACHE_FORMAT_VERSION = 1  # You can use any type, strings or ints, only equality test is done on these
 
 # TODO create a class for filecache and have a method to query the cache (that updates the entry if stale mtime is detected)
 
 
 class FileCache(object):
-    def __init__(self, filepath):
+    def __init__(self, filepath, version=None):
         """Create an empty filecache
         """
-        self.version = CACHE_FORMAT_VERSION
+        if version is None:
+            self.version = CACHE_FORMAT_VERSION
+        else:
+            self.version = version
         self.filepath = filepath
 
         self._cache = dict()
@@ -287,15 +290,16 @@ def saveCache(cache):
     cache.save()
 
 def loadCache(filepath, expected_version=None):
+    if expected_version is None:
+        expected_version = CACHE_FORMAT_VERSION
+
     try:
         if os.path.isfile(filepath):
             f = open(filepath, "rb")
             result = pickle.load(f)
             f.close()
-            if expected_version is None:
-                expected_version = CACHE_FORMAT_VERSION
             if result.version != expected_version:
-                log.message("File cache %s has a different version than expected, dropping it." % filepath)
+                log.message("File cache %s has a different version (%s) than expected (%s), dropping it." % (filepath, result.version, expected_version))
                 del result
             else:
                 return result
@@ -303,4 +307,5 @@ def loadCache(filepath, expected_version=None):
         log.debug("Failed to load stored cache %s" % filepath, exc_info=True)
     # Create new filecache
     log.debug("Creating new file metadata cache %s" % filepath)
-    return FileCache(filepath)
+    return FileCache(filepath, expected_version)
+

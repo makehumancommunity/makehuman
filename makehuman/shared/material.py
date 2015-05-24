@@ -194,6 +194,8 @@ class Material(object):
         else:
             self.name = name
 
+        self.description = "%s material" % name
+
         self.filename = None
         self.filepath = None
 
@@ -265,6 +267,7 @@ class Material(object):
 
     def copyFrom(self, material):
         self.name = material.name
+        self.description = material.description
 
         self.filename = material.filename
         self.filepath = material.filepath
@@ -358,6 +361,8 @@ class Material(object):
                 self.name = words[1]
             elif words[0] == "tag":
                 self.addTag(" ".join(words[1:]))
+            elif words[0] == "description":
+                self.description = " ".join(words[1:])
             elif words[0] == "ambientColor":
                 self._ambientColor.copyFrom([float(w) for w in words[1:4]])
             elif words[0] == "diffuseColor":
@@ -509,6 +514,7 @@ class Material(object):
         f.write("\n")
 
         f.write("name %s\n" % self.name)
+        f.write("description %s\n" % self.description)
         f.write("ambientColor %s\n" % self.ambientColor.asStr())
         f.write("diffuseColor %s\n" % self.diffuseColor.asStr())
         f.write("specularColor %s\n" % self.specularColor.asStr())
@@ -1462,6 +1468,7 @@ def peekMetadata(filename):
         return
 
     name = "UnnamedMaterial"
+    description = None
     tags = set()
 
     for line in f:
@@ -1475,7 +1482,12 @@ def peekMetadata(filename):
             name = words[1]
         elif words[0] == "tag":
             tags.add((" ".join(words[1:])).lower())
+        if words[0] == "description":
+            description = " ".join(words[1:])
         else:
             pass
 
-    return (name, tags)
+    if description is None:
+        description = "%s material" % name
+
+    return (name, tags, description)
