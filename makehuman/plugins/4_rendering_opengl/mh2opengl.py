@@ -50,6 +50,8 @@ import image_operations as imgop
 from progress import Progress
 import numpy as np
 
+# TODO perhaps these settings should be saved in settings.ini as well to remember them
+
 def Render(settings):
     progress = Progress.begin()
     

@@ -115,7 +115,7 @@ class ModifierTaskView(gui3d.TaskView):
         if self.showMacroStats:
             self.showMacroStatus()
 
-        if G.app.settings.get('cameraAutoZoom', True):
+        if G.app.getSetting('cameraAutoZoom'):
             self.setCamera()
 
         self.syncSliders()
@@ -181,7 +181,7 @@ class ModifierTaskView(gui3d.TaskView):
         muscle = (human.getMuscle() * 100.0)
         weight = (50 + (150 - 50) * human.getWeight())
         height = human.getHeightCm()
-        if G.app.settings['units'] == 'metric':
+        if G.app.getSetting('units') == 'metric':
             units = 'cm'
         else:
             units = 'in'

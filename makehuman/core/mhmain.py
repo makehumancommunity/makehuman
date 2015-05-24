@@ -92,14 +92,18 @@ class PluginCheckBox(gui.CheckBox):
 
     def __init__(self, module):
 
-        super(PluginCheckBox, self).__init__(module, module not in gui3d.app.settings['excludePlugins'])
+        super(PluginCheckBox, self).__init__(module, module not in gui3d.app.getSetting('excludePlugins'))
         self.module = module
 
     def onClicked(self, event):
         if self.selected:
-            gui3d.app.settings['excludePlugins'].remove(self.module)
+            excludes = gui3d.app.getSetting('excludePlugins')
+            excludes.remove(self.module)
+            gui3d.app.setSetting('excludePlugins', excludes)
         else:
-            gui3d.app.settings['excludePlugins'].append(self.module)
+            excludes = gui3d.app.getSetting('excludePlugins')
+            excludes.append(self.module)
+            gui3d.app.setSetting('excludePlugins', excludes)
 
         gui3d.app.saveSettings()
 
@@ -197,8 +201,10 @@ class MHApplication(gui3d.Application, mh.Application):
             (mh.Modifiers.CTRL, mh.Buttons.RIGHT_MASK): self.mouseFocus
         }
 
+        self._undeclared_settings = dict()
+
         if mh.isRelease():
-            self.settings = {
+            self._default_settings = {
                 'realtimeUpdates': True,
                 'realtimeFitting': True,
                 'sliderImages': True,
@@ -223,10 +229,10 @@ class MHApplication(gui3d.Application, mh.Application):
                 'units': 'metric',
                 'guiTheme': 'makehuman',
                 'restoreWindowSize': True,
-                'version': mh.getVersionDigitsStr()
+                'windowGeometry': ''
             }
         else:
-            self.settings = {
+            self._default_settings = {
                 'realtimeUpdates': True,
                 'realtimeFitting': True,
                 'realtimeNormalUpdates': False,
@@ -242,8 +248,10 @@ class MHApplication(gui3d.Application, mh.Application):
                 'guiTheme': 'makehuman',
                 'preloadTargets': False,
                 'restoreWindowSize': True,
-                'version': mh.getVersionDigitsStr()
+                'windowGeometry': ''
             }
+
+        self._settings = dict(self._default_settings)
 
         self.loadHandlers = {}
         self.saveHandlers = []
@@ -300,6 +308,61 @@ class MHApplication(gui3d.Application, mh.Application):
         self.guiCamera = mh.OrbitalCamera()
 
         mh.cameras.append(self.guiCamera)
+
+    @property
+    def settings(self):
+        """READ-ONLY dict of the settings of this application. Changing this
+        dict has NO impact."""
+        return dict(self._settings)
+
+    def addSetting(self, setting_name, default_value, value=None):
+        """Declare a new setting for this application. Only has an impact the
+        first time it's called for a unique setting_name. It's impossible to
+        re-declare defaults for settings.
+        """
+        if setting_name == 'version':
+            raise KeyError('The keyword "version" is protected for settings')
+
+        if setting_name in self._default_settings:
+            log.warning("Setting %s is already declared. Adding it again has no effect.")
+            return
+        self._default_settings[setting_name] = default_value
+        if value is None:
+            if setting_name in self._undeclared_settings:
+                # Deferred set of setting value
+                log.debug("Assigning setting %s value %s that was loaded before the setting was declared." % (setting_name, self._undeclared_settings[setting_name]))
+                self._settings[setting_name] = self._undeclared_settings[setting_name]
+                del self._undeclared_settings[setting_name]
+            else:
+                self._settings[setting_name] = default_value
+        else:
+            self._settings[setting_name] = value
+
+    def getSetting(self, setting_name):
+        """Retrieve the value of a setting.
+        """
+        if setting_name not in self._default_settings:
+            raise KeyError("Setting %s is unknown, make sure to declare it first with addSetting()" % setting_name)
+        return self._settings.get(setting_name, self.getSettingDefault(setting_name))
+
+    def getSettingDefault(self, setting_name):
+        """Retrieve the default value declared for a setting."""
+        return self._default_settings[setting_name]
+
+    def setSetting(self, setting_name, value):
+        """Change the value of a setting. If value == None, the default value
+        for that setting is restored."""
+        if setting_name not in self._default_settings:
+            raise KeyError("Setting %s is not declared" % setting_name)
+        if value is None:
+            self._settings[setting_name] = self.getSettingDefault(setting_name)
+        else:
+            self._settings[setting_name] = value
+
+    def resetSettings(self):
+        """Restore all settings to their defaults
+        """
+        self._settings = dict(self._default_settings)
 
     def _versionSentinel(self):
         # dummy method used for checking the shortcuts.ini version
@@ -473,7 +536,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         try:
             name, ext = os.path.splitext(os.path.basename(path))
-            if name not in self.settings['excludePlugins']:
+            if name not in self.getSetting('excludePlugins'):
                 log.message('Importing plugin %s', name)
                 #module = imp.load_source(name, path)
 
@@ -558,13 +621,13 @@ class MHApplication(gui3d.Application, mh.Application):
             self.removeObject(self.groundplaneGrid)
 
         offset = self.selectedHuman.getJointPosition('ground')[1]
-        spacing = 1 if self.settings.get('units', 'metric') == 'metric' else 3.048
+        spacing = 1 if self.getSetting('units') == 'metric' else 3.048
 
         # Background grid
         gridSize = int(200/spacing)
         if gridSize % 2 != 0:
             gridSize += 1
-        if self.settings.get('units', 'metric') == 'metric':
+        if self.getSetting('units') == 'metric':
             subgrids = 10
         else:
             subgrids = 12
@@ -696,7 +759,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         progress.step('Loading theme')
         try:
-            self.setTheme(self.settings.get('guiTheme', 'makehuman'))
+            self.setTheme(self.getSetting('guiTheme'))
         except:
             self.setTheme("default")
 
@@ -704,7 +767,7 @@ class MHApplication(gui3d.Application, mh.Application):
         self.loadFinish()
         
         progress.step('Loading macro targets')
-        if self.settings.get('preloadTargets', False):
+        if self.getSetting('preloadTargets'):
             self.loadMacroTargets()
 
         progress.step('Loading done')
@@ -727,9 +790,9 @@ class MHApplication(gui3d.Application, mh.Application):
             self.prompt('Warning', 'Your system does not support OpenGL shaders (GLSL v1.20 required).\nOnly simple shading will be available.', 'Ok', None, None, None, 'glslWarning')
 
         # Restore main window size and position
-        if self.settings.get('restoreWindowSize', False):
-            self.mainwin.restoreGeometry(self.settings.get(
-                'windowGeometry', mainwinGeometry))
+        geometry = self.getSetting('windowGeometry')
+        if self.getSetting('restoreWindowSize') and geometry:
+            self.mainwin.restoreGeometry(geometry)
         else:
             self.mainwin.restoreGeometry(mainwinGeometry)
 
@@ -761,8 +824,8 @@ class MHApplication(gui3d.Application, mh.Application):
         self.startupSequence()
 
     def onStop(self, event):
-        if self.settings.get('restoreWindowSize', False):
-            self.settings['windowGeometry'] = self.mainwin.storeGeometry()
+        if self.getSetting('restoreWindowSize'):
+            self.setSetting('windowGeometry', self.mainwin.storeGeometry())
 
         self.saveSettings(True)
         self.unloadPlugins()
@@ -795,7 +858,7 @@ class MHApplication(gui3d.Application, mh.Application):
     def onMouseWheel(self, event):
         if self.selectedHuman.isVisible():
             zoomOut = event.wheelDelta > 0
-            if gui3d.app.settings.get('invertMouseWheel', False):
+            if self.getSetting('invertMouseWheel'):
                 zoomOut = not zoomOut
 
             if event.x is not None:
@@ -859,9 +922,15 @@ class MHApplication(gui3d.Application, mh.Application):
 
                 if 'version' in settings and settings['version'] == mh.getVersionDigitsStr():
                     # Only load settings for this specific version
-                    self.settings.update(settings)
+                    del settings['version']
+                    for setting_name, value in settings.items():
+                        try:
+                            self.setSetting(setting_name, value)
+                        except:
+                            # Store the values of (yet) undeclared settings and defer until plugins are loaded
+                            self._undeclared_settings[setting_name] = value
                 else:
-                    log.warning("Incompatible MakeHuman settings (version %s) detected (expected %s). Loading default settings." % (settings['version'], mh.getVersionDigitsStr()))
+                    log.warning("Incompatible MakeHuman settings (version %s) detected (expected %s). Loading default settings." % (settings.get('version','undefined'), mh.getVersionDigitsStr()))
 
         if 'language' in self.settings:
             self.setLanguage(self.settings['language'])
@@ -902,7 +971,9 @@ class MHApplication(gui3d.Application, mh.Application):
                 os.makedirs(mh.getPath())
 
             with outFile("settings.ini") as f:
-                f.write(mh.formatINI(self.settings))
+                settings = self.settings
+                settings['version'] = mh.getVersionDigitsStr() 
+                f.write(mh.formatINI(settings))
 
             with outFile("shortcuts.ini") as f:
                 for action, shortcut in self.shortcuts.iteritems():
@@ -1043,7 +1114,7 @@ class MHApplication(gui3d.Application, mh.Application):
     def setLanguage(self, lang):
         log.debug("Setting language to %s", lang)
         language.language.setLanguage(lang)
-        self.settings['rtl'] = language.language.rtl
+        self.setSetting('rtl', language.language.rtl)
 
     def getLanguages(self):
         """
@@ -1430,9 +1501,9 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def cameraSpeed(self):
         if mh.getKeyModifiers() & mh.Modifiers.SHIFT:
-            return gui3d.app.settings.get('highspeed', 5)
+            return self.getSetting('highspeed')
         else:
-            return gui3d.app.settings.get('lowspeed', 1)
+            return self.getSetting('lowspeed')
 
     def zoomCamera(self, amount):
         self.modelCamera.addZoom(amount * self.cameraSpeed())
@@ -1521,7 +1592,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         speed = self.cameraSpeed()
 
-        if gui3d.app.settings.get('invertMouseWheel', False):
+        if self.getSetting('invertMouseWheel'):
             speed *= -1
 
         self.modelCamera.addZoom( -0.05 * event.dy * speed )
@@ -1658,7 +1729,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.createShortcuts()
 
-        self.splash = gui.SplashScreen(gui3d.app.getThemeResource('images', 'splash.png'), mh.getVersionDigitsStr())
+        self.splash = gui.SplashScreen(self.getThemeResource('images', 'splash.png'), mh.getVersionDigitsStr())
         self.splash.show()
         if sys.platform != 'darwin':
             self.mainwin.hide()  # Fix for OSX crash thanks to Francois (issue #593)

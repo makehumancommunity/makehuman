@@ -49,13 +49,16 @@ class ExportTaskView(gui3d.TaskView):
     def __init__(self, category):
         super(ExportTaskView, self).__init__(category, 'Export')
 
+        # Declare new settings
+        gui3d.app.addSetting('exportdir', mh.getPath("exports"))
+
         self.formats = []
         self.recentlyShown = None
         self._requiresUpdate = True
         self.showOverwriteWarning = False
 
         self.fileentry = self.addTopWidget(gui.FileEntryView('Export', mode='save'))
-        self.fileentry.directory = gui3d.app.settings.get('exportdir', mh.getPath('exports'))
+        self.fileentry.directory = gui3d.app.getSetting('exportdir')
         self.fileentry.filter = 'All Files (*.*)'
 
         self.exportBodyGroup = []
@@ -94,7 +97,7 @@ class ExportTaskView(gui3d.TaskView):
                 os.makedirs(dir)
 
             # Remember last used export folder
-            gui3d.app.settings['exportdir'] = dir
+            gui3d.app.setSetting('exportdir', dir)
 
             def filename(targetExt, different = False):
                 if not different and ext != '' and ('.' + targetExt.lower()) != ext.lower():

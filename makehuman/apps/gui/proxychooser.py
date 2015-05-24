@@ -509,7 +509,7 @@ class ProxyChooserTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     def onHumanChanging(self, event):
         if event.change == 'modifier':
-            if gui3d.app.settings.get('realtimeFitting', False):
+            if gui3d.app.getSetting('realtimeFitting'):
                 self.adaptAllProxies(updateSubdivided=False, fit_to_posed=True)
                 for obj in self.getObjects():
                     if obj.isSubdivided():
