@@ -79,14 +79,17 @@ class LoadTaskView(gui3d.TaskView):
         self.fileentry = self.addTopWidget(gui.FileEntryView('Browse', mode='dir'))
         self.fileentry.filter = 'MakeHuman Models (*.mhm)'
 
+        # Declare new settings
+        gui3d.app.addSetting('loaddir', mh.getPath("models"))
+
         @self.fileentry.mhEvent
         def onFileSelected(event):
             self.filechooser.setPaths([event.path])
             self.filechooser.refresh()
             # Remember load folder
-            gui3d.app.settings['loaddir'] = event.path
+            gui3d.app.setSetting('loaddir', event.path)
 
-        loadpath = gui3d.app.settings.get('loaddir', mh.getPath("models"))
+        loadpath = gui3d.app.getSetting('loaddir')
         self.filechooser = fc.IconListFileChooser(loadpath, 'mhm', 'thumb', mh.getSysDataPath('notfound.thumb'), sort=HumanFileSort())
         self.addRightWidget(self.filechooser)
         self.addLeftWidget(self.filechooser.createSortBox())
@@ -104,7 +107,7 @@ class LoadTaskView(gui3d.TaskView):
 
         self.modelPath = gui3d.app.currentFile.dir
         if self.modelPath is None:
-            self.modelPath = gui3d.app.settings.get('loaddir', mh.getPath("models"))
+            self.modelPath = gui3d.app.getSetting('loaddir')
 
         self.fileentry.directory = self.modelPath
         self.filechooser.setPaths(self.modelPath)

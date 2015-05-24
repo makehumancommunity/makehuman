@@ -57,7 +57,7 @@ class EyebrowsTaskView(proxychooser.ProxyChooserTaskView):
 
     def onShow(self, event):
         super(EyebrowsTaskView, self).onShow(event)
-        if gui3d.app.settings.get('cameraAutoZoom', True):
+        if gui3d.app.getSetting('cameraAutoZoom'):
             gui3d.app.setFaceCamera()
 
 

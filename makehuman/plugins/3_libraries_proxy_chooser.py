@@ -87,7 +87,7 @@ class ProxyTaskView(proxychooser.ProxyChooserTaskView):
 
     def onShow(self, event):
         super(ProxyTaskView, self).onShow(event)
-        if gui3d.app.settings.get('cameraAutoZoom', True):
+        if gui3d.app.getSetting('cameraAutoZoom'):
             gui3d.app.setGlobalCamera()
 
     def selectProxy(self, mhclofile):

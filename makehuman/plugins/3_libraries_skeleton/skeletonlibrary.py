@@ -188,7 +188,7 @@ class SkeletonLibrary(gui3d.TaskView, filecache.MetadataCacher):
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
-        if gui3d.app.settings.get('cameraAutoZoom', True):
+        if gui3d.app.getSetting('cameraAutoZoom'):
             gui3d.app.setGlobalCamera()
 
         # Set X-ray material

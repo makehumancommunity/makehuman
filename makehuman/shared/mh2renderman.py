@@ -592,9 +592,11 @@ class RMRScene:
         """
 
         """
+        # TODO should be declared only once at plugin load
+        self.app.addSetting('rendering_aqsis_oil', 0.3)
 
         #Get global subobjs parameteres.
-        self.humanCharacter.skinMat.setParameter("sweat", self.app.settings.get('rendering_aqsis_oil', 0.3))
+        self.humanCharacter.skinMat.setParameter("sweat", self.app.getSetting('rendering_aqsis_oil'))
         self.humanCharacter.materialInit()
         self.humanCharacter.subObjectsInit()
 
@@ -643,13 +645,15 @@ class RMRScene:
 
         #Getting global settings
 
-
+        # TODO should only be declared in the plugin once
+        self.app.addSetting('rendering_aqsis_samples', 2)
+        self.app.addSetting('rendering_aqsis_shadingrate', 2)
 
         ribSceneHeader = RMRHeader()
 
-        ribSceneHeader.sizeFormat = [self.app.settings.get('rendering_width', 800), self.app.settings.get('rendering_height', 600)]
-        ribSceneHeader.pixelSamples = [self.app.settings.get('rendering_aqsis_samples', 2),self.app.settings.get('rendering_aqsis_samples', 2)]
-        ribSceneHeader.shadingRate = self.app.settings.get('rendering_aqsis_shadingrate', 2)
+        ribSceneHeader.sizeFormat = [self.app.getSetting('rendering_width'), self.app.getSetting('rendering_height')]
+        ribSceneHeader.pixelSamples = [self.app.getSetting('rendering_aqsis_samples'),self.app.getSetting('rendering_aqsis_samples')]
+        ribSceneHeader.shadingRate = self.app.getSetting('rendering_aqsis_shadingrate')
         ribSceneHeader.setCameraPosition(self.camera.eyeX, -self.camera.eyeY, self.camera.eyeZ)
         ribSceneHeader.setSearchShaderPath([self.usrShaderPath])
         ribSceneHeader.setSearchTexturePath([self.appTexturePath,self.usrTexturePath,self.hairTexturePath,self.skinTexturePath])
@@ -687,7 +691,7 @@ class RMRScene:
         #"""
 
         ##Getting global settings
-        #self.xResolution, self.yResolution = self.app.settings.get('rendering_width', 800), self.app.settings.get('rendering_height', 600)
+        #self.xResolution, self.yResolution = self.app.getSetting('rendering_width'), self.app.getSetting('rendering_height')
         #self.pixelSamples = [2,2]
         #self.shadingRate = 0.5
 
@@ -698,11 +702,14 @@ class RMRScene:
 
         #ribfile.write('FrameBegin 1\n')
 
+        # TODO should be declared only once at plugin init
+        #self.app.addSetting('rendering_aqsis_shadingrate', 2)
+
         ##Getting global settings
         #ribSceneHeader = RMRHeader()
-        #ribSceneHeader.sizeFormat = [self.app.settings.get('rendering_width', 800), self.app.settings.get('rendering_height', 600)]
-        #ribSceneHeader.pixelSamples = [self.app.settings.get('rendering_aqsis_samples', 2),self.app.settings.get('rendering_aqsis_samples', 2)]
-        #ribSceneHeader.shadingRate = self.app.settings.get('rendering_aqsis_shadingrate', 2)
+        #ribSceneHeader.sizeFormat = [self.app.getSetting('rendering_width'), self.app.getSetting('rendering_height')]
+        #ribSceneHeader.pixelSamples = [self.app.getSetting('rendering_aqsis_samples'),self.app.getSetting('rendering_aqsis_samples')]
+        #ribSceneHeader.shadingRate = self.app.getSetting('rendering_aqsis_shadingrate')
         #ribSceneHeader.setCameraPosition(self.camera.eyeX, -self.camera.eyeY, self.camera.eyeZ)
         #ribSceneHeader.setSearchShaderPath([self.usrShaderPath])
         #ribSceneHeader.setSearchTexturePath([self.appTexturePath,self.usrTexturePath,self.hairTexturePath,self.skinTexturePath])

@@ -48,6 +48,10 @@ class RenderTaskView(gui3d.TaskView):
     def __init__(self, category, name, label=None):
         super(RenderTaskView, self).__init__(category, name, label)
 
+        # Declare settings
+        G.app.addSetting('rendering_width', 800)
+        G.app.addSetting('rendering_height', 600)
+
         self.oldShader = None
         self.taskViewShader = None
 
@@ -73,17 +77,17 @@ class RenderTaskView(gui3d.TaskView):
     # the rendering width and height stored in the settings.
 
     def getRenderingWidth(self):
-        return G.app.settings.get('rendering_width', 800)
+        return G.app.getSetting('rendering_width')
 
     def setRenderingWidth(self, value=None):
-        G.app.settings['rendering_width'] = 0 if not value else int(value)
+        G.app.setSetting('rendering_width', 0 if not value else int(value))
 
     renderingWidth = property(getRenderingWidth, setRenderingWidth)
 
     def getRenderingHeight(self):
-        return G.app.settings.get('rendering_height', 600)
+        return G.app.getSetting('rendering_height')
 
     def setRenderingHeight(self, value=None):
-        G.app.settings['rendering_height'] = 0 if not value else int(value)
+        G.app.setSetting('rendering_height', 0 if not value else int(value))
 
     renderingHeight = property(getRenderingHeight, setRenderingHeight)
