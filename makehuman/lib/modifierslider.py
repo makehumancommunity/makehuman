@@ -124,7 +124,7 @@ class ModifierSlider(gui.Slider):
         value = self.changing
         self.changing = None
 
-        if G.app.settings.get('realtimeUpdates', True):
+        if G.app.getSetting('realtimeUpdates'):
             human = G.app.selectedHuman
             if self.value is None:
                 self.value = self.modifier.getValue()
@@ -134,7 +134,7 @@ class ModifierSlider(gui.Slider):
                     else:
                         human.getSeedMesh().setVisibility(1)
                     human.getSubdivisionMesh(False).setVisibility(0)
-            self.modifier.updateValue(value, G.app.settings.get('realtimeNormalUpdates', True))
+            self.modifier.updateValue(value, G.app.getSetting('realtimeNormalUpdates'))
             human.updateProxyMesh(fit_to_posed=True)
 
 
@@ -174,7 +174,7 @@ class ModifierSlider(gui.Slider):
 
     def onFocus(self, event):
         if self.view:
-            if G.app.settings.get('cameraAutoZoom', True):
+            if G.app.getSetting('cameraAutoZoom'):
                 self.view()
 
     def update(self):

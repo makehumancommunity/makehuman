@@ -117,7 +117,7 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
 
     def getMeasure(self, measure):
         human = G.app.selectedHuman
-        measure = self.ruler.getMeasure(human, measure, G.app.settings['units'])
+        measure = self.ruler.getMeasure(human, measure, G.app.getSetting('units'))
         return measure
 
     def hideAllBoxes(self):
@@ -205,7 +205,7 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
         human = G.app.selectedHuman
 
         height = human.getHeightCm()
-        if G.app.settings['units'] == 'metric':
+        if G.app.getSetting('units') == 'metric':
             height = '%.2f cm' % height
         else:
             height = '%.2f in' % (height * 0.393700787)
@@ -258,7 +258,7 @@ class MeasurementValueConverter(object):
 
     @property
     def units(self):
-        return 'cm' if G.app.settings['units'] == 'metric' else 'in'
+        return 'cm' if G.app.getSetting('units') == 'metric' else 'in'
 
     @property
     def measure(self):

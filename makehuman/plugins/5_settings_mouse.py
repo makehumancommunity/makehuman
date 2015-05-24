@@ -63,7 +63,7 @@ class MouseActionsTaskView(gui3d.TaskView):
             row[0] += 1
 
         speedBox = self.addLeftWidget(gui.SliderBox('3D Viewport Speed'))
-        self.normal = speedBox.addWidget(gui.Slider(gui3d.app.settings.get('lowspeed', 1), 1, 10,
+        self.normal = speedBox.addWidget(gui.Slider(gui3d.app.getSetting('lowspeed'), 1, 10,
             ["Normal speed",": %d"]))
 
         self.mouseBox = self.addLeftWidget(gui.GroupBox('Camera'))
@@ -72,15 +72,15 @@ class MouseActionsTaskView(gui3d.TaskView):
         add(self.mouseBox, "Rotate", gui3d.app.mouseRotate)
         add(self.mouseBox, "Zoom",   gui3d.app.mouseZoom)
 
-        self.invertMouseWheel = self.mouseBox.addWidget(gui.CheckBox("Invert wheel", gui3d.app.settings.get('invertMouseWheel', False)))
+        self.invertMouseWheel = self.mouseBox.addWidget(gui.CheckBox("Invert wheel", gui3d.app.getSetting('invertMouseWheel')))
         
         @self.invertMouseWheel.mhEvent
         def onClicked(event):
-            gui3d.app.settings['invertMouseWheel'] = self.invertMouseWheel.selected
+            gui3d.app.setSetting('invertMouseWheel', self.invertMouseWheel.selected)
 
         @self.normal.mhEvent
         def onChange(value):
-            gui3d.app.settings['lowspeed'] = value
+            gui3d.app.setSetting('lowspeed', value)
             
     def onShow(self, event):
         

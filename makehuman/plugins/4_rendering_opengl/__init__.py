@@ -53,6 +53,10 @@ class OpenGLTaskView(RenderTaskView):
     def __init__(self, category):
         RenderTaskView.__init__(self, category, 'Render')
 
+        # Declare settings
+        G.app.addSetting('GL_RENDERER_SSS', False)
+        G.app.addSetting('GL_RENDERER_AA', True)
+
         # Don't change shader for this RenderTaskView.
         self.taskViewShader = G.app.selectedHuman.material.shader
 
@@ -61,12 +65,11 @@ class OpenGLTaskView(RenderTaskView):
         self.resBox = settingsBox.addWidget(gui.TextEdit(
             "x".join([str(self.renderingWidth), str(self.renderingHeight)])))
         self.AAbox = settingsBox.addWidget(gui.CheckBox("Anti-aliasing"))
-        self.AAbox.setSelected(G.app.settings.get('GL_RENDERER_AA', True))
+        self.AAbox.setSelected(G.app.getSetting('GL_RENDERER_AA'))
         self.renderButton = settingsBox.addWidget(gui.Button('Render'))
 
         self.lightmapSSS = gui.CheckBox("Lightmap SSS")
-        self.lightmapSSS.setSelected(
-            G.app.settings.get('GL_RENDERER_SSS', False))
+        self.lightmapSSS.setSelected(G.app.getSetting('GL_RENDERER_SSS'))
 
         self.optionsBox = self.addLeftWidget(gui.GroupBox('Options'))
         self.optionsWidgets = []
@@ -102,11 +105,11 @@ class OpenGLTaskView(RenderTaskView):
 
         @self.AAbox.mhEvent
         def onClicked(value):
-            G.app.settings['GL_RENDERER_AA'] = self.AAbox.selected
+            G.app.setSetting('GL_RENDERER_AA', self.AAbox.selected)
 
         @self.lightmapSSS.mhEvent
         def onClicked(value):
-            G.app.settings['GL_RENDERER_SSS'] = self.lightmapSSS.selected
+            G.app.setSetting('GL_RENDERER_SSS', self.lightmapSSS.selected)
 
         @self.renderMethodList.mhEvent
         def onClicked(item):

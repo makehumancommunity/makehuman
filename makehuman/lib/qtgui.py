@@ -2120,7 +2120,7 @@ class ZoomableImageView(QtGui.QScrollArea, Widget):
 
     def wheelEvent(self, event, displace = True):
         ratbef = self.ratio
-        if G.app.settings.get('invertMouseWheel', False):
+        if G.app.getSetting('invertMouseWheel'):
             delta = event.delta()
         else:
             delta = -event.delta()
