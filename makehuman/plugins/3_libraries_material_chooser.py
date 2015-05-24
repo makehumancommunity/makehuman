@@ -72,6 +72,7 @@ class MaterialTaskView(gui3d.TaskView, filecache.MetadataCacher):
     def __init__(self, category):
         gui3d.TaskView.__init__(self, category, 'Material', label='Skin/Material')
         filecache.MetadataCacher.__init__(self, 'mhmat', 'material_filecache.mhc')
+        self.cache_format_version = '1b'  # Override cache file version for materials, because we added metadata fields
         self.human = gui3d.app.selectedHuman
 
         self.materials = None
@@ -101,6 +102,10 @@ class MaterialTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     def getMetadataImpl(self, filename):
         return material.peekMetadata(filename)
+
+    def getTagsFromMetadata(self, metadata):
+        name, tags, description = metadata
+        return tags
 
     def getSearchPaths(self):
         return self.materials
