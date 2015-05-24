@@ -170,7 +170,7 @@ def writeMeshFile(human, filepath, objects, config):
         if human.getSkeleton():
             if pxy:
                 # Determine vertex weights for proxy (map to unfiltered proxy mesh)
-                weights = pxy.getVertexWeights(bodyWeights)
+                weights = pxy.getVertexWeights(bodyWeights, human.getSkeleton())
             else:
                 # Use vertex weights for human body
                 weights = bodyWeights
