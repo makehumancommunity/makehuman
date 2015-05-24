@@ -59,6 +59,12 @@ class FileCache(object):
 
         self._cache = dict()
 
+        self.get_metadata_filename = None
+
+    def __getstate__(self):
+        """Return state values to be pickled."""
+        return {'version': self.version, 'filepath': self.filepath, '_cache': self._cache}
+
     def save(self):
         """Save filecache to file"""
         f = open(self.filepath, "wb")
@@ -81,6 +87,12 @@ class FileCache(object):
                 except:
                     pass
 
+    def getMetadataFile(self, filename):
+        if self.get_metadata_filename is None:
+            return filename
+        else:
+            return self.get_metadata_filename(filename)
+
     def update(self, paths, fileExts, getMetadata, removeOldEntries=True):
         """
         Update this cache of files in the specified paths.
@@ -99,7 +111,7 @@ class FileCache(object):
             modification time. fileExts are expected to be passed in reverse order
             """
             if mtime is None:
-                mtime = os.path.getmtime(filepath)
+                mtime = os.path.getmtime(self.getMetadataFile(filepath))
 
             fileExt = os.path.splitext(filepath)[1][1:].lower()
             i = fileExts.index(fileExt)
@@ -107,7 +119,7 @@ class FileCache(object):
                 for altExt in fileExts[:i]:
                     overridepath = os.path.splitext(filepath)[0] + "." + altExt
                     if os.path.isfile(overridepath):
-                        mtime_ = os.path.getmtime(overridepath)
+                        mtime_ = os.path.getmtime(self.getMetadataFile(overridepath))
                         if mtime_ > mtime:
                             return (overridepath, mtime_)
             return None
@@ -124,7 +136,7 @@ class FileCache(object):
             files.extend(getpath.search(folder, fileExts, recursive=True, mutexExtensions=True))
         for filepath in files:
             fileId = getpath.canonicalPath(filepath)
-            mtime = os.path.getmtime(filepath)
+            mtime = os.path.getmtime(self.getMetadataFile(filepath))
 
             overridepath = _getOverridingFile(filepath, list(reversed(fileExts)), mtime)
             if overridepath is not None:
@@ -176,6 +188,21 @@ class MetadataCacher(object):
 
         self.cache_format_version = None  # Override this in a subclass to specify a custom cache version
 
+    def _get_metadata_callback(self, filename):
+        return self.getMetadataImpl(self.getMetadataFile(filename))
+
+    def getMetadataFile(self, filename):
+        """For a specified asset file, return the file that should be read for
+        metadata. By default returns the same filename. Change this if the
+        metadata is stored in a separate file.
+        It is from this file that the modification time is tested, to update
+        the metadata in the cache if a newer file is available.
+        This method is expected to return an existing file, if the metadata file
+        does not exist it should return, for example, the path to the original
+        file.
+        """
+        return filename
+
     def getMetadataImpl(self, filename):
         """This method should be implemented by the library to define the logic
         to retrieve the metadata of a file.
@@ -183,7 +210,8 @@ class MetadataCacher(object):
         raise NotImplementedError("Subclass should implement this method")
 
     def getTagsFromMetadata(self, metadata):
-        """Override this if the format of the metadata is different
+        """Override this if the format of the metadata is different.
+        NOTE: The returned tags should be all in lower cases!
         """
         name, tags = metadata
         return tags
@@ -214,7 +242,7 @@ class MetadataCacher(object):
                 mtime = metadata[0]
                 metadata = metadata[1:]
 
-                if mtime < os.path.getmtime(fileId):
+                if mtime < os.path.getmtime(self.getMetadataFile(fileId)):
                     # Queried file was updated, update stale cache
                     self.updateFileCache(self.getSearchPaths() + [os.path.dirname(fileId)], self.getFileExtensions(), False)
                     metadata = self._filecache[fileId]
@@ -258,7 +286,7 @@ class MetadataCacher(object):
             search_paths=self.getSearchPaths()
         if file_extensions is None:
             file_extensions=self.getFileExtensions()
-        self._filecache.update(search_paths, file_extensions, self.getMetadataImpl, remove_old_entries)
+        self._filecache.update(search_paths, file_extensions, self._get_metadata_callback, remove_old_entries)
 
     def onUnload(self):
         """
@@ -282,6 +310,7 @@ class MetadataCacher(object):
     def loadCache(self):
         filename = getpath.getPath(os.path.join('cache', self.cache_file))
         self._filecache = loadCache(filename, self.cache_format_version)
+        self._filecache.get_metadata_filename = self.getMetadataFile
 
 
 def saveCache(cache):
