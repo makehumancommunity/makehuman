@@ -65,6 +65,12 @@ class SettingCheckbox(gui.CheckBox):
         if self.postAction is not None:
             self.postAction(self.selected)
 
+    def currentValue(self):
+        try:
+            return gui3d.app.settings[self.setting_name]
+        except:
+            return self.default_value
+
 class ThemeRadioButton(gui.RadioButton):
     def __init__(self, group, label, theme):
         self.theme = theme
@@ -135,7 +141,7 @@ class SettingsTaskView(gui3d.TaskView):
         self.imperial = unitBox.addWidget(gui.RadioButton(modes, 'Imperial', gui3d.app.settings.get('units', 'metric') == 'imperial'))
 
         startupBox = self.addLeftWidget(gui.GroupBox('Startup'))
-        self.preload = startupBox.addWidget(SettingCheckbox("Preload macro targets", 'preloadTargets', False))
+        self.preload = startupBox.addWidget(SettingCheckbox("Preload macro targets", 'preloadTargets', False))  # TODO this differs from release to dev version
 
         self.saveScreenSize = startupBox.addWidget(SettingCheckbox("Restore window size", 'restoreWindowSize', False))
 
@@ -184,7 +190,7 @@ class SettingsTaskView(gui3d.TaskView):
 
     def updateGui(self):
         for checkbox in self.checkboxes:
-            checkbox.update(None)
+            checkbox.update(checkbox.currentValue())
 
         use_metric = gui3d.app.settings.get('units', 'metric') == 'metric'
         if use_metric:
