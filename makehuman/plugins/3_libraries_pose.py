@@ -69,7 +69,7 @@ class PoseLibraryTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     def __init__(self, category):
         gui3d.TaskView.__init__(self, category, 'Pose')
-        filecache.MetadataCacher.__init__(self, 'bvh', 'pose_filecache.mhc')
+        filecache.MetadataCacher.__init__(self, ['bvh', 'meta'], 'pose_filecache.mhc')
         self.human = G.app.selectedHuman
         self.currentPose = None
 
@@ -95,12 +95,12 @@ class PoseLibraryTaskView(gui3d.TaskView, filecache.MetadataCacher):
             return (tags, )
         from codecs import open
         f = open(metafile, encoding='utf-8')
-        for l in f.read():
+        for l in f.read().split('\n'):
             l = l.strip()
             l = l.split()
             if len(l) == 0:
                 continue
-            if l[0].lower == 'tag':
+            if l[0].lower() == 'tag':
                 tags.add(' '.join(l[1:]))
         return (tags, )
 
