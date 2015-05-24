@@ -69,7 +69,9 @@ class PoseLibraryTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     def __init__(self, category):
         gui3d.TaskView.__init__(self, category, 'Pose')
-        filecache.MetadataCacher.__init__(self, ['bvh', 'meta'], 'pose_filecache.mhc')
+        filecache.MetadataCacher.__init__(self, ['bvh'], 'pose_filecache.mhc')
+        self.cache_format_version = '1c'  # Bump cacher version for updated format of pose metadata
+
         self.human = G.app.selectedHuman
         self.currentPose = None
 
@@ -88,21 +90,41 @@ class PoseLibraryTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         self.skelObj = None
 
+    def getMetadataFile(self, filename):
+        metafile = os.path.splitext(filename)[0] + '.meta'
+        if os.path.isfile(metafile):
+            return metafile
+        return filename
+
     def getMetadataImpl(self, filename):
         tags = set()
-        metafile = os.path.splitext(filename)[0] + '.meta'
-        if not os.path.isfile(metafile):
+        if not os.path.isfile(filename):
             return (tags, )
+        name = os.path.splitext(os.path.basename(filename))[0]
+        description = ""
+        license = mh.getAssetLicense()
         from codecs import open
-        f = open(metafile, encoding='utf-8')
+        f = open(filename, encoding='utf-8')
         for l in f.read().split('\n'):
             l = l.strip()
             l = l.split()
             if len(l) == 0:
                 continue
             if l[0].lower() == 'tag':
-                tags.add(' '.join(l[1:]))
-        return (tags, )
+                tags.add((' '.join(l[1:])).lower())
+            elif l[0].lower() == 'name':
+                name = ' '.join(l[1:])
+            elif l[0].lower() == 'description':
+                description = ' '.join(l[1:])
+            elif l[0].lower() == 'author':
+                license.author = ' '.join(l[1:])
+            elif l[0].lower() == 'license':
+                license.license = ' '.join(l[1:])
+            elif l[0].lower() == 'copyright':
+                license.copyright = ' '.join(l[1:])
+            elif l[0].lower() == 'homepage':
+                license.homepage = ' '.join(l[1:])
+        return (tags, name, description, license)
 
     def getTagsFromMetadata(self, metadata):
         return metadata[0]
@@ -138,7 +160,9 @@ class PoseLibraryTaskView(gui3d.TaskView, filecache.MetadataCacher):
     def loadBvh(self, filepath, convertFromZUp="auto"):
         bvh_file = bvh.load(filepath, convertFromZUp)
         self.autoScaleBVH(bvh_file)
-        return bvh_file.createAnimationTrack(self.human.getBaseSkeleton())
+        anim = bvh_file.createAnimationTrack(self.human.getBaseSkeleton())
+        _, _, _, license = self.getMetadata(filepath)
+        anim.license = license
 
     def autoScaleBVH(self, bvh_file):
         """
