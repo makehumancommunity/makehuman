@@ -67,14 +67,14 @@ class MaterialAction(gui3d.Action):
         return True
 
 
-class MaterialTaskView(gui3d.TaskView):
+class MaterialTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     def __init__(self, category):
         gui3d.TaskView.__init__(self, category, 'Material', label='Skin/Material')
+        filecache.MetadataCacher.__init__(self, 'mhmat', 'material_filecache.mhc')
         self.human = gui3d.app.selectedHuman
 
         self.materials = None
-        self._matFileCache = None
 
         self.filechooser = self.addRightWidget(fc.IconListFileChooser(self.materials, 'mhmat', ['thumb', 'png'], mh.getSysDataPath('skins/notfound.thumb'), name='Material'))
         self.filechooser.setIconSize(50,50)
@@ -99,77 +99,17 @@ class MaterialTaskView(gui3d.TaskView):
         self.filechooser.setFileLoadHandler(fc.TaggedFileLoader(self))
         self.addLeftWidget(self.filechooser.createTagFilter())
 
-    def getTags(self, filename=None):
-        def _getMaterialTags(filename):
-            return material.peekMetadata(filename)
+    def getMetadataImpl(self, filename):
+        return material.peekMetadata(filename)
 
-        if self._matFileCache is None:
-            # Init cache
-            self.loadCache()
-            self._matFileCache = filecache.updateFileCache(self.materials, 'mhmat', _getMaterialTags,self._matFileCache, False)
-
-        result = set()
-        # TODO move most of this (duplicated) logic inside a class in filecache
-
-        if filename:
-            fileId = getpath.canonicalPath(filename)
-            if fileId not in self._matFileCache:
-                # Lazily update cache
-                self._matFileCache = filecache.updateFileCache(self.materials + [os.path.dirname(fileId)], 'mhmat', _getMaterialTags,self._matFileCache, False)
-
-            if fileId in self._matFileCache:
-                metadata = self._matFileCache[fileId]
-                if metadata is not None:
-                    mtime, name, tags = metadata
-
-                    if mtime < os.path.getmtime(fileId):
-                        # Queried file was updated, update stale cache
-                        self._matFileCache = filecache.updateFileCache(self.materials + [os.path.dirname(fileId)], 'mhmat', _getMaterialTags,self._matFileCache, False)
-                        metadata = self._matFileCache[fileId]
-                        mtime, name, tags = metadata
-
-                    result = result.union(tags)
-            else:
-                log.warning('Could not get tags for material file %s. Does not exist in Material library.', filename)
-            return result
-        else:
-            for (path, values) in self._matFileCache.items():
-                _, name, tags = values
-                result = result.union(tags)
-        return result
-
-    def onUnload(self):
-        """
-        Called when this library taskview is being unloaded (usually when MH
-        is exited).
-        Note: make sure you connect the plugin's unload() method to this one!
-        """
-        self.storeCache()
-
-    def storeCache(self):
-        import filecache
-        if self._matFileCache is None or len(self._matFileCache) == 0:
-            return
-
-        filecache.cleanupCache(self._matFileCache)
-
-        cachedir = getpath.getPath('cache')
-        if not os.path.isdir(cachedir):
-            os.makedirs(cachedir)
-        filecache.saveCache(self._matFileCache, os.path.join(cachedir, 'material_filecache.mhc'))
-
-    def loadCache(self):
-        import filecache
-        filename = getpath.getPath('cache/material_filecache.mhc')
-        if os.path.isfile(filename):
-            self._matFileCache = filecache.loadCache(filename)
+    def getSearchPaths(self):
+        return self.materials
 
     def onShow(self, event):
         # When the task gets shown, set the focus to the file chooser
         gui3d.TaskView.onShow(self, event)
 
         self.reloadMaterialChooser()
-
 
     def applyClothesMaterial(self, uuid, filename):
         human = self.human

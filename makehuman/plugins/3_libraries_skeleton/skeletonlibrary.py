@@ -43,6 +43,7 @@ import gui3d
 import log
 from collections import OrderedDict
 import filechooser as fc
+import filecache
 
 import skeleton
 import skeleton_drawing
@@ -79,20 +80,18 @@ class SkeletonAction(gui3d.Action):
 #   class SkeletonLibrary
 #------------------------------------------------------------------------------------------
 
-class SkeletonLibrary(gui3d.TaskView):
+class SkeletonLibrary(gui3d.TaskView, filecache.MetadataCacher):
 
     def __init__(self, category):
         gui3d.TaskView.__init__(self, category, 'Skeleton')
+        filecache.MetadataCacher.__init__(self, 'mhskel', 'skeleton_filecache.mhc')
         self.optionsSelector = None
-
-        self._skelFileCache = None
 
         self.systemRigs = mh.getSysDataPath('rigs')
         self.userRigs = os.path.join(mh.getPath(''), 'data', 'rigs')
         self.rigPaths = [self.userRigs, self.systemRigs]
         if not os.path.exists(self.userRigs):
             os.makedirs(self.userRigs)
-        self.extension = "rig"
 
         self.human = gui3d.app.selectedHuman
 
@@ -291,71 +290,15 @@ class SkeletonLibrary(gui3d.TaskView):
 
         mh.redraw()
 
-    def getTags(self, filename=None):
-        import filecache
-        def _getSkeletonTags(filename):
-            return skeleton.peekMetadata(filename)
+    def getMetadataImpl(self, filename):
+        return skeleton.peekMetadata(filename)
 
-        if self._skelFileCache is None:
-            # Init cache
-            self.loadCache()
-            self._skelFileCache = filecache.updateFileCache(self.paths, 'mhmat', _getSkeletonTags,self._skelFileCache, False)
+    def getTagsFromMetadata(self, metadata):
+        name, desc, tags = metadata
+        return tags
 
-        # TODO move most of this (duplicated) logic inside a class in filecache
-        result = set()
-
-        if filename:
-            fileId = getpath.canonicalPath(filename)
-            if fileId not in self._skelFileCache:
-                # Lazily update cache
-                self._skelFileCache = filecache.updateFileCache(self.paths + [os.path.dirname(fileId)], 'mhskel', _getSkeletonTags,self._skelFileCache, False)
-
-            if fileId in self._skelFileCache:
-                metadata = self._skelFileCache[fileId]
-                if metadata is not None:
-                    mtime, name, desc, tags = metadata
-
-                    if mtime < os.path.getmtime(fileId):
-                        # Queried file was updated, update stale cache
-                        self._skelFileCache = filecache.updateFileCache(self.paths + [os.path.dirname(fileId)], 'mhskel', _getSkeletonTags,self._skelFileCache, False)
-                        metadata = self._skelFileCache[fileId]
-                        mtime, name, desc, tags = metadata
-
-                    result = result.union(tags)
-            else:
-                log.warning('Could not get tags for material file %s. Does not exist in Material library.', filename)
-            return result
-        else:
-            for (path, values) in self._skelFileCache.items():
-                _, name, desc, tags = values
-                result = result.union(tags)
-        return result
-
-    def onUnload(self):
-        """
-        Called when this library taskview is being unloaded (usually when MH
-        is exited).
-        Note: make sure you connect the plugin's unload() method to this one!
-        """
-        self.storeCache()
-
-    def storeCache(self):
-        import filecache
-        if self._skelFileCache is None or len(self._skelFileCache) == 0:
-            return
-
-        filecache.cleanupCache(self._skelFileCache)
-
-        cachedir = getpath.getPath('cache')
-        if not os.path.isdir(cachedir):
-            os.makedirs(cachedir)
-        filecache.saveCache(self._skelFileCache, os.path.join(cachedir, 'skeleton_filecache.mhc'))
-
-    def loadCache(self):
-        import filecache
-        filename = getpath.getPath('cache/skeleton_filecache.mhc')
-        if os.path.isfile(filename):
-            self._skelFileCache = filecache.loadCache(filename)
+    def getSearchPaths(self):
+        return self.paths
 
     def drawJointHelpers(self):
         """

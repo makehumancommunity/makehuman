@@ -844,28 +844,6 @@ def getAsciiFileExtension(proxyType):
     return '.proxy' if proxyType == 'Proxymeshes' else '.mhclo'
 
 
-#
-# Caching of proxy files in data folders
-#
-
-def updateProxyFileCache(paths, fileExts, cache=None, proxytype="Clothes"):
-    """
-    Update cache of proxy files in the specified paths. If no cache is given as
-    parameter, a new cache is created.
-    This cache contains per canonical filename (key) the UUID and tags of that
-    proxy file.
-    Cache entries are invalidated if their modification time has changed, or no
-    longer exist on disk.
-    """
-    import filecache
-
-    if proxytype == 'Proxymeshes':
-        fileExts = ['.mhpxy', '.proxy']
-    else:
-        fileExts = ['.mhpxy', '.mhclo']
-
-    return filecache.updateFileCache(paths, fileExts, peekMetadata, cache)
-
 def peekMetadata(proxyFilePath, proxyType=None):
     """
     Read UUID and tags from proxy file, and return as soon as vertex data

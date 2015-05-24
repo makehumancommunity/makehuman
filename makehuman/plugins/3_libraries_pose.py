@@ -47,6 +47,7 @@ import bvh
 import os
 from core import G
 import getpath
+import filecache
 
 class PoseAction(gui3d.Action):
     def __init__(self, name, library, before, after):
@@ -64,11 +65,11 @@ class PoseAction(gui3d.Action):
         return True
 
 
-# TODO add save/load handlers
-class PoseLibraryTaskView(gui3d.TaskView):
+class PoseLibraryTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     def __init__(self, category):
         gui3d.TaskView.__init__(self, category, 'Pose')
+        filecache.MetadataCacher.__init__(self, 'bvh', 'pose_filecache.mhc')
         self.human = G.app.selectedHuman
         self.currentPose = None
 
@@ -82,9 +83,32 @@ class PoseLibraryTaskView(gui3d.TaskView):
         def onFileSelected(filename):
             gui3d.app.do(PoseAction("Change pose", self, self.currentPose, filename))
 
-        box = self.addLeftWidget(gui.GroupBox('Pose'))
+        self.filechooser.setFileLoadHandler(fc.TaggedFileLoader(self))
+        self.addLeftWidget(self.filechooser.createTagFilter())
 
         self.skelObj = None
+
+    def getMetadataImpl(self, filename):
+        tags = set()
+        metafile = os.path.splitext(filename)[0] + '.meta'
+        if not os.path.isfile(metafile):
+            return (tags, )
+        from codecs import open
+        f = open(metafile, encoding='utf-8')
+        for l in f.read():
+            l = l.strip()
+            l = l.split()
+            if len(l) == 0:
+                continue
+            if l[0].lower == 'tag':
+                tags.add(' '.join(l[1:]))
+        return (tags, )
+
+    def getTagsFromMetadata(self, metadata):
+        return metadata[0]
+
+    def getSearchPaths(self):
+        return self.paths
 
     def loadPose(self, filepath, apply_pose=True):
         self.currentPose = filepath
@@ -180,6 +204,7 @@ taskview = None
 
 
 def load(app):
+    global taskview
     category = app.getCategory('Pose/Animate')
     taskview = PoseLibraryTaskView(category)
     taskview.sortOrder = 2
@@ -194,4 +219,4 @@ def load(app):
 
 
 def unload(app):
-    pass
+    taskview.onUnload()

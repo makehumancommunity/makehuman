@@ -47,6 +47,7 @@ import proxy
 import filechooser as fc
 import log
 import getpath
+import filecache
 
 
 class ProxyAction(gui3d.Action):
@@ -87,7 +88,7 @@ class MultiProxyAction(gui3d.Action):
         return True
 
 
-class ProxyChooserTaskView(gui3d.TaskView):
+class ProxyChooserTaskView(gui3d.TaskView, filecache.MetadataCacher):
     """
     Common base class for all proxy chooser libraries.
     """
@@ -96,9 +97,10 @@ class ProxyChooserTaskView(gui3d.TaskView):
         if not tabLabel:
             tabLabel = proxyName.capitalize()
         proxyName = proxyName.lower().replace(" ", "_")
-        gui3d.TaskView.__init__(self, category, tabLabel)
-
         self.proxyName = proxyName
+        gui3d.TaskView.__init__(self, category, tabLabel)
+        filecache.MetadataCacher.__init__(self, self.getFileExtension(), self.proxyName + '_filecache.mhc')
+
         self.label = tabLabel
         self.multiProxy = multiProxy
         self.tagFilter = tagFilter
@@ -114,7 +116,6 @@ class ProxyChooserTaskView(gui3d.TaskView):
 
         self.human = gui3d.app.selectedHuman
 
-        self._proxyFileCache = None
         self._proxyFilePerUuid = None
 
         self.selectedProxies = []
@@ -171,6 +172,15 @@ class ProxyChooserTaskView(gui3d.TaskView):
             def onDeselectAll(value):
                 self.deselectAllProxies()
 
+    def getMetadataImpl(self, filename):
+        return proxy.peekMetadata(filename, self.getProxyType())
+
+    def getTagsFromMetadata(self, metadata):
+        uuid, tags = metadata
+        return tags
+
+    def getSearchPaths(self):
+        return self.paths
 
     def getSaveName(self):
         """
@@ -452,8 +462,10 @@ class ProxyChooserTaskView(gui3d.TaskView):
         human.callEvent('onChanged', event)
 
     def onShow(self, event):
-        if self._proxyFileCache is None:
-            self.loadProxyFileCache()
+        if self._filecache is None:
+            # Init cache
+            self.loadCache()
+            self.updateFileCache(self.getSearchPaths(), self.getFileExtensions(), False)
 
         # When the task gets shown, set the focus to the file chooser
         gui3d.TaskView.onShow(self, event)
@@ -518,8 +530,10 @@ class ProxyChooserTaskView(gui3d.TaskView):
         if values[0] == 'status':
             return
 
-        if self._proxyFileCache is None:
-            self.loadProxyFileCache()
+        if self._filecache is None:
+            # Init cache
+            self.loadCache()
+            self.updateFileCache(self.getSearchPaths(), self.getFileExtensions(), False)
 
         if values[0] == self.getSaveName():
             if len(values) >= 3:
@@ -538,48 +552,6 @@ class ProxyChooserTaskView(gui3d.TaskView):
         for pxy in self.getSelection():
             file.write('%s %s %s\n' % (self.getSaveName(), pxy.name, pxy.getUuid()))
 
-    def onUnload(self):
-        """
-        Called when this library taskview is being unloaded (usually when MH
-        is exited).
-        Note: make sure you connect the plugin's unload() method to this one!
-        """
-        self.storeProxyFileCache()
-
-    def storeProxyFileCache(self):
-        """
-        Save MH cache file for the proxy files managed by this library.
-        """
-        import filecache
-        if self._proxyFileCache == None or len(self._proxyFileCache) == 0:
-            return
-        saveDir = getpath.getPath('cache')
-        if not os.path.isdir(saveDir):
-            os.makedirs(saveDir)
-        filecache.saveCache(self._proxyFileCache, os.path.join(saveDir, self.proxyName + '_filecache.mhc'))
-
-    def loadProxyFileCache(self, restoreFromFile = True):
-        """
-        Initialize or update the proxy file cache for this proxy library.
-        Will attempt to load a previous cache from file if restoreFromFile is true.
-        """
-        import filecache
-        self._proxyFilePerUuid = None
-        if restoreFromFile:
-            try:
-                cacheFile = getpath.getPath(os.path.join('cache', self.proxyName + '_filecache.mhc'))
-                if os.path.isfile(cacheFile):
-                    self._proxyFileCache = filecache.loadCache(cacheFile)
-            except:
-                log.debug("Failed to restore proxy list cache from file %s", cacheFile)
-        self._proxyFileCache = proxy.updateProxyFileCache(self.paths, self.getFileExtension(), self._proxyFileCache, proxytype=self.getProxyType())
-
-    def updateProxyFileCache(self):
-        """
-        Update proxy file cache to add newly added proxy files.
-        """
-        self.loadProxyFileCache(restoreFromFile = False)
-
     def findProxyMetadataByFilename(self, path):
         """
         Retrieve proxy metadata by canonical path from metadata cache.
@@ -587,28 +559,30 @@ class ProxyChooserTaskView(gui3d.TaskView):
         """
         proxyId = getpath.canonicalPath(path)
 
-        if self._proxyFileCache is None:
-            self.loadProxyFileCache()
+        if self._filecache is None:
+            # Init cache
+            self.loadCache()
+            self.updateFileCache(self.getSearchPaths(), self.getFileExtensions(), False)
 
         if self._proxyFilePerUuid is None:
             self._loadUuidLookup()
 
-        if proxyId not in self._proxyFileCache:
+        if proxyId not in self._filecache:
             # Try again once more, but update the metadata cache first (lazy cache for performance reasons)
-            self.updateProxyFileCache()
+            self.updateFileCache(self.getSearchPaths(), self.getFileExtensions(), False)
             self._loadUuidLookup()
 
-            if proxyId not in self._proxyFileCache:
+            if proxyId not in self._filecache:
                 log.warning('Could not get metadata for proxy with filename %s. Does not exist in %s library.', proxyId, self.proxyName)
                 return None
 
-        metadata = self._proxyFileCache[proxyId]
+        metadata = self._filecache[proxyId]
         mtime = metadata[0]
         if mtime < os.path.getmtime(proxyId):
             # Queried file was updated, update stale cache
-            self.updateProxyFileCache()
+            self.updateFileCache(self.getSearchPaths(), self.getFileExtensions(), False)
             self._loadUuidLookup()
-            metadata = self._proxyFileCache[proxyId]
+            metadata = self._filecache[proxyId]
 
         return metadata
 
@@ -619,15 +593,22 @@ class ProxyChooserTaskView(gui3d.TaskView):
         Returns the path of the proxy file if it is found, else returns None.
         The returned path is a canonical path name.
         """
-        if self._proxyFileCache is None:
-            self.loadProxyFileCache()
+        if self._filecache is None:
+            # Init cache
+            self.loadCache()
+            self.updateFileCache(self.getSearchPaths(), self.getFileExtensions(), False)
+
+        if self._filecache is None:
+            # Init cache
+            self.loadCache()
+            self.updateFileCache(self.getSearchPaths(), self.getFileExtensions(), False)
 
         if self._proxyFilePerUuid is None:
             self._loadUuidLookup()
 
         if uuid not in self._proxyFilePerUuid:
             # Try again once more, but update the proxy UUID lookup table first (lazy cache for performance reasons)
-            self.updateProxyFileCache()
+            self.updateFileCache(self.getSearchPaths(), self.getFileExtensions(), False)
             self._loadUuidLookup()
             if uuid not in self._proxyFilePerUuid:
                 log.warning('Could not find a proxy with UUID %s. Does not exist in %s library.', uuid, self.proxyName)
@@ -636,7 +617,7 @@ class ProxyChooserTaskView(gui3d.TaskView):
         return self._proxyFilePerUuid[uuid]
 
     def _loadUuidLookup(self):
-        items = [ (values[1], path) for (path, values) in self._proxyFileCache.items() ]
+        items = [ (values[1], path) for (path, values) in self._filecache.items() ]
         self._proxyFilePerUuid = dict()
         for (_uuid, path) in items:
             if _uuid in self._proxyFilePerUuid and self._proxyFilePerUuid[_uuid] != path:
@@ -654,11 +635,6 @@ class ProxyChooserTaskView(gui3d.TaskView):
         An empty library (no proxies) or a library where no proxy file contains
         tags will always return an empty set.
         """
-        if self._proxyFileCache is None:
-            self.loadProxyFileCache()
-
-        result = set()
-
         if uuid and filename:
             raise RuntimeWarning("getTags: Specify either uuid or filename, not both!")
 
@@ -666,20 +642,12 @@ class ProxyChooserTaskView(gui3d.TaskView):
             proxyFile = self.findProxyByUuid(uuid)
             if not proxyFile:
                 log.warning('Could not get tags for proxy with UUID %s. Does not exist in %s library.', uuid, self.proxyName)
-                return result
+                return set()
+            filecache.MetadataCacher.getTags(self, proxyFile)
         elif filename:
-            pxymetadata = self.findProxyMetadataByFilename(filename)
-            if pxymetadata is not None:
-                _, _, tags = pxymetadata
-                result = result.union(tags)
-            else:
-                log.warning('Could not get tags for proxy with filename %s. Does not exist in %s library.', filename, self.proxyName)
-            return result
+            return filecache.MetadataCacher.getTags(self, filename)
         else:
-            for (path, values) in self._proxyFileCache.items():
-                _, uuid, tags = values
-                result = result.union(tags)
-        return result
+            return self.getAllTags()
 
     def registerLoadSaveHandlers(self):
         gui3d.app.addLoadHandler(self.getSaveName(), self.loadHandler)
