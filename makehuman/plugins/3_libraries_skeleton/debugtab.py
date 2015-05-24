@@ -268,7 +268,7 @@ class SkeletonDebugLibrary(gui3d.TaskView):
         for obj in objects:
             # Remap vertex weights to mesh
             if obj.proxy:
-                parentWeights = obj.proxy.getVertexWeights(rawWeights)
+                parentWeights = obj.proxy.getVertexWeights(rawWeights, self.human.getSkeleton())
             else:
                 parentWeights = rawWeights
             weights = obj.mesh.getVertexWeights(parentWeights)
