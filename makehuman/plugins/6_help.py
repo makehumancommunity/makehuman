@@ -51,8 +51,9 @@ class HelpTaskView(gui3d.TaskView):
 
         aboutBox = self.addLeftWidget(gui.GroupBox('About MakeHuman'))
         self.aboutButton = aboutBox.addWidget(gui.Button("About"))
+        self.websiteButton = aboutBox.addWidget(gui.Button("Website"))
 
-        optionsBox = self.addLeftWidget(gui.GroupBox('Support options'))
+        optionsBox = self.addLeftWidget(gui.GroupBox('Support'))
         self.manualButton = optionsBox.addWidget(gui.Button("Manual"))
         self.reportBugButton = optionsBox.addWidget(gui.Button("Report bug"))
         self.requestFeatureButton = optionsBox.addWidget(gui.Button("Request feature"))   
@@ -62,6 +63,10 @@ class HelpTaskView(gui3d.TaskView):
         @self.aboutButton.mhEvent
         def onClicked(event):
             gui3d.app.about()
+
+        @self.websiteButton.mhEvent
+        def onClicked(event):
+            webbrowser.open('http://www.makehuman.org');
 
         @self.manualButton.mhEvent
         def onClicked(event):

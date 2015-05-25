@@ -1205,7 +1205,11 @@ class MHApplication(gui3d.Application, mh.Application):
         """
         Show about dialog
         """
-        gui.QtGui.QMessageBox.about(self.mainwin, 'About MakeHuman', mh.getCopyrightMessage())
+        #gui.QtGui.QMessageBox.about(self.mainwin, 'About MakeHuman', mh.getCopyrightMessage())
+        #aboutbox = gui.AboutBox(self.mainwin, 'About MakeHuman', mh.getCopyrightMessage())
+        aboutbox = gui.AboutBoxScrollbars(self.mainwin, 'About MakeHuman', mh.getCopyrightMessage(), "MakeHuman v"+mh.getVersionStr(verbose=False, full=True))
+        aboutbox.show()
+        aboutbox.exec_()
 
     def setGlobalCamera(self):
         human = self.selectedHuman
