@@ -653,9 +653,63 @@ def getAssetLicense(properties=None):
         result._customized = False
     return result
 
-def getCredits():
-    # TODO
-    return ""
+def _wordwrap(text, chars_per_line=80):
+    """Split the lines of a text between whitespaces when a line length exceeds
+    the specified number of characters. Newlines already present in text are 
+    kept.
+    """
+    text_ = text.split('\n')
+    text = []
+    for l in text_:
+        if len(l) > chars_per_line:
+            l = l.split()
+            c = 0
+            i = 0
+            _prev_i = 0
+            while i < len(l):
+                while c <= chars_per_line and i < len(l):
+                    c += len(l[i])
+                    if i < (len(l) - 1):
+                        c += 1  # whitespace char
+                    i += 1
+                if c > chars_per_line:
+                    i -= 1
+                text.append(' '.join(l[_prev_i:i]))
+                _prev_i = i
+                c = 0
+        else:
+            text.append(l)
+    # drop any trailing empty lines
+    while not text[-1].strip():
+        text.pop()
+    return '\n'.join(text)
+
+def getCredits(richtext=False):
+    # TODO print contributors.txt
+    if richtext:
+        result = '<h2>MakeHuman credits</h2>'
+    else:
+        result = ''
+    return result + '''The list of people that made this software can be found at our website at 
+http://www.makehuman.org/halloffame'''
+
+def getSoftwareLicense(richtext=False):
+    import getpath
+    from codecs import open
+    lfile = getpath.getSysPath('license.txt')
+    if not os.path.isfile(lfile):
+        if richtext:
+            return '\n<span style="color: red;">Error: License file %s is not found, this is an incomplete MakeHuman distribution!</span>\n' % lfile
+        else:
+            return "Error: License file %s is not found, this is an incomplete MakeHuman distribution!" % lfile
+    f = open(lfile, encoding='utf-8')
+    text = f.read()
+    f.close()
+    if richtext:
+        result = '<h2>MakeHuman software license</h2>'
+    else:
+        result = ""
+    return result + _wordwrap(text)
 
 def getThirdPartyLicenses(richtext=False):
     import getpath
@@ -705,31 +759,14 @@ makes use of.\n"""
     for name, (lic_file, url, lic_type) in external_licenses.items():
         result += _title(name, url, lic_type)
 
-        f = open(os.path.join(license_folder, lic_file), encoding='utf-8')
+        lfile = os.path.join(license_folder, lic_file)
+        if not os.path.isfile(lfile):
+            result += "\n%s\n" % _error("Error: License file %s is not found, this is an incomplete MakeHuman distribution!" % lfile)
+            continue
+        f = open(lfile, encoding='utf-8')
         text = f.read()
-        text_ = text.split('\n')
-        text = []
-        for l in text_:
-            if len(l) > 80:
-                l = l.split()
-                c = 0
-                i = 0
-                _prev_i = 0
-                while i < len(l):
-                    while c <= 80 and i < len(l):
-                        c += len(l[i])
-                        if i < (len(l) - 1):
-                            c += 1  # whitespace char
-                        i += 1
-                    if c > 80:
-                        i -= 1
-                    text.append(' '.join(l[_prev_i:i]))
-                    _prev_i = i
-                    c = 0
-            else:
-                text.append(l)
         f.close()
-        text = '\n'.join(text)
+        text = _wordwrap(text)
         result += "\n%s\n" % _block(text)
 
     return result

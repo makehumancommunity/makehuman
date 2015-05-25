@@ -1207,7 +1207,7 @@ class MHApplication(gui3d.Application, mh.Application):
         """
         #gui.QtGui.QMessageBox.about(self.mainwin, 'About MakeHuman', mh.getCopyrightMessage())
         #aboutbox = gui.AboutBox(self.mainwin, 'About MakeHuman', mh.getCopyrightMessage())
-        abouttext = '<h2>MakeHuman license</h2>' + mh.getCopyrightMessage() + "\n\n\n" + mh.getThirdPartyLicenses(richtext=True)
+        abouttext = '<h1>MakeHuman license</h1>' + mh.getCopyrightMessage() + "\n" + mh.getCredits(richtext=True) + "\n\n" + mh.getSoftwareLicense(richtext=True) + "\n\n\n" + mh.getThirdPartyLicenses(richtext=True)
 
         aboutbox = gui.AboutBoxScrollbars(self.mainwin, 'About MakeHuman', abouttext, "MakeHuman v"+mh.getVersionStr(verbose=False, full=True))
         aboutbox.show()
