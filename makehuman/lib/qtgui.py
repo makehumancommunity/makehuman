@@ -39,6 +39,7 @@ TODO
 
 import sys
 import os
+import re
 
 from PyQt4 import QtCore, QtGui, QtSvg
 
@@ -1282,7 +1283,7 @@ class AboutBoxScrollbars(QtGui.QDialog):
         chars_per_line = 80
         fm = QtGui.QFontMetrics(label.font())
         leftMargin, topMargin, rightMargin, bottomMargin = self.getContentsMargins()
-        width = fm.width('0') * chars_per_line + 4 + leftMargin + rightMargin
+        width = fm.width('#') * chars_per_line + 4 + leftMargin + rightMargin
         horizontalSpacer = QtGui.QSpacerItem(width, 0, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         grid.addItem(horizontalSpacer, 3, 0, 1, 0)
 
@@ -1292,7 +1293,7 @@ class AboutBoxScrollbars(QtGui.QDialog):
         self.setModal(True)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
-        size = QtCore.QSize(width + 60, 0.8 * parent.size().height())
+        size = QtCore.QSize(min(parent.size().width(), width + 60), 0.8 * parent.size().height())
         self.resize(size)
 
 
