@@ -653,6 +653,87 @@ def getAssetLicense(properties=None):
         result._customized = False
     return result
 
+def getCredits():
+    # TODO
+    return ""
+
+def getThirdPartyLicenses(richtext=False):
+    import getpath
+    from codecs import open
+    from collections import OrderedDict
+    def _title(name, url, license):
+        if richtext:
+            return '<a id="%s"><h3>%s</h3></a>%s<br>Licensed under %s license.<br>' % (name, name, url, license)
+        else:
+            return "%s (%s) licensed under %s license." % (name, url, license)
+
+    def _error(text):
+        if richtext:
+            return '<span style="color: red;">%s</span>' % text
+        else:
+            return text
+
+    def _block(text):
+        if richtext:
+            return '%s<hr style="border: 1px solid #ffa02f;">' % text
+            #return '%s<div style="border: none; background-color #ffa02f; height: 1px; width: 100%%">a</div>' % text
+        else:
+            return text
+
+    if richtext:
+        result = '<h2>Third-party licenses</h2>'
+    else:
+        result = ""
+    result += """MakeHuman includes a number of third part software components, which have 
+their own respective licenses. We express our gratitude to the developers of
+those libraries, without which MakeHuman would not have been made possible.
+Here follows a list of the third-party open source libraries that MakeHuman
+makes use of.\n"""
+    license_folder = getpath.getSysPath('licenses')
+    if not os.path.isdir(license_folder):
+        return result + _error("Error: external licenses folder is not found, this is an incomplete MakeHuman distribution!")
+    external_licenses = [ ("PyQt4", ("pyQt4-license.txt", "http://www.riverbankcomputing.co.uk", "GPLv3")),
+                          ("Qt4", ("qt4-license.txt", "http://www.qt-project.org", "LGPLv2.1")),
+                          ("Numpy", ("numpy-license.txt", "http://www.numpy.org", "BSD (3-clause)")),
+                          ("PyOpenGL", ("pyOpenGL-license.txt", "http://pyopengl.sourceforge.net", "BSD (3-clause)")),
+                          ("Transformations", ("transformations-license.txt", "http://www.lfd.uci.edu/~gohlke/", "BSD (3-clause)")),
+                          ("pyFBX", ("pyFbx-license.txt", "http://wiki.blender.org/index.php/Extensions:2.6/Py/Scripts/Import-Export/Autodesk_FBX", "GPLv2")),
+                          ("Python hglib", ("hglib-license.txt", "http://mercurial.selenic.com/wiki/PythonHglib", "MIT"))
+                        ]
+    external_licenses = OrderedDict(external_licenses)
+
+    for name, (lic_file, url, lic_type) in external_licenses.items():
+        result += _title(name, url, lic_type)
+
+        f = open(os.path.join(license_folder, lic_file), encoding='utf-8')
+        text = f.read()
+        text_ = text.split('\n')
+        text = []
+        for l in text_:
+            if len(l) > 80:
+                l = l.split()
+                c = 0
+                i = 0
+                _prev_i = 0
+                while i < len(l):
+                    while c <= 80 and i < len(l):
+                        c += len(l[i])
+                        if i < (len(l) - 1):
+                            c += 1  # whitespace char
+                        i += 1
+                    if c > 80:
+                        i -= 1
+                    text.append(' '.join(l[_prev_i:i]))
+                    _prev_i = i
+                    c = 0
+            else:
+                text.append(l)
+        f.close()
+        text = '\n'.join(text)
+        result += "\n%s\n" % _block(text)
+
+    return result
+
 
 def main():
     print getCopyrightMessage(short=True) + "\n"
