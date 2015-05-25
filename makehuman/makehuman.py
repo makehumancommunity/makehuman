@@ -95,11 +95,11 @@ def getVersion():
 
 version = getVersion()  # For backward compat.
 
-def getVersionStr(verbose=True):
+def getVersionStr(verbose=True, full=False):
     """
     Verbose version as string, for displaying and information
     """
-    if isRelease():
+    if isRelease() and not full:
         return _versionStr()
     else:
         if 'HGREVISION' not in os.environ:
