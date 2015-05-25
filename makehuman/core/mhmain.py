@@ -41,7 +41,7 @@ import sys
 import os
 import glob
 import imp
-import contextlib
+import re
 
 from core import G
 import mh
@@ -58,6 +58,7 @@ import algos3d
 import gui
 import language
 import log
+import contextlib
 
 @contextlib.contextmanager
 def outFile(path):
@@ -1207,7 +1208,8 @@ class MHApplication(gui3d.Application, mh.Application):
         """
         #gui.QtGui.QMessageBox.about(self.mainwin, 'About MakeHuman', mh.getCopyrightMessage())
         #aboutbox = gui.AboutBox(self.mainwin, 'About MakeHuman', mh.getCopyrightMessage())
-        aboutbox = gui.AboutBoxScrollbars(self.mainwin, 'About MakeHuman', mh.getCopyrightMessage(), "MakeHuman v"+mh.getVersionStr(verbose=False, full=True))
+        abouttext = mh.getCopyrightMessage()
+        aboutbox = gui.AboutBoxScrollbars(self.mainwin, 'About MakeHuman', _replace_urls(abouttext), "MakeHuman v"+mh.getVersionStr(verbose=False, full=True))
         aboutbox.show()
         aboutbox.exec_()
 
