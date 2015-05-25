@@ -1183,6 +1183,113 @@ class Dialog(QtGui.QDialog):
             return False
 
 
+class AboutBox(QtGui.QMessageBox):
+    def __init__(self, parent, title, text):
+        super(AboutBox, self).__init__(title, text, QtGui.QMessageBox.Information, 0, 0, 0, parent)
+
+        if sys.platform == 'darwin':
+            self.setWindowFlags(QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowSystemMenuHint)
+        # Grab window icon of parent
+        icon = self.windowIcon()
+        size = icon.actualSize(QtCore.QSize(64, 64))
+        self.setIconPixmap(icon.pixmap(size))
+
+        # Add an invisible spacer to make the dialog box size to fit the width
+        chars_per_line = 80
+        fm = QtGui.QFontMetrics(self.font())
+        leftMargin, topMargin, rightMargin, bottomMargin = self.getContentsMargins()
+        width = fm.width('0') * chars_per_line + 4 + leftMargin + rightMargin
+
+        horizontalSpacer = QtGui.QSpacerItem(width, 0, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        layout = self.layout()
+        layout.addItem(horizontalSpacer, layout.rowCount(), 0, 1, layout.columnCount())
+
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+
+class AboutBoxScrollbars(QtGui.QDialog):
+    def __init__(self, parent, title, text, versiontext):
+        super(AboutBoxScrollbars, self).__init__(parent)
+
+        if sys.platform == 'darwin':
+            self.setWindowFlags(QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowSystemMenuHint)
+        # Grab window icon of parent
+        icon = self.windowIcon()
+        size = icon.actualSize(QtCore.QSize(64, 64))
+
+        self.setWindowTitle(title)
+
+        label = QtGui.QLabel(self)
+        label.setText(text)
+        label.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignLeft)
+        label.setOpenExternalLinks(True)
+
+        if sys.platform == 'darwin':
+            label.setContentsMargins(16, 0, 0, 0)
+        else:
+            label.setContentsMargins(2, 0, 0, 0)
+            label.setIndent(9)
+
+        versionLabel = QtGui.QLabel(self)
+        versionLabel.setText(versiontext)
+        versionLabel.setContentsMargins(0, 0, 0, 10)
+        f = versionLabel.font()
+        f.setBold(True)
+        versionLabel.setFont(f)
+
+        iconLabel = QtGui.QLabel(self)
+        iconLabel.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        iconLabel.setPixmap(icon.pixmap(size))
+        iconLabel.setContentsMargins(5, 0, 5, 0)
+
+        scroll = QtGui.QScrollArea(self)
+        scroll.setWidget(label)
+        scroll.setWidgetResizable(True)
+
+        buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok)
+        self.connect(buttonBox, QtCore.SIGNAL("accepted()"), self.close)
+        buttonBox.button(QtGui.QDialogButtonBox.Ok).setDefault(True)
+        buttonBox.setContentsMargins(0, 0, 10, 0)
+
+        grid = QtGui.QGridLayout()
+        if sys.platform == 'darwin':
+            grid.addWidget(versionLabel, 0, 1, 1, 1, QtCore.Qt.AlignTop)
+            grid.addWidget(iconLabel, 0, 0, 2, 1, QtCore.Qt.AlignTop)
+        else:
+            grid.setMargin(0)
+            grid.setVerticalSpacing(8)
+            grid.setHorizontalSpacing(0)
+            self.setContentsMargins(0, 15, 0, 20)
+            grid.setRowStretch(1, 100)
+            grid.setRowMinimumHeight(2, 6)
+
+            grid.addWidget(versionLabel, 0, 1, 1, 1, QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
+            grid.addWidget(iconLabel, 0, 0, 2, 1, QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
+
+        grid.addWidget(scroll, 1, 1, 1, 1)
+        grid.addWidget(buttonBox, 2, 0, 1, 2)
+
+        if sys.platform == 'darwin':
+            f = self.font()
+            f.setBold(True)
+            label.setFont(f)
+
+        # Add an invisible spacer to make the dialog box size to fit the width
+        chars_per_line = 80
+        fm = QtGui.QFontMetrics(label.font())
+        leftMargin, topMargin, rightMargin, bottomMargin = self.getContentsMargins()
+        width = fm.width('0') * chars_per_line + 4 + leftMargin + rightMargin
+        horizontalSpacer = QtGui.QSpacerItem(width, 0, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        grid.addItem(horizontalSpacer, 3, 0, 1, 0)
+
+        grid.setSizeConstraint(QtGui.QLayout.SetNoConstraint)
+        self.setLayout(grid)
+
+        self.setModal(True)
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+
+        size = QtCore.QSize(width + 60, 0.8 * parent.size().height())
+        self.resize(size)
+
 
 class FileEntryView(QtGui.QWidget, Widget):
     """Widget for entering paths and filenames.
