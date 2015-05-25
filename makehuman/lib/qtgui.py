@@ -1210,6 +1210,10 @@ class AboutBoxScrollbars(QtGui.QDialog):
     def __init__(self, parent, title, text, versiontext):
         super(AboutBoxScrollbars, self).__init__(parent)
 
+        def _replace_urls(text):
+            re_match_urls = re.compile(r"""((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.‌​][a-z]{2,4}/)(?:[^\s()<>]+|(([^\s()<>]+|(([^\s()<>]+)))*))+(?:(([^\s()<>]+|(‌​([^\s()<>]+)))*)|[^\s`!()[]{};:'".,<>?«»“”‘’]))""", re.DOTALL)
+            return re_match_urls.sub(lambda x: '<a href="%(url)s" style="color: #ffa02f;">%(url)s</a>' % dict(url=str(x.group())), text)
+
         if sys.platform == 'darwin':
             self.setWindowFlags(QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowSystemMenuHint)
         # Grab window icon of parent
@@ -1219,9 +1223,10 @@ class AboutBoxScrollbars(QtGui.QDialog):
         self.setWindowTitle(title)
 
         label = QtGui.QLabel(self)
-        label.setText(text)
+        label.setText(_replace_urls(text).replace('\n', '<br>'))
         label.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignLeft)
         label.setOpenExternalLinks(True)
+        label.setTextFormat(QtCore.Qt.RichText)
 
         if sys.platform == 'darwin':
             label.setContentsMargins(16, 0, 0, 0)
