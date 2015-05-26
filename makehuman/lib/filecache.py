@@ -274,7 +274,7 @@ class MetadataCacher(object):
     def getFileExtensions(self):
         return self.file_extensions
 
-    def updateFileCache(self, search_paths=None, file_extensions=None, remove_old_entries=False):
+    def updateFileCache(self, search_paths=None, file_extensions=None, remove_old_entries=True):
         """
         Update cache of file metadata in the specified paths.
         This cache contains per canonical filename (key) the UUID and tags of that
