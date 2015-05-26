@@ -150,6 +150,7 @@ class VIEW3D_OT_ImportBaseMhcloButton(bpy.types.Operator):
         try:
             import_obj.importBaseMhclo(context, filepath=mt.baseMhcloFile)
             afterImport(context, mt.baseMhcloFile, False, True)
+            loadAndApplyTarget(context)
         except MHError:
             handleMHError(context)
         return {'FINISHED'}
@@ -166,9 +167,33 @@ class VIEW3D_OT_ImportBaseObjButton(bpy.types.Operator):
         try:
             import_obj.importBaseObj(context, filepath=mt.baseObjFile)
             afterImport(context, mt.baseObjFile, True, False)
+            loadAndApplyTarget(context)
         except MHError:
             handleMHError(context)
         return {'FINISHED'}
+
+
+def loadAndApplyTarget(context):
+    bodytype = context.scene.MhBodyType
+    if bodytype == 'None':
+        return
+    trgpath = os.path.join(os.path.dirname(__file__), "../makeclothes/targets", bodytype + ".target")
+    try:
+        utils.loadTarget(trgpath, context)
+        found = True
+    except FileNotFoundError:
+        found = False
+    if not found:
+        raise MHError("Target \"%s\" not found.\nPath \"%s\" does not seem to be the path to the MakeHuman program" % (trgpath, scn.MhProgramPath))
+
+    ob = context.object
+    pxyfile = ob.ProxyFile
+    objfile = ob.ObjFile
+    applyTargets(context)
+    ob["NTargets"] = 0
+    ob.ProxyFile = pxyfile
+    ob.ObjFile =  objfile
+    ob.MhHuman = True
 
 
 def makeBaseObj(context):
@@ -1383,6 +1408,14 @@ def init():
                  ('Hair','Hair','Hair'),
                  ('All','All','All')],
     default='All')
+
+    bpy.types.Scene.MhBodyType = EnumProperty(
+        items = [('None', 'Base Mesh', 'None'),
+                 ('caucasian-male-young', 'Average Male', 'caucasian-male-young'),
+                 ('caucasian-female-young', 'Average Female', 'caucasian-female-young'),
+                ],
+        description = "Character to load",
+    default='caucasian-female-young')
 
     bpy.types.Object.MhIrrelevantDeleted = BoolProperty(name="Irrelevant deleted", default = False)
     bpy.types.Object.MhMeshVertsDeleted = BoolProperty(name="Cannot load", default = False)
