@@ -152,6 +152,7 @@ class MakeTargetPanel(bpy.types.Panel):
             layout.operator("mh.prune_target_file")
 
         if not utils.isBaseOrTarget(ob):
+            layout.prop(scn, "MhBodyType")
             layout.operator("mh.import_base_obj")
             layout.operator("mh.import_base_mhclo")
             layout.operator("mh.make_base_obj")

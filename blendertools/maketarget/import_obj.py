@@ -79,7 +79,6 @@ def importBaseMhclo(context, filepath=None):
     ob.ObjFile = mh.proxy.obj_file
     ob.MhHuman = True
     print("Base object imported")
-    print(mh.proxy)
     return ob
 
 
