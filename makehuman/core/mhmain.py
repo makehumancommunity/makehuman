@@ -324,7 +324,7 @@ class MHApplication(gui3d.Application, mh.Application):
             raise KeyError('The keyword "version" is protected for settings')
 
         if setting_name in self._default_settings:
-            log.warning("Setting %s is already declared. Adding it again has no effect.")
+            log.warning("Setting %s is already declared. Adding it again has no effect." % setting_name)
             return
         self._default_settings[setting_name] = default_value
         if value is None:
