@@ -1280,7 +1280,7 @@ class AboutBoxScrollbars(QtGui.QDialog):
             label.setFont(f)
 
         # Add an invisible spacer to make the dialog box size to fit the width
-        chars_per_line = 80
+        chars_per_line = 83
         fm = QtGui.QFontMetrics(label.font())
         leftMargin, topMargin, rightMargin, bottomMargin = self.getContentsMargins()
         width = fm.width('#') * chars_per_line + 4 + leftMargin + rightMargin
