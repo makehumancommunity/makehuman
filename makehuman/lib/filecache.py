@@ -63,7 +63,7 @@ class FileCache(object):
 
     def __getstate__(self):
         """Return state values to be pickled."""
-        return {'version': self.version, 'filepath': self.filepath, '_cache': self._cache}
+        return {'version': self.version, '_cache': self._cache}
 
     def save(self):
         """Save filecache to file"""
@@ -329,6 +329,7 @@ def loadCache(filepath, expected_version=None):
                 log.message("File cache %s has a different version (%s) than expected (%s), dropping it." % (filepath, result.version, expected_version))
                 del result
             else:
+                result.filepath = filepath
                 return result
     except:
         log.debug("Failed to load stored cache %s" % filepath, exc_info=True)
