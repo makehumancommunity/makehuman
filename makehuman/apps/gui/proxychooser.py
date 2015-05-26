@@ -191,6 +191,7 @@ class ProxyChooserTaskView(gui3d.TaskView, filecache.MetadataCacher):
     def getFileExtension(self):
         """
         The file extension for proxy files of this type.
+        Order determines precedence: the first extension in the list is preferred.
         """
         return ['mhpxy', 'mhclo']
 
