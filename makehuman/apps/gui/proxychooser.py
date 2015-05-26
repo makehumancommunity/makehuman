@@ -466,7 +466,7 @@ class ProxyChooserTaskView(gui3d.TaskView, filecache.MetadataCacher):
         if self._filecache is None:
             # Init cache
             self.loadCache()
-            self.updateFileCache(self.getSearchPaths(), self.getFileExtensions(), False)
+            self.updateFileCache(self.getSearchPaths(), self.getFileExtensions())
 
         # When the task gets shown, set the focus to the file chooser
         gui3d.TaskView.onShow(self, event)
@@ -534,7 +534,7 @@ class ProxyChooserTaskView(gui3d.TaskView, filecache.MetadataCacher):
         if self._filecache is None:
             # Init cache
             self.loadCache()
-            self.updateFileCache(self.getSearchPaths(), self.getFileExtensions(), False)
+            self.updateFileCache(self.getSearchPaths(), self.getFileExtensions(), True)
 
         if values[0] == self.getSaveName():
             if len(values) >= 3:
@@ -563,14 +563,14 @@ class ProxyChooserTaskView(gui3d.TaskView, filecache.MetadataCacher):
         if self._filecache is None:
             # Init cache
             self.loadCache()
-            self.updateFileCache(self.getSearchPaths(), self.getFileExtensions(), False)
+            self.updateFileCache(self.getSearchPaths(), self.getFileExtensions(), True)
 
         if self._proxyFilePerUuid is None:
             self._loadUuidLookup()
 
         if proxyId not in self._filecache:
             # Try again once more, but update the metadata cache first (lazy cache for performance reasons)
-            self.updateFileCache(self.getSearchPaths(), self.getFileExtensions(), False)
+            self.updateFileCache(self.getSearchPaths(), self.getFileExtensions(), True)
             self._loadUuidLookup()
 
             if proxyId not in self._filecache:
@@ -581,7 +581,7 @@ class ProxyChooserTaskView(gui3d.TaskView, filecache.MetadataCacher):
         mtime = metadata[0]
         if mtime < os.path.getmtime(proxyId):
             # Queried file was updated, update stale cache
-            self.updateFileCache(self.getSearchPaths(), self.getFileExtensions(), False)
+            self.updateFileCache(self.getSearchPaths(), self.getFileExtensions(), True)
             self._loadUuidLookup()
             metadata = self._filecache[proxyId]
 
@@ -597,19 +597,14 @@ class ProxyChooserTaskView(gui3d.TaskView, filecache.MetadataCacher):
         if self._filecache is None:
             # Init cache
             self.loadCache()
-            self.updateFileCache(self.getSearchPaths(), self.getFileExtensions(), False)
-
-        if self._filecache is None:
-            # Init cache
-            self.loadCache()
-            self.updateFileCache(self.getSearchPaths(), self.getFileExtensions(), False)
+            self.updateFileCache(self.getSearchPaths(), self.getFileExtensions(), True)
 
         if self._proxyFilePerUuid is None:
             self._loadUuidLookup()
 
         if uuid not in self._proxyFilePerUuid:
             # Try again once more, but update the proxy UUID lookup table first (lazy cache for performance reasons)
-            self.updateFileCache(self.getSearchPaths(), self.getFileExtensions(), False)
+            self.updateFileCache(self.getSearchPaths(), self.getFileExtensions(), True)
             self._loadUuidLookup()
             if uuid not in self._proxyFilePerUuid:
                 log.warning('Could not find a proxy with UUID %s. Does not exist in %s library.', uuid, self.proxyName)
