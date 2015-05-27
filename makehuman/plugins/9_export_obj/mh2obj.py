@@ -54,10 +54,10 @@ def exportObj(filepath, config=None):
     name = config.goodName(os.path.splitext(filename)[0])
 
     progress(0, 0.3, "Collecting Objects")
-    objects = human.getObjects(excludeZeroFaceObjs=not config.helperGeom)
+    objects = human.getObjects(excludeZeroFaceObjs=not config.hiddenGeom)
     meshes = [o.mesh for o in objects]
 
-    if config.helperGeom:
+    if config.hiddenGeom:
         # Disable the face masking on copies of the input meshes
         meshes = [m.clone(filterMaskedVerts=False) for m in meshes]
         for m in meshes:
@@ -71,6 +71,6 @@ def exportObj(filepath, config=None):
             m.updateIndexBuffer()
 
     progress(0.3, 0.99, "Writing Objects")
-    wavefront.writeObjFile(filepath, meshes, True, config, filterMaskedFaces=not config.helperGeom)
+    wavefront.writeObjFile(filepath, meshes, True, config, filterMaskedFaces=not config.hiddenGeom)
 
     progress(1.0, None, "OBJ Export finished. Output file: %s" % filepath)
