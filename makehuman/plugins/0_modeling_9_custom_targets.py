@@ -132,6 +132,9 @@ class CustomTargetsTaskView(gui3d.TaskView):
         self.syncStatus()
 
     def unloadTargets(self):
+        if len(self.modifiers) == 0:
+            return
+        
         # Invalidate any cached targets
         for m in self.modifiers.values():
             for tpath,_ in m.targets:
