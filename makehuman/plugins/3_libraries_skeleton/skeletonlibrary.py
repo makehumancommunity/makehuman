@@ -183,7 +183,6 @@ class SkeletonLibrary(gui3d.TaskView, filecache.MetadataCacher):
         self.xray_mat = None
 
         # the reference skeleton
-        log.message("Loading base reference skeleton.")
         self.referenceRig = self.human.getBaseSkeleton()
 
     def onShow(self, event):
