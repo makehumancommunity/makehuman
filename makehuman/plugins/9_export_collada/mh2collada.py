@@ -47,8 +47,6 @@ import log
 import getpath
 import bvh
 
-import gui3d
-
 from progress import Progress
 
 from . import dae_materials
