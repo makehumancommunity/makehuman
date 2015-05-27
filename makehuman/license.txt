@@ -5,7 +5,7 @@ TOC
 
 A. The MakeHuman Source code and data
 B. Other MakeHuman Application Code
-C. MakeHuman output GPL exception
+C. Optional use of CC0 for output
 D. CC0 1.0 Universal
 
 
@@ -253,7 +253,7 @@ B. Other MakeHuman Application Code
 From time to time the MakeHuman Team may release other application code in various forms. Unless otherwise explicitly stated this application code is also covered by the GNU GPL 2. 
 
 ==================================
-C. MakeHuman output GPL exception
+C. Optional use of CC0 for output
 ==================================
 
 As a special and limited exception, the copyright holders of the MakeHuman assets grants the option to use CC0 1.0 Universal as published by the Creative Commons, either version 1.0 of the License, or (at your option) any later version, as a license for the MakeHuman characters exported under the conditions that a) The assets were bundled in an export that was made using the file export functionality inside an OFFICIAL and UNMODIFIED version of MakeHuman and/or b) the asset solely consists of a 2D binary image in PNG, BMP or JPG format.
