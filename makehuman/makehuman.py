@@ -477,7 +477,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-The MakeHuman source and data are released under the AGPLv3 license.
+The MakeHuman source and data are released under the AGPL license.
 This also includes everything that is exported from or by MakeHuman. 
 However, respecting a set of conditions (which are explained in section 
 C of license.txt), you are allowed to instead use the CC0 license 
