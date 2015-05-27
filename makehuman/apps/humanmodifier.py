@@ -180,8 +180,8 @@ class Modifier(object):
         self.human = None
 
     def setHuman(self, human):
-        human.addModifier(self)
         self.human = human
+        human.addModifier(self)
 
     @property
     def fullName(self):
@@ -331,6 +331,9 @@ class Modifier(object):
         Retrieve the other modifiers of the same type on the human.
         """
         return [m for m in self.human.getModifiersByType(type(self)) if m != self]
+
+    def isMacro(self):
+        return self.macroVariable is not None
 
     def __str__(self):
         return "%s %s" % (type(self).__name__, self.fullName)

@@ -70,6 +70,7 @@ class ModifierTaskView(gui3d.TaskView):
         self.groupBox = self.addLeftWidget(gui.StackedBox())
 
         self.showMacroStats = False
+        self.human = gui3d.app.selectedHuman
 
     def addSlider(self, sliderCategory, slider, enabledCondition=None):
         # Get category groupbox
@@ -93,16 +94,11 @@ class ModifierTaskView(gui3d.TaskView):
         slider.enabledCondition = enabledCondition
         self.sliders.append(slider)
 
-        self.updateMacro()
+    def updateMacro(self):
+        self.human.updateMacroModifiers()
 
     def getModifiers(self):
         return self.modifiers
-
-    # TODO is this still needed?
-    def updateMacro(self):
-        for modifier in self.modifiers.itervalues():
-            if isinstance(modifier, humanmodifier.MacroModifier):
-                modifier.setValue(modifier.getValue())
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
