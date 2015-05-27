@@ -59,7 +59,7 @@ def pathToUnicode(path):
     else:
         try:
             # Works eg. for QString objects
-            unicode(path, sys.getfilesystemencoding())
+            return unicode(path, sys.getfilesystemencoding())
         except:
             return path
 
