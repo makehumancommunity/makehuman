@@ -477,14 +477,14 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+The MakeHuman source and data are relased under AGPL. 
+This also includes everything that is exported from or by MakeHuman. 
+However, respecting a set of conditions (which are explained in section 
+C of license.txt), you are allowed to instead use the CC0 license 
+for exports. 
 
-MakeHuman's source code and its mesh data is distributed freely under 
-the AGPL3 license (see license.txt). Content created using the MakeHuman 
-application is released under the liberal CC0 license. For more details, 
-refer to these pages:
-
-    http://www.makehuman.org/doc/node/the_makehuman_application.html
-    http://www.makehuman.org/doc/node/makehuman_mesh_license.html
+The human readable explanation of the license terms is here: 
+http://www.makehuman.org/content/license_explanation.html
 
 Licenses for dependencies are included in the licenses folder.
 
