@@ -37,8 +37,6 @@ Abstract
 Exporter plugin for the Ogre3d mesh format.
 """
 
-import gui3d
-import gui
 import mh2ogre
 from export import Exporter, ExportConfig
 
@@ -68,6 +66,7 @@ class ExporterOgre(Exporter):
         mh2ogre.exportOgreMesh(filename("mesh.xml"), cfg)
 
     def build(self, options, taskview):
+        import gui
         self.taskview     = taskview
         self.feetOnGround = options.addWidget(gui.CheckBox("Feet on ground", True))
 

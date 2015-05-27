@@ -37,7 +37,6 @@ Abstract
 Lightmap texture exporter
 """
 
-import gui
 from export import Exporter
 
 class ExporterLight(Exporter):
@@ -48,6 +47,7 @@ class ExporterLight(Exporter):
         self.filter = "PNG (*.png)"
 
     def build(self, options, taskview):
+        import gui
         pass
 
     def export(self, human, filename):
@@ -69,3 +69,4 @@ def load(app):
 
 def unload(app):
     pass
+
