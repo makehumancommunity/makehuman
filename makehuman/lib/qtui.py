@@ -625,12 +625,17 @@ class Frame(QtGui.QMainWindow):
         self.windowState = set(geometry['state'])
 
     def dragEnterEvent(self, event):
+        """Decide whether to accept files dragged into the MakeHuman window."""
         if event.mimeData().hasUrls():
-            event.acceptProposedAction()
+            url = event.mimeData().urls()[0]
+            path = getpath.pathToUnicode(url.toLocalFile())
+            if os.path.splitext(path)[1].lower() == '.mhm':
+                event.acceptProposedAction()
 
     def dropEvent(self, event):
+        """Support drag and dropping .MHM files in the MakeHuman window to load
+        them"""
         mime_data = event.mimeData()
-        # check for our needed mime type, here a file or a list of files
         if not mime_data.hasUrls():
             return
 
