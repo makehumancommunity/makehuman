@@ -337,7 +337,7 @@ def get_hg_revision():
         os.environ['HGNODEID'] = str(version_.split(':')[1])
         os.environ['HGREVISION_SOURCE'] = "data/VERSION static revision data"
     elif not isBuild():
-        print >> sys.stderr,  u"NO VERSION file detected retrieving revision info from HG"
+        print >> sys.stderr,  u"NO VERSION file detected, retrieving revision info from HG"
         # Set HG rev in environment so it can be used elsewhere
         hgrev = get_hg_revision_1()
         print >> sys.stderr,  u"Detected HG revision: r%s (%s)" % (hgrev[0], hgrev[1])
