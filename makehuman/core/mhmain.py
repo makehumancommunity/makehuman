@@ -716,7 +716,7 @@ class MHApplication(gui3d.Application, mh.Application):
             algos3d.getTarget(self.selectedHuman.meshData, target.path)
 
     def loadFinish(self):
-        #self.selectedHuman.callEvent('onChanged', events3d.HumanEvent(self.selectedHuman, 'reset'))
+        self.selectedHuman.updateMacroModifiers()
         self.selectedHuman.applyAllTargets()
 
         self.currentFile.modified = False

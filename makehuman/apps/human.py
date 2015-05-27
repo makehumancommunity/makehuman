@@ -857,6 +857,13 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         name = canonicalPath(name)
         return self.targetsDetailStack.get(name, 0.0)
 
+    def updateMacroModifiers(self):
+        """Update the targetsDetailStack for this human
+        determined by the macromodifier target combinations."""
+        for modifier in self.modifiers:
+            if modifier.isMacro():
+                modifier.setValue(modifier.getValue())
+
     @property
     def modifiers(self):
         """
@@ -964,6 +971,9 @@ class Human(guicommon.Object, animation.AnimatedMesh):
                 self._modifier_dependencyMapping[dep] = []
             if modifier.groupName not in self._modifier_dependencyMapping[dep]:
                 self._modifier_dependencyMapping[dep].append(modifier.groupName)
+
+            if modifier.isMacro():
+                self.updateMacroModifiers()
 
     def getModifierDependencies(self, modifier, filter = None):
         """
