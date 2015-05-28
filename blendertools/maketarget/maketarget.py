@@ -187,13 +187,15 @@ def loadAndApplyTarget(context):
         raise MHError("Target \"%s\" not found.\nPath \"%s\" does not seem to be the path to the MakeHuman program" % (trgpath, scn.MhProgramPath))
 
     ob = context.object
-    pxyfile = ob.ProxyFile
-    objfile = ob.ObjFile
+    props = {}
+    for key in ob.keys():
+        props[key] = ob[key]
     applyTargets(context)
+    for key in props.keys():
+        ob[key] = props[key]
+    ob.name = bodytype.split("-")[1]
+    ob.shape_key_add(name="Basis")
     ob["NTargets"] = 0
-    ob.ProxyFile = pxyfile
-    ob.ObjFile =  objfile
-    ob.MhHuman = True
 
 
 def makeBaseObj(context):
