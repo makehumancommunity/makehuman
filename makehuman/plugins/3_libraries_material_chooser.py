@@ -188,7 +188,7 @@ class MaterialTaskView(gui3d.TaskView, filecache.MetadataCacher):
     def onHide(self, event):
         gui3d.TaskView.onHide(self, event)
 
-    def loadHandler(self, human, values):
+    def loadHandler(self, human, values, strict):
         if values[0] == 'status':
             return
 
@@ -201,6 +201,8 @@ class MaterialTaskView(gui3d.TaskView, filecache.MetadataCacher):
             else:
                 absP = getpath.thoroughFindFile(path)
                 if not os.path.isfile(absP):
+                    if strict:
+                        raise RuntimeError('Could not find material %s for skinMaterial parameter.', values[1]))
                     log.warning('Could not find material %s for skinMaterial parameter.', values[1])
                     return
                 mat = material.fromFile(absP)
@@ -227,7 +229,9 @@ class MaterialTaskView(gui3d.TaskView, filecache.MetadataCacher):
                 proxy.object.material = material.fromFile(filepath)
                 return
             elif not uuid in human.clothesProxies.keys():
-                log.error("Could not load material for proxy with uuid %s (%s)! No such proxy." % (uuid, name))
+                if strict:
+                    raise RuntimeError("Could not load material for proxy with uuid %s (%s)! No such proxy." % (uuid, name))
+                log.error("Could not load material for proxy with uuid %s (%s)! No such proxy.", uuid, name)
                 return
 
             proxy = human.clothesProxies[uuid]

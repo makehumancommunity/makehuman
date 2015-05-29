@@ -152,7 +152,7 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
         super(ClothesTaskView, self).onHide(event)
         self.visualizeFaceMasks(False)
 
-    def loadHandler(self, human, values):
+    def loadHandler(self, human, values, strict):
         if values[0] == 'status':
             if values[1] == 'started':
                 # Don't update face masks during loading (optimization)
@@ -168,7 +168,7 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
             self.faceHidingTggl.setChecked(enabled)
             return
 
-        super(ClothesTaskView, self).loadHandler(human, values)
+        super(ClothesTaskView, self).loadHandler(human, values, strict)
 
     def onHumanChanged(self, event):
         super(ClothesTaskView, self).onHumanChanged(event)

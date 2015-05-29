@@ -210,7 +210,7 @@ class CustomTargetsTaskView(gui3d.TaskView):
             self.syncSliders()
             self.syncStatus()
 
-    def loadHandler(self, human, values):
+    def loadHandler(self, human, values, strict):
         pass
 
     def saveHandler(self, human, file):
