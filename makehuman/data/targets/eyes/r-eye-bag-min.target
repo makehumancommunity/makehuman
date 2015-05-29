@@ -1,0 +1,85 @@
+# MakeHuman 3d morphing modelled by Manuel Bastioni
+# Copyright (C) 2015 Manuel Bastioni (mb@makehuman.org)
+# homepage http://www.makehuman.org
+# basemesh hm08
+# license AGPL3 (http://www.makehuman.org/doc/node/makehuman_mesh_license.html)
+#    This file is part of MakeHuman (www.makehuman.org).
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+31 0 0 0
+32 .004 0 0
+34 0 0 0
+35 .005 0 -.002
+37 .001 0 0
+38 .006 0 -.003
+39 .003 .001 -.003
+40 0 0 0
+42 .002 .002 -.006
+43 -.001 0 0
+45 -.001 .001 -.003
+46 -.001 0 0
+48 -.002 0 0
+49 -.001 0 0
+51 0 0 0
+52 0 0 0
+75 .004 .001 .002
+76 .006 .003 .002
+77 .005 .007 -.001
+78 0 .006 -.002
+79 -.003 .006 -.001
+80 -.005 .003 .001
+81 0 0 0
+88 .001 0 .001
+137 .001 0 .001
+138 .004 0 .001
+139 .002 .004 -.001
+140 -.001 .003 -.002
+141 -.005 .002 0
+142 -.004 0 0
+1117 .002 .002 -.004
+1118 .004 .005 -.011
+1119 .005 .007 -.014
+1120 .003 .008 -.016
+1121 -.003 .005 -.011
+1122 -.002 .002 -.005
+1123 0 0 0
+4859 0 0 0
+4861 0 0 0
+4863 0 0 0
+4864 0 0 0
+4882 .001 .001 .001
+4884 .004 .006 -.003
+4885 .007 .002 0
+4886 .001 .005 -.005
+4887 -.002 .004 -.002
+4888 0 0 0
+4889 -.003 .001 0
+4890 .005 .001 .001
+5076 0 0 0
+5079 0 0 0
+5081 -.001 0 0
+5082 -.002 .001 .001
+5084 0 0 0
+5105 0 0 0
+5129 0 0 0
+5130 -.001 0 .002
+5209 0 0 0
+5219 0 0 0
+5248 0 0 0
+14708 .005 .003 -.001
+14709 .005 .002 0
+14716 0 0 0
+14717 .007 .020 -.004
+14725 0 0 0
+14726 -.002 .009 -.001
