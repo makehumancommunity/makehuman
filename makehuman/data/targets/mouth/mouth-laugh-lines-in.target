@@ -1,0 +1,68 @@
+# MakeHuman 3d morphing modelled by Manuel Bastioni
+# Copyright (C) 2015 Manuel Bastioni (mb@makehuman.org)
+# homepage http://www.makehuman.org
+# basemesh hm08
+# license AGPL3 (http://www.makehuman.org/doc/node/makehuman_mesh_license.html)
+#    This file is part of MakeHuman (www.makehuman.org).
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+372 -.004 .009 -.008
+376 -.004 .007 -.006
+711 -.004 .005 -.005
+712 .004 0 -.005
+725 .003 .001 -.005
+3739 -.004 .003 -.006
+5135 0 .005 -.002
+5136 -.003 .010 -.022
+5137 -.005 .012 -.011
+5140 .008 -.002 .005
+5141 .008 -.004 .004
+5142 .006 .002 -.008
+5143 .005 .001 -.009
+5144 -.003 .010 -.022
+5145 -.003 .010 -.022
+5218 .013 -.001 .003
+5258 -.003 .010 -.022
+5286 .009 -.001 .005
+5287 .009 -.001 .006
+5288 .009 0 .007
+5289 .008 -.001 .007
+5322 .008 -.004 .003
+5330 -.003 .010 -.022
+5332 .009 -.004 .003
+7132 .004 .009 -.008
+7136 .004 .007 -.006
+7434 .004 .005 -.005
+7435 -.004 0 -.005
+7447 -.003 .001 -.005
+10367 -.003 .001 -.005
+10407 .004 .003 -.006
+11749 0 .005 -.002
+11750 .003 .010 -.022
+11751 .005 .012 -.011
+11754 -.008 -.002 .005
+11755 -.008 -.004 .004
+11756 -.009 .004 -.013
+11757 -.008 .002 -.014
+11758 .003 .010 -.022
+11759 .003 .010 -.022
+11828 -.013 -.001 .003
+11866 .003 .010 -.022
+11892 -.009 -.001 .005
+11893 -.009 -.001 .006
+11894 -.009 0 .007
+11895 -.008 -.001 .007
+11926 -.008 -.004 .003
+11934 .003 .010 -.022
+11936 -.009 -.004 .003

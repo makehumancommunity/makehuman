@@ -14,10 +14,10 @@
 
       {"target": "head-scale-depth", "min": "less", "max": "more"},
       {"target": "head-scale-horiz", "min": "less", "max": "more"},
-      {"target": "head-scale-vert", "min": "more", "max": "less"},
+      {"target": "head-scale-vert", "min": "less", "max": "more"},
       {"target": "head-trans", "min": "in", "max": "out"},
       {"target": "head-trans", "min": "down", "max": "up"},
-      {"target": "head-trans", "min": "forward", "max": "backward"},
+      {"target": "head-trans", "min": "backward", "max": "forward"},
       {"target": "head-back-scale-depth", "min": "less", "max": "more"}
     ]
   },
@@ -41,9 +41,10 @@
 
   { "group": "neck", 
     "modifiers": [
+      {"target": "neck-double", "min": "less", "max": "more"},
       {"target": "neck-scale-depth", "min": "less", "max": "more"},
       {"target": "neck-scale-horiz", "min": "less", "max": "more"},
-      {"target": "neck-scale-vert", "min": "more", "max": "less"},
+      {"target": "neck-scale-vert", "min": "less", "max": "more"},
       {"target": "neck-trans-horiz", "min": "in", "max": "out"},
       {"target": "neck-trans-vert", "min": "down", "max": "up"},
       {"target": "neck-trans-depth", "min": "forward", "max": "backward"},
@@ -53,38 +54,54 @@
 
   { "group": "eyes", 
     "modifiers": [
+      {"target": "r-eye-bag", "min": "min", "max": "max"},
+      {"target": "r-eye-bag", "min": "in", "max": "out"},
+      {"target": "r-eye-bag-height", "min": "min", "max": "max"},
+      {"target": "r-eye-eyefold-angle", "min": "down", "max": "up"},
+      {"target": "r-eye-epicanthus", "min": "in", "max": "out"},
+      {"target": "r-eye-eyefold", "min": "concave", "max": "convex"},
+      {"target": "r-eye-eyefold", "min": "down", "max": "up"},      
+      
       {"target": "r-eye-height1", "min": "min", "max": "max"},
       {"target": "r-eye-height2", "min": "min", "max": "max"},
       {"target": "r-eye-height3", "min": "min", "max": "max"},
       {"target": "r-eye-push1", "min": "in", "max": "out"},
-      {"target": "r-eye-push2", "min": "in", "max": "out"},
+      {"target": "r-eye-push2", "min": "out", "max": "in"},
       {"target": "r-eye-move", "min": "in", "max": "out"},
-      {"target": "r-eye-move", "min": "up", "max": "down"},
+      {"target": "r-eye-move", "min": "down", "max": "up"},
       {"target": "r-eye-size", "min": "small", "max": "big"},
-      {"target": "r-eye-corner1", "min": "up", "max": "down"},
-      {"target": "r-eye-corner2", "min": "up", "max": "down"},
+      {"target": "r-eye-corner1", "min": "down", "max": "up"},
+      {"target": "r-eye-corner2", "min": "down", "max": "up"},
+      
+      {"target": "l-eye-bag", "min": "min", "max": "max"},
+      {"target": "l-eye-bag", "min": "in", "max": "out"},
+      {"target": "l-eye-bag-height", "min": "min", "max": "max"},
+      {"target": "l-eye-eyefold-angle", "min": "down", "max": "up"},
+      {"target": "l-eye-epicanthus", "min": "in", "max": "out"},
+      {"target": "l-eye-eyefold", "min": "concave", "max": "convex"},
+      {"target": "l-eye-eyefold", "min": "down", "max": "up"},
 
       {"target": "l-eye-height1", "min": "min", "max": "max"},
       {"target": "l-eye-height2", "min": "min", "max": "max"},
       {"target": "l-eye-height3", "min": "min", "max": "max"},
       {"target": "l-eye-push1", "min": "in", "max": "out"},
-      {"target": "l-eye-push2", "min": "in", "max": "out"},
+      {"target": "l-eye-push2", "min": "out", "max": "in"},
       {"target": "l-eye-move", "min": "in", "max": "out"},
-      {"target": "l-eye-move", "min": "up", "max": "down"},
+      {"target": "l-eye-move", "min": "down", "max": "up"},
       {"target": "l-eye-size", "min": "small", "max": "big"},
-      {"target": "l-eye-corner1", "min": "up", "max": "down"},
-      {"target": "l-eye-corner2", "min": "up", "max": "down"}
+      {"target": "l-eye-corner1", "min": "down", "max": "up"},
+      {"target": "l-eye-corner2", "min": "down", "max": "up"}
     ]
   },
 
   { "group": "nose",
     "modifiers": [
-      {"target": "nose-trans-vert", "min": "up", "max": "down"},
-      {"target": "nose-trans-depth", "min": "forward", "max": "backward"},
+      {"target": "nose-trans-vert", "min": "down", "max": "up"},
+      {"target": "nose-trans-depth", "min": "backward", "max": "forward"},
       {"target": "nose-trans-horiz", "min": "in", "max": "out"},
-      {"target": "nose-scale-vert", "min": "incr", "max": "decr"},
-      {"target": "nose-scale-horiz", "min": "incr", "max": "decr"},
-      {"target": "nose-scale-depth", "min": "incr", "max": "decr"},
+      {"target": "nose-scale-vert", "min": "decr", "max": "incr"},
+      {"target": "nose-scale-horiz", "min": "decr", "max": "incr"},
+      {"target": "nose-scale-depth", "min": "decr", "max": "incr"},
 
       {"target": "nose-nostril-width", "min": "min", "max": "max"},
       {"target": "nose-point-width", "min": "less", "max": "more"},
@@ -94,12 +111,12 @@
       {"target": "nose-width3", "min": "min", "max": "max"},
 
       {"target": "nose-compression", "min": "compress", "max": "uncompress"},
-      {"target": "nose-curve", "min": "convex", "max": "concave"},
-      {"target": "nose-greek", "min": "moregreek", "max": "lessgreek"},
-      {"target": "nose-hump", "min": "morehump", "max": "lesshump"},
+      {"target": "nose-curve", "min": "concave", "max": "convex"},
+      {"target": "nose-greek", "min": "lessgreek", "max": "moregreek"},
+      {"target": "nose-hump", "min": "lesshump", "max": "morehump"},
       {"target": "nose-volume", "min": "potato", "max": "point"},
-      {"target": "nose-nostrils-angle", "min": "up", "max": "down"},
-      {"target": "nose-point", "min": "up", "max": "down"},
+      {"target": "nose-nostrils-angle", "min": "down", "max": "up"},
+      {"target": "nose-point", "min": "down", "max": "up"},
       {"target": "nose-septumangle", "min": "decr", "max": "incr"},
       {"target": "nose-flaring", "min": "decr", "max": "incr"}
     ]
@@ -107,27 +124,29 @@
 
   { "group": "mouth",
     "modifiers": [
-      {"target": "mouth-scale-horiz", "min": "incr", "max": "decr"},
-      {"target": "mouth-scale-vert", "min": "incr", "max": "decr"},
-      {"target": "mouth-scale-depth", "min": "incr", "max": "decr"},
+      {"target": "mouth-scale-horiz", "min": "decr", "max": "incr"},
+      {"target": "mouth-scale-vert", "min": "decr", "max": "incr"},
+      {"target": "mouth-scale-depth", "min": "decr", "max": "incr"},
       {"target": "mouth-trans", "min": "in", "max": "out"},
-      {"target": "mouth-trans", "min": "up", "max": "down"},
-      {"target": "mouth-trans", "min": "forward", "max": "backward"},
+      {"target": "mouth-trans", "min": "down", "max": "up"},
+      {"target": "mouth-trans", "min": "backward", "max": "forward"},
 
       {"target": "mouth-lowerlip-height", "min": "min", "max": "max"},
       {"target": "mouth-lowerlip-width", "min": "min", "max": "max"},
       {"target": "mouth-upperlip-height", "min": "min", "max": "max"},
       {"target": "mouth-upperlip-width", "min": "min", "max": "max"},
       {"target": "mouth-cupidsbow-width", "min": "min", "max": "max"},
-
+      
+      {"target": "mouth-dimples", "min": "in", "max": "out"},
+      {"target": "mouth-laugh-lines", "min": "in", "max": "out"},
       {"target": "mouth-lowerlip-ext", "min": "up", "max": "down"},
-      {"target": "mouth-angles", "min": "up", "max": "down"},
+      {"target": "mouth-angles", "min": "down", "max": "up"},
       {"target": "mouth-lowerlip-middle", "min": "up", "max": "down"},
       {"target": "mouth-lowerlip-volume", "min": "deflate", "max": "inflate"},
       {"target": "mouth-philtrum-volume", "min": "increase", "max": "decrease"},
       {"target": "mouth-upperlip-volume", "min": "deflate", "max": "inflate"},
-      {"target": "mouth-upperlip-ext", "min": "up", "max": "down"},
-      {"target": "mouth-upperlip-middle", "min": "up", "max": "down"},
+      {"target": "mouth-upperlip-ext", "min": "down", "max": "up"},
+      {"target": "mouth-upperlip-middle", "min": "down", "max": "up"},
       {"target": "mouth-cupidsbow", "min": "decr", "max": "incr"}
     ]
   },
@@ -135,33 +154,35 @@
   { "group": "ears",
     "modifiers": [
       {"target": "r-ear-trans-depth", "min": "backward", "max": "forward"},
-      {"target": "r-ear-size", "min": "big", "max": "small"},
+      {"target": "r-ear-size", "min": "small", "max": "big"},
       {"target": "r-ear-trans-vert", "min": "down", "max": "up"},
       {"target": "r-ear-height", "min": "min", "max": "max"},
       {"target": "r-ear-lobe", "min": "min", "max": "max"},
       {"target": "r-ear-shape1", "min": "pointed", "max": "triangle"},
       {"target": "r-ear-rot", "min": "backward", "max": "forward"},
       {"target": "r-ear-shape2", "min": "square", "max": "round"},
-      {"target": "r-ear-width", "min": "max", "max": "min"},
-      {"target": "r-ear-wing", "min": "out", "max": "in"},
-      {"target": "r-ear-flap", "min": "out", "max": "in"},
+      {"target": "r-ear-width", "min": "min", "max": "max"},
+      {"target": "r-ear-wing", "min": "in", "max": "out"},
+      {"target": "r-ear-flap", "min": "in", "max": "out"},
 
       {"target": "l-ear-trans-depth", "min": "backward", "max": "forward"},
-      {"target": "l-ear-size", "min": "big", "max": "small"},
+      {"target": "l-ear-size", "min": "small", "max": "big"},
       {"target": "l-ear-trans-vert", "min": "down", "max": "up"},
       {"target": "l-ear-height", "min": "min", "max": "max"},
       {"target": "l-ear-lobe", "min": "min", "max": "max"},
       {"target": "l-ear-shape1", "min": "pointed", "max": "triangle"},
       {"target": "l-ear-rot", "min": "backward", "max": "forward"},
       {"target": "l-ear-shape2", "min": "square", "max": "round"},
-      {"target": "l-ear-width", "min": "max", "max": "min"},
-      {"target": "l-ear-wing", "min": "out", "max": "in"},
-      {"target": "l-ear-flap", "min": "out", "max": "in"}
+      {"target": "l-ear-width", "min": "min", "max": "max"},
+      {"target": "l-ear-wing", "min": "in", "max": "out"},
+      {"target": "l-ear-flap", "min": "in", "max": "out"}
     ]
   },
 
   { "group": "chin",
     "modifiers": [
+      {"target": "chin-jaw-drop", "min": "less", "max": "more"},
+      {"target": "chin-cleft", "min": "in", "max": "out"},
       {"target": "chin-prominent", "min": "less", "max": "more"},
       {"target": "chin-width", "min": "min", "max": "max"},
       {"target": "chin-height", "min": "min", "max": "max"},
@@ -211,6 +232,7 @@
 
   { "group": "stomach",
     "modifiers": [
+      {"target": "stomach-navel", "min": "in", "max": "out"},
       {"target": "stomach-tone", "min": "decr", "max": "incr"},
       {"target": "stomach-pregnant", "min": "decr", "max": "incr"},
       {"target": "stomach-navel", "min": "down", "max": "up"}
@@ -232,11 +254,13 @@
 
   { "group": "armslegs",
     "modifiers": [
+        {"target": "r-hand-fingers-distance", "min": "decr", "max": "incr"},
         {"target": "r-hand-fingers-diameter", "min": "decr", "max": "incr"},
         {"target": "r-hand-fingers-length", "min": "decr", "max": "incr"},
         {"target": "r-hand-scale", "min": "decr", "max": "incr"},
         {"target": "r-hand-trans", "min": "in", "max": "out"},
 
+        {"target": "l-hand-fingers-distance", "min": "decr", "max": "incr"},
         {"target": "l-hand-fingers-diameter", "min": "decr", "max": "incr"},
         {"target": "l-hand-fingers-length", "min": "decr", "max": "incr"},
         {"target": "l-hand-scale", "min": "decr", "max": "incr"},
@@ -306,7 +330,10 @@
         {"target": "breast-trans-vert", "min": "down", "max": "up"},
         {"target": "breast-dist", "min": "min", "max": "max"},
         {"target": "breast-point", "min": "min", "max": "max"},
-        {"target": "breast-volume-vert", "min": "up", "max": "down"}
+        {"target": "breast-volume-vert", "min": "up", "max": "down"},
+        {"target": "nipple-size", "min": "min", "max": "max"},
+        {"target": "nipple-point", "min": "in", "max": "out"}
+        
     ]
   },
 
