@@ -1377,12 +1377,22 @@ class MHApplication(gui3d.Application, mh.Application):
     # Load handlers
 
     def addLoadHandler(self, keyword, handler):
+        """Register a handler for handling the loading of the specified
+        keyword from MHM file."""
         self.loadHandlers[keyword] = handler
+
+    def getLoadHandler(self, keyword):
+        """Retrieve the plugin or handler that handles the loading of the
+        specified keyword from MHM file.
+        """
+        self.loadHandlers.get(keyword, None)
 
     # Save handlers
 
     def addSaveHandler(self, handler, priority = None):
         """
+        Register a handler to trigger when a save action happens, when called
+        the handler gets the chance to write property lines to the MHM file.
         If priority is specified, should be an integer number > 0.
         0 is highest priority.
         """

@@ -1385,6 +1385,14 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
     def load(self, filename, update=True):
         from codecs import open
+
+        def _get_version(lineData):
+            for l in lineData:
+                l = l.split()
+                if l[0] == 'version':
+                    return l[1]
+            return None
+
         log.message("Loading human from MHM file %s.", filename)
         progress = Progress()(0.0, 0.8)
         event = events3d.HumanEvent(self, 'load')
@@ -1402,16 +1410,19 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             lh(self, ['status', 'started'])
 
         lines = f.readlines()
-        fprog = Progress(len(lines))
-        for data in lines:
-            lineData = data.split()
 
+        def _load_property(lineData):
             if len(lineData) > 0 and not lineData[0] == '#':
                 if lineData[0] == 'version':
                     log.message('Version %s', lineData[1])
                 elif lineData[0] == 'tags':
                     for tag in lineData[1:]:
                         log.debug('Tag %s', tag)
+                elif lineData[0] == 'modifier':
+                    try:
+                        self.getModifier(lineData[1]).setValue(float(lineData[2]), skipDependencies=True)
+                    except KeyError:
+                        log.warning('Unknown modifier specified in MHM file: %s', lineData[1])
                 elif lineData[0] == 'camera':
                     rot = map(float, lineData[1:3]) + [0.0]
                     trans = map(float, lineData[3:6])
@@ -1424,8 +1435,19 @@ class Human(guicommon.Object, animation.AnimatedMesh):
                 elif lineData[0] in G.app.loadHandlers:
                     G.app.loadHandlers[lineData[0]](self, lineData)
                 else:
-                    log.debug('Could not load %s', lineData)
-            fprog.step()
+                    log.warning('Unknown property in MHM file: %s', lineData)
+
+        version = _get_version(lines)
+        if version != getShortVersion():
+            log.message("MHM file is of version %s, attempting to load with backward compatibility")
+            import compat
+            compat.loadMHM(version, lines, _load_property)
+        else:
+            fprog = Progress(len(lines))
+            for data in lines:
+                lineData = data.strip().split()
+                _load_property(lineData)
+                fprog.step()
 
         log.debug("Finalizing MHM loading.")
         for lh in set(G.app.loadHandlers.values()):
@@ -1463,6 +1485,10 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         cam_trans = list(G.app.modelCamera.translation[:3])
         cam_zoom = [G.app.modelCamera.zoomFactor]
         f.write('camera %s %s %s %s %s %s\n' % tuple(cam_rot + cam_trans + cam_zoom))
+
+        for modifier in self.modifiers:
+            if modifier.getValue() or modifier.isMacro():
+                f.write('modifier %s %f\n' % (modifier.fullName, modifier.getValue()))
 
         class SaveWriter(object):
             def __init__(self, file_obj):
