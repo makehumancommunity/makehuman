@@ -1383,7 +1383,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             self.mesh.update()
         self.callEvent('onChanged', event)
 
-    def load(self, filename, update=True):
+    def load(self, filename, update=True, strict=False):
         from codecs import open
 
         def _get_version(lineData):
@@ -1407,7 +1407,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         f = open(filename, 'rU', encoding="utf-8")
 
         for lh in G.app.loadHandlers.values():
-            lh(self, ['status', 'started'])
+            lh(self, ['status', 'started'], strict)
 
         lines = f.readlines()
 
@@ -1433,15 +1433,18 @@ class Human(guicommon.Object, animation.AnimatedMesh):
                 elif lineData[0] == 'subdivide':
                     subdivide = lineData[1].lower() in ['true', 'yes']
                 elif lineData[0] in G.app.loadHandlers:
-                    G.app.loadHandlers[lineData[0]](self, lineData)
+                    G.app.loadHandlers[lineData[0]](self, lineData, strict)
                 else:
-                    log.warning('Unknown property in MHM file: %s', lineData)
+                    if strict:
+                        raise RuntimeError('Unknown property in MHM file: %s' % (lineData, ))
+                    else:
+                        log.warning('Unknown property in MHM file: %s', lineData)
 
         version = _get_version(lines)
         if version != getShortVersion():
             log.message("MHM file is of version %s, attempting to load with backward compatibility")
             import compat
-            compat.loadMHM(version, lines, _load_property)
+            compat.loadMHM(version, lines, _load_property, strict)
         else:
             fprog = Progress(len(lines))
             for data in lines:

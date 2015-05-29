@@ -205,12 +205,14 @@ class PoseLibraryTaskView(gui3d.TaskView, filecache.MetadataCacher):
             if self.isShown():
                 self.onShow(event)
 
-    def loadHandler(self, human, values):
+    def loadHandler(self, human, values, strict):
         if values[0] == "pose":
             poseFile = values[1]
             poseFile = getpath.thoroughFindFile(poseFile, self.paths)
             if not os.path.isfile(poseFile):
-                log.warning("Could not load pose %s, file does not exist." % poseFile)
+                if strict:
+                    raise RuntimeError("Could not load pose %s, file does not exist." % poseFile)
+                log.warning("Could not load pose %s, file does not exist.", poseFile)
             else:
                 self.loadPose(poseFile)
             return

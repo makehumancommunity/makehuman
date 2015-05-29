@@ -433,7 +433,7 @@ class BackgroundChooser(gui3d.TaskView):
         self.backgroundImage.mesh.setPosition(x, y)
         self.transformations[side][0] = (float(x), float(y))
 
-    def loadHandler(self, human, values):
+    def loadHandler(self, human, values, strict):
         if values[0] == "background":
             if len(values) >= 7:
                 side = values[1]
@@ -452,6 +452,8 @@ class BackgroundChooser(gui3d.TaskView):
                 enabled = values[2].lower() in ['true', 'yes']
                 self.setBackgroundEnabled(enabled)
             else:
+                if strict:
+                    raise RuntimeError("Unknown background option: %s" % (' '.join( values[1:]) ))
                 log.error("Unknown background option: %s", (' '.join( values[1:]) ))
 
     def saveHandler(self, human, file):

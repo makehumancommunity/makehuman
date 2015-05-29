@@ -305,11 +305,12 @@ class ExpressionTaskView(gui3d.TaskView):
             slider.update()
 
 
-    def loadHandler(self, human, values):
+    def loadHandler(self, human, values, strict):
         if values[0] == 'status':
             return
 
         if values[0] == 'expression' and len(values) > 1:
+            # TODO catch error when expression does not exist
             modifier = self.modifiers.get(values[1], None)
             if modifier:
                 value = float(values[2])
