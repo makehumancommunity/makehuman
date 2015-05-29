@@ -502,7 +502,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         else:
             return self.MID_AGE + ((self.MAX_AGE - self.MID_AGE) * 2) * (self.getAge() - 0.5)
 
-    def setAgeYears(self, ageYears):
+    def setAgeYears(self, ageYears, updateModifier=True):
         """
         Set age in amount of years.
         """
@@ -513,7 +513,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             age = (ageYears - self.MIN_AGE) / ((self.MID_AGE - self.MIN_AGE) * 2)
         else:
             age = ( (ageYears - self.MID_AGE) / ((self.MAX_AGE - self.MID_AGE) * 2) ) + 0.5
-        self.setAge(age)
+        self.setAge(age, updateModifier)
 
     def _setAgeVals(self):
         """
