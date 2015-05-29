@@ -527,7 +527,7 @@ class ProxyChooserTaskView(gui3d.TaskView, filecache.MetadataCacher):
             obj = self.getObjects()[pIdx]
             self.adaptProxyToHuman(pxy, obj, updateSubdivided, fit_to_posed)
 
-    def loadHandler(self, human, values):
+    def loadHandler(self, human, values, strict):
         if values[0] == 'status':
             return
 
@@ -542,6 +542,8 @@ class ProxyChooserTaskView(gui3d.TaskView, filecache.MetadataCacher):
                 uuid = values[2]
                 proxyFile = self.findProxyByUuid(uuid)
                 if not proxyFile:
+                    if strict:
+                        raise RuntimeError("%s library could not load %s proxy with UUID %s, file not found." % (self.proxyName, name, uuid))
                     log.warning("%s library could not load %s proxy with UUID %s, file not found.", self.proxyName, name, uuid)
                     return
                 self.selectProxy(proxyFile)

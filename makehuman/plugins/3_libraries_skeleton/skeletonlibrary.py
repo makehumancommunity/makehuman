@@ -360,13 +360,15 @@ class SkeletonLibrary(gui3d.TaskView, filecache.MetadataCacher):
         if self.jointsObj:
             self.jointsObj.setPosition(gui3d.app.selectedHuman.getPosition())
 
-    def loadHandler(self, human, values):
+    def loadHandler(self, human, values, strict):
         if values[0] == "skeleton":
             skelFile = values[1]
 
             skelFile = getpath.thoroughFindFile(skelFile, self.paths)
             if not os.path.isfile(skelFile):
-                log.warning("Could not load rig %s, file does not exist." % skelFile)
+                if strict:
+                    raise RuntimeError("Could not load rig %s, file does not exist." % skelFile)
+                log.warning("Could not load rig %s, file does not exist.", skelFile)
             else:
                 self.chooseSkeleton(skelFile)
             return

@@ -136,7 +136,7 @@ class ModifierTaskView(gui3d.TaskView):
         if self.showMacroStats and self.isVisible():
             self.showMacroStatus()
 
-    def loadHandler(self, human, values):
+    def loadHandler(self, human, values, strict):
         pass
 
     def saveHandler(self, human, file):

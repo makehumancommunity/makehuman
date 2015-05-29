@@ -175,7 +175,7 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
     def onHumanRotated(self, event):
         self.measureObject.setRotation(G.app.selectedHuman.getRotation())
 
-    def loadHandler(self, human, values):
+    def loadHandler(self, human, values, strict):
         pass
 
     def saveHandler(self, human, file):
