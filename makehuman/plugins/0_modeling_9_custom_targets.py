@@ -61,6 +61,8 @@ class FolderButton(gui.RadioButton):
     def onClicked(self, event):
         self.task.syncVisibility()
 
+# TODO inherit from guimodifier if possible
+
 class CustomTargetsTaskView(gui3d.TaskView):
 
     def __init__(self, category, app):
@@ -100,6 +102,7 @@ class CustomTargetsTaskView(gui3d.TaskView):
             folderGroup.targetCount = 0
             self.folders.append(groupBox)
 
+            # TODO allow creating more complex modifiers (or we could also require the user to create a modifier .json file)
             for f in files:
                 if f.endswith(".target"):
                     self.createTargetControls(groupBox, os.path.join(root, f))
@@ -176,7 +179,7 @@ class CustomTargetsTaskView(gui3d.TaskView):
 
         modifier = humanmodifier.SimpleModifier('custom', self.targetsPath, targetFile)
         modifier.setHuman(self.human)
-        self.modifiers[modifier.name] = modifier
+        self.modifiers[modifier.fullName] = modifier
 
         label = modifier.name.replace('-',' ').capitalize()
         self.sliders.append(box.addWidget(modifierslider.ModifierSlider(modifier=modifier, label=label)))
@@ -208,24 +211,10 @@ class CustomTargetsTaskView(gui3d.TaskView):
             self.syncStatus()
 
     def loadHandler(self, human, values):
-        if values[0] == 'status':
-            return
-
-        modifier = self.modifiers.get(values[1], None)
-        if modifier:
-            modifier.setValue(float(values[2]))
-
-        # Equally good alternative:
-        #try:
-        #    human.getModifier("custom/"+values[1]).setValue(float(values[2]))
-        #except:
-        #    pass
+        pass
 
     def saveHandler(self, human, file):
-        for name, modifier in self.modifiers.iteritems():
-            value = modifier.getValue()
-            if value:
-                file.write('custom %s %f\n' % (name, value))
+        pass
 
 category = None
 taskview = None
