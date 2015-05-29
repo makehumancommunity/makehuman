@@ -193,7 +193,7 @@ class Modifier(object):
     def getMax(self):
         return 1.0
 
-    def setValue(self, value, skipDependencies = False):
+    def setValue(self, value, skipDependencies=False):
         value = self.clampValue(value)
         factors = self.getFactors(value)
 
@@ -458,7 +458,7 @@ class ManagedTargetModifier(Modifier):
             value = max( 0.0, value)
         return value
 
-    def setValue(self, value, skipDependencies = False):
+    def setValue(self, value, skipDependencies=False):
         value = self.clampValue(value)
         factors = self.getFactors(value)
 

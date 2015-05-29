@@ -89,7 +89,7 @@ class ModifierTaskView(gui3d.TaskView):
             box = self.groupBoxes[categoryName]
 
         # Add slider to groupbox
-        self.modifiers[slider.modifier.name.replace('|','-')] = slider.modifier # TODO this strange naming scheme is legacy for MHM compatibility
+        self.modifiers[slider.modifier.fullName] = slider.modifier
         box.addWidget(slider)
         slider.enabledCondition = enabledCondition
         self.sliders.append(slider)
@@ -137,21 +137,10 @@ class ModifierTaskView(gui3d.TaskView):
             self.showMacroStatus()
 
     def loadHandler(self, human, values):
-        if values[0] == 'status':
-            return
-
-        if values[0] == self.saveName:
-            modifier = self.modifiers.get(values[1], None)
-            if modifier:
-                modifier.setValue(float(values[2]))
+        pass
 
     def saveHandler(self, human, file):
-        for name, modifier in self.modifiers.iteritems():
-            if name is None:
-                continue
-            value = modifier.getValue()
-            if value or isinstance(modifier, humanmodifier.MacroModifier):
-                file.write('%s %s %f\n' % (self.saveName, name, value))
+        pass
 
     def setCamera(self):
         if self.cameraFunc:
