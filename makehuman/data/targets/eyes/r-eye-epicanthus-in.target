@@ -1,0 +1,90 @@
+# MakeHuman 3d morphing modelled by Manuel Bastioni
+# Copyright (C) 2015 Manuel Bastioni (mb@makehuman.org)
+# homepage http://www.makehuman.org
+# basemesh hm08
+# license AGPL3 (http://www.makehuman.org/doc/node/makehuman_mesh_license.html)
+#    This file is part of MakeHuman (www.makehuman.org).
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+42 0 0 -.003
+48 0 0 -.002
+51 -.001 0 0
+52 -.002 .003 .004
+64 0 0 0
+65 0 0 .001
+67 0 0 0
+68 .001 0 0
+70 .001 0 0
+71 .001 0 0
+73 0 0 .002
+74 0 0 0
+79 0 0 -.004
+80 .001 0 -.017
+81 .003 -.001 -.009
+96 .001 .001 -.008
+97 .002 0 -.011
+98 .002 .002 -.010
+99 .005 0 -.009
+100 0 0 .001
+101 0 0 .001
+103 0 0 0
+104 .006 .007 -.018
+105 .009 .002 -.026
+106 .010 0 -.023
+107 .009 -.002 -.016
+108 .001 .003 -.004
+109 .012 .010 -.020
+110 .012 .002 -.028
+111 .010 -.001 -.023
+112 .008 -.003 -.014
+113 .006 .007 -.004
+114 0 .002 -.002
+115 .004 0 -.006
+116 .004 -.001 -.010
+117 .003 -.003 -.007
+118 0 .001 -.002
+120 0 0 0
+122 .002 0 -.004
+123 0 0 -.002
+140 0 0 -.001
+141 0 0 -.012
+142 .002 -.003 -.025
+143 .005 -.003 -.010
+165 0 0 0
+909 .003 0 -.004
+4864 -.001 .002 .002
+4873 0 .001 -.004
+4886 0 0 -.001
+4887 0 0 -.001
+4888 .001 -.001 -.008
+4889 0 0 -.009
+4891 0 0 0
+4892 .001 .001 -.001
+4893 0 0 -.001
+4894 .001 0 -.002
+5061 .001 0 -.003
+5079 0 0 0
+5081 0 0 -.003
+5082 .002 -.002 -.016
+5084 .003 -.003 -.016
+5130 .001 -.003 -.012
+5132 .007 -.004 -.013
+5209 0 0 -.016
+5219 0 0 -.001
+5247 .006 -.003 -.009
+5248 .003 -.004 -.021
+5249 0 0 -.001
+5303 .002 -.002 -.011
+5306 .003 -.003 -.008
+5307 .003 -.002 -.004
