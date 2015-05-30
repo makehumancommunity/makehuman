@@ -1454,7 +1454,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
         log.debug("Finalizing MHM loading.")
         for lh in set(G.app.loadHandlers.values()):
-            lh(self, ['status', 'finished'])
+            lh(self, ['status', 'finished'], strict)
         f.close()
 
         self.blockEthnicUpdates = False
