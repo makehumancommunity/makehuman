@@ -1342,18 +1342,16 @@ class Human(guicommon.Object, animation.AnimatedMesh):
     def getVertexWeights(self, skel=None):
         """Get vertex weights for human body. Optionally remap them to fit a
         user-selected skeleton. If no skel argument is provided, the weights
-        for the base skeleton are returned."""
+        for the base skeleton are returned.
+        Returns a VertexBoneWeights object.
+        """
         if not self.getBaseSkeleton():
             return None
 
         _, bodyWeights = self.getBoundMesh(self.meshData.name)
 
         if skel and skel.name != self.getBaseSkeleton().name:
-            if skel.vertexWeights:
-                # This is an optimalisation: if skeleton already has weights loaded, don't remap them again
-                return skel.getVertexWeights()
-            else:
-                return skel.getVertexWeights(bodyWeights)
+            return skel.getVertexWeights(bodyWeights, force_remap=False)
         return bodyWeights
 
     def setPosed(self, posed):

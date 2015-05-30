@@ -265,10 +265,11 @@ class Proxy:
         if self.hasCustomVertexWeights():
             # TODO we could introduce caching of weights here as long as the skeleton is not changed
             if skel is None:
-                return self.human.getBaseSkeleton().getVertexWeights(self.vertexBoneWeights)
+                return self.human.getBaseSkeleton().getVertexWeights(self.vertexBoneWeights, force_remap=True)
             else:
-                return skel.getVertexWeights(self.vertexBoneWeights)
+                return skel.getVertexWeights(self.vertexBoneWeights, force_remap=True)
 
+        # Remap weights through proxy mapping
         WEIGHT_THRESHOLD = 1e-4  # Threshold for including bone weight
         weights = OrderedDict()
 
