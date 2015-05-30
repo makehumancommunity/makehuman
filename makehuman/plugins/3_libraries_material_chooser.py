@@ -202,7 +202,7 @@ class MaterialTaskView(gui3d.TaskView, filecache.MetadataCacher):
                 absP = getpath.thoroughFindFile(path)
                 if not os.path.isfile(absP):
                     if strict:
-                        raise RuntimeError('Could not find material %s for skinMaterial parameter.', values[1]))
+                        raise RuntimeError('Could not find material %s for skinMaterial parameter.' % values[1])
                     log.warning('Could not find material %s for skinMaterial parameter.', values[1])
                     return
                 mat = material.fromFile(absP)
