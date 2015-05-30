@@ -528,6 +528,8 @@ class Skeleton(object):
         """
         Set pose of this skeleton as a list of pose matrices, one matrix per
         bone with bones in breadth-first order (same order as getBones()).
+        Converts the pose from global coordinates to coordinates relative to
+        the local bone rest axis.
 
         poseMats    np.array((nBones, 4, 4), dtype=float32)
         """
@@ -541,7 +543,13 @@ class Skeleton(object):
 
             # Add translations from original
             if poseMats.shape[2] == 4:
-                bone.matPose[:3,3] = poseMats[bIdx,:3,3]
+                # Note: we generally only have translations on the root bone
+                trans = poseMats[bIdx,:3,3]
+                trans = np.dot(invRest[:3,:3], trans.T)  # Describe translation in bone-local axis directions
+                bone.matPose[:3,3] = trans.T
+            else:
+                # No translation
+                bone.matPose[:3,3] = [0, 0, 0]
         # TODO avoid this loop, eg by storing a pre-allocated poseMats np array in skeleton and keeping a reference to a sub-array in each bone. It would allow batch processing of all pose matrices in one np call
         self.update()
 
@@ -1359,9 +1367,6 @@ def transformBoneMatrix(mat, meshOrientation='yUpFaceZ', localBoneAxis='y', offs
                    same axes as the global coordinate space used for the model.
         allowed values: y, x, g
     """
-
-    # TODO this is not nice, but probably needs to be done before transforming the matrix
-    # TODO perhaps add offset as argument
     mat = mat.copy()
     mat[:3,3] += offsetVect
 
