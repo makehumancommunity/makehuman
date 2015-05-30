@@ -75,9 +75,19 @@ def exportCollada(filepath, config):
 
     progress(0, 0.5, "Preparing")
 
-    objects = human.getObjects(excludeZeroFaceObjs=True)
+    objects = human.getObjects(excludeZeroFaceObjs=not config.hiddenGeom)
     # Clone meshes with desired scale and hidden faces/vertices filtered out
-    meshes = [obj.mesh.clone(config.scale, True) for obj in objects]
+    meshes = [obj.mesh.clone(config.scale, filterMaskedVerts=not config.hiddenGeom) for obj in objects]
+
+    if config.hiddenGeom:
+        import numpy as np
+        # Disable the face masking on copies of the input meshes
+        for m in meshes:
+            # Disable the face masking on the mesh
+            face_mask = np.ones(m.face_mask.shape, dtype=bool)
+            m.changeFaceMask(face_mask)
+            m.calcNormals()
+            m.updateIndexBuffer()
 
     # Scale skeleton
     skel = human.getSkeleton()

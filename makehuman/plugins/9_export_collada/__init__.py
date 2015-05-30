@@ -57,6 +57,7 @@ class DaeConfig(ExportConfig):
         self.localG = False
 
         self.facePoseUnits = False
+        self.hiddenGeom = False
 
     # TODO preferably these are used (perhaps as enum) instead of the bools above
     # TODO move these to export Config super class
@@ -109,6 +110,7 @@ class ExporterCollada(Exporter):
         import gui
         Exporter.build(self, options, taskview)
 
+        self.hiddenGeom = options.addWidget(gui.CheckBox("Helper geometry", False))
         self.facePoseUnits = options.addWidget(gui.CheckBox("Facial pose-units", False))
 
         orients = []
@@ -145,6 +147,7 @@ class ExporterCollada(Exporter):
         cfg.localG = self.localG.selected
 
         cfg.facePoseUnits = self.facePoseUnits.selected
+        cfg.hiddenGeom        = self.hiddenGeom.selected
 
         return cfg
 
