@@ -99,6 +99,7 @@ def writeSkinController(fp, human, mesh, skel, config):
         wts = zip(verts, ws)
         skinWeights += wts
         for (vn,_w) in wts:
+            vn = int(vn)
             vertexWeights[int(vn)].append((bIdx,wn))
             wn += 1
     nSkinWeights = len(skinWeights)
