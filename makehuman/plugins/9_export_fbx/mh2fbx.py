@@ -64,8 +64,19 @@ def exportFbx(filepath, config):
     name = config.goodName(os.path.splitext(filename)[0])
 
     # Collect objects, scale meshes and filter out hidden faces/verts, scale rig
-    objects = human.getObjects(excludeZeroFaceObjs=True)
-    meshes = [obj.mesh.clone(config.scale, True) for obj in objects]
+    objects = human.getObjects(excludeZeroFaceObjs=not config.hiddenGeom)
+    meshes = [obj.mesh.clone(config.scale, filterMaskedVerts=not config.hiddenGeom) for obj in objects]
+
+    if config.hiddenGeom:
+        import numpy as np
+        # Disable the face masking on copies of the input meshes
+        for m in meshes:
+            # Disable the face masking on the mesh
+            face_mask = np.ones(m.face_mask.shape, dtype=bool)
+            m.changeFaceMask(face_mask)
+            m.calcNormals()
+            m.updateIndexBuffer()
+
     skel = human.getSkeleton()
     if skel:
         if config.scale != 1:
