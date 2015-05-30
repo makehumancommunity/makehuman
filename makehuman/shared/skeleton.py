@@ -83,6 +83,7 @@ class Skeleton(object):
         self.plane_map_strategy = 3  # The remapping strategy used by addReferencePlanes() for remapping orientation planes from a reference skeleton
 
         self.vertexWeights = None  # Source vertex weights, defined on the basemesh, for this skeleton
+        self.has_custom_weights = False  # True if this skeleton has its own .mhw file
 
     def fromFile(self, filepath, mesh=None):
         """
@@ -132,8 +133,12 @@ class Skeleton(object):
         if "weights_file" in skelData and skelData["weights_file"]:
             weights_file = skelData["weights_file"]
             weights_file = getpath.thoroughFindFile(weights_file, os.path.dirname(getpath.canonicalPath(filepath)), True)
+            if not os.path.isfile(weights_file):
+                log.warning("Could not find custom weights file %s for skeleton %s!", skelData["weights_file"], self.name)
+                return
 
             self.vertexWeights = VertexBoneWeights.fromFile(weights_file, mesh.getVertexCount() if mesh else None, rootBone=self.roots[0].name)
+            self.has_custom_weights = True
 
     def toFile(self, filename, ref_weights=None):
         """
@@ -186,17 +191,22 @@ class Skeleton(object):
         weights = self.getVertexWeights(ref_weights)
         weights.toFile(os.path.join(os.path.dirname(filename), weights_file))
 
-    def getVertexWeights(self, referenceWeights=None):
+    def getVertexWeights(self, referenceWeights=None, force_remap=False):
         """
         Get the vertex weights of this skeleton. If this is called for the first
         time, and referenceWeights is specified (weight of the mh reference rig), 
         and the weights for this skeleton were not explicitly defined, the
         weights will be initialized as a remapping of the reference weights
         through specified reference bones.
+        When force_remap is True, weights will always be returned as referenceWeights
+        remapped to this skeleton, this is for example needed when passing proxy
+        vertexweights through this method.
         Returns the vertex weights for this skeleton.
         """
         from collections import OrderedDict
         if referenceWeights is None:
+            return self.vertexWeights
+        if not force_remap and self.vertexWeights is not None:
             return self.vertexWeights
 
         # Remap vertex weights from reference bones
@@ -229,6 +239,9 @@ class Skeleton(object):
         if self.vertexWeights is None:
             self.vertexWeights = vertWeights
         return vertWeights
+
+    def hasCustomVertexWeights(self):
+        return self.has_custom_weights
 
     def autoBuildWeightReferences(self, referenceSkel):
         """
