@@ -212,13 +212,29 @@ class Skeleton(object):
         for bone in self.getBones():
             b_weights = []
             if len(bone.weight_reference_bones) > 0:
+                add_count = 0
                 for rbname in bone.weight_reference_bones:
                     if rbname in referenceWeights.data:
                         vrts,wghs = referenceWeights.data[rbname]
                         b_weights.extend( zip(vrts,wghs) )
+                        add_count += 1
                     else:
                         if not makehuman.isRelease():
-                            log.warning("Reference bone %s is not present in reference weights", rbname)
+                            # This warning is emitted when the reference skeleton does not have a bone
+                            # with name rbname. In other words: this skeleton references a bone that does
+                            # not exist.
+                            # Often this warning is harmless, and is the result of the autoBuildWeightReferences()
+                            # method, in which case it simply means that the default skeleton has some bones that have
+                            # no weights and that therefore it cannot copy any weights for that reference bone to this
+                            # bone. It might be a problem if this bone references only bones with no weights, though.
+                            log.debug("Weight reference bone %s, referenced by %s is not present in reference weights. This is probably harmless.", rbname, bone.name)
+                if add_count == 0:
+                    if not makehuman.isRelease():
+                        # This is emitted when this bone has a few weight references, but all of these referenced bones
+                        # have no weights attached to them in the reference skeleton. Therefore this bone will not
+                        # receive any weights. This is ok if this is supposed to be a "pentograph" bone, and is not
+                        # supposed to have any weights.
+                        log.warning("No weights could be mapped to bone %s because all of its weight reference bones had no weights. This bone will not have any weights.", bone.name)
             else:
                 # Try to map by bone name
                 if bone.name in referenceWeights.data:
@@ -227,7 +243,13 @@ class Skeleton(object):
                     b_weights = zip(vrts,wghs)
                 else:
                     if not makehuman.isRelease():
-                        log.warning("No explicit reference bone mapping for bone %s, and cannot implicitly map by name", bone.name)
+                        # This warning is emitted when no matching bones in the reference skeleton can be found, and
+                        # this bone cannot be mapped to any reference bone. This is because the skeleton definition
+                        # does not explicitly define a set of reference bones for this bone, and the reference skeleton
+                        # does not hava a bone with the same name as this bone. This bone will not receive any weights.
+                        # This warning is rather serious: it means that one of the bones in your seleton will not have
+                        # weights.
+                        log.warning("No explicit weight reference bone mapping for bone %s, and cannot implicitly map by name. This bone will not have any weights.", bone.name)
 
             if len(b_weights) > 0:
                 weights[bone.name] = b_weights
@@ -244,7 +266,7 @@ class Skeleton(object):
         """
         Complete the vertex reference weights by taking the (pose) reference
         weights defined on this skeleton, and potentially complete them with
-        extra bones from there reference skeleton.
+        extra bones from the reference skeleton.
         If a bone of this skeleton references a bone in the reference skeleton,
         and that referenced bone has a chain or chains of bones until an end
         connector (a bone with no children) that are all unreferenced by this
