@@ -296,6 +296,9 @@ class Skeleton(object):
         reverse_ref_map = _update_reverse_ref_map(self)
 
         def _hasUnreferencedTail(bone, reverse_ref_map, first_bone=False):
+            """Returns True if there is a chain of child bones of this bone,
+            up to an end connector, that are not referenced.
+            """
             # TODO perhaps relax the unreferenced criterium if the bone referrer bone is the same that references the first bone
             if not first_bone and (bone.name in reverse_ref_map and len(reverse_ref_map) > 0):
                 return False
