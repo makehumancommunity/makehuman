@@ -58,6 +58,8 @@ class FbxConfig(ExportConfig):
         self.localX = False
         self.localG = False
 
+        self.hiddenGeom = False
+
     # TODO preferably these are used (perhaps as enum) instead of the bools above
     # TODO move these to export Config super class
     @property
@@ -95,6 +97,7 @@ class ExporterFBX(Exporter):
         import gui
         Exporter.build(self, options, taskview)
         self.binary   = options.addWidget(gui.CheckBox("Binary FBX", False))
+        self.hiddenGeom = options.addWidget(gui.CheckBox("Helper geometry", False))
 
     def export(self, human, filename):
         from . import mh2fbx
@@ -107,6 +110,8 @@ class ExporterFBX(Exporter):
         cfg.feetOnGround      = self.feetOnGround.selected
         cfg.scale,cfg.unit    = self.taskview.getScale()
         cfg.binary            = self.binary.selected
+
+        cfg.hiddenGeom        = self.hiddenGeom.selected
 
         return cfg
 
