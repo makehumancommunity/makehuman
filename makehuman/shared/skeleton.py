@@ -133,9 +133,6 @@ class Skeleton(object):
         if "weights_file" in skelData and skelData["weights_file"]:
             weights_file = skelData["weights_file"]
             weights_file = getpath.thoroughFindFile(weights_file, os.path.dirname(getpath.canonicalPath(filepath)), True)
-            if not os.path.isfile(weights_file):
-                log.warning("Could not find custom weights file %s for skeleton %s!", skelData["weights_file"], self.name)
-                return
 
             self.vertexWeights = VertexBoneWeights.fromFile(weights_file, mesh.getVertexCount() if mesh else None, rootBone=self.roots[0].name)
             self.has_custom_weights = True
