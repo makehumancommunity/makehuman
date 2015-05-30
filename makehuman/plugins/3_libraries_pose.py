@@ -159,7 +159,7 @@ class PoseLibraryTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     def loadBvh(self, filepath, convertFromZUp="auto"):
         bvh_file = bvh.load(filepath, convertFromZUp)
-        self.autoScaleBVH(bvh_file)
+        self.autoScaleBVH(bvh_file)  # TODO scaling once is probably not enough, every time the height of the human changes significantly the animation needs to be rescaled
         anim = bvh_file.createAnimationTrack(self.human.getBaseSkeleton())
         _, _, _, license = self.getMetadata(filepath)
         anim.license = license

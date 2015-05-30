@@ -673,9 +673,15 @@ class BVHJoint():
             if channel == "Xposition":
                 rXs = self.frames[chanIdx:dataLen:nChannels]
             elif channel == "Yposition":
-                rYs = self.frames[chanIdx:dataLen:nChannels]
+                if self.skeleton.convertFromZUp:
+                    rZs = -self.frames[chanIdx:dataLen:nChannels]
+                else:
+                    rYs = self.frames[chanIdx:dataLen:nChannels]
             elif channel == "Zposition":
-                rZs = self.frames[chanIdx:dataLen:nChannels]
+                if self.skeleton.convertFromZUp:
+                    rYs = self.frames[chanIdx:dataLen:nChannels]
+                else:
+                    rZs = self.frames[chanIdx:dataLen:nChannels]
 
             elif channel == "Xrotation":
                 aXs = D*self.frames[chanIdx:dataLen:nChannels]
