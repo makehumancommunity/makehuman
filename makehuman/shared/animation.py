@@ -55,6 +55,8 @@ INTERPOLATION = {
 # TODO allow saving VertexBoneWeights to binary file
 
 class AnimationTrack(object):
+    """Baseclass for all animations and poses that can be applied to a
+    MakeHuman (base) skeleton."""
 
     def __init__(self, name, poseData, nFrames, framerate):
         """
@@ -261,9 +263,28 @@ class Pose(AnimationTrack):
         """
         return self.getAtFramePos(0)
 
-    def fromPoseUnit(self, unitPoseData):
-        # TODO
-        pass
+    def fromPoseUnit(self, filename, poseUnit):
+        """
+        Parse a .mhupb file and construct a pose by blending the
+        weighted sum of unit poses as specified in the mhupb file.
+        :param filename: path to .mhupb file that defines which unit poses to blend
+        :param poseUnit: a PoseUnit containing all unit poses referenced by the .mhupb file
+        """
+        from collections import OrderedDict
+        import json
+        mhupb = json.load(open(filename, 'rb'), object_pairs_hook=OrderedDict)
+        self.name = mhupb['name']
+        self.description = mhupb.get('description', '')
+        self.tags = set([t.lower() for t in mhupb.get('tags', [])])
+        self.license.fromJson(mhupb)
+        self.unitposes = mhupb['unit_poses']  # Expected to be a dict with posename: weight pairs
+
+        self._data = poseUnit.getBlendedPose(self.unitposes.keys(), self.unitposes.values(), only_data=True)
+        self.dataLen = len(self._data)
+        self.nFrames = 1
+        self.nBones = self.dataLen
+
+        return self
 
 class PoseUnit(AnimationTrack):
     """
@@ -289,7 +310,7 @@ class PoseUnit(AnimationTrack):
 
     def getUnitPose(self, name):
         if isinstance(name, basestring):
-            frame_idx = poseNames.index(name)
+            frame_idx = self._poseNames.index(name)
         else:
             frame_idx = name
         return self.getAtFramePos(frame_idx)
@@ -317,7 +338,12 @@ class PoseUnit(AnimationTrack):
                 if not isRest(frameData[b_idx]):
                     self._affectedBones[f_idx].append(b_idx)
 
-    def getBlendedPose(self, poses, weights, additiveBlending=True):
+    def getBlendedPose(self, poses, weights, additiveBlending=True, only_data=False):
+        """Create a new pose by blending multiple poses together with a specified
+        weight.
+        poses is expected to be a list of poseunit (frame) names
+        weights is expected to be a list of float values between 0 and 1
+        """
         import transformations as tm
 
         REST_QUAT = np.asarray([1,0,0,0], dtype=np.float32)
@@ -366,12 +392,20 @@ class PoseUnit(AnimationTrack):
 
                 result[b_idx] = tm.quaternion_matrix( quat )[:3,:4]
 
+        if only_data:
+            return result
         return Pose(self.name+'-blended', result)
 
-
-def poseFromUnitPose(name, unitPoseData):
-    # TODO
-    pass
+def poseFromUnitPose(name, filename, poseUnit):
+    """
+    Parse a .mhupb file and construct a pose by blending the
+    weighted sum of unit poses as specified in the mhupb file.
+    :param name:     The name to assign to the created pose
+    :param filename: path to .mhupb file that defines which unit poses to blend
+    :param poseUnit: a PoseUnit containing all unit poses referenced by the .mhupb file
+    :return: a Pose object that contains the end result of blending the unit poses together
+    """
+    return Pose(name, emptyPose()).fromPoseUnit(filename, poseUnit)
 
 def blendPoses(poses, weights):
     """
