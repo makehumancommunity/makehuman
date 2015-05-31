@@ -1,0 +1,67 @@
+/****************************************************************************
+* MeshLab                                                           o o     *
+* An extendible mesh processor                                    o     o   *
+*                                                                _   O  _   *
+* Copyright(C) 2005, 2009                                          \/)\/    *
+* Visual Computing Lab                                            /\/|      *
+* ISTI - Italian National Research Council                           |      *
+*                                                                    \      *
+* All rights reserved.                                                      *
+*                                                                           *
+* This program is free software; you can redistribute it and/or modify      *
+* it under the terms of the GNU General Public License as published by      *
+* the Free Software Foundation; either version 2 of the License, or         *
+* (at your option) any later version.                                       *
+*                                                                           *
+* This program is distributed in the hope that it will be useful,           *
+* but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+* GNU General Public License (http://www.gnu.org/licenses/gpl.txt)          *
+* for more details.                                                         *
+*                                                                           *
+****************************************************************************/
+
+#version 120
+
+// vertex to fragment shader io
+varying vec3 N;
+varying vec3 I;
+varying vec4 Cs;
+
+// globals
+// Falloff value (between 0 and 4)
+uniform float edgefalloff = 1.0;
+// Intensity value (between 0 and 4)
+uniform float intensity = 0.7;
+
+// Ambient passed from material properties
+uniform vec3 ambient;
+
+#ifdef DIFFUSE
+    uniform sampler2D diffuseTexture;
+#endif
+
+#ifndef VERTEX_COLOR
+    uniform vec4 diffuse;
+#endif
+
+// entry point
+void main()
+{
+    float opac = dot(normalize(-N), normalize(-I));
+    opac = abs(opac);
+    float ambientf = (ambient.r + ambient.g + ambient.b) / 3;
+    opac = ambientf + intensity*(1.0-pow(opac, edgefalloff));
+    //opac = 1.0 - opac;
+ 
+
+    vec4 diffCol = Cs;
+    //vec4 diffCol = diffuse;
+
+    #ifdef DIFFUSE
+        diffCol.rgba += texture2D(diffuseTexture, gl_TexCoord[0].xy).rgba;
+    #endif
+
+    gl_FragColor.rgb =  opac * diffCol.rgb;
+    gl_FragColor.a = opac;
+}
