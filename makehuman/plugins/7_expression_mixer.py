@@ -1,0 +1,190 @@
+#!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
+
+"""
+**Project Name:**      MakeHuman
+
+**Product Home Page:** http://www.makehuman.org/
+
+**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
+
+**Authors:**           Manuel Bastioni, Jonas Hauquier
+
+**Copyright(c):**      MakeHuman Team 2001-2015
+
+**Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
+
+    This file is part of MakeHuman (www.makehuman.org).
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+**Coding Standards:**  See http://www.makehuman.org/node/165
+
+Abstract
+--------
+
+Development tool for blending unit poses together in an expression pose.
+"""
+
+import algos3d
+import gui3d
+import animation
+import bvh
+import gui
+import getpath
+import json
+import log
+
+
+# TODO make right click reset slider to 0
+class ExprSlider(gui.Slider):
+
+    def __init__(self, posename, taskview):
+        super(ExprSlider, self).__init__(label=posename.capitalize(), min=0.0, max=1.0)
+        self.posename = posename
+        self.eventType = 'expression'
+        self.taskview = taskview
+
+    def _changed(self, value):
+        #print 'caller', self
+        self.callEvent('onChange', self)
+        # TODO temporary
+        print json.dumps(dict([(m,v) for m, v in self.taskview.modifiers.iteritems() if v != 0]))
+
+    def _changing(self, value):
+        value = self._i2f(value)
+        self._sync(value)
+        self.changingValue = value
+        self.callEvent('onChanging', self)
+
+
+class ExpressionMixerTaskView(gui3d.TaskView):
+
+    def __init__(self, category):
+        gui3d.TaskView.__init__(self, category, 'Expression mixer')
+
+        self.human = gui3d.app.selectedHuman
+
+        self.base_bvh = None
+        self.base_anim = None
+
+        self.sliders = []
+        self.modifiers = {}
+
+    def updatePose(self):
+        posenames = []
+        posevalues = []
+        for pname,pval in self.modifiers.items():
+            if pval != 0:
+                posenames.append(pname)
+                posevalues.append(pval)
+        if len(posenames) == 0:
+            return
+
+        panim = self.base_poseunit.getBlendedPose(posenames, posevalues)
+        panim.disableBaking = True  # Faster for realtime updating a single pose
+        self.human.addAnimation(panim)
+        self.human.setActiveAnimation(panim.name)
+        self.human.refreshPose()
+
+    def _load_pose_units(self):
+        from collections import OrderedDict
+        self.base_bvh = bvh.load(getpath.getSysDataPath('poseunits/face-poseunits.bvh'), allowTranslation="none")
+        self.base_anim = self.base_bvh.createAnimationTrack(self.human.getBaseSkeleton(), name="Expression-Face-PoseUnits")
+
+        poseunit_json = json.load(open(getpath.getSysDataPath('poseunits/face-poseunits.json'),'rb'), object_pairs_hook=OrderedDict)
+        self.poseunit_names = poseunit_json['framemapping']
+        log.message('unit pose frame count:%s', len(self.poseunit_names))
+
+        self.modifiers = dict(zip(self.poseunit_names, len(self.poseunit_names)*[0.0]))
+        self.base_poseunit = animation.PoseUnit(self.base_anim.name, self.base_anim.data[:self.base_anim.nBones*len(self.poseunit_names)], self.poseunit_names)
+
+        self._load_gui()
+
+    def _load_gui(self):
+        # Create box
+        box = self.addLeftWidget(gui.SliderBox("Expressions"))
+        # Create sliders
+        for posename in self.poseunit_names:
+            slider = box.addWidget(ExprSlider(posename, self))
+            @slider.mhEvent
+            def onChange(event):
+                slider = event
+                self.modifiers[slider.posename] = slider.getValue()
+                self.updatePose()
+
+            @slider.mhEvent
+            def onChanging(event):
+                slider = event
+                self.modifiers[slider.posename] = slider.changingValue
+                self.updatePose()
+
+            self.sliders.append(slider)
+
+    def updateGui(self):
+        for slider in self.sliders:
+            slider.update()
+
+    def onShow(self, event):
+        gui3d.TaskView.onShow(self, event)
+
+        if self.base_bvh is None:
+            self._load_pose_units()
+
+        self.updateGui()
+
+        if gui3d.app.getSetting('cameraAutoZoom'):
+            gui3d.app.setFaceCamera()
+
+
+    def onHumanChanging(self, event):
+        if event.change not in ['expression', 'material']:
+            self.resetTargets()
+
+    def resetTargets(self):
+        return
+
+        #log.debug("EXPRESSION RESET %d targets" % len(self.targets))
+        if self.targets:
+            human = gui3d.app.selectedHuman
+            for target in self.targets:
+                human.setDetail(target, 0)
+            try:
+                del algos3d._targetBuffer[target]
+            except KeyError:
+                pass
+            self.targets = {}
+            human.applyAllTargets()
+
+    def onHumanChanged(self, event):
+        # TODO reset?
+        for slider in self.sliders:
+            slider.update()
+
+
+# This method is called when the plugin is loaded into makehuman
+# The app reference is passed so that a plugin can attach a new category, task, or other GUI elements
+
+def load(app):
+    category = app.getCategory('Utilities')
+    taskview = ExpressionMixerTaskView(category)
+    taskview.sortOrder = 6
+    category.addTask(taskview)
+
+
+# This method is called when the plugin is unloaded from makehuman
+# At the moment this is not used, but in the future it will remove the added GUI elements
+
+def unload(app):
+    pass
