@@ -46,6 +46,7 @@ import animation
 import bvh
 import gui
 import getpath
+import mh
 import log
 
 
@@ -63,12 +64,25 @@ class ExprSlider(gui.Slider):
         self.callEvent('onChange', self)
         # TODO temporary
         print json.dumps(dict([(m,v) for m, v in self.taskview.modifiers.iteritems() if v != 0]))
+        self.taskview.sliderChanged()
 
     def _changing(self, value):
         value = self._i2f(value)
         self._sync(value)
         self.changingValue = value
         self.callEvent('onChanging', self)
+
+
+class TextEdit(gui.GroupBox):
+    def __init__(self, name, value=""):
+        super(TextEdit, self).__init__(name)
+        self.edit = self.addWidget(gui.TextEdit(value))
+
+    def setValue(self, value):
+        self.edit.setText(value)
+
+    def getValue(self):
+        return self.edit.getText()
 
 
 class ExpressionMixerTaskView(gui3d.TaskView):
@@ -84,7 +98,25 @@ class ExpressionMixerTaskView(gui3d.TaskView):
         self.sliders = []
         self.modifiers = {}
 
-        self.saveBtn = self.addRightWidget(gui.BrowseButton('save', "Save pose"))
+        savebox = self.addRightWidget(gui.GroupBox("Save"))
+
+        self.nameField = savebox.addWidget(TextEdit("Name"))
+        self.descrField = savebox.addWidget(TextEdit("Description"))
+        self.tagsField = savebox.addWidget(TextEdit("Tags (separate with ;)"))
+        self.authorField = savebox.addWidget(TextEdit("Author"))
+        self.copyrightField = savebox.addWidget(TextEdit("Copyright"))
+        self.licenseField = savebox.addWidget(TextEdit("License"))
+        self.websiteField = savebox.addWidget(TextEdit("Website"))
+
+        lic = mh.getAssetLicense()
+        self.authorField.setValue(lic.author)
+        self.copyrightField.setValue(lic.copyright)
+        self.licenseField.setValue(lic.license)
+        self.websiteField.setValue(lic.homepage)
+        self.descrField.setValue("No description set")
+        self.tagsField.setValue("no tag;expression")
+
+        self.saveBtn = savebox.addWidget(gui.BrowseButton('save', "Save pose"))
         self.saveBtn.setFilter("MakeHuman unit-pose blend file (*.mhupb)")
         savepath = getpath.getDataPath('expressions')
         if not os.path.exists(savepath):
@@ -151,6 +183,13 @@ class ExpressionMixerTaskView(gui3d.TaskView):
     def updateGui(self):
         for slider in self.sliders:
             slider.update()
+        self.sliderChanged()
+
+    def sliderChanged(self):
+        if sum(v for m, v in self.modifiers.iteritems()) == 0:
+            self.saveBtn.setEnabled(False)
+        else:
+            self.saveBtn.setEnabled(True)
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
@@ -171,13 +210,20 @@ class ExpressionMixerTaskView(gui3d.TaskView):
     def saveCurrentPose(self, filename):
         import makehuman
         unitpose_values = dict([(m,v) for m, v in self.modifiers.iteritems() if v != 0])
-        data = { "name": "No name",
-                 "description": "No description",
-                 "tags": ["no tag"],
-                 "unit_poses": unitpose_values
+        if len(unitpose_values) == 0:
+            raise RuntimeError("Requires at least one pose to be specified")
+        tags = [t.strip() for t in self.tagsField.getValue().split(';')]
+
+        data = { "name": self.nameField.getValue(),
+                 "description": self.descrField.getValue(),
+                 "tags": tags,
+                 "unit_poses": unitpose_values,
+                 "author": self.authorField.getValue(),
+                 "copyright": self.copyrightField.getValue(),
+                 "license": self.licenseField.getValue(),
+                 "homepage": self.websiteField.getValue()
                 }
-        data.update(makehuman.getAssetLicense().asDict())
-        json.dump(data, open(filename, 'w'))
+        json.dump(data, open(filename, 'w'), indent=4)
         log.message("Saved pose as %s" % filename)
 
     def resetTargets(self):

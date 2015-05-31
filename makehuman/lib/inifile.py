@@ -34,7 +34,7 @@
 Abstract
 --------
 
-TODO
+Configuration file parser using JSON format
 """
 
 import json
