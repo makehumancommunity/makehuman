@@ -209,10 +209,10 @@
       {"target": "torso-scale-depth", "min": "decr", "max": "incr"},
       {"target": "torso-scale-horiz", "min": "decr", "max": "incr"},
       {"target": "torso-scale-vert", "min": "decr", "max": "incr"},
-      {"target": "torso-trans-horiz", "min": "in", "max": "out"},
-      {"target": "torso-trans-vert", "min": "down", "max": "up"},
-      {"target": "torso-trans-depth", "min": "forward", "max": "backward"},
-      {"target": "torso-vshape", "min": "less", "max": "more"},
+      {"target": "torso-trans", "min": "in", "max": "out"},
+      {"target": "torso-trans", "min": "down", "max": "up"},
+      {"target": "torso-trans", "min": "backward", "max": "forward"},
+      {"target": "torso-vshape", "min": "decr", "max": "incr"},
       {"target": "torso-muscle-dorsi", "min": "decr", "max": "incr"},
       {"target": "torso-muscle-pectoral", "min": "decr", "max": "incr"}
     ]
@@ -225,7 +225,7 @@
       {"target": "hip-scale-vert", "min": "decr", "max": "incr"},
       {"target": "hip-trans", "min": "in", "max": "out"},
       {"target": "hip-trans", "min": "down", "max": "up"},
-      {"target": "hip-trans", "min": "forward", "max": "backward"},
+      {"target": "hip-trans", "min": "backward", "max": "forward"},
       {"target": "hip-waist", "min": "down", "max": "up"}
     ]
   },
@@ -268,56 +268,56 @@
 
         {"target": "r-foot-scale", "min": "decr", "max": "incr"},
         {"target": "r-foot-trans", "min": "in", "max": "out"},        
-        {"target": "r-foot-trans", "min": "forward", "max": "backward"},
+        {"target": "r-foot-trans", "min": "backward", "max": "forward"},
 
         {"target": "l-foot-scale", "min": "decr", "max": "incr"},
         {"target": "l-foot-trans", "min": "in", "max": "out"},        
-        {"target": "l-foot-trans", "min": "forward", "max": "backward"},
+        {"target": "l-foot-trans", "min": "backward", "max": "forward"},
 
         {"target": "r-lowerarm-scale-depth", "min": "decr", "max": "incr"},
         {"target": "r-lowerarm-scale-horiz", "min": "decr", "max": "incr"},
         {"target": "r-lowerarm-scale-vert", "min": "decr", "max": "incr"},
-        {"target": "r-lowerarm", "min": "skinny", "max": "fat"},
+        {"target": "r-lowerarm-fat", "min": "decr", "max": "incr"},
         {"target": "r-lowerarm-muscle", "min": "decr", "max": "incr"},
         {"target": "r-upperarm-scale-depth", "min": "decr", "max": "incr"},
         {"target": "r-upperarm-scale-horiz", "min": "decr", "max": "incr"},
         {"target": "r-upperarm-scale-vert", "min": "decr", "max": "incr"},
-        {"target": "r-upperarm", "min": "skinny", "max": "fat"},
+        {"target": "r-upperarm-fat", "min": "decr", "max": "incr"},
         {"target": "r-upperarm-shoulder-muscle", "min": "decr", "max": "incr"}, 
         {"target": "r-upperarm-muscle", "min": "decr", "max": "incr"},       
 
         {"target": "l-lowerarm-scale-depth", "min": "decr", "max": "incr"},
         {"target": "l-lowerarm-scale-horiz", "min": "decr", "max": "incr"},
         {"target": "l-lowerarm-scale-vert", "min": "decr", "max": "incr"},
-        {"target": "l-lowerarm", "min": "skinny", "max": "fat"},
+        {"target": "l-lowerarm-fat", "min": "decr", "max": "incr"},
         {"target": "l-lowerarm-muscle", "min": "decr", "max": "incr"},
         {"target": "l-upperarm-scale-depth", "min": "decr", "max": "incr"},
         {"target": "l-upperarm-scale-horiz", "min": "decr", "max": "incr"},
         {"target": "l-upperarm-scale-vert", "min": "decr", "max": "incr"},
-        {"target": "l-upperarm", "min": "skinny", "max": "fat"},
+        {"target": "l-upperarm-fat", "min": "decr", "max": "incr"},
         {"target": "l-upperarm-shoulder-muscle", "min": "decr", "max": "incr"},
         {"target": "l-upperarm-muscle", "min": "decr", "max": "incr"},
 
-        {"target": "r-leg-genu", "min": "varun", "max": "valgus"},
+        {"target": "r-leg-valgus", "min": "decr", "max": "incr"},
         {"target": "r-lowerleg-scale-depth", "min": "decr", "max": "incr"},
         {"target": "r-lowerleg-scale-horiz", "min": "decr", "max": "incr"},
-        {"target": "r-lowerleg", "min": "skinny", "max": "fat"},  
+        {"target": "r-lowerleg-fat", "min": "decr", "max": "incr"}, 
         {"target": "r-lowerleg-muscle", "min": "decr", "max": "incr"},          
         {"target": "r-upperleg-scale-depth", "min": "decr", "max": "incr"},
         {"target": "r-upperleg-scale-horiz", "min": "decr", "max": "incr"},
         {"target": "r-upperleg-scale-vert", "min": "decr", "max": "incr"},
-        {"target": "r-upperleg", "min": "skinny", "max": "fat"},
+        {"target": "r-upperleg-fat", "min": "decr", "max": "incr"},
         {"target": "r-upperleg-muscle", "min": "decr", "max": "incr"},
 
-        {"target": "l-leg-genu", "min": "varun", "max": "valgus"},
+        {"target": "l-leg-valgus", "min": "decr", "max": "incr"},
         {"target": "l-lowerleg-scale-depth", "min": "decr", "max": "incr"},
         {"target": "l-lowerleg-scale-horiz", "min": "decr", "max": "incr"}, 
-        {"target": "l-lowerleg", "min": "skinny", "max": "fat"},   
+        {"target": "l-lowerleg-fat", "min": "decr", "max": "incr"},
         {"target": "l-lowerleg-muscle", "min": "decr", "max": "incr"},    
         {"target": "l-upperleg-scale-depth", "min": "decr", "max": "incr"},
         {"target": "l-upperleg-scale-horiz", "min": "decr", "max": "incr"},
         {"target": "l-upperleg-scale-vert", "min": "decr", "max": "incr"},
-        {"target": "l-upperleg", "min": "skinny", "max": "fat"},
+        {"target": "l-upperleg-fat", "min": "decr", "max": "incr"},
         {"target": "l-upperleg-muscle", "min": "decr", "max": "incr"}        
     ]       
   },
@@ -327,21 +327,21 @@
         {"macrovar": "BreastSize"},
         {"macrovar": "BreastFirmness"},
 
-        {"target": "breast-trans-vert", "min": "down", "max": "up"},
-        {"target": "breast-dist", "min": "min", "max": "max"},
-        {"target": "breast-point", "min": "min", "max": "max"},
-        {"target": "breast-volume-vert", "min": "up", "max": "down"},
-        {"target": "nipple-size", "min": "min", "max": "max"},
-        {"target": "nipple-point", "min": "in", "max": "out"}
+        {"target": "breast-trans", "min": "down", "max": "up"},
+        {"target": "breast-dist", "min": "decr", "max": "incr"},
+        {"target": "breast-point", "min": "decr", "max": "incr"},
+        {"target": "breast-volume-vert", "min": "down", "max": "up"},
+        {"target": "nipple-size", "min": "decr", "max": "incr"},
+        {"target": "nipple-point", "min": "decr", "max": "incr"}
         
     ]
   },
 
   { "group": "genitals",
     "modifiers": [
-        {"target": "penis-length", "min": "min", "max": "max"},
-        {"target": "penis-circ", "min": "min", "max": "max"},
-        {"target": "penis-testicles", "min": "min", "max": "max"}
+        {"target": "penis-length", "min": "decr", "max": "incr"},
+        {"target": "penis-circ", "min": "decr", "max": "incr"},
+        {"target": "penis-testicles", "min": "decr", "max": "incr"}
     ]
   },
 
