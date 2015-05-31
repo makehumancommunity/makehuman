@@ -34,20 +34,21 @@
 Abstract
 --------
 
-Main skeleton tab
+Skeleton library, allows selecting an animation skeleton or rig for the human
+to be exported.
+This skeleton is not used within MakeHuman, as all posing and animation
+is applied to the base skeleton, which is the default or reference skeleton.
 """
 
 import mh
 import gui
 import gui3d
 import log
-from collections import OrderedDict
 import filechooser as fc
 import filecache
 
 import skeleton
 import skeleton_drawing
-import animation
 import getpath
 import material
 
@@ -112,42 +113,11 @@ class SkeletonLibrary(gui3d.TaskView, filecache.MetadataCacher):
         self.oldHumanMat = self.human.material
         self.oldPxyMats = dict()
 
-        #
-        #   Display box
-        #
-
-        '''
-        self.displayBox = self.addLeftWidget(gui.GroupBox('Display'))
-        self.showHumanTggl = self.displayBox.addWidget(gui.CheckBox("Show human"))
-        @self.showHumanTggl.mhEvent
-        def onClicked(event):
-            if self.showHumanTggl.selected:
-                self.human.show()
-            else:
-                self.human.hide()
-        self.showHumanTggl.setSelected(True)
-
-        self.showJointsTggl = self.displayBox.addWidget(gui.CheckBox("Show joints"))
-        @self.showJointsTggl.mhEvent
-        def onClicked(event):
-            if not self.jointsObj:
-                return
-            if self.showJointsTggl.selected:
-                self.jointsObj.show()
-            else:
-                self.jointsObj.hide()
-        self.showJointsTggl.setSelected(True)
-        '''
-
         self.sysDataPath = getpath.getSysDataPath('rigs')
         self.userDataPath = getpath.getDataPath('rigs')
         if not os.path.exists(self.userDataPath):
             os.makedirs(self.userDataPath)
         self.paths = [self.userDataPath, self.sysDataPath]
-
-        #
-        #   Preset box
-        #
 
         self.filechooser = self.addRightWidget(fc.IconListFileChooser( \
                                                     self.paths,
