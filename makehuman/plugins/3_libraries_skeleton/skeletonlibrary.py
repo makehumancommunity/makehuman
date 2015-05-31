@@ -88,19 +88,11 @@ class SkeletonLibrary(gui3d.TaskView, filecache.MetadataCacher):
         filecache.MetadataCacher.__init__(self, 'mhskel', 'skeleton_filecache.mhc')
         self.optionsSelector = None
 
-        self.systemRigs = mh.getSysDataPath('rigs')
-        self.userRigs = os.path.join(mh.getPath(''), 'data', 'rigs')
-        self.rigPaths = [self.userRigs, self.systemRigs]
-        if not os.path.exists(self.userRigs):
-            os.makedirs(self.userRigs)
-
         self.human = gui3d.app.selectedHuman
 
         self.referenceRig = None
 
         self.selectedRig = None
-
-        self.humanChanged = False   # Used for determining when joints need to be redrawn
 
         self.skelMesh = None
         self.skelObj = None
@@ -235,7 +227,6 @@ class SkeletonLibrary(gui3d.TaskView, filecache.MetadataCacher):
         self.drawSkeleton()
 
         self.filechooser.selectItem(filename)
-
 
     def drawSkeleton(self):
         if self.skelObj:
