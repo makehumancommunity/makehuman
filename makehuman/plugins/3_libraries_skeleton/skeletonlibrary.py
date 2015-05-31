@@ -86,7 +86,6 @@ class SkeletonLibrary(gui3d.TaskView, filecache.MetadataCacher):
     def __init__(self, category):
         gui3d.TaskView.__init__(self, category, 'Skeleton')
         filecache.MetadataCacher.__init__(self, 'mhskel', 'skeleton_filecache.mhc')
-        self.optionsSelector = None
 
         self.human = gui3d.app.selectedHuman
 
