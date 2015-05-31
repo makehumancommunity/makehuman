@@ -82,7 +82,7 @@ class ExpressionTaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.base_anim = None
 
         self.sysDataPath = getpath.getSysDataPath('expressions')
-        self.userPath = getpath.getSysDataPath('expressions')
+        self.userPath = getpath.getDataPath('expressions')
         self.paths = [self.userPath, self.sysDataPath]
         if not os.path.exists(self.userPath):
             os.makedirs(self.userPath)
@@ -163,7 +163,7 @@ class ExpressionTaskView(gui3d.TaskView, filecache.MetadataCacher):
             # TODO remove the expression from existing pose
             self.filechooser.selectItem(None)
             self.human.setActiveAnimation(None)
-            self.human.refreshPose()
+            self.human.refreshPose(updateIfInRest=True)
             return
 
         # Assign to human
