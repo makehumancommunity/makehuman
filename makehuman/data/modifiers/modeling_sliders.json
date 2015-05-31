@@ -198,10 +198,10 @@
           {"mod": "torso/torso-scale-depth-decr|incr", "cam": "leftView", "label": "Scale depth"},
           {"mod": "torso/torso-scale-horiz-decr|incr", "cam": "globalCamera", "label": "Scale horizontally"},
           {"mod": "torso/torso-scale-vert-decr|incr", "cam": "globalCamera", "label": "Scale vertically"},
-          {"mod": "torso/torso-trans-horiz-in|out", "cam": "globalCamera", "label": "Move horizontally"},
-          {"mod": "torso/torso-trans-vert-down|up", "cam": "globalCamera", "label": "Move vertically"},
-          {"mod": "torso/torso-trans-depth-forward|backward", "cam": "leftView", "label": "Move depth"},
-          {"mod": "torso/torso-vshape-less|more", "cam": "globalCamera", "label": "Scale cone-shape"},
+          {"mod": "torso/torso-trans-in|out", "cam": "globalCamera", "label": "Move horizontally"},
+          {"mod": "torso/torso-trans-down|up", "cam": "globalCamera", "label": "Move vertically"},
+          {"mod": "torso/torso-trans-backward|forward", "cam": "leftView", "label": "Move depth"},
+          {"mod": "torso/torso-vshape-decr|incr", "cam": "globalCamera", "label": "Scale cone-shape"},
           {"mod": "torso/torso-muscle-dorsi-decr|incr", "cam": "globalCamera", "label": "Dorsi muscle"},
           {"mod": "torso/torso-muscle-pectoral-decr|incr", "cam": "globalCamera", "label": "Pectoral muscle"}
         ],
@@ -211,7 +211,7 @@
           {"mod": "hip/hip-scale-vert-decr|incr", "cam": "globalCamera", "label": "Scale vertically"},
           {"mod": "hip/hip-trans-in|out", "cam": "globalCamera", "label": "Move horizontally"},
           {"mod": "hip/hip-trans-down|up", "cam": "globalCamera", "label": "Move vertically"},
-          {"mod": "hip/hip-trans-forward|backward", "cam": "globalCamera", "label": "Move depth"},
+          {"mod": "hip/hip-trans-backward|forward", "cam": "globalCamera", "label": "Move depth"},
           {"mod": "hip/hip-waist-down|up", "cam": "globalCamera", "label": "Waist vertical position"}          
         ],
       "Stomach": [          
@@ -251,12 +251,12 @@
       "right foot": [
           {"mod": "armslegs/r-foot-scale-decr|incr", "cam": "rightFootRightCamera", "label": "Scale foot"},
           {"mod": "armslegs/r-foot-trans-in|out", "cam": "rightFootFrontCamera", "label": "Move horizontally"},         
-          {"mod": "armslegs/r-foot-trans-forward|backward", "cam": "rightFootRightCamera", "label": "Move depth"}
+          {"mod": "armslegs/r-foot-trans-backward|forward", "cam": "rightFootRightCamera", "label": "Move depth"}
         ],
       "left foot": [
           {"mod": "armslegs/l-foot-scale-decr|incr", "cam": "leftFootLeftCamera", "label": "Scale foot"},
           {"mod": "armslegs/l-foot-trans-in|out", "cam": "leftFootFrontCamera", "label": "Move horizontally"},          
-          {"mod": "armslegs/l-foot-trans-forward|backward", "cam": "leftFootLeftCamera", "label": "Move depth"}
+          {"mod": "armslegs/l-foot-trans-backward|forward", "cam": "leftFootLeftCamera", "label": "Move depth"}
         ],
       "left shoulder": [
           {"mod": "armslegs/l-upperarm-shoulder-muscle-decr|incr", "cam": "leftArmTopCamera", "label": "Shoulder muscle mass"}          
@@ -268,48 +268,48 @@
           {"mod": "armslegs/r-lowerarm-scale-depth-decr|incr", "cam": "rightArmTopCamera", "label": "Lowerarm thickness 1"},
           {"mod": "armslegs/r-lowerarm-scale-horiz-decr|incr", "cam": "rightArmFrontCamera", "label": "Lowerarm length"},
           {"mod": "armslegs/r-lowerarm-scale-vert-decr|incr", "cam": "rightArmFrontCamera", "label": "Lowerarm thickness 2"},
-          {"mod": "armslegs/r-lowerarm-skinny|fat", "cam": "rightArmTopCamera", "label": "Lowerarm skinny-fat"},
+          {"mod": "armslegs/r-lowerarm-fat-decr|incr", "cam": "rightArmTopCamera", "label": "Lowerarm skinny-fat"},
           {"mod": "armslegs/r-lowerarm-muscle-decr|incr", "cam": "rightArmTopCamera", "label": "Lowerarm muscles"},
           {"mod": "armslegs/r-upperarm-scale-depth-decr|incr", "cam": "rightArmTopCamera", "label": "Upperarm thickness 1"},
           {"mod": "armslegs/r-upperarm-scale-horiz-decr|incr", "cam": "rightArmFrontCamera", "label": "Upperarm length"},
           {"mod": "armslegs/r-upperarm-scale-vert-decr|incr", "cam": "rightArmFrontCamera", "label": "Upperarm thickness 2"},
-          {"mod": "armslegs/r-upperarm-skinny|fat", "cam": "rightArmTopCamera", "label": "Upperarm skinny-fat"},
+          {"mod": "armslegs/r-upperarm-fat-decr|incr", "cam": "rightArmTopCamera", "label": "Upperarm skinny-fat"},
           {"mod": "armslegs/r-upperarm-muscle-decr|incr", "cam": "rightArmTopCamera", "label": "Upperarm muscles"}
         ],
       "left arm": [
           {"mod": "armslegs/l-lowerarm-scale-depth-decr|incr", "cam": "leftArmTopCamera", "label": "Lowerarm thickness 1"},
           {"mod": "armslegs/l-lowerarm-scale-horiz-decr|incr", "cam": "leftArmFrontCamera", "label": "Lowerarm length"},
           {"mod": "armslegs/l-lowerarm-scale-vert-decr|incr", "cam": "leftArmFrontCamera", "label": "Lowerarm thickness 2"},
-          {"mod": "armslegs/l-lowerarm-skinny|fat", "cam": "leftArmFrontCamera", "label": "Lowerarm skinny-fat"},   
+          {"mod": "armslegs/l-lowerarm-fat-decr|incr", "cam": "leftArmFrontCamera", "label": "Lowerarm skinny-fat"},   
           {"mod": "armslegs/l-lowerarm-muscle-decr|incr", "cam": "leftArmTopCamera", "label": "Lowerarm muscles"},       
           {"mod": "armslegs/l-upperarm-scale-depth-decr|incr", "cam": "leftArmTopCamera", "label": "Upperarm thickness 1"},
           {"mod": "armslegs/l-upperarm-scale-horiz-decr|incr", "cam": "leftArmFrontCamera", "label": "Upperarm length"},
           {"mod": "armslegs/l-upperarm-scale-vert-decr|incr", "cam": "leftArmFrontCamera", "label": "Upperarm thickness 2"},
-          {"mod": "armslegs/l-upperarm-skinny|fat", "cam": "leftArmTopCamera", "label": "Upperarm skinny-fat"},
+          {"mod": "armslegs/l-upperarm-fat-decr|incr", "cam": "leftArmTopCamera", "label": "Upperarm skinny-fat"},
           {"mod": "armslegs/l-upperarm-muscle-decr|incr", "cam": "leftArmTopCamera", "label": "Upperarm muscles"}
         ],
       "right leg": [
-          {"mod": "armslegs/r-leg-genu-varun|valgus", "cam": "rightLegFrontCamera", "label": "Move knee horizontally"},
+          {"mod": "armslegs/r-leg-valgus-decr|incr", "cam": "rightLegFrontCamera", "label": "Move knee horizontally"},
           {"mod": "armslegs/r-lowerleg-scale-depth-decr|incr", "cam": "rightLegRightCamera", "label": "Lowerleg scale depth"},
           {"mod": "armslegs/r-lowerleg-scale-horiz-decr|incr", "cam": "rightLegFrontCamera", "label": "Lowerleg scale horizontally"},
-          {"mod": "armslegs/r-lowerleg-skinny|fat", "cam": "rightLegFrontCamera", "label": "Lowerleg skinny-fat"},
+          {"mod": "armslegs/r-lowerleg-fat-decr|incr", "cam": "rightLegFrontCamera", "label": "Lowerleg skinny-fat"},
           {"mod": "armslegs/r-lowerleg-muscle-decr|incr", "cam": "rightLegFrontCamera", "label": "Lowerleg muscle"},
           {"mod": "armslegs/r-upperleg-scale-depth-decr|incr", "cam": "rightLegRightCamera", "label": "Upperleg scale depth"},
           {"mod": "armslegs/r-upperleg-scale-horiz-decr|incr", "cam": "rightLegFrontCamera", "label": "Upperleg scale horizontally"},
           {"mod": "armslegs/r-upperleg-scale-vert-decr|incr", "cam": "rightLegFrontCamera", "label": "Move knee vertically"},
-          {"mod": "armslegs/r-upperleg-skinny|fat", "cam": "rightLegFrontCamera", "label": "Upperleg skinny-fat"},
+          {"mod": "armslegs/r-upperleg-fat-decr|incr", "cam": "rightLegFrontCamera", "label": "Upperleg skinny-fat"},
           {"mod": "armslegs/r-upperleg-muscle-decr|incr", "cam": "rightLegFrontCamera", "label": "Upperleg muscle"}          
         ],
       "left leg": [
-          {"mod": "armslegs/l-leg-genu-varun|valgus", "cam": "leftLegFrontCamera", "label": "Move knee horizontally"},
+          {"mod": "armslegs/l-leg-valgus-decr|incr", "cam": "leftLegFrontCamera", "label": "Move knee horizontally"},
           {"mod": "armslegs/l-lowerleg-scale-depth-decr|incr", "cam": "leftLegLeftCamera", "label": "Lowerleg scale depth"},
           {"mod": "armslegs/l-lowerleg-scale-horiz-decr|incr", "cam": "leftLegFrontCamera", "label": "Lowerleg scale horizontally"}, 
-          {"mod": "armslegs/l-lowerleg-skinny|fat", "cam": "leftLegFrontCamera", "label": "Lowerleg skinny-fat"}, 
+          {"mod": "armslegs/l-lowerleg-fat-decr|incr", "cam": "leftLegFrontCamera", "label": "Lowerleg skinny-fat"}, 
           {"mod": "armslegs/l-lowerleg-muscle-decr|incr", "cam": "leftArmFrontCamera", "label": "Lowerleg muscle"},        
           {"mod": "armslegs/l-upperleg-scale-depth-decr|incr", "cam": "leftLegLeftCamera", "label": "Upperleg scale depth"},
           {"mod": "armslegs/l-upperleg-scale-horiz-decr|incr", "cam": "leftLegFrontCamera", "label": "Upperleg scale horizontally"},
           {"mod": "armslegs/l-upperleg-scale-vert-decr|incr", "cam": "leftLegFrontCamera", "label": "Move knee vertically"},
-          {"mod": "armslegs/l-upperleg-skinny|fat", "cam": "leftLegFrontCamera", "label": "Upperleg skinny-fat"},
+          {"mod": "armslegs/l-upperleg-fat-decr|incr", "cam": "leftLegFrontCamera", "label": "Upperleg skinny-fat"},
           {"mod": "armslegs/l-upperleg-muscle-decr|incr", "cam": "leftLegFrontCamera", "label": "Upperleg muscle"}          
         ],
         "legs": [          
@@ -326,17 +326,17 @@
       "Breast": [
           {"mod": "breast/BreastSize", "label": "Breast size"},
           {"mod": "breast/BreastFirmness", "label": "Breast firmness"},
-          {"mod": "breast/breast-trans-vert-down|up", "label": "Vertical position"},
-          {"mod": "breast/breast-dist-min|max", "label": "Horizontal distance"},
-          {"mod": "breast/breast-point-min|max", "label": "Pointiness"},
-          {"mod": "breast/breast-volume-vert-up|down", "label": "Breast Volume"},
-          {"mod": "breast/nipple-size-min|max", "label": "Nipple size"},
-          {"mod": "breast/nipple-point-in|out", "label": "Nipple point"}
+          {"mod": "breast/breast-trans-down|up", "label": "Vertical position"},
+          {"mod": "breast/breast-dist-decr|incr", "label": "Horizontal distance"},
+          {"mod": "breast/breast-point-decr|incr", "label": "Pointiness"},
+          {"mod": "breast/breast-volume-vert-down|up", "label": "Breast Volume"},
+          {"mod": "breast/nipple-size-decr|incr", "label": "Nipple size"},
+          {"mod": "breast/nipple-point-decr|incr", "label": "Nipple point"}
         ],
       "Genitals": [
-          {"mod": "genitals/penis-length-min|max", "label": "Penis length", "enabledCondition": "hasGenitals"},
-          {"mod": "genitals/penis-circ-min|max", "label": "Penis circumference", "enabledCondition": "hasGenitals"},
-          {"mod": "genitals/penis-testicles-min|max", "label": "Testicles size", "enabledCondition": "hasGenitals"}
+          {"mod": "genitals/penis-length-decr|incr", "label": "Penis length", "enabledCondition": "hasGenitals"},
+          {"mod": "genitals/penis-circ-decr|incr", "label": "Penis circumference", "enabledCondition": "hasGenitals"},
+          {"mod": "genitals/penis-testicles-decr|incr", "label": "Testicles size", "enabledCondition": "hasGenitals"}
         ]
     }
   },
