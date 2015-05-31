@@ -37,13 +37,15 @@ Abstract
 Development tool for blending unit poses together in an expression pose.
 """
 
+import os
+import json
+
 import algos3d
 import gui3d
 import animation
 import bvh
 import gui
 import getpath
-import json
 import log
 
 
@@ -81,6 +83,20 @@ class ExpressionMixerTaskView(gui3d.TaskView):
 
         self.sliders = []
         self.modifiers = {}
+
+        self.saveBtn = self.addRightWidget(gui.BrowseButton('save', "Save pose"))
+        self.saveBtn.setFilter("MakeHuman unit-pose blend file (*.mhupb)")
+        savepath = getpath.getDataPath('expressions')
+        if not os.path.exists(savepath):
+            os.makedirs(savepath)
+        self.saveBtn.setDirectory(getpath.getDataPath('expressions'))
+
+        @self.saveBtn.mhEvent
+        def onClicked(path):
+            if path:
+                if not os.path.splitext(path)[1]:
+                    path = path + ".mhupb"
+                self.saveCurrentPose(path)
 
     def updatePose(self):
         posenames = []
@@ -151,6 +167,18 @@ class ExpressionMixerTaskView(gui3d.TaskView):
     def onHumanChanging(self, event):
         if event.change not in ['expression', 'material']:
             self.resetTargets()
+
+    def saveCurrentPose(self, filename):
+        import makehuman
+        unitpose_values = dict([(m,v) for m, v in self.modifiers.iteritems() if v != 0])
+        data = { "name": "No name",
+                 "description": "No description",
+                 "tags": ["no tag"],
+                 "unit_poses": unitpose_values
+                }
+        data.update(makehuman.getAssetLicense().asDict())
+        json.dump(data, open(filename, 'w'))
+        log.message("Saved pose as %s" % filename)
 
     def resetTargets(self):
         return
