@@ -1,0 +1,78 @@
+# MakeHuman 3d morphing modelled by Manuel Bastioni
+# Copyright (C) 2014 Manuel Bastioni (mb@makehuman.org)
+# homepage http://www.makehuman.org
+# basemesh hm08
+# license AGPL3 (http://www.makehuman.org/doc/node/makehuman_mesh_license.html)
+#    This file is part of MakeHuman (www.makehuman.org).
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+6786 0 -.001 0
+6787 0 -.001 .004
+6788 0 -.015 .007
+6789 0 -.018 .009
+6791 -.001 -.004 .001
+6792 -.001 -.017 .008
+6794 0 -.002 0
+6795 -.003 -.013 .007
+6797 0 -.001 0
+6798 -.001 -.009 .002
+6800 0 0 0
+6801 .003 -.002 .002
+6803 0 0 0
+6804 .002 0 .002
+6840 0 -.006 0
+6843 0 -.002 0
+6866 0 -.004 .012
+6867 -.001 0 .004
+6868 .001 0 .001
+6873 .001 -.016 .026
+6874 .002 -.012 .027
+6875 .002 -.014 .030
+6876 0 -.009 .018
+6877 .001 -.011 .024
+6878 0 -.009 .023
+6879 0 -.003 .008
+6887 .002 0 .002
+6888 .005 0 0
+6892 .007 -.003 .003
+6897 .004 -.003 -.004
+6922 -.005 -.002 .011
+6923 -.003 -.002 .005
+6924 0 0 0
+6929 .001 -.009 .015
+6930 .003 -.008 .015
+6931 -.003 -.005 .020
+6932 -.001 -.001 .014
+6933 .003 -.008 .016
+6934 .004 -.010 .015
+6935 .002 -.008 .003
+6942 .005 -.004 -.007
+6946 0 -.004 -.002
+6947 .004 -.006 0
+6948 -.005 -.005 -.001
+6949 -.009 -.002 .002
+6950 .005 -.006 .004
+6951 .006 -.007 0
+11467 0 0 0
+11468 0 0 0
+11492 -.002 -.012 .012
+11493 -.003 -.004 .006
+11494 .003 -.026 .024
+11495 -.003 -.010 .010
+11496 .001 0 .004
+11497 .002 0 .002
+11513 .001 -.022 .020
+11514 .006 -.030 .025
+11515 .003 -.025 .025
+11516 -.001 -.018 .018

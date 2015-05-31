@@ -1,0 +1,78 @@
+# MakeHuman 3d morphing modelled by Manuel Bastioni
+# Copyright (C) 2014 Manuel Bastioni (mb@makehuman.org)
+# homepage http://www.makehuman.org
+# basemesh hm08
+# license AGPL3 (http://www.makehuman.org/doc/node/makehuman_mesh_license.html)
+#    This file is part of MakeHuman (www.makehuman.org).
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+2 0 -.001 0
+3 0 -.001 .004
+4 0 -.015 .007
+5 0 -.018 .009
+7 .001 -.004 .001
+8 .001 -.017 .008
+10 0 -.002 0
+11 .003 -.013 .007
+13 0 -.001 0
+14 .001 -.009 .002
+16 0 0 0
+17 -.003 -.002 .002
+19 0 0 0
+20 -.002 0 .002
+56 0 -.006 0
+59 0 -.002 0
+82 0 -.004 .012
+83 .001 0 .004
+84 -.001 0 .001
+89 -.001 -.016 .026
+90 -.002 -.012 .027
+91 -.002 -.014 .030
+92 0 -.009 .018
+93 -.001 -.011 .024
+94 0 -.009 .023
+95 0 -.003 .008
+103 -.002 0 .002
+104 -.005 0 0
+108 -.007 -.003 .003
+113 -.004 -.003 -.004
+144 .005 -.002 .011
+145 .003 -.002 .005
+146 0 0 0
+151 -.001 -.009 .015
+152 -.003 -.008 .015
+153 .003 -.005 .020
+154 .001 -.001 .014
+155 -.003 -.008 .016
+156 -.004 -.010 .015
+157 -.002 -.008 .003
+165 -.005 -.004 -.007
+170 0 -.004 -.002
+171 -.004 -.006 0
+172 .005 -.005 -.001
+173 .009 -.002 .002
+174 -.005 -.006 .004
+175 -.006 -.007 0
+4849 0 0 0
+4850 0 0 0
+4874 .002 -.012 .012
+4875 .003 -.004 .006
+4876 -.003 -.026 .024
+4877 .003 -.010 .010
+4878 -.001 0 .004
+4879 -.002 0 .002
+4895 -.001 -.022 .020
+4896 -.006 -.030 .025
+4897 -.003 -.025 .025
+4898 .001 -.018 .018

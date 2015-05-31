@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=MakeHuman VERSION
+Comment=MakeHuman is a free, open source tool for creating realistic 3D human characters.
+Exec=/usr/bin/makehuman
+Terminal=false
+Type=Application
+Icon=/usr/share/makehuman/makehuman.svg
+Categories=Graphics
+
