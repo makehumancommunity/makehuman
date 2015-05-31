@@ -278,6 +278,8 @@ class Pose(AnimationTrack):
         self.tags = set([t.lower() for t in mhupb.get('tags', [])])
         self.license.fromJson(mhupb)
         self.unitposes = mhupb['unit_poses']  # Expected to be a dict with posename: weight pairs
+        if len(self.unitposes) == 0:
+            raise RuntimeError("Cannot load pose: unit_poses dict needs to contain at least one entry")
 
         self._data = poseUnit.getBlendedPose(self.unitposes.keys(), self.unitposes.values(), only_data=True)
         self.dataLen = len(self._data)
