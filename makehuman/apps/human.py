@@ -1364,10 +1364,13 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         self.callEvent('onChanged', event)
 
     def setActiveAnimation(self, anim_name):
-        # TODO emit pose change event?
+        event = events3d.HumanEvent(self, 'poseChange')
+        event.pose = anim_name
+        self.callEvent('onChanging', event)
         if self.skeleton:
             self.skeleton.dirty = True
         super(Human, self).setActiveAnimation(anim_name)
+        self.callEvent('onChanged', event)
 
     def refreshPose(self, updateIfInRest=False):
         event = events3d.HumanEvent(self, 'poseRefresh')
