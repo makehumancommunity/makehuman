@@ -193,11 +193,12 @@ class PoseLibraryTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     def onHumanChanging(self, event):
         if event.change == 'reset':
-            self.human.removeAnimations(update=False)
+            self.human.removeAnimations(update=False)  # TODO the human object now also does this, so not strictly needed
             self.currentPose = None
 
     def onHumanChanged(self, event):
         if event.change == 'skeleton':
+            # TODO still needed?
             if self.currentPose:
                 self.loadPose(self.currentPose, apply_pose=False)
         elif event.change == 'reset':
