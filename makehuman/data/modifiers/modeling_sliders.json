@@ -94,8 +94,8 @@
           {"mod": "nose/nose-scale-depth-decr|incr", "cam": "leftView", "label": "Scale depth"}
         ],
       "nose size details": [
-          {"mod": "nose/nose-nostril-width-decr|incr", "cam": "frontView", "label": "Scale nostrils width"},
-          {"mod": "nose/nose-point-width-less|more", "cam": "frontView", "label": "Scale tip width"},
+          {"mod": "nose/nose-nostrils-width-decr|incr", "cam": "frontView", "label": "Scale nostrils width"},
+          {"mod": "nose/nose-point-width-decr|incr", "cam": "frontView", "label": "Scale tip width"},
           {"mod": "nose/nose-base-down|up", "cam": "leftView", "label": "Move base vert."},
           {"mod": "nose/nose-width1-decr|incr", "cam": "frontView", "label": "Scale width 1"},
           {"mod": "nose/nose-width2-decr|incr", "cam": "frontView", "label": "Scale width 2"},
@@ -104,8 +104,8 @@
       "nose features": [
           {"mod": "nose/nose-compression-compress|uncompress", "cam": "leftView"},
           {"mod": "nose/nose-curve-concave|convex", "cam": "leftView"},
-          {"mod": "nose/nose-greek-less|more", "cam": "leftView"},
-          {"mod": "nose/nose-hump-less|more", "cam": "leftView"},
+          {"mod": "nose/nose-greek-decr|incr", "cam": "leftView"},
+          {"mod": "nose/nose-hump-decr|incr", "cam": "leftView"},
           {"mod": "nose/nose-volume-decr|incr", "cam": "leftView"},
           {"mod": "nose/nose-nostrils-angle-down|up", "cam": "leftView"},
           {"mod": "nose/nose-point-down|up", "cam": "leftView", "label": "Move tip vertically"},
@@ -130,9 +130,9 @@
       "mouth features": [
           {"mod": "mouth/mouth-dimples-in|out", "cam": "frontView", "label": "Dimples"},
           {"mod": "mouth/mouth-laugh-lines-in|out", "cam": "frontView", "label": "Laugh-lines"},
-          {"mod": "mouth/mouth-lowerlip-ext-up|down", "cam": "frontView", "label": "Lowerlip curved shape"},
+          {"mod": "mouth/mouth-lowerlip-ext-down|up", "cam": "frontView", "label": "Lowerlip curved shape"},
           {"mod": "mouth/mouth-angles-down|up", "cam": "frontView", "label": "Move corners vert."},
-          {"mod": "mouth/mouth-lowerlip-middle-up|down", "cam": "frontView", "label": "Scale middle lowerlip"},
+          {"mod": "mouth/mouth-lowerlip-middle-down|up", "cam": "frontView", "label": "Scale middle lowerlip"},
           {"mod": "mouth/mouth-lowerlip-volume-decr|incr", "cam": "leftView", "label": "Scale lowerlip volume"},
           {"mod": "mouth/mouth-philtrum-volume-decr|incr", "cam": "leftView", "label": "Scale philtrum volume"},
           {"mod": "mouth/mouth-upperlip-volume-decr|incr", "cam": "leftView", "label": "Scale upperlip volume"},
@@ -145,7 +145,7 @@
           {"mod": "ears/r-ear-scale-decr|incr", "cam": "rightView", "label": "Scale ear"},
           {"mod": "ears/r-ear-trans-down|up", "cam": "rightView", "label": "Move vertically"},
           {"mod": "ears/r-ear-scale-vert-decr|incr", "cam": "rightView", "label": "Scale height"},
-          {"mod": "ears/r-ear-lobe-min|max", "cam": "rightView", "label": "Scale lobe"},
+          {"mod": "ears/r-ear-lobe-decr|incr", "cam": "rightView", "label": "Scale lobe"},
           {"mod": "ears/r-ear-shape-pointed|triangle", "cam": "rightView", "label": "Ear shape (pointed-triangle)"},
           {"mod": "ears/r-ear-rot-backward|forward", "cam": "rightView", "label": "Ear rotation"},
           {"mod": "ears/r-ear-shape-square|round", "cam": "rightView", "label": "Ear shape (squared-round)"},
@@ -158,7 +158,7 @@
           {"mod": "ears/l-ear-scale-decr|incr", "cam": "leftView", "label": "Scale ear"},
           {"mod": "ears/l-ear-trans-down|up", "cam": "leftView", "label": "Move vertically"},
           {"mod": "ears/l-ear-scale-vert-decr|incr", "cam": "leftView", "label": "Scale height"},
-          {"mod": "ears/l-ear-lobe-min|max", "cam": "leftView", "label": "Scale lobe"},
+          {"mod": "ears/l-ear-lobe-decr|incr", "cam": "leftView", "label": "Scale lobe"},
           {"mod": "ears/l-ear-shape-pointed|triangle", "cam": "leftView", "label": "Ear shape (pointed-triangle)"},
           {"mod": "ears/l-ear-rot-backward|forward", "cam": "leftView", "label": "Ear rotation"},
           {"mod": "ears/l-ear-shape-square|round", "cam": "leftView", "label": "Ear shape (squared-round)"},
@@ -313,8 +313,8 @@
           {"mod": "armslegs/l-upperleg-muscle-decr|incr", "cam": "leftLegFrontCamera", "label": "Upperleg muscle"}          
         ],
         "legs": [          
-          {"mod": "legs/legs-upperlegheight-decr|incr", "label": "Upperleg height"},
-          {"mod": "legs/legs-lowerlegheight-decr|incr", "label": "Lowerleg height"}  
+          {"mod": "armslegs/upperlegs-height-decr|incr", "label": "Upperlegs height"},
+          {"mod": "armslegs/lowerlegs-height-decr|incr", "label": "Lowerlegs height"}  
         ]
     }
   },
