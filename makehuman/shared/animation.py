@@ -58,6 +58,8 @@ class AnimationTrack(object):
     """Baseclass for all animations and poses that can be applied to a
     MakeHuman (base) skeleton."""
 
+    # TODO it might be a good idea to store the bone names in the animationtrack (eg in bvh.createAnimationTrack), or at least store the name of the skeleton it was created for
+
     def __init__(self, name, poseData, nFrames, framerate):
         """
         Create a skeletal animation track with specified name from given pose
@@ -145,6 +147,13 @@ class AnimationTrack(object):
             progress.step("Baking animation frame %s", f_idx+1)
 
         skel.setPose(old_pose)
+
+    def isPose(self):
+        """
+        Returns true if this animationtrack is a pose,
+        meaning that it contains only one frame.
+        """
+        return self.nFrames == 1
 
     def getAtTime(self, time, noBake=False):
         """
@@ -302,7 +311,7 @@ class PoseUnit(AnimationTrack):
         super(PoseUnit, self).__init__(name, poseData, nFrames=len(poseNames), framerate=1)
         self._poseNames = poseNames
 
-        self._affectedBones = None  # Stores for every frame which bones are posed
+        self._affectedBones = None  # Stores for every frame which bones (index) are posed
 
     def sparsify(self, newFrameRate):
         raise NotImplementedError("sparsify() does not exist for poseunits")
@@ -425,6 +434,26 @@ def blendPoses(poses, weights):
         poseData += w * pose    # TODO does not work as it adds a scale transformation too
 
     return poseData
+
+def mixPoses(pose1, pose2, bonesList):
+    """
+    Combine two poses into one by taking pose1 and replacing
+    the orientations of the bones in bonesList with the orientations
+    of pose 2. bonesList is a list of bone indices (integers) that
+    should be replaced in pose1 with the orientations in pose2
+    Returns a new Pose object and does not modify the original
+    poses.
+    We assume that pose1 and pose2 are created for the same
+    skeleton, meaning that they contain motions for the same
+    bones.
+    If pose1 or pose2 is an animation, its first frame will be
+    used.
+    """
+    if pose1.nBones != pose2.nBones:
+        raise RuntimeError("Pose %s and %s are not compatible and cannot be mixed: they are for different skeletons and do not contain the same number of bones (%s and %s)." % (pose1.name, pose2.name, pose1.nBones, pose2.nBones))
+    data = pose1.getAtFramePos(0, noBake=True).copy()
+    data[bonesList] = pose2.getAtFramePos(0, noBake=True)[[bonesList]]
+    return Pose(pose1.name+"_mix_"+pose2.name, data)
 
 def joinAnimations(anim1, anim2):
     """

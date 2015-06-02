@@ -50,7 +50,6 @@ import log
 import filecache
 import filechooser as fc
 
-# TODO viseme poses can simply be added to this library and assigned a 'visemes' tag
 
 class ExpressionAction(gui3d.Action):
     def __init__(self, msg, before, filename, taskView):
@@ -77,9 +76,12 @@ class ExpressionTaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.human = gui3d.app.selectedHuman
         self.selectedFile = None
         self.selectedPose = None
+        self.face_bone_idxs = None
 
         self.base_bvh = None
         self.base_anim = None
+
+        self._setting_pose = False
 
         self.sysDataPath = getpath.getSysDataPath('expressions')
         self.userPath = getpath.getDataPath('expressions')
@@ -114,12 +116,14 @@ class ExpressionTaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.base_bvh = bvh.load(getpath.getSysDataPath('poseunits/face-poseunits.bvh'), allowTranslation="none")
         self.base_anim = self.base_bvh.createAnimationTrack(self.human.getBaseSkeleton(), name="Expression-Face-PoseUnits")
 
-
         poseunit_json = json.load(open(getpath.getSysDataPath('poseunits/face-poseunits.json'),'rb'), object_pairs_hook=OrderedDict)
         self.poseunit_names = poseunit_json['framemapping']
 
         self.base_anim = animation.PoseUnit(self.base_anim.name, self.base_anim._data, self.poseunit_names)
         log.message('unit pose frame count:%s', len(self.poseunit_names))
+
+        # Store indexes of all bones affected by face unit poses, should be all face bones
+        self.face_bone_idxs = sorted(list(set([bIdx for l in self.base_anim.getAffectedBones() for bIdx in l])))
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
@@ -132,26 +136,40 @@ class ExpressionTaskView(gui3d.TaskView, filecache.MetadataCacher):
         if gui3d.app.getSetting('cameraAutoZoom'):
             gui3d.app.setFaceCamera()
 
+    def _get_current_pose(self):
+        if self.human.getActiveAnimation():
+            return self.human.getActiveAnimation()
+        else:
+            return None
+
+    def _get_current_unmodified_pose(self):
+        pose = self._get_current_pose()
+        if pose and hasattr(pose, 'pose_backref') and pose.pose_backref:
+            return pose.pose_backref
+        return pose
+
     def applyToPose(self, pose):
-        self.human.addAnimation(pose)
-        self.human.setActiveAnimation(pose.name)
+        if self.base_bvh is None:
+            self._load_pose_units()
+        self._setting_pose = True
 
-        # TODO if old pose still set on human, remove it ('expr-lib-pose')
-
-        # TODO blend with current pose on human
-        '''
         if self.human.getActiveAnimation() is None:
             # No pose set, simply set this one
             self.human.addAnimation(pose)
             self.human.setActiveAnimation(pose.name)
         else:
-            pose_ = self.human.getAnimation(self.human.getActiveAnimation())
-            pose_.override(pose)
-        '''
+            # If the current pose was already modified by expression library, use the original one
+            org_pose = self._get_current_unmodified_pose()
+            pose_ = animation.mixPoses(org_pose, pose, self.face_bone_idxs)
+            pose_.name = 'expr-lib-pose'
+            pose_.pose_backref = org_pose
+            self.human.addAnimation(pose_)
+            self.human.setActiveAnimation('expr-lib-pose')
 
         self.human.setPosed(True)
         self.human.refreshPose()
-        # TODO fix interaction when another pose is set, implement onHumanChanging handler
+
+        self._setting_pose = False
 
     def chooseExpression(self, filename):
         log.debug("Loading expression from %s", filename)
@@ -160,15 +178,27 @@ class ExpressionTaskView(gui3d.TaskView, filecache.MetadataCacher):
         if not filename:
             # Unload current expression
             self.selectedPose = None
-            # TODO remove the expression from existing pose
+            # Remove the expression from existing pose by restoring the original
+            org_pose = self._get_current_unmodified_pose()
+            if org_pose is None:
+                self.human.setActiveAnimation(None)
+            elif self.human.hasAnimation(org_pose.name):
+                self.human.setActiveAnimation(org_pose.name)
+            else:
+                self.human.addAnimation(org_pose)
+                self.human.setActiveAnimation(org_pose.name)
+
+            # Remove pose reserved for expression library from human
+            if self.human.hasAnimation('expr-lib-pose'):
+                self.human.removeAnimation('expr-lib-pose')
             self.filechooser.selectItem(None)
-            self.human.setActiveAnimation(None)
             self.human.refreshPose(updateIfInRest=True)
             return
 
         # Assign to human
-        pose = animation.poseFromUnitPose('expr-lib-pose', filename, self.base_anim)
-        self.applyToPose(pose)
+        self.selectedPose = animation.poseFromUnitPose('expr-lib-pose', filename, self.base_anim)
+        self.applyToPose(self.selectedPose)
+        self.human.refreshPose()
 
         self.filechooser.selectItem(filename)
 
@@ -188,24 +218,26 @@ class ExpressionTaskView(gui3d.TaskView, filecache.MetadataCacher):
         return self.paths
 
     def onHumanChanging(self, event):
-        if event.change not in ['expression', 'material']:
-            pass  # TODO
-
-    def onHumanChanged(self, event):
-        # TODO
         pass
 
+    def onHumanChanged(self, event):
+        if self._setting_pose:
+            return
+        if event.change == 'poseChange':
+            if self.selectedPose:
+                self.applyToPose(self.selectedPose)
+
     def loadHandler(self, human, values, strict):
+        # TODO make sure that this plugin loads values after pose plugin
         if values[0] == 'status':
             return
 
         if values[0] == 'expression' and len(values) > 1:
             if self.base_bvh is None:
                 self._load_pose_units()
-            # TODO catch error when expression does not exist
-            # TODO
 
     def saveHandler(self, human, file):
+        # TODO implement
         pass
 
 

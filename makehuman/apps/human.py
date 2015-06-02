@@ -1229,6 +1229,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         self.setDefaultValues()
         self.resetBoundMeshes()
         self._resetProxies()  # TODO does not properly take care of calling removeObject
+        self.removeAnimations(update=False)
         self.resetToRestPose(update=False)
 
         self.targetsDetailStack = {}
@@ -1373,6 +1374,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         self.callEvent('onChanged', event)
 
     def refreshPose(self, updateIfInRest=False):
+        # TODO investigate why at startup this is called so often
         event = events3d.HumanEvent(self, 'poseRefresh')
         self.callEvent('onChanging', event)
         if self.skeleton:
