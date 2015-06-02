@@ -72,6 +72,8 @@
     "copyright": "(c) Manuel Bastioni 2014",
     "license": "GNU Affero General Public License 3",
     "name": "Standard face pose units",
-    "version": 102,
-    "animation_file": "poseunits.bvh"
+    "version": 110,
+    "animation_file": "poseunits.bvh",
+    "homepage": "www.makehuman.org",
+    "author": "Manuel Bastioni"
 }
