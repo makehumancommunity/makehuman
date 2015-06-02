@@ -31,7 +31,7 @@
      ]
   },
 
-  { "group": "eyebrows", 
+  { "group": "eyebrows",
     "modifiers": [
       {"target": "eyebrows-trans", "min": "backward", "max": "forward"},
       {"target": "eyebrows-angle", "min": "down", "max": "up"},
@@ -39,7 +39,7 @@
     ]
   },
 
-  { "group": "neck", 
+  { "group": "neck",
     "modifiers": [
       {"target": "neck-double", "min": "decr", "max": "incr"},
       {"target": "neck-scale-depth", "min": "decr", "max": "incr"},
@@ -52,7 +52,7 @@
     ]
   },
 
-  { "group": "eyes", 
+  { "group": "eyes",
     "modifiers": [
       {"target": "r-eye-bag", "min": "decr", "max": "incr"},
       {"target": "r-eye-bag", "min": "in", "max": "out"},
@@ -60,8 +60,8 @@
       {"target": "r-eye-eyefold-angle", "min": "down", "max": "up"},
       {"target": "r-eye-epicanthus", "min": "in", "max": "out"},
       {"target": "r-eye-eyefold", "min": "concave", "max": "convex"},
-      {"target": "r-eye-eyefold", "min": "down", "max": "up"},      
-      
+      {"target": "r-eye-eyefold", "min": "down", "max": "up"},
+
       {"target": "r-eye-height1", "min": "decr", "max": "incr"},
       {"target": "r-eye-height2", "min": "decr", "max": "incr"},
       {"target": "r-eye-height3", "min": "decr", "max": "incr"},
@@ -72,7 +72,7 @@
       {"target": "r-eye-scale", "min": "decr", "max": "incr"},
       {"target": "r-eye-corner1", "min": "down", "max": "up"},
       {"target": "r-eye-corner2", "min": "down", "max": "up"},
-      
+
       {"target": "l-eye-bag", "min": "decr", "max": "incr"},
       {"target": "l-eye-bag", "min": "in", "max": "out"},
       {"target": "l-eye-bag-height", "min": "decr", "max": "incr"},
@@ -103,8 +103,8 @@
       {"target": "nose-scale-horiz", "min": "decr", "max": "incr"},
       {"target": "nose-scale-depth", "min": "decr", "max": "incr"},
 
-      {"target": "nose-nostril-width", "min": "decr", "max": "incr"},
-      {"target": "nose-point-width", "min": "less", "max": "more"},
+      {"target": "nose-nostrils-width", "min": "decr", "max": "incr"},
+      {"target": "nose-point-width", "min": "decr", "max": "incr"},
       {"target": "nose-base", "min": "down", "max": "up"},
       {"target": "nose-width1", "min": "decr", "max": "incr"},
       {"target": "nose-width2", "min": "decr", "max": "incr"},
@@ -112,8 +112,8 @@
 
       {"target": "nose-compression", "min": "compress", "max": "uncompress"},
       {"target": "nose-curve", "min": "concave", "max": "convex"},
-      {"target": "nose-greek", "min": "less", "max": "more"},
-      {"target": "nose-hump", "min": "less", "max": "more"},
+      {"target": "nose-greek", "min": "decr", "max": "incr"},
+      {"target": "nose-hump", "min": "decr", "max": "incr"},
       {"target": "nose-volume", "min": "decr", "max": "incr"},
       {"target": "nose-nostrils-angle", "min": "down", "max": "up"},
       {"target": "nose-point", "min": "down", "max": "up"},
@@ -136,12 +136,12 @@
       {"target": "mouth-upperlip-height", "min": "decr", "max": "incr"},
       {"target": "mouth-upperlip-width", "min": "decr", "max": "incr"},
       {"target": "mouth-cupidsbow-width", "min": "decr", "max": "incr"},
-      
+
       {"target": "mouth-dimples", "min": "in", "max": "out"},
       {"target": "mouth-laugh-lines", "min": "in", "max": "out"},
-      {"target": "mouth-lowerlip-ext", "min": "up", "max": "down"},
+      {"target": "mouth-lowerlip-ext", "min": "down", "max": "up"},
       {"target": "mouth-angles", "min": "down", "max": "up"},
-      {"target": "mouth-lowerlip-middle", "min": "up", "max": "down"},
+      {"target": "mouth-lowerlip-middle", "min": "down", "max": "up"},
       {"target": "mouth-lowerlip-volume", "min": "decr", "max": "incr"},
       {"target": "mouth-philtrum-volume", "min": "decr", "max": "incr"},
       {"target": "mouth-upperlip-volume", "min": "decr", "max": "incr"},
@@ -157,7 +157,7 @@
       {"target": "r-ear-scale", "min": "decr", "max": "incr"},
       {"target": "r-ear-trans", "min": "down", "max": "up"},
       {"target": "r-ear-scale-vert",  "min": "decr", "max": "incr"},
-      {"target": "r-ear-lobe", "min": "min", "max": "max"},
+      {"target": "r-ear-lobe", "min": "decr", "max": "incr"},
       {"target": "r-ear-shape", "min": "pointed", "max": "triangle"},
       {"target": "r-ear-rot", "min": "backward", "max": "forward"},
       {"target": "r-ear-shape", "min": "square", "max": "round"},
@@ -169,7 +169,7 @@
       {"target": "l-ear-scale", "min": "decr", "max": "incr"},
       {"target": "l-ear-trans", "min": "down", "max": "up"},
       {"target": "l-ear-scale-vert",  "min": "decr", "max": "incr"},
-      {"target": "l-ear-lobe", "min": "min", "max": "max"},
+      {"target": "l-ear-lobe", "min": "decr", "max": "incr"},
       {"target": "l-ear-shape", "min": "pointed", "max": "triangle"},
       {"target": "l-ear-rot", "min": "backward", "max": "forward"},
       {"target": "l-ear-shape", "min": "square", "max": "round"},
@@ -267,11 +267,11 @@
         {"target": "l-hand-trans", "min": "in", "max": "out"},
 
         {"target": "r-foot-scale", "min": "decr", "max": "incr"},
-        {"target": "r-foot-trans", "min": "in", "max": "out"},        
+        {"target": "r-foot-trans", "min": "in", "max": "out"},
         {"target": "r-foot-trans", "min": "backward", "max": "forward"},
 
         {"target": "l-foot-scale", "min": "decr", "max": "incr"},
-        {"target": "l-foot-trans", "min": "in", "max": "out"},        
+        {"target": "l-foot-trans", "min": "in", "max": "out"},
         {"target": "l-foot-trans", "min": "backward", "max": "forward"},
 
         {"target": "r-lowerarm-scale-depth", "min": "decr", "max": "incr"},
@@ -283,8 +283,8 @@
         {"target": "r-upperarm-scale-horiz", "min": "decr", "max": "incr"},
         {"target": "r-upperarm-scale-vert", "min": "decr", "max": "incr"},
         {"target": "r-upperarm-fat", "min": "decr", "max": "incr"},
-        {"target": "r-upperarm-shoulder-muscle", "min": "decr", "max": "incr"}, 
-        {"target": "r-upperarm-muscle", "min": "decr", "max": "incr"},       
+        {"target": "r-upperarm-shoulder-muscle", "min": "decr", "max": "incr"},
+        {"target": "r-upperarm-muscle", "min": "decr", "max": "incr"},
 
         {"target": "l-lowerarm-scale-depth", "min": "decr", "max": "incr"},
         {"target": "l-lowerarm-scale-horiz", "min": "decr", "max": "incr"},
@@ -301,8 +301,8 @@
         {"target": "r-leg-valgus", "min": "decr", "max": "incr"},
         {"target": "r-lowerleg-scale-depth", "min": "decr", "max": "incr"},
         {"target": "r-lowerleg-scale-horiz", "min": "decr", "max": "incr"},
-        {"target": "r-lowerleg-fat", "min": "decr", "max": "incr"}, 
-        {"target": "r-lowerleg-muscle", "min": "decr", "max": "incr"},          
+        {"target": "r-lowerleg-fat", "min": "decr", "max": "incr"},
+        {"target": "r-lowerleg-muscle", "min": "decr", "max": "incr"},
         {"target": "r-upperleg-scale-depth", "min": "decr", "max": "incr"},
         {"target": "r-upperleg-scale-horiz", "min": "decr", "max": "incr"},
         {"target": "r-upperleg-scale-vert", "min": "decr", "max": "incr"},
@@ -311,15 +311,18 @@
 
         {"target": "l-leg-valgus", "min": "decr", "max": "incr"},
         {"target": "l-lowerleg-scale-depth", "min": "decr", "max": "incr"},
-        {"target": "l-lowerleg-scale-horiz", "min": "decr", "max": "incr"}, 
+        {"target": "l-lowerleg-scale-horiz", "min": "decr", "max": "incr"},
         {"target": "l-lowerleg-fat", "min": "decr", "max": "incr"},
-        {"target": "l-lowerleg-muscle", "min": "decr", "max": "incr"},    
+        {"target": "l-lowerleg-muscle", "min": "decr", "max": "incr"},
         {"target": "l-upperleg-scale-depth", "min": "decr", "max": "incr"},
         {"target": "l-upperleg-scale-horiz", "min": "decr", "max": "incr"},
         {"target": "l-upperleg-scale-vert", "min": "decr", "max": "incr"},
         {"target": "l-upperleg-fat", "min": "decr", "max": "incr"},
-        {"target": "l-upperleg-muscle", "min": "decr", "max": "incr"}        
-    ]       
+        {"target": "l-upperleg-muscle", "min": "decr", "max": "incr"},
+        
+        {"target": "lowerlegs-height", "min": "decr", "max": "incr"},
+        {"target": "upperlegs-height", "min": "decr", "max": "incr"}
+    ]
   },
 
   { "group": "breast",
@@ -333,7 +336,7 @@
         {"target": "breast-volume-vert", "min": "down", "max": "up"},
         {"target": "nipple-size", "min": "decr", "max": "incr"},
         {"target": "nipple-point", "min": "decr", "max": "incr"}
-        
+
     ]
   },
 
@@ -374,7 +377,7 @@
     ]
   },
   { "group": "legs",
-    "modifiers": [      
+    "modifiers": [
       {"target": "legs-upperlegheight", "min": "decr", "max": "incr"},
       {"target": "legs-lowerlegheight", "min": "decr", "max": "incr"}
     ]
