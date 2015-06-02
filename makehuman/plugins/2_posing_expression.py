@@ -220,6 +220,7 @@ class ExpressionTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     def onHumanChanging(self, event):
         if event.change == 'reset':
+            self._setting_pose = True
             self.selectedFile = None
             self.selectedPose = None
 
@@ -231,6 +232,8 @@ class ExpressionTaskView(gui3d.TaskView, filecache.MetadataCacher):
             # Update GUI after reset (if tab is currently visible)
             if self.isShown():
                 self.onShow(event)
+            self._setting_pose = False
+            self.chooseExpression(None)
 
     def loadHandler(self, human, values, strict):
         if values[0] == 'status':
