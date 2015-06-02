@@ -672,7 +672,7 @@ def loadModifiers(filename, human):
     import os
     from collections import OrderedDict
     modifiers = []
-    lookup = {}
+    lookup = OrderedDict()
     data = json.load(open(filename, 'rb'), object_pairs_hook=OrderedDict)
     for modifierGroup in data:
         groupName = modifierGroup['group']
@@ -703,6 +703,7 @@ def loadModifiers(filename, human):
     # Attempt to load modifier descriptions
     _tmp = os.path.splitext(filename)
     descFile = _tmp[0]+'_desc'+_tmp[1]
+    hasDesc = OrderedDict([(key,False) for key in lookup.keys()])
     if os.path.isfile(descFile):
         data = json.load(open(descFile, 'rb'), object_pairs_hook=OrderedDict)
         dCount = 0
@@ -711,9 +712,13 @@ def loadModifiers(filename, human):
                 mod = lookup[mName]
                 mod.description = mDesc
                 dCount += 1
+                hasDesc[mName] = True
             except:
                 log.warning("Loaded description for %s but modifier does not exist!", mName)
         log.message("Loaded %s modifier descriptions from file %s", dCount, descFile)
+    for mName, mHasDesc in hasDesc.items():
+        if not mHasDesc:
+            log.warning("No description defined for modifier %s!", mName)
 
     return modifiers
 
