@@ -117,7 +117,7 @@ class ExpressionMixerTaskView(gui3d.TaskView):
         self.tagsField.setValue("no tag;expression")
 
         self.saveBtn = savebox.addWidget(gui.BrowseButton('save', "Save pose"))
-        self.saveBtn.setFilter("MakeHuman unit-pose blend file (*.mhupb)")
+        self.saveBtn.setFilter("MakeHuman blend pose file (*.mhpose)")
         savepath = getpath.getDataPath('expressions')
         if not os.path.exists(savepath):
             os.makedirs(savepath)
@@ -127,7 +127,7 @@ class ExpressionMixerTaskView(gui3d.TaskView):
         def onClicked(path):
             if path:
                 if not os.path.splitext(path)[1]:
-                    path = path + ".mhupb"
+                    path = path + ".mhpose"
                 self.saveCurrentPose(path)
 
     def updatePose(self):
