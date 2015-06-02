@@ -144,7 +144,7 @@ class ExpressionTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     def _get_current_unmodified_pose(self):
         pose = self._get_current_pose()
-        if pose and hasattr(pose, 'pose_backref') and pose.pose_backref:
+        if pose and hasattr(pose, 'pose_backref'):
             return pose.pose_backref
         return pose
 
@@ -155,16 +155,17 @@ class ExpressionTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         if self.human.getActiveAnimation() is None:
             # No pose set, simply set this one
-            self.human.addAnimation(pose)
-            self.human.setActiveAnimation(pose.name)
+            pose_ = pose
+            pose_.pose_backref = None
         else:
             # If the current pose was already modified by expression library, use the original one
             org_pose = self._get_current_unmodified_pose()
             pose_ = animation.mixPoses(org_pose, pose, self.face_bone_idxs)
-            pose_.name = 'expr-lib-pose'
             pose_.pose_backref = org_pose
-            self.human.addAnimation(pose_)
-            self.human.setActiveAnimation('expr-lib-pose')
+
+        pose_.name = 'expr-lib-pose'
+        self.human.addAnimation(pose_)
+        self.human.setActiveAnimation('expr-lib-pose')
 
         self.human.setPosed(True)
         self.human.refreshPose()
@@ -218,27 +219,40 @@ class ExpressionTaskView(gui3d.TaskView, filecache.MetadataCacher):
         return self.paths
 
     def onHumanChanging(self, event):
-        pass
+        if event.change == 'reset':
+            self.selectedFile = None
+            self.selectedPose = None
 
     def onHumanChanged(self, event):
-        if self._setting_pose:
-            return
-        if event.change == 'poseChange':
+        if event.change == 'poseChange' and not self._setting_pose:
             if self.selectedPose:
                 self.applyToPose(self.selectedPose)
+        if event.change == 'reset':
+            # Update GUI after reset (if tab is currently visible)
+            if self.isShown():
+                self.onShow(event)
 
     def loadHandler(self, human, values, strict):
-        # TODO make sure that this plugin loads values after pose plugin
         if values[0] == 'status':
             return
 
         if values[0] == 'expression' and len(values) > 1:
             if self.base_bvh is None:
                 self._load_pose_units()
+            poseFile = values[1]
+            poseFile = getpath.thoroughFindFile(poseFile, self.paths)
+            if not os.path.isfile(poseFile):
+                if strict:
+                    raise RuntimeError("Could not load expression pose %s, file does not exist." % poseFile)
+                log.warning("Could not load expression pose %s, file does not exist.", poseFile)
+            else:
+                self.chooseExpression(poseFile)
+            return
 
     def saveHandler(self, human, file):
-        # TODO implement
-        pass
+        if self.selectedFile:
+            poseFile = getpath.getRelativePath(self.selectedFile, self.paths)
+            file.write('expression %s\n' % poseFile)
 
 
 # This method is called when the plugin is loaded into makehuman
@@ -253,7 +267,7 @@ def load(app):
     category.addTask(taskview)
 
     app.addLoadHandler('expression', taskview.loadHandler)
-    app.addSaveHandler(taskview.saveHandler)
+    app.addSaveHandler(taskview.saveHandler, priority=8) # After pose library (even though it does not really matter)
 
 
 # This method is called when the plugin is unloaded from makehuman
