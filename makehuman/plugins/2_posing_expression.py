@@ -70,7 +70,7 @@ class ExpressionAction(gui3d.Action):
 class ExpressionTaskView(gui3d.TaskView, filecache.MetadataCacher):
     def __init__(self, category):
         gui3d.TaskView.__init__(self, category, 'Expressions')
-        self.extension = 'mhupb'  # MH unit-pose blend (preliminary name)
+        self.extension = 'mhpose'  # MH unit-pose blend (preliminary name)
         filecache.MetadataCacher.__init__(self, self.extension, 'expression_filecache.mhc')
 
         self.human = gui3d.app.selectedHuman
@@ -204,10 +204,10 @@ class ExpressionTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     def getMetadataImpl(self, filename):
         import json
-        mhupb = json.load(open(filename, 'rb'))
-        name = mhupb['name']
-        description = mhupb.get('description', '')
-        tags = set([t.lower() for t in mhupb.get('tags', [])])
+        posedata = json.load(open(filename, 'rb'))
+        name = posedata['name']
+        description = posedata.get('description', '')
+        tags = set([t.lower() for t in posedata.get('tags', [])])
         return (tags, name, description)
 
     def getTagsFromMetadata(self, metadata):
