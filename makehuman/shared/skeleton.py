@@ -249,7 +249,7 @@ class Skeleton(object):
                         # does not hava a bone with the same name as this bone. This bone will not receive any weights.
                         # This warning is rather serious: it means that one of the bones in your seleton will not have
                         # weights.
-                        log.warning("No explicit weight reference bone mapping for bone %s, and cannot implicitly map by name. This bone will not have any weights.", bone.name)
+                        log.warning("No explicit weight reference bone mapping for bone %s, and cannot implicitly map by name. This bone will not have any weights. This might be normal if this is for example a proxy only weighted to a few bones.", bone.name)
 
             if len(b_weights) > 0:
                 weights[bone.name] = b_weights
