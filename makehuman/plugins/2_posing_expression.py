@@ -119,6 +119,9 @@ class ExpressionTaskView(gui3d.TaskView, filecache.MetadataCacher):
         poseunit_json = json.load(open(getpath.getSysDataPath('poseunits/face-poseunits.json'),'rb'), object_pairs_hook=OrderedDict)
         self.poseunit_names = poseunit_json['framemapping']
 
+        if len(self.poseunit_names) != self.base_bvh.frameCount:
+            self.base_anim = None
+            raise RuntimeError("Face units BVH has wrong number of frames (%s) while face-poseunits.json defines %s poses, they should be equal." % (self.base_bvh.frameCount, len(self.poseunit_names)))
         self.base_anim = animation.PoseUnit(self.base_anim.name, self.base_anim._data, self.poseunit_names)
         log.message('unit pose frame count:%s', len(self.poseunit_names))
 
