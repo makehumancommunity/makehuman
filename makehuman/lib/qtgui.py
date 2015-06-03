@@ -387,6 +387,7 @@ class Slider(QtGui.QWidget, Widget):
         self._valueConverter = valueConverter
         if self.valueConverter:
             self.edit = NarrowLineEdit(5)
+            self.edit.installEventFilter(self)
             self.connect(self.edit, QtCore.SIGNAL('returnPressed()'), self._enter)
             self.layout.addWidget(self.edit, 1, 1, 1, 1)
             if hasattr(self.valueConverter, 'units'):
@@ -438,13 +439,16 @@ class Slider(QtGui.QWidget, Widget):
             return self.valueConverter.displayToData(value)
 
     def eventFilter(self, object, event):
-        if object != self.slider:
+        if object != self.slider and object != self.edit:
             return
+        result = False
+        if object == self.edit:
+            result = self.edit.eventFilter(object, event)
         if event.type() == QtCore.QEvent.FocusIn:
             self.callEvent('onFocus', self)
         elif event.type() == QtCore.QEvent.FocusOut:
             self.callEvent('onBlur', self)
-        return False
+        return result
 
     def _update_image(self):
         if self.image is None:
