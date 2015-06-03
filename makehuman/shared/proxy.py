@@ -88,7 +88,7 @@ class Proxy:
         self.uuid = None
         self.basemesh = makehuman.getBasemeshVersion()
         self.tags = []
-        self.version = 101
+        self.version = 110
 
         self.ref_vIdxs = None       # (Vidx1,Vidx2,Vidx3) list with references to human vertex indices, indexed by proxy vert
         self.weights = None         # (w1,w2,w3) list, with weights per human vertex (mapped by ref_vIdxs), indexed by proxy vert
@@ -102,6 +102,8 @@ class Proxy:
 
         self.z_depth = -1       # Render order depth for the proxy object. Also used to determine which proxy object should mask others (delete faces)
         self.max_pole = None    # Signifies the maximum number of faces per vertex on the mesh topology. Set to none for default.
+
+        self.special_pose = {}  # Special poses that should be set on the human when this proxy is active to make it look good
 
         self.uvLayers = {}  # TODO what is this used for?
 
@@ -379,6 +381,8 @@ def loadTextProxy(human, filepath, type="Clothes"):
             proxy.z_depth = int(words[1])
         elif key == 'max_pole':
             proxy.max_pole = int(words[1])
+        elif key == 'special_pose':
+            proxy.special_pose[words[1]] = words[2]
 
         elif key == 'verts':
             status = doRefVerts
@@ -543,7 +547,15 @@ def saveBinaryProxy(proxy, path):
         vars_["z_depth"] = np.asarray(proxy.z_depth, dtype=np.int32)
 
     if proxy.max_pole:
-        vars_["max_pole"] = np.asarray(proxy.max_pole, dtype=np.uint32),
+        vars_["max_pole"] = np.asarray(proxy.max_pole, dtype=np.uint32)
+
+    special_poses = []
+    for posetype, posename in proxy.special_poses.items():
+        special_poses.append(posetype)
+        special_poses.append(posename)
+    specialposeStr, specialposeIdx = _packStringList(special_poses)
+    vars_["special_pose_str"] = specialposeStr
+    vars_["special_pose_idx"] = specialposeIdx
 
     if proxy.weights[:,1:].any():
         # 3 ref verts used in this proxy
@@ -596,6 +608,11 @@ def loadBinaryProxy(path, human, type):
 
     if 'max_pole' in npzfile:
         proxy.max_pole = int(npzfile['max_pole'])
+
+    if 'special_pose_str' in npzfile:
+        special_poses = _unpackStringList(npzfile['special_pose_str'], npzfile['special_pose_idx'])
+        for idx in range(0, len(special_poses), 2):
+            proxy.special_pose[special_poses[idx]] = special_poses[idx+1]
 
     num_refverts = int(npzfile['num_refverts'])
 

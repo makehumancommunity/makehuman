@@ -137,10 +137,7 @@ class ExpressionTaskView(gui3d.TaskView, filecache.MetadataCacher):
             gui3d.app.setFaceCamera()
 
     def _get_current_pose(self):
-        if self.human.getActiveAnimation():
-            return self.human.getActiveAnimation()
-        else:
-            return None
+        return self.human.getActiveAnimation()
 
     def _get_current_unmodified_pose(self):
         pose = self._get_current_pose()
@@ -153,13 +150,15 @@ class ExpressionTaskView(gui3d.TaskView, filecache.MetadataCacher):
             self._load_pose_units()
         self._setting_pose = True
 
-        if self.human.getActiveAnimation() is None:
+        if self._get_current_pose() is None:
             # No pose set, simply set this one
             pose_ = pose
             pose_.pose_backref = None
         else:
             # If the current pose was already modified by expression library, use the original one
             org_pose = self._get_current_unmodified_pose()
+            if org_pose is None:
+                org_pose = self._get_current_pose()
             pose_ = animation.mixPoses(org_pose, pose, self.face_bone_idxs)
             pose_.pose_backref = org_pose
 
