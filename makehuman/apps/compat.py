@@ -39,6 +39,8 @@ Backwards compatibility with older MakeHuman releases.
 
 import log
 import progress
+import csv
+import getpath
 
 def _parse_version(version_str):
     version_str = version_str.lower().strip()
@@ -129,7 +131,7 @@ class MHM10Loader(object):
                         "penis": "genitals"
                      }
 
-    modifier_mapping = {  "face": {
+    target_mapping = {    "face": {
                           },
                           "torso": {
                           },
@@ -174,6 +176,9 @@ class MHM10Loader(object):
                           "custom": {
                           }
                        }
+
+    modifier_mapping = None
+
     skel_mapping = {  "basic.json": "default.mhskel",
                       "makehuman.json": "default.mhskel",
                       "game.json": "cmu_mb.mhskel",
@@ -190,6 +195,20 @@ class MHM10Loader(object):
                         }
                     }
 
+    def getModifierMapping(self):
+        if self.modifier_mapping is None:
+            self.modifier_mapping = dict()
+            f = open(getpath.getSysDataPath('modifiers/mh_1-0_modifier_mapping.csv'), 'rb')
+            csvreader = csv.reader(f, delimiter=',', quotechar='"')
+            for r_idx, row in enumerate(csvreader):
+                if r_idx == 0:
+                    # First line is header, drop it
+                    continue
+                if row[0]:
+                    self.modifier_mapping[row[0]] = (row[1], bool(row[2]))
+            f.close()
+        return self.modifier_mapping
+
     def loadProperty(self, line_data, default_load_callback, strict):
         prop = line_data[0]
         if prop in ['tags', 'camera', 'subdivide']:
@@ -203,8 +222,7 @@ class MHM10Loader(object):
                     default_load_callback(["skeleton", skel])
                 else:
                     log.warning("There is no good replacement for MH v1.0 rig %s" % skeltype)
-        elif prop in self.modifier_mapping.keys():
-            mapping = self.modifier_mapping[prop]
+        elif prop in self.target_mapping.keys():
             target_name = line_data[1]
             value = float(line_data[2])
 
@@ -212,24 +230,56 @@ class MHM10Loader(object):
                 modifier_name = "custom/%s" % target_name
                 default_load_callback(["modifier", modifier_name, value])
                 return
-            if target_name in mapping:
-                default_load_callback(["modifier", mapping[target_name], value])
-                return
 
-            tokens = target_name.split('-')
-            if '-'.join(tokens[-2:]) in self.trail_tokens:
-                target_name = '-'.join(tokens[:-2]+[self.trail_tokens['-'.join(tokens[-2:])]])
+            modifier_name = self.targetToModifier(prop, target_name)
+            new_modifier = self.mapModifier(modifier_name, value)
 
-            if tokens[0] in self.leading_tokens:
-                modifier_name = "%s/%s" % (self.leading_tokens[tokens[0]], target_name)
-            elif '-'.join(tokens[:2]) in self.leading_tokens:
-                modifier_name = "%s/%s" % (self.leading_tokens['-'.join(tokens[:2])], target_name)
+            if new_modifier:
+                modifier_name, value = new_modifier
             else:
-                modifier_name = "%s/%s" % (tokens[0], target_name)
+                log.warning("No 1.0 -> 1.1 mapping found for modifier %s", modifier_name)
 
             default_load_callback(["modifier", modifier_name, value])
+
         else:
             default_load_callback(line_data)
+
+    def targetToModifier(self, target_savename, target_name):
+        """
+        Map a target and savename, as stored in 1.0.x MHM files
+        to the name of the corresponding modifier (in 1.0).
+        Returns the MH 1.0.x modifier name corresponding to that
+        target.
+        """
+        mapping = self.target_mapping[target_savename]
+        if target_name in mapping:
+            return mapping[target_name]
+
+        tokens = target_name.split('-')
+        if '-'.join(tokens[-2:]) in self.trail_tokens:
+            target_name = '-'.join(tokens[:-2]+[self.trail_tokens['-'.join(tokens[-2:])]])
+
+        if tokens[0] in self.leading_tokens:
+            modifier_name = "%s/%s" % (self.leading_tokens[tokens[0]], target_name)
+        elif '-'.join(tokens[:2]) in self.leading_tokens:
+            modifier_name = "%s/%s" % (self.leading_tokens['-'.join(tokens[:2])], target_name)
+        else:
+            modifier_name = "%s/%s" % (tokens[0], target_name)
+        return modifier_name
+
+    def mapModifier(self, modifier_name, value):
+        """
+        Map a MH 1.0.x modifier name and a value for it to a modifier
+        in MH 1.1.x and the corresponding value.
+        """
+        mapping = self.getModifierMapping()
+        result = mapping.get(modifier_name, None)
+        if result is None:
+            return None
+        new_modifier_name, invert_value = result
+        if invert_value:
+            value = -value
+        return (new_modifier_name, value)
 
     def getAcceptedVersion(self):
         return (1, 0)
