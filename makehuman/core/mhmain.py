@@ -293,9 +293,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         @self.modelCamera.mhEvent
         def onChanged(event):
-            for category in self.categories.itervalues():
-                for task in category.tasks:
-                    task.callEvent('onCameraChanged', event)
+            self.callEventHandlers('onCameraChanged', event)
 
         mh.cameras.append(self.modelCamera)
 
@@ -451,9 +449,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         @self.selectedHuman.mhEvent
         def onChanging(event):
-            for category in self.categories.itervalues():
-                for task in category.tasks:
-                    task.callEvent('onHumanChanging', event)
+            self.callEventHandlers('onHumanChanging', event)
 
         @self.selectedHuman.mhEvent
         def onChanged(event):
@@ -470,43 +466,30 @@ class MHApplication(gui3d.Application, mh.Application):
                 self.currentFile.saved(event.path)
             elif event.change == 'reset':
                 self.currentFile.closed()
-            for category in self.categories.itervalues():
-                for task in category.tasks:
-                    task.callEvent('onHumanChanged', event)
+            self.callEventHandlers('onHumanChanged', event)
 
         @self.selectedHuman.mhEvent
         def onTranslated(event):
-            for category in self.categories.itervalues():
-                for task in category.tasks:
-                    task.callEvent('onHumanTranslated', event)
+            self.callEventHandlers('onHumanTranslated', event)
 
         @self.selectedHuman.mhEvent
         def onRotated(event):
-            for category in self.categories.itervalues():
-                for task in category.tasks:
-                    task.callEvent('onHumanRotated', event)
+            self.callEventHandlers('onHumanRotated', event)
 
         @self.selectedHuman.mhEvent
         def onShown(event):
-            for category in self.categories.itervalues():
-                for task in category.tasks:
-                    task.callEvent('onHumanShown', event)
+            self.callEventHandlers('onHumanShown', event)
 
         @self.selectedHuman.mhEvent
         def onHidden(event):
-            for category in self.categories.itervalues():
-                for task in category.tasks:
-                    task.callEvent('onHumanHidden', event)
+            self.callEventHandlers('onHumanHidden', event)
 
         @self.modelCamera.mhEvent
         def onRotated(event):
-            for category in self.categories.itervalues():
-                for task in category.tasks:
-                    task.callEvent('onCameraRotated', event)
+            self.callEventHandlers('onCameraRotated', event)
 
         # Set up categories and tasks
-        self.files = guifiles.FilesCategory()
-        self.addCategory(self.files)
+        self.files = guifiles.FilesCategory(self)
         self.getCategory("Modelling")
         self.getCategory("Geometries")
         self.getCategory("Materials")
@@ -1326,8 +1309,7 @@ class MHApplication(gui3d.Application, mh.Application):
             setSceneLighting(self.scene)
 
         for category in self.categories.itervalues():
-            for task in category.tasks:
-                task.callEvent('onSceneChanged', event)
+            self.callEventHandlers('onSceneChanged', event)
 
     # Shortcuts
     def setShortcut(self, modifier, key, action):

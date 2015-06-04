@@ -1,4 +1,3 @@
-#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
 """
@@ -694,6 +693,7 @@ class Application(QtGui.QApplication, events3d.EventHandler):
         self.logger_async = log.getLogger('mh.callAsync')
         self.logger_redraw = log.getLogger('mh.redraw')
         self.logger_event = log.getLogger('mh.event')
+        self.eventHandlers = []
         # self.installEventFilter(self)
 
     def OnInit(self):
@@ -757,6 +757,19 @@ class Application(QtGui.QApplication, events3d.EventHandler):
     def eventFilter(self, object, event):
         self.logger_event.debug('eventFilter(%s, %s(%s))', object, event, event.type())
         return False
+
+    def addEventHandler(self, handler, sortOrder=None):
+        if sortOrder is None:
+            orders = [h.sortOrder for h in self.eventHandlers]
+            o = max(orders) +1
+            handler.sortOrder = o
+
+        self.eventHandlers.append(handler)
+        self.eventHandlers.sort(key = lambda h: h.sortOrder)
+
+    def callEventHandlers(self, event_type, event):
+        for handler in self.eventHandlers:
+            handler.callEvent(event_type, event)
 
     def addTimer(self, milliseconds, callback):
         timer_id = self.startTimer(milliseconds)
