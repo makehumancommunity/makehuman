@@ -375,12 +375,5 @@
     "modifiers": [
         {"macrovar": "BodyProportions"}
     ]
-  },
-  { "group": "legs",
-    "modifiers": [
-      {"target": "legs-upperlegheight", "min": "decr", "max": "incr"},
-      {"target": "legs-lowerlegheight", "min": "decr", "max": "incr"}
-    ]
   }
-
 ]
