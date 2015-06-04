@@ -43,8 +43,10 @@ from guiload import LoadTaskView
 from guiexport import ExportTaskView
 
 class FilesCategory(gui3d.Category):
-    def __init__(self):
+    def __init__(self, parent):
         super(FilesCategory, self).__init__('Files')
+
+        parent.addCategory(self)
 
         self.load = LoadTaskView(self)
         self.save = SaveTaskView(self)

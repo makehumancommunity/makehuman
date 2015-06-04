@@ -325,6 +325,13 @@ class Category(View):
         if self.tabs is not None:
             self._taskTab(task)
         self.task = self.tasks[0].name
+
+        categories = sorted(self.parent.categories.values(), key=lambda c: c.sortOrder)
+        categoryOrder = categories.index(self)
+        # Ensure that event order is per category, per task
+        eventOrder = 1000 * categoryOrder + task.sortOrder
+        self.parent.addEventHandler(task, eventOrder)
+
         return task
 
     def getTaskByName(self, name):
