@@ -550,7 +550,7 @@ def saveBinaryProxy(proxy, path):
         vars_["max_pole"] = np.asarray(proxy.max_pole, dtype=np.uint32)
 
     special_poses = []
-    for posetype, posename in proxy.special_poses.items():
+    for posetype, posename in proxy.special_pose.items():
         special_poses.append(posetype)
         special_poses.append(posename)
     specialposeStr, specialposeIdx = _packStringList(special_poses)
