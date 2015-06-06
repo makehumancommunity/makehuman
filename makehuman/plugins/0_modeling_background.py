@@ -439,10 +439,13 @@ class BackgroundChooser(gui3d.TaskView):
                 side = values[1]
                 img_filename = values[2]
                 i = 0
-                while img_filename and not any( [img_filename.lower().endswith(ex) for ex in self.extensions] ) and (len(values) - (i+2)) >= 5:
+                while img_filename and not any( [img_filename.lower().endswith(ex) for ex in self.extensions] ) and (len(values) - (i+2)) >= 6:
                     i += 1
                     img_filename = img_filename + ' ' + values[2+i]
                 img_filename = getpath.thoroughFindFile(img_filename, self.backgroundsFolders)
+                if not os.path.isfile(img_filename):
+                    log.warning("Background file %s not found", img_filename)
+                    return
                 aspect = float(values[3+i])
                 trans = (float(values[4+i]), float(values[5+i]))
                 scale = float(values[6+i])
@@ -459,11 +462,19 @@ class BackgroundChooser(gui3d.TaskView):
     def saveHandler(self, human, file):
         for side in self.sides.keys():
             side_data = self.filenames.get(side)
+            backgrounds = 0
             if side_data is not None:
                 (filename, aspect) = side_data
+                if not filename:
+                    continue
                 (trans, scale) = self.transformations[side]
                 filename = getpath.getJailedPath(filename, self.backgroundsFolders, jailLimits=self.backgroundsFolders)
+                if not filename:
+                    continue
                 file.write('background %s %s %s %s %s %s\n' % (side, filename, aspect, trans[0], trans[1], scale))
+                backgrounds += 1
+        if backgrounds == 0:
+            return
         file.write('background enabled %s\n' % self.isBackgroundEnabled() )
 
 class TextureProjectionView(gui3d.TaskView) :
