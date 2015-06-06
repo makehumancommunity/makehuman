@@ -1410,11 +1410,28 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         f = open(filename, 'rU', encoding="utf-8")
 
         for lh in G.app.loadHandlers.values():
-            lh(self, ['status', 'started'], strict)
+            try:
+                lh(self, ['status', 'started'], strict)
+            except:
+                if strict:
+                    e = sys.exc_info()
+                    raise e[0], e[1], e[2]
+                else:
+                    log.warning("Exception while starting MHM loading.", exc_info=True)
 
         lines = f.readlines()
 
         def _load_property(lineData):
+            try:
+                _do_load_property(lineData)
+            except:
+                if strict:
+                    e = sys.exc_info()
+                    raise e[0], e[1], e[2]
+                else:
+                    log.warning("Exception while loading MHM property.", exc_info=True)
+
+        def _do_load_property(lineData):
             if len(lineData) > 0 and not lineData[0] == '#':
                 if lineData[0] == 'version':
                     log.message('Version %s', lineData[1])
@@ -1457,7 +1474,14 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
         log.debug("Finalizing MHM loading.")
         for lh in set(G.app.loadHandlers.values()):
-            lh(self, ['status', 'finished'], strict)
+            try:
+                lh(self, ['status', 'finished'], strict)
+            except:
+                if strict:
+                    e = sys.exc_info()
+                    raise e[0], e[1], e[2]
+                else:
+                    log.warning("Exception while finishing MHM loading.", exc_info=True)
         f.close()
 
         self.blockEthnicUpdates = False
