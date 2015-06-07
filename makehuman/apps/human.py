@@ -1451,7 +1451,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
                     G.app.modelCamera.translation[:3] = trans[:3]
                     G.app.modelCamera.setZoomFactor(zoom)
                 elif lineData[0] == 'subdivide':
-                    subdivide = lineData[1].lower() in ['true', 'yes']
+                    G.app.selectedHuman._mhm_do_subdivide = lineData[1].lower() in ['true', 'yes']
                 elif lineData[0] in G.app.loadHandlers:
                     G.app.loadHandlers[lineData[0]](self, lineData, strict)
                 else:
@@ -1494,6 +1494,9 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             self.applyAllTargets()
 
         progress(0.9, 0.99)
+        if hasattr(self, '_mhm_do_subdivide'):
+            subdivide = self._mhm_do_subdivide
+            del self._mhm_do_subdivide
         self.setSubdivided(subdivide)
 
         progress(1.0)
