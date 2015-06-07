@@ -192,8 +192,21 @@ class MHM10Loader(object):
     proxy_mapping = {  "genitals": {
                             "3b354e4f-ebdb-4336-a5fb-add41fc05f12": "ece8ae91-d8d7-4e98-a737-dd1f5f08519a",  # penis proxy, replace with male genitals proxy
                             "a52a556f-076d-4f46-a3a3-931b28ff1af4": "e71e3025-e6b5-415b-87a9-92be4642c7cc",  # Vagina proxy, replace with female genitals proxy
-                        }
+                       },
+                       "hair": {
+                            "c4808d0d-bbbc-4e62-82a1-8610b06d0e05": "6c6b0bb1-3608-40b8-9108-4bfd8fa71e39", # fhair01 -> long01
+                            "710b4c8c-d34e-47a8-9d1d-e3f623bb8d95": "766436e9-63ed-4f6a-afa9-99f3acff70a8",  # mhair01 -> short01
+                            "f81a4e9a-e3d7-4ecb-bdf0-16d7fd9070a4": "c104cd4a-1edc-43f9-8b94-f63345a44638",  # mhair02 -> short02
+                       }
                     }
+
+    skin_mapping = {  "skins/young_asian_female/young_asian_female_sweat.mhmat": "skins/young_asian_female/young_asian_female.mhmat",
+                      "skins/young_asian_female/young_asian_male_sweat.mhmat": "skins/young_asian_female/young_asian_male.mhmat",
+                      "skins/young_african_female/young_african_female_sweat.mhmat": "skins/young_african_female/young_african_female.mhmat",
+                      "skins/young_african_female/young_african_male_sweat.mhmat": "skins/young_african_female/young_african_male.mhmat",
+                      "skins/young_caucasian_female/young_caucasian_female_sweat.mhmat": "skins/young_caucasian_female/young_caucasian_female.mhmat",
+                      "skins/young_caucasian_female/young_caucasian_male_sweat.mhmat": "skins/young_caucasian_female/young_caucasian_male.mhmat"
+                   }
 
     def getModifierMapping(self):
         if self.modifier_mapping is None:
@@ -222,7 +235,13 @@ class MHM10Loader(object):
                     default_load_callback(["skeleton", skel])
                 else:
                     log.warning("There is no good replacement for MH v1.0 rig %s" % skeltype)
-        elif prop in self.target_mapping.keys():
+        elif prop == 'skinMaterial':
+            mat = line_data[1]
+            if mat in skin_mapping:
+                default_load_callback(["skinMaterial", skin_mapping[mat]])
+            else:
+                default_load_callback(line_data)
+        elif prop in self.target_mapping:
             target_name = line_data[1]
             value = float(line_data[2])
 
@@ -240,6 +259,14 @@ class MHM10Loader(object):
                 log.warning("No 1.0 -> 1.1 mapping found for modifier %s", modifier_name)
 
             default_load_callback(["modifier", modifier_name, value])
+        elif prop in proxy_mapping:
+            mapping = proxy_mapping[prop]
+            name = line_data[1]
+            pxy = line_data[2]
+            if pxy in mapping:
+                default_load_callback([prop, name, mapping[pxy]])
+            else:
+                default_load_callback(line_data)
 
         else:
             default_load_callback(line_data)
