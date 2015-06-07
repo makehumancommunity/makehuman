@@ -237,8 +237,8 @@ class MHM10Loader(object):
                     log.warning("There is no good replacement for MH v1.0 rig %s" % skeltype)
         elif prop == 'skinMaterial':
             mat = line_data[1]
-            if mat in skin_mapping:
-                default_load_callback(["skinMaterial", skin_mapping[mat]])
+            if mat in self.skin_mapping:
+                default_load_callback(["skinMaterial", self.skin_mapping[mat]])
             else:
                 default_load_callback(line_data)
         elif prop in self.target_mapping:
@@ -259,8 +259,8 @@ class MHM10Loader(object):
                 log.warning("No 1.0 -> 1.1 mapping found for modifier %s", modifier_name)
 
             default_load_callback(["modifier", modifier_name, value])
-        elif prop in proxy_mapping:
-            mapping = proxy_mapping[prop]
+        elif prop in self.proxy_mapping:
+            mapping = self.proxy_mapping[prop]
             name = line_data[1]
             pxy = line_data[2]
             if pxy in mapping:
