@@ -49,6 +49,11 @@ from core import G
 import getpath
 import filecache
 
+
+# Bone used for determining the pose scaling (root bone translation scale)
+COMPARE_BONE = "upperleg02.L"
+
+
 class PoseAction(gui3d.Action):
     def __init__(self, name, library, before, after):
         super(PoseAction, self).__init__(name)
@@ -74,6 +79,8 @@ class PoseLibraryTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         self.human = G.app.selectedHuman
         self.currentPose = None
+        self.bvh_bone_length = None
+        self.bvh_root_translation = None
 
         self.paths = [mh.getDataPath('poses'), mh.getSysDataPath('poses')]
 
@@ -137,6 +144,8 @@ class PoseLibraryTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         if not filepath:
             self.human.resetToRestPose()
+            self.bvh_bone_length = None
+            self.bvh_root_translation = None
             return
 
         if os.path.splitext(filepath)[1].lower() == '.mhp':
@@ -159,29 +168,47 @@ class PoseLibraryTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     def loadBvh(self, filepath, convertFromZUp="auto"):
         bvh_file = bvh.load(filepath, convertFromZUp)
-        self.autoScaleBVH(bvh_file)  # TODO scaling once is probably not enough, every time the height of the human changes significantly the animation needs to be rescaled
         anim = bvh_file.createAnimationTrack(self.human.getBaseSkeleton())
+        if "root" in bvh_file.joints:
+            posedata = anim.getAtFramePos(0, noBake=True)
+            root_bone_idx = 0
+            self.bvh_root_translation = posedata[root_bone_idx, :3, 3].copy()
+        else:
+            self.bvh_root_translation = np.asarray(3*[0.0], dtype=np.float32)
+        self.bvh_bone_length = self.calculateBvhBoneLength(bvh_file)
+        self.autoScaleAnim(anim)
         _, _, _, license = self.getMetadata(filepath)
         anim.license = license
         return anim
 
-    def autoScaleBVH(self, bvh_file):
-        """
-        Auto scale BVH translations by comparing upper leg length
-        """
+    def calculateBvhBoneLength(self, bvh_file):
         import numpy.linalg as la
-        COMPARE_BONE = "upperleg02.L"
         if COMPARE_BONE not in bvh_file.joints:
             raise RuntimeError('Failed to auto scale BVH file %s, it does not contain a joint for "%s"' % (bvh_file.name, COMPARE_BONE))
+
         bvh_joint = bvh_file.joints[COMPARE_BONE]
-        bone = self.human.getBaseSkeleton().getBoneByReference(COMPARE_BONE)
-        if bone is not None:
-            joint_length = la.norm(bvh_joint.children[0].position - bvh_joint.position)
-            scale_factor = bone.length / joint_length
-            log.message("Scaling BVH file %s with factor %s" % (bvh_file.name, scale_factor))
-            bvh_file.scale(scale_factor)
-        else:
-            log.warning("Could not find bone or bone reference with name %s in skeleton %s, cannot auto resize BVH file %s", COMPARE_BONE, self.human.getBaseSkeleton().name, bvh_file.name)
+        joint_length = la.norm(bvh_joint.children[0].position - bvh_joint.position)
+        return joint_length
+
+    def autoScaleAnim(self, anim):
+        """
+        Auto scale BVH translations by comparing upper leg length to make the
+        human stand on the ground plane, independent of body length.
+        """
+        import numpy.linalg as la
+        bone = self.human.getBaseSkeleton().getBone(COMPARE_BONE)
+        scale_factor = float(bone.length) / self.bvh_bone_length
+        trans = scale_factor * self.bvh_root_translation
+        log.message("Scaling animation %s with factor %s" % (anim.name, scale_factor))
+        # It's possible to use anim.scale() as well, but by repeated scaling we accumulate error
+        # It's easier to simply set the translation, as poses only have a translation on
+        # root joint
+
+        # Set pose root bone translation
+        root_bone_idx = 0
+        posedata = anim.getAtFramePos(0, noBake=True)
+        posedata[root_bone_idx, :3, 3] = trans
+        anim.resetBaked()
 
     def onShow(self, event):
         self.filechooser.refresh()
@@ -201,6 +228,11 @@ class PoseLibraryTaskView(gui3d.TaskView, filecache.MetadataCacher):
             # TODO still needed?
             if self.currentPose:
                 self.loadPose(self.currentPose, apply_pose=False)
+        elif event.change in ['modifier', 'targets']:
+            # TODO do we need to react on 'targets' event as well?
+            anim = self.human.getActiveAnimation()
+            if anim:
+                self.autoScaleAnim(anim)
         elif event.change == 'reset':
             # Update GUI after reset (if tab is currently visible)
             if self.isShown():
