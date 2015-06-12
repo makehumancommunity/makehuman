@@ -148,6 +148,16 @@ class AnimationTrack(object):
 
         skel.setPose(old_pose)
 
+    def scale(self, scale):
+        """
+        Scale the animation with the specified scale.
+        This means scaling the transformation portion of this animation.
+        """
+        for f_idx in xrange(self.nFrames):
+            frameData = self.getAtFramePos(f_idx, noBake=True)
+            frameData[:,:3,3] *= scale
+            self.resetBaked()
+
     def isPose(self):
         """
         Returns true if this animationtrack is a pose,
