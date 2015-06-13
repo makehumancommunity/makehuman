@@ -193,7 +193,7 @@ class EventHandler(object):
     Note that self is not passed to the handler in this case, which should not be a problem as you can just use the variable since you are creating a closure.
     """
     def __init__(self):
-        pass
+        self.sortOrder = None
 
     _logger = log.getLogger('mh.callEvent')
     _depth = 0
