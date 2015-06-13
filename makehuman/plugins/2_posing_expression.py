@@ -70,7 +70,7 @@ class ExpressionAction(gui3d.Action):
 class ExpressionTaskView(gui3d.TaskView, filecache.MetadataCacher):
     def __init__(self, category):
         gui3d.TaskView.__init__(self, category, 'Expressions')
-        self.extension = 'mhpose'  # MH unit-pose blend (preliminary name)
+        self.extension = 'mhpose'
         filecache.MetadataCacher.__init__(self, self.extension, 'expression_filecache.mhc')
 
         self.human = gui3d.app.selectedHuman
