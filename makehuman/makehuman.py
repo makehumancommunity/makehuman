@@ -109,11 +109,11 @@ def getVersionStr(verbose=True, full=False):
             result += (" [%s]" % os.environ['HGREVISION_SOURCE'])
         return result
 
-def getShortVersion():
+def getShortVersion(noSub=False):
     """
     Useful for tagging assets
     """
-    if versionSub:
+    if not noSub and versionSub:
         return versionSub.replace(' ', '_').lower()
     else:
         return "v" + getVersionDigitsStr()
