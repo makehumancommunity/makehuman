@@ -1467,7 +1467,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
                         log.warning('Unknown property in MHM file: %s', lineData)
 
         version = _get_version(lines)
-        if version != getShortVersion():
+        if version != getShortVersion(noSub=True):
             log.message("MHM file is of version %s, attempting to load with backward compatibility")
             import compat
             compat.loadMHM(version, lines, _load_property, strict)
@@ -1518,7 +1518,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
         f = open(filename, "w", encoding="utf-8")
         f.write('# Written by MakeHuman %s\n' % getVersionStr())
-        f.write('version %s\n' % getShortVersion())
+        f.write('version %s\n' % getShortVersion(noSub=True))
         f.write('tags %s\n' % tags)
         cam_rot = list(G.app.modelCamera.getRotation()[:2])
         cam_trans = list(G.app.modelCamera.translation[:3])
