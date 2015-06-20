@@ -12,7 +12,7 @@ Logging.
 
 **Authors:**           Glynn Clements
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -44,7 +44,7 @@ import os
 import logging
 import logging.config
 import code
-from logging import debug, warning, error, getLogger, getLevelName
+from logging import getLogger, getLevelName
 from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL
 
 from core import G
@@ -53,7 +53,88 @@ from getpath import getPath, getSysDataPath
 NOTICE = 25
 MESSAGE = logging.INFO
 
-message = logging.info
+LEVEL_TO_STR = { DEBUG: "debug",
+                 INFO: "info",
+                 WARNING: "warning",
+                 ERROR: "error",
+                 CRITICAL: "critical",
+                 NOTICE: "notice"
+               }
+
+def logLevelToStr(levelCode):
+    if levelCode in LEVEL_TO_STR:
+        return LEVEL_TO_STR[levelCode]
+    else:
+        levels = sorted(LEVEL_TO_STR.keys())
+        i = 0
+        while i < len(levels) and levelCode < levels[i]:
+            i += 1
+        i = min(i, len(levels)-1)
+        return levels[i]
+
+def _toUnicode(msg, *args):
+    """
+    Unicode representation of the formatted message.
+    String is decoded with the codeset used by the filesystem of the operating
+    system.
+    """
+    try:
+        msg_ = msg % args
+    except TypeError:
+        # Also allow dict with keywords in format string, passed as first arg
+        if len(args) == 1 and isinstance(args[0], dict):
+            msg_ = msg % args[0]
+        else:
+            raise
+
+    if isinstance(msg_, unicode):
+        return msg_
+    elif isinstance(msg_, basestring):
+        try:
+            return msg_.decode(sys.getdefaultencoding())
+        except UnicodeError:
+            pass
+        try:
+            return msg_.decode(sys.getfilesystemencoding())
+        except UnicodeError:
+            pass
+        try:
+            import locale
+            return msg_.decode(locale.getpreferredencoding())
+        except UnicodeError:
+            pass
+
+        return msg_.decode('UTF-8', 'replace')
+    else:
+        return msg_
+
+def debug(msg, *args, **kwargs):
+    try:
+        logging.debug(msg, *args, **kwargs)
+    except UnicodeError:
+        msg_ = _toUnicode(msg, args)
+        logging.debug(msg_, kwargs)
+
+def warning(msg, *args, **kwargs):
+    try:
+        logging.warning(msg, *args, **kwargs)
+    except UnicodeError:
+        msg_ = _toUnicode(msg, args)
+        logging.warning(msg_, kwargs)
+
+def error(msg, *args, **kwargs):
+    try:
+        logging.error(msg, *args, **kwargs)
+    except UnicodeError:
+        msg_ = _toUnicode(msg, args)
+        logging.error(msg_, kwargs)
+
+def message(msg, *args, **kwargs):
+    try:
+        logging.info(msg, *args, **kwargs)
+    except UnicodeError:
+        msg_ = _toUnicode(msg, args)
+        logging.info(msg_, kwargs)
 
 # We have to make notice() appear to have been defined in the logging module
 # so that logging.findCaller() finds its caller, not notice() itself
@@ -115,6 +196,8 @@ _logLevelColors = {
 
 def getLevelColor(logLevel):
     global _logLevelColors
+    if logLevel not in _logLevelColors:
+        warning("Unknown log level color %s (%s)" % (logLevel, logLevelToStr(logLevel)))
     return _logLevelColors.get(logLevel, 'red')
 
 class SplashLogHandler(logging.Handler):
