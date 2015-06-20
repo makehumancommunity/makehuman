@@ -12,6 +12,7 @@ color bgtopright 0.312 0.312 0.312
 
 logwindow_color DEBUG lightgrey
 logwindow_color NOTICE blue
+logwindow_color INFO blue
 logwindow_color WARNING darkorange
 logwindow_color ERROR red
 logwindow_color CRITICAL red
