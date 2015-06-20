@@ -189,7 +189,7 @@ class DowngradeFilter(logging.Filter):
 _logLevelColors = {
     DEBUG: 'grey',
     NOTICE: 'blue',
-    INFO: 'blue'
+    INFO: 'blue',
     WARNING: 'darkorange',
     ERROR: 'red',
     CRITICAL: 'red'
