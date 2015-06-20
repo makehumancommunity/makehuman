@@ -914,6 +914,8 @@ class MHApplication(gui3d.Application, mh.Application):
                             self._undeclared_settings[setting_name] = value
                 else:
                     log.warning("Incompatible MakeHuman settings (version %s) detected (expected %s). Loading default settings." % (settings.get('version','undefined'), mh.getVersionDigitsStr()))
+            else:
+                log.warning("No settings file found, starting with default settings.")
 
         if 'language' in self.settings:
             self.setLanguage(self.settings['language'])
@@ -1719,6 +1721,7 @@ class MHApplication(gui3d.Application, mh.Application):
         self.loadSettings()
 
         # Necessary because otherwise setting back to default theme causes crash
+        log.info("Initializing default theme first.")
         self.setTheme("default")
         log.debug("Using Qt system style %s", self.getLookAndFeel())
 
