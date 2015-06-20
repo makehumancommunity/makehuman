@@ -53,6 +53,25 @@ from getpath import getPath, getSysDataPath
 NOTICE = 25
 MESSAGE = logging.INFO
 
+LEVEL_TO_STR = { DEBUG: "debug",
+                 INFO: "info",
+                 WARNING: "warning",
+                 ERROR: "error",
+                 CRITICAL: "critical",
+                 NOTICE: "notice"
+               }
+
+def logLevelToStr(levelCode):
+    if levelCode in LEVEL_TO_STR:
+        return LEVEL_TO_STR[levelCode]
+    else:
+        levels = sorted(LEVEL_TO_STR.keys())
+        i = 0
+        while i < len(levels) and levelCode < levels[i]:
+            i += 1
+        i = min(i, len(levels)-1)
+        return levels[i]
+
 def _toUnicode(msg, *args):
     """
     Unicode representation of the formatted message.
@@ -177,6 +196,8 @@ _logLevelColors = {
 
 def getLevelColor(logLevel):
     global _logLevelColors
+    if logLevel not in _logLevelColors:
+        warning("Unknown log level color %s (%s)" % (logLevel, logLevelToStr(logLevel)))
     return _logLevelColors.get(logLevel, 'red')
 
 class SplashLogHandler(logging.Handler):
