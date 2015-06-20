@@ -177,7 +177,7 @@ _logLevelColors = {
 
 def getLevelColor(logLevel):
     global _logLevelColors
-    return _logLevelColors.get(logLevel)
+    return _logLevelColors.get(logLevel, 'red')
 
 class SplashLogHandler(logging.Handler):
     def emit(self, record):
