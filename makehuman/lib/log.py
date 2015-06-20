@@ -70,7 +70,7 @@ def logLevelToStr(levelCode):
         while i < len(levels) and levelCode < levels[i]:
             i += 1
         i = min(i, len(levels)-1)
-        return levels[i]
+        return levels[i].upper()
 
 def _toUnicode(msg, *args):
     """
@@ -189,6 +189,7 @@ class DowngradeFilter(logging.Filter):
 _logLevelColors = {
     DEBUG: 'grey',
     NOTICE: 'blue',
+    INFO: 'blue'
     WARNING: 'darkorange',
     ERROR: 'red',
     CRITICAL: 'red'
