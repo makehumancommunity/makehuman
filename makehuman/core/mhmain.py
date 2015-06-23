@@ -1721,7 +1721,7 @@ class MHApplication(gui3d.Application, mh.Application):
         self.loadSettings()
 
         # Necessary because otherwise setting back to default theme causes crash
-        log.info("Initializing default theme first.")
+        log.message("Initializing default theme first.")
         self.setTheme("default")
         log.debug("Using Qt system style %s", self.getLookAndFeel())
 
