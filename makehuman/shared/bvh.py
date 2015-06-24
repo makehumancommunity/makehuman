@@ -10,7 +10,7 @@
 
 **Authors:**           Jonas Hauquier, Marc Flerackers, Thomas Larsson
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -45,7 +45,6 @@ import log
 
 import numpy as np
 import transformations as tm
-import numpy.linalg as la
 
 from math import pi
 D = pi/180
@@ -56,7 +55,8 @@ class BVH():
     A BVH skeleton. We assume a single root joint.
     This skeleton allows access to both joints and bones.
     """
-    def __init__(self):
+    def __init__(self, name="Untitled"):
+        self.name = name
         self.joints = {}    # Lookup dict to find joints by name
         self.bvhJoints = [] # List of joints in the order in which they were defined in the BVH file (important for MOTION data parsing)
         self.jointslist = []    # Cached breadth-first list of all joints
@@ -66,6 +66,7 @@ class BVH():
         self.frames = []
 
         self.convertFromZUp = False     # Set to true to convert the coordinates from a Z-is-up coordinate system. Most motion capture data uses Y-is-up, though.
+        self.allowTranslation = "onlyroot"  # Joints to accept translation animation data for
 
     def addRootJoint(self, name):
         self.rootJoint = self.__addJoint(name)
@@ -76,7 +77,7 @@ class BVH():
         i = 1
         while name in self.joints.keys():
             name = "%s_%s" % (origName, i)
-            i = i+1
+            i += 1
         parent = self.getJoint(parentName)
         joint = self.__addJoint(name)
         parent.addChild(joint)
@@ -120,7 +121,7 @@ class BVH():
                     postIdx = 1
                     while skel.containsBone(boneName):
                         boneName = "%s_%s" % (parent.name, postIdx)
-                        postIdx = postIdx + 1
+                        postIdx += 1
 
                 # TODO this code would be simpler if we assigned joint objects to bones
                 if parent.parent:
@@ -143,71 +144,106 @@ class BVH():
         skel.update()
         return skel
 
-    # TODO guess source armature from a BVH rig
-
-    def createAnimationTrack(self, jointsOrder = None, name="BVHMotion"):
+    def createAnimationTrack(self, skel=None, name=None):
         """
         Create an animation track from the motion stored in this BHV file.
         """
-        if jointsOrder == None:
+        def _bvhJointName(boneName):
+            # Remove the tail from duplicate bone names (added by the BVH parser)
+            import re
+            if not boneName:
+                return boneName
+            r = re.search("(.*)_\d+$", boneName)
+            if r:
+                return r.group(1)
+            return boneName
+
+        def _createAnimation(jointsData, name, frameTime, nFrames):
+            nJoints = len(jointsData)
+            #nFrames = len(jointsData[0])
+
+            # Interweave joints animation data, per frame with joints in breadth-first order
+            animData = np.hstack(jointsData).reshape(nJoints*nFrames,3,4)
+            framerate = 1.0/frameTime
+            return animation.AnimationTrack(name, animData, nFrames, framerate)
+
+        if name is None:
+            name = self.name
+
+        if skel is None:
             jointsData = [joint.matrixPoses for joint in self.getJoints() if not joint.isEndConnector()]
             # We leave out end effectors as they should not have animation data
-        else:
-            nFrames = self.frameCount
-            import re
-            # Remove the tail from duplicate bone names
-            for idx,jName in enumerate(jointsOrder):
-                # Joint mappings can contain a rotation compensation
-                if isinstance(jName, tuple):
-                    jName, _ = jName
-                if not jName:
-                    continue
-                r = re.search("(.*)_\d+$",jName)
-                if r:
-                    jointsOrder[idx] = r.group(1)
+
+            return _createAnimation(jointsData, name, self.frameTime, self.frameCount)
+        elif isinstance(skel, list):
+            # skel parameter is a list of joint or bone names
+            jointsOrder = skel
 
             jointsData = []
             for jointName in jointsOrder:
-                if isinstance(jointName, tuple):
-                    jointName, angle = jointName
-                else:
-                    angle = 0.0
-                if jointName:
+                jointName = _bvhJointName(jointName)
+                if jointName and self.getJointByCanonicalName(jointName) is not None:
                     poseMats = self.getJointByCanonicalName(jointName).matrixPoses.copy()
-                    if isinstance(angle, float):
-                        if angle != 0.0:
-                            # Rotate around global Z axis
-                            rot = tm.rotation_matrix(-angle*D, [0,0,1])
-                            # Roll around global Y axis (this is a limitation)
-                            roll = tm.rotation_matrix(angle*D, [0,1,0])
-                            for i in xrange(nFrames):
-                                # TODO make into numpy loop
-                                poseMats[i] = np.dot(poseMats[i], rot)
-                                poseMats[i] = np.dot(poseMats[i], roll)
-                    else:   # Compensation (angle) is a transformation matrix
-                        # Compensate animation frames
-                        for i in xrange(nFrames):
-                            # TODO make into numpy loop
-                            poseMats[i] = np.mat(poseMats[i]) * np.mat(angle)
-                            #poseMats[i] = np.mat(angle) # Test compensated rest pose
                     jointsData.append(poseMats)
                 else:
-                    jointsData.append(animation.emptyTrack(nFrames))
+                    jointsData.append(animation.emptyTrack(self.frameCount))
 
-        nJoints = len(jointsData)
-        nFrames = len(jointsData[0])
+            return _createAnimation(jointsData, name, self.frameTime, self.frameCount)
+        else:
+            # skel parameter is a Skeleton
+            jointsData = []
+            for bone in skel.getBones():
+                if len(bone.reference_bones) > 0:
+                    # Combine the rotations of reference bones to influence this bone
+                    # TODO combining poses like this does not work, works with one reference bone only
+                    bvhJoints = []
+                    for bonename in bone.reference_bones:
+                        jointname = _bvhJointName(bonename)
+                        joint = self.getJointByCanonicalName(jointname)
+                        if joint:
+                            bvhJoints.append(joint)
 
-        # Interweave joints animation data, per frame with joints in breadth-first order
-        animData = np.hstack(jointsData).reshape(nJoints*nFrames,4,4)
-        framerate = 1.0/self.frameTime
-        return animation.AnimationTrack(name, animData, nFrames, framerate)
+                    if len(bvhJoints) == 0:
+                        poseMats = animation.emptyTrack(self.frameCount)
+                    elif len(bvhJoints) == 1:
+                        poseMats = bvhJoints[0].matrixPoses.copy()
+                    else:  # len(bvhJoints) >= 2:
+                        # Combine the rotations using quaternions to simplify math and normalizing (rotations only)
+                        poseMats = animation.emptyTrack(self.frameCount)
+                        m = np.identity(4, dtype=np.float32)
+                        for f_idx in xrange(self.frameCount):
+                            m[:3,:4] = bvhJoints[0].matrixPoses[f_idx]
+                            q1 = tm.quaternion_from_matrix(m, True)
+                            m[:3,:4] = bvhJoints[1].matrixPoses[f_idx]
+                            q2 = tm.quaternion_from_matrix(m, True)
+
+                            quat = tm.quaternion_multiply(q2, q1)
+
+                            for bvhJoint in bvhJoints[2:]:
+                                m[:3,:4] = bvhJoint.matrixPoses[f_idx]
+                                q = tm.quaternion_from_matrix(m, True)
+                                quat = tm.quaternion_multiply(q, quat)
+
+                            poseMats[f_idx] = tm.quaternion_matrix( quat )[:3,:4]
+
+                    jointsData.append(poseMats)
+                else:
+                    # Map bone to joint by bone name
+                    jointName = _bvhJointName(bone.name)
+                    joint = self.getJointByCanonicalName(jointName)
+                    if joint:
+                        jointsData.append( joint.matrixPoses.copy() )
+                    else:
+                        jointsData.append(animation.emptyTrack(self.frameCount))
+
+            return _createAnimation(jointsData, name, self.frameTime, self.frameCount)
 
     def getJoint(self, name):
         return self.joints[name]
 
     def getJointByCanonicalName(self, canonicalName):
         canonicalName = canonicalName.lower().replace(' ','_').replace('-','_')
-        for jointName in [ name for name in self.joints.keys()]:
+        for jointName in self.joints.keys():
             if canonicalName == jointName.lower().replace(' ','_').replace('-','_'):
                 return self.getJoint(jointName)
         return None
@@ -229,6 +265,7 @@ class BVH():
     def getJoints(self):
         """
         Returns linear list of all joints in breadth-first order.
+        Requires __cacheGetJoints to be called first.
         """
         return self.jointslist
 
@@ -244,6 +281,16 @@ class BVH():
         Loads both the skeleton hierarchy and the animation track from the 
         specified BVH file.
         """
+        import os
+        self.name = os.path.splitext(os.path.basename(filepath))[0]
+        if self.convertFromZUp == "auto":
+            autoAxis = True
+            self.convertFromZUp = False
+        elif not isinstance(self.convertFromZUp, bool):
+            raise RuntimeError('Cannot load BVH, illegal option for "convertFromZUp" (%s)' % self.convertFromZUp)
+        else:
+            autoAxis = False
+
         fp = open(filepath, "rU")
 
         # Read hierarchy
@@ -252,6 +299,16 @@ class BVH():
         rootJoint = self.addRootJoint(words[1])        
 
         self.__readJoint(self.rootJoint, fp)
+
+        # Auto determine and adjust for up axis
+        if autoAxis:
+            self.convertFromZUp = self._autoGuessCoordinateSystem()
+            log.message("Automatically guessed coordinate system for BVH file %s (%s)" % (filepath, "Z-up" if self.convertFromZUp else "Y-up"))
+            if self.convertFromZUp:
+                # Conversion needed: convert from Z-up to Y-up
+                self.__cacheGetJoints()
+                for joint in self.jointslist:
+                    self.__calcPosition(joint, joint.offset)
 
         # Read motion
         self.__expectKeyword('MOTION', fp)
@@ -274,7 +331,43 @@ class BVH():
         for joint in self.getJoints():
             joint.calculateFrames()     # TODO we don't need to calculate pose matrices for end effectors
 
-    def fromSkeleton(self, skel, animationTrack = None, dummyJoints = True):
+    def _autoGuessCoordinateSystem(self):
+        """
+        Guesses whether this BVH rig uses a Y-up or Z-up axis system, using the
+        joint offsets of this rig (longest direction is expected to be the height).
+        Requires joints of this BVH skeleton to be initialized.
+        Returns False if no conversion is needed (BVH file uses Y-up coordinates),
+        returns True if BVH uses Z-up coordinates and conversion is needed.
+        Note that coordinate system is expected to be right-handed.
+        """
+        ref_joint = None
+        # TODO an alternative approach is to measure the length of all bones. For humanoids the bone length is always highest in the up direction
+        ref_names = ['head', 'spine03', 'spine02', 'spine01', 'upperleg02.L', 'lowerleg02.L']
+        while ref_joint is None and len(ref_names) != 0:
+            joint_name = ref_names.pop()
+            try:
+                ref_joint = self.joints[joint_name]
+            except:
+                try:
+                    ref_joint = self.joints[joint_name[0].capitalize()+joint_name[1:]]
+                except:
+                    ref_joint = None
+            if ref_joint != None and len(ref_joint.children) == 0:
+                log.debug("Cannot use reference joint %s for determining axis system, it is an end-effector (has no children)" % ref_joint.name)
+                ref_joint = None
+        if ref_joint is None:
+            log.warning("Could not auto guess axis system for BVH file %s because no known joint name is found. Using Y up as default axis orientation." % filepath)
+        else:
+            tail_joint = ref_joint.children[0]
+            direction = tail_joint.position - ref_joint.position
+            if abs(direction[1]) > abs(direction[2]):
+                # Y-up
+                return False
+            else:
+                # Z-up
+                return True
+
+    def fromSkeleton(self, skel, animationTrack=None, dummyJoints=True):
         """
         Construct a BVH object from a skeleton structure and optionally an 
         animation track. If no animation track is specified, a dummy animation
@@ -284,7 +377,7 @@ class BVH():
         position offset from their parent bone tail. This often happens when
         multiple bones are attached to one parent bones, for example in the
         shoulder, hip and hand areas.
-        When dummyJoints is set to false, for each bone in the skeeton, exactly
+        When dummyJoints is set to false, for each bone in the skeleton, exactly
         one BVH joint will be created. How this is interpreted depends on the
         tool importing the BVH file. Some create only a bone between the parent
         and its first child joint, and create empty offsets to the other childs.
@@ -516,9 +609,6 @@ class BVH():
         """
         Scale the skeleton stored in this BVH data.
         """
-        oldZup = self.convertFromZUp
-        self.convertFromZUp = False     # Avoid converting again
-
         for joint in self.getJoints():
             # Rescale joint offset and recalculate positions and rest matrices
             self.__calcPosition(joint, scaleFactor * joint.offset)
@@ -533,8 +623,6 @@ class BVH():
 
             # Recalculate pose matrices
             joint.calculateFrames()
-
-        self.convertFromZUp = oldZup
 
 
 class BVHJoint():
@@ -585,9 +673,15 @@ class BVHJoint():
             if channel == "Xposition":
                 rXs = self.frames[chanIdx:dataLen:nChannels]
             elif channel == "Yposition":
-                rYs = self.frames[chanIdx:dataLen:nChannels]
+                if self.skeleton.convertFromZUp:
+                    rZs = -self.frames[chanIdx:dataLen:nChannels]
+                else:
+                    rYs = self.frames[chanIdx:dataLen:nChannels]
             elif channel == "Zposition":
-                rZs = self.frames[chanIdx:dataLen:nChannels]
+                if self.skeleton.convertFromZUp:
+                    rYs = self.frames[chanIdx:dataLen:nChannels]
+                else:
+                    rZs = self.frames[chanIdx:dataLen:nChannels]
 
             elif channel == "Xrotation":
                 aXs = D*self.frames[chanIdx:dataLen:nChannels]
@@ -632,12 +726,19 @@ class BVHJoint():
 
         # Add translations to pose matrices
         # Allow partial transformation channels too
-        if rXs != None or rYs != None or rZs != None:
-            if rXs == None:
+        allowTranslation = self.skeleton.allowTranslation
+        if allowTranslation == "all":
+            poseTranslate = True
+        elif allowTranslation == "onlyroot":
+            poseTranslate = (self.parent is None)
+        else:
+            poseTranslate = False
+        if poseTranslate and (rXs is not None or rYs is not None or rZs is not None):
+            if rXs is None:
                 rXs = np.zeros(nFrames, dtype=np.float32)
-            if rYs == None:
+            if rYs is None:
                 rYs = np.zeros(nFrames, dtype=np.float32)
-            if rZs == None:
+            if rZs is None:
                 rZs = np.zeros(nFrames, dtype=np.float32)
 
             self.matrixPoses[:,:3,3] = np.column_stack([rXs,rYs,rZs])[:,:]
@@ -662,13 +763,22 @@ class BVHJoint():
         return not self.hasChildren()
 
 
-def load(filename, convertFromZUp = False):
+def load(filename, convertFromZUp="auto", allowTranslation="onlyroot"):
+    """
+    convertFromZUp      determine whether to convert the joint structure from
+                        Z-up coordinates to MH's Y-up coordinate system, or
+                        import them unchanged
+                        (allowed values: "auto", True, False)
+    allowTranslation    determine which should receive translation animation 
+                        (allowed values: "onlyroot", "all", "none")
+    """
     result = BVH()
     result.convertFromZUp = convertFromZUp
+    result.allowTranslation = allowTranslation
     result.fromFile(filename)
     return result
 
-def createFromSkeleton(skel, animationTrack = None):
+def createFromSkeleton(skel, animationTrack=None, dummyJoints=True):
     result = BVH()
-    result.fromSkeleton(skel, animationTrack)
+    result.fromSkeleton(skel, animationTrack, dummyJoints)
     return result

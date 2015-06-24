@@ -10,7 +10,7 @@
 
 **Authors:**           Marc Flerackers, Thomas Larsson
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -37,13 +37,12 @@ Abstract
 TODO
 """
 
-from export import Exporter
-from exportutils.config import Config
+from export import Exporter, ExportConfig
 
-class STLConfig(Config):
+class STLConfig(ExportConfig):
 
     def __init__(self):
-        Config.__init__(self)
+        ExportConfig.__init__(self)
         self.useRelPaths = True
 
 
@@ -64,7 +63,6 @@ class ExporterSTL(Exporter):
 
     def getConfig(self):
         cfg = STLConfig()
-        cfg.useTPose          = False # self.useTPose.selected
         cfg.feetOnGround      = self.feetOnGround.selected
         cfg.scale,cfg.unit    = self.taskview.getScale()
         return cfg
@@ -77,7 +75,10 @@ class ExporterSTL(Exporter):
         cfg = self.getConfig()
         cfg.setHuman(human)
         if self.stlAscii.selected:
-            mh2stl.exportStlAscii(filename("stl"), cfg)
+            try:
+                mh2stl.exportStlAscii(filename("stl"), cfg)
+            except MemoryError:
+                log.error("Not enough memory to export the mesh. Try exporting a binary STL or disable mesh smoothing.")
         else:
             mh2stl.exportStlBinary(filename("stl"), cfg)
 

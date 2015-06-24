@@ -8,9 +8,9 @@
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Thomas Larsson
+**Authors:**           Thomas Larsson, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -38,11 +38,9 @@ Fbx exporter
 """
 
 import os.path
-import sys
 import codecs
 
 from core import G
-import exportutils
 import log
 
 from . import fbx_utils
@@ -52,8 +50,6 @@ from . import fbx_mesh
 from . import fbx_deformer
 from . import fbx_material
 from . import fbx_anim
-
-import skeleton
 
 
 def exportFbx(filepath, config):
@@ -66,37 +62,63 @@ def exportFbx(filepath, config):
 
     filename = os.path.basename(filepath)
     name = config.goodName(os.path.splitext(filename)[0])
-    #rawTargets = exportutils.collect.readTargets(human, config)    # TODO no idea what to do with this
 
     # Collect objects, scale meshes and filter out hidden faces/verts, scale rig
-    objects = human.getObjects(excludeZeroFaceObjs=True)
-    meshes = [obj.mesh.clone(config.scale, True) for obj in objects]
+    objects = human.getObjects(excludeZeroFaceObjs=not config.hiddenGeom)
+    meshes = [obj.mesh.clone(config.scale, filterMaskedVerts=not config.hiddenGeom) for obj in objects]
+
+    if config.hiddenGeom:
+        import numpy as np
+        # Disable the face masking on copies of the input meshes
+        for m in meshes:
+            # Disable the face masking on the mesh
+            face_mask = np.ones(m.face_mask.shape, dtype=bool)
+            m.changeFaceMask(face_mask)
+            m.calcNormals()
+            m.updateIndexBuffer()
+
     skel = human.getSkeleton()
     if skel:
-        skel = skel.scaled(config.scale)
+        if config.scale != 1:
+            skel = skel.scaled(config.scale)  # TODO perhaps create a skeleton.transformed() just like for mesh
 
     # Set mesh names
     for mesh in meshes:
-        mesh.name = fbx_utils.getMeshName(mesh, skel)
+        mesh.name = fbx_utils.getMeshName(mesh, name)
+
+    useAnim = False
+    if useAnim:
+        # TODO allow exporting poseunits
+        action = None
+    else:
+        action = None
 
     G.app.progress(0.5, text="Exporting %s" % filepath)
 
-    fp = codecs.open(filepath, "w", encoding="utf-8")
+    if config.binary:
+        import fbx_binary
+        root = fbx_binary.elem_empty(None, b"")
+        fp = root
+    else:
+        fp = codecs.open(filepath, "w", encoding="utf-8")
+
     fbx_utils.resetId()  # Reset global ID generator
-    fbx_utils.setAbsolutePath(filepath)
-    fbx_header.writeHeader(fp, filepath)
+    fbx_utils.setAbsolutePath(filepath)  # TODO fix this
+
+    # 1) FBX Header, documents and references
+    fbx_header.writeHeader(fp, filepath, config)
 
     # Generate bone weights for all meshes up front so they can be reused for all
     if skel:
-        rawWeights = human.getVertexWeights()  # Basemesh weights
+        rawWeights = human.getVertexWeights(human.getSkeleton())  # Basemesh weights
         for mesh in meshes:
             if mesh.object.proxy:
                 # Transfer weights to proxy
-                parentWeights = skeleton.getProxyWeights(mesh.object.proxy, rawWeights)
+                parentWeights = mesh.object.proxy.getVertexWeights(rawWeights, human.getSkeleton())
             else:
                 parentWeights = rawWeights
             # Transfer weights to face/vert masked and/or subdivided mesh
-            weights = mesh.getWeights(parentWeights)
+            weights = mesh.getVertexWeights(parentWeights)
 
             # Attach these vertexWeights to the mesh to pass them around the
             # exporter easier, the cloned mesh is discarded afterwards, anyway
@@ -104,45 +126,64 @@ def exportFbx(filepath, config):
     else:
         # Attach trivial weights to the meshes
         for mesh in meshes:
-            mesh.vertexWeights = dict()
+            mesh.vertexWeights = None
 
     # TODO if "shapes" need to be exported, attach them to meshes in a similar way
 
     nVertexGroups, nShapes = fbx_deformer.getObjectCounts(meshes)
-    fbx_header.writeObjectDefs(fp, meshes, skel, config)
-    fbx_skeleton.writeObjectDefs(fp, meshes, skel)
-    fbx_mesh.writeObjectDefs(fp, meshes, nShapes)
-    fbx_deformer.writeObjectDefs(fp, meshes, skel)
-    if config.useMaterials:
-        fbx_material.writeObjectDefs(fp, meshes)
-    #fbx_anim.writeObjectDefs(fp)
-    fp.write('}\n\n')
 
-    fbx_header.writeObjectProps(fp)
+    # 2) FBX template definitions
+    # GlobalSettings template definition
+    fbx_header.writeObjectDefs(fp, meshes, skel, action, config)
+    # Skeleton template definition
+    fbx_skeleton.writeObjectDefs(fp, meshes, skel, config)
+    # Objects template definition
+    fbx_mesh.writeObjectDefs(fp, meshes, nShapes, config)
+    # Skin deformer template definition
+    fbx_deformer.writeObjectDefs(fp, meshes, skel, config)
+    # Material template definition
+    if config.useMaterials:
+        fbx_material.writeObjectDefs(fp, meshes, config)
+    # Animation template definition
+    if useAnim:
+        fbx_anim.writeObjectDefs(fp, action, config)
+    if not config.binary: fp.write('}\n\n')
+
+    # 3) FBX object properties (the actual data)
+    fbx_header.writeObjectProps(fp, config)
     if skel:
         fbx_skeleton.writeObjectProps(fp, skel, config)
     fbx_mesh.writeObjectProps(fp, meshes, config)
     fbx_deformer.writeObjectProps(fp, meshes, skel, config)
     if config.useMaterials:
         fbx_material.writeObjectProps(fp, meshes, config)
-    #fbx_anim.writeObjectProps(fp)
-    fp.write('}\n\n')
+    if useAnim:
+        # TODO support binary FBX animations export
+        fbx_anim.writeObjectProps(fp, action, skel, config)
+    if not config.binary: fp.write('}\n\n')
 
+    # 4) FBX node links
     fbx_utils.startLinking()
-    fbx_header.writeLinks(fp)
+    fbx_header.writeLinks(fp, config)
     if skel:
-        fbx_skeleton.writeLinks(fp, skel)
-    fbx_mesh.writeLinks(fp, meshes)
-    fbx_deformer.writeLinks(fp, meshes, skel)
+        fbx_skeleton.writeLinks(fp, skel, config)
+    fbx_mesh.writeLinks(fp, meshes, config)
+    fbx_deformer.writeLinks(fp, meshes, skel, config)
     if config.useMaterials:
-        fbx_material.writeLinks(fp, meshes)
-    #fbx_anim.writeLinks(fp)
-    fp.write('}\n\n')
+        fbx_material.writeLinks(fp, meshes, config)
+    if useAnim:
+        fbx_anim.writeLinks(fp, action, config, config)
+    if not config.binary: fp.write('}\n\n')
 
-    fbx_header.writeTakes(fp)
-    fp.close()
+    # 5) FBX animations (takes)
+    # TODO support binary FBX export
+    fbx_anim.writeTakes(fp, action, config)
+    if config.binary:
+        import encode_bin
+        root = fp
+        encode_bin.write(filepath, root)
+    else:
+        fp.close()
 
     G.app.progress(1)
     log.message("%s written" % filepath)
-
-

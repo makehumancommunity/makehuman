@@ -10,7 +10,7 @@
 
 **Authors:**           Marc Flerackers
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -193,7 +193,7 @@ class EventHandler(object):
     Note that self is not passed to the handler in this case, which should not be a problem as you can just use the variable since you are creating a closure.
     """
     def __init__(self):
-        pass
+        self.sortOrder = None
 
     _logger = log.getLogger('mh.callEvent')
     _depth = 0
@@ -212,6 +212,7 @@ class EventHandler(object):
                 method(event)
         except Exception, _:
             log.warning('Exception during event %s', eventType, exc_info=True)
+            self.eventFailed(EventHandler._depth)
         EventHandler._depth -= 1
         if topLevel:
             self._logger.debug('callEvent: done')
@@ -219,6 +220,11 @@ class EventHandler(object):
                 G.app.redraw()
             return True
         return False
+
+    def eventFailed(self, level):
+        # Reset progress
+        if G.app:
+            G.app.progress(1)
 
     def attachEvent(self, eventName, eventMethod):
         setattr(self, eventName, eventMethod)

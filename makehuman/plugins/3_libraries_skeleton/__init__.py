@@ -10,7 +10,7 @@
 
 **Authors:**           Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -48,20 +48,21 @@ from . import skeletonlibrary
 #------------------------------------------------------------------------------------------
 
 def load(app):
+    global maintask
     import gui3d
     import mh
     category = app.getCategory('Pose/Animate')
     maintask = skeletonlibrary.SkeletonLibrary(category)
-    maintask.sortOrder = 3
+    maintask.sortOrder = -0.5
     category.addTask(maintask)
 
     human = gui3d.app.selectedHuman
     app.addLoadHandler('skeleton', maintask.loadHandler)
-    app.addSaveHandler(maintask.saveHandler)
+    app.addSaveHandler(maintask.saveHandler, priority=5)
 
     if not mh.isRelease():
         from . import debugtab
-        debugtask = debugtab.SkeletonDebugLibrary(category, maintask)
+        debugtask = debugtab.SkeletonDebugLibrary(category)
         debugtask.sortOrder = 3
         category = app.getCategory('Utilities')
         category.addTask(debugtask)
@@ -69,5 +70,5 @@ def load(app):
 # This method is called when the plugin is unloaded from makehuman
 # At the moment this is not used, but in the future it will remove the added GUI elements
 def unload(app):
-    pass
+    maintask.onUnload()
 

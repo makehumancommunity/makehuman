@@ -10,7 +10,7 @@
 
 **Authors:**           Thomas Larsson, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -60,6 +60,7 @@ def writeLibraryGeometry(fp, meshes, config, shapes=None):
     fp.write('  </library_geometries>\n')
 
 
+# TODO make shared function, config.getTransform() and mesh.clone(transform)
 def rotateCoord(coord, config):
     if config.meshOrientation == 'yUpFaceZ':
         pass

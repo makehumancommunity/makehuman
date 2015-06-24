@@ -10,7 +10,7 @@
 
 **Authors:**           Thomas Larsson
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/external_tools_license.html)
 
@@ -88,22 +88,12 @@ Epsilon = 1e-4
 #
 
 def exportObjFile(path, groupsAsMaterials, context):
-    global BMeshAware
     ob = context.object
     me = ob.data
     if (not me) or (len(me.materials) < 2):
         raise MHError("Mesh must have materials")
 
-    try:
-        faces = me.polygons
-        BMeshAware = True
-        print("Using BMesh")
-    except:
-        faces = me.faces
-        BMeshAware = False
-        print("Not using BMesh")
-
-    orderedFaces = zOrderFaces(me, faces)
+    orderedFaces = zOrderFaces(me, me.polygons)
 
     (name,ext) = os.path.splitext(path)
     if ext.lower() != ".obj":
@@ -224,7 +214,6 @@ def zOrderFaces(me, faces):
 #
 
 def setupTexVerts(me, faces):
-    global BMeshAware
     vertEdges = {}
     vertFaces = {}
 
@@ -268,22 +257,14 @@ def setupTexVerts(me, faces):
 
     vtn = 0
     texVerts = {}
-    if BMeshAware:
-        uvloop = me.uv_layers[0]
-        n = 0
-        for f in faces:
-            for vn in f.vertices:
-                vtn = findTexVert(uvloop.data[n].uv, vtn, f, faceNeighbors, uvFaceVerts, texVerts)
-                n += 1
-    else:
-        uvtex = me.uv_textures[0]
-        for f in faces:
-            uvf = uvtex.data[f.index]
-            vtn = findTexVert(uvf.uv1, vtn, f, faceNeighbors, uvFaceVerts, texVerts)
-            vtn = findTexVert(uvf.uv2, vtn, f, faceNeighbors, uvFaceVerts, texVerts)
-            vtn = findTexVert(uvf.uv3, vtn, f, faceNeighbors, uvFaceVerts, texVerts)
-            if len(f.vertices) > 3:
-                vtn = findTexVert(uvf.uv4, vtn, f, faceNeighbors, uvFaceVerts, texVerts)
+
+    uvloop = me.uv_layers[0]
+    n = 0
+    for f in faces:
+        for vn in f.vertices:
+            vtn = findTexVert(uvloop.data[n].uv, vtn, f, faceNeighbors, uvFaceVerts, texVerts)
+            n += 1
+
     return (uvFaceVerts, texVerts, vtn)
 
 #

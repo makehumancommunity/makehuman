@@ -23,7 +23,7 @@
 # Product Home Page:   http://www.makehuman.org/
 # Code Home Page:      https://bitbucket.org/MakeHuman/makehuman/
 # Authors:             Thomas Larsson
-# Script copyright (C) MakeHuman Team 2001-2014
+# Script copyright (C) MakeHuman Team 2001-2015
 # Coding Standards:    See http://www.makehuman.org/node/165
 
 
@@ -82,35 +82,31 @@ RigifyLayers = 27*[True] + 5*[False]
 #   Identify rig type
 #
 
-def isMhxRig(rig):
-    try:
-        rig.pose.bones['foot.rev.L']
-        return True
-    except KeyError:
-        return False
+def allBonesInList(list, rig):
+    for bname in list:
+        if bname not in rig.pose.bones.keys():
+            return False
+    return True
 
+
+def isMhxRig(rig):
+    return ('foot.rev.L' in rig.pose.bones.keys())
+
+def isDefaultRig(rig):
+    return allBonesInList(['risorius03.L', 'shoulder01.R'], rig)
+
+def isMbRig(rig):
+    return allBonesInList(["LeftArm", "LeftArmRoll"], rig)
 
 def isMhx7Rig(rig):
-    try:
-        rig.pose.bones['FootRev_L']
-        return True
-    except KeyError:
-        return False
-
+    return ('FootRev_L' in rig.pose.bones.keys())
 
 def isRigify(rig):
-    try:
-        rig.pose.bones['MCH-spine.flex']
-        return True
-    except KeyError:
-        return False
+    return ('MCH-spine.flex' in rig.pose.bones.keys())
 
 
 def isMakeHumanRig(rig):
-    try:
-        return rig["MhAlpha8"]
-    except KeyError:
-        return False
+    return ("MhAlpha8" in rig.keys())
 
 #
 #   nameOrNone(string):
@@ -166,6 +162,11 @@ def getIkBoneList(rig):
             hips = rig.pose.bones["root"]
         elif isRigify(rig):
             hips = rig.pose.bones["hips"]
+        else:
+            for bone in rig.data.bones:
+                if bone.parent is None:
+                    hips = bone
+                    break
     blist = [hips]
     for bname in ['hand.ik.L', 'hand.ik.R', 'foot.ik.L', 'foot.ik.R']:
         try:
@@ -233,7 +234,7 @@ def isRotationMatrix(mat):
     diff = prod - Matrix().to_3x3()
     for i in range(3):
         for j in range(3):
-            if abs(diff[i][j]) > 1e-4:
+            if abs(diff[i][j]) > 1e-3:
                 print("Not a rotation matrix")
                 print(mat)
                 print(prod)
@@ -388,18 +389,41 @@ def setRotation(pb, rot, frame, group):
 #   setRestPose(rig):
 #
 
-def setRestPose(rig):
-    unit = Matrix()
-    for pb in rig.pose.bones:
-        pb.matrix_basis = unit
-
 def selectAndSetRestPose(rig, scn):
-    scn.objects.active = rig
+    reallySelect(rig, scn)
     bpy.ops.object.mode_set(mode='POSE')
     bpy.ops.pose.select_all(action='SELECT')
     bpy.ops.pose.rot_clear()
     bpy.ops.pose.loc_clear()
     bpy.ops.pose.scale_clear()
+
+#
+#  reallySelect(ob, scn)
+#  Make sure that selecting an object really takes.
+#
+
+def reallySelect(ob, scn):
+    ob.hide = False
+    visible = False
+    for n,vis in enumerate(ob.layers):
+        if vis and scn.layers[n]:
+            visible = True
+            break
+    if not visible:
+        for n,vis in enumerate(ob.layers):
+            if vis:
+                scn.layers[n] = True
+                visible = True
+                break
+    if not visible:
+        for n,vis in enumerate(scn.layers):
+            if vis:
+                ob.layers[n] = True
+                visible = True
+                break
+    if not visible:
+        ob.layers[0] = scn.layers[0] = True
+    scn.objects.active = ob
 
 
 #
@@ -440,16 +464,23 @@ def getObjectProblems(self, context):
     self.problems = ""
     epsilon = 1e-2
     rig = context.object
+    scn = context.scene
 
     eu = rig.rotation_euler
     print(eu)
     if abs(eu.x) + abs(eu.y) + abs(eu.z) > epsilon:
-        self.problems += "object rotation\n"
+        if scn.McpApplyObjectTransforms:
+            bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+        else:
+            self.problems += "object rotation\n"
 
     vec = rig.scale - Vector((1,1,1))
     print(vec, vec.length)
     if vec.length > epsilon:
-        self.problems += "object scaling\n"
+        if scn.McpApplyObjectTransforms:
+            bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        else:
+            self.problems += "object scaling\n"
 
     if self.problems:
         wm = context.window_manager
@@ -475,10 +506,11 @@ def problemFreeFileSelect(self, context):
 
 
 def drawObjectProblems(self):
-    self.layout.label("MakeWalk cannot use this rig because it has:")
-    for problem in self.problems.split("\n"):
-        self.layout.label("  %s" % problem)
-    self.layout.label("Apply object transformations before using MakeWalk")
+    if self.problems:
+        self.layout.label("MakeWalk cannot use this rig because it has:")
+        for problem in self.problems.split("\n"):
+            self.layout.label("  %s" % problem)
+        self.layout.label("Apply object transformations before using MakeWalk")
 
 #
 #   showProgress(n, frame):

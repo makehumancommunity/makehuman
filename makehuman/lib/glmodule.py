@@ -10,7 +10,7 @@
 
 **Authors:**           Glynn Clements, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -64,14 +64,14 @@ g_primitiveMap = [GL_POINTS, GL_LINES, GL_TRIANGLES, GL_QUADS]
 TEX_NOT_FOUND = False
 MAX_TEXTURE_UNITS = 0
 
-def grabScreen(x, y, width, height, filename = None):
+def grabScreen(x, y, width, height, filename = None, productionRender=False):
     if width <= 0 or height <= 0:
         raise RuntimeError("width or height is 0")
 
     log.debug('grabScreen: %d %d %d %d', x, y, width, height)
 
     # Draw before grabbing, to make sure we grab a rendering and not a picking buffer
-    draw()
+    draw(productionRender)
 
     sx0 = x
     sy0 = G.windowHeight - y - height

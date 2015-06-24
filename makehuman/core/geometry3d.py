@@ -10,7 +10,7 @@
 
 **Authors:**           Marc Flerackers
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -42,7 +42,6 @@ import numpy as np
 import transformations as tm
 
 class RectangleMesh(module3d.Object3D):
-
     """
     A filled rectangle.
     
@@ -154,6 +153,19 @@ class RectangleMesh(module3d.Object3D):
         self.changeCoords(self._rotatedVerts(v))
         self.update()
 
+    def setColors(self, bottomLeft, bottomRight, topRight, topLeft):
+        def _toNpArray(arr):
+            if len(arr) == 3:
+                return np.asarray(arr+[1.0], dtype=np.float32)
+            else:
+                return np.asarray(arr, dtype=np.float32)
+
+        color = np.asarray([255 * _toNpArray(bottomLeft), 
+                            255 * _toNpArray(bottomRight), 
+                            255 * _toNpArray(topRight), 
+                            255 * _toNpArray(topLeft)     ], dtype=np.uint8)
+        self.setColor(color)
+
     def _bbox(self, ignore_rotation=True):
         if ignore_rotation:
             coord = self._originalVerts(self.coord)
@@ -179,7 +191,34 @@ class RectangleMesh(module3d.Object3D):
             dx = x0
             dy = y1
         return dx, dy
-       
+
+class AxisMesh(module3d.Object3D):
+    def __init__(self, scale=1.0):
+        import files3d
+        import getpath
+        module3d.Object3D.__init__(self, 'axis', 4)
+        files3d.loadMesh(getpath.getSysDataPath('3dobjs/axis.obj'), maxFaces=4, obj=self)
+
+        for fg_name in self.getFaceGroups():
+            if 'red' in fg_name.lower():
+                self.color[self.getVerticesForGroups([fg_name])] = [255, 0, 0, 255]
+            elif 'green' in fg_name.lower():
+                self.color[self.getVerticesForGroups([fg_name])] = [0, 255, 0, 255]
+            elif 'blue' in fg_name.lower():
+                self.color[self.getVerticesForGroups([fg_name])] = [0, 0, 255, 255]
+
+        self.markCoords(colr=True)
+        self.sync_color()
+
+        if scale != 1.0:
+            self.coord[:] *= float(scale)
+            self.markCoords(coor=True)
+            self.sync_coord()
+
+        # These are recommended, but cannot be assigned until this mesh is attached to an Object
+        #self.material.ambientColor=[0.2,0.2,0.2]
+        #self.material.configureShading(vertexColors=True)
+
 class FrameMesh(module3d.Object3D):
     """
     A wire rectangle.
@@ -191,7 +230,6 @@ class FrameMesh(module3d.Object3D):
     """
             
     def __init__(self, width, height):
-
         module3d.Object3D.__init__(self, 'frame', 2)
         
         # create group
@@ -429,6 +467,9 @@ class GridMesh(module3d.Object3D):
 
     @module3d.Object3D.visibility.getter
     def visibility(self):
+        if not self._visibility:
+            return False
+
         from core import G
         camera = G.cameras[self.cameraMode]
 

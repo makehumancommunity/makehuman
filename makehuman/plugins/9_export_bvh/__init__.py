@@ -10,7 +10,7 @@
 
 **Authors:**           Thomas Larsson, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -40,8 +40,7 @@ Supports exporting of selected skeleton and animations in BVH format.
 
 import bvh
 
-from export import Exporter
-from exportutils.config import Config
+from export import Exporter, ExportConfig
 import log
 from core import G
 
@@ -49,10 +48,10 @@ import os
 
 # TODO add options such as z-up, feetonground, etc
 
-class BvhConfig(Config):
+class BvhConfig(ExportConfig):
 
     def __init__(self):
-        Config.__init__(self)
+        ExportConfig.__init__(self)
         self.useRelPaths = True
 
 class ExporterBVH(Exporter):
@@ -83,12 +82,12 @@ class ExporterBVH(Exporter):
         cfg = self.getConfig()
         cfg.setHuman(human)
 
-        if self.exportAnimations and len(human.animated.getAnimations()) > 0:
+        if self.exportAnimations and len(human.getAnimations()) > 0:
             baseFilename = os.path.splitext(filename("bvh"))[0]
-            for animName in human.animated.getAnimations():
+            for animName in human.getAnimations():
                 fn = baseFilename + "_%s.bvh" % animName
                 log.message("Exporting file %s.", fn)
-                bvhData = bvh.createFromSkeleton(skel, human.animated.getAnimation(animName))
+                bvhData = bvh.createFromSkeleton(skel, human.getAnimation(animName))
                 if cfg.scale != 1:
                     bvhData.scale(cfg.scale)
                 bvhData.writeToFile(fn)

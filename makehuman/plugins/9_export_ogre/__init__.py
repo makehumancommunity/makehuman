@@ -10,7 +10,7 @@
 
 **Authors:**           Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -37,16 +37,13 @@ Abstract
 Exporter plugin for the Ogre3d mesh format.
 """
 
-import gui3d
-import gui
 import mh2ogre
-from export import Exporter
-from exportutils.config import Config
+from export import Exporter, ExportConfig
 
-class OgreConfig(Config):
+class OgreConfig(ExportConfig):
 
     def __init__(self):
-        Config.__init__(self)
+        ExportConfig.__init__(self)
         self.useRelPaths = True
         self.exportShaders = False  # TODO add support for this
 
@@ -69,12 +66,12 @@ class ExporterOgre(Exporter):
         mh2ogre.exportOgreMesh(filename("mesh.xml"), cfg)
 
     def build(self, options, taskview):
+        import gui
         self.taskview     = taskview
         self.feetOnGround = options.addWidget(gui.CheckBox("Feet on ground", True))
 
     def getConfig(self):
         cfg = OgreConfig()
-        cfg.useTPose          = False # self.useTPose.selected
         cfg.feetOnGround      = self.feetOnGround.selected
         cfg.scale,cfg.unit    = self.taskview.getScale()
 

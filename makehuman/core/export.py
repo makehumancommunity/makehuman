@@ -10,7 +10,7 @@
 
 **Authors:**           Glynn Clements
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -38,6 +38,7 @@ Common base class for all exporters.
 """
 
 from core import G
+import log
 
 
 class Exporter(object):
@@ -75,3 +76,108 @@ class Exporter(object):
         This method is called when this exporter is hidden from the export GUI.
         """
         pass
+
+class ExportConfig(object):
+
+    def __init__(self):
+        self.feetOnGround       = False
+        self.scale              = 1.0
+        self.unit               = "dm"
+
+        self.useNormals         = False
+        self.useRelPaths        = True
+        self.texFolder          = None
+        self.customPrefix       = ""
+        self.human              = None
+
+        # TODO integrate meshOrientation and localBoneAxis properties in this config
+
+
+    def selectedOptions(self, exporter):
+        self.feetOnGround =         exporter.feetOnGround.selected
+        self.scale,self.unit    = exporter.taskview.getScale()
+        return self
+
+
+    @property
+    def offset(self):
+        # TODO if meshOrientation property is integrated in this config, adapt this property to the orientation
+        import numpy as np
+        if self.feetOnGround:
+            yOffset = -self.scale * self.human.getJointPosition('ground')[1]
+            return np.asarray([0.0, yOffset, 0.0], dtype=np.float32)
+        else:
+            return np.zeros(3, dtype=np.float32)
+
+
+    @property
+    def subdivide(self):
+        if not self.human:
+            log.warning('No human set in config, disabled subdivision for export.')
+            return False
+        else:
+            return self.human.isSubdivided()
+
+
+    def setHuman(self, human):
+        """
+        Set the human object for this config.
+        """
+        self.human = human
+
+
+    # TODO revise
+    def setupTexFolder(self, filepath):
+        import os
+
+        def _getSubFolder(path, name):
+            folder = os.path.join(path, name)
+            if not os.path.exists(folder):
+                log.message("Creating folder %s", folder)
+                try:
+                    os.mkdir(folder)
+                except:
+                    log.error("Unable to create separate folder:", exc_info=True)
+                    return None
+            return folder
+
+        (fname, ext) = os.path.splitext(filepath)
+        fname = self.goodName(os.path.basename(fname))
+        self.outFolder = os.path.realpath(os.path.dirname(filepath))
+        self.filename = os.path.basename(filepath)
+        self.texFolder = _getSubFolder(self.outFolder, "textures")
+        self._copiedFiles = {}
+
+
+    # TODO revise
+    def copyTextureToNewLocation(self, filepath):
+        import os
+        import shutil
+
+        srcDir = os.path.abspath(os.path.expanduser(os.path.dirname(filepath)))
+        filename = os.path.basename(filepath)
+
+        newpath = os.path.abspath( os.path.join(self.texFolder, filename) )
+        try:
+            self._copiedFiles[filepath]
+            done = True
+        except:
+            done = False
+        if not done:
+            try:
+                shutil.copyfile(filepath, newpath)
+            except:
+                log.message("Unable to copy \"%s\" -> \"%s\"" % (filepath, newpath))
+            self._copiedFiles[filepath] = True
+
+        if not self.useRelPaths:
+            return newpath
+        else:
+            relpath = os.path.relpath(newpath, self.outFolder)
+            return str(os.path.normpath(relpath))
+
+
+    def goodName(self, name):
+        string = name.replace(" ", "_").replace("-","_").lower()
+        return string
+

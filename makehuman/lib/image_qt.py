@@ -10,7 +10,7 @@
 
 **Authors:**           Glynn Clements
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -113,4 +113,18 @@ def save(path, data):
     format = "PNG" if path.lower().endswith('.thumb') else None
     if not im.save(path, format):
         raise RuntimeError('error saving image %s' % path)
+
+def resized(img, width, height, filter=0):
+    """
+    Resize image using Qt image library. If filter > 0 bi-linear interpolation
+    will be used. Note that Qt does not support bi-cubic interpolation.
+    """
+    qi = img.toQImage()
+    if filter > 0:
+        transform = QtCore.Qt.SmoothTransformation
+    else:
+        transform = QtCore.Qt.FastTransformation
+    qi = qi.scaled(QtCore.QSize(width, height), 
+                   transformMode=transform)
+    return load(qi)
 

@@ -12,7 +12,7 @@ Modules to handle supported 3D file formats.
 
 **Authors:**           Manuel Bastioni, Marc Flerackers
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -112,7 +112,8 @@ def saveBinaryMesh(obj, path):
     if obj.has_uv:
         vars_['fuvs']  = obj.fuvs
 
-    np.savez(path, **vars_)
+    np.savez_compressed(path, **vars_)
+    os.utime(path, None)  # Ensure modification time is updated
 
 def loadBinaryMesh(obj, path):
     log.debug("Loading binary mesh %s.", path)
@@ -160,7 +161,7 @@ def loadTextMesh(obj, path):
     wavefront.loadObjFile(path, obj)
     #log.debug('loadTextMesh: end')
 
-def loadMesh(path, loadColors=1, maxFaces=None):
+def loadMesh(path, loadColors=1, maxFaces=None, obj=None):
     """
     This function loads the specified mesh object into internal MakeHuman data 
     structures, and returns it. The loaded file should be in Wavefront OBJ 
@@ -178,7 +179,8 @@ def loadMesh(path, loadColors=1, maxFaces=None):
       *uint* Number of faces per vertex (pole), None for default (min 4)
     """
     name = os.path.basename(path)
-    obj = module3d.Object3D(name)
+    if obj is None:
+        obj = module3d.Object3D(name)
     if maxFaces:
         obj.MAX_FACES = maxFaces
 

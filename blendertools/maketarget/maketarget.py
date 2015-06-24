@@ -10,7 +10,7 @@
 
 **Authors:**           Thomas Larsson
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/external_tools_license.html)
 
@@ -150,6 +150,7 @@ class VIEW3D_OT_ImportBaseMhcloButton(bpy.types.Operator):
         try:
             import_obj.importBaseMhclo(context, filepath=mt.baseMhcloFile)
             afterImport(context, mt.baseMhcloFile, False, True)
+            loadAndApplyTarget(context)
         except MHError:
             handleMHError(context)
         return {'FINISHED'}
@@ -166,9 +167,35 @@ class VIEW3D_OT_ImportBaseObjButton(bpy.types.Operator):
         try:
             import_obj.importBaseObj(context, filepath=mt.baseObjFile)
             afterImport(context, mt.baseObjFile, True, False)
+            loadAndApplyTarget(context)
         except MHError:
             handleMHError(context)
         return {'FINISHED'}
+
+
+def loadAndApplyTarget(context):
+    bodytype = context.scene.MhBodyType
+    if bodytype == 'None':
+        return
+    trgpath = os.path.join(os.path.dirname(__file__), "../makeclothes/targets", bodytype + ".target")
+    try:
+        utils.loadTarget(trgpath, context)
+        found = True
+    except FileNotFoundError:
+        found = False
+    if not found:
+        raise MHError("Target \"%s\" not found.\nPath \"%s\" does not seem to be the path to the MakeHuman program" % (trgpath, scn.MhProgramPath))
+
+    ob = context.object
+    props = {}
+    for key in ob.keys():
+        props[key] = ob[key]
+    applyTargets(context)
+    for key in props.keys():
+        ob[key] = props[key]
+    ob.name = bodytype.split("-")[1]
+    ob.shape_key_add(name="Basis")
+    ob["NTargets"] = 0
 
 
 def makeBaseObj(context):
@@ -494,8 +521,6 @@ def loadStatueMinusPose(context):
                 for g in v.groups:
                     print("\nGrp %d %f %f" % (g.group, g.weight, relMats[g.group].determinant()))
                     print("Rel", relMats[g.group])
-
-                #halt
 
     #scn.objects.unlink(statue)
     scn.objects.unlink(posed)
@@ -1234,7 +1259,7 @@ def snapWaist(context):
 
     nVerts = len(settings.skirtWaist)
     if len(settings.tightsWaist) != nVerts:
-        halt
+        raise RuntimeError("snapWaist: %d %d" % (len(settings.tightsWaist), nVerts))
     bpy.ops.object.mode_set(mode='OBJECT')
     skey = ob.data.shape_keys.key_blocks[-1]
     verts = skey.data
@@ -1385,6 +1410,14 @@ def init():
                  ('Hair','Hair','Hair'),
                  ('All','All','All')],
     default='All')
+
+    bpy.types.Scene.MhBodyType = EnumProperty(
+        items = [('None', 'Base Mesh', 'None'),
+                 ('caucasian-male-young', 'Average Male', 'caucasian-male-young'),
+                 ('caucasian-female-young', 'Average Female', 'caucasian-female-young'),
+                ],
+        description = "Character to load",
+    default='caucasian-female-young')
 
     bpy.types.Object.MhIrrelevantDeleted = BoolProperty(name="Irrelevant deleted", default = False)
     bpy.types.Object.MhMeshVertsDeleted = BoolProperty(name="Cannot load", default = False)

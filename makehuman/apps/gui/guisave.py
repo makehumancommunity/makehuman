@@ -13,7 +13,7 @@ Save Tab GUI
 
 **Authors:**           Marc Flerackers
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -73,6 +73,9 @@ def saveMHM(path):
     G.app.selectedHuman.save(path, name)
     #G.app.clearUndoRedo()
 
+    # Remember last save folder
+    gui3d.app.setSetting('savedir', os.path.dirname(path))
+
     G.app.status('Your model has been saved to %s.', path)
 
 
@@ -87,8 +90,10 @@ class SaveTaskView(gui3d.TaskView):
         accompanied by a square border which the user can utilize
         to create a thumbnail for the saved model.
         """
-
         gui3d.TaskView.__init__(self, category, 'Save')
+
+        # Declare new settings
+        gui3d.app.addSetting('savedir', mh.getPath("models"))
 
         self.fileentry = self.addTopWidget(gui.FileEntryView('Save', mode='save'))
         self.fileentry.setFilter('MakeHuman Models (*.mhm)')
@@ -114,7 +119,7 @@ class SaveTaskView(gui3d.TaskView):
 
         modelPath = G.app.currentFile.dir
         if modelPath is None:
-            modelPath = mh.getPath("models")
+            modelPath = gui3d.app.getSetting('savedir')
         self.fileentry.directory = modelPath
 
         name = G.app.currentFile.title

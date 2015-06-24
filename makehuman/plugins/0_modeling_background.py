@@ -10,7 +10,7 @@
 
 **Authors:**           Marc Flerackers, Jonas Hauquier, Glynn Clements
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -153,6 +153,7 @@ class BackgroundChooser(gui3d.TaskView):
                 m = None
 
             mesh = geometry3d.RectangleMesh(20, 20, centered=True, rotation=m)
+            mesh.name = "Background_%s" % viewName
             obj = gui3d.app.addObject(gui3d.Object(mesh, [0, 0, 0], visible=False))
             obj.setShadeless(True)
             obj.setDepthless(True)
@@ -213,7 +214,7 @@ class BackgroundChooser(gui3d.TaskView):
                     gui3d.app.axisView(side)
                 self.refreshFileChooser()
 
-        self.opacitySlider = self.bgSettingsBox.addWidget(gui.Slider(value=self.opacity, min=0,max=100, label = "Opacity: %d%%"))
+        self.opacitySlider = self.bgSettingsBox.addWidget(gui.Slider(value=self.opacity, min=0,max=100, label = ["Opacity",": %d%%"]))
         self.dragButton = self.bgSettingsBox.addWidget(gui.CheckBox('Move && Resize'))
         self.foregroundTggl = self.bgSettingsBox.addWidget(gui.CheckBox("Show in foreground"))
 
@@ -336,7 +337,7 @@ class BackgroundChooser(gui3d.TaskView):
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
-        text = language.language.getLanguageString(u'Images which are placed in %s will show up here.') % self.backgroundsFolder
+        text = language.language.getLanguageString([u'If you want backgrounds to show up here, place the images in',u' %s']) % self.backgroundsFolder
         gui3d.app.prompt('Info', text, 'OK', helpId='backgroundHelp')
         gui3d.app.statusPersist(text)
         self.opacitySlider.setValue(self.opacity)
@@ -432,16 +433,19 @@ class BackgroundChooser(gui3d.TaskView):
         self.backgroundImage.mesh.setPosition(x, y)
         self.transformations[side][0] = (float(x), float(y))
 
-    def loadHandler(self, human, values):
+    def loadHandler(self, human, values, strict):
         if values[0] == "background":
             if len(values) >= 7:
                 side = values[1]
                 img_filename = values[2]
                 i = 0
-                while img_filename and not any( [img_filename.lower().endswith(ex) for ex in self.extensions] ) and (len(values) - (i+2)) >= 5:
+                while img_filename and not any( [img_filename.lower().endswith(ex) for ex in self.extensions] ) and (len(values) - (i+2)) >= 6:
                     i += 1
                     img_filename = img_filename + ' ' + values[2+i]
-                img_filename = getpath.findFile(img_filename, self.backgroundsFolders, strict=True)
+                img_filename = getpath.thoroughFindFile(img_filename, self.backgroundsFolders)
+                if not os.path.isfile(img_filename):
+                    log.warning("Background file %s not found", img_filename)
+                    return
                 aspect = float(values[3+i])
                 trans = (float(values[4+i]), float(values[5+i]))
                 scale = float(values[6+i])
@@ -451,16 +455,26 @@ class BackgroundChooser(gui3d.TaskView):
                 enabled = values[2].lower() in ['true', 'yes']
                 self.setBackgroundEnabled(enabled)
             else:
+                if strict:
+                    raise RuntimeError("Unknown background option: %s" % (' '.join( values[1:]) ))
                 log.error("Unknown background option: %s", (' '.join( values[1:]) ))
 
     def saveHandler(self, human, file):
         for side in self.sides.keys():
             side_data = self.filenames.get(side)
+            backgrounds = 0
             if side_data is not None:
                 (filename, aspect) = side_data
+                if not filename:
+                    continue
                 (trans, scale) = self.transformations[side]
                 filename = getpath.getJailedPath(filename, self.backgroundsFolders, jailLimits=self.backgroundsFolders)
+                if not filename:
+                    continue
                 file.write('background %s %s %s %s %s %s\n' % (side, filename, aspect, trans[0], trans[1], scale))
+                backgrounds += 1
+        if backgrounds == 0:
+            return
         file.write('background enabled %s\n' % self.isBackgroundEnabled() )
 
 class TextureProjectionView(gui3d.TaskView) :

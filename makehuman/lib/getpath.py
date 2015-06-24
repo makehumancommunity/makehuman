@@ -8,9 +8,9 @@
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Manuel Bastioni, Marc Flerackers, Glynn Clements
+**Authors:**           Jonas Hauquier, Glynn Clements, Manuel Bastioni, Marc Flerackers
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -57,7 +57,11 @@ def pathToUnicode(path):
     elif isinstance(path, basestring):
         return path.decode(sys.getfilesystemencoding())
     else:
-        return path
+        try:
+            # Works eg. for QString objects
+            return unicode(path, sys.getfilesystemencoding())
+        except:
+            return path
 
 def formatPath(path):
     if path is None:
@@ -74,9 +78,7 @@ def canonicalPath(path):
 def localPath(path):
     """
     Returns the path relative to the MH program directory,
-    i.e. the inverse of canonicalPath. Needed to get
-    human.targetsDetailStack keys from algos3d.targetBuffer keys.
-    If all buffers use the same keys, this becomes obsolete.
+    i.e. the inverse of canonicalPath.
     """
     path = os.path.realpath(path)
     root = os.path.realpath( getSysPath() )
@@ -197,6 +199,12 @@ def isSubPath(subpath, path):
     path = canonicalPath(path)
     return commonprefix([subpath, path]) == path
 
+def isSamePath(path1, path2):
+    """
+    Determines whether two paths point to the same location.
+    """
+    return canonicalPath(path1) == canonicalPath(path2)
+
 def getRelativePath(path, relativeTo = [getDataPath(), getSysDataPath()], strict=False):
     """
     Return a relative file path, relative to one of the specified search paths.
@@ -222,6 +230,8 @@ def findFile(relPath, searchPaths = [getDataPath(), getSysDataPath()], strict=Fa
     Inverse of getRelativePath: find an absolute path from specified relative
     path in one of the search paths.
     First occurence is returned, so order in which search paths are given matters.
+    Note: does NOT treat the path as relative to the current working dir, unless
+    you explicitly specify '.' as one of the searchpaths.
     """
     if not isinstance(searchPaths, list):
         searchPaths = [searchPaths]
@@ -235,6 +245,40 @@ def findFile(relPath, searchPaths = [getDataPath(), getSysDataPath()], strict=Fa
         return None
     else:
         return relPath
+
+def thoroughFindFile(filename, searchPaths=[], searchDefaultPaths=True):
+    """
+    Extensively search the data paths to find a file with matching filename in
+    as much cases as possible. If file is found, returns absolute filename.
+    If nothing is found return the most probable filename.
+    """
+    # Ensure unix style path
+    filename.replace('\\', '/')
+
+    if not isinstance(searchPaths, list):
+        searchPaths = [searchPaths]
+
+    if searchDefaultPaths:
+        # Search in user / sys data, and user / sys root folders
+        searchPaths = list(searchPaths)
+        searchPaths.extend([getDataPath(), getSysDataPath(), getPath(), getSysPath()])
+
+    path = findFile(filename, searchPaths, strict=True)
+    if path:
+        return canonicalPath(path)
+
+    # Treat as absolute path or search relative to application path
+    if os.path.isfile(filename):
+        return canonicalPath(filename)
+
+    # Strip leading data/ folder if present (for the scenario where sysDataPath is not in sysPath)
+    if filename.startswith('data/'):
+        result = thoroughFindFile(filename[5:], searchPaths, False)
+        if os.path.isfile(result):
+            return result
+
+    # Nothing found
+    return formatPath(filename)
 
 def search(paths, extensions, recursive=True, mutexExtensions=False):
     """

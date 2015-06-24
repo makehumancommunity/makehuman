@@ -12,7 +12,7 @@ Handles WaveFront .obj 3D mesh files.
 
 **Authors:**           Manuel Bastioni, Marc Flerackers, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -154,9 +154,9 @@ def loadObjFile(path, obj = None):
     return obj
 
 
-def writeObjFile(path, objects, writeMTL=True, config=None, filterMaskedFaces=True):
-    if not isinstance(objects, list):
-        objects = [objects]
+def writeObjFile(path, meshes, writeMTL=True, config=None, filterMaskedFaces=True):
+    if not isinstance(meshes, list):
+        meshes = [meshes]
 
     if isinstance(path, file):
         fp = path
@@ -171,8 +171,6 @@ def writeObjFile(path, objects, writeMTL=True, config=None, filterMaskedFaces=Tr
     if writeMTL:
         mtlfile = path.replace(".obj",".mtl")
         fp.write("mtllib %s\n" % os.path.basename(mtlfile))
-
-    meshes = [obj.mesh for obj in objects]
 
     scale = config.scale if config is not None else 1.0
 
@@ -200,7 +198,7 @@ def writeObjFile(path, objects, writeMTL=True, config=None, filterMaskedFaces=Tr
     # UV vertices
     for mesh in meshes:
         if mesh.has_uv:
-            fp.write("".join( ["vt %.4f %.4f\n" % tuple(uv) for uv in mesh.texco] ))
+            fp.write("".join( ["vt %.6f %.6f\n" % tuple(uv) for uv in mesh.texco] ))
 
     # Faces
     nVerts = 1

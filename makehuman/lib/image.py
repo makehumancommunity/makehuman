@@ -13,7 +13,7 @@ Image class definition
 
 **Authors:**           Glynn Clements
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -47,6 +47,10 @@ be imported (import happens only when needed).
 
 import numpy as np
 import time
+
+FILTER_NEAREST = 0   # Nearest neighbour resize filter (no real filtering)
+FILTER_BILINEAR = 1  # Bi-linear filter
+FILTER_BICUBIC = 2   # Bi-cubic filter (not supported with Qt, only PIL)
 
 class Image(object):
     """Container for handling images.
@@ -197,20 +201,25 @@ class Image(object):
         return image_qt.QtGui.QImage(
             data.tostring(), data.shape[1], data.shape[0], fmt)
 
-    def resized_(self, width, height):
-        dw, dh = width, height
-        sw, sh = self.size
-        xmap = np.floor((np.arange(dw) + 0.5) * sw / dw).astype(int)
-        ymap = np.floor((np.arange(dh) + 0.5) * sh / dh).astype(int)
-        return self._data[ymap, :][:, xmap]
+    def resized_(self, width, height, filter=FILTER_NEAREST):
+        if filter == FILTER_NEAREST:
+            dw, dh = width, height
+            sw, sh = self.size
+            xmap = np.floor((np.arange(dw) + 0.5) * sw / dw).astype(int)
+            ymap = np.floor((np.arange(dh) + 0.5) * sh / dh).astype(int)
+            return self._data[ymap, :][:, xmap]
+        else:
+            # NOTE: bi-cubic filtering is not supported by Qt, use bi-linear
+            import image_qt
+            return image_qt.resized(self, width, height, filter=filter)
 
-    def resized(self, width, height):
+    def resized(self, width, height, filter=FILTER_NEAREST):
         """Get a resized copy of the Image."""
-        return Image(data=self.resized_(width, height))
+        return Image(data=self.resized_(width, height, filter))
 
-    def resize(self, width, height):
+    def resize(self, width, height, filter=FILTER_NEAREST):
         """Resize the Image to a specified size."""
-        self._data = self.resized_(width, height)
+        self._data = self.resized_(width, height, filter)
         self.modified = time.time()
 
     def blit(self, other, x, y):

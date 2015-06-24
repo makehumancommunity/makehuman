@@ -10,7 +10,7 @@
 
 **Authors:**           Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -194,8 +194,12 @@ class Material(object):
         else:
             self.name = name
 
+        self.description = "%s material" % name
+
         self.filename = None
         self.filepath = None
+
+        self.tags = set()
 
         self._ambientColor = Color(1.0, 1.0, 1.0)
         self._diffuseColor = Color(1.0, 1.0, 1.0)
@@ -263,6 +267,7 @@ class Material(object):
 
     def copyFrom(self, material):
         self.name = material.name
+        self.description = material.description
 
         self.filename = material.filename
         self.filepath = material.filepath
@@ -354,6 +359,10 @@ class Material(object):
 
             if words[0] == "name":
                 self.name = words[1]
+            elif words[0] == "tag":
+                self.addTag(" ".join(words[1:]))
+            elif words[0] == "description":
+                self.description = " ".join(words[1:])
             elif words[0] == "ambientColor":
                 self._ambientColor.copyFrom([float(w) for w in words[1:4]])
             elif words[0] == "diffuseColor":
@@ -505,6 +514,7 @@ class Material(object):
         f.write("\n")
 
         f.write("name %s\n" % self.name)
+        f.write("description %s\n" % self.description)
         f.write("ambientColor %s\n" % self.ambientColor.asStr())
         f.write("diffuseColor %s\n" % self.diffuseColor.asStr())
         f.write("specularColor %s\n" % self.specularColor.asStr())
@@ -596,6 +606,14 @@ class Material(object):
             f.write("shaderConfig %s %s\n" % (name, value) )
 
         f.close()
+
+    def addTag(self, tag):
+        self.tags.add(tag.lower())
+
+    def removeTag(self, tag):
+        tag = tag.lower()
+        if tag in self.tags:
+            self.tags.remove(tag)
 
     def getUVMap(self):
         return self._uvMap
@@ -1365,29 +1383,14 @@ def getFilePath(filename, folder = None):
     if not filename or not isinstance(filename, basestring):
         return filename
 
-    # Ensure unix style path
-    filename.replace('\\', '/')
-
     searchPaths = []
 
     # Search within current folder
     if folder:
         searchPaths.append(folder)
 
-    from getpath import findFile, getPath, getSysDataPath, getSysPath, getDataPath
-    searchPaths.extend([getDataPath(), getSysDataPath(), getPath(), getSysPath()])
-
-    # Search in user / sys data, and user / sys root folders
-    path = findFile(filename, searchPaths, strict=True)
-    if path:
-        return os.path.abspath(path)
-
-    # Treat as absolute path or search relative to application path
-    if os.path.isfile(filename):
-        return os.path.abspath(filename)
-
-    # Nothing found
-    return os.path.normpath(filename)
+    import getpath
+    return getpath.thoroughFindFile(filename, searchPaths, True)
 
 def getShaderPath(shader, folder = None):
     if not shader:
@@ -1453,3 +1456,38 @@ def loadUvObjFile(filepath):
             fuvs.append( [(int(word.split("/")[1]) - 1) for word in words[1:]] )
     fp.close()
     return uvs,fuvs
+
+def peekMetadata(filename):
+    from codecs import open
+    try:
+        f = open(filename, "rU", encoding="utf-8")
+    except:
+        f = None
+    if f == None:
+        log.error("Failed to load metadata from material file %s.", filename)
+        return
+
+    name = "UnnamedMaterial"
+    description = None
+    tags = set()
+
+    for line in f:
+        words = line.split()
+        if len(words) == 0:
+            continue
+        if words[0] in ["#", "//"]:
+            continue
+
+        if words[0] == "name":
+            name = words[1]
+        elif words[0] == "tag":
+            tags.add((" ".join(words[1:])).lower())
+        if words[0] == "description":
+            description = " ".join(words[1:])
+        else:
+            pass
+
+    if description is None:
+        description = "%s material" % name
+
+    return (name, tags, description)

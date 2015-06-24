@@ -10,7 +10,7 @@
 
 **Authors:**           Thomas Larsson
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -37,15 +37,15 @@ Abstract
 TODO
 """
 
-from export import Exporter
-from exportutils.config import Config
+from export import Exporter, ExportConfig
 
-class ObjConfig(Config):
+class ObjConfig(ExportConfig):
 
     def __init__(self):
-        Config.__init__(self)
+        ExportConfig.__init__(self)
         self.useRelPaths = True
         self.useNormals = False
+        self.hiddenGeom = False
 
 
 class ExporterOBJ(Exporter):
@@ -60,6 +60,7 @@ class ExporterOBJ(Exporter):
         import gui
         Exporter.build(self, options, taskview)
         self.useNormals = options.addWidget(gui.CheckBox("Normals", False))
+        self.hiddenGeom = options.addWidget(gui.CheckBox("Helper geometry", False))
 
     def export(self, human, filename):
         from progress import Progress
@@ -74,9 +75,9 @@ class ExporterOBJ(Exporter):
         cfg = ObjConfig()
         cfg.useNormals = self.useNormals.selected
 
-        cfg.useTPose          = False # self.useTPose.selected
         cfg.feetOnGround      = self.feetOnGround.selected
         cfg.scale,cfg.unit    = self.taskview.getScale()
+        cfg.hiddenGeom        = self.hiddenGeom.selected
 
         return cfg
 

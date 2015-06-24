@@ -10,7 +10,7 @@
 
 **Authors:**           Thomas Larsson, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -76,18 +76,16 @@ def writeSkinController(fp, human, mesh, skel, config):
     nVerts = len(mesh.coord)
     nBones = len(skel.getBones())
 
-    rawWeights = human.getVertexWeights()
+    rawWeights = human.getVertexWeights(human.getSkeleton())
 
     obj = mesh.object
 
     # Remap vertex weights to mesh
     if obj.proxy:
-        import skeleton
-        parentWeights = skeleton.getProxyWeights(obj.proxy, rawWeights)
+        parentWeights = obj.proxy.getVertexWeights(rawWeights, human.getSkeleton())
     else:
         parentWeights = rawWeights
-    weights = mesh.getWeights(parentWeights)
-
+    weights = mesh.getVertexWeights(parentWeights)
 
     vertexWeights = [list() for _ in xrange(nVerts)]
     skinWeights = []
@@ -95,7 +93,7 @@ def writeSkinController(fp, human, mesh, skel, config):
     boneNames = [ bone.name for bone in skel.getBones() ]
     for bIdx, boneName in enumerate(boneNames):
         try:
-            (verts,ws) = weights[boneName]
+            (verts,ws) = weights.data[boneName]
         except:
             (verts,ws) = ([], [])
         wts = zip(verts, ws)
@@ -154,7 +152,6 @@ def writeSkinController(fp, human, mesh, skel, config):
 
     progress(0.4, 0.6)
     for bone in skel.getBones():
-        #mat = la.inv(bone.getRestOrTPoseMatrix(config))    # TODO remove (this is a hack)
         mat = la.inv(bone.getRestMatrix(config.meshOrientation, config.localBoneAxis, config.offset))
         for i in range(4):
             fp.write('\n           ')

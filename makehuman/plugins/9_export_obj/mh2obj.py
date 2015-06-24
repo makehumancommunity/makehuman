@@ -10,7 +10,7 @@
 
 **Authors:**           Thomas Larsson, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -39,9 +39,8 @@ Exports proxy mesh to obj
 
 import wavefront
 import os
-import exportutils
 from progress import Progress
-import proxy
+import numpy as np
 
 #
 #    exportObj(human, filepath, config):
@@ -49,17 +48,29 @@ import proxy
 
 def exportObj(filepath, config=None):
     progress = Progress(0, None)
-    if config is None:
-        config = exportutils.config.Config()
     human = config.human
     config.setupTexFolder(filepath)
     filename = os.path.basename(filepath)
     name = config.goodName(os.path.splitext(filename)[0])
 
     progress(0, 0.3, "Collecting Objects")
-    objects = human.getObjects(excludeZeroFaceObjs=True)
+    objects = human.getObjects(excludeZeroFaceObjs=not config.hiddenGeom)
+    meshes = [o.mesh for o in objects]
+
+    if config.hiddenGeom:
+        # Disable the face masking on copies of the input meshes
+        meshes = [m.clone(filterMaskedVerts=False) for m in meshes]
+        for m in meshes:
+            # Would be faster if we could tell clone() to do this, but it would 
+            # make the interface more complex.
+            # We could also let the wavefront module do this, but this would 
+            # introduce unwanted "magic" behaviour into the export function.
+            face_mask = np.ones(m.face_mask.shape, dtype=bool)
+            m.changeFaceMask(face_mask)
+            m.calcNormals()
+            m.updateIndexBuffer()
 
     progress(0.3, 0.99, "Writing Objects")
-    wavefront.writeObjFile(filepath, objects, True, config)
+    wavefront.writeObjFile(filepath, meshes, True, config, filterMaskedFaces=not config.hiddenGeom)
 
     progress(1.0, None, "OBJ Export finished. Output file: %s" % filepath)

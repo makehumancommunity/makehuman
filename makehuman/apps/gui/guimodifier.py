@@ -12,7 +12,7 @@ Modifier taskview
 
 **Authors:**           Glynn Clements, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -55,9 +55,6 @@ class ModifierTaskView(gui3d.TaskView):
             label = name.capitalize()
         if saveName is None:
             saveName = name
-        # JH: Hack to get around issue #396 for 1.0.1 release. For 1.1 translation strings should be updated.
-        if label == "Arms and legs":
-            label = "Arms and Legs"
 
         super(ModifierTaskView, self).__init__(category, name, label=label)
 
@@ -73,8 +70,9 @@ class ModifierTaskView(gui3d.TaskView):
         self.groupBox = self.addLeftWidget(gui.StackedBox())
 
         self.showMacroStats = False
+        self.human = gui3d.app.selectedHuman
 
-    def addSlider(self, sliderCategory, slider):
+    def addSlider(self, sliderCategory, slider, enabledCondition=None):
         # Get category groupbox
         categoryName = sliderCategory.capitalize()
         if categoryName not in self.groupBoxes:
@@ -91,20 +89,16 @@ class ModifierTaskView(gui3d.TaskView):
             box = self.groupBoxes[categoryName]
 
         # Add slider to groupbox
-        self.modifiers[slider.modifier.name.replace('|','-')] = slider.modifier # TODO this strange naming scheme is legacy for MHM compatibility
+        self.modifiers[slider.modifier.fullName] = slider.modifier
         box.addWidget(slider)
+        slider.enabledCondition = enabledCondition
         self.sliders.append(slider)
 
-        self.updateMacro()
+    def updateMacro(self):
+        self.human.updateMacroModifiers()
 
     def getModifiers(self):
         return self.modifiers
-
-    # TODO is this still needed?
-    def updateMacro(self):
-        for modifier in self.modifiers.itervalues():
-            if isinstance(modifier, humanmodifier.MacroModifier):
-                modifier.setValue(modifier.getValue())
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
@@ -114,7 +108,7 @@ class ModifierTaskView(gui3d.TaskView):
         if self.showMacroStats:
             self.showMacroStatus()
 
-        if G.app.settings.get('cameraAutoZoom', True):
+        if G.app.getSetting('cameraAutoZoom'):
             self.setCamera()
 
         self.syncSliders()
@@ -122,6 +116,9 @@ class ModifierTaskView(gui3d.TaskView):
     def syncSliders(self):
         for slider in self.sliders:
             slider.update()
+            if slider.enabledCondition:
+                enabled = getattr(slider.modifier.human, slider.enabledCondition)()
+                slider.setEnabled(enabled)
 
     def onHide(self, event):
         super(ModifierTaskView, self).onHide(event)
@@ -139,22 +136,11 @@ class ModifierTaskView(gui3d.TaskView):
         if self.showMacroStats and self.isVisible():
             self.showMacroStatus()
 
-    def loadHandler(self, human, values):
-        if values[0] == 'status':
-            return
-
-        if values[0] == self.saveName:
-            modifier = self.modifiers.get(values[1], None)
-            if modifier:
-                modifier.setValue(float(values[2]))
+    def loadHandler(self, human, values, strict):
+        pass
 
     def saveHandler(self, human, file):
-        for name, modifier in self.modifiers.iteritems():
-            if name is None:
-                continue
-            value = modifier.getValue()
-            if value or isinstance(modifier, humanmodifier.MacroModifier):
-                file.write('%s %s %f\n' % (self.saveName, name, value))
+        pass
 
     def setCamera(self):
         if self.cameraFunc:
@@ -177,13 +163,13 @@ class ModifierTaskView(gui3d.TaskView):
         muscle = (human.getMuscle() * 100.0)
         weight = (50 + (150 - 50) * human.getWeight())
         height = human.getHeightCm()
-        if G.app.settings['units'] == 'metric':
+        if G.app.getSetting('units') == 'metric':
             units = 'cm'
         else:
             units = 'in'
             height *= 0.393700787
 
-        self.setStatus('Gender: %s, Age: %d, Muscle: %.2f%%, Weight: %.2f%%, Height: %.2f %s', gender, age, muscle, weight, height, units)
+        self.setStatus([ ['Gender',': %s '], ['Age',': %d '], ['Muscle',': %.2f%% '], ['Weight',': %.2f%% '], ['Height',': %.2f %s'] ], gender, age, muscle, weight, height, units)
 
     def setStatus(self, format, *args):
         G.app.statusPersist(format, *args)
@@ -240,7 +226,8 @@ def loadModifierTaskViews(filename, human, category, taskviewClass=None):
                 label = sDef.get('label', None)
                 camFunc = _getCamFunc( sDef.get('cam', None) )
                 slider = modifierslider.ModifierSlider(modifier, label=label, cameraView=camFunc)
-                taskView.addSlider(sliderCategory, slider)
+                enabledCondition = sDef.get("enabledCondition", None)
+                taskView.addSlider(sliderCategory, slider, enabledCondition)
 
         if taskView.saveName is not None:
             gui3d.app.addLoadHandler(taskView.saveName, taskView.loadHandler)

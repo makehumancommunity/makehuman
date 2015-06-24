@@ -10,7 +10,7 @@
 
 **Authors:**           Thomas Larsson
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/external_tools_license.html)
 
@@ -40,8 +40,8 @@ Utility for making clothes to MH characters.
 bl_info = {
     "name": "Make Clothes",
     "author": "Thomas Larsson",
-    "version": (0, 949),
-    "blender": (2, 6, 9),
+    "version": (1,1,0),
+    "blender": (2,7,1),
     "location": "View3D > Properties > Make MH clothes",
     "description": "Make clothes and UVs for MakeHuman characters",
     "warning": "",
@@ -50,7 +50,7 @@ bl_info = {
 
 
 if "bpy" in locals():
-    print("Reloading makeclothes v %d.%d" % bl_info["version"])
+    print("Reloading makeclothes v %d.%d.%d" % bl_info["version"])
     import imp
     imp.reload(maketarget)
     imp.reload(mc)
@@ -58,7 +58,7 @@ if "bpy" in locals():
     imp.reload(makeclothes)
     imp.reload(project)
 else:
-    print("Loading makeclothes v %d.%d" % bl_info["version"])
+    print("Loading makeclothes v %d.%d.%d" % bl_info["version"])
     import bpy
     import os
     from bpy.props import *
@@ -105,7 +105,7 @@ def inset(layout):
 
 
 class MakeClothesPanel(bpy.types.Panel):
-    bl_label = "Make Clothes version %d.%d" % bl_info["version"]
+    bl_label = "Make Clothes version %d.%d.%d" % bl_info["version"]
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
 
@@ -136,6 +136,8 @@ class MakeClothesPanel(bpy.types.Panel):
 
         layout.separator()
         layout.operator("mhclo.make_clothes")
+        layout.separator()
+        layout.operator("mhclo.test_clothes")
         layout.separator()
 
         layout.prop(scn, "MCShowSelect")
@@ -187,8 +189,8 @@ class MakeClothesPanel(bpy.types.Panel):
         layout.prop(scn, "MCShowBoundary")
         if scn.MCShowBoundary:
             ins = inset(layout)
-            ins.prop(scn, "MCScaleUniform")
-            ins.prop(scn, "MCScaleCorrect")
+            ins.prop(scn, "MCUseShearing")
+            ins.prop(scn, "MCUseBoundaryMirror")
             ins.separator()
             ins.prop(scn, "MCBodyPart")
             vnums = makeclothes.getBodyPartVerts(scn)
@@ -482,6 +484,10 @@ class OBJECT_OT_ExamineBoundaryButton(bpy.types.Operator):
     bl_label = "Examine Boundary"
     bl_options = {'UNDO'}
 
+    @classmethod
+    def poll(self, context):
+        return context.object and context.object.MhHuman
+
     def execute(self, context):
         setObjectMode(context)
         try:
@@ -518,6 +524,10 @@ class VIEW3D_OT_SelectHumanPartButton(bpy.types.Operator):
 
     btype = StringProperty()
     htype = StringProperty()
+
+    @classmethod
+    def poll(self, context):
+        return context.object and context.object.MhHuman
 
     def execute(self, context):
         setObjectMode(context)

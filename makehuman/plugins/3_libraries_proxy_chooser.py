@@ -12,7 +12,7 @@ Proxy mesh library
 
 **Authors:**           Marc Flerackers
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -41,10 +41,8 @@ count or geometry adapted to special cases.
 """
 
 import gui3d
-import mh
 import proxychooser
 import filechooser as fc
-import os
 import proxy
 
 
@@ -52,28 +50,11 @@ class ProxyFileSort(fc.FileSort):
 
     def __init__(self):
         super(ProxyFileSort, self).__init__()
-        self.meta = {}
-
-    def fields(self):
-        return list(super(ProxyFileSort, self).fields()) + ["faces"]
-
-    def sortFaces(self, filenames):
-        self.updateMeta(filenames)
-        decorated = [(self.meta[filename]['faces'], i, filename) for i, filename in enumerate(filenames)]
-        decorated.sort()
-        return [filename for gender, i, filename in decorated]
-
-    def updateMeta(self, filenames):
-        for filename in filenames:
-            if filename in self.meta:
-                if self.meta[filename]['modified'] < os.path.getmtime(filename):
-                    self.meta[filename] = self.getMeta(filename)
-            else:
-                self.meta[filename] = self.getMeta(filename)
+        self.metaFields = ["faces"]
 
     def getMeta(self, filename):
         meta = {}
-        meta['modified'] = os.path.getmtime(filename)
+
         faces = 0
         try:
             from codecs import open
@@ -93,7 +74,7 @@ class ProxyFileSort(fc.FileSort):
 class ProxyTaskView(proxychooser.ProxyChooserTaskView):
 
     def __init__(self, category):
-        super(ProxyTaskView, self).__init__(category, 'proxymeshes', tabLabel = 'Topologies')
+        super(ProxyTaskView, self).__init__(category, 'proxymeshes', tabLabel = 'Topologies', tagFilter = True, descriptionWidget = True)
 
     def getObjectLayer(self):
         return 4
@@ -102,19 +83,11 @@ class ProxyTaskView(proxychooser.ProxyChooserTaskView):
         return "proxy"
 
     def getFileExtension(self):
-        return 'proxy'
-
-    def proxySelected(self, pxy, obj):
-        self.human.setProxy(pxy)
-        self.human.genitalsProxy = pxy
-
-    def proxyDeselected(self, pxy, obj):
-        self.human.genitalsObj = None
-        self.human.genitalsProxy = None
+        return ['mhpxy', 'proxy']
 
     def onShow(self, event):
         super(ProxyTaskView, self).onShow(event)
-        if gui3d.app.settings.get('cameraAutoZoom', True):
+        if gui3d.app.getSetting('cameraAutoZoom'):
             gui3d.app.setGlobalCamera()
 
     def selectProxy(self, mhclofile):
@@ -134,18 +107,18 @@ class ProxyTaskView(proxychooser.ProxyChooserTaskView):
             self.signalChange()
             return
 
-        if mhclofile not in self._proxyCache:
-            pxy = proxy.loadProxy(self.human,
-                                  mhclofile,
-                                  type=self.proxyName.capitalize())
-            self._proxyCache[mhclofile] = pxy
-        else:
-            pxy = self._proxyCache[mhclofile]
+        pxy = proxy.loadProxy(self.human,
+                              mhclofile,
+                              type=self.proxyName.capitalize())
 
+        # Override z_depth and mesh priority to the same as human mesh
+        pxy.z_depth = self.human.getSeedMesh().priority
         mesh,obj = pxy.loadMeshAndObject(self.human)
 
         self.human.setProxy(pxy)
-        self.human.updateProxyMesh()
+
+        if self.descriptionWidget:
+            self.descrLbl.setText(pxy.description)
 
         # Add to selection
         self.selectedProxies.append(pxy)

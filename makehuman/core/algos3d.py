@@ -10,9 +10,9 @@ MakeHuman 3D Transformation functions.
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Manuel Bastioni, Marc Flerackers
+**Authors:**           Manuel Bastioni, Marc Flerackers, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -97,9 +97,9 @@ class Target(object):
 
         try:
             self._load(self.name)
-        except:
+        except Exception as e:
             self.verts = []
-            log.error('Unable to open %s', name)
+            log.error('Unable to open %s (%s)', name, e)
             return
 
         self.faces = obj.getFacesForVertices(self.verts)
@@ -107,12 +107,28 @@ class Target(object):
     def __repr__(self):
         return ( "<Target %s>" % (os.path.basename(self.name)) )
 
+    @property
+    def license(self):
+        if hasattr(self, '_license'):
+            return self._license
+        elif Target.npzfile is not None and 'targets/targets.license' in Target.npzfile:
+            license = defaultTargetLicense()
+            return license.fromNumpyString(Target.npzfile['targets/targets.license'])
+        else:
+            return defaultTargetLicense()
+
+    def setLicense(self, license):
+        self._license = license
+
     def _load_text(self, name):
+        import makehuman
         data = []
+        license = defaultTargetLicense()
         with open(name, 'rU') as fd:
             for line in fd:
                 line = line.strip()
                 if line.startswith('#'):
+                    license.updateFromComment(line)
                     continue
                 translationData = line.split()
                 if len(translationData) != 4:
@@ -124,6 +140,8 @@ class Target(object):
         raw = np.asarray(data, dtype=Target.dtype)
         self.verts = raw['index']
         self.data = raw['vector']
+        if license.isCustomized():
+            self.setLicense(license)
 
     def _load_binary_archive(self, name):
         """
@@ -133,22 +151,27 @@ class Target(object):
         bname = os.path.splitext(name)[0]
         iname = '%s.index' % bname
         vname = '%s.vector' % bname
+        lname = '%s.license' % bname
         if os.path.isfile(name) and Target.npztime < os.path.getmtime(name):
             log.message('compiled file newer than archive: %s', name)
-            raise RuntimeError()
+            raise RuntimeError('compiled file newer than archive: %s' % name)
         if iname not in Target.npzfile:
             log.message('compiled file missing: %s', iname)
-            raise RuntimeError()
+            raise RuntimeError('compiled file missing: %s' % iname)
         if vname not in Target.npzfile:
             log.message('compiled file missing: %s', vname)
-            raise RuntimeError()
+            raise RuntimeError('compiled file missing: %s' % vname)
         self.verts = Target.npzfile[iname]
         self.data = Target.npzfile[vname] * 1e-3
+        if lname in Target.npzfile:
+            import makehuman
+            self._license = defaultTargetLicense().fromNumpyString(Target.npzfile[lname])
 
     def _load_binary_files(self, name):
         """
         Load target from individual .bin file
         """
+        # TODO no longer used, to be removed
         bname = os.path.splitext(name)[0]
         iname = '%s.index.npy' % bname
         vname = '%s.vector.npy' % bname
@@ -195,7 +218,12 @@ class Target(object):
             vector = np.ascontiguousarray(np.round(self.data * 1e3), dtype=np.int16)
             np.save(iname, index)
             np.save(vname, vector)
-            return iname, vname
+            if hasattr(self, '_license'):
+                lname = '%s.license.npy' % bname
+                license = np.ascontiguousarray(self._license.toNumpyString())
+                np.save(lname, license)
+                return iname, vname, lname
+            return iname, vname, None
         except StandardError, _:
             log.error('error saving %s', name)
 
@@ -208,7 +236,7 @@ class Target(object):
             self._load_text(name)
         logger.debug('loaded target %s', name)
 
-    def apply(self, obj, morphFactor, update=True, calcNormals=True, faceGroupToUpdateName=None, scale=(1.0,1.0,1.0)):
+    def apply(self, obj, morphFactor, update=True, calcNormals=True, faceGroupToUpdateName=None, scale=(1.0,1.0,1.0), animatedMesh=None):
         self.morphFactor = morphFactor
 
         if len(self.verts):
@@ -235,7 +263,22 @@ class Target(object):
                 # Adding the translation vector
 
                 scale = np.array(scale) * morphFactor
-                obj.coord[dstVerts] += self.data[srcVerts] * scale[None,:]
+                if animatedMesh is not None:
+                    # Pose the direction in which the target is applied, for fast
+                    # approximate modeling of a posed model
+                    import animation
+                    vertBoneMapping = animatedMesh.getBoundMesh(obj.name)[1]
+                    if not vertBoneMapping.isCompiled(4):
+                        vertBoneMapping.compileData(animatedMesh.getBaseSkeleton(), 4)
+                    animationTrack = animatedMesh.getActiveAnimation()
+                    if not animationTrack.isBaked():
+                        animationTrack.bake(animatedMesh.getBaseSkeleton())
+                    poseData = animatedMesh.getPoseState()
+                    obj.coord[dstVerts] += animation.skinMesh( \
+                                  self.data[srcVerts] * scale[None,:], 
+                                  vertBoneMapping.compiled(4)[dstVerts], poseData )
+                else:
+                    obj.coord[dstVerts] += self.data[srcVerts] * scale[None,:]
                 obj.markCoords(dstVerts, coor=True)
 
             if calcNormals:
@@ -289,8 +332,18 @@ def getTarget(obj, targetPath):
     _targetBuffer[targetPath] = target
     return target
 
+def refreshCachedTarget(targetPath):
+    """
+    Invalidate the cache for the specified target, so that it will be reloaded
+    next time it is requested.
+    Generally this only has effect if the target was loaded from an ascii file,
+    not from npz archive.
+    """
+    targetPath = canonicalPath(targetPath)
+    if targetPath in _targetBuffer:
+        del _targetBuffer[targetPath]
 
-def loadTranslationTarget(obj, targetPath, morphFactor, faceGroupToUpdateName=None, update=1, calcNorm=1, scale=[1.0,1.0,1.0]):
+def loadTranslationTarget(obj, targetPath, morphFactor, faceGroupToUpdateName=None, update=1, calcNorm=1, scale=[1.0,1.0,1.0], animatedMesh=None):
     """
     This function retrieves a set of translation vectors and applies those
     translations to the specified vertices of the mesh object. This set of
@@ -337,6 +390,13 @@ def loadTranslationTarget(obj, targetPath, morphFactor, faceGroupToUpdateName=No
         *int flag*. A flag to indicate whether the normals are to be recalculated (1/true)
         or not (0/false).
 
+    scale:
+        *float*. Scale the target offsets with this vector. Defaults to unit vector.
+
+    animatedMesh:
+        *AnimatedMesh*. Posed state of the basemesh with which the target should 
+        be transformed before being applied.
+
     """
 
     if not (morphFactor or update):
@@ -344,7 +404,7 @@ def loadTranslationTarget(obj, targetPath, morphFactor, faceGroupToUpdateName=No
 
     target = getTarget(obj, targetPath)
 
-    target.apply(obj, morphFactor, update, calcNorm, faceGroupToUpdateName, scale)
+    target.apply(obj, morphFactor, update, calcNorm, faceGroupToUpdateName, scale, animatedMesh)
 
 def saveTranslationTarget(obj, targetPath, groupToSave=None, epsilon=0.001):
     """
@@ -399,8 +459,8 @@ def saveTranslationTarget(obj, targetPath, groupToSave=None, epsilon=0.001):
 
         if nVertsExported == 0:
             log.warning('Zero verts exported in file %s', targetPath)
-    except:
-        log.error('Unable to open %s', targetPath)
+    except Exception as e:
+        log.error('Unable to open %s (%s)', targetPath, e)
         return None
 
 
@@ -428,3 +488,14 @@ def resetObj(obj, update=None, calcNorm=None):
         obj.update()
     if calcNorm:
         obj.calcNormals()
+
+def defaultTargetLicense():
+    """
+    Default license for targets, shared for all targets that do not specify
+    their own custom license, which is useful for saving storage space as this
+    license is globally referenced by and applies to the majority of targets.
+    """
+    import makehuman
+    return makehuman.getAssetLicense( {"license": "AGPL3 (http://www.makehuman.org/doc/node/makehuman_mesh_license.html)",
+                                       "author": "Manuel Bastioni",
+                                       "copyright": "2014 Manuel Bastioni (mb@makehuman.org)"} )

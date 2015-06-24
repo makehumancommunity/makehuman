@@ -23,7 +23,7 @@
 # Product Home Page:   http://www.makehuman.org/
 # Code Home Page:      https://bitbucket.org/MakeHuman/makehuman/
 # Authors:             Thomas Larsson
-# Script copyright (C) MakeHuman Team 2001-2014
+# Script copyright (C) MakeHuman Team 2001-2015
 # Coding Standards:    See http://www.makehuman.org/node/165
 
 
@@ -129,7 +129,12 @@ class CArmature:
             _,terminal = self.chainEnd(pb)
             _,tail,_ = getHeadTailDir(terminal)
             limbs.append((tail[0], pb))
-        limbs.sort()
+        try:
+            limbs.sort()
+        except TypeError:
+            string = "Children of hips incorrectly located. X-coordinates:\n"
+            string += "".join(["  %s: %f\n" % (pb.name, x) for (x,pb) in limbs])
+            raise MocapError(string)
         _,rightLeg = limbs[0]
         _,spine = limbs[1]
         _,leftLeg = limbs[2]
@@ -235,7 +240,7 @@ class CArmature:
             hand = hands[0]
             print("  hand%s:" % suffix, hand.name)
             if upperarm.bone.length < hand.bone.length:
-                bnames = ["shoulder"+suffix] + bnames
+                bnames = ["shoulder"+suffix, ""] + bnames[1:]
         self.findTerminal(shoulder, bnames)
 
 

@@ -10,7 +10,7 @@
 
 **Authors:**           Marc Flerackers
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -44,7 +44,7 @@ import proxychooser
 class HairTaskView(proxychooser.ProxyChooserTaskView):
 
     def __init__(self, category):
-        super(HairTaskView, self).__init__(category, 'hair')
+        super(HairTaskView, self).__init__(category, 'hair', tagFilter = True, descriptionWidget = False)
 
     def getObjectLayer(self):
         #return 3
@@ -58,7 +58,7 @@ class HairTaskView(proxychooser.ProxyChooserTaskView):
 
     def onShow(self, event):
         super(HairTaskView, self).onShow(event)
-        if gui3d.app.settings.get('cameraAutoZoom', True):
+        if gui3d.app.getSetting('cameraAutoZoom'):
             gui3d.app.setFaceCamera()
 
 

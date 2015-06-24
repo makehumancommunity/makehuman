@@ -23,7 +23,7 @@
 # Product Home Page:   http://www.makehuman.org/
 # Code Home Page:      https://bitbucket.org/MakeHuman/makehuman/
 # Authors:             Thomas Larsson
-# Script copyright (C) MakeHuman Team 2001-2014
+# Script copyright (C) MakeHuman Team 2001-2015
 # Coding Standards:    See http://www.makehuman.org/node/165
 
 
@@ -132,6 +132,7 @@ def findSrcArmature(context, rig):
         selectAndSetRestPose(rig, scn)
         amt.findArmature(rig)
         t_pose.autoTPose(rig, scn)
+        t_pose.defineTPose(rig)
         _sourceArmatures["Automatic"] = amt
         amt.display("Source")
 

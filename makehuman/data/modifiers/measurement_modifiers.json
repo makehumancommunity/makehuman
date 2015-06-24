@@ -1,32 +1,32 @@
 [
   { "group": "measure",
     "modifiers": [
-      {"target": "measure-neckcirc", "min": "decrease", "max": "increase"},
-      {"target": "measure-neckheight", "min": "decrease", "max": "increase"},
+      {"target": "measure-neck-circ", "min": "decr", "max": "incr"},
+      {"target": "measure-neck-height", "min": "decr", "max": "incr"},
 
-      {"target": "measure-upperarm", "min": "decrease", "max": "increase"},
-      {"target": "measure-upperarmlenght", "min": "decrease", "max": "increase"},
+      {"target": "measure-upperarm-circ", "min": "decr", "max": "incr"},
+      {"target": "measure-upperarm-length", "min": "decr", "max": "incr"},
 
-      {"target": "measure-lowerarmlenght", "min": "decrease", "max": "increase"},
-      {"target": "measure-wrist", "min": "decrease", "max": "increase"},
+      {"target": "measure-lowerarm-length", "min": "decr", "max": "incr"},
+      {"target": "measure-wrist-circ", "min": "decr", "max": "incr"},
 
-      {"target": "measure-frontchest", "min": "decrease", "max": "increase"},
-      {"target": "measure-bust", "min": "decrease", "max": "increase"},
-      {"target": "measure-underbust", "min": "decrease", "max": "increase"},
-      {"target": "measure-waist", "min": "decrease", "max": "increase"},
-      {"target": "measure-napetowaist", "min": "decrease", "max": "increase"},
-      {"target": "measure-waisttohip", "min": "decrease", "max": "increase"},
-      {"target": "measure-shoulder", "min": "decrease", "max": "increase"},
+      {"target": "measure-frontchest-dist", "min": "decr", "max": "incr"},
+      {"target": "measure-bust-circ", "min": "decr", "max": "incr"},
+      {"target": "measure-underbust-circ", "min": "decr", "max": "incr"},
+      {"target": "measure-waist-circ", "min": "decr", "max": "incr"},
+      {"target": "measure-napetowaist-dist", "min": "decr", "max": "incr"},
+      {"target": "measure-waisttohip-dist", "min": "decr", "max": "incr"},
+      {"target": "measure-shoulder-dist", "min": "decr", "max": "incr"},
 
-      {"target": "measure-hips", "min": "decrease", "max": "increase"},
+      {"target": "measure-hips-circ", "min": "decr", "max": "incr"},
 
-      {"target": "measure-upperlegheight", "min": "decrease", "max": "increase"},
-      {"target": "measure-thighcirc", "min": "decrease", "max": "increase"},
+      {"target": "measure-upperleg-height", "min": "decr", "max": "incr"},
+      {"target": "measure-thigh-circ", "min": "decr", "max": "incr"},
 
-      {"target": "measure-lowerlegheight", "min": "decrease", "max": "increase"},
-      {"target": "measure-calf", "min": "decrease", "max": "increase"},
-
-      {"target": "measure-ankle", "min": "decrease", "max": "increase"}
+      {"target": "measure-lowerleg-height", "min": "decr", "max": "incr"},
+      {"target": "measure-calf-circ", "min": "decr", "max": "incr"},
+      {"target": "measure-knee-circ", "min": "decr", "max": "incr"},
+      {"target": "measure-ankle-circ", "min": "decr", "max": "incr"}
     ]
   }
 ]

@@ -23,7 +23,7 @@
 # Product Home Page:   http://www.makehuman.org/
 # Code Home Page:      https://bitbucket.org/MakeHuman/makehuman/
 # Authors:             Thomas Larsson
-# Script copyright (C) MakeHuman Team 2001-2014
+# Script copyright (C) MakeHuman Team 2001-2015
 # Coding Standards:    See http://www.makehuman.org/node/165
 
 #
@@ -52,8 +52,8 @@ from bpy_extras.io_utils import ImportHelper
 from bpy.props import *
 
 from .simplify import simplifyFCurves, rescaleFCurves
-from .t_pose import setTPose, getStoredBonePose
 from .utils import *
+from . import t_pose
 
 
 class CAnimation:
@@ -83,13 +83,9 @@ class CAnimation:
 
     def setTPose(self, scn):
         selectAndSetRestPose(self.srcRig, scn)
-        setTPose(self.srcRig, scn)
+        t_pose.setTPose(self.srcRig, scn)
         selectAndSetRestPose(self.trgRig, scn)
-        if isMakeHumanRig(self.trgRig) and scn.McpMakeHumanTPose:
-            tpose = "target_rigs/makehuman_tpose.json"
-        else:
-            tpose = None
-        setTPose(self.trgRig, scn, filename=tpose)
+        t_pose.setTPose(self.trgRig, scn)
         for banim in self.boneAnims.values():
             banim.insertTPoseFrame()
         scn.frame_set(0)
@@ -184,18 +180,18 @@ class CBoneAnim:
 
 
     def insertTPoseFrame(self):
-        mat = getStoredBonePose(self.trgBone)
+        mat = t_pose.getStoredBonePose(self.trgBone)
         self.insertKeyFrame(mat, 0)
 
 
     def getTPoseMatrix(self):
         self.aMatrix =  self.srcBone.matrix.inverted() * self.trgBone.matrix
         if not isRotationMatrix(self.trgBone.matrix):
-            halt
+            print("* WARNING *\nTarget %s not rotation matrix:\n%s" % (self.trgBone.name, self.trgBone.matrix))
         if not isRotationMatrix(self.srcBone.matrix):
-            halt
+            print("* WARNING *\nSource %s not rotation matrix:\n%s" % (self.srcBone.name, self.srcBone.matrix))
         if not isRotationMatrix(self.aMatrix):
-            halt
+            print("* WARNING *\nA %s not rotation matrix:\n%s" % (self.trgBone.name, self.aMatrix.matrix))
 
 
     def retarget(self, frame):
@@ -330,16 +326,16 @@ def retargetAnimation(context, srcRig, trgRig):
 
     startProgress("Retargeting")
     scn = context.scene
-    setMhxIk(trgRig, True, True, False)
+    setMhxIk(trgRig, True, True, 0.0)
     frames = getActiveFrames(srcRig)
     nFrames = len(frames)
-    scn.objects.active = trgRig
+    reallySelect(trgRig, scn)
     if trgRig.animation_data:
         trgRig.animation_data.action = None
     scn.update()
 
     if isRigify(trgRig):
-        setRigifyFKIK(trgRig, 0)
+        setRigifyFKIK(trgRig, 0.0)
 
     try:
         scn.frame_current = frames[0]
@@ -353,6 +349,7 @@ def retargetAnimation(context, srcRig, trgRig):
 
     target.ensureTargetInited(scn)
     boneAssoc = target.getTargetArmature(trgRig, scn)
+    disconnectHips(trgRig, boneAssoc)
     anim = CAnimation(srcRig, trgRig, boneAssoc, scn)
     anim.setTPose(scn)
 
@@ -379,6 +376,14 @@ def retargetAnimation(context, srcRig, trgRig):
     clearCategory()
     endProgress("Retargeted %s --> %s" % (srcRig.name, trgRig.name))
 
+
+def disconnectHips(rig, boneAssoc):
+    for bname,mname in boneAssoc:
+        if mname == "hips":
+            bpy.ops.object.mode_set(mode='EDIT')
+            rig.data.edit_bones[bname].use_connect = False
+            bpy.ops.object.mode_set(mode='POSE')
+            return
 
 #
 #   changeTargetData(rig, scn):
@@ -474,7 +479,7 @@ def loadRetargetSimplify(context, filepath):
     trgRig = context.object
     data = changeTargetData(trgRig, scn)
     try:
-        clearMcpProps(trgRig)
+        #clearMcpProps(trgRig)
         srcRig = load.readBvhFile(context, filepath, scn, False)
         try:
             load.renameAndRescaleBvh(context, srcRig, trgRig)
@@ -518,6 +523,7 @@ class VIEW3D_OT_NewRetargetMhxButton(bpy.types.Operator):
         scn = context.scene
         data = changeTargetData(trgRig, scn)
         rigList = list(context.selected_objects)
+
         try:
             target.getTargetArmature(trgRig, scn)
             for srcRig in rigList:
@@ -546,6 +552,10 @@ class VIEW3D_OT_LoadAndRetargetButton(bpy.types.Operator, ImportHelper):
     filename_ext = ".bvh"
     filter_glob = StringProperty(default="*.bvh", options={'HIDDEN'})
     filepath = StringProperty(name="File Path", description="Filepath used for importing the BVH file", maxlen=1024, default="")
+
+    @classmethod
+    def poll(self, context):
+        return (context.object and context.object.type == 'ARMATURE')
 
     def execute(self, context):
         if self.problems:

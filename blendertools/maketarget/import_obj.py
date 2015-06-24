@@ -10,7 +10,7 @@
 
 **Authors:**           Thomas Larsson
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/external_tools_license.html)
 
@@ -79,7 +79,6 @@ def importBaseMhclo(context, filepath=None):
     ob.ObjFile = mh.proxy.obj_file
     ob.MhHuman = True
     print("Base object imported")
-    print(mh.proxy)
     return ob
 
 
@@ -88,8 +87,7 @@ def importBaseMhclo(context, filepath=None):
 #   Simple obj importer which reads only verts, faces, and texture verts
 #----------------------------------------------------------
 
-def importObj(filepath, context):
-    global BMeshAware
+def importObj(filepath, context, addBasisKey=True):
     scn = context.scene
     obname = utils.nameFromPath(filepath)
     fp = open(filepath, "rU")
@@ -145,24 +143,14 @@ def importObj(filepath, context):
     me.update()
     ob = bpy.data.objects.new(obname, me)
 
-    try:
-        me.polygons
-        BMeshAware = True
-        print("Using BMesh")
-    except:
-        BMeshAware = False
-        print("Not using BMesh")
-
     if texverts:
-        if BMeshAware:
-            addUvLayerBMesh(obname, me, texverts, texfaces)
-        else:
-            addUvLayerNoBMesh(obname, me, texverts, texfaces)
+        addUvLayerBMesh(obname, me, texverts, texfaces)
 
     scn.objects.link(ob)
     ob.select = True
     scn.objects.active = ob
-    ob.shape_key_add(name="Basis")
+    if addBasisKey:
+        ob.shape_key_add(name="Basis")
     bpy.ops.object.shade_smooth()
     return ob
 

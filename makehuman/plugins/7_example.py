@@ -10,7 +10,7 @@
 
 **Authors:**           Manuel Bastioni, Marc Flerackers
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -103,7 +103,7 @@ class ExampleTaskView(gui3d.TaskView):
         # By default a slider goes from 0.0 to 1.0, and the initial position will be 0.0 unless specified
 
         # We want the slider to start from the middle
-        self.aSlider = box.addWidget(gui.Slider(value=0.5, label='Slider %.2f'))
+        self.aSlider = box.addWidget(gui.Slider(value=0.5, label=['Slider',' %.2f']))
 
         self.aSliderLabel = box.addWidget(gui.TextView('Value is 0.5'))
 
@@ -121,7 +121,7 @@ class ExampleTaskView(gui3d.TaskView):
 
         self.aTextEdit = box.addWidget(gui.TextEdit(text='Some text'))
         
-        self.meshSlider = box.addWidget(gui.Slider(value=0.5, label='Mesh distort %0.2f'))
+        self.meshSlider = box.addWidget(gui.Slider(value=0.5, label=['Mesh distort',' %0.2f']))
         
         self.isMeshStored = False
         @self.meshSlider.mhEvent

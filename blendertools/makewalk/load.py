@@ -23,7 +23,7 @@
 # Product Home Page:   http://www.makehuman.org/
 # Code Home Page:      https://bitbucket.org/MakeHuman/makehuman/
 # Authors:             Thomas Larsson
-# Script copyright (C) MakeHuman Team 2001-2014
+# Script copyright (C) MakeHuman Team 2001-2015
 # Coding Standards:    See http://www.makehuman.org/node/165
 
 
@@ -170,7 +170,7 @@ def readBvhFile(context, filepath, scn, scan):
             amt = bpy.data.armatures.new("BvhAmt")
             rig = bpy.data.objects.new("BvhRig", amt)
             scn.objects.link(rig)
-            scn.objects.active = rig
+            reallySelect(rig, scn)
             scn.update()
             bpy.ops.object.mode_set(mode='EDIT')
             bpy.ops.object.mode_set(mode='EDIT')
@@ -222,7 +222,7 @@ def readBvhFile(context, filepath, scn, scan):
                 frameTime = float(words[2])
                 frameFactor = int(1.0/(scn.render.fps*frameTime) + 0.49)
                 if defaultSS:
-                    ssFactor = frameFactor
+                    ssFactor = frameFactor if frameFactor > 0 else 1
                 startFrame *= ssFactor
                 endFrame *= ssFactor
                 status = Frames
@@ -371,7 +371,7 @@ def renameBones(srcRig, scn):
     srcBones = []
     trgBones = {}
 
-    scn.objects.active = srcRig
+    reallySelect(srcRig, scn)
     scn.update()
     bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.object.mode_set(mode='EDIT')
@@ -442,9 +442,9 @@ def renameBvhRig(srcRig, filepath):
 def deleteSourceRig(context, rig, prefix):
     ob = context.object
     scn = context.scene
-    scn.objects.active = rig
+    reallySelect(rig, scn)
     bpy.ops.object.mode_set(mode='OBJECT')
-    scn.objects.active = ob
+    reallySelect(ob, scn)
     scn.objects.unlink(rig)
     if rig.users == 0:
         bpy.data.objects.remove(rig)
@@ -465,8 +465,13 @@ def deleteSourceRig(context, rig, prefix):
 def rescaleRig(scn, trgRig, srcRig):
     if not scn.McpAutoScale:
         return
-    upleg = getTrgBone('thigh.L', trgRig)
-    trgScale = upleg.length
+    if isDefaultRig(trgRig):
+        upleg1 = trgRig.data.bones["upperleg01.L"]
+        upleg2 = trgRig.data.bones["upperleg02.L"]
+        trgScale = upleg1.length + upleg2.length
+    else:
+        upleg = getTrgBone('thigh.L', trgRig)
+        trgScale = upleg.length
     srcScale = srcRig.data.bones['thigh.L'].length
     scale = trgScale/srcScale
     print("Rescale %s with factor %f" % (srcRig.name, scale))
@@ -505,7 +510,7 @@ def renameAndRescaleBvh(context, srcRig, trgRig):
 
     from . import t_pose
     scn = context.scene
-    scn.objects.active = srcRig
+    reallySelect(srcRig, scn)
     scn.update()
     #(srcRig, srcBones, action) =  renameBvhRig(rig, filepath)
     target.getTargetArmature(trgRig, scn)

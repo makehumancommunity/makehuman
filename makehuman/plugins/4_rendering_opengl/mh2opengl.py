@@ -12,7 +12,7 @@ Internal OpenGL Renderer Functions.
 
 **Authors:**           Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -50,6 +50,8 @@ import image_operations as imgop
 from progress import Progress
 import numpy as np
 
+# TODO perhaps these settings should be saved in settings.ini as well to remember them
+
 def Render(settings):
     progress = Progress.begin()
     
@@ -73,7 +75,7 @@ def Render(settings):
         lmap = imgop.compose([lmapR, lmapG, lmap])
         if not diffuse.isEmpty:
             progress(0.7, 0.8, "Combining textures")
-            lmap = imgop.resized(lmap, diffuse.width, diffuse.height)
+            lmap = imgop.resized(lmap, diffuse.width, diffuse.height, filter=image.FILTER_BILINEAR)
             progress(0.8, 0.9)
             lmap = imgop.multiply(lmap, diffuse)
         lmap.sourcePath = "Internal_Renderer_Lightmap_SSS_Texture"
@@ -106,15 +108,10 @@ def Render(settings):
 
         if settings['AA']:
             renderprog(0.4, 0.99, "AntiAliasing")
-            # Resize to 50% using Qt image class
-            qtImg = img.toQImage()
-            del img
-            # Bilinear filtered resize for anti-aliasing
-            scaledImg = qtImg.scaled(width/2, height/2, transformMode = gui.QtCore.Qt.SmoothTransformation)
-            del qtImg
-            img = scaledImg
-            #img = image.Image(scaledImg)    # Convert back to MH image
-            #del scaledImg
+            # Resize to 50% using bi-linear filtering
+            img = img.resized(width/2, height/2, filter=image.FILTER_BILINEAR)
+            # TODO still haven't figured out where components get swapped, but this hack appears to be necessary
+            img.data[:,:,:] = img.data[:,:,(2,1,0,3)]
         renderprog.finish()
 
     if settings['lightmapSSS']:

@@ -10,7 +10,7 @@
 
 **Authors:**           Thomas Larsson
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/external_tools_license.html)
 
@@ -63,7 +63,7 @@ def readDefaultSettings(context, tool):
     for line in fp:
         words = line.split()
         prop = words[0]
-        value = eval(words[1])
+        value = simpleEval(words[1])
         try:
             value = value.replace("%20", " ")
         except AttributeError:
@@ -72,6 +72,34 @@ def readDefaultSettings(context, tool):
             scn[prop] = value
     fp.close()
     return
+
+
+def simpleEval(expr):
+    if expr == "True":
+        return True
+    elif expr == "False":
+        return False
+    elif expr == "None":
+        return None
+    elif expr == "{}":
+        return {}
+    elif expr == "[]":
+        return []
+
+    try:
+        return int(expr)
+    except ValueError:
+        pass
+
+    try:
+        return float(expr)
+    except ValueError:
+        pass
+
+    if expr[0] in ['"',"'"] and expr[-1] == expr[0]:
+        return expr[1:-1]
+
+    raise MHError("Unable to evaluate:\n  %s" % expr)
 
 
 def saveDefaultSettings(context, tool, prefix):

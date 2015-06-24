@@ -1,0 +1,64 @@
+# MakeHuman 3d morphing modelled by Manuel Bastioni
+# Copyright (C) 2015 Manuel Bastioni (mb@makehuman.org)
+# homepage http://www.makehuman.org
+# basemesh hm08
+# license AGPL3 (http://www.makehuman.org/doc/node/makehuman_mesh_license.html)
+#    This file is part of MakeHuman (www.makehuman.org).
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+6786 -.003 .006 0
+6787 -.003 .011 0
+6788 -.008 .007 0
+6789 -.009 .013 0
+6794 0 0 0
+6795 -.004 -.004 0
+6798 0 0 0
+6839 -.007 .017 0
+6840 -.009 .017 0
+6842 -.007 .016 0
+6843 -.017 .023 0
+6845 -.001 .013 0
+6846 -.012 .008 0
+6873 -.005 .003 0
+6874 -.007 .011 0
+6875 -.002 -.002 0
+6876 -.002 -.004 0
+6877 -.012 .017 0
+6878 -.012 .015 0
+6879 -.005 .004 0
+6884 0 0 0
+6885 -.002 .002 0
+6929 -.001 0 0
+6930 -.002 .003 0
+6931 0 0 0
+6932 0 0 0
+6933 -.001 .007 0
+6934 -.007 .011 0
+6935 -.005 .003 0
+6950 -.001 .007 0
+6951 .001 .007 0
+11465 0 0 0
+11466 0 0 0
+11483 0 0 0
+11484 0 .002 0
+11485 0 .003 0
+11492 -.015 .019 0
+11493 -.009 .006 0
+11494 0 -.001 0
+11495 -.001 -.001 0
+11509 0 0 0
+11513 -.013 .020 0
+11514 -.007 .007 0
+11515 -.009 .016 0
+11516 -.002 -.003 0

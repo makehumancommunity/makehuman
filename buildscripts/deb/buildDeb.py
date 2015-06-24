@@ -12,7 +12,7 @@ MakeHuman debian package build script
 
 **Authors:**           Joel Palmius, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -181,8 +181,6 @@ def buildDeb(dest = None):
     shutil.rmtree(exportdir)
   exportInfo = build_prepare.export(sourcePath = hgrootdir, exportFolder = exportdir)
 
-  os.remove(os.path.join(exportdir, 'makehuman', 'blendertools', 'copy2blender.bat'))
-
   scriptdir = os.path.abspath( os.path.join(exportdir, 'makehuman') )    # .. Folder containing makehuman.py (source to package)
   print "Makehuman directory: " + scriptdir
 
@@ -253,7 +251,7 @@ def buildDeb(dest = None):
     print "ERROR did not find data/VERSION file (%s)! Your build is incomplete!! Verify your build_prepare settings." % os.path.join(programdir, 'data', 'VERSION')
     exit(1)
 
-  # Copy files in src bin dir to dest bin dir
+  # Copy files in src bin dir to dest bin dir (copy bash wrapper executable)
   _cp_files(srccontrol, controldir)
 
   hgrev = exportInfo.revision

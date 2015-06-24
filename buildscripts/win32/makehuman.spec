@@ -11,7 +11,7 @@ MakeHuman pyinstaller spec file for Windows build
 
 **Authors:**           Jonas Hauquier, Benjamin A Lau, Joel Palmius
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
 
@@ -38,13 +38,15 @@ package_explicit = False
 package_version = None
 dist_dir = None
 hgpath = "hg"
+hg_root_path = os.path.abspath( os.path.join("..","..") )
 
 def hgRootPath(subpath=""):
     """
     The source location, root folder of the hg repository.
     (we assume cwd is in buildscripts/win32 relative to hg root)
     """
-    return os.path.join('..', '..', subpath)
+    global hg_root_path
+    return os.path.join(hg_root_path, subpath)
 
 def exportPath(subpath=""):
     """
@@ -54,9 +56,9 @@ def exportPath(subpath=""):
     global package_name
     global package_explicit
     if package_explicit:
-        return os.path.join(hgRootPath(), '..', package_name + '_export_win32', subpath)
+        return os.path.abspath(os.path.join(hgRootPath(), '..', package_name + '_export_win32', subpath))
     else:
-        return os.path.join(hgRootPath(), '..', 'mh_export_win32', subpath)
+        return os.path.abspath(os.path.join(hgRootPath(), '..', 'mh_export_win32', subpath))
 
 def distPath(subpath=""):
     """
@@ -64,6 +66,10 @@ def distPath(subpath=""):
     data from export path is copied. This folder will eventually be packaged
     for distribution.
     """
+    global dist_dir
+
+    if not dist_dir is None:
+        return os.path.join(dist_dir, subpath)
     return os.path.join('dist', subpath)
 
 def parseConfig(configPath):
@@ -115,8 +121,7 @@ if os.path.exists(exportPath()):
 i = exportInfo = build_prepare.export(sourcePath = hgRootPath(), exportFolder = exportPath())
 
 # Copy extra windows-specific files to export folder
-shutil.copy(hgRootPath('makehuman/icons/makehuman.ico'), i.applicationPath('makehuman.ico'))
-exportInfo.datas.append(os.path.join(i.rootSubpath, 'makehuman.ico'))
+## no extra files needed
 
 # Create config file for the Qt libraries to be able to load plugins
 # (such as for loading jpg and svg images)
@@ -126,8 +131,7 @@ qtConf.close()
 exportInfo.datas.append(os.path.join(i.rootSubpath, 'qt.conf'))
 
 # Change to the export dir for building
-#os.chdir(exportPath())
-
+os.chdir(exportPath())
 
 VERSION = exportInfo.version
 HGREV = exportInfo.revision
@@ -138,8 +142,7 @@ if exportInfo.isRelease:
 else:
     VERSION_FN= str(HGREV) + '-' + NODEID
 
-
-appExecutable = exportPath( i.mainExecutable )
+appExecutable = exportPath( 'makehuman\makehuman.py' )
 
 a = Analysis([appExecutable] + i.getPluginFiles(),
              pathex= [ exportPath(p) for p in i.pathEx ],
@@ -210,7 +213,7 @@ elif sys.platform == 'win32':
         a.scripts,
         exclude_binaries=True,
         name='makehuman.exe',
-        icon=i.applicationPath('makehuman.ico'),
+        icon=hgRootPath('makehuman/icons/makehuman.ico'),
         debug=False,
         strip=None,
         upx=True,
@@ -222,7 +225,7 @@ elif sys.platform == 'win32':
         strip=None,
         upx=True,
         name='makehuman')
-    target_dir = distPath('makehuman')
+    target_dir = hgRootPath('buildscripts\win32\dist\makehuman')
     if package_explicit and not package_version is None and not package_name is None:
         label = package_name + "-" + package_version
     else:
@@ -239,4 +242,3 @@ elif sys.platform == 'win32':
         base = os.path.basename(zipfilename)
         dest = os.path.join(dist_dir,base)
         os.rename(zipfilename,dest)
-

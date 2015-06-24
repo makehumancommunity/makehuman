@@ -10,7 +10,7 @@
 
 **Authors:**           Marc Flerackers, Glynn Clements
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -47,7 +47,6 @@ from core import G
 import mh
 import log
 import matrix
-import scene
 import image_operations
 from progress import Progress
 
@@ -279,7 +278,7 @@ def fixSeams(img, mesh, border = 1):
     mask = mesh if isinstance(mesh, Image) else mapMask(img.size, mesh)
     img, mask = expand(img, mask, border)
     return (img, mask) if isinstance(mesh, Image) else img
-    
+
 def mapLightingSoft(lightpos = (-10.99, 20.0, 20.0), mesh = None, res = (1024, 1024), border = 1):
     """
     Create a lightmap for the selected human (software renderer).
@@ -291,7 +290,7 @@ def mapLightingSoft(lightpos = (-10.99, 20.0, 20.0), mesh = None, res = (1024, 1
 
     W = res[0]
     H = res[1]
-    
+
     dstImg = mh.Image(width=W, height=H, components=4)
     dstImg.data[...] = 0
 
@@ -333,7 +332,7 @@ def mapLightingGL(lightpos = (-10.99, 20.0, 20.0), mesh = None, res = (1024, 102
     Create a lightmap for the selected human (hardware accelerated).
     """
     progress = Progress() (0)
-    
+
     if mesh is None:
         mesh = G.app.selectedHuman.mesh
 
@@ -424,7 +423,7 @@ def mapSceneLighting(scn, object = None, res = (1024, 1024), border = 1):
     progress.step()
 
     # Lights
-    if (scn.lights):
+    if scn.lights:
         amb = lmap
         lmap = getLightmap(scn.lights[0]).data
         progress.step()
@@ -450,8 +449,8 @@ def mapMask(dimensions = (1024, 1024), mesh = None):
         try:
             if mesh is None:
                 mesh = G.app.selectedHuman.mesh
-            return mh.renderSkin(dimensions, mesh.vertsPerPrimitive, 
-                                 mesh.r_texco, index = mesh.index, 
+            return mh.renderSkin(dimensions, mesh.vertsPerPrimitive,
+                                 mesh.r_texco, index = mesh.index,
                                  clearColor = (0, 0, 0, 0))
         except Exception, e:
             log.debug(e)
@@ -542,7 +541,7 @@ def rasterizeVLines(dstImg, edges, delta):
     del x0
 
     data = dstImg.data[::-1]
-    
+
     progress = Progress(len(y0), None)
     for i in xrange(len(y0)):
         y = np.arange(y0[i], y1[i]) + 0.5
@@ -552,7 +551,7 @@ def rasterizeVLines(dstImg, edges, delta):
 
 def mapUVSoft(mesh = None):
     """
-    Project the UV map topology of the selected human mesh onto a texture 
+    Project the UV map topology of the selected human mesh onto a texture
     (software rasterizer).
     """
     progress = Progress() (0)
@@ -562,7 +561,7 @@ def mapUVSoft(mesh = None):
 
     W = 2048
     H = 2048
-    
+
     dstImg = mh.Image(width=W, height=H, components=3)
     dstImg.data[...] = 0
 
@@ -608,7 +607,7 @@ def mapUVSoft(mesh = None):
 
 def mapUVGL():
     """
-    Project the UV map topology of the selected human mesh onto a texture 
+    Project the UV map topology of the selected human mesh onto a texture
     (hardware accelerated).
     """
     progress = Progress() (0)
@@ -618,7 +617,7 @@ def mapUVGL():
 
     W = 2048
     H = 2048
-    
+
     dstImg = mh.Texture(size=(W,H), components=3)
 
     log.debug("mapUVGL: begin setup")

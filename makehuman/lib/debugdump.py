@@ -10,7 +10,7 @@
 
 **Authors:**           Joel Palmius
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -100,11 +100,13 @@ class DebugDump(object):
         self.write("IS RELEASE VERSION: %s", os.environ['MH_RELEASE'])
         self.write("WORKING DIRECTORY: %s", getpath.pathToUnicode(os.getcwd()))
         self.write("HOME LOCATION: %s", getpath.pathToUnicode(self.home))
-        syspath = ':'.join( [getpath.pathToUnicode(p) for p in sys.path] )
+        syspath = os.path.pathsep.join( [getpath.pathToUnicode(p) for p in sys.path] )
         self.write("PYTHON PATH: %s", syspath)
+        self.write("DLL PATH: %s", os.environ['PATH'])
         version = re.sub(r"[\r\n]"," ", sys.version)
         self.write("SYS.VERSION: %s", version)
         self.write("SYS.PLATFORM: %s", sys.platform)
+        self.write("SYS.EXECUTABLE: %s", sys.executable)
         self.write("PLATFORM.MACHINE: %s", platform.machine())
         self.write("PLATFORM.PROCESSOR: %s", platform.processor())
         self.write("PLATFORM.UNAME.RELEASE: %s", platform.uname()[2])
@@ -136,7 +138,22 @@ class DebugDump(object):
         import qtui
         self.open()
         self.write("PYQT.VERSION: %s", qtui.getQtVersionString())
+        self.write("PYQT.JPG_SUPPORT: %s", "supported" if qtui.supportsJPG() else "not supported")
         self.write("PYQT.SVG_SUPPORT: %s", "supported" if qtui.supportsSVG() else "not supported")
+        py_plugin_path = os.path.pathsep.join( [getpath.pathToUnicode(str(p)) for p in qtui.QtCore.QCoreApplication.libraryPaths()] )
+        self.write("QT.PLUGIN_PATH: %s" % py_plugin_path)
+        qt_plugin_path_env = os.environ['QT_PLUGIN_PATH'] if 'QT_PLUGIN_PATH' in os.environ else ""
+        self.write("QT.PLUGIN_PATH_ENV: %s" % qt_plugin_path_env)
+        qt_conf_present = os.path.isfile(getpath.getSysPath('qt.conf'))
+        if qt_conf_present:
+            from codecs import open
+            f = open(getpath.getSysPath('qt.conf'), "r", encoding="utf-8", errors="replace")
+            qt_conf_content = f.read()
+            qt_conf_content = qt_conf_content.replace('\n', '\n'+(' '*len('QT.CONF: '))).strip()
+            f.close()
+            self.write("QT.CONF: %s" % qt_conf_content)
+        else:
+            self.write("QT.CONF: NOT PRESENT")
         self.close()
 
     def appendMessage(self,message):

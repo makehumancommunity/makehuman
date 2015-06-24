@@ -10,7 +10,7 @@
 
 **Authors:**           Thomas Larsson
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/external_tools_license.html)
 
@@ -40,7 +40,7 @@ import os
 from . import mh
 
 folder = os.path.dirname(__file__)
-baseObjFile = os.path.join(folder, "data", "a8_v74.obj")
+baseObjFile = os.path.join(folder, "data", "base.obj")
 baseMhcloFile = os.path.join(folder, "data", "a8_v69_clothes.mhclo")
 convertMhcloFile = os.path.join(folder, "data", "a8_v69_targets.mhclo")
 

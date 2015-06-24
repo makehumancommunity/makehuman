@@ -2,6 +2,7 @@ syntax: glob
 
 *.npz
 *.pyc
+*.mhpxy
 *~
 *.exe
 *.dll
@@ -17,13 +18,16 @@ makehuman/data/eyelashes
 makehuman/data/genitals
 makehuman/data/hair
 makehuman/data/eyes
+makehuman/data/poses
 makehuman/data/litspheres
 makehuman/data/skins
 makehuman/data/teeth
 makehuman/data/tongue
 makehuman/data/proxymeshes
+makehuman/data/rigs
 makehuman/data/languages/empty.json
 makehuman/data/languages/english_template.json
+makehuman/data/languages/*.missing
 buildscripts/build.conf
 buildscripts/win32/build
 buildscripts/win32/dist
@@ -32,4 +36,6 @@ docs/odt/data
 docs/odt/docexport.xml
 docs/odt/unescaped.xml
 docs/odt/analyze.txt
-
+maketarget-standalone/resources/base.obj
+.build_prepare.out
+.idea

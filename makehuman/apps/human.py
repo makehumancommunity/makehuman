@@ -10,7 +10,7 @@
 
 **Authors:**           Manuel Bastioni, Marc Flerackers, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -41,18 +41,19 @@ import numpy as np
 import algos3d
 import guicommon
 from core import G
-import os
+from progress import Progress
 import events3d
 from getpath import getSysDataPath, canonicalPath
 import log
 import material
+import animation
 
 from makehuman import getBasemeshVersion, getShortVersion, getVersionStr, getVersion
 
-class Human(guicommon.Object):
+
+class Human(guicommon.Object, animation.AnimatedMesh):
 
     def __init__(self, mesh):
-
         guicommon.Object.__init__(self, mesh)
 
         self.hasWarpTargets = False
@@ -69,15 +70,7 @@ class Human(guicommon.Object):
 
         self.maskFaces()
 
-        self._hairProxy = None
-        self._eyesProxy = None
-        self._genitalsProxy = None
-        self.eyebrowsProxy = None
-        self.eyelashesProxy = None
-        self.teethProxy = None
-        self.tongueProxy = None
-
-        self.clothesProxies = {}
+        self._resetProxies()
 
         self.targetsDetailStack = {}  # All details targets applied, with their values
         self.symmetryModeEnabled = False
@@ -90,6 +83,9 @@ class Human(guicommon.Object):
         self.material = material.fromFile(getSysDataPath('skins/default.mhmat'))
         self._defaultMaterial = material.Material().copyFrom(self.material)
 
+        # Init with no user-selected skeleton
+        self.skeleton = None
+
         self._modifiers = dict()
         self._modifier_varMapping = dict()              # Maps macro variable to the modifier group that modifies it
         self._modifier_dependencyMapping = dict()       # Maps a macro variable to all the modifiers that depend on it
@@ -98,9 +94,30 @@ class Human(guicommon.Object):
 
         self.blockEthnicUpdates = False                 # When set to True, changes to race are not normalized automatically
 
+        animation.AnimatedMesh.__init__(self, skel=None, mesh=self.meshData, vertexToBoneMapping=None)
+        # Make sure that shadow vertices are copied
+        self.refreshStaticMeshes()
+
+    def setProxy(self, proxy):
+        oldPxy = self.getProxy()
+        oldPxyMesh = self.getProxyMesh()
+        # Fit to basemesh in rest pose, then pose proxy
+        super(Human, self).setProxy(proxy)
+
+        if oldPxyMesh:
+            self.removeBoundMesh(oldPxyMesh.name)
+        if self.proxy:
+            # Add new mesh and vertex weight assignments
+            self._updateMeshVertexWeights(self.getProxyMesh())
+            self.refreshPose()
+
+        event = events3d.HumanEvent(self, 'proxyChange')
+        event.proxy = 'human'
+        self.callEvent('onChanged', event)
 
     # TODO introduce better system for managing proxies, nothing done for clothes yet
     def setHairProxy(self, proxy):
+        self._swapProxies(self._hairProxy, proxy)
         self._hairProxy = proxy
         event = events3d.HumanEvent(self, 'proxyChange')
         event.proxy = 'hair'
@@ -111,6 +128,7 @@ class Human(guicommon.Object):
     hairProxy = property(getHairProxy, setHairProxy)
 
     def setEyesProxy(self, proxy):
+        self._swapProxies(self._eyesProxy, proxy)
         self._eyesProxy = proxy
         event = events3d.HumanEvent(self, 'proxyChange')
         event.proxy = 'eyes'
@@ -120,15 +138,90 @@ class Human(guicommon.Object):
 
     eyesProxy = property(getEyesProxy, setEyesProxy)
 
-    def setGenitalsProxy(self, proxy):
-        self._genitalsProxy = proxy
+    def setEyebrowsProxy(self, proxy):
+        self._swapProxies(self._eyebrowsProxy, proxy)
+        self._eyebrowsProxy = proxy
         event = events3d.HumanEvent(self, 'proxyChange')
-        event.proxy = 'genitals'
+        event.proxy = 'eyebrows'
         self.callEvent('onChanged', event)
-    def getGenitalsProxy(self):
-        return self._genitalsProxy
+    def getEyebrowsProxy(self):
+        return self._eyebrowsProxy
 
-    genitalsProxy = property(getGenitalsProxy, setGenitalsProxy)
+    eyebrowsProxy = property(getEyebrowsProxy, setEyebrowsProxy)
+
+    def setEyelashesProxy(self, proxy):
+        self._swapProxies(self._eyelashesProxy, proxy)
+        self._eyelashesProxy = proxy
+        event = events3d.HumanEvent(self, 'proxyChange')
+        event.proxy = 'eyelashes'
+        self.callEvent('onChanged', event)
+    def getEyelashesProxy(self):
+        return self._eyelashesProxy
+
+    eyelashesProxy = property(getEyelashesProxy, setEyelashesProxy)
+
+    def setTeethProxy(self, proxy):
+        self._swapProxies(self._teethProxy, proxy)
+        self._teethProxy = proxy
+        event = events3d.HumanEvent(self, 'proxyChange')
+        event.proxy = 'teeth'
+        self.callEvent('onChanged', event)
+    def getTeethProxy(self):
+        return self._teethProxy
+
+    teethProxy = property(getTeethProxy, setTeethProxy)
+
+    def setTongueProxy(self, proxy):
+        self._swapProxies(self._tongueProxy, proxy)
+        self._tongueProxy = proxy
+        event = events3d.HumanEvent(self, 'proxyChange')
+        event.proxy = 'tongue'
+        self.callEvent('onChanged', event)
+    def getTongueProxy(self):
+        return self._tongueProxy
+
+    tongueProxy = property(getTongueProxy, setTongueProxy)
+
+    @property
+    def clothesProxies(self):
+        """
+        Read-only access to the clothes proxies attached to this human
+        """
+        return dict(self._clothesProxies)
+
+    def addClothesProxy(self, proxy):
+        uuid = proxy.getUuid()
+        self._swapProxies(self._clothesProxies.get(uuid, None), proxy)
+        self._clothesProxies[uuid] = proxy
+        event = events3d.HumanEvent(self, 'proxyChange')
+        event.proxy = 'clothes'
+        event.action = 'add'
+        event.proxy_obj = proxy
+        self.callEvent('onChanged', event)
+
+    def removeClothesProxy(self, uuid):
+        self._swapProxies(self._clothesProxies.get(uuid, None), None)
+        event = events3d.HumanEvent(self, 'proxyChange')
+        proxy = None
+        if uuid in self._clothesProxies:
+            proxy = self._clothesProxies[uuid]
+            del self._clothesProxies[uuid]
+        event.proxy = 'clothes'
+        event.action = 'remove'
+        event.proxy_obj = proxy
+        self.callEvent('onChanged', event)
+
+    def _swapProxies(self, oldPxy, newPxy):
+        """
+        Update bound meshes for animation when proxies are changed
+        """
+        # TODO avoid continually reposing when loading mhm file with many proxies
+        if oldPxy:
+            self.removeBoundMesh(oldPxy.object.getSeedMesh().name)
+        if newPxy:
+            # Add new mesh and vertex weight assignments
+            self._updateMeshVertexWeights(newPxy.object.getSeedMesh())
+            self.refreshPose()
 
     def maskFaces(self):
         """
@@ -146,8 +239,23 @@ class Human(guicommon.Object):
         self.meshData.changeFaceMask(self.staticFaceMask)
         self.meshData.updateIndexBufferFaces()
 
+    def hasGenitals(self):
+        """
+        Determines whether the human model has genitals geometry.
+        Genitals geometry is present if the proxy (alt. topology)
+        has the tag "genitals" assinged (convention).
+        """
+        if self.isProxied():
+            if 'genitals' in self.proxy.tags or 'Genitals' in self.proxy.tags:
+                return True
+        return False
 
     def traceStack(self, all=True):
+        """
+        Debug helper
+        :param all:
+        :return:
+        """
         import warpmodifier
         log.debug("human.targetsDetailStack:")
         for path,value in self.targetsDetailStack.items():
@@ -165,6 +273,12 @@ class Human(guicommon.Object):
                 log.debug("  %s%s: %s" % (stars, path, value))
 
     def traceBuffer(self, all=True, vertsToList=0):
+        """
+        Debug helper
+        :param all:
+        :param vertsToList:
+        :return:
+        """
         import warpmodifier
         log.debug("algos3d.targetBuffer:")
         for path,target in algos3d._targetBuffer.items():
@@ -186,7 +300,6 @@ class Human(guicommon.Object):
         for obj in [
             self.hairObj,
             self.eyesObj,
-            self.genitalsObj,
             self.eyebrowsObj,
             self.eyelashesObj,
             self.teethObj,
@@ -204,7 +317,6 @@ class Human(guicommon.Object):
         for pxy in [
             self.hairProxy,
             self.eyesProxy,
-            self.genitalsProxy,
             self.eyebrowsProxy,
             self.eyelashesProxy,
             self.teethProxy,
@@ -214,17 +326,15 @@ class Human(guicommon.Object):
                 proxies.append(pxy)
         if includeHumanProxy and self.proxy:
             proxies.append(self.proxy)
-        for pxy in self.clothesProxies.values():
+        for pxy in self._clothesProxies.values():
             proxies.append(pxy)
         return proxies
-
 
     def getTypedSimpleProxies(self, ptype):
         ptype = ptype.capitalize()
         table = {
             'Hair' :     self.hairProxy,
             'Eyes' :     self.eyesProxy,
-            'Genitals' : self.genitalsProxy,
             'Eyebrows' : self.eyebrowsProxy,
             'Eyelashes': self.eyelashesProxy,
             'Teeth':     self.teethProxy,
@@ -241,7 +351,7 @@ class Human(guicommon.Object):
     def getObjects(self, excludeZeroFaceObjs=False):
         """
         All mesh objects that belong to this human, usually everything that has
-        to be exported. This can replace exportutils.collect
+        to be exported.
 
         If excludeZeroFaceObjs is set True, the result will not contain objects
         for which the meshes have 0 visible faces (all faces are masked)
@@ -296,13 +406,20 @@ class Human(guicommon.Object):
             if obj:
                 obj.setSolid(*args, **kwargs)
 
-    def setSubdivided(self, *args, **kwargs):
-        if not guicommon.Object.setSubdivided(self, *args, **kwargs):
-            return
-        for obj in self.getProxyObjects():
-            if obj:
-                obj.setSubdivided(*args, **kwargs)
-        self.callEvent('onChanged', events3d.HumanEvent(self, 'smooth'))
+    def setSubdivided(self, flag, *args, **kwargs):
+        if flag != self.isSubdivided():
+            proxies = [obj for obj in self.getProxyObjects() if obj]
+            progress = Progress([len(self.mesh.coord)] +
+                                [len(obj.mesh.coord) for obj in proxies])
+
+            guicommon.Object.setSubdivided(self, flag, *args, **kwargs)
+            progress.step()
+
+            for obj in proxies:
+                obj.setSubdivided(flag, *args, **kwargs)
+                progress.step()
+
+            self.callEvent('onChanged', events3d.HumanEvent(self, 'smooth'))
 
     def setGender(self, gender, updateModifier = True):
         """
@@ -391,7 +508,7 @@ class Human(guicommon.Object):
         else:
             return self.MID_AGE + ((self.MAX_AGE - self.MID_AGE) * 2) * (self.getAge() - 0.5)
 
-    def setAgeYears(self, ageYears):
+    def setAgeYears(self, ageYears, updateModifier=True):
         """
         Set age in amount of years.
         """
@@ -402,7 +519,7 @@ class Human(guicommon.Object):
             age = (ageYears - self.MIN_AGE) / ((self.MID_AGE - self.MIN_AGE) * 2)
         else:
             age = ( (ageYears - self.MID_AGE) / ((self.MAX_AGE - self.MID_AGE) * 2) ) + 0.5
-        self.setAge(age)
+        self.setAge(age, updateModifier)
 
     def _setAgeVals(self):
         """
@@ -718,7 +835,7 @@ class Human(guicommon.Object):
         if self.getAsian() > self.getAfrican():
             if self.getAsian() > self.getCaucasian():
                 return 'asian'
-            elif getCaucasian() > self.getAsian():
+            elif self.getCaucasian() > self.getAsian():
                 return 'caucasian'
             else:
                 return None
@@ -746,19 +863,46 @@ class Human(guicommon.Object):
         name = canonicalPath(name)
         return self.targetsDetailStack.get(name, 0.0)
 
+    def updateMacroModifiers(self):
+        """Update the targetsDetailStack for this human
+        determined by the macromodifier target combinations."""
+        for modifier in self.modifiers:
+            if modifier.isMacro():
+                modifier.setValue(modifier.getValue())
+
     @property
     def modifiers(self):
+        """
+        All modifier objects attached to this human.
+        """
         return self._modifiers.values()
 
     @property
     def modifierNames(self):
+        """
+        The names of all modifiers available.
+        """
         return self._modifiers.keys()
 
+    def getModifierNames(self):
+        """
+        The names of all modifiers available.
+        """
+        return self.modifierNames
+
     def getModifier(self, name):
+        """
+        Retrieve a modifier by name.
+        Use '.modifierNames' to retrieve the names of all available modifiers.
+        """
         return self._modifiers[name]
 
     @property
     def modifierGroups(self):
+        """
+        The names of all groups in which the modifiers of this human are
+        classified.
+        """
         return self._modifier_groups.keys()
 
     def getModifiersByGroup(self, groupName):
@@ -772,7 +916,7 @@ class Human(guicommon.Object):
             log.warning('Modifier group %s does not exist.', groupName)
             return []
 
-    def getModiersByType(self, classType):
+    def getModifiersByType(self, classType):
         """
         Retrieve all modifiers of a specified class type.
         """
@@ -785,6 +929,9 @@ class Human(guicommon.Object):
         return self._modifier_type_cache[classType.__name__]
 
     def addModifier(self, modifier):
+        """
+        Attach a new modifier to this human.
+        """
         #log.debug("Adding modifier of type %s: %s", type(modifier), modifier.fullName)
 
         if modifier.fullName in self._modifiers:
@@ -831,7 +978,14 @@ class Human(guicommon.Object):
             if modifier.groupName not in self._modifier_dependencyMapping[dep]:
                 self._modifier_dependencyMapping[dep].append(modifier.groupName)
 
+            if modifier.isMacro():
+                self.updateMacroModifiers()
+
     def getModifierDependencies(self, modifier, filter = None):
+        """
+        Retrieve all modifiers that should be updated if the specified modifier
+        is updated. (forward dependency mapping)
+        """
         result = set()
 
         if len(modifier.macroDependencies) > 0:
@@ -854,7 +1008,8 @@ class Human(guicommon.Object):
     def getModifiersAffectedBy(self, modifier, filter = None):
         """
         Reverse dependency search. Returns all modifier groups to update that
-        are affected by the change in the specified modifier.
+        are affected by the change in the specified modifier. (reverse 
+        dependency mapping)
         """
         result = self._modifier_dependencyMapping.get(modifier.macroVariable, [])
         if filter is None:
@@ -904,66 +1059,97 @@ class Human(guicommon.Object):
         """
         return set( [t[0] for m in self.modifiers for t in m.targets] )
 
-    def applyAllTargets(self, progressCallback=None, update=True):
+    def getRestposeCoordinates(self):
+        """
+        Retrieve human seed mesh vertex coordinates in rest pose.
+        """
+        return self.getRestCoordinates(self.meshData.name)
+
+    def getJointPosition(self, jointName, rest_coord=True):
+        """
+        Get the position of a joint from the human mesh.
+        This position is determined by the center of the joint helper with the
+        specified name.
+        """
+        if self.getBaseSkeleton():
+            return self.getBaseSkeleton().getJointPosition(jointName, self, rest_coord)
+        else:
+            import skeleton
+            return skeleton._getHumanJointPosition(self, jointName, rest_coord)
+
+    def getJoints(self):
+        """
+        Return names of joint positions defined as joint helpers on the basemesh.
+        """
+        return [ fg_name for fg_name in self.meshData.getFaceGroups() if fg_name.startswith('joint-') ]
+
+    def applyAllTargets(self, update=True):
         """
         This method applies all targets, in function of age and sex
 
         **Parameters:** None.
-
-        progressCallback will automatically be set to G.app.progress if the
-        progressCallback parameter is left to None. Set it to False to disable
-        progress reporting.
         """
-        if progressCallback is None:
-            progressCallback = G.app.progress
+        progress = Progress()
 
-        if progressCallback:
-            progressCallback(0.0)
+        progress(0.0, 0.5)
 
-        # First call progressCalback (which often processes events) before resetting mesh
+        # First call progress callback (which often processes events) before resetting mesh
         # so that mesh is not drawn in its reset state
-        algos3d.resetObj(self.meshData)
+        algos3d.resetObj(self.meshData)  # Reset mesh is in rest pose
 
-        progressVal = 0.0
-        progressIncr = 0.5 / (len(self.targetsDetailStack) + 1)
-
+        # Apply targets to seedmesh coordinates
+        itprog = Progress(len(self.targetsDetailStack))
         for (targetPath, morphFactor) in self.targetsDetailStack.iteritems():
             algos3d.loadTranslationTarget(self.meshData, targetPath, morphFactor, None, 0, 0)
+            itprog.step()
 
-            progressVal += progressIncr
-            if progressCallback:
-                progressCallback(progressVal)
-
+        # Make sure self.getRestposeCoordinates is up-to-date directly (required for proxy fitting)
+        self._updateOriginalMeshCoords(self.meshData.name, self.meshData.coord)
 
         # Update all verts
         self.getSeedMesh().update()
         self.updateProxyMesh()
-        if self.isSubdivided():
-            self.updateSubdivisionMesh()
-            if progressCallback:
-                progressCallback(0.7)
-            self.mesh.calcNormals()
-            if progressCallback:
-                progressCallback(0.8)
-            if update:
-                self.mesh.update()
-        else:
-            self.meshData.calcNormals(1, 1)
-            if progressCallback:
-                progressCallback(0.8)
-            if update:
-                self.meshData.update()
-
-        if progressCallback:
-            progressCallback(1.0)
 
         #self.traceStack(all=True)
         #self.traceBuffer(all=True, vertsToList=0)
 
+        # Update skeleton joint positions (before human is posed)
+        if self.getBaseSkeleton():
+            log.debug("Updating skeleton joint positions")
+            self.getBaseSkeleton().updateJoints(self.meshData)
+            self.resetBakedAnimations()    # TODO decide whether we require calling this manually, or whether animatedMesh automatically tracks updates of skeleton and updates accordingly
+
+        if self.skeleton:
+            self.skeleton.dirty = True
+
         self.callEvent('onChanged', events3d.HumanEvent(self, 'targets'))
 
+        # Restore pose, and shadow copy of vertex positions 
+        # (We do this after onChanged event so that proxies are already updated)
+        self.refreshStaticMeshes()  # TODO document: an external plugin that modifies the rest pose verts outside of an onHumanChang(ing/ed) event should explicitly call this method on the human
+
+        # Update subdivision mesh
+        if self.isSubdivided():
+            progress(0.5, 0.7)
+            self.updateSubdivisionMesh()
+            progress(0.7, 0.8)
+            self.mesh.calcNormals()
+            progress(0.8, 0.99)
+            if update:
+                self.mesh.update()
+        else:
+            progress(0.5, 0.8)
+            if not self.isPosed():
+                # Update seedmesh normals (if not already done so by posing)
+                self.meshData.calcNormals(1, 1)
+                progress(0.8, 0.99)
+                if update:
+                    self.meshData.update()
+
+        progress(1.0)
+
     def getPartNameForGroupName(self, groupName):
-        # TODO is this still used anywhere
+        # TODO is this still used anywhere?
         for k in self.bodyZones:
             if k in groupName:
                 return k
@@ -1047,6 +1233,10 @@ class Human(guicommon.Object):
     def resetMeshValues(self):
         self.setSubdivided(False, update=False)
         self.setDefaultValues()
+        self.resetBoundMeshes()
+        self._resetProxies()  # TODO does not properly take care of calling removeObject
+        self.removeAnimations(update=False)
+        self.resetToRestPose(update=False)
 
         self.targetsDetailStack = {}
 
@@ -1054,6 +1244,20 @@ class Human(guicommon.Object):
 
         self.callEvent('onChanging', events3d.HumanEvent(self, 'reset'))
         self.callEvent('onChanged', events3d.HumanEvent(self, 'reset'))
+
+    def _resetProxies(self):
+        """
+        Remove all attached proxies.
+        For internal use only: does not emit events
+        """
+        self._hairProxy = None
+        self._eyesProxy = None
+        self._eyebrowsProxy = None
+        self._eyelashesProxy = None
+        self._teethProxy = None
+        self._tongueProxy = None
+
+        self._clothesProxies = {}
 
     def getMaterial(self):
         return super(Human, self).getMaterial()
@@ -1065,21 +1269,141 @@ class Human(guicommon.Object):
 
     material = property(getMaterial, setMaterial)
 
-    def getJointPosition(self, jointName):
+    def setSkeleton(self, skel):
+        """Change user-selected skeleton.
         """
-        Get the position of a joint from the human mesh.
-        This position is determined by the center of the joint helper with the
-        specified name.
-        """
-        fg = self.meshData.getFaceGroup("joint-"+jointName)
-        if not fg:
-            raise RuntimeError("Human does not contain a joint helper with name %s" % ("joint-"+jointName))
-        verts = self.meshData.getCoords(self.meshData.getVerticesForGroups([fg.name]))
-        return verts.mean(axis=0)
+        self.callEvent('onChanging', events3d.HumanEvent(self, 'user-skeleton'))
+        self.skeleton = skel
+        if self.skeleton:
+            self.skeleton.dirty = True
+        self.callEvent('onChanged', events3d.HumanEvent(self, 'user-skeleton'))
 
-    def load(self, filename, update=True, progressCallback=None):
+    def getSkeleton(self):
+        """The user-selected skeleton. The skeleton that is shown on the human
+        and that will be used for exporting.
+        """
+        if self.skeleton:
+            if not hasattr(self.skeleton, 'dirty') or self.skeleton.dirty:
+                # Update joint positions and copy bone orientations (normals) from base skeleton
+                self.skeleton.updateJoints(self.meshData, ref_skel=self.getBaseSkeleton())
+                self.skeleton.dirty = False
+        return self.skeleton
+
+    def setBaseSkeleton(self, skel):
+        """Set the reference skeleton, used for poses and weighting vertices.
+        Generally this skeleton is initialized once and does not change.
+        """
+        self.callEvent('onChanging', events3d.HumanEvent(self, 'skeleton'))
+        animation.AnimatedMesh.setBaseSkeleton(self, skel)
+        self.updateVertexWeights(skel.getVertexWeights() if skel else None)
+        self.callEvent('onChanged', events3d.HumanEvent(self, 'skeleton'))
+        self.refreshPose()
+
+    def updateVertexWeights(self, vertexWeights):
+        for mName in self.getBoundMeshes():  # Meshes are unsubdivided
+            # TODO perhaps this identity by name is not strong enough, or enforce unique names in AnimatedMesh
+            if vertexWeights is None: 
+                animation.AnimatedMesh.updateVertexWeights(self, mName, vertexWeights)
+            else:
+                # Update proxy mesh weights
+                self._updateMeshVertexWeights(self.getBoundMesh(mName)[0], vertexWeights)
+
+    def resetBoundMeshes(self):
+        """
+        Remove all bound meshes except for the basemesh.
+        """
+        for mName in self.getBoundMeshes():
+            if mName != self.getSeedMesh().name:
+                self.removeBoundMesh(mName)
+
+    def _updateMeshVertexWeights(self, mesh, bodyVertexWeights=None):
+        obj = mesh.object
+
+        if not obj:
+            log.debug("Removing detached mesh %s from animated mesh" % mesh.name)
+            self.removeBoundMesh(mesh.name)
+            return
+
+        if self.getBaseSkeleton():
+            if bodyVertexWeights is None:
+                bodyVertexWeights = self.getVertexWeights()
+
+            if mesh == self.meshData:
+                # Use vertex weights for human body
+                weights = bodyVertexWeights
+            elif obj.proxy:
+                # Determine vertex weights for proxy (map to unfiltered proxy mesh)
+                weights = obj.proxy.getVertexWeights(bodyVertexWeights)
+            else:
+                # We assume this bound mesh is manually handled by an external plugin
+                return
+        else:
+            weights = None
+
+        if not self.containsBoundMesh(mesh):
+            animation.AnimatedMesh.addBoundMesh(self, mesh, weights)
+        else:
+            animation.AnimatedMesh.updateVertexWeights(self, mesh.name, weights)
+
+
+    def getVertexWeights(self, skel=None):
+        """Get vertex weights for human body. Optionally remap them to fit a
+        user-selected skeleton. If no skel argument is provided, the weights
+        for the base skeleton are returned.
+        Returns a VertexBoneWeights object.
+        """
+        if not self.getBaseSkeleton():
+            return None
+
+        _, bodyWeights = self.getBoundMesh(self.meshData.name)
+
+        if skel and skel.name != self.getBaseSkeleton().name:
+            return skel.getVertexWeights(bodyWeights, force_remap=False)
+        return bodyWeights
+
+    def setPosed(self, posed):
+        event = events3d.HumanEvent(self, 'poseState')
+        event.state = posed
+        self.callEvent('onChanging', event)
+        if self.skeleton:
+            self.skeleton.dirty = True
+        animation.AnimatedMesh.setPosed(self, posed)
+        self.callEvent('onChanged', event)
+
+    def setActiveAnimation(self, anim_name):
+        event = events3d.HumanEvent(self, 'poseChange')
+        event.pose = anim_name
+        self.callEvent('onChanging', event)
+        if self.skeleton:
+            self.skeleton.dirty = True
+        super(Human, self).setActiveAnimation(anim_name)
+        self.callEvent('onChanged', event)
+
+    def refreshPose(self, updateIfInRest=False):
+        # TODO investigate why at startup this is called so often
+        event = events3d.HumanEvent(self, 'poseRefresh')
+        self.callEvent('onChanging', event)
+        if self.skeleton:
+            self.skeleton.dirty = True
+        super(Human, self).refreshPose(updateIfInRest)
+        if self.isSubdivided():
+            self.updateSubdivisionMesh()
+            self.mesh.calcNormals()
+            self.mesh.update()
+        self.callEvent('onChanged', event)
+
+    def load(self, filename, update=True, strict=False):
         from codecs import open
+
+        def _get_version(lineData):
+            for l in lineData:
+                l = l.split()
+                if l[0] == 'version':
+                    return l[1]
+            return None
+
         log.message("Loading human from MHM file %s.", filename)
+        progress = Progress()(0.0, 0.8)
         event = events3d.HumanEvent(self, 'load')
         event.path = filename
         self.callEvent('onChanging', event)
@@ -1089,31 +1413,81 @@ class Human(guicommon.Object):
 
         subdivide = False
 
-        # TODO perhaps create progress indicator that depends on line count of mhm file?
         f = open(filename, 'rU', encoding="utf-8")
 
         for lh in G.app.loadHandlers.values():
-            lh(self, ['status', 'started'])
+            try:
+                lh(self, ['status', 'started'], strict)
+            except:
+                if strict:
+                    e = sys.exc_info()
+                    raise e[0], e[1], e[2]
+                else:
+                    log.warning("Exception while starting MHM loading.", exc_info=True)
 
-        for data in f.readlines():
-            lineData = data.split()
+        lines = f.readlines()
 
+        def _load_property(lineData):
+            try:
+                _do_load_property(lineData)
+            except:
+                if strict:
+                    e = sys.exc_info()
+                    raise e[0], e[1], e[2]
+                else:
+                    log.warning("Exception while loading MHM property.", exc_info=True)
+
+        def _do_load_property(lineData):
             if len(lineData) > 0 and not lineData[0] == '#':
                 if lineData[0] == 'version':
                     log.message('Version %s', lineData[1])
                 elif lineData[0] == 'tags':
                     for tag in lineData[1:]:
                         log.debug('Tag %s', tag)
+                elif lineData[0] == 'modifier':
+                    try:
+                        self.getModifier(lineData[1]).setValue(float(lineData[2]), skipDependencies=True)
+                    except KeyError:
+                        log.warning('Unknown modifier specified in MHM file: %s', lineData[1])
+                elif lineData[0] == 'camera':
+                    rot = map(float, lineData[1:3]) + [0.0]
+                    trans = map(float, lineData[3:6])
+                    zoom = float(lineData[6])
+                    G.app.modelCamera.setRotation(rot)
+                    G.app.modelCamera.translation[:3] = trans[:3]
+                    G.app.modelCamera.setZoomFactor(zoom)
                 elif lineData[0] == 'subdivide':
-                    subdivide = lineData[1].lower() in ['true', 'yes']
+                    G.app.selectedHuman._mhm_do_subdivide = lineData[1].lower() in ['true', 'yes']
                 elif lineData[0] in G.app.loadHandlers:
-                    G.app.loadHandlers[lineData[0]](self, lineData)
+                    G.app.loadHandlers[lineData[0]](self, lineData, strict)
                 else:
-                    log.debug('Could not load %s', lineData)
+                    if strict:
+                        raise RuntimeError('Unknown property in MHM file: %s' % (lineData, ))
+                    else:
+                        log.warning('Unknown property in MHM file: %s', lineData)
+
+        version = _get_version(lines)
+        if version != getShortVersion(noSub=True):
+            log.message("MHM file is of version %s, attempting to load with backward compatibility")
+            import compat
+            compat.loadMHM(version, lines, _load_property, strict)
+        else:
+            fprog = Progress(len(lines))
+            for data in lines:
+                lineData = data.strip().split()
+                _load_property(lineData)
+                fprog.step()
 
         log.debug("Finalizing MHM loading.")
         for lh in set(G.app.loadHandlers.values()):
-            lh(self, ['status', 'finished'])
+            try:
+                lh(self, ['status', 'finished'], strict)
+            except:
+                if strict:
+                    e = sys.exc_info()
+                    raise e[0], e[1], e[2]
+                else:
+                    log.warning("Exception while finishing MHM loading.", exc_info=True)
         f.close()
 
         self.blockEthnicUpdates = False
@@ -1122,10 +1496,16 @@ class Human(guicommon.Object):
         self.callEvent('onChanged', event)
 
         if update:
-            self.applyAllTargets(progressCallback)
+            progress(0.8, 0.9)
+            self.applyAllTargets()
 
+        progress(0.9, 0.99)
+        if hasattr(self, '_mhm_do_subdivide'):
+            subdivide = self._mhm_do_subdivide
+            del self._mhm_do_subdivide
         self.setSubdivided(subdivide)
 
+        progress(1.0)
         log.message("Done loading MHM file.")
 
     def save(self, filename, tags):
@@ -1138,8 +1518,37 @@ class Human(guicommon.Object):
 
         f = open(filename, "w", encoding="utf-8")
         f.write('# Written by MakeHuman %s\n' % getVersionStr())
-        f.write('version %s\n' % getShortVersion())
+        f.write('version %s\n' % getShortVersion(noSub=True))
         f.write('tags %s\n' % tags)
+        cam_rot = list(G.app.modelCamera.getRotation()[:2])
+        cam_trans = list(G.app.modelCamera.translation[:3])
+        cam_zoom = [G.app.modelCamera.zoomFactor]
+        f.write('camera %s %s %s %s %s %s\n' % tuple(cam_rot + cam_trans + cam_zoom))
+
+        for modifier in self.modifiers:
+            if modifier.getValue() or modifier.isMacro():
+                f.write('modifier %s %f\n' % (modifier.fullName, modifier.getValue()))
+
+        class SaveWriter(object):
+            def __init__(self, file_obj):
+                self.f = file_obj
+
+            def write(self, text):
+                # Ensure that handlers write lines ending with newline character
+                if not text.endswith("\n"):
+                    text = text+"\n"
+                self.f.write(text)
+
+            def writelines(self, text):
+                # Ensure that handlers write lines ending with newline character
+                if not text.endswith("\n"):
+                    text = text+"\n"
+                self.f.writelines(text)
+
+            def __getattr__(self, attr):
+                return self.f.__getattribute__(attr)
+
+        f = SaveWriter(f)
 
         for handler in G.app.saveHandlers:
             handler(self, f)

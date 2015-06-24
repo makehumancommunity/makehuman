@@ -23,7 +23,7 @@
 # Product Home Page:   http://www.makehuman.org/
 # Code Home Page:      https://bitbucket.org/MakeHuman/makehuman/
 # Authors:             Thomas Larsson
-# Script copyright (C) MakeHuman Team 2001-2014
+# Script copyright (C) MakeHuman Team 2001-2015
 # Coding Standards:    See http://www.makehuman.org/node/165
 
 import bpy
@@ -36,30 +36,9 @@ from mathutils import Quaternion, Matrix
 from .utils import *
 from .io_json import *
 
-
-def setTPoseAsRestPose(context):
-    rig = context.object
-    setTPose(rig, context.scene)
-    if not rig.McpRestTPose:
-        applyRestPose(context, 1.0)
-        invertQuats(rig)
-        rig.McpRestTPose = True
-
-
-def setDefaultPoseAsRestPose(context):
-    rig = context.object
-    clearTPose(rig)
-    if rig.McpRestTPose:
-        applyRestPose(context, 0.0)
-        invertQuats(rig)
-        rig.McpRestTPose = False
-
-
-def invertQuats(rig):
-    for pb in rig.pose.bones:
-        quat = Quaternion((pb.McpQuatW, pb.McpQuatX, pb.McpQuatY, pb.McpQuatZ))
-        pb.McpQuatW, pb.McpQuatX, pb.McpQuatY, pb.McpQuatZ = quat.inverted()
-
+#------------------------------------------------------------------
+#   Define current pose as rest pose
+#------------------------------------------------------------------
 
 def applyRestPose(context, value):
     rig = context.object
@@ -69,7 +48,7 @@ def applyRestPose(context, value):
         if ob.type != 'MESH':
             continue
 
-        scn.objects.active = ob
+        reallySelect(ob, scn)
         if ob != context.object:
             raise StandardError("Context switch did not take:\nob = %s\nc.ob = %s\nc.aob = %s" %
                 (ob, context.object, context.active_object))
@@ -91,20 +70,20 @@ def applyRestPose(context, value):
                     ob.McpArmatureModifier = mod.name
                     break
 
-    scn.objects.active = rig
+    reallySelect(rig, scn)
     bpy.ops.object.mode_set(mode='POSE')
     bpy.ops.pose.armature_apply()
     for ob in children:
         name = ob.McpArmatureModifier
-        scn.objects.active = ob
+        reallySelect(ob, scn)
         mod = ob.modifiers.new(name, 'ARMATURE')
         mod.object = rig
         mod.use_vertex_groups = True
         bpy.ops.object.modifier_move_up(modifier=name)
         #setShapeKey(ob, name, value)
 
-    scn.objects.active = rig
-    print("Created T-pose")
+    reallySelect(rig, scn)
+    print("Applied pose as rest pose")
 
 
 def setShapeKey(ob, name, value):
@@ -113,6 +92,25 @@ def setShapeKey(ob, name, value):
     skey = ob.data.shape_keys.key_blocks[name]
     skey.value = value
 
+
+class VIEW3D_OT_McpRestCurrentPoseButton(bpy.types.Operator):
+    bl_idname = "mcp.rest_current_pose"
+    bl_label = "Current Pose => Rest Pose"
+    bl_description = "Change rest pose to current pose"
+    bl_options = {'UNDO'}
+
+    def execute(self, context):
+        try:
+            initRig(context)
+            applyRestPose(context, 1.0)
+            print("Set current pose to rest pose")
+        except MocapError:
+            bpy.ops.mcp.error('INVOKE_DEFAULT')
+        return{'FINISHED'}
+
+#------------------------------------------------------------------
+#   Automatic T-Pose
+#------------------------------------------------------------------
 
 TPose = {
     "upper_arm.L" : (0, 0, -pi/2, 'XYZ'),
@@ -135,6 +133,7 @@ TPose = {
 }
 
 def autoTPose(rig, scn):
+    print("Auto T-pose", rig.name)
     selectAndSetRestPose(rig, scn)
     for pb in rig.pose.bones:
         try:
@@ -164,155 +163,106 @@ def autoTPose(rig, scn):
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.object.mode_set(mode='POSE')
 
-        quat = pb.matrix_basis.to_quaternion()
-        setBoneTPose(pb, quat)
+#------------------------------------------------------------------
+#   Set current pose to T-Pose
+#------------------------------------------------------------------
 
-        rig.McpTPoseLoaded = True
-        rig.McpRestTPose = False
-
-
-def setTPose(rig, scn, filename=None, reload=True):
-    if reload or not rig.McpTPoseLoaded:
-        if isMakeHumanRig(rig):
-            filename = "target_rigs/makehuman_tpose.json"
-        elif filename is None:
+def setTPose(rig, scn, filename=None, reload=False):
+    if reload or not rig.McpTPoseDefined:
+        if filename is None:
             filename = rig.McpTPoseFile
-        hasFile = loadTPose(rig, filename)
+        hasFile = loadPose(rig, filename)
         if not hasFile:
             autoTPose(rig, scn)
-    if rig.McpRestTPose:
-        setRestPose(rig)
+        defineTPose(rig)
     else:
-        setStoredPose(rig)
+        getStoredTPose(rig)
 
 
-def clearTPose(rig):
-    if not rig.McpTPoseLoaded:
-        loadTPose(rig, rig.McpTPoseFile)
-    if rig.McpRestTPose:
-        setStoredPose(rig)
-    else:
-        setRestPose(rig)
+class VIEW3D_OT_McpSetTPoseButton(bpy.types.Operator):
+    bl_idname = "mcp.set_t_pose"
+    bl_label = "Set T-pose"
+    bl_description = "Set current pose to T-pose"
+    bl_options = {'UNDO'}
+
+    def execute(self, context):
+        try:
+            rig = initRig(context)
+            isdefined = rig.McpTPoseDefined
+            setTPose(rig, context.scene)
+            rig.McpTPoseDefined = isdefined
+            print("Pose set to T-pose")
+        except MocapError:
+            bpy.ops.mcp.error('INVOKE_DEFAULT')
+        return{'FINISHED'}
+
+#------------------------------------------------------------------
+#   Set T-Pose
+#------------------------------------------------------------------
+
+def getStoredTPose(rig):
+    for pb in rig.pose.bones:
+        pb.matrix_basis = getStoredBonePose(pb)
 
 
 def getStoredBonePose(pb):
-    try:
-        quat = Quaternion((pb.McpQuatW, pb.McpQuatX, pb.McpQuatY, pb.McpQuatZ))
-    except KeyError:
-        quat = Quaternion()
-    return quat.to_matrix().to_4x4()
-
-
-def setStoredPose(rig):
-    for pb in rig.pose.bones:
-        pb.matrix_basis = getStoredBonePose(pb)
+        try:
+            quat = Quaternion((pb.McpQuatW, pb.McpQuatX, pb.McpQuatY, pb.McpQuatZ))
+        except KeyError:
+            quat = Quaternion()
+        return quat.to_matrix().to_4x4()
 
 
 def addTPoseAtFrame0(rig, scn):
     from .source import getSourceTPoseFile
 
     scn.frame_current = 0
-    if rig.McpTPoseLoaded:
-        setTPose(rig, scn)
+    if rig.McpTPoseDefined:
+        getStoredTPose(rig)
     elif getSourceTPoseFile():
         rig.McpTPoseFile = getSourceTPoseFile()
-        setTPose(rig, scn)
+        defineTPose(rig)
     else:
         setRestPose(rig)
+        defineTPose(rig)
+
     for pb in rig.pose.bones:
         if pb.rotation_mode == 'QUATERNION':
             pb.keyframe_insert('rotation_quaternion', group=pb.name)
         else:
             pb.keyframe_insert('rotation_euler', group=pb.name)
 
+#------------------------------------------------------------------
+#   Define current pose as T-Pose
+#------------------------------------------------------------------
 
-def getCurrentPose(rig):
-    return [(pb, pb.matrix_basis.copy()) for pb in rig.pose.bones]
-
-
-def setCurrentPose(pose):
-    for pb,mat in pose:
-        pb.matrix_basis = mat
-
-
-class VIEW3D_OT_McpRestTPoseButton(bpy.types.Operator):
-    bl_idname = "mcp.rest_t_pose"
-    bl_label = "T-pose => Rest Pose"
-    bl_description = "Change rest pose to T-pose"
-    bl_options = {'UNDO'}
-
-    def execute(self, context):
-        try:
-            initRig(context)
-            setTPoseAsRestPose(context)
-        except MocapError:
-            bpy.ops.mcp.error('INVOKE_DEFAULT')
-        return{'FINISHED'}
+def defineTPose(rig):
+    for pb in rig.pose.bones:
+        quat = pb.matrix_basis.to_quaternion()
+        pb.McpQuatW = quat.w
+        pb.McpQuatX = quat.x
+        pb.McpQuatY = quat.y
+        pb.McpQuatZ = quat.z
+    rig.McpTPoseDefined = True
 
 
-class VIEW3D_OT_McpRestDefaultPoseButton(bpy.types.Operator):
-    bl_idname = "mcp.rest_default_pose"
-    bl_label = "Default Pose => Rest Pose"
-    bl_description = "Change rest pose to default pose"
-    bl_options = {'UNDO'}
-
-    def execute(self, context):
-        try:
-            initRig(context)
-            setDefaultPoseAsRestPose(context)
-        except MocapError:
-            bpy.ops.mcp.error('INVOKE_DEFAULT')
-        return{'FINISHED'}
-
-
-class VIEW3D_OT_McpRestCurrentPoseButton(bpy.types.Operator):
-    bl_idname = "mcp.rest_current_pose"
-    bl_label = "Current Pose => Rest Pose"
-    bl_description = "Change rest pose to current pose"
-    bl_options = {'UNDO'}
-
-    def execute(self, context):
-        try:
-            pose = getCurrentPose(context.object)
-            initRig(context)
-            setCurrentPose(pose)
-            applyRestPose(context, 1.0)
-            print("Set current pose to rest pose")
-        except MocapError:
-            bpy.ops.mcp.error('INVOKE_DEFAULT')
-        return{'FINISHED'}
-
-
-class VIEW3D_OT_McpSetTPoseButton(bpy.types.Operator):
-    bl_idname = "mcp.set_t_pose"
-    bl_label = "Set T-pose"
-    bl_description = "Set pose to stored T-pose"
+class VIEW3D_OT_McpDefineTPoseButton(bpy.types.Operator):
+    bl_idname = "mcp.define_t_pose"
+    bl_label = "Define T-pose"
+    bl_description = "Define T-pose as current pose"
     bl_options = {'UNDO'}
 
     problems = ""
 
     def execute(self, context):
-        from .retarget import changeTargetData, restoreTargetData
-        from .fkik import setRigifyFKIK
-
         if self.problems:
             return{'FINISHED'}
-
-        rig = context.object
-        scn = context.scene
-        print("EXE")
-        #data = changeTargetData(rig, scn)
         try:
-            initRig(context)
-            if isRigify(rig):
-                setRigifyFKIK(rig, 0)
-            setTPose(rig, scn)
-            print("Set T-pose")
+            rig = initRig(context)
+            defineTPose(rig)
+            print("T-pose defined as current pose")
         except MocapError:
             bpy.ops.mcp.error('INVOKE_DEFAULT')
-        finally:
-            pass
-            #restoreTargetData(rig, data)
         return{'FINISHED'}
 
     def invoke(self, context, event):
@@ -321,24 +271,36 @@ class VIEW3D_OT_McpSetTPoseButton(bpy.types.Operator):
     def draw(self, context):
         drawObjectProblems(self)
 
+#------------------------------------------------------------------
+#   Undefine stored T-pose
+#------------------------------------------------------------------
 
-class VIEW3D_OT_McpClearTPoseButton(bpy.types.Operator):
-    bl_idname = "mcp.clear_t_pose"
-    bl_label = "Clear T-pose"
-    bl_description = "Clear stored T-pose"
+def setRestPose(rig):
+    unit = Matrix()
+    for pb in rig.pose.bones:
+        pb.matrix_basis = unit
+
+
+class VIEW3D_OT_McpUndefineTPoseButton(bpy.types.Operator):
+    bl_idname = "mcp.undefine_t_pose"
+    bl_label = "Undefine T-pose"
+    bl_description = "Remove definition of T-pose"
     bl_options = {'UNDO'}
 
     def execute(self, context):
         try:
-            initRig(context)
-            clearTPose(context.object)
-            print("Cleared T-pose")
+            rig = initRig(context)
+            rig.McpTPoseDefined = False
+            print("Undefined T-pose")
         except MocapError:
             bpy.ops.mcp.error('INVOKE_DEFAULT')
         return{'FINISHED'}
 
+#------------------------------------------------------------------
+#   Load T-pose from file
+#------------------------------------------------------------------
 
-def loadTPose(rig, filename):
+def loadPose(rig, filename):
     if filename:
         filepath = os.path.join(os.path.dirname(__file__), filename)
         filepath = os.path.normpath(filepath)
@@ -348,9 +310,7 @@ def loadTPose(rig, filename):
     else:
         return False
 
-    unit = Matrix()
-    for pb in rig.pose.bones:
-        pb.matrix_basis = unit
+    setRestPose(rig)
 
     for name,value in struct:
         bname = getBoneName(rig, name)
@@ -360,24 +320,25 @@ def loadTPose(rig, filename):
             continue
         quat = Quaternion(value)
         pb.matrix_basis = quat.to_matrix().to_4x4()
-        setBoneTPose(pb, quat)
 
-    rig.McpTPoseLoaded = True
-    rig.McpRestTPose = False
     return True
 
 
-def setBoneTPose(pb, quat):
-    pb.McpQuatW = quat.w
-    pb.McpQuatX = quat.x
-    pb.McpQuatY = quat.y
-    pb.McpQuatZ = quat.z
+def getBoneName(rig, name):
+    if rig.McpIsSourceRig:
+        return name
+    else:
+        pb = getTrgBone(name, rig)
+        if pb:
+            return pb.name
+        else:
+            return ""
 
 
-class VIEW3D_OT_McpLoadTPoseButton(bpy.types.Operator, ImportHelper):
-    bl_idname = "mcp.load_t_pose"
-    bl_label = "Load T-pose"
-    bl_description = "Load T-pose to active rig"
+class VIEW3D_OT_McpLoadPoseButton(bpy.types.Operator, ImportHelper):
+    bl_idname = "mcp.load_pose"
+    bl_label = "Load Pose"
+    bl_description = "Load pose from file"
     bl_options = {'UNDO'}
 
     filename_ext = ".json"
@@ -385,23 +346,24 @@ class VIEW3D_OT_McpLoadTPoseButton(bpy.types.Operator, ImportHelper):
     filepath = StringProperty(name="File Path", description="Filepath to tpose file", maxlen=1024, default="")
 
     def execute(self, context):
-        initRig(context)
-        rig = context.object
+        rig = initRig(context)
         filename = os.path.relpath(self.filepath, os.path.dirname(__file__))
         try:
-            loadTPose(rig, filename)
+            loadPose(rig, filename)
         except MocapError:
             bpy.ops.mcp.error('INVOKE_DEFAULT')
-        print("Loaded T-pose")
-        setTPose(rig, context.scene)
+        print("Loaded pose")
         return{'FINISHED'}
 
     def invoke(self, context, event):
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
+#------------------------------------------------------------------
+#   Save current pose to file
+#------------------------------------------------------------------
 
-def saveTPose(context, filepath):
+def savePose(context, filepath):
     rig = context.object
     struct = []
     for pb in rig.pose.bones:
@@ -424,10 +386,10 @@ def saveTPose(context, filepath):
     saveJson(struct, filepath)
 
 
-class VIEW3D_OT_McpSaveTPoseButton(bpy.types.Operator, ImportHelper):
-    bl_idname = "mcp.save_t_pose"
-    bl_label = "Save T-pose"
-    bl_description = "Save current pose as T-pose"
+class VIEW3D_OT_McpSavePoseButton(bpy.types.Operator, ImportHelper):
+    bl_idname = "mcp.save_pose"
+    bl_label = "Save Pose"
+    bl_description = "Save current pose as .json file"
     bl_options = {'UNDO'}
 
     filename_ext = ".json"
@@ -436,34 +398,38 @@ class VIEW3D_OT_McpSaveTPoseButton(bpy.types.Operator, ImportHelper):
 
     def execute(self, context):
         try:
-            saveTPose(context, self.filepath)
+            savePose(context, self.filepath)
         except MocapError:
             bpy.ops.mcp.error('INVOKE_DEFAULT')
-        print("Saved T-pose")
+        print("Saved current pose")
         return{'FINISHED'}
 
     def invoke(self, context, event):
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
+#------------------------------------------------------------------
+#   Utils
+#------------------------------------------------------------------
 
 def initRig(context):
     from . import target
     from . import source
+    from .fkik import setRigifyFKIK
+
     rig = context.object
+    pose = [(pb, pb.matrix_basis.copy()) for pb in rig.pose.bones]
+
     if rig.McpIsSourceRig:
         source.findSrcArmature(context, rig)
     else:
         target.getTargetArmature(rig, context.scene)
 
+    for pb,mat in pose:
+        pb.matrix_basis = mat
 
-def getBoneName(rig, name):
-    if rig.McpIsSourceRig:
-        return name
-    else:
-        pb = getTrgBone(name, rig)
-        if pb:
-            return pb.name
-        else:
-            return ""
+    if isRigify(rig):
+        setRigifyFKIK(rig, 0.0)
+
+    return rig
 

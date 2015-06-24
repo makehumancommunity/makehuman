@@ -10,7 +10,7 @@
 
 **Authors:**           Thomas Larsson, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -44,9 +44,8 @@ import os.path
 import time
 import codecs
 import log
-
-import gui3d
-import exportutils
+import getpath
+import bvh
 
 from progress import Progress
 
@@ -54,6 +53,7 @@ from . import dae_materials
 from . import dae_controller
 from . import dae_geometry
 from . import dae_node
+from . import dae_animation
 
 #
 #    Size of end bones = 1 mm
@@ -74,16 +74,26 @@ def exportCollada(filepath, config):
     name = config.goodName(os.path.splitext(filename)[0])
 
     progress(0, 0.5, "Preparing")
-    #rawTargets = exportutils.collect.readTargets(human, config)    # TODO what is this used for?
 
-    objects = human.getObjects(excludeZeroFaceObjs=True)
+    objects = human.getObjects(excludeZeroFaceObjs=not config.hiddenGeom)
     # Clone meshes with desired scale and hidden faces/vertices filtered out
-    meshes = [obj.mesh.clone(config.scale, True) for obj in objects]
+    meshes = [obj.mesh.clone(config.scale, filterMaskedVerts=not config.hiddenGeom) for obj in objects]
+
+    if config.hiddenGeom:
+        import numpy as np
+        # Disable the face masking on copies of the input meshes
+        for m in meshes:
+            # Disable the face masking on the mesh
+            face_mask = np.ones(m.face_mask.shape, dtype=bool)
+            m.changeFaceMask(face_mask)
+            m.calcNormals()
+            m.updateIndexBuffer()
 
     # Scale skeleton
     skel = human.getSkeleton()
     if skel:
-        skel = skel.scaled(config.scale)
+        if config.scale != 1:
+            skel = skel.scaled(config.scale)
 
     # TODO a shared method for properly naming meshes would be a good idea
     for mesh in meshes:
@@ -132,11 +142,20 @@ def exportCollada(filepath, config):
         progress(0.7, 0.75, "Exporting controllers")
         dae_controller.writeLibraryControllers(fp, human, meshes, skel, config)
 
+        progress(0.75, 0.8, "Exporting animations")
+        #animations = [human.getAnimation(name) for name in human.getAnimations()]  # TODO distinguish poses from animations
+        if skel and config.facePoseUnits:
+            bvhfile = bvh.load(getpath.getSysDataPath('poseunits/face-poseunits.bvh'), allowTranslation="none")
+            # TODO compensate for rest pose
+            faceunit_anim = bvhfile.createAnimationTrack(skel, name="Expression-Face-PoseUnits")
+            animations = [human.getAnimation(name) for name in human.getAnimations()] + [faceunit_anim]
+            dae_animation.writeLibraryAnimations(fp, human, skel, animations, config)
+
         progress(0.75, 0.9, "Exporting geometry")
         dae_geometry.writeLibraryGeometry(fp, meshes, config)
 
         progress(0.9, 0.99, "Exporting scene")
-        dae_node.writeLibraryVisualScenes(fp, meshes, skel, config)
+        dae_node.writeLibraryVisualScenes(fp, meshes, skel, config, name)
 
         fp.write(
             '  <scene>\n' +

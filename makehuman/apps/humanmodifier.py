@@ -10,7 +10,7 @@
 
 **Authors:**           Marc Flerackers, Glynn Clements, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -128,7 +128,7 @@ class ModifierAction(guicommon.Action):
             else:
                 opposite.setValue( self.modifier.getValue() )
 
-        self.human.applyAllTargets(G.app.progress)
+        self.human.applyAllTargets()
         self.postAction()
         return True
 
@@ -145,7 +145,7 @@ class ModifierAction(guicommon.Action):
                 opposite = self.human.getModifier( self.modifier.getSymmetricOpposite() )
                 opposite.setValue( self.modifier.getValue() )
 
-        self.human.applyAllTargets(G.app.progress)
+        self.human.applyAllTargets()
         self.postAction()
         return True
 
@@ -180,8 +180,8 @@ class Modifier(object):
         self.human = None
 
     def setHuman(self, human):
-        human.addModifier(self)
         self.human = human
+        human.addModifier(self)
 
     @property
     def fullName(self):
@@ -193,7 +193,7 @@ class Modifier(object):
     def getMax(self):
         return 1.0
 
-    def setValue(self, value, skipDependencies = False):
+    def setValue(self, value, skipDependencies=False):
         value = self.clampValue(value)
         factors = self.getFactors(value)
 
@@ -269,7 +269,12 @@ class Modifier(object):
         for target, old, new in zip(self.targets, old_detail, new_detail):
             if new == old:
                 continue
-            algos3d.loadTranslationTarget(self.human.meshData, target[0], new - old, None, 0, 0)
+            if self.human.isPosed():
+                # Apply target with pose transformation
+                animatedMesh = self.human
+            else:
+                animatedMesh = None
+            algos3d.loadTranslationTarget(self.human.meshData, target[0], new - old, None, 0, 0, animatedMesh=animatedMesh)
 
         if skipUpdate:
             # Used for dependency updates (avoid dependency loops and double updates to human)
@@ -325,7 +330,10 @@ class Modifier(object):
         """
         Retrieve the other modifiers of the same type on the human.
         """
-        return [m for m in self.human.getModiersByType(type(self)) if m != self]
+        return [m for m in self.human.getModifiersByType(type(self)) if m != self]
+
+    def isMacro(self):
+        return self.macroVariable is not None
 
     def __str__(self):
         return "%s %s" % (type(self).__name__, self.fullName)
@@ -450,7 +458,7 @@ class ManagedTargetModifier(Modifier):
             value = max( 0.0, value)
         return value
 
-    def setValue(self, value, skipDependencies = False):
+    def setValue(self, value, skipDependencies=False):
         value = self.clampValue(value)
         factors = self.getFactors(value)
 
@@ -664,7 +672,7 @@ def loadModifiers(filename, human):
     import os
     from collections import OrderedDict
     modifiers = []
-    lookup = {}
+    lookup = OrderedDict()
     data = json.load(open(filename, 'rb'), object_pairs_hook=OrderedDict)
     for modifierGroup in data:
         groupName = modifierGroup['group']
@@ -695,6 +703,7 @@ def loadModifiers(filename, human):
     # Attempt to load modifier descriptions
     _tmp = os.path.splitext(filename)
     descFile = _tmp[0]+'_desc'+_tmp[1]
+    hasDesc = OrderedDict([(key,False) for key in lookup.keys()])
     if os.path.isfile(descFile):
         data = json.load(open(descFile, 'rb'), object_pairs_hook=OrderedDict)
         dCount = 0
@@ -703,9 +712,13 @@ def loadModifiers(filename, human):
                 mod = lookup[mName]
                 mod.description = mDesc
                 dCount += 1
+                hasDesc[mName] = True
             except:
                 log.warning("Loaded description for %s but modifier does not exist!", mName)
         log.message("Loaded %s modifier descriptions from file %s", dCount, descFile)
+    for mName, mHasDesc in hasDesc.items():
+        if not mHasDesc:
+            log.warning("No description defined for modifier %s!", mName)
 
     return modifiers
 

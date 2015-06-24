@@ -10,7 +10,7 @@
 
 **Authors:**           Thomas Larsson
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -37,7 +37,7 @@ Fbx utilities
 """
 
 import os
-import math
+from .fbx_utils_bin import *
 
 #--------------------------------------------------------------------
 #   Radians - degrees
@@ -83,6 +83,7 @@ def getId(key):
 #   Paths
 #--------------------------------------------------------------------
 
+# TODO storing global variable is ugly
 def setAbsolutePath(filepath):
     global _AbsPath
     _AbsPath = os.path.dirname(os.path.abspath(filepath))
@@ -107,9 +108,9 @@ def getTextureName(filepath):
     return texfile.replace(".","_")
 
 
-def getMeshName(mesh, skel):
-    if skel and mesh.name == "base.obj":
-        return skel.name
+def getMeshName(mesh, exportname):
+    if mesh.name == "base.obj":
+        return exportname
     else:
         return os.path.splitext(mesh.name)[0]
 
@@ -122,6 +123,7 @@ def writeMatrix(fp, name, mat, pad=""):
         '%s        %s: *16 {\n' % (pad, name) +
         '%s            a: ' % pad)
     for i in range(4):
+        # FBX stores matrices in column-major fashion
         fp.write("%.4f,%.4f,%.4f,%.4f" % (mat[i,0],mat[i,1],mat[i,2],mat[i,3]))
         if i < 3:
             fp.write(',\n%s               ' % pad)
@@ -131,20 +133,33 @@ def writeMatrix(fp, name, mat, pad=""):
 #   Links
 #--------------------------------------------------------------------
 
-def ooLink(fp, child, parent):
+def ooLink(fp, child, parent, config):
     cid,_ = getId(child)
     pid,_ = getId(parent)
+
+    if config.binary:
+        import fbx_binary
+        elem = fbx_binary.get_child_element(fp, 'Connections')
+        fbx_binary.elem_connection(elem, b"OO", cid, pid)
+        return
+
     fp.write(
 '    ;%s, %s\n' % (child, parent) +
 '    C: "OO",%d,%d\n' % (cid, pid) +
 '\n')
 
 
-def opLink(fp, child, parent, channel):
+def opLink(fp, child, parent, channel, config):
     cid,_ = getId(child)
     pid,_ = getId(parent)
+
+    if config.binary:
+        import fbx_binary
+        elem = fbx_binary.get_child_element(fp, 'Connections')
+        fbx_binary.elem_connection(elem, b"OP", cid, pid, channel)
+        return
+
     fp.write(
 '    ;%s, %s\n' % (child, parent) +
 '    C: "OP",%d,%d, "%s"\n' % (cid, pid, channel) +
 '\n')
-

@@ -10,7 +10,7 @@
 
 **Authors:**           Marc Flerackers, Jonas Hauquier, Thomas Larsson
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -54,15 +54,19 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
     def __init__(self, category):
         super(ClothesTaskView, self).__init__(category, 'clothes', multiProxy = True, tagFilter = True)
 
-        #self.taggedClothes = {}
-
-        self.originalHumanMask = self.human.meshData.getFaceMask().copy()
-        self.faceHidingTggl = self.optionsBox.addWidget(gui.CheckBox("Hide faces under clothes"))
+        self.faceHidingTggl = self.optionsBox.addWidget(FaceHideCheckbox("Hide faces under clothes"))
         @self.faceHidingTggl.mhEvent
         def onClicked(event):
             self.updateFaceMasks(self.faceHidingTggl.selected)
+        @self.faceHidingTggl.mhEvent
+        def onMouseEntered(event):
+            self.visualizeFaceMasks(True)
+        @self.faceHidingTggl.mhEvent
+        def onMouseExited(event):
+            self.visualizeFaceMasks(False)
         self.faceHidingTggl.setSelected(True)
 
+        self.oldPxyMats = {}
         self.blockFaceMasking = False
 
     def createFileChooser(self):
@@ -73,13 +77,12 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
         return 10
 
     def proxySelected(self, pxy):
-        uuid = pxy.getUuid()
-        self.human.clothesProxies[uuid] = pxy
+        self.human.addClothesProxy(pxy)
         self.updateFaceMasks(self.faceHidingTggl.selected)
 
     def proxyDeselected(self, pxy, suppressSignal = False):
         uuid = pxy.uuid
-        del self.human.clothesProxies[uuid]
+        self.human.removeClothesProxy(uuid)
         if not suppressSignal:
             self.updateFaceMasks(self.faceHidingTggl.selected)
 
@@ -112,8 +115,6 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
             human.changeVertexMask(None)
 
             proxies = self.getSelection()
-            if self.human.genitalsProxy:
-                proxies.append(self.human.genitalsProxy)
             for pxy in proxies:
                 obj = pxy.object
                 obj.changeVertexMask(None)
@@ -123,9 +124,6 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
         vertsMask = np.ones(human.meshData.getVertexCount(), dtype=bool)
 
         stackedProxies = [human.clothesProxies[uuid] for uuid in reversed(self.getClothesByRenderOrder())]
-        # Mask genitals too
-        if self.human.genitalsProxy:
-            stackedProxies.append( self.human.genitalsProxy )
 
         for pxy in stackedProxies:
             obj = pxy.object
@@ -136,7 +134,7 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
             # Apply accumulated mask from previous clothes layers on this clothing piece
             obj.changeVertexMask(proxyVertMask)
 
-            if pxy.deleteVerts != None and len(pxy.deleteVerts > 0):
+            if pxy.deleteVerts is not None and len(pxy.deleteVerts > 0):
                 log.debug("Loaded %s deleted verts (%s faces) from %s proxy.", np.count_nonzero(pxy.deleteVerts), len(human.meshData.getFacesForVertices(np.argwhere(pxy.deleteVerts)[...,0])),pxy.name)
 
                 # Modify accumulated (basemesh) verts mask
@@ -147,10 +145,14 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
 
     def onShow(self, event):
         super(ClothesTaskView, self).onShow(event)
-        if gui3d.app.settings.get('cameraAutoZoom', True):
+        if gui3d.app.getSetting('cameraAutoZoom'):
             gui3d.app.setGlobalCamera()
 
-    def loadHandler(self, human, values):
+    def onHide(self, event):
+        super(ClothesTaskView, self).onHide(event)
+        self.visualizeFaceMasks(False)
+
+    def loadHandler(self, human, values, strict):
         if values[0] == 'status':
             if values[1] == 'started':
                 # Don't update face masks during loading (optimization)
@@ -166,25 +168,49 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
             self.faceHidingTggl.setChecked(enabled)
             return
 
-        super(ClothesTaskView, self).loadHandler(human, values)
+        super(ClothesTaskView, self).loadHandler(human, values, strict)
 
     def onHumanChanged(self, event):
         super(ClothesTaskView, self).onHumanChanged(event)
         if event.change == 'reset':
-            self.faceHidingTggl.setSelected(True)
-        elif event.change == 'proxy' and \
-             (event.pxy == 'genitals' or event.pxy == 'proxymeshes') and \
+            self.faceHidingTggl.setSelected(True)  # TODO super already reapplies masking before this is reset
+        elif event.change == 'proxy' and event.pxy == 'proxymeshes' and \
              self.faceHidingTggl.selected:
-            # Update face masks if genital proxy was changed
+            # Update face masks if topology was changed
             self.updateFaceMasks(self.faceHidingTggl.selected)
 
     def saveHandler(self, human, file):
         super(ClothesTaskView, self).saveHandler(human, file)
-        file.write('clothesHideFaces %s\n' % self.faceHidingTggl.selected)
+        file.write('clothesHideFaces %s\n' % str(self.faceHidingTggl.selected))
 
     def registerLoadSaveHandlers(self):
         super(ClothesTaskView, self).registerLoadSaveHandlers()
         gui3d.app.addLoadHandler('clothesHideFaces', self.loadHandler)
+
+    def visualizeFaceMasks(self, enabled):
+        import material
+        import getpath
+        if enabled:
+            self.oldPxyMats = dict()
+            xray_mat = material.fromFile(getpath.getSysDataPath('materials/xray.mhmat'))
+            for pxy in self.human.getProxies(includeHumanProxy=False):
+                print pxy.type
+                if pxy.type == 'Eyes':
+                    # Don't X-ray the eyes, it looks weird
+                    continue
+                self.oldPxyMats[pxy.uuid] = pxy.object.material.clone()
+                pxy.object.material = xray_mat
+        else:
+            for pxy in self.human.getProxies(includeHumanProxy=False):
+                if pxy.uuid in self.oldPxyMats:
+                    pxy.object.material = self.oldPxyMats[pxy.uuid]
+
+class FaceHideCheckbox(gui.CheckBox):
+    def enterEvent(self, event):
+        self.callEvent("onMouseEntered", None)
+
+    def leaveEvent(self, event):
+        self.callEvent("onMouseExited", None)
 
 
 # This method is called when the plugin is loaded into makehuman

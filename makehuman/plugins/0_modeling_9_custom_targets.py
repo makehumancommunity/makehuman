@@ -10,9 +10,9 @@ Plugin to apply custom targets.
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Eduardo Menezes de Morais
+**Authors:**           Eduardo Menezes de Morais, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -48,6 +48,7 @@ import os
 import humanmodifier
 import modifierslider
 import gui
+import algos3d
 from core import G
 
 class FolderButton(gui.RadioButton):
@@ -59,6 +60,8 @@ class FolderButton(gui.RadioButton):
 
     def onClicked(self, event):
         self.task.syncVisibility()
+
+# TODO inherit from guimodifier if possible
 
 class CustomTargetsTaskView(gui3d.TaskView):
 
@@ -75,9 +78,10 @@ class CustomTargetsTaskView(gui3d.TaskView):
         self.folderBox = self.addRightWidget(gui.GroupBox('Folders'))
         self.targetsBox = self.addLeftWidget(gui.StackedBox())
 
+        self.human = app.selectedHuman
+
         @rescanButton.mhEvent
         def onClicked(event):
-            #TODO: undo any applied change here
             self.searchTargets()
 
         self.folders = []
@@ -98,6 +102,7 @@ class CustomTargetsTaskView(gui3d.TaskView):
             folderGroup.targetCount = 0
             self.folders.append(groupBox)
 
+            # TODO allow creating more complex modifiers (or we could also require the user to create a modifier .json file)
             for f in files:
                 if f.endswith(".target"):
                     self.createTargetControls(groupBox, os.path.join(root, f))
@@ -123,33 +128,39 @@ class CustomTargetsTaskView(gui3d.TaskView):
                 visible.append(child)
         if selectOther and len(visible) > 0:
             visible[0].setSelected(True)
-            
+
 
         self.syncVisibility()
 
         self.syncStatus()
 
     def unloadTargets(self):
-        self.sliders = []
+        if len(self.modifiers) == 0:
+            return
 
-        for folder in self.folders:
-            self.targetsBox.removeWidget(folder)
-            folder.destroy()
+        # Invalidate any cached targets
+        for m in self.modifiers.values():
+            for tpath,_ in m.targets:
+                algos3d.refreshCachedTarget(tpath)
+
+        for b in self.folders:
+            self.targetsBox.removeWidget(b)
+            b.destroy()
+
+        self.sliders = []
+        self.folders = []
 
         for child in self.folderBox.children[:]:
-            if child.selected:
-                active = child.getLabel()
             self.folderBox.removeWidget(child)
             child.destroy()
 
-        self.folders = []
-
-        human = G.app.selectedHuman
         for mod in self.modifiers.values():
-            human.removeModifier(mod)
+            self.human.removeModifier(mod)
             
         self.modifiers = {}
 
+        # Apply changes to human (of unloaded modifiers)
+        self.human.applyAllTargets()
 
     def syncStatus(self):
         if not self.isVisible():
@@ -157,7 +168,7 @@ class CustomTargetsTaskView(gui3d.TaskView):
         if self.sliders:
             gui3d.app.statusPersist('')
         else:
-            gui3d.app.statusPersist('No custom targets found. To add a custom target, place the file in %s',
+            gui3d.app.statusPersist(['No custom targets found. To add a custom target, place the file in',' %s'],
                                     self.targetsPath)
 
     def createTargetControls(self, box, targetFile):
@@ -167,8 +178,8 @@ class CustomTargetsTaskView(gui3d.TaskView):
         targetFile = os.path.relpath(targetFile, self.targetsPath)
 
         modifier = humanmodifier.SimpleModifier('custom', self.targetsPath, targetFile)
-        modifier.setHuman(G.app.selectedHuman)
-        self.modifiers[modifier.name] = modifier
+        modifier.setHuman(self.human)
+        self.modifiers[modifier.fullName] = modifier
 
         label = modifier.name.replace('-',' ').capitalize()
         self.sliders.append(box.addWidget(modifierslider.ModifierSlider(modifier=modifier, label=label)))
@@ -199,25 +210,11 @@ class CustomTargetsTaskView(gui3d.TaskView):
             self.syncSliders()
             self.syncStatus()
 
-    def loadHandler(self, human, values):
-        if values[0] == 'status':
-            return
-
-        modifier = self.modifiers.get(values[1], None)
-        if modifier:
-            modifier.setValue(float(values[2]))
-
-        # Equally good alternative:
-        #try:
-        #    human.getModifier("custom/"+values[1]).setValue(float(values[2]))
-        #except:
-        #    pass
+    def loadHandler(self, human, values, strict):
+        pass
 
     def saveHandler(self, human, file):
-        for name, modifier in self.modifiers.iteritems():
-            value = modifier.getValue()
-            if value:
-                file.write('custom %s %f\n' % (name, value))
+        pass
 
 category = None
 taskview = None

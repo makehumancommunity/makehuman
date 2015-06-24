@@ -10,7 +10,7 @@
 
 **Authors:**           Glynn Clements
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -108,7 +108,7 @@ class Texture(object):
         if use_mipmaps and pixels is None:
             raise RuntimeError("Non-power-of-two textures not supported")
 
-        if pixels == None:
+        if pixels is None:
             # Zero fill pixel data to allocate
             import numpy as np
             pixels = np.zeros(width*height*components, dtype=np.uint8)

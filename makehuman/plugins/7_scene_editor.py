@@ -10,7 +10,7 @@
 
 **Authors:**           Thanasis Papoutsidakis
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -191,6 +191,10 @@ class SceneEditorTaskView(guirender.RenderTaskView):
 
     def __init__(self, category):
         guirender.RenderTaskView.__init__(self, category, 'Scene Editor')
+
+        # Declare settings
+        G.app.addSetting('Scene_Editor_FileDlgPath', mh.getDataPath('scenes'))
+
         sceneBox = self.addLeftWidget(gui.GroupBox('Scene'))
         self.fnlbl = sceneBox.addWidget(gui.TextView('<New scene>'))
         self.saveButton = sceneBox.addWidget(gui.Button('Save'), 1, 0)
@@ -215,11 +219,10 @@ class SceneEditorTaskView(guirender.RenderTaskView):
 
         def doLoad():
             filename = mh.getOpenFileName(
-                G.app.settings.get('Scene_Editor_FileDlgPath',
-                    mh.getDataPath('scenes')),
+                G.app.getSetting('Scene_Editor_FileDlgPath'),
                 'MakeHuman scene (*.mhscene);;All files (*.*)')
             if filename:
-                G.app.settings['Scene_Editor_FileDlgPath'] = filename
+                G.app.setSetting('Scene_Editor_FileDlgPath', filename)
                 self.scene.load(filename)
 
         def doSave(filename):
@@ -257,11 +260,10 @@ class SceneEditorTaskView(guirender.RenderTaskView):
         @self.saveAsButton.mhEvent
         def onClicked(event):
             filename = mh.getSaveFileName(
-                G.app.settings.get('Scene_Editor_FileDlgPath',
-                    mh.getPath('data/scenes')),
+                G.app.getSetting('Scene_Editor_FileDlgPath'),
                 'MakeHuman scene (*.mhscene);;All files (*.*)')
             if filename:
-                G.app.settings['Scene_Editor_FileDlgPath'] = filename
+                G.app.setSetting('Scene_Editor_FileDlgPath', filename)
                 doSave(filename)
 
         @self.itemList.mhEvent

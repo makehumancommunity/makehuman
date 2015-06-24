@@ -10,7 +10,7 @@
 
 **Authors:**           Manuel Bastioni
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -41,6 +41,7 @@ import gui3d
 import webbrowser
 import mh
 import gui
+from gui import QtGui
 
 class HelpTaskView(gui3d.TaskView):
 
@@ -48,13 +49,25 @@ class HelpTaskView(gui3d.TaskView):
         
         gui3d.TaskView.__init__(self, category, 'Help')
 
-        optionsBox = self.addLeftWidget(gui.GroupBox('Support options'))
+        aboutBox = self.addLeftWidget(gui.GroupBox('About MakeHuman'))
+        self.aboutButton = aboutBox.addWidget(gui.Button("About"))
+        self.websiteButton = aboutBox.addWidget(gui.Button("Website"))
+
+        optionsBox = self.addLeftWidget(gui.GroupBox('Support'))
         self.manualButton = optionsBox.addWidget(gui.Button("Manual"))
         self.reportBugButton = optionsBox.addWidget(gui.Button("Report bug"))
         self.requestFeatureButton = optionsBox.addWidget(gui.Button("Request feature"))   
         self.forumButton = optionsBox.addWidget(gui.Button("Forum")) 
-        self.facebookButton = optionsBox.addWidget(gui.Button("FaceBook page"))        
-        
+        self.facebookButton = optionsBox.addWidget(gui.Button("FaceBook page")) 
+
+        @self.aboutButton.mhEvent
+        def onClicked(event):
+            gui3d.app.about()
+
+        @self.websiteButton.mhEvent
+        def onClicked(event):
+            webbrowser.open('http://www.makehuman.org');
+
         @self.manualButton.mhEvent
         def onClicked(event):
             webbrowser.open('http://www.makehuman.org/documentation');

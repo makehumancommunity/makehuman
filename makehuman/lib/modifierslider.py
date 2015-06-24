@@ -10,7 +10,7 @@
 
 **Authors:**           Marc Flerackers
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -114,6 +114,7 @@ class ModifierSlider(gui.Slider):
 
     def onChanging(self, value):
         if self.changing is not None:
+            # Avoid concurrent updates
             self.changing = value
             return
         self.changing = value
@@ -123,7 +124,7 @@ class ModifierSlider(gui.Slider):
         value = self.changing
         self.changing = None
 
-        if G.app.settings.get('realtimeUpdates', True):
+        if G.app.getSetting('realtimeUpdates'):
             human = G.app.selectedHuman
             if self.value is None:
                 self.value = self.modifier.getValue()
@@ -133,8 +134,8 @@ class ModifierSlider(gui.Slider):
                     else:
                         human.getSeedMesh().setVisibility(1)
                     human.getSubdivisionMesh(False).setVisibility(0)
-            self.modifier.updateValue(value, G.app.settings.get('realtimeNormalUpdates', True))
-            human.updateProxyMesh()
+            self.modifier.updateValue(value, G.app.getSetting('realtimeNormalUpdates'))
+            human.updateProxyMesh(fit_to_posed=True)
 
 
     def onChange(self, value):
@@ -152,14 +153,14 @@ class ModifierSlider(gui.Slider):
         human = self.modifier.human
         if self.value is None:
             self.value = self.modifier.getValue()
+        action = humanmodifier.ModifierAction(self.modifier, self.value, value, self.update)
         if self.value != value:
-            G.app.do(humanmodifier.ModifierAction(self.modifier, self.value, value, self.update))
+            G.app.do(action)
         else:
-            # Indicate that onChanging event is ended with onChanged event (type == 'modifier', not 'targets')
-            import events3d
-            event = events3d.HumanEvent(human, self.modifier.eventType)
-            event.modifier = self.modifier.fullName
-            human.callEvent('onChanged', event)
+            # Apply the change anyway, to make sure everything's updated
+            # Perform the action without adding it to the undo stack
+            action.do()
+
         if human.isSubdivided():
             if human.isProxied():
                 human.getProxyMesh().setVisibility(0)
@@ -170,18 +171,16 @@ class ModifierSlider(gui.Slider):
 
     def onRelease(self, w):
         G.app.callAsync(self._onChange)
-        #self._onChange()
 
     def onFocus(self, event):
         if self.view:
-            if G.app.settings.get('cameraAutoZoom', True):
+            if G.app.getSetting('cameraAutoZoom'):
                 self.view()
 
     def update(self):
         """Synchronize slider value with value of its modifier, make it up to
         date.
         """
-        human = G.app.selectedHuman
         self.blockSignals(True)
         if not self.slider.isSliderDown():
             # Only update slider position when it is not being clicked or dragged

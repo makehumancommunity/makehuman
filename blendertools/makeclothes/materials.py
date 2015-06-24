@@ -10,7 +10,7 @@
 
 **Authors:**           Thomas Larsson
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/external_tools_license.html)
 
@@ -115,10 +115,8 @@ def writeMaterialFile(fp, mat, name, outdir):
             continue
         if tex.image.filepath == "":
             raise MHError("Texture %s image must be saved first" % tex.name)
-        blenddir = os.path.dirname(bpy.data.filepath)
-        relpath =  bpy.path.relpath(tex.image.filepath)     # starts with //
-        filepath = os.path.join(blenddir, relpath[2:])
-        texpath = os.path.basename(filepath).replace(" ","_")
+        srcpath = tex.image.filepath
+        texpath = os.path.basename(srcpath).replace(" ","_")
 
         if mtex.use_map_color_diffuse:
             fp.write('diffuseTexture %s\n' % texpath)
@@ -140,11 +138,11 @@ def writeMaterialFile(fp, mat, name, outdir):
             useDisplacement = "true"
 
         trgpath = os.path.join(outdir, texpath)
-        print("Copy texture %s => %s" % (filepath, trgpath))
+        print("Copy texture %s => %s" % (srcpath, trgpath))
         try:
-            shutil.copy(filepath, trgpath)
+            shutil.copy(srcpath, trgpath)
         except FileNotFoundError:
-            addWarning("Texture\n \"%s\" \nnot found\n" % filepath)
+            addWarning("Texture\n \"%s\" \nnot found\n" % srcpath)
 
     fp.write(
         '\n' +

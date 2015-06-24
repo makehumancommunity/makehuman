@@ -1,4 +1,3 @@
-#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
 """
@@ -10,7 +9,7 @@
 
 **Authors:**           Glynn Clements
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -38,6 +37,7 @@ TODO
 """
 
 import sys
+import os
 import log
 
 from PyQt4 import QtCore, QtGui, QtOpenGL
@@ -49,6 +49,19 @@ import qtgui
 import queue
 import time
 import getpath
+
+import makehuman
+import getpath
+if False and makehuman.isBuild():
+    # Set absolute Qt plugin path programatically on frozen deployment to fix
+    # crashes when Qt is on DLL PATH in windows.
+    # No qt.conf file should be present in the application folder!
+    deployment_path = getpath.canonicalPath(getpath.getSysPath())
+    QtCore.QCoreApplication.addLibraryPath(os.path.join(deployment_path,'qt4_plugins'))
+    # Plugins will be loaded when QCoreApplication object is constructed. Some
+    # Qt deployments are known to prepend new library paths at this time, such
+    # as /usr/lib/qt4/plugins on some linux platforms, but this is not a likely
+    # case on windows platforms.
 
 # Timeout in seconds after which moving the mousewheel will pick a new mouse pos
 # TODO make this configureable in settings?
@@ -162,6 +175,7 @@ g_mousewheel_t = None
 class Canvas(QtOpenGL.QGLWidget):
     def __init__(self, parent, app):
         self.app = app
+        self.blockRedraw = False
         format = QtOpenGL.QGLFormat()
         format.setAlpha(True)
         format.setDepthBufferSize(24)
@@ -277,6 +291,9 @@ class Canvas(QtOpenGL.QGLWidget):
         gl.OnInit()
 
     def paintGL(self):
+        if self.blockRedraw:
+            self.app.logger_redraw.debug('paintGL (blocked)')
+            return
         self.app.logger_redraw.debug('paintGL')
         gl.renderToCanvas()
 
@@ -386,11 +403,20 @@ def supportsSVG():
     Determines whether Qt supports SVG image files.
     """
     qtVersion = getQtVersion()
-    # TODO
-    # pyinstaller windows builds appear to cause issues with this
-    # py2app on OSX appears not to include qt svg libs either...
+    # Care needs to be taken that pyinstaller windows builds and
+    # OSX py2app builds include the qt svg lib and plugin
     return qtVersion[0] >= 4 and qtVersion[1] >= 2 and \
-        'svg' in [ str(s).lower() for s in QtGui.QImageReader.supportedImageFormats() ]
+        'svg' in supportedImageFormats()
+
+def supportsJPG():
+    return 'jpg' in supportedImageFormats()
+
+def supportedImageFormats():
+    """
+    The image formats supported by MakeHuman. This is determined by the plugins
+    that were loaded into the Qt libraries.
+    """
+    return [ str(s).lower() for s in QtGui.QImageReader.supportedImageFormats() ]
 
 class Frame(QtGui.QMainWindow):
     title = "MakeHuman"
@@ -408,6 +434,7 @@ class Frame(QtGui.QMainWindow):
             self.setWindowIcon(QtGui.QIcon(getpath.getSysPath("icons/makehuman.png")))
 
         self.setAttribute(QtCore.Qt.WA_KeyCompression, False)
+        self.setAcceptDrops(True)
         self.resize(*size)
         
         # work-around for mac QT toolbar bug described in: https://bugreports.qt-project.org/browse/QTBUG-18567
@@ -479,12 +506,13 @@ class Frame(QtGui.QMainWindow):
         self.progressBar = qtgui.ProgressBar()
         self.bottom.addWidget(self.progressBar)
 
-    def resizeEvent(self, event):
-        """QMainWindow method override that is called upon resizing the window,
-        including after the maximize / restore or fullscreen actions."""
-        if 'normal geometry' in self.windowState:
-            self.normalStateGeometry = self.storeGeometry()
-        QtGui.QMainWindow.resizeEvent(self, event)
+    def changeEvent(self, event):
+        """QMainWindow method override that is called whenever a change
+        happens on the widget."""
+        if event.type() == QtCore.QEvent.WindowStateChange:
+            if 'normal geometry' in self.windowState:
+                self.normalStateGeometry = self.storeGeometry()
+        QtGui.QMainWindow.changeEvent(self, event)
 
     def resizeEvent(self, event):
         """QMainWindow method override that is called when
@@ -532,20 +560,14 @@ class Frame(QtGui.QMainWindow):
             if child.isWidgetType():
                 self.refreshLayout(child)
 
-    def getWindowState(self):
-        """Return a set of window state strings that apply to the frame.
+    @staticmethod
+    def _asWindowStateSet(stateflags):
+        """Construct a set of window state strings
+        from a QWindowStates flags object.
 
         Multiple window states may apply to the same window, for example
         a window might be shown minimized, but set to be maximized when
         restored."""
-        stateflags = QtGui.QMainWindow.windowState(self)
-
-        # Use caching for faster generation on successive calls
-        if hasattr(self, '_windowStateFlagsCache') and \
-            stateflags == self._windowStateFlagsCache:
-            return self._windowStateCache.copy()
-        else:
-            self._windowStateFlagsCache = stateflags
 
         state = set()
         if stateflags & QtCore.Qt.WindowMaximized:
@@ -561,9 +583,11 @@ class Frame(QtGui.QMainWindow):
             state.add('normal geometry')
             if not stateflags & QtCore.Qt.WindowMinimized:
                 state.add('normal')
-
-        self._windowStateCache = state.copy()
         return state
+
+    def getWindowState(self):
+        """Return a set of window state strings that apply to the frame."""
+        return self._asWindowStateSet(QtGui.QMainWindow.windowState(self))
 
     def setWindowState(self, state):
         """Set the window state according to a window state set
@@ -598,6 +622,32 @@ class Frame(QtGui.QMainWindow):
         self.resize(geometry['width'], geometry['height'])
         self.move(geometry['x'], geometry['y'])
         self.windowState = set(geometry['state'])
+
+    def dragEnterEvent(self, event):
+        """Decide whether to accept files dragged into the MakeHuman window."""
+        if event.mimeData().hasUrls():
+            url = event.mimeData().urls()[0]
+            path = getpath.pathToUnicode(url.toLocalFile())
+            if os.path.splitext(path)[1].lower() == '.mhm':
+                event.acceptProposedAction()
+
+    def dropEvent(self, event):
+        """Support drag and dropping .MHM files in the MakeHuman window to load
+        them"""
+        mime_data = event.mimeData()
+        if not mime_data.hasUrls():
+            return
+
+        url = mime_data.urls()[0]
+        path = getpath.pathToUnicode(url.toLocalFile())
+        if os.path.splitext(path)[1].lower() != '.mhm':
+            return
+
+        if self.app.currentFile.modified:
+            self.app.prompt("Load", "You have unsaved changes. Are you sure you want to close the current file?",
+                             "Yes", "No", lambda: self.app.loadHumanMHM(path))
+        else:
+            self.app.loadHumanMHM(path)
 
 
 class LogWindow(qtgui.ListView):
@@ -643,6 +693,7 @@ class Application(QtGui.QApplication, events3d.EventHandler):
         self.logger_async = log.getLogger('mh.callAsync')
         self.logger_redraw = log.getLogger('mh.redraw')
         self.logger_event = log.getLogger('mh.event')
+        self.eventHandlers = []
         # self.installEventFilter(self)
 
     def OnInit(self):
@@ -706,6 +757,19 @@ class Application(QtGui.QApplication, events3d.EventHandler):
     def eventFilter(self, object, event):
         self.logger_event.debug('eventFilter(%s, %s(%s))', object, event, event.type())
         return False
+
+    def addEventHandler(self, handler, sortOrder=None):
+        if sortOrder is None:
+            orders = [h.sortOrder for h in self.eventHandlers]
+            o = max(orders) +1
+            handler.sortOrder = o
+
+        self.eventHandlers.append(handler)
+        self.eventHandlers.sort(key = lambda h: h.sortOrder)
+
+    def callEventHandlers(self, event_type, event):
+        for handler in self.eventHandlers:
+            handler.callEvent(event_type, event)
 
     def addTimer(self, milliseconds, callback):
         timer_id = self.startTimer(milliseconds)

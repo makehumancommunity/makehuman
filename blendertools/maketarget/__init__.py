@@ -10,7 +10,7 @@
 
 **Authors:**           Thomas Larsson
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/external_tools_license.html)
 
@@ -39,8 +39,8 @@ Abstract
 bl_info = {
     "name": "Make Target",
     "author": "Thomas Larsson",
-    "version": (1, 32),
-    "blender": (2, 6, 9),
+    "version": (1,1,0),
+    "blender": (2,7,1),
     "location": "View3D > Properties > Make Target",
     "description": "Make MakeHuman Target",
     "warning": "",
@@ -48,7 +48,7 @@ bl_info = {
     "category": "MakeHuman"}
 
 if "bpy" in locals():
-    print("Reloading maketarget v %d.%d" % bl_info["version"])
+    print("Reloading maketarget v %d.%d.%d" % bl_info["version"])
     import imp
 
     imp.reload(mh)
@@ -65,7 +65,7 @@ if "bpy" in locals():
     #imp.reload(perfect)
     imp.reload(export_mh_obj)
 else:
-    print("Loading maketarget v %d.%d" % bl_info["version"])
+    print("Loading maketarget v %d.%d.%d" % bl_info["version"])
     import bpy
     import os
     from bpy.props import *
@@ -90,9 +90,9 @@ Thomas = False
 #----------------------------------------------------------
 #   class ConvertTargetPanel(bpy.types.Panel):
 #----------------------------------------------------------
-
+'''
 class ConvertTargetPanel(bpy.types.Panel):
-    bl_label = "Convert Target %d.%d" % bl_info["version"]
+    bl_label = "Convert Target %d.%d.%d" % bl_info["version"]
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_options = {'DEFAULT_CLOSED'}
@@ -124,13 +124,13 @@ class ConvertTargetPanel(bpy.types.Panel):
         layout.prop(scn, "MhSourceVGroup", text="")
         layout.operator("mh.convert_vgroup")
         layout.operator("mh.convert_vgroup_dir")
-
+'''
 #----------------------------------------------------------
 #   class MakeTargetPanel(bpy.types.Panel):
 #----------------------------------------------------------
 
 class MakeTargetPanel(bpy.types.Panel):
-    bl_label = "Make Target  Version %d.%d" % bl_info["version"]
+    bl_label = "Make Target  Version %d.%d.%d" % bl_info["version"]
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
 
@@ -152,6 +152,7 @@ class MakeTargetPanel(bpy.types.Panel):
             layout.operator("mh.prune_target_file")
 
         if not utils.isBaseOrTarget(ob):
+            layout.prop(scn, "MhBodyType", text="Type")
             layout.operator("mh.import_base_obj")
             layout.operator("mh.import_base_mhclo")
             layout.operator("mh.make_base_obj")
@@ -291,6 +292,8 @@ class McpPanel(bpy.types.Panel):
         layout = self.layout
         layout.operator("mh.saveas_mhp")
         layout.operator("mh.load_mhp")
+        layout.separator()
+        layout.operator("mh.write_matrices")
 
 #----------------------------------------------------------
 #   class ExportObj(bpy.types.Operator, ExportHelper):

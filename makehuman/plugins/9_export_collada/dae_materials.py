@@ -10,7 +10,7 @@
 
 **Authors:**           Thomas Larsson, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -80,7 +80,7 @@ def writeImage(fp, filepath, config):
     texname = getTextureName(filepath)
     fp.write(
         '    <image id="%s" name="%s">\n' % (texname, texname) +
-        '      <init_from>%s</init_from>\n' % newpath +
+        '      <init_from>file://%s</init_from>\n' % newpath +
         '    </image>\n'
     )
 

@@ -10,7 +10,7 @@
 
 **Authors:**           Thomas Larsson
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/external_tools_license.html)
 
@@ -81,11 +81,11 @@ def writeMhpBones(fp, pb, log):
     if pb.parent:
         mat = b.matrix_local.inverted() * b.parent.matrix_local * pb.parent.matrix.inverted() * pb.matrix
     else:
-        mat = pb.matrix.copy()
-        maty = mat[1].copy()
-        matz = mat[2].copy()
-        mat[1] = matz
-        mat[2] = -maty
+        mat = b.matrix_local.inverted() * pb.matrix
+        #maty = mat[1].copy()
+        #matz = mat[2].copy()
+        #mat[1] = matz
+        #mat[2] = -maty
 
     diff = mat - Matrix()
     nonzero = False
@@ -545,6 +545,53 @@ class VIEW3D_OT_ConvertRigButton(bpy.types.Operator):
 
         return{'FINISHED'}
 
+
+
+#----------------------------------------------------------
+#   Write matrices (for debug)
+#----------------------------------------------------------
+
+def writeMatrices(context, filepath):
+    rig = context.object
+    fp = open(filepath, "w", encoding="utf-8", newline="\n")
+    for pb in rig.pose.bones:
+        fp.write(
+            "\n%s\n" % pb.name +
+            "%s\n" % pb.matrix_basis +
+            "%s\n" % pb.matrix)
+    fp.close()
+
+
+class VIEW3D_OT_WriteMatricesButton(bpy.types.Operator, ExportHelper):
+    bl_idname = "mh.write_matrices"
+    bl_label = "Write Matrices"
+    bl_description = "Write Matrices"
+    bl_options = {'UNDO'}
+
+    filename_ext = ".txt"
+    filter_glob = StringProperty(default="*.txt", options={'HIDDEN'})
+    filepath = bpy.props.StringProperty(
+        name="File Path",
+        description="File path used for txt file",
+        maxlen= 1024, default= "")
+
+    @classmethod
+    def poll(self, context):
+        return context.object
+
+    def execute(self, context):
+        try:
+            setObjectMode(context)
+            writeMatrices(context, self.properties.filepath)
+        except MHError:
+            handleMHError(context)
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
+
 #----------------------------------------------------------
 #   Init
 #----------------------------------------------------------
@@ -585,3 +632,5 @@ def init():
                    ),
             default='ZYX',
             )
+
+print("pose.py reloaded")

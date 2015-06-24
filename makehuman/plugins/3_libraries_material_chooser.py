@@ -10,7 +10,7 @@
 
 **Authors:**           Jonas Hauquier, Marc Flerackers
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -44,12 +44,12 @@ import material
 import os
 import gui3d
 import mh
-import gui
 from proxy import SimpleProxyTypes
 import filechooser as fc
 from humanobjchooser import HumanObjectSelector
 import log
 import getpath
+import filecache
 
 class MaterialAction(gui3d.Action):
     def __init__(self, obj, after):
@@ -67,15 +67,13 @@ class MaterialAction(gui3d.Action):
         return True
 
 
-class MaterialTaskView(gui3d.TaskView):
+class MaterialTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     def __init__(self, category):
         gui3d.TaskView.__init__(self, category, 'Material', label='Skin/Material')
+        filecache.MetadataCacher.__init__(self, 'mhmat', 'material_filecache.mhc')
+        self.cache_format_version = '1b'  # Override cache file version for materials, because we added metadata fields
         self.human = gui3d.app.selectedHuman
-
-        # Paths, in order, in which relative material filepaths will be searched
-        self.searchPaths = [mh.getPath(), mh.getSysDataPath()]
-        self.searchPaths = [os.path.abspath(p) for p in self.searchPaths]
 
         self.materials = None
 
@@ -99,13 +97,24 @@ class MaterialTaskView(gui3d.TaskView):
         def onActivate(value):
             self.reloadMaterialChooser()
 
+        self.filechooser.setFileLoadHandler(fc.TaggedFileLoader(self))
+        self.addLeftWidget(self.filechooser.createTagFilter())
+
+    def getMetadataImpl(self, filename):
+        return material.peekMetadata(filename)
+
+    def getTagsFromMetadata(self, metadata):
+        name, tags, description = metadata
+        return tags
+
+    def getSearchPaths(self):
+        return self.materials
 
     def onShow(self, event):
         # When the task gets shown, set the focus to the file chooser
         gui3d.TaskView.onShow(self, event)
 
         self.reloadMaterialChooser()
-
 
     def applyClothesMaterial(self, uuid, filename):
         human = self.human
@@ -169,6 +178,7 @@ class MaterialTaskView(gui3d.TaskView):
 
         # Reload filechooser
         self.filechooser.deselectAll()
+        self.filechooser.tagFilter.clearAll()
         self.filechooser.setPaths(self.materials)
         self.filechooser.refresh()
         if selectedMat:
@@ -178,7 +188,7 @@ class MaterialTaskView(gui3d.TaskView):
     def onHide(self, event):
         gui3d.TaskView.onHide(self, event)
 
-    def loadHandler(self, human, values):
+    def loadHandler(self, human, values, strict):
         if values[0] == 'status':
             return
 
@@ -189,8 +199,10 @@ class MaterialTaskView(gui3d.TaskView):
                 human.material = mat
                 return
             else:
-                absP = getpath.findFile(path, [mh.getPath('data'), mh.getSysDataPath()])
+                absP = getpath.thoroughFindFile(path)
                 if not os.path.isfile(absP):
+                    if strict:
+                        raise RuntimeError('Could not find material %s for skinMaterial parameter.' % values[1])
                     log.warning('Could not find material %s for skinMaterial parameter.', values[1])
                     return
                 mat = material.fromFile(absP)
@@ -216,13 +228,10 @@ class MaterialTaskView(gui3d.TaskView):
                 filepath = self.getMaterialPath(filepath, proxy.file)
                 proxy.object.material = material.fromFile(filepath)
                 return
-            elif human.genitalsProxy and human.genitalsProxy.getUuid() == uuid:
-                proxy = human.genitalsProxy
-                filepath = self.getMaterialPath(filepath, proxy.file)
-                proxy.object.material = material.fromFile(filepath)
-                return
             elif not uuid in human.clothesProxies.keys():
-                log.error("Could not load material for proxy with uuid %s (%s)! No such proxy." % (uuid, name))
+                if strict:
+                    raise RuntimeError("Could not load material for proxy with uuid %s (%s)! No such proxy." % (uuid, name))
+                log.error("Could not load material for proxy with uuid %s (%s)! No such proxy.", uuid, name)
                 return
 
             proxy = human.clothesProxies[uuid]
@@ -237,25 +246,25 @@ class MaterialTaskView(gui3d.TaskView):
         """
         # TODO move as helper func to material module
         if objFile:
-            objFile = os.path.abspath(objFile)
-            if os.path.isdir(objFile):
-                objFile = os.path.dirname(objFile)[0]
-            searchPaths = [ objFile ] + self.searchPaths
+            objFile = getpath.canonicalPath(objFile)
+            if os.path.isfile(objFile):
+                objFile = os.path.dirname(objFile)
+            searchPaths = [ objFile ]
         else:
-            searchPaths = self.searchPaths
+            searchPaths = []
 
-        return getpath.getRelativePath(filepath, searchPaths)
+        return getpath.getJailedPath(filepath, searchPaths)
 
     def getMaterialPath(self, relPath, objFile = None):
         if objFile:
             objFile = os.path.abspath(objFile)
-            if os.path.isdir(objFile):
-                objFile = os.path.split(objFile)[0]
-            searchPaths = [ objFile ] + self.searchPaths
+            if os.path.isfile(objFile):
+                objFile = os.path.dirname(objFile)
+            searchPaths = [ objFile ]
         else:
-            searchPaths = self.searchPaths
+            searchPaths = []
 
-        return getpath.findFile(relPath, searchPaths)
+        return getpath.thoroughFindFile(relPath, searchPaths)
 
     def onHumanChanged(self, event):
         if event.change == 'reset':
@@ -281,11 +290,6 @@ class MaterialTaskView(gui3d.TaskView):
             eyesObj = proxy.object
             materialPath = self.getRelativeMaterialPath(eyesObj.material.filename, proxy.file)
             file.write('material %s %s %s\n' % (proxy.name, proxy.getUuid(), materialPath))
-        if human.genitalsProxy:
-            proxy = human.genitalsProxy
-            genitalsObj = proxy.object
-            materialPath = self.getRelativeMaterialPath(genitalsObj.material.filename, proxy.file)
-            file.write('material %s %s %s\n' % (proxy.name, proxy.getUuid(), materialPath))
 
 
 # This method is called when the plugin is loaded into makehuman
@@ -293,6 +297,7 @@ class MaterialTaskView(gui3d.TaskView):
 
 
 def load(app):
+    global taskview
     category = app.getCategory('Materials')
     taskview = MaterialTaskView(category)
     taskview.sortOrder = 0
@@ -308,4 +313,4 @@ def load(app):
 
 
 def unload(app):
-    pass
+    taskview.onUnload()

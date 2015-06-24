@@ -10,7 +10,7 @@
 
 **Authors:**           Thomas Larsson
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -37,22 +37,17 @@ Abstract
 TODO
 """
 
-from export import Exporter
-from exportutils.config import Config
+from export import Exporter, ExportConfig
 
 
-class FbxConfig(Config):
+class FbxConfig(ExportConfig):
 
     def __init__(self):
-        Config.__init__(self)
+        ExportConfig.__init__(self)
 
         self.useRelPaths     = False
-        self.expressions = False    #exporter.expressions.selected
-        self.useCustomTargets = False   #exporter.useCustomTargets.selected
-        self.useMaterials    = True # for debugging
-
-        # Used by Collada, needed for armature access
-        self.useTPose = False
+        self.useMaterials    = True # for debugging  # TODO what is the function of this?
+        self.binary = False
 
         self.yUpFaceZ = True
         self.yUpFaceX = False
@@ -62,6 +57,8 @@ class FbxConfig(Config):
         self.localY = True
         self.localX = False
         self.localG = False
+
+        self.hiddenGeom = False
 
     # TODO preferably these are used (perhaps as enum) instead of the bools above
     # TODO move these to export Config super class
@@ -88,11 +85,6 @@ class FbxConfig(Config):
         return 'y'
 
 
-    def __repr__(self):
-        return("<FbxConfig %s e %s>" % (
-            self.expressions,))
-
-
 class ExporterFBX(Exporter):
     def __init__(self):
         Exporter.__init__(self)
@@ -104,22 +96,22 @@ class ExporterFBX(Exporter):
     def build(self, options, taskview):
         import gui
         Exporter.build(self, options, taskview)
-        #self.expressions     = options.addWidget(gui.CheckBox("Expressions", False))
-        #self.useCustomTargets = options.addWidget(gui.CheckBox("Custom targets", False))
+        self.binary   = options.addWidget(gui.CheckBox("Binary FBX", False))
+        self.hiddenGeom = options.addWidget(gui.CheckBox("Helper geometry", False))
 
     def export(self, human, filename):
         from . import mh2fbx
-        #self.taskview.exitPoseMode()
         cfg = self.getConfig()
         cfg.setHuman(human)
         mh2fbx.exportFbx(filename("fbx"), cfg)
-        #self.taskview.enterPoseMode()
 
     def getConfig(self):
         cfg = FbxConfig()
-        cfg.useTPose          = False # self.useTPose.selected
         cfg.feetOnGround      = self.feetOnGround.selected
         cfg.scale,cfg.unit    = self.taskview.getScale()
+        cfg.binary            = self.binary.selected
+
+        cfg.hiddenGeom        = self.hiddenGeom.selected
 
         return cfg
 

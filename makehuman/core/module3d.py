@@ -10,7 +10,7 @@
 
 **Authors:**           Marc Flerackers, Glynn Clements, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -173,6 +173,26 @@ class Object3D(object):
 
         return other
 
+    def transformed(self, transform_mat, filterMaskedVerts=False):
+        """Create a clone of this mesh with its coordinates transformed
+        with the specified transformation matrix. filterMaskedVerts works the
+        same is for clone()
+        """
+        if transform_mat.shape == (4,4):
+            translation = transform_mat[:3, 3]
+            transform_mat = transform_mat[:3,:3]
+        else:
+            translation = np.zeros(3, dtype=np.float32)
+
+        result = self.clone(filterMaskedVerts=filterMaskedVerts)
+
+        coords = np.dot(transform_mat, result.getCoords().T).T
+        coords += translation
+        result.changeCoords(coords)
+        result.calcNormals()
+        result.update()
+        return result
+
     @property
     def parent_map(self):
         """
@@ -274,7 +294,7 @@ class Object3D(object):
         # Reverse vertex mapping:
         # _inverse_parent_map[idx] = mIdx: self.coord[idx] -> other.coord[mIdx]
         other._inverse_parent_map = - np.ones(self.getVertexCount(), dtype=np.int32)
-        other._inverse_parent_map[other.parent_map] = np.arange(self.getVertexCount(), dtype=np.int32)
+        other._inverse_parent_map[other.parent_map] = np.arange(len(other._parent_map), dtype=np.int32)
         #other._inverse_parent_map = np.ma.masked_less(other._inverse_parent_map, 0)  # TODO might be useful
 
         other.setCoords(self.coord[other.parent_map])
@@ -509,7 +529,7 @@ class Object3D(object):
         self.vface = np.zeros((nverts, self.MAX_FACES), dtype=np.uint32)
         self.nfaces = np.zeros(nverts, dtype=np.uint8)
 
-        self.orig_coord = self.coord.copy()
+        self.orig_coord = self.coord.copy() # Keep a copy of the original coordinates
 
         self.ucoor = True
         self.unorm = True
@@ -692,54 +712,30 @@ class Object3D(object):
             log.error("Failed to index faces of mesh %s, you are probably loading a mesh with mixed nb of verts per face (do not mix tris and quads). Or your mesh has too many faces attached to one vertex (the maximum is %s-poles). In the second case, either increase MAX_FACES for this mesh, or improve the mesh topology. Original error message: (%s) %s", self.name, self.MAX_FACES, type(e), format(str(e)))
             raise RuntimeError('Incompatible mesh topology.')
 
-    def getWeights(self, parentWeights):
+    def getVertexWeights(self, parentWeights):
         """
         Map armature weights mapped to the root parent (original mesh) to this
         child mesh. Returns parentWeights unaltered if this mesh has no parent.
         If this is a proxy mesh, parentWeights should be the weights mapped 
-        through the proxy.getWeights() method first.
+        through the proxy.getVertexWeights() method first.
+
+        This particular vertex weights mapping is only used for exporting rigged
+        meshes, as in MakeHuman only unsubdivided meshes are posed, and then
+        smoothed in their posed state if required. Vertices are not removed 
+        within MH when faces are hidden, either.
         """
-        # TODO this would heavily benefit from numpy optimization
+        if not hasattr(self, 'parent') or not self.parent:
+            return parentWeights
 
         vmap = self.inverse_parent_map
         vwmap = self.parent_map_weights
 
         from collections import OrderedDict
         weights = OrderedDict()
-        if not parentWeights:
-            return weights
-
-        # Zip vertex indices and weights
-        zippedWeights = {}
-        for (key, val) in parentWeights.items():
-            indxs, wghts = val
-            zippedWeights[key] = zip(indxs, wghts)
-        parentWeights = zippedWeights
-
-        def _fixVertexGroup(vgroup):
-            """
-            Merge duplicate weighings to the same vertex by reducing it to only
-            one entry with summed weights.
-            """
-            fixedVGroup = []
-            vgroup.sort()
-            pv = -1
-            while vgroup:
-                (pv0, wt0) = vgroup.pop()
-                if pv0 == pv:
-                    wt += wt0
-                else:
-                    if pv >= 0 and wt > 1e-4:
-                        fixedVGroup.append((pv, wt))
-                    (pv, wt) = (pv0, wt0)
-            if pv >= 0 and wt > 1e-4:
-                fixedVGroup.append((pv, wt))
-            return fixedVGroup
-
-        for key in parentWeights.keys():
+        for bname, (verts,wghts) in parentWeights.data.items():
             vgroup = []
             empty = True
-            for (v,wt) in parentWeights[key]:
+            for (v,wt) in zip(verts,wghts):
                 mvs = vmap[v]
                 if isinstance(mvs, (int, np.int32)):
                     mvs = [mvs]
@@ -749,28 +745,9 @@ class Object3D(object):
                         vgroup.append((mv, w * wt))
                         empty = False
             if not empty:
-                vgroup = _fixVertexGroup(vgroup)
-                weights[key] = vgroup
+                weights[bname] = vgroup
 
-        # Unzip and normalize weights (and put them in np format)
-        # TODO it would be a good idea to impose a max limit on nb of weights per vertex here
-        boneWeights = {}
-        wtot = np.zeros(self.getVertexCount(), np.float32)
-        for vgroup in weights.values():
-            for vn,w in vgroup:
-                wtot[vn] += w
-
-        for bname,vgroup in weights.items():
-            weights = np.zeros(len(vgroup), np.float32)
-            verts = []
-            n = 0
-            for vn,w in vgroup:
-                verts.append(vn)
-                weights[n] = w/wtot[vn]
-                n += 1
-            boneWeights[bname] = (verts, weights)
-
-        return boneWeights
+        return parentWeights.create(weights, self.getVertexCount())
 
 
     def updateIndexBuffer(self):
@@ -919,7 +896,7 @@ class Object3D(object):
 
     def setColor(self, color):
         """
-        Sets the color for the entire object.
+        Sets the vertex colors for the entire object.
 
         :param color: The color in rgba.
         :type color: [byte, byte, byte, byte]
@@ -986,6 +963,7 @@ class Object3D(object):
         Common priorities used:
         file                                 description       2D/3D priority
 
+        core/mhmain.py                       background-gradient 2D   -200
         0_modeling_background.py             background          2D    -90
         core/mhmain.py                       human               3D      0
         3_libraries_clothes_chooser.py       clothing            3D     10
@@ -1056,8 +1034,13 @@ class Object3D(object):
         :return: The FaceGroup if found, None otherwise.
         :rtype: :py:class:`module3d.FaceGroup`
         """
-
         return self._groups_rev.get(name, None)
+
+    def getFaceGroups(self):
+        """
+        The names of the facegroups available on this mesh.
+        """
+        return self._groups_rev.keys()
 
     def getGroupMaskForGroups(self, groupNames):
         groups = np.zeros(len(self._faceGroups), dtype=bool)
@@ -1135,6 +1118,13 @@ class Object3D(object):
 
         self.cameraMode = cameraMode
 
+    def getCamera(self):
+        """
+        The camera with which this mesh is rendered.
+        """
+        from core import G
+        return G.cameras[self.cameraMode]
+
     def update(self):
         """
         This method is used to call the update methods on each of a list of vertices or all vertices that form part of this object.
@@ -1186,7 +1176,7 @@ class Object3D(object):
         return np.vstack((v0, v1))
 
     def __str__(self):
-        return 'object3D named: %s, nverts: %s, nfaces: %s' % (self.name, self.getVertexCount(), self.getFaceCount())
+        return 'object3D Mesh named: %s, nverts: %s, nfaces: %s' % (self.name, self.getVertexCount(), self.getFaceCount())
 
 def dot_v3(v3_arr1, v3_arr2):
     """

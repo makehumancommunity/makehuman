@@ -10,7 +10,7 @@
 
 **Authors:**           Thomas Larsson
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/external_tools_license.html)
 
@@ -40,7 +40,7 @@ Abstract
 # Product Home Page:   http://www.makehuman.org/
 # Code Home Page:      https://bitbucket.org/MakeHuman/makehuman/
 # Authors:             Thomas Larsson
-# Script copyright (C) MakeHuman Team 2001-2014
+# Script copyright (C) MakeHuman Team 2001-2015
 # Coding Standards:    See http://www.makehuman.org/node/165
 #
 # Abstract
@@ -148,11 +148,10 @@ def projectUVs(bob, pob, context):
     bTexVerts = bTexVertsList[0]
     bNTexVerts = len(bTexVerts)
     table = {}
-    bFaces = getFaces(bob.data)
     bTexFaces = getTexFaces(bob.data, 0)
     if (scn.MCMHVersion != "None" and
         len(bob.data.vertices) > theSettings.vertices["Penis"][0]):
-        modifyTexFaces(bFaces, bTexFaces)
+        modifyTexFaces(bob.data.polygons, bTexFaces)
     for (pv, exact, verts, wts, diff) in data:
         if exact:
             (v0, x) = verts[0]
@@ -202,8 +201,7 @@ def projectUVs(bob, pob, context):
     remains = {}
     zero = (0,0)
     uvIndex = 0
-    pMeFaces = getFaces(pob.data)
-    for pf in pMeFaces:
+    for pf in pob.data.polygons:
         fn = pf.index
         rmd = {}
         rmd[0] = None
@@ -239,7 +237,7 @@ def projectUVs(bob, pob, context):
                             uvf.set(n, uv)
                             remains[fn][n] = None
 
-    for pf in pMeFaces:
+    for pf in pob.data.polygons:
         rmd = remains[pf.index]
         for n in range(4):
             if rmd[n]:
@@ -385,8 +383,7 @@ def getSeamData(me, uvFaceVerts, edgeFaces):
         vertTexVerts[vn] = {}
         v.select = False
 
-    meFaces = getFaces(me)
-    for f in meFaces:
+    for f in me.polygons:
         fn = f.index
         for vn in f.vertices:
             n = getFaceIndex(vn, f)
@@ -455,9 +452,7 @@ def getSingleUvLoc(vn, table):
         try:
             return buvs[0]*wts[0] + buvs[1]*wts[1] + buvs[2]*wts[2]
         except:
-            for n in range(3):
-                print(buvs[n], wts[n])
-            halt
+            raise RuntimeError("Bug getSingleUvLoc: %s" % [(buvs[n], wts[n]) for n in range(3)])
 
 
 def getUvLoc(vn, f, uvface):
@@ -473,7 +468,6 @@ def getUvLoc(vn, f, uvface):
 def createSeamObject(context):
     ob = getHuman(context)
     scn = context.scene
-    getFaces(ob.data)
     texFaces = getTexFaces(ob.data, 0)
     vertList, pairList, _edgeList = getSeams(ob, texFaces, scn)
     coords = coordList(vertList, ob.data.vertices)
@@ -500,7 +494,6 @@ def autoSeams(context):
     bpy.ops.mesh.select_all(action='DESELECT')
     bpy.ops.object.mode_set(mode='OBJECT')
 
-    getFaces(bob.data)
     texFaces = getTexFaces(bob.data, 0)
     (bvnums, _pairList, bedges) = getSeams(bob, texFaces, scn)
 
@@ -554,7 +547,7 @@ def autoSeams(context):
             pf.select = True
             for pe in edges:
                 pe.use_seam = not pe.use_seam
-            halt
+            raise RuntimeError("Bug: Three seams")
 
 def otherEnd(e, v, ob):
     v1 = ob.data.vertices[e.vertices[0]]
@@ -571,7 +564,7 @@ def findEdge(verts, vertEdges):
     print(verts)
     print(vertEdges[vn1])
     print(vertEdges[vn2])
-    halt
+    raise RuntimeError("Cannot find edge")
 
 
 def markEdges(pv0, pv1, pob, pVertEdges, taken, depth):
@@ -631,8 +624,7 @@ def setSeams(context):
     seams = None
     for ob in scn.objects:
         if ob.select and not ob.MhHuman:
-            faces = getFaces(ob.data)
-            if faces:
+            if ob.data.polygons:
                 clothing = ob
             else:
                 seams = ob
@@ -680,8 +672,7 @@ def coordList(vertList, verts):
 
 def getSeams(ob, texFaces, scn):
     verts = ob.data.vertices
-    meFaces = getFaces(ob.data)
-    faceTable = createFaceTable(verts, meFaces)
+    faceTable = createFaceTable(verts, ob.data.polygons)
     onEdges = {}
     for v in verts:
         onEdges[v.index] = False

@@ -8,9 +8,9 @@
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Thomas Larsson
+**Authors:**           Thomas Larsson, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2015
 
 **Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
 
@@ -37,21 +37,15 @@ Abstract
 TODO
 """
 
-from export import Exporter
-from exportutils.config import Config
+from export import Exporter, ExportConfig
 
 
-class DaeConfig(Config):
+class DaeConfig(ExportConfig):
     def __init__(self):
-
-        Config.__init__(self)
+        ExportConfig.__init__(self)
 
         self.useRelPaths = True
         self.useNormals = True
-
-        self.expressions = False
-        self.useCustomTargets = False
-        self.useTPose = False
 
         self.yUpFaceZ = True
         self.yUpFaceX = False
@@ -61,6 +55,9 @@ class DaeConfig(Config):
         self.localY = True
         self.localX = False
         self.localG = False
+
+        self.facePoseUnits = False
+        self.hiddenGeom = False
 
     # TODO preferably these are used (perhaps as enum) instead of the bools above
     # TODO move these to export Config super class
@@ -101,20 +98,6 @@ class DaeConfig(Config):
         return result
     '''
 
-    def getRigOptions(self):
-        rigOptions = super(DaeConfig, self).getRigOptions()
-        if rigOptions is None:
-            return None
-            #from armature.options import ArmatureOptions
-            #self.rigOptions = ArmatureOptions()
-        else:
-            rigOptions.setExportOptions(
-                useExpressions = self.expressions,
-                useTPose = self.useTPose,
-            )
-        return rigOptions
-
-
 class ExporterCollada(Exporter):
     def __init__(self):
         Exporter.__init__(self)
@@ -126,47 +109,45 @@ class ExporterCollada(Exporter):
     def build(self, options, taskview):
         import gui
         Exporter.build(self, options, taskview)
-        #self.expressions     = options.addWidget(gui.CheckBox("Expressions", False))
-        #self.useCustomTargets = options.addWidget(gui.CheckBox("Custom targets", False))
-        #self.useTPose = options.addWidget(gui.CheckBox("T-pose", False))
+
+        self.hiddenGeom = options.addWidget(gui.CheckBox("Helper geometry", False))
+        self.facePoseUnits = options.addWidget(gui.CheckBox("Facial pose-units", False))
 
         orients = []
-        self.yUpFaceZ = options.addWidget(gui.RadioButton(orients, "Y up, face Z", True))
-        self.yUpFaceX = options.addWidget(gui.RadioButton(orients, "Y up, face X", False))
-        self.zUpFaceNegY = options.addWidget(gui.RadioButton(orients, "Z up, face -Y", False))
-        self.zUpFaceX = options.addWidget(gui.RadioButton(orients, "Z up, face X", False))
+        box = options.addWidget(gui.GroupBox("Orientation"))
+        self.yUpFaceZ = box.addWidget(gui.RadioButton(orients, "Y up, face Z", True))
+        self.yUpFaceX = box.addWidget(gui.RadioButton(orients, "Y up, face X", False))
+        self.zUpFaceNegY = box.addWidget(gui.RadioButton(orients, "Z up, face -Y", False))
+        self.zUpFaceX = box.addWidget(gui.RadioButton(orients, "Z up, face X", False))
 
-        #csyses = []
-        #self.localY = options.addWidget(gui.RadioButton(csyses, "Local Y along bone", True))
-        #self.localX = options.addWidget(gui.RadioButton(csyses, "Local X along bone", False))
-        #self.localG = options.addWidget(gui.RadioButton(csyses, "Local = Global", False))
+        csyses = []
+        box = options.addWidget(gui.GroupBox("Bone orientation"))
+        self.localY = box.addWidget(gui.RadioButton(csyses, "Along local Y", True))
+        self.localX = box.addWidget(gui.RadioButton(csyses, "Along local X", False))
+        self.localG = box.addWidget(gui.RadioButton(csyses, "Local = Global", False))
 
     def export(self, human, filename):
         from .mh2collada import exportCollada
-        #self.taskview.exitPoseMode()
         cfg = self.getConfig()
         cfg.setHuman(human)
         exportCollada(filename("dae"), cfg)
-        #self.taskview.enterPoseMode()
 
     def getConfig(self):
         cfg = DaeConfig()
-        cfg.useTPose           = False # self.useTPose.selected
         cfg.feetOnGround       = self.feetOnGround.selected
         cfg.scale,cfg.unit    = self.taskview.getScale()
-
-        #cfg.expressions = self.expressions.selected
-        #cfg.useCustomTargets = self.useCustomTargets.selected
-        #cfg.useTPose = self.useTPose.selected
 
         cfg.yUpFaceZ = self.yUpFaceZ.selected
         cfg.yUpFaceX = self.yUpFaceX.selected
         cfg.zUpFaceNegY = self.zUpFaceNegY.selected
         cfg.zUpFaceX = self.zUpFaceX.selected
 
-        #cfg.localY = self.localY.selected
-        #cfg.localX = self.localX.selected
-        #cfg.localG = self.localG.selected
+        cfg.localY = self.localY.selected
+        cfg.localX = self.localX.selected
+        cfg.localG = self.localG.selected
+
+        cfg.facePoseUnits = self.facePoseUnits.selected
+        cfg.hiddenGeom        = self.hiddenGeom.selected
 
         return cfg
 
