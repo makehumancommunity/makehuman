@@ -186,4 +186,4 @@ def load(app):
 # At the moment this is not used, but in the future it will remove the added GUI elements
 
 def unload(app):
-    eventhandler.onUnload()
+    pass
