@@ -1396,10 +1396,15 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         from codecs import open
 
         def _get_version(lineData):
-            for l in lineData:
-                l = l.split()
-                if l[0] == 'version':
-                    return l[1]
+            try:
+                for l in lineData:
+                    if not l:
+                        continue
+                    l = l.split()
+                    if l[0] == 'version':
+                        return l[1]
+            except:
+                return None
             return None
 
         log.message("Loading human from MHM file %s.", filename)
