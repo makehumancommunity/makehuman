@@ -22,6 +22,7 @@
 
 import array
 import datetime
+import log
 
 from fbx_utils import *
 
@@ -250,7 +251,7 @@ def fbx_data_bindpose_element(objectsParent, key, id, count):
 def fbx_data_pose_node_element(bindposeParent, key, id, bindmat):
     fbx_posenode = elem_empty(bindposeParent, b"PoseNode")
     elem_data_single_int64(fbx_posenode, b"Node", id)
-    elem_data_single_float64_array(fbx_posenode, b"Matrix", bindmat.ravel(order='F'))  # Use column-major order
+    elem_data_single_float64_array(fbx_posenode, b"Matrix", bindmat.ravel(order='C'))  # Use column-major order
 
 def fbx_data_mesh_element(objectsParent, key, id, properties, coord, fvert, vnorm, texco, fuv):
     geom = elem_data_single_int64(objectsParent, b"Geometry", id)  #get_fbx_uuid_from_key(key))
@@ -261,8 +262,8 @@ def fbx_data_mesh_element(objectsParent, key, id, properties, coord, fvert, vnor
 
     props = elem_properties(geom)
 
-    for name, ptype, value, animatable, custom in get_properties(properties):
-        elem_props_set(props, ptype, name, value, animatable, custom)
+    for pname, ptype, value, animatable, custom in get_properties(properties):
+        elem_props_set(props, ptype, pname, value, animatable, custom)
         #fbx_data_element_custom_properties(props, me)
 
 
@@ -287,6 +288,7 @@ def fbx_data_mesh_element(objectsParent, key, id, properties, coord, fvert, vnor
     #elem_data_single_int32_array(geom, b"Edges", t_eli)
     del t_pvi
 
+    elem_data_single_int32(geom, b"GeometryVersion", 124)
 
     # Layers
 
@@ -398,6 +400,14 @@ def fbx_data_mesh_element(objectsParent, key, id, properties, coord, fvert, vnor
     elem_data_single_string(lay_mat, b"ReferenceInformationType", b"IndexToDirect")
     elem_data_single_int32_array(lay_mat, b"Materials", [0])
 
+    # Face's textures -perhaps obsolete.
+    lay_tex = elem_data_single_int32(geom, b"LayerElementTexture", 0)
+    elem_data_single_int32(lay_tex, b"Version", 101)
+    elem_data_single_string(lay_tex, b"Name", (name+"_Texture").encode())
+
+    elem_data_single_string(lay_tex, b"MappingInformationType", b"ByPolygonVertex")
+    elem_data_single_string(lay_tex, b"ReferenceInformationType", b"IndexToDirect")
+    elem_data_single_string(lay_tex, b"BlendMode", b"Translucent")
 
     # Layer TOC
     layer = elem_data_single_int32(geom, b"Layer", 0)
@@ -433,9 +443,13 @@ def fbx_data_mesh_element(objectsParent, key, id, properties, coord, fvert, vnor
     elem_data_single_string(lay_mat, b"Type", b"LayerElementMaterial")
     elem_data_single_int32(lay_mat, b"TypedIndex", 0)
 
+    lay_tex = elem_empty(layer, b"LayerElement")
+    elem_data_single_string(lay_tex, b"Type", b"LayerElementTexture")
+    elem_data_single_int32(lay_tex, b"TypedIndex", 0)
 
     # Shape keys
     #fbx_data_mesh_shapes_elements(root, me_obj, me, scene_data, tmpl, props)
+
 
 def fbx_data_model_element(objectsParent, key, id, properties):
     mod = elem_data_single_int64(objectsParent, b"Model", id)
@@ -445,11 +459,26 @@ def fbx_data_model_element(objectsParent, key, id, properties):
     elem_data_single_int32(mod, b"Version", FBX_MODELS_VERSION)
 
     props = elem_properties(mod)
-    for name, ptype, value, animatable, custom in get_properties(properties):
-        elem_props_set(props, ptype, name, value, animatable, custom)
+    for pname, ptype, value, animatable, custom in get_properties(properties):
+        elem_props_set(props, ptype, pname, value, animatable, custom)
 
-    elem_data_single_bool(mod, b"Shading", True)
+    elem_data_single_string(mod, b"Shading", "Y")
     elem_data_single_string(mod, b"Culling", "CullingOff")
+
+
+def fbx_data_material(objectsParent, key, id, properties):
+    fbx_mat = elem_data_single_int64(objectsParent, b"Material", id)
+    fbx_mat.add_string(fbx_name_class(key))
+    fbx_mat.add_string(b"")
+
+    elem_data_single_int32(fbx_mat, b"Version", 102)
+    elem_data_single_string(fbx_mat, b"ShadingModel", "phong")
+    elem_data_single_int32(fbx_mat, b"MultiLayer", 0)
+
+    props = elem_properties(fbx_mat)
+    for pname, ptype, value, animatable, custom in get_properties(properties):
+        elem_props_set(props, ptype, pname, value, animatable, custom)
+
 
 def fbx_data_texture_file_element(objectsParent, key, id, video_key, video_id, texpath, texpath_rel, properties_tex, properties_vid):
     """
@@ -464,8 +493,8 @@ def fbx_data_texture_file_element(objectsParent, key, id, video_key, video_id, t
     fbx_vid.add_string(b"Clip")
 
     props = elem_properties(fbx_vid)
-    for name, ptype, value, animatable, custom in get_properties(properties_vid):
-        elem_props_set(props, ptype, name, value, animatable, custom)
+    for pname, ptype, value, animatable, custom in get_properties(properties_vid):
+        elem_props_set(props, ptype, pname, value, animatable, custom)
 
     elem_data_single_int32(fbx_vid, b"UseMipMap", 0)
     elem_data_single_string_unicode(fbx_vid, b"Filename", texpath)
@@ -480,21 +509,21 @@ def fbx_data_texture_file_element(objectsParent, key, id, video_key, video_id, t
     elem_data_single_int32(fbx_tex, b"Version", FBX_TEXTURE_VERSION)
     elem_data_single_string(fbx_tex, b"TextureName", fbx_name_class(key.encode()))
     elem_data_single_string(fbx_tex, b"Media", video_key)
-    elem_data_single_string_unicode(fbx_tex, b"FileName", texpath)
+    elem_data_single_string_unicode(fbx_tex, b"Filename", texpath)
     elem_data_single_string_unicode(fbx_tex, b"RelativeFilename", texpath_rel)
 
-    elem_data_single_int32(fbx_tex, b"Version", FBX_TEXTURE_VERSION)
     elem_data_single_float32_array(fbx_tex, b"ModelUVTranslation", [0,0])
     elem_data_single_float32_array(fbx_tex, b"ModelUVScaling", [1,1])
     elem_data_single_string(fbx_tex, b"Texture_Alpha_Source", "None")
     elem_data_single_int32_array(fbx_tex, b"Cropping", [0,0,0,0])
 
     props = elem_properties(fbx_tex)
-    for name, ptype, value, animatable, custom in get_properties(properties_tex):
-        elem_props_set(props, ptype, name, value, animatable, custom)
+    for pname, ptype, value, animatable, custom in get_properties(properties_tex):
+        elem_props_set(props, ptype, pname, value, animatable, custom)
 
     # UseMaterial should always be ON imho.
     elem_props_set(props, "p_bool", b"UseMaterial", True)
+
 
 def fbx_data_skeleton_bone_model(objectsParent, key, id, properties):
     # Bone "data".
@@ -510,8 +539,9 @@ def fbx_data_skeleton_bone_model(objectsParent, key, id, properties):
     elem_data_single_string(fbx_bo, b"Culling", "CullingOff")
 
     props = elem_properties(fbx_bo)
-    for name, ptype, value, animatable, custom in get_properties(properties):
-        elem_props_set(props, ptype, name, value, animatable, custom)
+    for pname, ptype, value, animatable, custom in get_properties(properties):
+        elem_props_set(props, ptype, pname, value, animatable, custom)
+
 
 def fbx_data_skeleton_bone_node(objectsParent, key, id, properties):
     # Bone "data".
@@ -524,8 +554,9 @@ def fbx_data_skeleton_bone_node(objectsParent, key, id, properties):
     elem_data_single_string(fbx_bo, b"TypeFlags", b"Skeleton")
 
     props = elem_properties(fbx_bo)
-    for name, ptype, value, animatable, custom in get_properties(properties):
-        elem_props_set(props, ptype, name, value, animatable, custom)
+    for pname, ptype, value, animatable, custom in get_properties(properties):
+        elem_props_set(props, ptype, pname, value, animatable, custom)
+
 
 def fbx_data_skeleton_model(objectsParent, key, id, properties):
     # Skeleton null object (has no data).
@@ -540,8 +571,8 @@ def fbx_data_skeleton_model(objectsParent, key, id, properties):
     elem_data_single_string(fbx_bo, b"Culling", "CullingOff")
 
     props = elem_properties(fbx_bo)
-    for name, ptype, value, animatable, custom in get_properties(properties):
-        elem_props_set(props, ptype, name, value, animatable, custom)
+    for pname, ptype, value, animatable, custom in get_properties(properties):
+        elem_props_set(props, ptype, pname, value, animatable, custom)
 
 
 def fbx_data_deformer(objectsParent, key, id, properties):
@@ -550,11 +581,12 @@ def fbx_data_deformer(objectsParent, key, id, properties):
     fbx_skin.add_string(b"Skin")
 
     props = elem_properties(fbx_skin)
-    for name, ptype, value, animatable, custom in get_properties(properties):
-        elem_props_set(props, ptype, name, value, animatable, custom)
+    for pname, ptype, value, animatable, custom in get_properties(properties):
+        elem_props_set(props, ptype, pname, value, animatable, custom)
 
     elem_data_single_int32(fbx_skin, b"Version", FBX_DEFORMER_SKIN_VERSION)
     elem_data_single_float64(fbx_skin, b"Link_DeformAcuracy", 50.0)  # Only vague idea what it is...
+
 
 def fbx_data_subdeformer(objectsParent, key, id, indices, weights, bindmat, bindinv):
     # Create the cluster.
@@ -574,13 +606,13 @@ def fbx_data_subdeformer(objectsParent, key, id, indices, weights, bindmat, bind
     #          **it is stored in bone space in FBX data!** See:
     #          http://area.autodesk.com/forum/autodesk-fbx/fbx-sdk/why-the-values-return-
     #                 by-fbxcluster-gettransformmatrix-x-not-same-with-the-value-in-ascii-fbx-file/
-    elem_data_single_float64_array(fbx_clstr, b"Transform", bindmat.ravel(order='F'))
-    elem_data_single_float64_array(fbx_clstr, b"TransformLink", bindinv.ravel(order='F'))
+    elem_data_single_float64_array(fbx_clstr, b"Transform", bindmat.ravel(order='C'))
+    elem_data_single_float64_array(fbx_clstr, b"TransformLink", bindinv.ravel(order='C'))
     #elem_data_single_float64_array(fbx_clstr, b"TransformAssociateModel", matrix4_to_array(mat_world_arm))
 
 # ##### Top-level FBX elements generators. #####
 
-def fbx_header_elements(root, config, time=None):
+def fbx_header_elements(root, config, filepath, time=None):
     """
     Write boiling code of FBX root.
     time is expected to be a datetime.datetime object, or None (using now() in this case).
@@ -589,6 +621,7 @@ def fbx_header_elements(root, config, time=None):
     app_vendor = "MakeHuman.org"
     app_name = "MakeHuman"
     app_ver = makehuman.getVersionStr()
+
     # ##### Start of FBXHeaderExtension element.
     header_ext = elem_empty(root, b"FBXHeaderExtension")
 
@@ -611,7 +644,9 @@ def fbx_header_elements(root, config, time=None):
     elem_data_single_int32(elem, b"Second", time.second)
     elem_data_single_int32(elem, b"Millisecond", time.microsecond // 1000)
 
-    elem_data_single_string_unicode(header_ext, b"Creator", "%s - %s" % (app_name, app_ver))
+    # The FBX converter refuses to load the character unless this is the creator.
+    elem_data_single_string_unicode(header_ext, b"Creator", "FBX SDK/FBX Plugins version 2013.3")
+    #elem_data_single_string_unicode(header_ext, b"Creator", "%s - %s" % (app_name, app_ver))
 
     # 'SceneInfo' seems mandatory to get a valid FBX file...
     # TODO use real values!
@@ -624,25 +659,25 @@ def fbx_header_elements(root, config, time=None):
     elem_data_single_int32(meta_data, b"Version", FBX_SCENEINFO_VERSION)
     elem_data_single_string(meta_data, b"Title", b"")
     elem_data_single_string(meta_data, b"Subject", b"")
-    elem_data_single_string(meta_data, b"Author", b"")
+    elem_data_single_string(meta_data, b"Author", b"www.makehuman.org")
     elem_data_single_string(meta_data, b"Keywords", b"")
     elem_data_single_string(meta_data, b"Revision", b"")
     elem_data_single_string(meta_data, b"Comment", b"")
 
     props = elem_properties(scene_info)
-    elem_props_set(props, "p_string_url", b"DocumentUrl", "/foobar.fbx")    # TODO set to current export filename?
-    elem_props_set(props, "p_string_url", b"SrcDocumentUrl", "/foobar.fbx")
+    elem_props_set(props, "p_string_url", b"DocumentUrl", filepath)    # TODO set to current export filename?
+    elem_props_set(props, "p_string_url", b"SrcDocumentUrl", filepath)
     original = elem_props_compound(props, b"Original")
     original("p_string", b"ApplicationVendor", app_vendor)
     original("p_string", b"ApplicationName", app_name)
     original("p_string", b"ApplicationVersion", app_ver)
-    original("p_datetime", b"DateTime_GMT", "01/01/1970 00:00:00.000")
-    original("p_string", b"FileName", "/foobar.fbx")
+    original("p_datetime", b"DateTime_GMT", "")
+    original("p_string", b"FileName", "")
     lastsaved = elem_props_compound(props, b"LastSaved")
     lastsaved("p_string", b"ApplicationVendor", app_vendor)
     lastsaved("p_string", b"ApplicationName", app_name)
     lastsaved("p_string", b"ApplicationVersion", app_ver)
-    lastsaved("p_datetime", b"DateTime_GMT", "01/01/1970 00:00:00.000")
+    lastsaved("p_datetime", b"DateTime_GMT", "")
 
     # ##### End of FBXHeaderExtension element.
 
@@ -655,7 +690,8 @@ def fbx_header_elements(root, config, time=None):
                                     "".format(time.year, time.month, time.day, time.hour, time.minute, time.second,
                                               time.microsecond * 1000))
 
-    elem_data_single_string_unicode(root, b"Creator", "%s - %s" % (app_name, app_ver))
+    #elem_data_single_string_unicode(root, b"Creator", "%s - %s" % (app_name, app_ver))
+    elem_data_single_string_unicode(root, b"Creator", "FBX SDK/FBX Plugins version 2013.3 build=20120911")
 
     # ##### Start of GlobalSettings element.
     global_settings = elem_empty(root, b"GlobalSettings")
@@ -703,8 +739,8 @@ def fbx_documents_elements(root, name, id):
     elem_data_single_int32(docs, b"Count", 1)
 
     doc = elem_data_single_int64(docs, b"Document", id)
-    doc.add_string_unicode(name)
-    doc.add_string_unicode(name)
+    doc.add_string_unicode("Scene")
+    doc.add_string_unicode("Scene")
 
     props = elem_properties(doc)
     elem_props_set(props, "p_object", b"SourceObject")
@@ -731,6 +767,7 @@ def fbx_definitions_elements(root, users_count):
     elem_data_single_int32(definitions, b"Version", FBX_TEMPLATES_VERSION)
     elem_data_single_int32(definitions, b"Count", users_count)
 
+    fbx_template_generate(definitions, b"GlobalSettings", 1)
     #fbx_templates_generate(definitions, scene_data.templates)
 
 

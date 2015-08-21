@@ -137,13 +137,13 @@ def exportFbx(filepath, config):
     fbx_header.writeObjectDefs(fp, meshes, skel, action, config)
     # Skeleton template definition
     fbx_skeleton.writeObjectDefs(fp, meshes, skel, config)
+    # Material template definition
+    if config.useMaterials:
+        fbx_material.writeObjectDefs(fp, meshes, config)
     # Objects template definition
     fbx_mesh.writeObjectDefs(fp, meshes, nShapes, config)
     # Skin deformer template definition
     fbx_deformer.writeObjectDefs(fp, meshes, skel, config)
-    # Material template definition
-    if config.useMaterials:
-        fbx_material.writeObjectDefs(fp, meshes, config)
     # Animation template definition
     if useAnim:
         fbx_anim.writeObjectDefs(fp, action, config)
@@ -154,9 +154,9 @@ def exportFbx(filepath, config):
     if skel:
         fbx_skeleton.writeObjectProps(fp, skel, config)
     fbx_mesh.writeObjectProps(fp, meshes, config)
-    fbx_deformer.writeObjectProps(fp, meshes, skel, config)
     if config.useMaterials:
         fbx_material.writeObjectProps(fp, meshes, config)
+    fbx_deformer.writeObjectProps(fp, meshes, skel, config)
     if useAnim:
         # TODO support binary FBX animations export
         fbx_anim.writeObjectProps(fp, action, skel, config)

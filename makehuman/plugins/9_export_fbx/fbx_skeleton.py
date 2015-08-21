@@ -97,18 +97,18 @@ def writeObjectDefs(fp, meshes, skel, config):
         ("ScalingActive",   "p_bool",       0),
         ("ScalingMin",      "p_vector_3d",  [0,0,0]),
         ("ScalingMax",      "p_vector_3d",  [1,1,1]),
-        ("ScalingMinX",     "p_bool",       [0]),
-        ("ScalingMinY",     "p_bool",       [0]),
-        ("ScalingMinZ",     "p_bool",       [0]),
-        ("ScalingMaxX",     "p_bool",       [0]),
+        ("ScalingMinX",     "p_bool",       0),
+        ("ScalingMinY",     "p_bool",       0),
+        ("ScalingMinZ",     "p_bool",       0),
+        ("ScalingMaxX",     "p_bool",       0),
         ("ScalingMaxY",     "p_bool",       0),
         ("ScalingMaxZ",     "p_bool",       0),
         ("GeometricTranslation", "p_vector_3d", [0,0,0]),
         ("GeometricRotation", "p_vector_3d", [0,0,0]),
         ("GeometricScaling", "p_vector_3d", [1,1,1]),
         ("MinDampRangeX",   "p_double",     0),
-        ("MinDampRangeZ",   "p_double",     0),
         ("MinDampRangeY",   "p_double",     0),
+        ("MinDampRangeZ",   "p_double",     0),
         ("MaxDampRangeX",   "p_double",     0),
         ("MaxDampRangeY",   "p_double",     0),
         ("MaxDampRangeZ",   "p_double",     0),
@@ -198,7 +198,7 @@ def writeNodeAttributeProp(fp, bone, config):
 
     properties = [
         ("Size",        "p_double",     1),
-        ("LimbLength",  "p_double",     1)  # TODO what to do with "H" flag?
+        ("LimbLength",  "p_double",     bone.length)  # TODO what to do with "H" flag?
     ]
 
     if config.binary:

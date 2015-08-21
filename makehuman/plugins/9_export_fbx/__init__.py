@@ -47,7 +47,7 @@ class FbxConfig(ExportConfig):
 
         self.useRelPaths     = False
         self.useMaterials    = True # for debugging  # TODO what is the function of this?
-        self.binary = False
+        self.binary = True
 
         self.yUpFaceZ = True
         self.yUpFaceX = False
@@ -96,7 +96,7 @@ class ExporterFBX(Exporter):
     def build(self, options, taskview):
         import gui
         Exporter.build(self, options, taskview)
-        self.binary   = options.addWidget(gui.CheckBox("Binary FBX", False))
+        self.binary   = options.addWidget(gui.CheckBox("Binary FBX", True))
         self.hiddenGeom = options.addWidget(gui.CheckBox("Helper geometry", False))
 
     def export(self, human, filename):

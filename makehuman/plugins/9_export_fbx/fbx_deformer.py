@@ -86,12 +86,14 @@ def writeObjectDefs(fp, meshes, skel, config):
     if config.binary:
         from . import fbx_binary
         elem = fbx_binary.get_child_element(fp, 'Definitions')
-        fbx_binary.fbx_template_generate(elem, "Deformer", count)
+        if count > 0:
+            fbx_binary.fbx_template_generate(elem, "Deformer", count)
         if skel:
             fbx_binary.fbx_template_generate(elem, "Pose", 1)
         return
 
-    fp.write(
+    if count > 0:
+        fp.write(
 '    ObjectType: "Deformer" {\n' +
 '       Count: %d' % count +
 """
@@ -224,8 +226,7 @@ def writeSubDeformer(fp, name, bone, weights, config):
     if config.binary:
         from . import fbx_binary
         elem = fbx_binary.get_child_element(fp, 'Objects')
-        import numpy as np
-        fbx_binary.fbx_data_subdeformer(elem, key, id, weights[0], weights[1], bindmat, np.transpose(bindinv))
+        fbx_binary.fbx_data_subdeformer(elem, key, id, weights[0], weights[1], bindmat, bindinv)
         return
 
     nVertexWeights = len(weights[0])
