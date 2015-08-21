@@ -179,6 +179,10 @@ def writeGeometryProp(fp, mesh, config):
         Layer: 0 {
             Version: 100
             LayerElement:  {
+                Type: "LayerElementUV"
+                TypedIndex: 0
+            }
+            LayerElement:  {
                 Type: "LayerElementNormal"
                 TypedIndex: 0
             }
@@ -188,14 +192,6 @@ def writeGeometryProp(fp, mesh, config):
             }
             LayerElement:  {
                 Type: "LayerElementTexture"
-                TypedIndex: 0
-            }
-            LayerElement:  {
-                Type: "LayerElementNormal"
-                TypedIndex: 0
-            }
-            LayerElement:  {
-                Type: "LayerElementUV"
                 TypedIndex: 0
             }
         }

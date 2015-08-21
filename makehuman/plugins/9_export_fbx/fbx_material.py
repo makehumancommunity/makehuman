@@ -53,7 +53,7 @@ def getObjectNumbers(meshes):
     for mesh in meshes:
         mat = mesh.material
         if mat.diffuseTexture:
-            nTextures += 2
+            nTextures += 1
             nImages += 1
         if mat.specularMapTexture:
             nTextures += 1
@@ -136,7 +136,7 @@ def writeObjectDefs(fp, meshes, config):
         ("LastFrame", "p_integer", 0),
         ("Width", "p_integer", 0),
         ("Height", "p_integer", 0),
-        ("Path", "p_string_url", ""),
+        ("Path", "p_string_xrefurl", ""),
         ("StartFrame", "p_integer", 0),
         ("StopFrame", "p_integer", 0),
         ("PlaySpeed", "p_double", 0),
@@ -150,7 +150,7 @@ def writeObjectDefs(fp, meshes, config):
     if config.binary:
         from . import fbx_binary
         elem = fbx_binary.get_child_element(fp, 'Definitions')
-        fbx_binary.fbx_template_generate(elem, "Material", nMaterials, None, properties_mat)
+        fbx_binary.fbx_template_generate(elem, "Material", nMaterials, "FbxSurfacePhong", properties_mat)
         fbx_binary.fbx_template_generate(elem, "Texture", nTextures, "FbxFileTexture", properties_tex)
         fbx_binary.fbx_template_generate(elem, "Video", nImages, "FbxVideo", properties_vid)
         return
@@ -216,23 +216,22 @@ def writeMaterial(fp, mesh, config):
 
     mat = mesh.material
     properties = [
-        ("TransparentColor", "p_color", tuple(3*[1.0 - mat.opacity]), True),
-        ("TransparencyFactor", "p_number", mat.transparencyMapIntensity, True),
-        #("ShininessExponent", "p_number", mat.shininess, True),
-        #("EmissiveColor", "p_vector_3d", mat.emissiveColor.asTuple()),
-        #("AmbientColor", "p_vector_3d", mat.ambientColor.asTuple()),
-        ("DiffuseColor", "p_vector_3d", mat.diffuseColor.asTuple()),
-        ("DiffuseFactor", "p_number", 1.0, True),
-        ("SpecularColor", "p_vector_3d", mat.specularColor.asTuple()),
-        ("SpecularFactor", "p_number", mat.specularMapIntensity, True),
-        ("Shininess", "p_double", mat.shininess),
-        ("Reflectivity", "p_double", 0)
+        ("DiffuseColor", "p_color", mat.diffuseColor.asTuple(), b"A"),
+        ("Diffuse", "p_vector_3d", mat.diffuseColor.asTuple(), b"A"),
+        ("SpecularColor", "p_color", mat.specularColor.asTuple(), b"A"),
+        ("Specular", "p_vector_3d", mat.specularColor.asTuple(), b"A"),
+        ("Shininess", "p_double", mat.shininess, b"A"),
+        ("Reflectivity", "p_double", 0, b"A"),
+        ("Emissive", "p_vector_3d", mat.emissiveColor.asTuple(), b"A"),
+        ("Ambient", "p_vector_3d", mat.ambientColor.asTuple(), b"A"),
+        ("TransparencyFactor", "p_number", mat.transparencyMapIntensity, True, b"A"),
+        ("Opacity", "p_double", mat.opacity, b"A")
     ]
 
     if config.binary:
         from . import fbx_binary
         elem = fbx_binary.get_child_element(fp, 'Objects')
-        fbx_binary.fbx_data_deformer(elem, key, id, properties)
+        fbx_binary.fbx_data_material(elem, key, id, properties)
         return
 
     import fbx_utils
