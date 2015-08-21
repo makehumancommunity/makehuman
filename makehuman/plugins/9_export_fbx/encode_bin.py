@@ -150,11 +150,11 @@ class FBXElem:
 
         # mimic behavior of fbxconverter (also common sense)
         # we could make this configurable.
-        encoding = 0 if len(data) <= 128 else 1
+        encoding = 0 if len(data) <= 128 else 0
         if encoding == 0:
             pass
         elif encoding == 1:
-            data = zlib.compress(data, 1)
+            data = zlib.compress(data, 9)
 
         comp_len = len(data)
 

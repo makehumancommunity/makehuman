@@ -53,7 +53,7 @@ def writeHeader(fp, filepath, config):
         from . import fbx_binary
         import os
         root = fp
-        fbx_binary.fbx_header_elements(root, config, today)
+        fbx_binary.fbx_header_elements(root, config, filepath, today)
         name = os.path.splitext(os.path.basename(filepath))[0]
         fbx_binary.fbx_documents_elements(root, name, id)
         fbx_binary.fbx_references_elements(root)
@@ -147,7 +147,6 @@ Documents:  {
         Properties70:  {
             P: "SourceObject", "object", "", ""
             P: "ActiveAnimStackName", "KString", "", "", ""
-            P: "COLLADA_ID", "KString", "", "", "Scene"
         }
         RootNode: 0
     }

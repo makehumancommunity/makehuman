@@ -20,7 +20,7 @@
 # ##### END GPL LICENSE BLOCK #####
 
 # Script copyright (C) Campbell Barton, Bastien Montagne
-# Modified by Jonas Hauquier for python 2.7 compat and MakeHuman FBX export 
+# Modified by Jonas Hauquier for python 2.7 compat and MakeHuman FBX export
 
 
 import math
@@ -32,7 +32,7 @@ from . import encode_bin, data_types
 
 
 # "Constants"
-FBX_VERSION = 7400
+FBX_VERSION = 7300
 FBX_HEADER_VERSION = 1003
 FBX_SCENEINFO_VERSION = 100
 FBX_TEMPLATES_VERSION = 100
@@ -391,6 +391,7 @@ FBX_PROPERTIES_DEFINITIONS = {
     "p_color": (b"Color", b"", "add_float64", "add_float64", "add_float64"),  # Animatable-only?
     "p_string": (b"KString", b"", "add_string_unicode"),
     "p_string_url": (b"KString", b"Url", "add_string_unicode"),
+    "p_string_xrefurl": (b"KString", b"XrefUrl", "add_string_unicode"),
     "p_timestamp": (b"KTime", b"Time", "add_int64"),
     "p_datetime": (b"DateTime", b"", "add_string_unicode"),
     # Special types.
