@@ -93,7 +93,7 @@ def isMhxRig(rig):
     return ('foot.rev.L' in rig.pose.bones.keys())
 
 def isDefaultRig(rig):
-    return allBonesInList(['risorius03.L', 'shoulder01.R'], rig)
+    return allBonesInList(['risorius03.L', 'shoulder01.R', "upperleg01.L", "upperleg02.L"], rig)
 
 def isMbRig(rig):
     return allBonesInList(["LeftArm", "LeftArmRoll"], rig)
