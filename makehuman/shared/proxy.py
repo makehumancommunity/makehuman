@@ -902,7 +902,7 @@ def peekMetadata(proxyFilePath, proxyType=None):
         elif words[0] == 'uuid':
             uuid = words[1]
         elif words[0] == 'tag':
-            tags.add(words[1].lower())
+            tags.add(" ".join(words[1:]).lower())
         elif words[0] == 'verts':
             break
     fp.close()
