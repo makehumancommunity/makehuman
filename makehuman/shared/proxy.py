@@ -549,6 +549,8 @@ def saveBinaryProxy(proxy, path):
     if proxy.max_pole:
         vars_["max_pole"] = np.asarray(proxy.max_pole, dtype=np.uint32)
 
+    proxy.tmatrix.toNumpyStruct(vars_)
+
     special_poses = []
     for posetype, posename in proxy.special_pose.items():
         special_poses.append(posetype)
@@ -634,7 +636,7 @@ def loadBinaryProxy(path, human, type):
     # Reconstruct reverse vertex (and weights) mapping
     proxy._reloadReverseMapping()
 
-    proxy.tmatrix = TMatrix()
+    proxy.tmatrix.fromNumpyStruct(npzfile)
 
     proxy.uvLayers = {}
     for uvIdx, uvName in enumerate(_unpackStringList(npzfile['uvLayers_str'], npzfile['uvLayers_idx'])):
@@ -731,6 +733,105 @@ class TMatrix:
         self.shearData = None
         self.lShearData = None
         self.rShearData = None
+
+
+    def toNumpyStruct(self, npzfile, prefix=""):
+        """Serialize TMatrix in npz file"""
+        def _nan_array(size):
+            return np.repeat(float('nan'), size).astype(np.float32)
+
+        def _pack_scales(scaleData):
+            scales = list()
+            vidxs = list()
+            for e_idx, entry in enumerate(scaleData):
+                # Should be 3 entries
+                if entry is None:
+                    scales.append(float('nan'))
+                    vidxs.extend([0, 0])
+                else:
+                    vidx1, vidx2, scale = entry
+                    scales.append(scale)
+                    vidxs.extend([vidx1, vidx2])
+            return (np.asarray(scales, dtype=np.float32), 
+                    np.asarray(vidxs, dtype=np.uint32))
+
+        def _pack_shears(shearData):
+            shears = list()
+            vidxs = list()
+            for e_idx, entry in enumerate(shearData):
+                # Should be 3 entries
+                if entry is None:
+                    shears.extend([float('nan'), float('nan')])
+                    vidxs.extend([0, 0])
+                else:
+                    vidx1, vidx2, shear1, shear2 = entry
+                    shears.extend([shear1, shear2])
+                    vidxs.extend([vidx1, vidx2])
+            return (np.asarray(shears, dtype=np.float32), 
+                    np.asarray(vidxs, dtype=np.uint32))
+
+        if prefix:
+            prefix += "_"
+        if self.scaleData:
+            scales, vidxs = _pack_scales(self.scaleData)
+            npzfile[prefix+"tmat_scale"] = scales
+            npzfile[prefix+"tmat_scale_idx"] = vidxs
+        if self.shearData:
+            shears, vidxs = _pack_shears(self.shearData)
+            npzfile[prefix+"tmat_shear"] = shears
+            npzfile[prefix+"tmat_shear_idx"] = vidxs
+        if self.lShearData:
+            shears, vidxs = _pack_shears(self.lShearData)
+            npzfile[prefix+"tmat_lshear"] = shears
+            npzfile[prefix+"tmat_lshear_idx"] = vidxs
+        if self.rShearData:
+            shears, vidxs = _pack_shears(self.rShearData)
+            npzfile[prefix+"tmat_rshear"] = shears
+            npzfile[prefix+"tmat_rshear_idx"] = vidxs
+
+
+    def fromNumpyStruct(self, npzfile, prefix=""):
+        """Deserialize TMatrix from npz file"""
+        def _unpack_scales(scales, vidxs):
+            scaleData = [None, None, None]
+            for i in xrange(3):
+                if i >= min(len(scales), len(vidxs)/2):
+                    break
+                scale = scales[i]
+                if not math.isnan(scale):
+                    vidx1, vidx2 = vidxs[i*2], vidxs[i*2+1]
+                    scaleData[i] = (int(vidx1), int(vidx2), float(scale))
+            return scaleData
+
+        def _unpack_shears(shears, vidxs):
+            shearData = [None, None, None]
+            for i in xrange(3):
+                if i >= min(len(scales)/2, len(vidxs)/2):
+                    break
+                shear1, shear2 = shears[i*2], shears[i*2+1]
+                vidx1, vidx2 = vidxs[i*2], vidxs[i*2+1]
+                shearData[i] = (int(vidx1), int(vidx2), float(shear1), float(shear2))
+            return shearData
+
+        if prefix:
+            prefix += "_"
+
+        if prefix+'tmat_scale' in npzfile and prefix+'tmat_scale_idx' in npzfile:
+            scales = npzfile[prefix+'tmat_scale']
+            vidxs = npzfile[prefix+'tmat_scale_idx']
+            self.scaleData = _unpack_scales(scales, vidxs)
+        if prefix+'tmat_shear' in npzfile and prefix+'tmat_shear_idx' in npzfile:
+            shears = npzfile[prefix+'tmat_shear']
+            vidxs = npzfile[prefix+'tmat_shear_idx']
+            self.shearData = _unpack_shears(shears, vidxs)
+        if prefix+'tmat_lshear' in npzfile and prefix+'tmat_lshear_idx' in npzfile:
+            shears = npzfile[prefix+'tmat_lshear']
+            vidxs = npzfile[prefix+'tmat_lshear_idx']
+            self.lShearData = _unpack_shears(shears, vidxs)
+        if prefix+'tmat_rshear' in npzfile and prefix+'tmat_rshear_idx' in npzfile:
+            shears = npzfile[prefix+'tmat_rshear']
+            vidxs = npzfile[prefix+'tmat_rshear_idx']
+            self.rShearData = _unpack_shears(shears, vidxs)
 
 
     def getScaleData(self, words, idx):
