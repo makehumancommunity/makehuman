@@ -747,7 +747,7 @@ class TMatrix:
         vn2 = int(words[2])
         x1 = float(words[3])
         x2 = float(words[4])
-        bbdata = (vn1, vn2, x1, x2, side)
+        bbdata = (vn1, vn2, x1, x2)
         if side == "Left":
             if not self.lShearData:
                 self.lShearData = [None, None, None]
@@ -790,7 +790,7 @@ class TMatrix:
         sfaces = np.zeros((3,2), float)
         tfaces = np.zeros((3,2), float)
         for n in range(3):
-            (vn1, vn2, sfaces[n,0], sfaces[n,1], side) = shear[n]
+            (vn1, vn2, sfaces[n,0], sfaces[n,1]) = shear[n]
             tfaces[n,0] = hcoord[vn1][n]
             tfaces[n,1] = hcoord[vn2][n]
 
