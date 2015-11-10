@@ -107,7 +107,8 @@ def saveBinaryMesh(obj, path):
         fvert = obj.fvert,
         group = obj.group,
         fgstr = fgstr,
-        fgidx = fgidx)
+        fgidx = fgidx,
+        MAX_FACES = [obj.MAX_FACES])
 
     if obj.has_uv:
         vars_['fuvs']  = obj.fuvs
@@ -120,6 +121,10 @@ def loadBinaryMesh(obj, path):
     #log.debug('loadBinaryMesh: np.load()')
 
     npzfile = np.load(path)
+
+    if 'MAX_FACES' in npzfile:
+        # Set pole count if stored
+        obj.MAX_FACES = int(npzfile['MAX_FACES'][0])
 
     #log.debug('loadBinaryMesh: loading arrays')
     coord = npzfile['coord']
