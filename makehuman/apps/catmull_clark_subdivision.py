@@ -225,8 +225,11 @@ class SubdivisionObject(Object3D):
         n = first[1:] - first[:-1]
         n = np.hstack((n, np.array([len(vi) - first[-1]])))
         self.nedges[ix] = n.astype(np.uint8)
-        for i in xrange(len(ix)):
-            self.vedge[ix[i],:n[i]] = ei[first[i]:][:n[i]]
+        try:
+            for i in xrange(len(ix)):
+                self.vedge[ix[i],:n[i]] = ei[first[i]:][:n[i]]
+        except ValueError as e:
+            raise RuntimeError("Pole-count too low, try increasing max_pole: %s" % e)
         del vi, ei, ix, n, first
 
         progress.step()
