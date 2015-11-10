@@ -454,12 +454,6 @@ def loadTextProxy(human, filepath, type="Clothes"):
         elif key == 'r_shear_z':
             proxy.tmatrix.getShearData(words, 2, 'Right')
 
-        elif key == 'uniform_scale':
-            proxy.uniformScale = True
-            if len(words) > 1:
-                proxy.scaleCorrect = float(words[1])
-            proxy.uniformizeScale()
-
         elif key == 'basemesh':
             proxy.basemesh = words[1]
 
