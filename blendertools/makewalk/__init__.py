@@ -45,7 +45,7 @@ bl_info = {
     "location": "View3D > Tools > MakeWalk",
     "description": "Mocap tool for MakeHuman character",
     "warning": "",
-    'wiki_url': "http://www.makehuman.org/doc/node/makewalk.html",
+    'wiki_url': "http://web.archive.org/web/20150317163903/www.makehuman.org/doc/node/makewalk.html",
     "category": "MakeHuman"}
 
 # To support reload properly, try to access a package var, if it's there, reload everything

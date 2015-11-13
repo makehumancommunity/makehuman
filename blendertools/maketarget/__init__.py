@@ -44,7 +44,7 @@ bl_info = {
     "location": "View3D > Properties > Make Target",
     "description": "Make MakeHuman Target",
     "warning": "",
-    'wiki_url': "http://www.makehuman.org/node/223",
+    'wiki_url': "http://web.archive.org/web/20141013235052/www.makehuman.org/doc/node/mhblendertools_maketarget.html",
     "category": "MakeHuman"}
 
 if "bpy" in locals():
