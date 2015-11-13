@@ -45,7 +45,7 @@ bl_info = {
     "location": "View3D > Properties > Make MH clothes",
     "description": "Make clothes and UVs for MakeHuman characters",
     "warning": "",
-    'wiki_url': "http://makehuman.org/doc/node/makeclothes.html",
+    'wiki_url': "http://web.archive.org/web/20150317163903/www.makehuman.org/doc/node/mhblendertools_makeclothes.html",
     "category": "MakeHuman"}
 
 
