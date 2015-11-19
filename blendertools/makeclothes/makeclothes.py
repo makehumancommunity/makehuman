@@ -836,9 +836,21 @@ def writeStuff(fp, clo, context, matfile):
             fp.write("solidify %.3f %.3f\n" % (mod.thickness, mod.offset))
     '''
 
+    pc = getPoleCount(clo)
+    fp.write("max_pole %d\n" % pc)
     if matfile:
         fp.write("material %s\n" % matfile)
 
+
+def getPoleCount(ob):
+    counts = dict([(vn,0) for vn in range(len(ob.data.vertices))])
+    for e in ob.data.edges:
+        vn1,vn2 = e.vertices
+        counts[vn1] += 1
+        counts[vn2] += 1
+    clist = list(counts.values())
+    clist.sort()
+    return clist[-1]
 
 #
 #   deleteStrayVerts(context, ob):
