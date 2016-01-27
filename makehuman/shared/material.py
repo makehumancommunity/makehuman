@@ -350,6 +350,9 @@ class Material(object):
         shaderConfig_transparency = None
         shaderConfig_ambientOcclusion = None
 
+        def _readbool(value):
+            return value.lower() in ["yes", "enabled", "true"]
+
         for line in f:
             words = line.split()
             if len(words) == 0:
@@ -382,23 +385,23 @@ class Material(object):
             elif words[0] == "translucency":
                 self._translucency = max(0.0, min(1.0, float(words[1])))
             elif words[0] == "shadeless":
-                self._shadeless = words[1].lower() in ["yes", "enabled", "true"]
+                self._shadeless = _readbool(words[1])
             elif words[0] == "wireframe":
-                self._wireframe = words[1].lower() in ["yes", "enabled", "true"]
+                self._wireframe = _readbool(words[1])
             elif words[0] == "transparent":
-                self._transparent = words[1].lower() in ["yes", "enabled", "true"]
+                self._transparent = _readbool(words[1])
             elif words[0] == "alphaToCoverage":
-                self._alphaToCoverage = words[1].lower() in ["yes", "enabled", "true"]
+                self._alphaToCoverage = _readbool(words[1])
             elif words[0] == "backfaceCull":
-                self._backfaceCull = words[1].lower() in ["yes", "enabled", "true"]
+                self._backfaceCull = _readbool(words[1])
             elif words[0] == "depthless":
-                self._depthless = words[1].lower() in ["yes", "enabled", "true"]
+                self._depthless = _readbool(words[1])
             elif words[0] == "castShadows":
-                self._castShadows = words[1].lower() in ["yes", "enabled", "true"]
+                self._castShadows = _readbool(words[1])
             elif words[0] == "receiveShadows":
-                self._receiveShadows = words[1].lower() in ["yes", "enabled", "true"]
+                self._receiveShadows = _readbool(words[1])
             elif words[0] == "autoBlendSkin":
-                self._autoBlendSkin = words[1].lower() in ["yes", "enabled", "true"]
+                self._autoBlendSkin = _readbool(words[1])
             elif words[0] == "diffuseTexture":
                 self._diffuseTexture = getFilePath(words[1], self.filepath)
             elif words[0] == "bumpmapTexture":
@@ -426,7 +429,7 @@ class Material(object):
             elif words[0] == "aomapIntensity":
                 self._aoMapIntensity = max(0.0, min(1.0, float(words[1])))
             elif words[0] == "sssEnabled":
-                self._sssEnabled = words[1].lower() in ["yes", "enabled", "true"]
+                self._sssEnabled = _readbool(words[1])
             elif words[0] == "sssRScale":
                 self._sssRScale = max(0.0, float(words[1]))
             elif words[0] == "sssGScale":
@@ -452,21 +455,21 @@ class Material(object):
                 self.addShaderDefine(words[1])
             elif words[0] == "shaderConfig":
                 if words[1] == "diffuse":
-                    shaderConfig_diffuse = words[2].lower() in ["yes", "enabled", "true"]
+                    shaderConfig_diffuse = _readbool(words[2])
                 elif words[1] == "bump":
-                    shaderConfig_bump = words[2].lower() in ["yes", "enabled", "true"]
+                    shaderConfig_bump = _readbool(words[2])
                 elif words[1] == "normal":
-                    shaderConfig_normal = words[2].lower() in ["yes", "enabled", "true"]
+                    shaderConfig_normal = _readbool(words[2])
                 elif words[1] == "displacement":
-                    shaderConfig_displacement = words[2].lower() in ["yes", "enabled", "true"]
+                    shaderConfig_displacement = _readbool(words[2])
                 elif words[1] == "spec":
-                    shaderConfig_spec = words[2].lower() in ["yes", "enabled", "true"]
+                    shaderConfig_spec = _readbool(words[2])
                 elif words[1] == "vertexColors":
-                    shaderConfig_vertexColors = words[2].lower() in ["yes", "enabled", "true"]
+                    shaderConfig_vertexColors = _readbool(words[2])
                 elif words[1] == "transparency":
-                    shaderConfig_transparency = words[2].lower() in ["yes", "enabled", "true"]
+                    shaderConfig_transparency = _readbool(words[2])
                 elif words[1] == "ambientOcclusion":
-                    shaderConfig_ambientOcclusion = words[2].lower() in ["yes", "enabled", "true"]
+                    shaderConfig_ambientOcclusion = _readbool(words[2])
                 else:
                     log.warning('Unknown material shaderConfig property: %s', words[1])
 
