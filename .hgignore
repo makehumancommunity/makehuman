@@ -25,6 +25,7 @@ makehuman/data/teeth
 makehuman/data/tongue
 makehuman/data/proxymeshes
 makehuman/data/rigs
+makehuman/data/expressions
 makehuman/data/languages/empty.json
 makehuman/data/languages/english_template.json
 makehuman/data/languages/*.missing
