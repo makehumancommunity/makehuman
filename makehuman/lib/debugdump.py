@@ -65,7 +65,6 @@ class DebugDump(object):
     def open(self):
         from codecs import open
         if self.debugpath is None:
-            self.home = os.path.expanduser('~')
             self.debugpath = getpath.getPath()
 
             if not os.path.exists(self.debugpath):
@@ -99,7 +98,7 @@ class DebugDump(object):
         self.write("IS BUILT (FROZEN): %s", os.environ['MH_FROZEN'])
         self.write("IS RELEASE VERSION: %s", os.environ['MH_RELEASE'])
         self.write("WORKING DIRECTORY: %s", getpath.pathToUnicode(os.getcwd()))
-        self.write("HOME LOCATION: %s", getpath.pathToUnicode(self.home))
+        self.write("HOME LOCATION: %s", getpath.pathToUnicode(getpath.getHomePath()))
         syspath = os.path.pathsep.join( [getpath.pathToUnicode(p) for p in sys.path] )
         self.write("PYTHON PATH: %s", syspath)
         self.write("DLL PATH: %s", os.environ['PATH'])
