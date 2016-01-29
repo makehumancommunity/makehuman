@@ -1,0 +1,54 @@
+{
+  "Measure": {
+    "showMacroStats": true,
+    "modifiers": {
+      "Neck": [
+          {"mod": "measure/measure-neck-circ-decr|incr", "label": "Neck circum"},
+          {"mod": "measure/measure-neck-height-decr|incr", "label": "Neck height"}
+        ],
+
+      "Upper arm": [
+          {"mod": "measure/measure-upperarm-circ-decr|incr", "label": "Upper arm circum"},
+          {"mod": "measure/measure-upperarm-length-decr|incr", "label": "Upperarm length"}
+        ],
+
+      "Lower arm": [
+          {"mod": "measure/measure-lowerarm-length-decr|incr", "label": "Lowerarm length"},
+          {"mod": "measure/measure-wrist-circ-decr|incr", "label": "Wrist circum"}
+        ],
+
+      "Torso": [
+          {"mod": "measure/measure-frontchest-dist-decr|incr", "label": "Front chest dist"},
+          {"mod": "measure/measure-bust-circ-decr|incr", "label": "Bust circum"},
+          {"mod": "measure/measure-underbust-circ-decr|incr", "label": "Underbust circum"},
+          {"mod": "measure/measure-waist-circ-decr|incr", "label": "Waist circum"},
+          {"mod": "measure/measure-napetowaist-dist-decr|incr", "label": "Nape to waist"},
+          {"mod": "measure/measure-waisttohip-dist-decr|incr", "label": "Waist to hip"},
+          {"mod": "measure/measure-shoulder-dist-decr|incr", "label": "Shoulder dist"}
+        ],
+
+      "Hips": [
+          {"mod": "measure/measure-hips-circ-decr|incr", "label": "Hips circum"}
+        ],
+
+      "Upper leg": [
+          {"mod": "measure/measure-upperleg-height-decr|incr", "label": "Upperleg height"},
+          {"mod": "measure/measure-thigh-circ-decr|incr", "label": "Thigh circ."}          
+        ],
+      "Knee": [          
+          {"mod": "measure/measure-knee-circ-decr|incr", "label": "Knee circ."}
+        ],
+      "Lower leg": [
+          {"mod": "measure/measure-lowerleg-height-decr|incr", "label": "Lowerleg height"},
+          {"mod": "measure/measure-calf-circ-decr|incr", "label": "Calf circum"}
+        ],
+
+      "Ankle": [
+          {"mod": "measure/measure-ankle-circ-decr|incr", "label": "Ankle circum"}
+        ]
+
+    }
+  }
+
+}
+

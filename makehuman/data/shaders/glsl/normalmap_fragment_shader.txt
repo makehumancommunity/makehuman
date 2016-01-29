@@ -1,0 +1,46 @@
+#version 120
+
+/**
+ * Simple normal mapping shader used for testing.
+ * Based on example from http://www.ozone3d.net/tutorials/bump_mapping_p4.php
+ * Normal mapping happens in tangent space.
+ **/
+
+// Inputs
+varying vec3 lightVec;  // light direction in tangent space
+varying vec3 eyeVec;    // eye direction in tangent space
+varying vec2 texCoord;  // UV coordinate
+
+// TODO allow disabling diffuse texture
+uniform sampler2D diffuseTexture;
+uniform sampler2D normalmapTexture;
+
+void main (void)
+{
+    vec3 lVec = normalize(lightVec);
+
+    vec3 vVec = normalize(eyeVec);
+    
+    vec4 base = texture2D(diffuseTexture, texCoord);
+    
+    vec3 bump = normalize( texture2D(normalmapTexture, texCoord).xyz * 2.0 - 1.0);  // Normal sampled from normal map
+
+    vec4 vAmbient = gl_LightSource[0].ambient * gl_FrontMaterial.ambient;
+
+    float diffuse = max( dot(lVec, bump), 0.0 );    // L dot N
+    
+    vec4 vDiffuse = gl_LightSource[0].diffuse * gl_FrontMaterial.diffuse * 
+                    diffuse;
+
+    float specular = pow(clamp(dot(reflect(-lVec, bump), vVec), 0.0, 1.0), 
+                     gl_FrontMaterial.shininess );
+    
+    vec4 vSpecular = gl_LightSource[0].specular * gl_FrontMaterial.specular * 
+                     specular;
+
+    gl_FragColor = ( vAmbient*base + 
+                     vDiffuse*base + 
+                     vSpecular); //* att;   // we do not need light attenuation
+
+    gl_FragColor.a = 1.0;
+}

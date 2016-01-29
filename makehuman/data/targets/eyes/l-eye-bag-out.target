@@ -1,0 +1,90 @@
+# MakeHuman 3d morphing modelled by Manuel Bastioni
+# Copyright (C) 2015 Manuel Bastioni (mb@makehuman.org)
+# homepage http://www.makehuman.org
+# basemesh hm08
+# license AGPL3 (http://www.makehuman.org/doc/node/makehuman_mesh_license.html)
+#    This file is part of MakeHuman (www.makehuman.org).
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+6862 .001 0 0
+6863 0 0 0
+6915 .001 0 0
+6916 .002 0 0
+6917 .002 0 -.001
+6918 .006 -.002 -.001
+6919 .002 -.001 0
+6928 0 0 0
+6959 .012 0 -.005
+6962 0 0 0
+6963 0 0 -.001
+6967 .012 -.003 -.004
+6968 .040 -.005 -.018
+6970 0 0 0
+6971 0 -.002 -.002
+6972 .006 -.005 -.008
+6988 .034 -.002 -.015
+6991 0 -.001 0
+6992 .001 -.004 -.003
+6993 .008 -.008 -.013
+6994 .022 0 -.010
+7026 0 -.001 0
+7027 0 -.004 -.002
+7028 .005 -.007 -.012
+7603 .019 -.005 -.014
+7604 .013 -.004 -.011
+7605 .008 -.001 -.004
+7606 .004 -.002 -.004
+7607 .031 -.002 -.014
+7608 .017 -.004 -.011
+7609 .005 -.001 0
+7610 .031 -.005 -.012
+11667 .013 -.004 -.003
+11675 .024 -.007 -.003
+11676 .027 -.008 -.007
+11677 .034 -.011 -.009
+11678 .039 -.011 -.006
+11681 .012 .003 -.012
+11682 .010 .004 -.005
+11700 0 0 0
+11701 .008 -.002 -.001
+11702 .001 -.005 -.005
+11704 .002 -.007 -.008
+11706 .002 -.007 -.008
+11714 0 -.001 -.002
+11748 .030 -.001 -.016
+11761 0 0 0
+11764 0 0 0
+11787 .001 0 -.002
+11790 .001 -.003 -.005
+11793 0 -.003 -.002
+11796 0 -.002 0
+11799 0 0 0
+11820 .008 -.005 -.003
+11829 .017 -.005 -.004
+11856 .001 0 0
+11857 .028 -.009 -.008
+11858 .004 -.001 -.001
+11859 .005 -.001 0
+11861 0 0 0
+11908 .020 -.008 -.006
+11909 .001 0 -.002
+11910 .015 -.005 -.005
+11911 .007 -.001 0
+11927 .002 0 -.003
+11928 0 0 0
+11930 0 0 0
+11931 0 -.001 0
+11932 0 0 0
+11933 0 0 0
+11937 0 0 -.001

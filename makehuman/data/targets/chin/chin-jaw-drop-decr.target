@@ -1,0 +1,79 @@
+# MakeHuman 3d morphing modelled by Manuel Bastioni
+# Copyright (C) 2014 Manuel Bastioni (mb@makehuman.org)
+# homepage http://www.makehuman.org
+# basemesh hm08
+# license AGPL3 (http://www.makehuman.org/doc/node/makehuman_mesh_license.html)
+#    This file is part of MakeHuman (www.makehuman.org).
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+742 0 .004 .002
+743 .002 .026 -.002
+891 .007 .042 -.001
+892 .002 .019 .012
+914 .001 .017 .004
+915 0 .003 .002
+916 .002 .040 .003
+917 .003 .039 .004
+920 0 .016 -.002
+921 0 .009 .002
+922 .002 .037 -.001
+995 0 .001 0
+3696 .001 .017 .002
+3697 .005 .036 0
+3698 .002 .023 .001
+5161 0 0 0
+5165 .001 .007 -.001
+5166 0 0 0
+5170 0 0 0
+5172 .004 .004 .006
+5210 0 .003 0
+5217 .001 0 .002
+5222 0 0 0
+5223 .001 .016 0
+5224 .002 .017 .006
+5226 0 0 0
+5293 0 .012 .003
+5294 .004 .030 .006
+5295 .003 .030 .007
+5297 .001 .007 .001
+7462 0 .004 .002
+7463 -.002 .026 -.002
+7593 -.007 .042 -.001
+7594 -.002 .019 .012
+7616 -.001 .017 .004
+7617 0 .003 .002
+7618 -.002 .040 .003
+7619 -.003 .039 .004
+7622 0 .016 -.002
+7623 0 .009 .002
+7624 -.002 .037 -.001
+7689 0 .001 0
+10364 -.001 .017 .002
+10365 -.005 .036 0
+10366 -.002 .023 .001
+11775 0 0 0
+11778 -.001 .007 -.001
+11779 0 0 0
+11783 0 0 0
+11784 -.004 .004 .006
+11821 0 .003 0
+11827 -.001 0 .002
+11832 0 0 0
+11833 -.001 .016 0
+11834 -.002 .017 .006
+11835 0 0 0
+11899 0 .012 .003
+11900 -.004 .030 .006
+11901 -.003 .030 .007
+11902 -.001 .007 .001
