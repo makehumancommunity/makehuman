@@ -1103,45 +1103,68 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             algos3d.loadTranslationTarget(self.meshData, targetPath, morphFactor, None, 0, 0)
             itprog.step()
 
+        progress(0.5, 1.0)
+        self.fullUpdate(update)
+
+    def fullUpdate(self, update=True):
+        """
+        Update all aspects that depend on the human base mesh geometry in proper
+        order.
+        When update=True, the updated mesh coordinates are uploaded to the OpenGL
+        buffer.
+        """
+        progress = Progress()
+
+        # Update seedmesh normals (required for new proxy fitting)
+        # Normals are recalculated again later if a pose is applied
+        # TODO optimization is possible: only execute this if new-style proxies are applied or if no pose is set
+        # TODO alternative optimization: only execute if no pose is set, apply new-style proxies after pose is applied
+        self.meshData.calcNormals(1, 1)
+        progress(0.3)
+
         # Make sure self.getRestposeCoordinates is up-to-date directly (required for proxy fitting)
         self._updateOriginalMeshCoords(self.meshData.name, self.meshData.coord)
 
         # Update (body) proxy
         self.updateProxyMesh()
+        # Note that other proxy mesh updates are not calculated here but 
+        # propagated through the onChange event in the proxychooser gui app.
 
         #self.traceStack(all=True)
         #self.traceBuffer(all=True, vertsToList=0)
+        progress(0.2)
 
         # Update skeleton joint positions (before human is posed)
         if self.getBaseSkeleton():
             log.debug("Updating skeleton joint positions")
             self.getBaseSkeleton().updateJoints(self.meshData)
             self.resetBakedAnimations()    # TODO decide whether we require calling this manually, or whether animatedMesh automatically tracks updates of skeleton and updates accordingly
+        progress(0.3)
 
         if self.skeleton:
             self.skeleton.dirty = True
 
         self.callEvent('onChanged', events3d.HumanEvent(self, 'targets'))
+        # Proxy updates and most additional updates performed by plugins happen here
+        progress(0.4)
 
         # Restore pose, and shadow copy of vertex positions 
         # (We do this after onChanged event so that proxies are already updated)
-        self.refreshStaticMeshes()  # TODO document: an external plugin that modifies the rest pose verts outside of an onHumanChang(ing/ed) event should explicitly call this method on the human
+        self.refreshStaticMeshes()  # TODO document: an external plugin that modifies the rest pose verts outside of an onHumanChang(ing/ed) event should explicitly call this method (refreshStaticMeshes) on the human.
 
         # Update subdivision mesh
         if self.isSubdivided():
-            progress(0.5, 0.7)
+            progress(0.5)
             self.updateSubdivisionMesh()
-            progress(0.7, 0.8)
+            progress(0.7)
             self.mesh.calcNormals()
-            progress(0.8, 0.99)
+            progress(0.8)
             if update:
                 self.mesh.update()
         else:
-            progress(0.5, 0.8)
+            progress(0.5)
             if not self.isPosed():
-                # Update seedmesh normals (if not already done so by posing)
-                self.meshData.calcNormals(1, 1)
-                progress(0.8, 0.99)
+                progress(0.8)
                 if update:
                     self.meshData.update()
 
