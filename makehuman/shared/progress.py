@@ -126,7 +126,10 @@ description for every change in its progress. (This does not include
 sub-Progresses that have logging disabled.) A number of dashes is added
 at the beginning of the log message representing the level of nesting
 of the current procedure, to help distinguish between the messages logged
-from the parent and the child Progress.
+from the parent and the child Progress. With logging=False, this feature
+is forced disabled. The default setting, logging=None, inherits the logging
+setting from its parent (resolves to False if root progress has no logging 
+enabled).
 
 If messaging is enabled too, on a description change, Progress will log.debug
 only its progress, and will let messaging to log.message the description
@@ -172,7 +175,7 @@ class Progress(object):
             self.logger(text, *self.args)
 
     def __init__(self, steps=0, progressCallback=True,
-            logging=False, timing=False, messaging=False):
+            logging=None, timing=False, messaging=False):
         global current_Progress_
 
         self.progress = 0.0
@@ -216,6 +219,9 @@ class Progress(object):
                 self.progressCallback = progressCallback
             # To completely disable updating when this is a
             # master Progress, pass None as progressCallback.
+        else:
+            if self.logging is None:
+                self.logging = self.parent.logging
 
     def getDescription(self):
         return self._description
