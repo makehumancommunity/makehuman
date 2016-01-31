@@ -1127,7 +1127,7 @@ class Object3D(object):
 
     def update(self):
         """
-        This method is used to call the update methods on each of a list of vertices or all vertices that form part of this object.
+        This method is used to call the update methods on each of a list of vertices or all vertices that form part of this object. Passes the current mesh state to the OpenGL buffers.
         """
         self.sync_all()
 
