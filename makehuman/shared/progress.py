@@ -322,7 +322,7 @@ class Progress(object):
         if self.steps:
             return "Step %i/%i" % (self.stepsdone, self.steps)
         else:
-            return "Progress %.2f%%" % self.progress
+            return "Progress %.2f%%" % (self.progress*100)
 
     def finish(self):
         '''Method to be called when a subroutine has finished,
