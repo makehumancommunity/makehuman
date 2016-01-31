@@ -1106,8 +1106,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         # Make sure self.getRestposeCoordinates is up-to-date directly (required for proxy fitting)
         self._updateOriginalMeshCoords(self.meshData.name, self.meshData.coord)
 
-        # Update all verts
-        self.getSeedMesh().update()
+        # Update (body) proxy
         self.updateProxyMesh()
 
         #self.traceStack(all=True)
