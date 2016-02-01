@@ -126,7 +126,11 @@ class Skeleton(object):
 
         for bone_name in breadthfirst_bones:
             bone_defs = skelData["bones"][bone_name]
-            self.addBone(bone_name, bone_defs.get("parent", None), bone_defs["head"], bone_defs["tail"], bone_defs.get("rotation_plane", 0), bone_defs.get("reference",None), bone_defs.get("weights_reference",None))
+            rotation_plane = bone_defs.get("rotation_plane", 0)
+            if rotation_plane == [None, None, None]:
+                log.warning("Invalid rotation plane specified for bone %s. Please make sure that you edited the .mhskel file by hand to include roll plane joints." % bone_name)
+                rotation_plane = 0
+            self.addBone(bone_name, bone_defs.get("parent", None), bone_defs["head"], bone_defs["tail"], rotation_plane, bone_defs.get("reference",None), bone_defs.get("weights_reference",None))
 
         self.build()
 
@@ -421,6 +425,8 @@ class Skeleton(object):
         for that joint name, it falls back to looking for a vertex group in the
         human basemesh with that joint name.
         """
+        if not joint_name:
+            raise RuntimeError("Cannot get joint position, no reference vertices or joint name specified.")
         if joint_name in self.joint_pos_idxs:
             v_idx = self.joint_pos_idxs[joint_name]
             if rest_coord:
