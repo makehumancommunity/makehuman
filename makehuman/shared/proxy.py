@@ -557,8 +557,9 @@ def saveBinaryProxy(proxy, path):
         # 3 ref verts used in this proxy
         num_refverts = 3
         vars_["ref_vIdxs"] = proxy.ref_vIdxs
-        vars_["offsets"] = proxy.offsets
         vars_["weights"] = proxy.weights
+        if np.any(proxy.offsets):
+            vars_["offsets"] = proxy.offsets
     else:
         # Proxy uses exact fitting exclusively: store npz file more compactly
         num_refverts = 1
@@ -614,8 +615,11 @@ def loadBinaryProxy(path, human, type):
 
     if num_refverts == 3:
         proxy.ref_vIdxs = npzfile['ref_vIdxs']
-        proxy.offsets = npzfile['offsets']
         proxy.weights = npzfile['weights']
+        if 'offsets' in npzfile:
+            proxy.offsets = npzfile['offsets']
+        else:
+            proxy.offsets = np.zeros((num_refs,3), dtype=np.float32)
     else:
         num_refs = npzfile['ref_vIdxs'].shape[0]
         proxy.ref_vIdxs = np.zeros((num_refs,3), dtype=np.uint32)
