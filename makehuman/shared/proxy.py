@@ -232,7 +232,7 @@ class Proxy:
 
         return coord
 
-    def getCoordsNew(self, fit_to_posed=False):
+    def getCoordsNew(self, fit_to_posed=False, fast=False):
         """New proxy fitting technique, using offset vector in polygon-local
         base, as introduced by Manuel Bastioni. This fitting technique works
         a lot better on posed meshes, and allows for more stable proxies,
@@ -272,7 +272,7 @@ class Proxy:
         va = v1 - v2
         vb = v1 - v3
         normals = np.cross(va, vb)
-        if hmesh.vertsPerPrimitive == 4:
+        if not fast and hmesh.vertsPerPrimitive == 4:
             # In case of quads
             # TODO we can speed up if we assume planar quads, so triangle normal should be enough
             v4 = verts[:,3,:]
@@ -296,10 +296,10 @@ class Proxy:
     def new_fitting(self):
         return self.version >= 120
 
-    def update(self, mesh, fit_to_posed=False):
+    def update(self, mesh, fit_to_posed=False, fast=False):
         #log.debug("Updating proxy %s.", self.name)
         if self.new_fitting:
-            proxy_coords = self.getCoordsNew(fit_to_posed)
+            proxy_coords = self.getCoordsNew(fit_to_posed, fast)
         else:
             # Old v1.0 fitting algorithm
             proxy_coords = self.getCoords(fit_to_posed)
@@ -545,12 +545,10 @@ def loadTextProxy(human, filepath, type="Clothes"):
         elif status == doRefVerts:
             refVert = ProxyRefVert(human)
             refVerts.append(refVert)
-            if len(words) == 1:
-                refVert.fromSingle(words, vnum, proxy.vertWeights)
-            elif len(words) == 7:
-                if not proxy.new_fitting:
-                    raise RuntimeError('Invalid proxy file: New-style (1.2) proxy data detected, but version is not specified as "120".')
+            if proxy.new_fitting:
                 refVert.fromQuad(words, vnum, proxy.vertWeights)
+            elif len(words) == 1:
+                refVert.fromSingle(words, vnum, proxy.vertWeights)
             else:
                 refVert.fromTriple(words, vnum, proxy.vertWeights)
             vnum += 1

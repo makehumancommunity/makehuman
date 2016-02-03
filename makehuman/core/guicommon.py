@@ -355,9 +355,9 @@ class Object(events3d.EventHandler):
     def getProxyMesh(self):
         return self.__proxyMesh
 
-    def updateProxyMesh(self, fit_to_posed=False):
+    def updateProxyMesh(self, fit_to_posed=False, fast=False):
         if self.proxy and self.__proxyMesh:
-            self.proxy.update(self.__proxyMesh, fit_to_posed)
+            self.proxy.update(self.__proxyMesh, fit_to_posed, fast)
             self.__proxyMesh.update()
 
     def isProxied(self):
