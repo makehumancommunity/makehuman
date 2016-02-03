@@ -722,6 +722,11 @@ def loadBinaryProxy(path, human, type):
     # Reconstruct reverse vertex (and weights) mapping
     proxy._reloadReverseMapping()
 
+    if proxy.new_fitting:
+        # Create alias
+        proxy.deltas = proxy.weights
+
+    # TODO we could skip this for new-style proxies
     proxy.tmatrix.fromNumpyStruct(npzfile)
 
     proxy.uvLayers = {}
