@@ -90,7 +90,7 @@ class Proxy:
         self.tags = []
         self.version = 110
 
-        self.ref_vIdxs = None       # (Vidx1,Vidx2,Vidx3) list with references to human vertex indices, indexed by proxy vert
+        self.ref_vIdxs = None       # (Vidx1,Vidx2,Vidx3,(Vidx4)) list with references to human vertex indices, indexed by proxy vert
         self.weights = None         # (w1,w2,w3) list, with weights per human vertex (mapped by ref_vIdxs), indexed by proxy vert
         self.vertWeights = {}       # (proxy-vert, weight) list for each parent vert (reverse mapping of self.weights, indexed by human vertex)
         self.offsets = None         # (x,y,z) list of vertex offsets, indexed by proxy vert
@@ -185,7 +185,14 @@ class Proxy:
         """
         self.weights = np.asarray([v._weights for v in refVerts], dtype=np.float32)
         self.ref_vIdxs = np.asarray([v._verts for v in refVerts], dtype=np.uint32)
-        self.offsets = np.asarray([v._offset for v in refVerts], dtype=np.float32)
+        if self.new_fitting:
+            self.offsets = None
+            # Since we retrofit the delta vector used in new-fitting into the
+            # weights vector of the original proxy format, we at least make a
+            # more meaningful alias for it
+            self.deltas = self.weights 
+        else:
+            self.offsets = np.asarray([v._offset for v in refVerts], dtype=np.float32)
 
 
     def _reloadReverseMapping(self):
@@ -193,11 +200,18 @@ class Proxy:
         Reconstruct reverse vertex (and weights) mapping
         """
         self.vertWeights = {}
-        for pxy_vIdx in xrange(self.ref_vIdxs.shape[0]):
-            _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 0], pxy_vIdx, self.weights[pxy_vIdx, 0])
-            _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 1], pxy_vIdx, self.weights[pxy_vIdx, 1])
-            _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 2], pxy_vIdx, self.weights[pxy_vIdx, 2])
-
+        if self.new_fitting:
+            w = 1.0 / self.human.meshData.vertsPerPrimitive
+            for pxy_vIdx in xrange(self.ref_vIdxs.shape[0]):
+                _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 0], pxy_vIdx, w)
+                _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 1], pxy_vIdx, w)
+                _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 2], pxy_vIdx, w)
+                _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 3], pxy_vIdx, w)
+        else:
+            for pxy_vIdx in xrange(self.ref_vIdxs.shape[0]):
+                _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 0], pxy_vIdx, self.weights[pxy_vIdx, 0])
+                _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 1], pxy_vIdx, self.weights[pxy_vIdx, 1])
+                _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 2], pxy_vIdx, self.weights[pxy_vIdx, 2])
 
     def getCoords(self, fit_to_posed=False):
         if fit_to_posed:
@@ -218,13 +232,80 @@ class Proxy:
 
         return coord
 
+    def getCoordsNew(self, fit_to_posed=False):
+        """New proxy fitting technique, using offset vector in polygon-local
+        base, as introduced by Manuel Bastioni. This fitting technique works
+        a lot better on posed meshes, and allows for more stable proxies,
+        but most importantly, it's a lot easier to create proxies using this
+        fitting technique.
+        """
+        def average_basis_matrices(vec0, vec1, vec2, normalize=True):
+            if normalize:
+                vec0 /= np.sqrt(np.sum(vec0 ** 2, axis=-1))[:,None]
+                vec1 /= np.sqrt(np.sum(vec1 ** 2, axis=-1))[:,None]
+                vec2 /= np.sqrt(np.sum(vec2 ** 2, axis=-1))[:,None]
+
+            M = np.zeros((len(vec0), 3,3), dtype=np.float32)
+            M[:,:,0] = vec0
+            M[:,:,1] = vec1
+            M[:,:,2] = vec2
+            return M
+
+        hmesh = self.human.meshData
+        if fit_to_posed:
+            hcoord = self.human.meshData.coord
+        else:
+            hcoord = self.human.getRestposeCoordinates()
+
+        # Inputs:
+        # ref_vIdxs: basemesh vertex indices (a quad), format: [[vidx1,vidx2,vidx3,vidx4], ...] every inner list a face
+        # deltas: delta vectors in face-local space, format: [[d1,d2,d3], ...]
+        verts = hcoord[self.ref_vIdxs]
+
+        # Calculate polygon centers (naive way: take the average, same as Blender)
+        centers = np.sum(verts, axis=1) / hmesh.vertsPerPrimitive
+
+        # Calculate normals
+        v1 = verts[:,0,:]
+        v2 = verts[:,1,:]
+        v3 = verts[:,2,:]
+        va = v1 - v2
+        vb = v1 - v3
+        normals = np.cross(va, vb)
+        if hmesh.vertsPerPrimitive == 4:
+            # In case of quads
+            # TODO we can speed up if we assume planar quads, so triangle normal should be enough
+            v4 = verts[:,3,:]
+            vc = v3 - v4
+            normals2 = np.cross(vb, vc)
+            normals = np.sqrt(normals **2 + normals2 **2)  # average normals
+
+        # Calculate local base matrix
+        vec0 = normals
+        vec1 = centers - v1
+        vec2 = np.cross(centers, vec1)
+        M = average_basis_matrices(vec0, vec1, vec2)
+
+        # Calculate proxy mesh coordinates (delta_vectors = M * deltas)
+        #delta_vectors = np.sum(M * deltas[:,None,:], axis=-1)
+        # Might be slightly faster:
+        delta_vectors = np.einsum('ijk,ikl -> ij', M, self.deltas[:,:,None])
+        return centers + delta_vectors
+
+    @property
+    def new_fitting(self):
+        return self.version >= 120
 
     def update(self, mesh, fit_to_posed=False):
         #log.debug("Updating proxy %s.", self.name)
-        coords = self.getCoords(fit_to_posed)
-        mesh.changeCoords(coords)
-        mesh.calcNormals()
+        if self.new_fitting:
+            proxy_coords = self.getCoordsNew(fit_to_posed)
+        else:
+            # Old v1.0 fitting algorithm
+            proxy_coords = self.getCoords(fit_to_posed)
 
+        mesh.changeCoords(proxy_coords)
+        mesh.calcNormals()
 
     def getUuid(self):
         if self.uuid:
@@ -466,6 +547,10 @@ def loadTextProxy(human, filepath, type="Clothes"):
             refVerts.append(refVert)
             if len(words) == 1:
                 refVert.fromSingle(words, vnum, proxy.vertWeights)
+            elif len(words) == 7:
+                if not proxy.new_fitting:
+                    raise RuntimeError('Invalid proxy file: New-style (1.2) proxy data detected, but version is not specified as "120".')
+                refVert.fromQuad(words, vnum, proxy.vertWeights)
             else:
                 refVert.fromTriple(words, vnum, proxy.vertWeights)
             vnum += 1
@@ -553,12 +638,12 @@ def saveBinaryProxy(proxy, path):
     vars_["special_pose_str"] = specialposeStr
     vars_["special_pose_idx"] = specialposeIdx
 
-    if proxy.weights[:,1:].any():
-        # 3 ref verts used in this proxy
-        num_refverts = 3
+    if proxy.new_fitting or proxy.weights[:,1:].any():
+        # 3 ref verts used in this proxy (4 for new fitting)
+        num_refverts = proxy.weights.shape[1]
         vars_["ref_vIdxs"] = proxy.ref_vIdxs
         vars_["weights"] = proxy.weights
-        if np.any(proxy.offsets):
+        if proxy.offsets is not None and np.any(proxy.offsets):
             vars_["offsets"] = proxy.offsets
     else:
         # Proxy uses exact fitting exclusively: store npz file more compactly
@@ -613,14 +698,17 @@ def loadBinaryProxy(path, human, type):
 
     num_refverts = int(npzfile['num_refverts'])
 
-    if num_refverts == 3:
+    if num_refverts > 1:  # 3 or 4
         proxy.ref_vIdxs = npzfile['ref_vIdxs']
         proxy.weights = npzfile['weights']
         if 'offsets' in npzfile:
             proxy.offsets = npzfile['offsets']
         else:
-            proxy.offsets = np.zeros((num_refs,3), dtype=np.float32)
-    else:
+            if proxy.new_fitting:
+                proxy.offsets = None
+            else:
+                proxy.offsets = np.zeros((num_refs,3), dtype=np.float32)
+    else: # 1 refvert
         num_refs = npzfile['ref_vIdxs'].shape[0]
         proxy.ref_vIdxs = np.zeros((num_refs,3), dtype=np.uint32)
         proxy.ref_vIdxs[:,0] = npzfile['ref_vIdxs']
@@ -703,15 +791,28 @@ class ProxyRefVert:
         _addProxyVertWeight(vertWeights, v2, vnum, w2)
         return self
 
-    def getWeights(self):
-        return self._weights
+    def fromQuad(self, words, vnum, vertWeights):
+        """For new fitting algorithm."""
+        v0 = int(words[0])
+        v1 = int(words[1])
+        v2 = int(words[2])
+        v3 = int(words[3])
+        dx = float(words[4])
+        dy = float(words[5])
+        dz = float(words[6])
 
-    def getCoord(self, matrix):
-        hcoord = self.human.getRestposeCoordinates()
-        return (
-            np.dot(hcoord[self._verts], self._weights) +
-            np.dot(matrix, self._offset)
-            )
+        self._verts = (v0,v1,v2,v3) # We reference 4 verts (a quad) instead of 3
+        self._weights = (dx,dy,dz)  # We retrofit the delta vector used in new-fitting into the weights vector of the old proxy format 
+
+        # Equally define the influence of vertex weights (for rigging) across each
+        # vertex of the face the proxy vert is fitted against.
+        w = 1.0 / self.human.meshData.vertsPerPrimitive
+        _addProxyVertWeight(vertWeights, v0, vnum, w)
+        _addProxyVertWeight(vertWeights, v1, vnum, w)
+        _addProxyVertWeight(vertWeights, v2, vnum, w)
+        _addProxyVertWeight(vertWeights, v3, vnum, w)
+        return self
+
 
 def _addProxyVertWeight(vertWeights, v, pv, w):
     try:
