@@ -1,0 +1,365 @@
+{
+  "Face": {
+    "cameraView": "faceCamera",
+    "sortOrder": 0.2,
+    "modifiers": {
+      "head shape": [
+          {"mod": "head/head-age-decr|incr", "cam": "frontView"},
+          {"mod": "head/head-fat-decr|incr", "cam": "frontView", "label": "Head fat"},
+          {"mod": "head/head-angle-in|out", "cam": "leftView"},
+          {"mod": "head/head-oval", "cam": "frontView"},
+          {"mod": "head/head-round", "cam": "frontView"},
+          {"mod": "head/head-rectangular", "cam": "frontView"},
+          {"mod": "head/head-square", "cam": "frontView"},
+          {"mod": "head/head-triangular", "cam": "frontView"},
+          {"mod": "head/head-invertedtriangular", "cam": "frontView"},
+          {"mod": "head/head-diamond", "cam": "frontView"},
+          {"mod": "head/head-back-scale-depth-decr|incr", "cam": "leftView", "label": "Scale depth of parietal side"}
+        ],
+      "head size": [
+          {"mod": "head/head-scale-depth-decr|incr", "cam": "leftView", "label": "Scale depth"},
+          {"mod": "head/head-scale-horiz-decr|incr", "cam": "frontView", "label": "Scale horizontally"},
+          {"mod": "head/head-scale-vert-decr|incr", "cam": "frontView", "label": "Scale vertically"},
+          {"mod": "head/head-trans-in|out", "cam": "frontView", "label": "Move horizontally"},
+          {"mod": "head/head-trans-down|up", "cam": "frontView", "label": "Move vertically"},
+          {"mod": "head/head-trans-backward|forward", "cam": "leftView", "label": "Move depth"}          
+        ],
+      "forehead": [
+          {"mod": "forehead/forehead-trans-backward|forward", "cam": "leftView", "label": "Forehead bulge"},
+          {"mod": "forehead/forehead-scale-vert-decr|incr", "cam": "leftView", "label": "Scale vertically"},
+          {"mod": "forehead/forehead-nubian-decr|incr", "cam": "leftView", "label": "Cranic shape"},
+          {"mod": "forehead/forehead-temple-decr|incr", "cam": "frontView", "label": "Temple bulge"}
+        ],
+      "eyebrows": [
+          {"mod": "eyebrows/eyebrows-trans-backward|forward", "cam": "rightView", "label": "Eyebrows bulge"},
+          {"mod": "eyebrows/eyebrows-angle-down|up", "cam": "frontView", "label": "Eyebrows angle"},
+          {"mod": "eyebrows/eyebrows-trans-down|up", "cam": "frontView", "label": "Move vert"}
+        ],
+      "neck": [
+          {"mod": "neck/neck-double-decr|incr", "cam": "leftView", "label": "Double neck"},
+          {"mod": "neck/neck-scale-depth-decr|incr", "cam": "leftView", "label": "Scale depth"},
+          {"mod": "neck/neck-scale-horiz-decr|incr", "cam": "frontView", "label": "Scale horizontally"},
+          {"mod": "neck/neck-scale-vert-decr|incr", "cam": "frontView", "label": "Scale vertically"},
+          {"mod": "neck/neck-trans-in|out", "cam": "frontView", "label": "Move horizontally."},
+          {"mod": "neck/neck-trans-down|up", "cam": "frontView", "label": "Move vertically"},
+          {"mod": "neck/neck-trans-backward|forward", "cam": "leftView", "label": "Move depth"},
+          {"mod": "neck/neck-back-scale-depth-decr|incr", "cam": "leftView", "label": "Scale depth of nape"}
+        ],
+      "right eye": [
+          {"mod": "eyes/r-eye-bag-decr|incr", "cam": "frontView", "label": "Eye bag volume"},
+          {"mod": "eyes/r-eye-bag-in|out", "cam": "frontView", "label": "Eye bag distorsion"},
+          {"mod": "eyes/r-eye-bag-height-decr|incr", "cam": "frontView", "label": "Eye bag height"},
+          {"mod": "eyes/r-eye-eyefold-angle-down|up", "cam": "frontView", "label": "Eyefold angle"},
+          {"mod": "eyes/r-eye-epicanthus-in|out", "cam": "frontView", "label": "Eye epicanthus"},
+          {"mod": "eyes/r-eye-eyefold-concave|convex", "cam": "frontView", "label": "Eyefold volume"},
+          {"mod": "eyes/r-eye-eyefold-down|up", "cam": "frontView", "label": "Eyefold position"},
+                    
+          {"mod": "eyes/r-eye-height1-decr|incr", "cam": "frontView", "label": "Scale height 1"},
+          {"mod": "eyes/r-eye-height2-decr|incr", "cam": "frontView", "label": "Scale height 2"},
+          {"mod": "eyes/r-eye-height3-decr|incr", "cam": "frontView", "label": "Scale height 3"},
+          {"mod": "eyes/r-eye-push1-in|out", "cam": "frontView", "label": "Move outer corner horiz."},
+          {"mod": "eyes/r-eye-push2-in|out", "cam": "frontView", "label": "Move inner corner horiz."},
+          {"mod": "eyes/r-eye-trans-in|out", "cam": "frontView", "label": "Move eye horizontally"},
+          {"mod": "eyes/r-eye-trans-down|up", "cam": "frontView", "label": "Move eye vertically"},
+          {"mod": "eyes/r-eye-scale-decr|incr", "cam": "frontView", "label": "Scale eye"},
+          {"mod": "eyes/r-eye-corner1-down|up", "cam": "frontView", "label": "Move outer corner vert."},
+          {"mod": "eyes/r-eye-corner2-down|up", "cam": "frontView", "label": "Move inner corner vert."}
+        ],
+      "left eye": [
+          {"mod": "eyes/l-eye-bag-decr|incr", "cam": "frontView", "label": "Eye bag volume"},
+          {"mod": "eyes/l-eye-bag-in|out", "cam": "frontView", "label": "Eye bag distorsion"},
+          {"mod": "eyes/l-eye-bag-height-decr|incr", "cam": "frontView", "label": "Eye bag height"},
+          {"mod": "eyes/l-eye-eyefold-angle-down|up", "cam": "frontView", "label": "Eyefold angle"},
+          {"mod": "eyes/l-eye-epicanthus-in|out", "cam": "frontView", "label": "Eye epicanthus"},
+          {"mod": "eyes/l-eye-eyefold-concave|convex", "cam": "frontView", "label": "Eyefold volume"},
+          {"mod": "eyes/l-eye-eyefold-down|up", "cam": "frontView", "label": "Eyefold position"},
+          
+          {"mod": "eyes/l-eye-height1-decr|incr", "cam": "frontView", "label": "Scale height 1"},
+          {"mod": "eyes/l-eye-height2-decr|incr", "cam": "frontView", "label": "Scale height 2"},
+          {"mod": "eyes/l-eye-height3-decr|incr", "cam": "frontView", "label": "Scale height 3"},
+          {"mod": "eyes/l-eye-push1-in|out", "cam": "frontView", "label": "Move outer corner horiz."},
+          {"mod": "eyes/l-eye-push2-in|out", "cam": "frontView", "label": "Move inner corner horiz."},
+          {"mod": "eyes/l-eye-trans-in|out", "cam": "frontView", "label": "Move eye horizontally"},
+          {"mod": "eyes/l-eye-trans-down|up", "cam": "frontView", "label": "Move eye vertically"},
+          {"mod": "eyes/l-eye-scale-decr|incr", "cam": "frontView", "label": "Scale eye"},
+          {"mod": "eyes/l-eye-corner1-down|up", "cam": "frontView", "label": "Move outer corner vert."},
+          {"mod": "eyes/l-eye-corner2-down|up", "cam": "frontView", "label": "Move inner corner vert."}
+        ],
+      "nose size": [
+          {"mod": "nose/nose-trans-down|up", "cam": "frontView", "label": "Move vertically"},
+          {"mod": "nose/nose-trans-backward|forward", "cam": "leftView", "label": "Move depth"},
+          {"mod": "nose/nose-trans-in|out", "cam": "frontView", "label": "Move horizontally"},
+          {"mod": "nose/nose-scale-vert-decr|incr", "cam": "frontView", "label": "Scale vertically"},
+          {"mod": "nose/nose-scale-horiz-decr|incr", "cam": "frontView", "label": "Scale horizontally"},
+          {"mod": "nose/nose-scale-depth-decr|incr", "cam": "leftView", "label": "Scale depth"}
+        ],
+      "nose size details": [
+          {"mod": "nose/nose-nostrils-width-decr|incr", "cam": "frontView", "label": "Scale nostrils width"},
+          {"mod": "nose/nose-point-width-decr|incr", "cam": "frontView", "label": "Scale tip width"},
+          {"mod": "nose/nose-base-down|up", "cam": "leftView", "label": "Move base vert."},
+          {"mod": "nose/nose-width1-decr|incr", "cam": "frontView", "label": "Scale width 1"},
+          {"mod": "nose/nose-width2-decr|incr", "cam": "frontView", "label": "Scale width 2"},
+          {"mod": "nose/nose-width3-decr|incr", "cam": "frontView", "label": "Scale width 3"}
+        ],
+      "nose features": [
+          {"mod": "nose/nose-compression-compress|uncompress", "cam": "leftView"},
+          {"mod": "nose/nose-curve-concave|convex", "cam": "leftView"},
+          {"mod": "nose/nose-greek-decr|incr", "cam": "leftView"},
+          {"mod": "nose/nose-hump-decr|incr", "cam": "leftView"},
+          {"mod": "nose/nose-volume-decr|incr", "cam": "leftView"},
+          {"mod": "nose/nose-nostrils-angle-down|up", "cam": "leftView"},
+          {"mod": "nose/nose-point-down|up", "cam": "leftView", "label": "Move tip vertically"},
+          {"mod": "nose/nose-septumangle-decr|incr", "cam": "leftView", "label": "Septum Angle"},
+          {"mod": "nose/nose-flaring-decr|incr", "cam": "leftView", "label": "Scale nostrils flaring"}
+        ],
+      "mouth size": [
+          {"mod": "mouth/mouth-scale-horiz-decr|incr", "cam": "frontView", "label": "Scale horizontally"},
+          {"mod": "mouth/mouth-scale-vert-decr|incr", "cam": "frontView", "label": "Scale vertically"},
+          {"mod": "mouth/mouth-scale-depth-decr|incr", "cam": "leftView", "label": "Scale depth"},
+          {"mod": "mouth/mouth-trans-in|out", "cam": "frontView", "label": "Move horizontally"},
+          {"mod": "mouth/mouth-trans-down|up", "cam": "frontView", "label": "Move vertically"},
+          {"mod": "mouth/mouth-trans-backward|forward", "cam": "leftView", "label": "Move depth"}
+        ],
+      "mouth size details": [
+          {"mod": "mouth/mouth-lowerlip-height-decr|incr", "cam": "frontView", "label": "Scale lowerlip height"},
+          {"mod": "mouth/mouth-lowerlip-width-decr|incr", "cam": "frontView", "label": "Scale lowerlip width"},
+          {"mod": "mouth/mouth-upperlip-height-decr|incr", "cam": "frontView", "label": "Scale upperlip height"},
+          {"mod": "mouth/mouth-upperlip-width-decr|incr", "cam": "frontView", "label": "Scale upperlip width"},
+          {"mod": "mouth/mouth-cupidsbow-width-decr|incr", "cam": "frontView", "label": "Cupid's bow width"}
+        ],
+      "mouth features": [
+          {"mod": "mouth/mouth-dimples-in|out", "cam": "frontView", "label": "Dimples"},
+          {"mod": "mouth/mouth-laugh-lines-in|out", "cam": "frontView", "label": "Laugh-lines"},
+          {"mod": "mouth/mouth-lowerlip-ext-down|up", "cam": "frontView", "label": "Lowerlip curved shape"},
+          {"mod": "mouth/mouth-angles-down|up", "cam": "frontView", "label": "Move corners vert."},
+          {"mod": "mouth/mouth-lowerlip-middle-down|up", "cam": "frontView", "label": "Scale middle lowerlip"},
+          {"mod": "mouth/mouth-lowerlip-volume-decr|incr", "cam": "leftView", "label": "Scale lowerlip volume"},
+          {"mod": "mouth/mouth-philtrum-volume-decr|incr", "cam": "leftView", "label": "Scale philtrum volume"},
+          {"mod": "mouth/mouth-upperlip-volume-decr|incr", "cam": "leftView", "label": "Scale upperlip volume"},
+          {"mod": "mouth/mouth-upperlip-ext-down|up", "cam": "frontView", "label": "Upperlip curved shape"},
+          {"mod": "mouth/mouth-upperlip-middle-down|up", "cam": "frontView", "label": "Scale middle upperlip"},
+          {"mod": "mouth/mouth-cupidsbow-decr|incr", "cam": "frontView", "label": "Cupid's bow shape"}
+        ],
+      "right ear": [
+          {"mod": "ears/r-ear-trans-backward|forward", "cam": "rightView", "label": "Move depth"},
+          {"mod": "ears/r-ear-scale-decr|incr", "cam": "rightView", "label": "Scale ear"},
+          {"mod": "ears/r-ear-trans-down|up", "cam": "rightView", "label": "Move vertically"},
+          {"mod": "ears/r-ear-scale-vert-decr|incr", "cam": "rightView", "label": "Scale height"},
+          {"mod": "ears/r-ear-lobe-decr|incr", "cam": "rightView", "label": "Scale lobe"},
+          {"mod": "ears/r-ear-shape-pointed|triangle", "cam": "rightView", "label": "Ear shape (pointed-triangle)"},
+          {"mod": "ears/r-ear-rot-backward|forward", "cam": "rightView", "label": "Ear rotation"},
+          {"mod": "ears/r-ear-shape-square|round", "cam": "rightView", "label": "Ear shape (squared-round)"},
+          {"mod": "ears/r-ear-scale-depth-decr|incr", "cam": "rightView", "label": "Scale width"},
+          {"mod": "ears/r-ear-wing-decr|incr", "cam": "frontView", "label": "Ear wing-shaped"},
+          {"mod": "ears/r-ear-flap-decr|incr", "cam": "frontView", "label": "Ear flapped"}
+        ],
+      "left ear": [
+          {"mod": "ears/l-ear-trans-backward|forward", "cam": "leftView", "label": "Move depth"},
+          {"mod": "ears/l-ear-scale-decr|incr", "cam": "leftView", "label": "Scale ear"},
+          {"mod": "ears/l-ear-trans-down|up", "cam": "leftView", "label": "Move vertically"},
+          {"mod": "ears/l-ear-scale-vert-decr|incr", "cam": "leftView", "label": "Scale height"},
+          {"mod": "ears/l-ear-lobe-decr|incr", "cam": "leftView", "label": "Scale lobe"},
+          {"mod": "ears/l-ear-shape-pointed|triangle", "cam": "leftView", "label": "Ear shape (pointed-triangle)"},
+          {"mod": "ears/l-ear-rot-backward|forward", "cam": "leftView", "label": "Ear rotation"},
+          {"mod": "ears/l-ear-shape-square|round", "cam": "leftView", "label": "Ear shape (squared-round)"},
+          {"mod": "ears/l-ear-scale-depth-decr|incr", "cam": "leftView", "label": "Scale width"},
+          {"mod": "ears/l-ear-wing-decr|incr", "cam": "frontView", "label": "Ear wing-shaped"},
+          {"mod": "ears/l-ear-flap-decr|incr", "cam": "frontView", "label": "Ear flapped"}
+        ],
+      "chin/jaw": [
+          {"mod": "chin/chin-jaw-drop-decr|incr", "cam": "leftView", "label": "Tone of side chin"},
+          {"mod": "chin/chin-cleft-decr|incr", "cam" : "frontView", "label": "Cleft chin"},
+          {"mod": "chin/chin-prominent-decr|incr", "cam": "leftView", "label": "Scale chin prominence"},
+          {"mod": "chin/chin-width-decr|incr", "cam" : "frontView", "label": "Scale chin width"},
+          {"mod": "chin/chin-height-decr|incr", "cam" : "frontView", "label": "Scale chin height"},
+          {"mod": "chin/chin-bones-decr|incr", "cam" : "frontView", "label": "Scale chin angular"},
+          {"mod": "chin/chin-prognathism-decr|incr", "cam": "leftView", "label": "Scale chin prognathism"}
+        ],
+      "left cheek": [
+          {"mod": "cheek/l-cheek-volume-decr|incr", "cam" : "frontView", "label": "Cheek outer volume"},
+          {"mod": "cheek/l-cheek-bones-decr|incr", "cam" : "frontView", "label": "Scale cheek prominence"},
+          {"mod": "cheek/l-cheek-inner-decr|incr", "cam": "leftView", "label": "Cheek inner volume"},
+          {"mod": "cheek/l-cheek-trans-down|up", "cam" : "frontView", "label": "Move vertically"}
+        ],
+      "right cheek": [          
+          {"mod": "cheek/r-cheek-volume-decr|incr", "cam" : "frontView", "label": "Cheek outer volume"},
+          {"mod": "cheek/r-cheek-bones-decr|incr", "cam" : "frontView", "label": "Scale cheek prominence"},
+          {"mod": "cheek/r-cheek-inner-decr|incr", "cam": "rightView", "label": "Cheek inner volume"},
+          {"mod": "cheek/r-cheek-trans-down|up", "cam" : "frontView", "label": "Move vertically"}
+        ]
+    }
+  },
+
+
+  "Torso": {
+    "sortOrder": 0.3,
+    "modifiers": {
+      "Torso": [
+          {"mod": "torso/torso-scale-depth-decr|incr", "cam": "leftView", "label": "Scale depth"},
+          {"mod": "torso/torso-scale-horiz-decr|incr", "cam": "globalCamera", "label": "Scale horizontally"},
+          {"mod": "torso/torso-scale-vert-decr|incr", "cam": "globalCamera", "label": "Scale vertically"},
+          {"mod": "torso/torso-trans-in|out", "cam": "globalCamera", "label": "Move horizontally"},
+          {"mod": "torso/torso-trans-down|up", "cam": "globalCamera", "label": "Move vertically"},
+          {"mod": "torso/torso-trans-backward|forward", "cam": "leftView", "label": "Move depth"},
+          {"mod": "torso/torso-vshape-decr|incr", "cam": "globalCamera", "label": "Scale cone-shape"},
+          {"mod": "torso/torso-muscle-dorsi-decr|incr", "cam": "globalCamera", "label": "Dorsi muscle"},
+          {"mod": "torso/torso-muscle-pectoral-decr|incr", "cam": "globalCamera", "label": "Pectoral muscle"}
+        ],
+      "Hip": [
+          {"mod": "hip/hip-scale-depth-decr|incr", "cam": "globalCamera", "label": "Scale depth"},
+          {"mod": "hip/hip-scale-horiz-decr|incr", "cam": "globalCamera", "label": "Scale horizontally"},
+          {"mod": "hip/hip-scale-vert-decr|incr", "cam": "globalCamera", "label": "Scale vertically"},
+          {"mod": "hip/hip-trans-in|out", "cam": "globalCamera", "label": "Move horizontally"},
+          {"mod": "hip/hip-trans-down|up", "cam": "globalCamera", "label": "Move vertically"},
+          {"mod": "hip/hip-trans-backward|forward", "cam": "globalCamera", "label": "Move depth"},
+          {"mod": "hip/hip-waist-down|up", "cam": "globalCamera", "label": "Waist vertical position"}          
+        ],
+      "Stomach": [          
+          {"mod": "stomach/stomach-tone-decr|incr", "cam": "globalCamera", "label": "Muscular tone"},
+          {"mod": "stomach/stomach-pregnant-decr|incr", "cam": "globalCamera", "label": "Pregnancy shape"},
+          {"mod": "stomach/stomach-navel-in|out", "cam": "globalCamera", "label": "Navel bump"},
+          {"mod": "stomach/stomach-navel-down|up", "cam": "globalCamera", "label": "Navel position"}
+        ],
+      "Buttocks": [
+          {"mod": "buttocks/buttocks-volume-decr|incr", "cam": "globalCamera", "label": "Buttocks volume"}
+        ],
+      "Pelvis": [
+          {"mod": "pelvis/pelvis-tone-decr|incr", "cam": "globalCamera", "label": "Pelvis muscular tone"},
+          {"mod": "pelvis/bulge-decr|incr", "cam": "globalCamera", "label": "Genital volume"}
+        ]
+    }
+  },
+
+
+  "Arms and Legs": {
+    "sortOrder": 0.4,
+    "modifiers": {
+      "right hand": [
+          {"mod": "armslegs/r-hand-fingers-distance-decr|incr", "cam": "rightHandFrontCamera", "label": "Fingers distance"},
+          {"mod": "armslegs/r-hand-fingers-diameter-decr|incr", "cam": "rightHandFrontCamera", "label": "Fingers diameter"},
+          {"mod": "armslegs/r-hand-fingers-length-decr|incr", "cam": "rightHandFrontCamera", "label": "Fingers length"},
+          {"mod": "armslegs/r-hand-scale-decr|incr", "cam": "rightHandFrontCamera", "label": "Scale hand"},
+          {"mod": "armslegs/r-hand-trans-in|out", "cam": "rightHandFrontCamera", "label": "Hand position"}
+        ],
+      "left hand": [
+          {"mod": "armslegs/l-hand-fingers-distance-decr|incr", "cam": "rightHandFrontCamera", "label": "Fingers distance"},
+          {"mod": "armslegs/l-hand-fingers-diameter-decr|incr", "cam": "leftHandFrontCamera", "label": "Fingers diameter"},
+          {"mod": "armslegs/l-hand-fingers-length-decr|incr", "cam": "leftHandFrontCamera", "label": "Fingers length"},
+          {"mod": "armslegs/l-hand-scale-decr|incr", "cam": "leftHandFrontCamera", "label": "Scale hand"},
+          {"mod": "armslegs/l-hand-trans-in|out", "cam": "leftHandFrontCamera", "label": "Hand position"}
+        ],
+      "right foot": [
+          {"mod": "armslegs/r-foot-scale-decr|incr", "cam": "rightFootRightCamera", "label": "Scale foot"},
+          {"mod": "armslegs/r-foot-trans-in|out", "cam": "rightFootFrontCamera", "label": "Move horizontally"},         
+          {"mod": "armslegs/r-foot-trans-backward|forward", "cam": "rightFootRightCamera", "label": "Move depth"}
+        ],
+      "left foot": [
+          {"mod": "armslegs/l-foot-scale-decr|incr", "cam": "leftFootLeftCamera", "label": "Scale foot"},
+          {"mod": "armslegs/l-foot-trans-in|out", "cam": "leftFootFrontCamera", "label": "Move horizontally"},          
+          {"mod": "armslegs/l-foot-trans-backward|forward", "cam": "leftFootLeftCamera", "label": "Move depth"}
+        ],
+      "left shoulder": [
+          {"mod": "armslegs/l-upperarm-shoulder-muscle-decr|incr", "cam": "leftArmTopCamera", "label": "Shoulder muscle mass"}          
+        ],
+      "right shoulder": [
+          {"mod": "armslegs/r-upperarm-shoulder-muscle-decr|incr", "cam": "rightArmTopCamera", "label": "Shoulder muscle mass"}          
+        ],
+      "right arm": [
+          {"mod": "armslegs/r-lowerarm-scale-depth-decr|incr", "cam": "rightArmTopCamera", "label": "Lowerarm thickness 1"},
+          {"mod": "armslegs/r-lowerarm-scale-horiz-decr|incr", "cam": "rightArmFrontCamera", "label": "Lowerarm length"},
+          {"mod": "armslegs/r-lowerarm-scale-vert-decr|incr", "cam": "rightArmFrontCamera", "label": "Lowerarm thickness 2"},
+          {"mod": "armslegs/r-lowerarm-fat-decr|incr", "cam": "rightArmTopCamera", "label": "Lowerarm skinny-fat"},
+          {"mod": "armslegs/r-lowerarm-muscle-decr|incr", "cam": "rightArmTopCamera", "label": "Lowerarm muscles"},
+          {"mod": "armslegs/r-upperarm-scale-depth-decr|incr", "cam": "rightArmTopCamera", "label": "Upperarm thickness 1"},
+          {"mod": "armslegs/r-upperarm-scale-horiz-decr|incr", "cam": "rightArmFrontCamera", "label": "Upperarm length"},
+          {"mod": "armslegs/r-upperarm-scale-vert-decr|incr", "cam": "rightArmFrontCamera", "label": "Upperarm thickness 2"},
+          {"mod": "armslegs/r-upperarm-fat-decr|incr", "cam": "rightArmTopCamera", "label": "Upperarm skinny-fat"},
+          {"mod": "armslegs/r-upperarm-muscle-decr|incr", "cam": "rightArmTopCamera", "label": "Upperarm muscles"}
+        ],
+      "left arm": [
+          {"mod": "armslegs/l-lowerarm-scale-depth-decr|incr", "cam": "leftArmTopCamera", "label": "Lowerarm thickness 1"},
+          {"mod": "armslegs/l-lowerarm-scale-horiz-decr|incr", "cam": "leftArmFrontCamera", "label": "Lowerarm length"},
+          {"mod": "armslegs/l-lowerarm-scale-vert-decr|incr", "cam": "leftArmFrontCamera", "label": "Lowerarm thickness 2"},
+          {"mod": "armslegs/l-lowerarm-fat-decr|incr", "cam": "leftArmFrontCamera", "label": "Lowerarm skinny-fat"},   
+          {"mod": "armslegs/l-lowerarm-muscle-decr|incr", "cam": "leftArmTopCamera", "label": "Lowerarm muscles"},       
+          {"mod": "armslegs/l-upperarm-scale-depth-decr|incr", "cam": "leftArmTopCamera", "label": "Upperarm thickness 1"},
+          {"mod": "armslegs/l-upperarm-scale-horiz-decr|incr", "cam": "leftArmFrontCamera", "label": "Upperarm length"},
+          {"mod": "armslegs/l-upperarm-scale-vert-decr|incr", "cam": "leftArmFrontCamera", "label": "Upperarm thickness 2"},
+          {"mod": "armslegs/l-upperarm-fat-decr|incr", "cam": "leftArmTopCamera", "label": "Upperarm skinny-fat"},
+          {"mod": "armslegs/l-upperarm-muscle-decr|incr", "cam": "leftArmTopCamera", "label": "Upperarm muscles"}
+        ],
+      "right leg": [
+          {"mod": "armslegs/r-leg-valgus-decr|incr", "cam": "rightLegFrontCamera", "label": "Move knee horizontally"},
+          {"mod": "armslegs/r-lowerleg-scale-depth-decr|incr", "cam": "rightLegRightCamera", "label": "Lowerleg scale depth"},
+          {"mod": "armslegs/r-lowerleg-scale-horiz-decr|incr", "cam": "rightLegFrontCamera", "label": "Lowerleg scale horizontally"},
+          {"mod": "armslegs/r-lowerleg-fat-decr|incr", "cam": "rightLegFrontCamera", "label": "Lowerleg skinny-fat"},
+          {"mod": "armslegs/r-lowerleg-muscle-decr|incr", "cam": "rightLegFrontCamera", "label": "Lowerleg muscle"},
+          {"mod": "armslegs/r-upperleg-scale-depth-decr|incr", "cam": "rightLegRightCamera", "label": "Upperleg scale depth"},
+          {"mod": "armslegs/r-upperleg-scale-horiz-decr|incr", "cam": "rightLegFrontCamera", "label": "Upperleg scale horizontally"},
+          {"mod": "armslegs/r-upperleg-scale-vert-decr|incr", "cam": "rightLegFrontCamera", "label": "Move knee vertically"},
+          {"mod": "armslegs/r-upperleg-fat-decr|incr", "cam": "rightLegFrontCamera", "label": "Upperleg skinny-fat"},
+          {"mod": "armslegs/r-upperleg-muscle-decr|incr", "cam": "rightLegFrontCamera", "label": "Upperleg muscle"}          
+        ],
+      "left leg": [
+          {"mod": "armslegs/l-leg-valgus-decr|incr", "cam": "leftLegFrontCamera", "label": "Move knee horizontally"},
+          {"mod": "armslegs/l-lowerleg-scale-depth-decr|incr", "cam": "leftLegLeftCamera", "label": "Lowerleg scale depth"},
+          {"mod": "armslegs/l-lowerleg-scale-horiz-decr|incr", "cam": "leftLegFrontCamera", "label": "Lowerleg scale horizontally"}, 
+          {"mod": "armslegs/l-lowerleg-fat-decr|incr", "cam": "leftLegFrontCamera", "label": "Lowerleg skinny-fat"}, 
+          {"mod": "armslegs/l-lowerleg-muscle-decr|incr", "cam": "leftArmFrontCamera", "label": "Lowerleg muscle"},        
+          {"mod": "armslegs/l-upperleg-scale-depth-decr|incr", "cam": "leftLegLeftCamera", "label": "Upperleg scale depth"},
+          {"mod": "armslegs/l-upperleg-scale-horiz-decr|incr", "cam": "leftLegFrontCamera", "label": "Upperleg scale horizontally"},
+          {"mod": "armslegs/l-upperleg-scale-vert-decr|incr", "cam": "leftLegFrontCamera", "label": "Move knee vertically"},
+          {"mod": "armslegs/l-upperleg-fat-decr|incr", "cam": "leftLegFrontCamera", "label": "Upperleg skinny-fat"},
+          {"mod": "armslegs/l-upperleg-muscle-decr|incr", "cam": "leftLegFrontCamera", "label": "Upperleg muscle"}          
+        ],
+        "legs": [          
+          {"mod": "armslegs/upperlegs-height-decr|incr", "label": "Upperlegs height"},
+          {"mod": "armslegs/lowerlegs-height-decr|incr", "label": "Lowerlegs height"}  
+        ]
+    }
+  },
+
+
+  "Gender": {
+    "sortOrder": 0.1,
+    "modifiers": {
+      "Breast": [
+          {"mod": "breast/BreastSize", "label": "Breast size"},
+          {"mod": "breast/BreastFirmness", "label": "Breast firmness"},
+          {"mod": "breast/breast-trans-down|up", "label": "Vertical position"},
+          {"mod": "breast/breast-dist-decr|incr", "label": "Horizontal distance"},
+          {"mod": "breast/breast-point-decr|incr", "label": "Pointiness"},
+          {"mod": "breast/breast-volume-vert-down|up", "label": "Breast Volume"},
+          {"mod": "breast/nipple-size-decr|incr", "label": "Nipple size"},
+          {"mod": "breast/nipple-point-decr|incr", "label": "Nipple point"}
+        ],
+      "Genitals": [
+          {"mod": "genitals/penis-length-decr|incr", "label": "Penis length", "enabledCondition": "hasGenitals"},
+          {"mod": "genitals/penis-circ-decr|incr", "label": "Penis circumference", "enabledCondition": "hasGenitals"},
+          {"mod": "genitals/penis-testicles-decr|incr", "label": "Testicles size", "enabledCondition": "hasGenitals"}
+        ]
+    }
+  },
+
+
+  "Macro modelling": {
+    "label": "Main",
+    "sortOrder": 0,
+    "showMacroStats": true,
+    "modifiers": {
+      "Macro": [
+          {"mod": "macrodetails/Gender", "label": "Gender"},
+          {"mod": "macrodetails/Age", "label": "Age"},
+          {"mod": "macrodetails-universal/Muscle", "label": "Muscle"},
+          {"mod": "macrodetails-universal/Weight", "label": "Weight"},
+          {"mod": "macrodetails-height/Height", "label": "Height"},
+          {"mod": "macrodetails-proportions/BodyProportions", "label": "Proportions"},
+          {"mod": "macrodetails/African", "label": "African"},
+          {"mod": "macrodetails/Asian", "label": "Asian"},
+          {"mod": "macrodetails/Caucasian", "label": "Caucasian"}
+        ]
+    }
+  }
+
+  
+}

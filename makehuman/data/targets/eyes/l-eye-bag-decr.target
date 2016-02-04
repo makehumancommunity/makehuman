@@ -1,0 +1,85 @@
+# MakeHuman 3d morphing modelled by Manuel Bastioni
+# Copyright (C) 2015 Manuel Bastioni (mb@makehuman.org)
+# homepage http://www.makehuman.org
+# basemesh hm08
+# license AGPL3 (http://www.makehuman.org/doc/node/makehuman_mesh_license.html)
+#    This file is part of MakeHuman (www.makehuman.org).
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+6815 0 0 0
+6816 -.004 0 0
+6818 0 0 0
+6819 -.005 0 -.002
+6821 -.001 0 0
+6822 -.006 0 -.003
+6823 -.003 .001 -.003
+6824 0 0 0
+6826 -.002 .002 -.006
+6827 .001 0 0
+6829 .001 .001 -.003
+6830 .001 0 0
+6832 .002 0 0
+6833 .001 0 0
+6835 0 0 0
+6836 0 0 0
+6859 -.004 .001 .002
+6860 -.006 .003 .002
+6861 -.005 .007 -.001
+6862 0 .006 -.002
+6863 .003 .006 -.001
+6864 .005 .003 .001
+6865 0 0 0
+6872 -.001 0 .001
+6915 -.001 0 .001
+6916 -.004 0 .001
+6917 -.002 .004 -.001
+6918 .001 .003 -.002
+6919 .005 .002 0
+6920 .004 0 0
+7809 -.002 .002 -.004
+7810 -.004 .005 -.011
+7811 -.005 .007 -.014
+7812 -.003 .008 -.016
+7813 .003 .005 -.011
+7814 .002 .002 -.005
+7815 0 0 0
+11477 0 0 0
+11479 0 0 0
+11481 0 0 0
+11482 0 0 0
+11500 -.001 .001 .001
+11502 -.004 .006 -.003
+11503 -.007 .002 0
+11504 -.001 .005 -.005
+11505 .002 .004 -.002
+11506 0 0 0
+11507 .003 .001 0
+11508 -.005 .001 .001
+11691 0 0 0
+11694 0 0 0
+11696 .001 0 0
+11697 .002 .001 .001
+11699 0 0 0
+11720 0 0 0
+11744 0 0 0
+11745 .001 0 .002
+11820 0 0 0
+11829 0 0 0
+11856 0 0 0
+14636 -.005 .003 -.001
+14637 -.005 .002 0
+14644 0 0 0
+14645 -.007 .020 -.004
+14653 0 0 0
+14654 .002 .009 -.001
