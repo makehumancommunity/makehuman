@@ -1106,6 +1106,8 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         progress(0.5, 1.0)
         self.fullUpdate(update)
 
+        progress(1.0)
+
     def fullUpdate(self, update=True):
         """
         Update all aspects that depend on the human base mesh geometry in proper
@@ -1120,7 +1122,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         # TODO optimization is possible: only execute this if new-style proxies are applied or if no pose is set
         # TODO alternative optimization: only execute if no pose is set, apply new-style proxies after pose is applied
         self.meshData.calcNormals(1, 1)
-        progress(0.3)
+        progress(0.1)
 
         # Make sure self.getRestposeCoordinates is up-to-date directly (required for proxy fitting)
         self._updateOriginalMeshCoords(self.meshData.name, self.meshData.coord)
