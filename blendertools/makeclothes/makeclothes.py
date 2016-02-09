@@ -237,8 +237,10 @@ def findClothes(context, hum, clo):
 
     scn = context.scene
     humanGroup,pExactIndex = findVertexGroups(hum, clo)
-    bestVerts,vfaces = findBestVerts(scn, humanGroup, pExactIndex, hum, clo)
-    bestFaces = findBestFaces(scn, bestVerts, vfaces, hum, clo)
+    #    bestVerts,vfaces = findBestVerts(scn, humanGroup, pExactIndex, hum, clo)
+    #    bestFaces = findBestFaces(scn, bestVerts, vfaces, hum, clo)
+    bestVerts,vfaces,rgfaces = findBestVerts(scn, humanGroup, pExactIndex, hum, clo)
+    bestFaces = findBestFaces(scn, bestVerts, vfaces, rgfaces, hum, clo)
     return bestFaces
 
 
@@ -384,12 +386,12 @@ def findBestVerts(scn, humanGroup, pExactIndex, hum, clo):
     print("Setting up face table")
 
     vfaces = {}
-    rigid = {}
+    # rigid = {}
     for vn in range(len(hum.data.vertices)):
         vfaces[vn] = []
-        rigid[vn] = False
+        # rigid[vn] = False
 
-    #
+    rgfaces = {}
     for idx in humanGroup.keys():
         bg,bverts = humanGroup[idx]
         if isRigidVGroup(bg):
@@ -399,12 +401,14 @@ def findBestVerts(scn, humanGroup, pExactIndex, hum, clo):
             v0,v1,v2 = bverts
             vn0,vn1,vn2 = v0.index, v1.index, v2.index
             t = (vn0,vn1,vn2)
-            vfaces[vn0] = vfaces[vn1] = vfaces[vn2] = [t]
-            rigid[vn0] = rigid[vn1] = rigid[vn2] = True
+            #vfaces[vn0] = vfaces[vn1] = vfaces[vn2] = [t]
+            #rigid[vn0] = rigid[vn1] = rigid[vn2] = True
+            rgfaces[bg.index] = [t]
 
     for f in hum.data.polygons:
         vn0,vn1,vn2,vn3 = f.vertices
-        if not (rigid[vn0] or rigid[vn1] or rigid[vn2] or rigid[vn3]):
+        # if not (rigid[vn0] or rigid[vn1] or rigid[vn2] or rigid[vn3]):
+        if True:
             t0 = [vn0,vn1,vn2]
             t1 = [vn1,vn2,vn3]
             t2 = [vn2,vn3,vn0]
@@ -414,18 +418,25 @@ def findBestVerts(scn, humanGroup, pExactIndex, hum, clo):
             vfaces[vn2].extend( [t0,t1,t2] )
             vfaces[vn3].extend( [t1,t2,t3] )
 
-    return bestVerts, vfaces
+    # return bestVerts, vfaces
+    return bestVerts, vfaces, rgfaces
 
 
-def findBestFaces(scn, bestVerts, vfaces, hum, clo):
+def findBestFaces(scn, bestVerts, vfaces, rgfaces, hum, clo):
     print("Finding weights")
     for bestVert in bestVerts:
         pv = bestVert.pv
         if bestVert.exact:
             continue
+        isRigid = (bestVert.bindex >= 0) and (bestVert.bindex in rgfaces)
         for (bv,mdist) in bestVert.mverts:
             if bv:
-                for f in vfaces[bv.index]:
+                #for f in vfaces[bv.index]:                
+                if isRigid: 
+                    faces = rgfaces[bestVert.bindex]
+                else:
+                    faces = vfaces[bv.index]
+                for f in faces:
                     v0 = hum.data.vertices[f[0]]
                     v1 = hum.data.vertices[f[1]]
                     v2 = hum.data.vertices[f[2]]
