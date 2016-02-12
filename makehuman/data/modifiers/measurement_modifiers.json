@@ -1,0 +1,34 @@
+[
+  { "group": "measure",
+    "modifiers": [
+      {"target": "measure-neck-circ", "min": "decr", "max": "incr"},
+      {"target": "measure-neck-height", "min": "decr", "max": "incr"},
+
+      {"target": "measure-upperarm-circ", "min": "decr", "max": "incr"},
+      {"target": "measure-upperarm-length", "min": "decr", "max": "incr"},
+
+      {"target": "measure-lowerarm-length", "min": "decr", "max": "incr"},
+      {"target": "measure-wrist-circ", "min": "decr", "max": "incr"},
+
+      {"target": "measure-frontchest-dist", "min": "decr", "max": "incr"},
+      {"target": "measure-bust-circ", "min": "decr", "max": "incr"},
+      {"target": "measure-underbust-circ", "min": "decr", "max": "incr"},
+      {"target": "measure-waist-circ", "min": "decr", "max": "incr"},
+      {"target": "measure-napetowaist-dist", "min": "decr", "max": "incr"},
+      {"target": "measure-waisttohip-dist", "min": "decr", "max": "incr"},
+      {"target": "measure-shoulder-dist", "min": "decr", "max": "incr"},
+
+      {"target": "measure-hips-circ", "min": "decr", "max": "incr"},
+
+      {"target": "measure-upperleg-height", "min": "decr", "max": "incr"},
+      {"target": "measure-thigh-circ", "min": "decr", "max": "incr"},
+
+      {"target": "measure-lowerleg-height", "min": "decr", "max": "incr"},
+      {"target": "measure-calf-circ", "min": "decr", "max": "incr"},
+      {"target": "measure-knee-circ", "min": "decr", "max": "incr"},
+      {"target": "measure-ankle-circ", "min": "decr", "max": "incr"}
+    ]
+  }
+]
+
+

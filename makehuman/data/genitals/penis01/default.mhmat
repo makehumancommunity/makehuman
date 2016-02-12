@@ -1,0 +1,36 @@
+# Default material for MakeHuman genitals
+
+name penisMaterial
+
+// Color shading attributes
+ambientColor 0.11 0.11 0.11
+specularColor 0.3 0.3 0.3
+shininess 0.96
+opacity 1
+
+transparent false
+
+autoBlendSkin true
+
+sssEnabled true
+sssRScale 5.0
+sssGScale 2.5
+sssBScale 1.0
+
+
+// Shader programme
+shader data/shaders/glsl/litsphere
+
+// Pass alpha channel used by ALPHA_MAP feature
+shaderParam alphaTexture data/genitals/penis01/penis01_default.png
+
+// Enable alpha-only mapping in litsphere, uses alpha from diffuse texture
+shaderDefine ALPHA_MAP
+
+// Configure built-in shader defines
+shaderConfig diffuse false
+shaderConfig bump True
+shaderConfig normal  false
+shaderConfig displacement  false
+shaderConfig spec  false
+shaderConfig vertexColors false
