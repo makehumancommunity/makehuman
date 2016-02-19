@@ -10,7 +10,7 @@ Translation and localization module.
 
 **Code Home Page:**    http://code.google.com/p/makehuman/
 
-**Authors:**           Manuel Bastioni, Marc Flerackers, Glynn Clements
+**Authors:**           Joel Palmius, Marc Flerackers, Glynn Clements
 
 **Copyright(c):**      MakeHuman Team 2001-2015
 
