@@ -1142,7 +1142,7 @@
             "tail": "wrist.R____tail"
         }
     },
-    "copyright": "(c) 2016 Data Collection AB, Joel Palmius, Jonas Hauquier",
+    "copyright": "(c) Manuel Bastioni 2014",
     "description": "MakeHuman default skeleton. A complex skeleton with detailed fingers, toes and facial bones for advanced animations.",
     "joints": {
         "breast.L____head": [
