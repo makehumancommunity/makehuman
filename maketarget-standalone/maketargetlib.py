@@ -14,7 +14,7 @@ Library with common functionality for MakeTarget tool
 
 **Copyright(c):**      MakeHuman Team 2001-2015
 
-**Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/external_tools_license.html)
+**Licensing:**         AGPL3
 
     This file is part of MakeHuman (www.makehuman.org).
 
