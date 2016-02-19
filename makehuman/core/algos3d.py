@@ -10,7 +10,7 @@ MakeHuman 3D Transformation functions.
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Manuel Bastioni, Marc Flerackers, Jonas Hauquier
+**Authors:**           Joel Palmius, Marc Flerackers, Jonas Hauquier
 
 **Copyright(c):**      MakeHuman Team 2001-2015
 
@@ -496,6 +496,6 @@ def defaultTargetLicense():
     license is globally referenced by and applies to the majority of targets.
     """
     import makehuman
-    return makehuman.getAssetLicense( {"license": "AGPL3 (http://www.makehuman.org/doc/node/makehuman_mesh_license.html)",
-                                       "author": "Manuel Bastioni",
-                                       "copyright": "2014 Manuel Bastioni (mb@makehuman.org)"} )
+    return makehuman.getAssetLicense( {"license": "AGPL3",
+                                       "author": "MakeHuman",
+                                       "copyright": "2016 Data Collection AB, Joel Palmius, Jonas Hauquier"} )
