@@ -8,7 +8,7 @@
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Jonas Hauquier, Glynn Clements, Manuel Bastioni, Marc Flerackers
+**Authors:**           Jonas Hauquier, Glynn Clements, Joel Palmius, Marc Flerackers
 
 **Copyright(c):**      MakeHuman Team 2001-2015
 
