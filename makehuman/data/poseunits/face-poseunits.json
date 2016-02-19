@@ -61,7 +61,7 @@
     "TonguePointUp",
     "TonguePointDown"     
     ],
-    "copyright": "(c) Manuel Bastioni 2014",
+    "copyright": "(c) 2016 Data Collection AB, Joel Palmius, Jonas Hauquier",
     "license": "GNU Affero General Public License 3",
     "name": "Standard face pose units",
     "version": 110,
