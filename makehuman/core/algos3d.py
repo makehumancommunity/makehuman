@@ -496,6 +496,6 @@ def defaultTargetLicense():
     license is globally referenced by and applies to the majority of targets.
     """
     import makehuman
-    return makehuman.getAssetLicense( {"license": "AGPL3",
+    return makehuman.getAssetLicense( {"license": "AGPL3 (http://www.makehuman.org/doc/node/makehuman_mesh_license.html)",
                                        "author": "Manuel Bastioni",
-                                       "copyright": "2016 Data Collection AB, Joel Palmius, Jonas Hauquier"} )
+                                       "copyright": "2014 Manuel Bastioni (mb@makehuman.org)"} )

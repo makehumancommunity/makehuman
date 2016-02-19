@@ -1,15 +1,8 @@
-# This is a mesh file for MakeHuman 
-#
-# Copyright (C) 2016 Data Collection AB, https://www.datacollection.se
-# Copyright (C) 2016 Joel Palmius 
-# Copyright (C) 2016 Jonas Hauquier
-#
-# The primary legal contact for MakeHuman is Data Collection AB.
-#
-# For more information, see homepage at http://www.makehuman.org
-#
-# This file is licensed AGPLv3
-#
+# MakeHuman 3d morphing modelled by Manuel Bastioni
+# Copyright (C) 2001-2015 Manuel Bastioni (mb@makehuman.org)
+# homepage http://www.makehuman.org
+# basemesh hm08
+# license AGPL3 (http://www.makehuman.org/doc/node/makehuman_mesh_license.html)
 #    This file is part of MakeHuman (www.makehuman.org).
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -24,8 +17,6 @@
 #
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-# basemesh hm08
 v -0.3492 7.3299 1.4076
 v -0.3110 7.3315 1.4107
 v -0.3481 7.3465 1.4062
