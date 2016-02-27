@@ -10,11 +10,11 @@ Handles WaveFront .obj 3D mesh files.
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Manuel Bastioni, Marc Flerackers, Jonas Hauquier
+**Authors:**           Joel Palmius, Marc Flerackers, Jonas Hauquier
 
 **Copyright(c):**      MakeHuman Team 2001-2015
 
-**Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
+**Licensing:**         AGPL3
 
     This file is part of MakeHuman (www.makehuman.org).
 
