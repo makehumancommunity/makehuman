@@ -10,11 +10,11 @@ MakeHuman python entry-point.
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Manuel Bastioni, Glynn Clements, Jonas Hauquier, Joel Palmius
+**Authors:**           Glynn Clements, Jonas Hauquier, Joel Palmius
 
 **Copyright(c):**      MakeHuman Team 2001-2015
 
-**Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
+**Licensing:**         AGPL3 
 
     This file is part of MakeHuman (www.makehuman.org).
 
@@ -52,8 +52,8 @@ versionSub = ""                         # Short version description
 meshVersion = "hm08"                    # Version identifier of the basemesh
 ################################################################################
 
-__author__ = "Manuel Bastioni, Jonas Hauquier, Joel Palmius, Glynn Clements, Thomas Larsson et al."
-__copyright__ = "Copyright 2001-2015, MakeHuman Project"
+__author__ = "Jonas Hauquier, Joel Palmius, Glynn Clements, Thomas Larsson et al."
+__copyright__ = "Copyright 2016 Data Collection AB and listed authors"
 __credits__ = ["See http://www.makehuman.org/halloffame"]
 __license__ = "AGPLv3"
 __maintainer__ = "Joel Palmius, Jonas Hauquier"
