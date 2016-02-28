@@ -1,0 +1,3 @@
+makehuman/data/targets/* usr/share/makehuman/data/targets
+makehuman/data/targets.npz usr/share/makehuman/data
+
