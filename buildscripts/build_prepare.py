@@ -340,9 +340,9 @@ class MHAppExporter(object):
         if not self.noDownload:
             ###DOWNLOAD ASSETS
             try:
-                self.runProcess( ["python","download_assets.py"] )
+                self.runProcess( ["python","download_assets_git.py"] )
             except subprocess.CalledProcessError:
-                print "check that download_assets.py is working correctly"
+                print "check that download_assets_git.py is working correctly"
                 sys.exit(1)
             print "\n"
 
