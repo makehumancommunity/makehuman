@@ -80,3 +80,12 @@
 # packageVersion = 20140503
 #distDir = c:\jenkins\workspace\makehuman-unstable-dist
 
+# Note that PPA signing and uploading requires a valid GPG signature
+
+#[PPA]
+#packageVersion = 1.1.0~rc1
+#packageSub = 1ppa1
+#signString = Joel Palmius <joepal1976@hotmail.com>
+#performSign = True
+#performUpload = True
+

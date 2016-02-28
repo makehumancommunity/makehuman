@@ -1,0 +1,14 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: MakeHuman
+Upstream-Contact: Joel Palmius <joepal1976@hotmail.com>
+Source: https://bitbucket.org/MakeHuman/makehuman
+
+Files: *
+Copyright: 2016, MakeHuman Team
+License: AGPL-3+ with CC0 exception.
+ The MakeHuman source (all files that include code) and data (3d models 
+ and 3d morphings) are relased under AGPL3. This also includes 
+ everything that is exported from or by MakeHuman. However, respecting 
+ a set of conditions, you are allowed to instead use the CC0 license 
+ for exports. See the makehuman home page for more information. 
+

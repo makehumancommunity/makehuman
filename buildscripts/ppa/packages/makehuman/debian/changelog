@@ -1,0 +1,6 @@
+makehuman (1.1.0~rc1-1ppa1) trusty; urgency=low
+
+  * Initial packaging release.
+
+ -- Joel Palmius <joepal1976@hotmail.com>  Sun, 28 Feb 2016 13:52:49 +0200
+
