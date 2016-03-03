@@ -80,12 +80,14 @@ class AnimationTrack(object):
         self.license = makehuman.getAssetLicense()
         self.dataLen = len(poseData)
         self.nFrames = nFrames
-        self.nBones = self.dataLen/nFrames
+        self.nBones = int(self.dataLen/nFrames)
 
+        if self.nBones == 0:
+            raise RuntimeError("Cannot create AnimationTrack %s: contains no or not enough data." % self.name)
         if self.nBones*self.nFrames != self.dataLen:
-            raise RuntimeError("The specified pose data does not have the proper length. Is %s, expected %s (nBones*nFrames)." % (self.dataLen, self.nBones*self.nFrames))
+            raise RuntimeError("Cannot create AnimationTrack %s: The specified pose data does not have the proper length. Is %s, expected %s (nBones*nFrames)." % (self.name, self.dataLen, self.nBones*self.nFrames))
         if not (poseData.shape == (self.dataLen, 3, 4) or poseData.shape == (self.dataLen, 4, 4)):
-            raise RuntimeError("The specified pose data does not have the proper dimensions. Is %s, expected (%s, 4, 4) or (%s, 3, 4)" % (poseData.shape, self.dataLen, self.dataLen))
+            raise RuntimeError("Cannot create AnimationTrack %s: The specified pose data does not have the proper dimensions. Is %s, expected (%s, 4, 4) or (%s, 3, 4)" % (self.name, poseData.shape, self.dataLen, self.dataLen))
 
         self._data = poseData[:self.dataLen,:3,:4]  # We do not store the last row to save memory
         self.frameRate = float(framerate)      # Numer of frames per second
