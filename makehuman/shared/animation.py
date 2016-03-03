@@ -225,7 +225,7 @@ class AnimationTrack(object):
             frameIdx = self.nFrames-1
             fraction = 0
 
-        return frameIdx, fraction
+        return int(frameIdx), float(fraction)
 
     def isLooping(self):
         return self.loop
