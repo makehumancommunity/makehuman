@@ -45,12 +45,12 @@ Prepares an export folder ready to build packages from.
 HG_PATH = "hg"
 
 # Filter of files from source folder to exclude (glob syntax)
-EXCLUDES = ['.hgignore', '.hgtags', '.hgeol', '*.target', '*.obj', '*.pyc', '*.mhclo', '*.proxy', '*.pyd', 'maketarget-standalone', 'plugins/4_rendering_mitsuba', 'plugins/4_rendering_povray', 'plugins/4_rendering_aqsis.py', 'plugins/0_modeling_5_editing.py', 'plugins/3_libraries_animation.py', 'compile_*.py', 'build_prepare.py', 'download_assets.py', '*~', '*.bak', 'setup.nsi', 'clean*.sh', 'makehuman.sh', 'makehuman/makehuman', 'pylintrc', 'clean*.bat', 'makehuman/docs', 'makehuman/icons/*psd', 'makehuman/icons/*bmp', 'makehuman/icons/*ico', 'makehuman/icons/*icns', 'makehuman/icons/*xcf', 'makehuman/icons/makehuman.svg', 'makehuman.rc', '*_contents.txt', 'buildscripts', '.build_prepare.out']
+EXCLUDES = ['.hgignore', '.hgtags', '.hgeol', '*.target', '*.obj', '*.pyc', '*.mhclo', '*.proxy', '*.pyd', 'maketarget-standalone', 'plugins/4_rendering_mitsuba', 'plugins/4_rendering_povray', 'plugins/4_rendering_aqsis.py', 'plugins/0_modeling_5_editing.py', 'plugins/3_libraries_animation.py', 'compile_*.py', 'build_prepare.py', 'download_assets.py', 'download_assets_git.py', '*~', '*.bak', 'setup.nsi', 'clean*.sh', 'makehuman.sh', 'makehuman/makehuman', 'pylintrc', 'clean*.bat', 'makehuman/docs', 'makehuman/icons/*psd', 'makehuman/icons/*bmp', 'makehuman/icons/*ico', 'makehuman/icons/*icns', 'makehuman/icons/*xcf', 'makehuman/icons/makehuman.svg', 'makehuman.rc', '*_contents.txt', 'buildscripts', '.build_prepare.out']
 # Same as above, but applies to release mode only
 EXCLUDES_RELEASE = ['testsuite']
 
 # Include filter for additional asset files (not on hg) to copy (glob syntax)
-ASSET_INCLUDES = ['*.npz', '*.mhpxy', '*.list', '*.thumb', '*.png', '*.json', '*.csv', '*.mhskel', '*.mhw', '*.mhmat', '*.mhclo', '*.proxy', 'glsl/*.txt', 'languages/*.ini', "*.bvh", "*.mhm", "*.qss", "*.mht", "*.svg", "*.mhpose", "icons/makehuman_bg.svg", "icons/makehuman.png", "logging.ini"]
+ASSET_INCLUDES = ['*.npz', '*.mhpxy', '*.list', '*.thumb', '*.png', '*.json', '*.csv', '*.meta', '*.mhskel', '*.mhw', '*.mhmat', '*.mhclo', '*.proxy', 'glsl/*.txt', 'languages/*.ini', "*.bvh", "*.mhm", "*.qss", "*.mht", "*.svg", "*.mhpose", "icons/makehuman_bg.svg", "icons/makehuman.png", "logging.ini"]
 
 # Even if empty, create these folders (relative to export path)
 CREATE_FOLDERS = ['makehuman/data/backgrounds', 'makehuman/data/clothes', 'makehuman/data/teeth', 'makehuman/data/eyelashes', 'makehuman/data/tongue']
