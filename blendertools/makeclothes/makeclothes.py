@@ -44,6 +44,7 @@ import random
 import ast
 from bpy.props import *
 from mathutils import Vector
+import mathutils
 
 from maketarget.utils import getMHBlenderDirectory
 from .error import MHError, handleMHError, addWarning
@@ -641,6 +642,7 @@ def writeClothes(context, hum, clo, data, matfile):
     fp = mc.openOutputFile(outfile)
     writeClothesHeader(fp, scn)
     fp.write("name %s\n" % clo.name.replace(" ","_"))
+    fp.write("version 110\n")
     fp.write("obj_file %s.obj\n" % mc.goodName(clo.name))
 
     vnums = getBodyPartVerts(scn)
@@ -1104,19 +1106,27 @@ def restoreData(context):
 #    makeClothes(context, doFindClothes):
 #
 
-def makeClothes(context, doFindClothes):
+def makeClothes(context, doFindClothes, version=1):
     from .project import saveClosest
     (hum, clo) = getObjectPair(context)
     scn = context.scene
     checkNoTriangles(scn, clo)
     checkObjectOK(hum, context, False)
-    autoVertexGroupsIfNecessary(hum, 'Selected')
+    if version == 1:
+        autoVertexGroupsIfNecessary(hum, 'Selected')
     #checkAndUnVertexDiamonds(context, hum)
-    checkObjectOK(clo, context, True)
-    autoVertexGroupsIfNecessary(clo)
-    checkSingleVertexGroups(clo, scn)
+    checkObjectOK(clo, context, True, version)
+    if version == 1:
+        autoVertexGroupsIfNecessary(clo)
+        checkSingleVertexGroups(clo, scn)
     saveClosest({})
     matfile = materials.writeMaterial(clo, scn.MhClothesDir)
+
+    if version == 2:
+        (outpath, outfile) = mc.getFileName(clo, scn.MhClothesDir, "mhclo")
+        save_proxy_v2(context, hum, clo, outfile, matfile)
+        return
+
     if doFindClothes:
         data = findClothes(context, hum, clo)
         storeData(clo, hum, data)
@@ -1124,6 +1134,94 @@ def makeClothes(context, doFindClothes):
         (hum, data) = restoreData(context)
     writeClothes(context, hum, clo, data, matfile)
 
+def save_proxy_v2(context, body, proxy, filepath, matfile):
+    """New algorithm for proxy fitting, does not require vertex groups and
+    yields more stable results. 
+    Based on new proxy fitting algorithm by Manuel Bastioni, proposed in
+    Manuel Lab.
+    """
+    print("- Saving proxy data in {0}".format(filepath))
+    fp = mc.openOutputFile(filepath)
+    scn = context.scene
+    
+    search_tree = mathutils.kdtree.KDTree(len(body.data.polygons))
+
+    for face in body.data.polygons:
+        search_tree.insert(face.center, face.index)
+    search_tree.balance()
+
+    proxy_data = []
+    for vert in proxy.data.vertices:
+        closer_polygons = search_tree.find_n(vert.co, 1)
+
+        p_index = closer_polygons[0][1]
+        polygon = body.data.polygons[p_index]
+
+        vec0 = polygon.normal.copy()
+        vec1 = polygon.center-body.data.vertices[polygon.vertices[0]].co
+        vec2 = vec0.cross(vec1)
+
+        delta_vector = vert.co-polygon.center
+        mtx = average_basis_matrix(vec0, vec1, vec2, invert=True)
+        vidx1 = polygon.vertices[0]
+        vidx2 = polygon.vertices[1]
+        vidx3 = polygon.vertices[2]
+        vidx4 = polygon.vertices[3]
+        if mtx:
+            d_vect = mtx*delta_vector
+            proxy_data.append("%s %s %s %s %.5f %.5f %.5f" % (vidx1,
+                vidx2,
+                vidx3,
+                vidx4,
+                d_vect[0],
+                d_vect[1],
+                d_vect[2]))                
+        else:
+            proxy_data.append("%s %s %s %s 0 0 0" % (vidx1,
+                vidx2,
+                vidx3,
+                vidx4))
+
+    writeClothesHeader(fp, scn)
+    fp.write("name %s\n" % proxy.name.replace(" ","_"))
+    fp.write("version 120\n")
+    fp.write("obj_file %s.obj\n" % mc.goodName(proxy.name))
+    writeStuff(fp, proxy, context, matfile)
+
+    fp.write("verts 0\n")
+
+    # Write fitting data
+    fp.write('\n'.join(proxy_data))
+
+    fp.write('\n')
+    printDeleteVerts(fp, body)
+
+    fp.close()
+
+def average_basis_matrix(vec0, vec1, vec2, invert=False, normalize=True):
+    """Based on new proxy fitting algorithm by Manuel Bastioni, proposed in
+    Manuel Lab.
+    """
+
+    if normalize:
+        vec0.normalize()
+        vec1.normalize()
+        vec2.normalize()
+
+    mtx = mathutils.Matrix((
+        (vec0[0], vec1[0], vec2[0]),
+        (vec0[1], vec1[1], vec2[1]),
+        (vec0[2], vec1[2], vec2[2]),
+        ))
+    if invert:
+        try:
+            mtx.invert()
+            return mtx
+        except:
+            #print("non invertible")
+            return None
+    else:
+        return mtx
 
 def checkNoTriangles(scn, ob):
     strayVerts = {}
@@ -1171,7 +1269,7 @@ def highlightVerts(scn, ob, verts):
     bpy.ops.object.mode_set(mode='EDIT')
 
 
-def checkObjectOK(ob, context, isClothing):
+def checkObjectOK(ob, context, isClothing, version=1):
     old = context.object
     scn = context.scene
     scn.objects.active = ob
@@ -1210,13 +1308,14 @@ def checkObjectOK(ob, context, isClothing):
         word = "parent"
         ob.parent = None
 
-    word = rightVGroupOnLeftSide(ob, -1, "LEFT", [".L", "_L"])
-    if word:
-        err = True
+    if version == 1:
+        word = rightVGroupOnLeftSide(ob, -1, "LEFT", [".L", "_L"])
+        if word:
+            err = True
 
-    word = rightVGroupOnLeftSide(ob, 1, "RIGHT", [".R", "_R"])
-    if word:
-        err = True
+        word = rightVGroupOnLeftSide(ob, 1, "RIGHT", [".R", "_R"])
+        if word:
+            err = True
 
     if isClothing:
         try:
