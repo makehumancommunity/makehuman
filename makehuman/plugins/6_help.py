@@ -52,13 +52,13 @@ class HelpTaskView(gui3d.TaskView):
         aboutBox = self.addLeftWidget(gui.GroupBox('About MakeHuman'))
         self.aboutButton = aboutBox.addWidget(gui.Button("About"))
         self.websiteButton = aboutBox.addWidget(gui.Button("Website"))
+        self.facebookButton = aboutBox.addWidget(gui.Button("FaceBook page")) 
 
         optionsBox = self.addLeftWidget(gui.GroupBox('Support'))
-        self.manualButton = optionsBox.addWidget(gui.Button("Manual"))
+        self.forumButton = optionsBox.addWidget(gui.Button("Forum")) 
+        self.manualButton = optionsBox.addWidget(gui.Button("Wiki"))
         self.reportBugButton = optionsBox.addWidget(gui.Button("Report bug"))
         self.requestFeatureButton = optionsBox.addWidget(gui.Button("Request feature"))   
-        self.forumButton = optionsBox.addWidget(gui.Button("Forum")) 
-        self.facebookButton = optionsBox.addWidget(gui.Button("FaceBook page")) 
 
         @self.aboutButton.mhEvent
         def onClicked(event):
@@ -70,19 +70,19 @@ class HelpTaskView(gui3d.TaskView):
 
         @self.manualButton.mhEvent
         def onClicked(event):
-            webbrowser.open('http://www.makehuman.org/documentation');
+            webbrowser.open('http://www.makehumancommunity.org/wiki/Main_Page');
         
         @self.reportBugButton.mhEvent
         def onClicked(event):
-            webbrowser.open('http://bugtracker.makehuman.org/issues/new?project_id=makehuman');
+            webbrowser.open('http://bugtracker.makehumancommunity.org/issues/new?project_id=makehuman');
           
         @self.requestFeatureButton.mhEvent
         def onClicked(event):
-            webbrowser.open('http://bugtracker.makehuman.org/issues/new?project_id=makehuman&issue[tracker_id]=2');
+            webbrowser.open('http://bugtracker.makehumancommunity.org/issues/new?project_id=makehuman&issue[tracker_id]=2');
             
         @self.forumButton.mhEvent
         def onClicked(event):
-            webbrowser.open('http://www.makehuman.org/forum/');
+            webbrowser.open('http://www.makehumancommunity.org/forum');
             
         @self.facebookButton.mhEvent
         def onClicked(event):
