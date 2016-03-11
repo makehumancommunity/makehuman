@@ -82,7 +82,11 @@ class PoseLibraryTaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.bvh_bone_length = None
         self.bvh_root_translation = None
 
-        self.paths = [mh.getDataPath('poses'), mh.getSysDataPath('poses')]
+        self.sysDataPath = getpath.getSysDataPath('poses')
+        self.userDataPath = getpath.getDataPath('poses')
+        if not os.path.exists(self.userDataPath):
+            os.makedirs(self.userDataPath)
+        self.paths = [self.userDataPath, self.sysDataPath]
 
         self.filechooser = self.addRightWidget(fc.IconListFileChooser(self.paths, ['bvh'], 'thumb', mh.getSysDataPath('poses/notfound.thumb'), name='Pose', noneItem=True))
         self.filechooser.setIconSize(50,50)
