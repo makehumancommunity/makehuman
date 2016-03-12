@@ -237,11 +237,14 @@ class FileSort(Sorter):
 
     def updateMeta(self, filenames):
         for filename in filenames:
-            if filename in self._meta and \
-            self._meta[filename]['modified'] >= os.path.getmtime(filename):
-                continue
-            self._meta[filename] = self.getMeta(filename)
-            self._meta[filename]['modified'] = os.path.getmtime(filename)
+            try:
+                if filename in self._meta and \
+                self._meta[filename]['modified'] >= os.path.getmtime(filename):
+                    continue
+                self._meta[filename] = self.getMeta(filename)
+                self._meta[filename]['modified'] = os.path.getmtime(filename)
+            except IOError:
+                log.warning("Filechooser could not update metadata of file %s (IO error)" % filename)
 
     def getMeta(self, filename):
         """
