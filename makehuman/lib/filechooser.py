@@ -46,6 +46,7 @@ from PyQt4 import QtCore, QtGui
 import qtgui as gui
 import mh
 import getpath
+import log
 from sorter import Sorter
 
 class ThumbnailCache(object):
