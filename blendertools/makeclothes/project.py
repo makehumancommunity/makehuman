@@ -595,6 +595,7 @@ def markEdges(pv0, pv1, pob, pVertEdges, taken, depth):
 
 
 def saveClosest(closest):
+    """TODO: function unclear, document"""
     fname = settingsFile("closest")
     fp = mc.openOutputFile(fname)
     if fp:
@@ -604,6 +605,7 @@ def saveClosest(closest):
 
 
 def readClosets(pob):
+    """TODO: function unclear, document"""
     closest = {}
     fname = settingsFile("closest")
     try:

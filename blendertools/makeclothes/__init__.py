@@ -137,6 +137,8 @@ class MakeClothesPanel(bpy.types.Panel):
         layout.separator()
         layout.operator("mhclo.make_clothes")
         layout.separator()
+        layout.operator("mhclo.make_clothesv2")
+        layout.separator()
         layout.operator("mhclo.test_clothes")
         layout.separator()
 
@@ -336,6 +338,35 @@ class OBJECT_OT_MakeClothesButton(bpy.types.Operator):
         try:
             initWarnings()
             makeclothes.makeClothes(context, True)
+            makeclothes.exportObjFile(context)
+            handleWarnings()
+        except MHError:
+            handleMHError(context)
+        return{'FINISHED'}
+
+    def invoke(self, context, event):
+        return invokeWithFileCheck(self, context, ["mhclo", "obj"])
+
+    def draw(self, context):
+        drawFileCheck(self)
+
+
+#
+#    class OBJECT_OT_MakeClothesv2Button(bpy.types.Operator):
+#
+
+class OBJECT_OT_MakeClothesv2Button(bpy.types.Operator):
+    bl_idname = "mhclo.make_clothesv2"
+    bl_label = "Make Clothes v2"
+    bl_options = {'UNDO'}
+
+    filepath = StringProperty(default="")
+
+    def execute(self, context):
+        setObjectMode(context)
+        try:
+            initWarnings()
+            makeclothes.makeClothes(context, True, 2)
             makeclothes.exportObjFile(context)
             handleWarnings()
         except MHError:
