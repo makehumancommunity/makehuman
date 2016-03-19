@@ -54,14 +54,16 @@ def pathToUnicode(path):
         return path
     elif isinstance(path, unicode):
         return path
-    elif isinstance(path, basestring):
-        return path.decode(sys.getfilesystemencoding())
     else:
+        # Approach for basestring type, as well as others such as QString
         try:
-            # Works eg. for QString objects
-            return unicode(path, sys.getfilesystemencoding())
-        except:
-            return path
+            return unicode(path, sys.getfilesystemencoding(), 'strict')
+        except UnicodeDecodeError:
+            try:
+                path = unicode(path, 'utf-8', 'strict')
+                return path.decode(sys.getfilesystemencoding(), 'strict')
+            except UnicodeDecodeError:
+                return unicode(path, 'ascii', 'replace')
 
 def formatPath(path):
     if path is None:
