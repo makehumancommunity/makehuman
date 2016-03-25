@@ -154,6 +154,14 @@ class ResizeEvent(Event):
         return 'ResizeEvent(%d, %d, %s)' % (self.width, self.height, self.fullscreen)
 
 
+class ThemeChangedEvent(Event):
+    def __init__(self, theme):
+        self.theme = theme
+
+    def __repr__(self):
+        return 'event: %s' % (self.theme)
+
+
 class HumanEvent(Event):
     def __init__(self, human, change):
         self.human = human
