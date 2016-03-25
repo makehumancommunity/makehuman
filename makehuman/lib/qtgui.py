@@ -645,7 +645,7 @@ class ListItem(QtGui.QListWidgetItem):
         self.setData(QtCore.Qt.UserRole, data)
 
     def getUserData(self):
-        return self.data(QtCore.Qt.UserRole).toPyObject()
+        return self.data(QtCore.Qt.UserRole)
 
     def setText(self, text):
         super(ListItem, self).setText(text)
@@ -2070,7 +2070,7 @@ class TableItem(QtGui.QTableWidgetItem):
         self.setData(QtCore.Qt.UserRole, data)
 
     def getUserData(self):
-        return self.data(QtCore.Qt.UserRole).toPyObject()
+        return self.data(QtCore.Qt.UserRole)
 
     @property
     def text(self):

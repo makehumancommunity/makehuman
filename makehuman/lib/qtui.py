@@ -40,6 +40,19 @@ import sys
 import os
 import log
 
+# Set the QT API to PyQt4
+os.environ['QT_API'] = 'pyqt'
+
+# Use version 2 of PyQt4 API
+import sip
+sip.setapi(u'QDate', 2)
+sip.setapi(u'QDateTime', 2)
+sip.setapi(u'QString', 2)
+sip.setapi(u'QTextStream', 2)
+sip.setapi(u'QTime', 2)
+sip.setapi(u'QUrl', 2)
+sip.setapi(u'QVariant', 2)
+
 from PyQt4 import QtCore, QtGui, QtOpenGL
 
 from core import G
