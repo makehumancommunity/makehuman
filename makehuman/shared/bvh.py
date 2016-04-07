@@ -624,6 +624,20 @@ class BVH():
             # Recalculate pose matrices
             joint.calculateFrames()
 
+    def offset(self, offsetVect):
+        """
+        Offset BVH rig (and thus its root joint) with a specified vector.
+        The offsetting happens in the coordinate space of the BVH file, so
+        check self.convertFromZUp
+        """
+        self.rootJoint.offset += offsetVect
+        for joint in self.getJoints():
+            # Rescale joint offset and recalculate positions and rest matrices
+            self.__calcPosition(joint, joint.offset)
+            
+            # Recalculate pose matrices
+            joint.calculateFrames()
+
 
 class BVHJoint():
 
