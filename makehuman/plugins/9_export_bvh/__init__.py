@@ -66,9 +66,11 @@ class ExporterBVH(Exporter):
         import gui
         self.taskview       = taskview
         self.exportAnimations = options.addWidget(gui.CheckBox("Animations", True))
+        self.feetOnGround = options.addWidget(gui.CheckBox("Feet on ground", True))
 
     def getConfig(self):
         cfg = BvhConfig()
+        cfg.feetOnGround      = self.feetOnGround.selected
         cfg.scale,cfg.unit    = self.taskview.getScale()
 
         return cfg
@@ -90,6 +92,8 @@ class ExporterBVH(Exporter):
                 bvhData = bvh.createFromSkeleton(skel, human.getAnimation(animName))
                 if cfg.scale != 1:
                     bvhData.scale(cfg.scale)
+                if cfg.feetOnGround:
+                    bvhData.offset(cfg.offset)
                 bvhData.writeToFile(fn)
         else:
             fn = filename("bvh")
@@ -97,6 +101,8 @@ class ExporterBVH(Exporter):
             bvhData = bvh.createFromSkeleton(skel)
             if cfg.scale != 1:
                 bvhData.scale(cfg.scale)
+            if cfg.feetOnGround:
+                bvhData.offset(cfg.offset)
             bvhData.writeToFile(fn)
 
     def onShow(self, exportTaskView):
