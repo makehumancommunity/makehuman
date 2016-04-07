@@ -105,12 +105,6 @@ class ExporterBVH(Exporter):
                 bvhData.offset(cfg.offset)
             bvhData.writeToFile(fn)
 
-    def onShow(self, exportTaskView):
-        exportTaskView.scaleBox.hide()
-
-    def onHide(self, exportTaskView):
-        exportTaskView.scaleBox.show()
-
 def load(app):
     app.addExporter(ExporterBVH())
 
