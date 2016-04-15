@@ -4829,7 +4829,7 @@
             "wrist.R____head"
         ]
     },
-    "version": 102,
+    "version": 110,
     "tags": ["facial bones", "detailed hands", "detailed feet"],
     "weights_file": "default_weights.mhw"
 }
