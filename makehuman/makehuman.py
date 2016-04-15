@@ -12,7 +12,7 @@ MakeHuman python entry-point.
 
 **Authors:**           Glynn Clements, Jonas Hauquier, Joel Palmius
 
-**Copyright(c):**      MakeHuman Team 2001-2015
+**Copyright(c):**      MakeHuman Team 2001-2016
 
 **Licensing:**         AGPL3 
 
@@ -30,8 +30,6 @@ MakeHuman python entry-point.
 
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-**Coding Standards:**  See http://www.makehuman.org/node/165
 
 Abstract
 --------
@@ -483,23 +481,28 @@ However, respecting a set of conditions (which are explained in section
 C of license.txt), you are allowed to instead use the CC0 license 
 for exports. 
 
-The human readable explanation of the license terms is here: 
-    http://www.makehuman.org/content/license_explanation.html
+The human readable explanation of the license terms can be found via: 
+
+    http://www.makehuman.org/license.php
 
 Licenses for dependencies are included in the licenses folder.
 
-
 For further help, have a look at our documentation at:
-    http://www.makehuman.org/documentation
-Frequently asked questions are found at:
-    http://www.makehuman.org/faq
 
+    http://www.makehumancommunity.org/wiki
+
+Frequently asked questions are found at:
+
+    http://www.makehumancommunity.org/wiki/FAQ:Index
 
 The MakeHuman team can be contacted at dev@makehuman.org
 If you have other questions, feel free to ask them on our forums at:
-    http://www.makehuman.org/forum/
+
+    http://www.makehumancommunity.org/forum
+
 Bugs can be reported on the project's bug tracker:
-    http://bugtracker.makehuman.org
+
+    http://bugtracker.makehumancommunity.org
 """
 
 
@@ -523,9 +526,9 @@ class LicenseInfo(object):
         user-created assets.
         """
         self.author = "MakeHuman Team"
-        self.license = "AGPL3 (see also http://www.makehuman.org/doc/node/external_tools_license.html)"
+        self.license = "AGPL3"
         self.homepage = "http://www.makehuman.org"
-        self.copyright = "(c) MakeHuman.org 2001-2015"
+        self.copyright = "(c) MakeHuman.org 2001-2016"
         self._keys = ["author", "license", "copyright", "homepage"]
         self._customized = False
 
