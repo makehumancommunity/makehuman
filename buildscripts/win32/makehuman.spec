@@ -11,9 +11,9 @@ MakeHuman pyinstaller spec file for Windows build
 
 **Authors:**           Jonas Hauquier, Benjamin A Lau, Joel Palmius
 
-**Copyright(c):**      MakeHuman Team 2001-2015
+**Copyright(c):**      MakeHuman Team 2001-2016
 
-**Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
+**Licensing:**         AGPL3
 
 
 Abstract
