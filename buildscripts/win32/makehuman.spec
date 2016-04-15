@@ -15,7 +15,6 @@ MakeHuman pyinstaller spec file for Windows build
 
 **Licensing:**         AGPL3 (see also http://www.makehuman.org/node/318)
 
-**Coding Standards:**  See http://www.makehuman.org/node/165
 
 Abstract
 --------
