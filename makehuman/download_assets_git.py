@@ -99,8 +99,12 @@ class DownloadAssetsGit:
         self.readOverridesFromEnvironment()
 
         if not os.path.isfile(self._git_command):
-            print "Could not find git command"
-            return;
+            print "\n\n\nCould not find git command\n\n"
+            sys.exit(1)
+
+        if not self.testGitLfs():
+            print "\n\n\nGIT LFS not detected. This routine requires LFS. See https://git-lfs.github.com/\n\n"
+            sys.exit(1)
 
         if os.path.isdir(self._git_official_clone_location):
             self.pullOfficialAssets()
@@ -108,6 +112,18 @@ class DownloadAssetsGit:
             self.cloneOfficialAssets()
 
         self.copyOfficialAssets()
+
+    def testGitLfs(self):
+        args = [self._git_command,"lfs","install"]
+        print args
+
+        try:
+            subprocess.check_call(args)
+        except Exception as e:
+            print e
+            return False
+
+        return True
  
     def findPathsWindows(self):
         for path in os.environ["PATH"].split(os.pathsep):
