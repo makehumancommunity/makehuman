@@ -481,24 +481,27 @@ However, respecting a set of conditions (which are explained in section
 C of license.txt), you are allowed to instead use the CC0 license 
 for exports. 
 
-The human readable explanation of the license terms can be found via: 
+A human readable explanation of the license terms can be found via
+the MakeHuman home page:
 
-    http://www.makehuman.org/license.php
+    http://www.makehuman.org
 
 Licenses for dependencies are included in the licenses folder.
-
-For further help, have a look at our documentation at:
-
-    http://www.makehumancommunity.org/wiki
 
 Frequently asked questions are found at:
 
     http://www.makehumancommunity.org/wiki/FAQ:Index
 
-The MakeHuman team can be contacted at dev@makehuman.org
-If you have other questions, feel free to ask them on our forums at:
+For further help, have a look in the community wiki at:
 
-    http://www.makehumancommunity.org/forum
+    http://www.makehumancommunity.org/wiki/Main_Page
+
+The MakeHuman team can be contacted at dev@makehuman.org
+
+If you have other questions or need support, feel free to ask on our 
+forums at:
+
+    http://www.makehumancommunity.org/forum/
 
 Bugs can be reported on the project's bug tracker:
 
