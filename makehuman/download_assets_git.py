@@ -102,9 +102,10 @@ class DownloadAssetsGit:
             print "\n\n\nCould not find git command\n\n"
             sys.exit(1)
 
-        if not self.testGitLfs():
-            print "\n\n\nGIT LFS not detected. This routine requires LFS. See https://git-lfs.github.com/\n\n"
-            sys.exit(1)
+        if not sys.platform == 'win32':
+            if not self.testGitLfs():
+                print "\n\n\nGIT LFS not detected. This routine requires LFS. See https://git-lfs.github.com/\n\n"
+                sys.exit(1)
 
         if os.path.isdir(self._git_official_clone_location):
             self.pullOfficialAssets()
