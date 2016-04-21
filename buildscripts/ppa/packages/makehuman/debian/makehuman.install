@@ -30,4 +30,5 @@ makehuman/data/*.ini usr/share/makehuman/data
 makehuman/data/*.list usr/share/makehuman/data
 extras/makehuman usr/bin
 extras/MakeHuman.desktop usr/share/applications
+makehuman/license.txt usr/share/makehuman
 

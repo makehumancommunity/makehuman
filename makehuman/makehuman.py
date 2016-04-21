@@ -12,7 +12,7 @@ MakeHuman python entry-point.
 
 **Authors:**           Glynn Clements, Jonas Hauquier, Joel Palmius
 
-**Copyright(c):**      MakeHuman Team 2001-2015
+**Copyright(c):**      MakeHuman Team 2001-2016
 
 **Licensing:**         AGPL3 
 
@@ -30,8 +30,6 @@ MakeHuman python entry-point.
 
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-**Coding Standards:**  See http://www.makehuman.org/node/165
 
 Abstract
 --------
@@ -455,14 +453,14 @@ def parse_arguments():
 
 def getCopyrightMessage(short=False):
     if short:
-        return """MakeHuman Copyright (C) 2001-2015 http://www.makehuman.org
+        return """MakeHuman Copyright (C) 2001-2016 http://www.makehuman.org
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it
 under certain conditions. For details use the option --license"""
 
     return """Makehuman is a completely free, open source, innovative and 
 professional software for the modelling of 3-Dimensional humanoid characters
-Copyright (C) 2001-2015  www.makehuman.org
+Copyright (C) 2001-2016  www.makehuman.org
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -483,23 +481,31 @@ However, respecting a set of conditions (which are explained in section
 C of license.txt), you are allowed to instead use the CC0 license 
 for exports. 
 
-The human readable explanation of the license terms is here: 
-    http://www.makehuman.org/content/license_explanation.html
+A human readable explanation of the license terms can be found via
+the MakeHuman home page:
+
+    http://www.makehuman.org
 
 Licenses for dependencies are included in the licenses folder.
 
-
-For further help, have a look at our documentation at:
-    http://www.makehuman.org/documentation
 Frequently asked questions are found at:
-    http://www.makehuman.org/faq
 
+    http://www.makehumancommunity.org/wiki/FAQ:Index
+
+For further help, have a look in the community wiki at:
+
+    http://www.makehumancommunity.org/wiki/Main_Page
 
 The MakeHuman team can be contacted at dev@makehuman.org
-If you have other questions, feel free to ask them on our forums at:
-    http://www.makehuman.org/forum/
+
+If you have other questions or need support, feel free to ask on our 
+forums at:
+
+    http://www.makehumancommunity.org/forum/
+
 Bugs can be reported on the project's bug tracker:
-    http://bugtracker.makehuman.org
+
+    http://bugtracker.makehumancommunity.org
 """
 
 
@@ -523,9 +529,9 @@ class LicenseInfo(object):
         user-created assets.
         """
         self.author = "MakeHuman Team"
-        self.license = "AGPL3 (see also http://www.makehuman.org/doc/node/external_tools_license.html)"
+        self.license = "AGPL3"
         self.homepage = "http://www.makehuman.org"
-        self.copyright = "(c) MakeHuman.org 2001-2015"
+        self.copyright = "(c) MakeHuman.org 2001-2016"
         self._keys = ["author", "license", "copyright", "homepage"]
         self._customized = False
 
