@@ -11,7 +11,7 @@
 **Authors:**           Jonas Hauquier, Glynn Clements,
                        Thanasis Papoutsidakis
 
-**Copyright(c):**      MakeHuman Team 2001-2015
+**Copyright(c):**      MakeHuman Team 2001-2016
 
 **Licensing:**         AGPL3
 
@@ -30,7 +30,6 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-**Coding Standards:**  See http://www.makehuman.org/node/165
 
 Abstract
 --------

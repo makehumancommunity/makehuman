@@ -12,9 +12,9 @@ MakeHuman debian package build script
 
 **Authors:**           Joel Palmius, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2014
+**Copyright(c):**      MakeHuman Team 2001-2016
 
-**Licensing:**         AGPL3 (http://www.makehuman.org/doc/node/the_makehuman_application.html)
+**Licensing:**         AGPL3
 
     This file is part of MakeHuman (www.makehuman.org).
 
@@ -30,8 +30,6 @@ MakeHuman debian package build script
 
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-**Coding Standards:**  See http://www.makehuman.org/node/165
 
 Abstract
 --------
