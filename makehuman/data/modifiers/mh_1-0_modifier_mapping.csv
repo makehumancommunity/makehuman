@@ -114,7 +114,7 @@ head/head-trans-down|up,head/head-trans-down|up,
 head/head-trans-forward|backward,head/head-trans-backward|forward,TRUE
 head/head-trans-in|out,head/head-trans-in|out,
 head/head-triangular,head/head-triangular,
-,head/head-skinny|fat,
+head/head-skinny|fat,head/head-fat-decr|incr,
 ,,
 forehead/forehead-nubian-less|more,forehead/forehead-nubian-decr|incr,
 forehead/forehead-scale-vert-less|more,forehead/forehead-scale-vert-decr|incr,
