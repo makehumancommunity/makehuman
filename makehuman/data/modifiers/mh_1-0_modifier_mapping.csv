@@ -89,7 +89,7 @@ breast/BreastSize,breast/BreastSize,
 breast/breast-dist-min|max,breast/breast-dist-decr|incr,
 breast/breast-point-min|max,breast/breast-point-decr|incr,
 breast/breast-trans-vert-down|up,breast/breast-trans-down|up,
-breast/breast-volume-vert-up|down,breast/breast-volume-vert-down|up,
+breast/breast-volume-vert-up|down,breast/breast-volume-vert-down|up,TRUE
 ,,
 ,breast/nipple-size-decr|incr,
 ,breast/nipple-point-decr|incr,
@@ -178,8 +178,8 @@ eyes/r-eye-size-small|big,eyes/r-eye-scale-decr|incr,
 ,eyes/l-eye-eyefold-concave|convex,
 ,eyes/l-eye-eyefold-down|up,
 ,,
-ears/l-ear-flap-out|in,ears/l-ear-flap-decr|incr,
-ears/r-ear-flap-out|in,ears/r-ear-flap-decr|incr,
+ears/l-ear-flap-out|in,ears/l-ear-flap-decr|incr,TRUE
+ears/r-ear-flap-out|in,ears/r-ear-flap-decr|incr,TRUE
 ears/l-ear-height-min|max,ears/l-ear-scale-vert-decr|incr,
 ears/r-ear-height-min|max,ears/r-ear-scale-vert-decr|incr,
 ears/l-ear-lobe-min|max,ears/l-ear-lobe-decr|incr,
@@ -234,7 +234,7 @@ neck/neck-trans-vert-down|up,neck/neck-trans-down|up,
 ,neck/neck-back-scale-depth-decr|incr,
 ,,
 nose/nose-compression-compress|uncompress,nose/nose-compression-compress|uncompress,
-nose/nose-curve-convex|concave,nose/nose-curve-concave|convex,
+nose/nose-curve-convex|concave,nose/nose-curve-concave|convex,TRUE
 nose/nose-flaring-decr|incr,nose/nose-flaring-decr|incr,
 nose/nose-greek-moregreek|lessgreek,nose/nose-greek-decr|incr,TRUE
 nose/nose-height-min|max,nose/nose-base-down|up,TRUE
@@ -243,14 +243,14 @@ nose/nose-nostril-width-min|max,nose/nose-nostrils-width-decr|incr,
 nose/nose-nostrils-angle-up|down,nose/nose-nostrils-angle-down|up,TRUE
 nose/nose-point-up|down,nose/nose-point-down|up,TRUE
 nose/nose-point-width-less|more,nose/nose-point-width-decr|incr,
-nose/nose-scale-depth-incr|decr,nose/nose-scale-depth-decr|incr,
-nose/nose-scale-horiz-incr|decr,nose/nose-scale-horiz-decr|incr,
-nose/nose-scale-vert-incr|decr,nose/nose-scale-vert-decr|incr,
+nose/nose-scale-depth-incr|decr,nose/nose-scale-depth-decr|incr,TRUE
+nose/nose-scale-horiz-incr|decr,nose/nose-scale-horiz-decr|incr,TRUE
+nose/nose-scale-vert-incr|decr,nose/nose-scale-vert-decr|incr,TRUE
 nose/nose-septumangle-decr|incr,nose/nose-septumangle-decr|incr,
 nose/nose-trans-vert-up|down,nose/nose-trans-down|up,TRUE
 nose/nose-trans-horiz-in|out,nose/nose-trans-in|out,
 nose/nose-trans-depth-forward|backward,nose/nose-trans-backward|forward,TRUE
-nose/nose-volume-potato|point,nose/nose-volume-decr|incr,
+nose/nose-volume-potato|point,nose/nose-volume-decr|incr,TRUE
 nose/nose-width1-min|max,nose/nose-width1-decr|incr,
 nose/nose-width2-min|max,nose/nose-width2-decr|incr,
 nose/nose-width3-min|max,nose/nose-width3-decr|incr,
