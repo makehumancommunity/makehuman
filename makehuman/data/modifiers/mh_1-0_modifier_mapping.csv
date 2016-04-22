@@ -198,8 +198,8 @@ ears/l-ear-trans-vert-down|up,ears/l-ear-trans-down|up,
 ears/r-ear-trans-vert-down|up,ears/r-ear-trans-down|up,
 ears/l-ear-width-max|min,ears/l-ear-scale-depth-decr|incr,TRUE
 ears/r-ear-width-max|min,ears/r-ear-scale-depth-decr|incr,TRUE
-ears/l-ear-wing-out|in,ears/l-ear-wing-decr|incr,
-ears/r-ear-wing-out|in,ears/r-ear-wing-decr|incr,
+ears/l-ear-wing-out|in,ears/l-ear-wing-decr|incr,TRUE
+ears/r-ear-wing-out|in,ears/r-ear-wing-decr|incr,TRUE
 ,,
 mouth/mouth-angles-up|down,mouth/mouth-angles-down|up,TRUE
 mouth/mouth-cupidsbow-decr|incr,mouth/mouth-cupidsbow-decr|incr,
