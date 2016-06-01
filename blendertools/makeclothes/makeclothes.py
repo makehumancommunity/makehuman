@@ -1134,10 +1134,11 @@ def makeClothes(context, doFindClothes, version=1):
     writeClothes(context, hum, clo, data, matfile)
 
 def save_proxy_v2(context, body, proxy, filepath, matfile):
-    """New algorithm for proxy fitting, does not require vertex groups and
-    yields more stable results. 
-    Based on new proxy fitting algorithm by Manuel Bastioni, proposed in
-    Manuel Lab.
+    """New proxy fitting technique, using offset vector in polygon-local
+    base, based on an algorithm originally found in ManuelBastioniLab 1.0.0.        
+    This fitting technique works a lot better on posed meshes, and allows for more stable proxies,
+    but most importantly, it's a lot easier to create proxies using this
+    fitting technique.
     """
     print("- Saving proxy data in {0}".format(filepath))
     fp = mc.openOutputFile(filepath)
@@ -1198,8 +1199,7 @@ def save_proxy_v2(context, body, proxy, filepath, matfile):
     fp.close()
 
 def average_basis_matrix(vec0, vec1, vec2, invert=False, normalize=True):
-    """Based on new proxy fitting algorithm by Manuel Bastioni, proposed in
-    Manuel Lab.
+    """New proxy fitting technique, based on an algorithm originally found in ManuelBastioniLab 1.0.0.        
     """
 
     if normalize:
