@@ -233,8 +233,8 @@ class Proxy:
 
     def getCoordsNew(self, fit_to_posed=False, fast=False):
         """New proxy fitting technique, using offset vector in polygon-local
-        base, as introduced by Manuel Bastioni. This fitting technique works
-        a lot better on posed meshes, and allows for more stable proxies,
+        base, based on an algorithm originally found in ManuelBastioniLab 1.0.0.
+        This fitting technique works a lot better on posed meshes, and allows for more stable proxies,
         but most importantly, it's a lot easier to create proxies using this
         fitting technique.
         """
