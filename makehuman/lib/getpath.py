@@ -102,13 +102,6 @@ def getHomePath():
     if __home_path is not None:
         return __home_path
 
-    # Check if Protable App?
-    #if os.getenv('MHisPortable','no').lower() == 'yes':
-    #    __home_path = formatPath(os.getenv('MHPortableHomePath'))
-    #    if os.path.isdir(__home_path) is False:
-    #        raise RuntimeError("Invalid data in environment variable MHPortableHomePath")
-    #    return __home_path
-
     # Windows
     if sys.platform == 'win32':
         import _winreg
