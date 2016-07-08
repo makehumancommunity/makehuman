@@ -95,7 +95,7 @@ def getHomePath():
     global __home_path
     
     if G.args.get("--home-location") is not None:
-        __home_path = formatPath(G.args.get('--home-location='))
+        __home_path = formatPath(G.args.get('--home-location'))
         if os.path.isdir(__home_path) is False:
             raise RuntimeError("Invalid path in command line option")
             
