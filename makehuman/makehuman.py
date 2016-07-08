@@ -781,9 +781,13 @@ makes use of.\n"""
 
 def main():
     print getCopyrightMessage(short=True) + "\n"
-
+    
+    
     try:
         set_sys_path()
+        args = parse_arguments()
+        from core import G
+        G.args = args
         make_user_dir()
         get_platform_paths()
         redirect_standard_streams()
@@ -791,7 +795,6 @@ def main():
         os.environ['MH_VERSION'] = getVersionStr()
         os.environ['MH_SHORT_VERSION'] = getShortVersion()
         os.environ['MH_MESH_VERSION'] = getBasemeshVersion()
-        args = parse_arguments()
         init_logging()
     except Exception as e:
         print >> sys.stderr,  "error: " + format(unicode(e))
@@ -805,11 +808,10 @@ def main():
     os.environ['MH_RELEASE'] = "Yes" if isRelease() else "No"
 
     debug_dump()
-    from core import G
-    G.args = args
-       
+    
+           
     # Set numpy properties
-    if not args.get('debugnumpy', False):
+    if not G.args.get('debugnumpy', False):
         import numpy
         # Suppress runtime errors
         numpy.seterr(all = 'ignore')
