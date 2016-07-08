@@ -807,7 +807,7 @@ def main():
     debug_dump()
     from core import G
     G.args = args
-
+       
     # Set numpy properties
     if not args.get('debugnumpy', False):
         import numpy
