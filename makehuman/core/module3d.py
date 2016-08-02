@@ -421,7 +421,7 @@ class Object3D(object):
         sdir[f_ix] = np.column_stack( [ ( (t2 * x1) - (t1 * x2) ) * r,
                                         ( (t2 * y1) - (t1 * y2) ) * r,
                                         ( (t2 * z1) - (t1 * z2) ) * r  ] )
-        tdir[f_ix] = np.column_stack( [ ( (s1 * x2) - (s1 * x2) ) * r,
+        tdir[f_ix] = np.column_stack( [ ( (s1 * x2) - (s2 * x1) ) * r,
                                         ( (s1 * y2) - (s2 * y1) ) * r,
                                         ( (s1 * z2) - (s2 * z1) ) * r  ] )
 
