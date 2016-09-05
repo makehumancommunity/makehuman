@@ -48,6 +48,7 @@ import files3d
 import gui3d
 import geometry3d
 import animation3d
+import events3d
 import human
 import skeleton
 import guifiles
@@ -1068,6 +1069,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.theme = theme
         self.reloadIcons()
+        self.callEventHandlers('onThemeChanged', events3d.ThemeChangedEvent(self.theme))
         self.redraw()
 
     def reloadIcons(self):

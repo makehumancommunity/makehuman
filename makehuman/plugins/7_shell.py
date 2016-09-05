@@ -8,7 +8,7 @@
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Glynn Clements
+**Authors:**           Glynn Clements, Jonas Hauquier
 
 **Copyright(c):**      MakeHuman Team 2001-2016
 
@@ -36,9 +36,6 @@ Abstract
 TODO
 """
 
-#!/usr/bin/python2.7
-# -*- coding: utf-8 -*-
-
 import sys
 import traceback
 
@@ -47,6 +44,8 @@ import gui
 from core import G
 import log
 from PyQt4 import QtCore, QtGui
+
+import ipythonconsole
 
 MAX_COMPLETIONS = -1
 
@@ -62,6 +61,13 @@ class ShellTaskView(gui3d.TaskView):
         self.history = []
         self.histitem = None
 
+        if ipythonconsole:
+            # Use the more advanced Ipython console
+            self.console = self.addTopWidget(ipythonconsole.IPythonConsoleWidget())
+            return
+
+        # Fall back to old console
+        self.console = None
         self.main = self.addTopWidget(QtGui.QWidget())
         self.layout = QtGui.QGridLayout(self.main)
         self.layout.setRowStretch(0, 0)
@@ -208,6 +214,11 @@ class ShellTaskView(gui3d.TaskView):
         else:
             self.histitem += 1
             self.line.setText(self.history[self.histitem])
+
+    def onThemeChanged(self, event):
+        if self.console is None:
+            return
+        self.console.set_theme(G.app.theme)
 
 def load(app):
     category = app.getCategory('Utilities')
