@@ -61,7 +61,7 @@ Package: makehuman
 Architecture: all
 Depends: ${misc:Depends}, makehuman-targets, makehuman-skins, makehuman-hair, makehuman-clothes, makehuman-bodyparts, python2.7, python-numpy, python-opengl, python-qt4, python-qt4-gl
 Suggests: makehuman-blendertools, makehuman-docs
-Replaces: makehuman-nightly, makehuman-alpha, makehumansvn, makehumanhg, makehuman-unstable
+Replaces: makehuman-nightly, makehuman-alpha, makehumansvn, makehumanhg, makehuman-unstable, makehuman-data
 Provides: makehuman
 Description: Free, open source tool for creating realistic 3D human characters.
  MakeHuman is a free, open source software which allows the creation of 

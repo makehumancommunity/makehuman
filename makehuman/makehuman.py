@@ -437,6 +437,7 @@ def parse_arguments():
     parser.add_argument("--debugopengl", action="store_true", help="enable OpenGL error checking and logging (slow)")
     parser.add_argument("--fullloggingopengl", action="store_true", help="log all OpenGL calls (very slow)")
     parser.add_argument("--debugnumpy", action="store_true", help="enable numpy runtime error messages")
+    parser.add_argument("--home-location", action="store", help="set alternative home path")
     if not isRelease():
         parser.add_argument("-t", "--runtests", action="store_true", help="run test suite (for developers)")
 
@@ -780,9 +781,13 @@ makes use of.\n"""
 
 def main():
     print getCopyrightMessage(short=True) + "\n"
-
+    
+    
     try:
         set_sys_path()
+        args = parse_arguments()
+        from core import G
+        G.args = args
         make_user_dir()
         get_platform_paths()
         redirect_standard_streams()
@@ -790,7 +795,6 @@ def main():
         os.environ['MH_VERSION'] = getVersionStr()
         os.environ['MH_SHORT_VERSION'] = getShortVersion()
         os.environ['MH_MESH_VERSION'] = getBasemeshVersion()
-        args = parse_arguments()
         init_logging()
     except Exception as e:
         print >> sys.stderr,  "error: " + format(unicode(e))
@@ -804,11 +808,10 @@ def main():
     os.environ['MH_RELEASE'] = "Yes" if isRelease() else "No"
 
     debug_dump()
-    from core import G
-    G.args = args
-
+    
+           
     # Set numpy properties
-    if not args.get('debugnumpy', False):
+    if not G.args.get('debugnumpy', False):
         import numpy
         # Suppress runtime errors
         numpy.seterr(all = 'ignore')
