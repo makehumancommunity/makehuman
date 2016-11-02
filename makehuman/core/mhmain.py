@@ -82,7 +82,7 @@ def inFile(path):
         if not os.path.isfile(path):
             yield []
             return
-        with open(path, 'rU', encoding="utf-8") as f:
+        with open(path, 'rU', encoding="iso-8859-1") as f:
             yield f
     except:
         log.error('Failed to load file %s', path, exc_info=True)
