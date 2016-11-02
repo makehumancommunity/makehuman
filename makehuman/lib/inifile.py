@@ -41,7 +41,7 @@ import getpath
 
 def _s2u(value):
     if isinstance(value, basestring):
-        return getpath.stringToUnicode(value, ['iso-8859-1'] + getpath.PATH_ENCODINGS)
+        return getpath.stringToUnicode(value, ['utf-8', 'iso-8859-1'] + getpath.PATH_ENCODINGS)
     elif isinstance(value, dict):
         return dict([(str(key), _s2u(val)) for key, val in value.iteritems()])
     elif isinstance(value, list):
@@ -51,12 +51,12 @@ def _s2u(value):
 
 def parseINI(s, replace = []):
     try:
-        result = json.loads(s, encoding='iso-8859-1')
+        result = json.loads(s, encoding='utf-8')
     except ValueError:
         for src, dst in replace + [("'",'"'), (": True",": true"), (": False",": false"), (": None",": null")]:
             s = s.replace(src, dst)
-        result = json.loads(s, encoding='iso-8859-1')
+        result = json.loads(s, encoding='utf-8')
     return _s2u(result)
 
 def formatINI(d):
-    return json.dumps(d, indent=4, ensure_ascii=True, encoding='iso-8859-1') + '\n'
+    return json.dumps(d, indent=4, ensure_ascii=True, encoding='utf-8') + '\n'
