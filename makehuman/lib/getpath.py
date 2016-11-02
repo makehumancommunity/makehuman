@@ -101,7 +101,10 @@ def stringToUnicode(string_, encodings):
     # Last-resort fallback
     fallback = unicode(string_, 'ascii', 'replace')
     import log
-    log.warning("Failed to decode string to unicode (encodings tried: %s). Using fallback value: %s", ', '.join(encodings), fallback)
+    try:
+        log.warning('Failed to decode string "%s" to unicode (encodings tried: %s). Using fallback value: %s', string_, ', '.join(encodings), fallback)
+    except:
+        log.warning("Failed to decode string to unicode (encodings tried: %s). Using fallback value: %s", ', '.join(encodings), fallback)
     return fallback
 
 def formatPath(path):
