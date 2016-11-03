@@ -825,7 +825,6 @@ class TextureValue(gui.QtGui.QWidget, gui.Widget):
     def __init__(self, parent, value, defaultPath = None):
         super(TextureValue, self).__init__()
         self.parent = parent
-        self._path = pathToUnicode(value)
 
         self.layout = gui.QtGui.QGridLayout(self)
         self.imageView = gui.ImageView()
@@ -837,6 +836,7 @@ class TextureValue(gui.QtGui.QWidget, gui.Widget):
 
         self.value = value
 
+        self.setValue(value)
         if value and isinstance(value, basestring):
             self.browseBtn._path = pathToUnicode(value)
         elif defaultPath:
@@ -854,7 +854,10 @@ class TextureValue(gui.QtGui.QWidget, gui.Widget):
         return self._path
 
     def setValue(self, value):
-        self._path = pathToUnicode(value)
+        if isinstance(value, basestring):
+            self._path = pathToUnicode(value)
+        else:
+            self._path = None
         if value:
             self.imageView.setImage(value)
             if isinstance(value, basestring):
