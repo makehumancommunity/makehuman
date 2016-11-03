@@ -96,6 +96,8 @@ class DebugDump(object):
         self.write("BASEMESH VERSION: %s", os.environ['MH_MESH_VERSION'])
         self.write("IS BUILT (FROZEN): %s", os.environ['MH_FROZEN'])
         self.write("IS RELEASE VERSION: %s", os.environ['MH_RELEASE'])
+        self.write("DEFAULT ENCODING: %s", sys.getdefaultencoding())
+        self.write("FILESYSTEM ENCODING: %s", sys.getfilesystemencoding())
         self.write("WORKING DIRECTORY: %s", getpath.pathToUnicode(os.getcwd()))
         self.write("HOME LOCATION: %s", getpath.pathToUnicode(getpath.getHomePath()))
         syspath = os.path.pathsep.join( [getpath.pathToUnicode(p) for p in sys.path] )
