@@ -47,6 +47,7 @@ import os
 from core import G
 import getpath
 import filecache
+import numpy as np
 
 
 # Bone used for determining the pose scaling (root bone translation scale)

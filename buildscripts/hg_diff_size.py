@@ -10,25 +10,27 @@
 import fileinput
 
 def is_diff_line(line):
-	return (line.startswith('-') and not line.startswith('--- ')) or \
-		(line.startswith('+') and not line.startswith('+++ '))
+    return (line.startswith('-') and not line.startswith('--- ')) or \
+        (line.startswith('+') and not line.startswith('+++ '))
 
 filename = None
 f = fileinput.input()
 try:
-	for line in f:
-		if f.isfirstline():
-			if filename:
-				print filename,": size changed by", size_diff, "bytes."
+    for line in f:
+        if f.isfirstline():
+            if filename:
+                print filename,": size changed by", size_diff, "bytes."
 
-			size_diff = 0
-			filename = f.filename()
+            size_diff = 0
+            line_diff = 0
+            filename = f.filename()
 
-		if is_diff_line(line):
-			size_diff += len(line[1:])
+        if is_diff_line(line):
+            size_diff += len(line[1:])
+            line_diff += 1
 
-	if filename:
-		print filename,": size changed by", size_diff, "bytes."
+    if filename:
+        print filename,": size changed by", size_diff, "bytes. %s lines changed" % line_diff
 
 finally:
-	f.close()
+    f.close()
