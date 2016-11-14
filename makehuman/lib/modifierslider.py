@@ -134,7 +134,7 @@ class ModifierSlider(gui.Slider):
                         human.getSeedMesh().setVisibility(1)
                     human.getSubdivisionMesh(False).setVisibility(0)
             self.modifier.updateValue(value, G.app.getSetting('realtimeNormalUpdates'))
-            human.updateProxyMesh(fit_to_posed=True)
+            human.updateProxyMesh(fit_to_posed=True, fast=True)
 
 
     def onChange(self, value):
