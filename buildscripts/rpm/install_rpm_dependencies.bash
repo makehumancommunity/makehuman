@@ -1,5 +1,5 @@
 #!/bin/bash
 
-yum install numpy PyOpenGL PyQt4
+dnf install numpy PyOpenGL PyQt4
 
 
