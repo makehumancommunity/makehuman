@@ -2,7 +2,7 @@
 installer="dnf"
 packages="numpy PyOpenGL PyQt4"
 
-if command_exist="$(type -p "$installer")" || [ -z "$command_exist" ]; then
+if ! command_exists="$(type -p "$installer")" || [ -z "$command_exists" ]; then
   installer="yum"
 fi
 
