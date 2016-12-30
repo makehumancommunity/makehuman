@@ -56,9 +56,7 @@ class ExporterSTL(Exporter):
     def build(self, options, taskview):
         import gui
         Exporter.build(self, options, taskview)
-        stlOptions = []
-        self.stlAscii = options.addWidget(gui.RadioButton(stlOptions,  "ASCII", selected=True))
-        self.stlBinary = options.addWidget(gui.RadioButton(stlOptions, "Binary"))
+        self.stlBinary = options.addWidget(gui.CheckBox("Binary STL", False))
 
     def getConfig(self):
         cfg = STLConfig()
@@ -73,7 +71,7 @@ class ExporterSTL(Exporter):
 
         cfg = self.getConfig()
         cfg.setHuman(human)
-        if self.stlAscii.selected:
+        if not self.stlBinary.selected:
             try:
                 mh2stl.exportStlAscii(filename("stl"), cfg)
             except MemoryError:
