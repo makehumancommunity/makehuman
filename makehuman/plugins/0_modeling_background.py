@@ -336,7 +336,7 @@ class BackgroundChooser(gui3d.TaskView):
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
-        text = language.language.getLanguageString([u'If you want backgrounds to show up here, place the images in',u' %s']) % self.backgroundsFolder
+        text = language.language.getLanguageString(u'If you want backgrounds to show up here, place the images in %s') % self.backgroundsFolder
         gui3d.app.prompt('Info', text, 'OK', helpId='backgroundHelp')
         gui3d.app.statusPersist(text)
         self.opacitySlider.setValue(self.opacity)
