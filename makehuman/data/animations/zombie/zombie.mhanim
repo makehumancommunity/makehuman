@@ -1,0 +1,14 @@
+# author Jonas Hauquier
+# license AGPL3
+# homepage http://www.makehuman.org/
+# uuid 4b0df733-a560-4f04-830a-1747b64768e1
+
+# tag Walk
+# tag Zombie
+# tag In-place
+
+# rig soft1
+
+# scale 1.0
+
+# anim zombieWalk1 zombieWalk1.bvh z_is_up

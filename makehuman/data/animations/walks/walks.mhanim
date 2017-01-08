@@ -1,0 +1,12 @@
+# author Jonas Hauquier
+# license AGPL3
+# homepage http://www.makehuman.org/
+# uuid df7b015d-4468-4f71-9db3-bd510e2352ce
+
+# tag Walk
+# tag In-place
+
+# rig soft1
+
+# anim Walk1 walk1.bvh z_is_up
+# anim Dance1 dance1.bvh z_is_up

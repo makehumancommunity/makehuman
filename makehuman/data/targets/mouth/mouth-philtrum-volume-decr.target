@@ -1,0 +1,63 @@
+# This is a MakeHuman target originally developed by Manuel Bastioni.
+#
+# Original copyright (C) 2014 Manuel Bastioni 
+#
+# The copyright was explicitly transfered to other team members in 2016.
+#
+# Copyright (C) 2016 Data Collection AB, https://www.datacollection.se
+# Copyright (C) 2016 Joel Palmius 
+# Copyright (C) 2016 Jonas Hauquier
+#
+# The primary legal contact for MakeHuman is Data Collection AB.
+#
+# For more information, see homepage at http://www.makehuman.org
+#
+# This file is licensed AGPLv3
+#
+#    This file is part of MakeHuman (www.makehuman.org).
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as
+#    published by the Free Software Foundation, either version 3 of the
+#    License, or (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# basemesh hm08
+314 0 0 .002
+317 0 0 .001
+341 0 0 .002
+342 0 0 .004
+343 0 .001 .013
+355 0 0 0
+356 0 0 .001
+357 0 0 0
+362 0 0 .005
+5071 0 .001 .016
+5072 0 .002 .023
+5073 0 0 0
+5074 -.001 0 .010
+5138 -.001 .001 .010
+5342 0 .002 .023
+5343 0 .001 .016
+5344 -.001 0 .011
+5345 -.001 0 .006
+7077 0 0 .002
+7103 0 0 .002
+7104 0 0 .004
+7116 0 0 0
+7117 0 0 .001
+7118 0 0 0
+11687 0 .001 .016
+11688 0 0 0
+11689 .001 0 .010
+11752 .001 .001 .010
+11945 0 .001 .016
+11946 .001 0 .011
+11947 .001 0 .006

@@ -1,0 +1,91 @@
+################################################################################
+# Example build configuration
+# Rename to build.conf to use (must be in buildscripts/ folder in hg root)
+# Uncomment the properties you want to change.
+# Don't wrap any "around your strings" (property = some string)!
+################################################################################
+
+#
+# General declarations
+#
+[General]
+# Path to hg executable on system (default: hg)
+# If HG is not installed, build_prepare will attempt to use python hglib (must 
+# be installed)
+#hgPath = /usr/bin/hg
+
+
+#
+# Config section for build_prepare.py
+#
+[BuildPrepare]
+# HG revision in format rev_nb:node_id (default: not specified, obtain rev 
+# from hg or data/VERSION file if skipHG is enabled)
+# Only set if you know what you're doing!
+#hgRev = 103:298d59a0c920
+
+# Version sub title string (default: not specified, obtained from declaration
+# in makehuman/makehuman.py) If set replaces contents of that file in export. 
+#versionSub = Alpha 8 final
+
+# Release status (default: not specified, obtained from declaration
+# in makehuman/makehuman.py) If set replaces contents of that file in export. 
+#isRelease = True
+
+# Skip HG command for obtaining revision (default: obtained from commandline
+# argument, False if not specified)
+# If set to True you need to specify hgRev or have a data/VERSION file present!
+#skipHg = False
+
+# Skip download and compile assets scripts (default: obtained from commandline
+# argument, False if not specified)
+#skipScripts = False
+
+# Skip only downloading assets scripts (default: obtained from commandline
+# argument, False if not specified) Has no effect if skipScripts is already
+# enabled
+#noDownload = False
+
+
+#
+# Debian package config
+#
+[Deb]
+# Name of the debian package. In nightly mode (isRelease == False) "hg" is 
+# appended to this string
+#packageName = makehuman
+
+# Installed packages to replace by this package
+#packageReplaces = makehuman-nightly, makehuman-alpha, makehumansvn
+
+# Override the string used as version for the package (default: is derived from
+# versionSub either specified in this file or in makehuman.py)
+#packageVersion = 1.0.0~alpha8~rc3
+
+
+#
+# Redhat RPM package config
+#
+[Rpm]
+# Name of the redhat package. In nightly mode (isRelease == False) "hg" is 
+# appended to this string
+#packageName = makehuman
+
+# Override the string used as version for the package (default: is derived from
+# versionSub either specified in this file or in makehuman.py)
+#packageVersion = 1.0.0.alpha8.rc3
+
+[Win32]
+# packageName = makehuman-unstable
+# packageVersion = 20140503
+#distDir = c:\jenkins\workspace\makehuman-unstable-dist
+
+# Note that PPA signing and uploading requires a valid GPG signature
+
+#[PPA]
+#packageVersion = 1.1.0~rc1
+#packageSub = 1ppa1
+#signString = Joel Palmius <joepal1976@hotmail.com>
+#performSign = True
+#performUpload = True
+

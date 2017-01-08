@@ -1,0 +1,35 @@
+# 3DSMax 
+#	bone	 	MHX bone	twist
+
+Name:	3DSMax
+
+Armature:
+	hips		hips	
+
+	lefthip		thigh.L	
+	leftknee	shin.L	
+	leftankle	foot.L	
+	lefttoe		toe.L	
+
+	righthip	thigh.R	
+	rightknee	shin.R	
+	rightankle	foot.R	
+	righttoe	toe.R	
+
+	lowerback	spine	
+	spine-1		spine-1	
+	chest1		chest	
+	chest2		chest-1	
+	lowerneck	LowerNeck
+	neck		neck	
+	head		head	
+
+	leftcollar	clavicle.L
+	leftshoulder	upper_arm.L	
+	leftelbow	forearm.L	
+	leftwrist	hand.L	
+
+	rightcollar	clavicle.R
+	rightshoulder	upper_arm.R	
+	rightelbow	forearm.R	
+	rightwrist	hand.R	

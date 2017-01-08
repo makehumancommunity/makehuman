@@ -1,0 +1,10 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Source: http://www.makehuman.org
+Upstream-Name: MakeHuman
+Upstream-Contact: Joel Palmius <joepal1976@hotmail.com>
+
+Files: *
+Copyright: Copyright 2016 Data Collection AB, Joel Palmius, Jonas Hauquier
+License: AGPL-3+
+
+

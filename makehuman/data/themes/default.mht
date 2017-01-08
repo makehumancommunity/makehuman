@@ -1,0 +1,17 @@
+# Default theme
+version 1.1.0
+color clear 0.5 0.5 0.5
+color grid 0.8 0.8 0.8
+color subgrid 0.6 0.6 0.6
+
+color bgbottomleft 0.2 0.2 0.2
+color bgbottomright 0.2 0.2 0.2
+color bgtopleft 0.5 0.5 0.5
+color bgtopright 0.5 0.5 0.5
+
+logwindow_color DEBUG grey
+logwindow_color NOTICE blue
+logwindow_color INFO blue
+logwindow_color WARNING darkorange
+logwindow_color ERROR red
+logwindow_color CRITICAL red

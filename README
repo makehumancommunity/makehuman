@@ -1,0 +1,49 @@
+MakeHuman
+=========
+
+Makehuman is a completely free, innovative and professional software for the 
+modelling of 3-Dimensional humanoid characters.
+This (https://bitbucket.org/MakeHuman/makehuman) is the official source 
+repository of the MakeHuman project.
+
+Official website: http://www.makehuman.org
+Development status: http://bugtracker.makehuman.org
+
+License
+-------
+
+The MakeHuman source and data are released under the AGPL license.
+This also includes everything that is exported from or by MakeHuman. 
+However, respecting a set of conditions (which are explained in section 
+C of license.txt), you are allowed to instead use the CC0 license 
+for exports.
+
+The human readable explanation of the license terms is here: 
+http://www.makehuman.org/content/license_explanation.html
+
+Licenses for dependencies are included in the licenses folder.
+
+Instructions
+------------
+
+MakeHuman is written in Python with support for the Python 2.7 interpreter.
+Additional requirements for running MakeHuman are the numpy, pyQt (Riverbank)
+and pyOpenGL python libraries.
+
+The main application is located in the "makehuman" folder, and can be started
+by running makehuman.py. Additionally this repository contains addon scripts 
+for use with Blender (www.blender.org).
+
+Help and support
+----------------
+
+For further help, have a look at our documentation at:
+http://www.makehuman.org/documentation 
+and frequently asked questions 
+http://www.makehuman.org/faq
+
+If you have other questions, feel free to ask them on our forums at:
+http://www.makehuman.org/forum/
+
+Bugs can be reported on the project's bug tracker: 
+http://bugtracker.makehuman.org
