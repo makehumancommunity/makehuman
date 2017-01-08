@@ -150,7 +150,13 @@ class FileCache(object):
                 if not (mtime > cached_mtime):
                     continue
 
-            self._cache[fileId] = (mtime,) + getMetadata(filepath)
+            try:
+                metadata = getMetadata(filepath)
+            except:
+                log.error("Failed to load metadata from file %s, it's probably corrupt." % filepath)
+                raise
+
+            self._cache[fileId] = (mtime,) + metadata
 
         if removeOldEntries:
             """Remove entries from cache that no longer exist"""
