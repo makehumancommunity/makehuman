@@ -1,4 +1,4 @@
-These instruction have been written for and tested on Fedora 19 64-bit. 
+These instruction have been written for and tested on Fedora 24 64-bit. 
 You will never be able to run the MakeHuman HG version on distros such
 as RHEL/CentOS 6.4 or earlier, since they do not support python 2.7, 
 not even if you enable RPMForge. The instructions may or may not work
@@ -9,7 +9,7 @@ STEP 1 INSTALL MERCURIAL
 ------------------------
 Install mercurial (hg):
 
-  yum install mercurial
+  dnf install mercurial
 
 
 STEP 2 CLONE THE CURRENT HG REPOSITORY
@@ -25,12 +25,12 @@ STEP 3 INSTALL REQUIRED DEPENDENCIES
 ------------------------------------
 As root, run the bash script for installing the required dependencies.
 
-  makehuman/rpm/install_rpm_dependencies.bash
+  makehuman/buildscripts/rpm/install_rpm_dependencies.bash
 
 This script also installs optional but recommended dependencies. If you
 only want the really required dependencies, run
 
-  yum install numpy PyOpenGL PyQt4
+  dnf install numpy PyOpenGL PyQt4
 
 
 STEP 4 RUN MAKEHUMAN
