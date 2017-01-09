@@ -52,6 +52,15 @@ def _unique_list(l):
 
 PATH_ENCODINGS = _unique_list(map(lambda s:s.lower(), [sys.getfilesystemencoding(), sys.getdefaultencoding(), 'utf-8']))
 
+if sys.platform == "win32":
+    """Workaround for windows 7 where people might enter a latin-1 file name, i.e something
+    called åäöüûñ, but this isn't reported as a file system encoding.
+    
+    There is no discernible way to decide exactly which cp125x encoding a file name has, as
+    they are all 8-bit code pages. So picking the one which have rendered us the most 
+    bug reports so far."""
+    PATH_ENCODINGS.append("cp1252")
+
 def pathToUnicode(path):
     """
     Unicode representation of the filename.
