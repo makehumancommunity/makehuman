@@ -686,6 +686,8 @@ def loadModifiers(filename, human):
 
             if 'macrovar' in mDef:
                 modifier = modifierClass(groupName, mDef['macrovar'])
+                if not modifier.isMacro():
+                    log.warning("Expected modifier %s to be a macro modifier, but identifies as a regular one. Check variable category definitions in targets.py" % modifier.fullName)
             else:
                 modifier = modifierClass(groupName, mDef['target'], mDef.get('min',None), mDef.get('max',None), mDef.get('mid',None))
 

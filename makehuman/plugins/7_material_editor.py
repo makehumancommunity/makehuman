@@ -66,12 +66,13 @@ class MaterialEditorTaskView(gui3d.TaskView):
         shaderConfig = self.human.material.shaderConfig
         for name in shaderConfig:
             chkBox = gui.CheckBox(name, shaderConfig[name])
+            chkBox.shaderOption = name
             self.shaderConfBox.addWidget(chkBox)
             @chkBox.mhEvent
             def onClicked(event):
                 shaderConfig = dict()
                 for child in self.shaderConfBox.children:
-                    shaderConfig[str(child.text())] = child.isChecked()
+                    shaderConfig[child.shaderOption] = child.isChecked()
                 self.getSelectedObject().material.configureShading(**shaderConfig)
 
         self.shaderDefBox = self.addLeftWidget(gui.GroupBox('Custom shader defines'))
@@ -399,7 +400,7 @@ class MaterialEditorTaskView(gui3d.TaskView):
         shaderConfig = mat.shaderConfig
 
         for child in self.shaderConfBox.children:
-            name = str(child.text())
+            name = child.shaderOption
             child.setChecked( shaderConfig[name] )
 
             if name == 'diffuse':
@@ -439,12 +440,13 @@ class MaterialEditorTaskView(gui3d.TaskView):
                 continue
 
             chkBox = gui.CheckBox(d, d in mat.shaderDefines)
+            chkBox.shaderDefine = d
             self.shaderDefBox.addWidget(chkBox)
             @chkBox.mhEvent
             def onClicked(event):
                 shaderConfig = dict()
                 for child in self.shaderDefBox.children:
-                    defName = str(child.text())
+                    defName = child.shaderDefine
                     enabled = child.isChecked()
                     try:
                         if enabled:

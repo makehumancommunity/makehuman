@@ -46,6 +46,7 @@ TARGETS_NPZ_PATH = getSysDataPath('targets.npz')
 
 # Defines reserved value keywords and which category they map to
 # Used for specifying dependencies between targets using their filename
+# Maps macro variable to discrete variables controlled by that macro modifier
 _cat_data = [
    # category     values
     ('gender',   ['male', 'female']),
@@ -56,7 +57,7 @@ _cat_data = [
     ('height',   ['minheight', 'averageheight', 'maxheight']),
     ('breastsize',     ['mincup', 'averagecup', 'maxcup']),
     ('breastfirmness', ['minfirmness', 'averagefirmness', 'maxfirmness']),
-    ('bodyproportion', ['uncommonproportions', 'regularproportions', 'idealproportions'])
+    ('bodyproportions', ['uncommonproportions', 'regularproportions', 'idealproportions'])
     ]
 
 _cat_values = dict(_cat_data)
