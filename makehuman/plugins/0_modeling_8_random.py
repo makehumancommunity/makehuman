@@ -85,6 +85,10 @@ class RandomTaskView(gui3d.TaskView):
         #self.modify = toolbox.addWidget(gui.Button("Adjust current"))
 
         self.randomBtn = toolbox.addWidget(gui.Button("Randomize"))
+
+        restorebox = self.addLeftWidget(gui.GroupBox('Restore settings'))
+        self.restoreBtn = restorebox.addWidget(gui.Button('Restore to defaults'))
+
         @self.randomBtn.mhEvent
         def onClicked(event):
             randomize(self.human,
@@ -187,4 +191,11 @@ def load(app):
 def unload(app):
     pass
 
+        @self.restoreBtn.mhEvent
+        def onClicked(event):
+            self.macro.setChecked(True)
+            self.face.setChecked(True)
+            self.body.setChecked(True)
+            self.height.setChecked(False)
+            self.symmetry.setValue(value=0.7)
 
