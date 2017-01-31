@@ -58,7 +58,6 @@ __copyright__ = "Copyright 2016 Data Collection AB and listed authors"
 __credits__ = ["See http://www.makehuman.org/halloffame"]
 __license__ = "AGPLv3"
 __maintainer__ = "Joel Palmius, Jonas Hauquier"
-__email__ = "dev@makehuman.org"
 __status__ = "Production" if release else "Development"
 
 
@@ -500,12 +499,12 @@ For further help, have a look in the community wiki at:
 
     http://www.makehumancommunity.org/wiki/Main_Page
 
-The MakeHuman team can be contacted at dev@makehuman.org
-
 If you have other questions or need support, feel free to ask on our 
 forums at:
 
     http://www.makehumancommunity.org/forum/
+
+The forums is also where you can contact the MakeHuman team. 
 
 Bugs can be reported on the project's bug tracker:
 
