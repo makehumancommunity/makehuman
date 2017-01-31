@@ -47,7 +47,6 @@ __author__ = "Joel Palmius"
 __copyright__ = "Copyright 2016 Data Collection AB and listed authors"
 __license__ = "AGPLv3"
 __maintainer__ = "Joel Palmius"
-__email__ = "dev@makehuman.org"
 
 syspath = ["./", "./lib", "./apps", "./shared", "./apps/gui","./core"]
 syspath.extend(sys.path)
