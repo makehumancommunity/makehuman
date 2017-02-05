@@ -10,7 +10,7 @@
 
 **Authors:**           Jonas Hauquier, Glynn Clements, Joel Palmius, Marc Flerackers
 
-**Copyright(c):**      MakeHuman Team 2001-2016
+**Copyright(c):**      MakeHuman Team 2001-2017
 
 **Licensing:**         AGPL3
 

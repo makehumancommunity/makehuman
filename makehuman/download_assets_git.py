@@ -44,7 +44,7 @@ import subprocess
 import shutil
 
 __author__ = "Joel Palmius"
-__copyright__ = "Copyright 2016 Data Collection AB and listed authors"
+__copyright__ = "Copyright 2017 Data Collection AB and listed authors"
 __license__ = "AGPLv3"
 __maintainer__ = "Joel Palmius"
 
