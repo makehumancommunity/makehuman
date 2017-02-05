@@ -47,7 +47,7 @@ import re
 import subprocess
 
 ## Version information #########################################################
-__version__ = "1.1.0"                   # Major, minor and patch version number
+__version__ = "1.1.1"                   # Major, minor and patch version number
 release = False                         # False for nightly
 versionSub = ""                         # Short version description
 meshVersion = "hm08"                    # Version identifier of the basemesh
