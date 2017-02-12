@@ -75,8 +75,20 @@ class DebugDump(object):
             self.debug = open(self.debugpath, "a", encoding="utf-8")
 
     def write(self, msg, *args):
-        self.debug.write((msg % args) + "\n")
-        log.debug(msg, *args)
+        try:
+            log.debug(msg, *args)
+            self.debug.write((msg % args) + "\n")
+        except UnicodeDecodeError:
+            msg = getpath.stringToUnicode(msg)
+            uargs = []
+            for i in args:
+                if isinstance(i,str):
+                    uargs.append(getpath.stringToUnicode(i))
+                else:
+                    uargs.append(i)
+
+            log.debug(msg, *uargs)
+            self.debug.write((msg % uargs) + "\n")
 
     def close(self):
         self.debug.close()
