@@ -145,7 +145,7 @@ appExecutable = exportPath( 'makehuman\makehuman.py' )
 
 a = Analysis([appExecutable] + i.getPluginFiles(),
              pathex= [ exportPath(p) for p in i.pathEx ],
-             hiddenimports=[],
+             hiddenimports=["skeleton_drawing"],
              hookspath=None,
              runtime_hooks=None
              )
@@ -241,3 +241,4 @@ elif sys.platform == 'win32':
         base = os.path.basename(zipfilename)
         dest = os.path.join(dist_dir,base)
         os.rename(zipfilename,dest)
+
