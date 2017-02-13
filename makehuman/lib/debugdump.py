@@ -79,7 +79,7 @@ class DebugDump(object):
             log.debug(msg, *args)
             self.debug.write((msg % args) + "\n")
         except UnicodeDecodeError:
-            encs = [sys.stdout.encoding,sys.getfilsystemencoding(),sys.getdefaultencoding(),'utf-8']
+            encs = [sys.stdout.encoding,sys.getfilesystemencoding(),sys.getdefaultencoding(),'utf-8']
             msg = getpath.stringToUnicode(msg,encs)
             uargs = []
             for i in args:
