@@ -169,7 +169,8 @@ class SettingsTaskView(gui3d.TaskView):
         
         languageFiles = gui3d.app.getLanguages()
         for language in languageFiles:
-            self.languageBox.addWidget(LanguageRadioButton(languages, language))
+            if not language.lower() == "master":
+                self.languageBox.addWidget(LanguageRadioButton(languages, language))
 
         @self.metric.mhEvent
         def onClicked(event):
