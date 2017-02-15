@@ -62,7 +62,7 @@ class AnimationLibrary(gui3d.TaskView):
         self.playbackSlider = self.addLeftWidget(gui.Slider(label='Frame'))
         self.playbackSlider.setMin(0)
         self.frameLbl = self.addLeftWidget(gui.TextView(''))
-        self.frameLbl.setTextFormat(["Frame",": %s"], 0)
+        self.frameLbl.setTextFormat(u"Frame: %s", 0)
 
         @self.playbackSlider.mhEvent
         def onChange(value):
