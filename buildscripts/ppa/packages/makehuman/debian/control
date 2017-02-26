@@ -44,7 +44,7 @@ Description: Clothes for MakeHuman.
 Package: makehuman-bodyparts
 Architecture: all
 Depends: ${misc:Depends}
-Description: test test
+Description: Bodyparts for MakeHuman.
  These are all the official body parts available for this version of MakeHuman.
  Body parts include things such as teeth, genitalia, eyes etc.
 
