@@ -35,11 +35,11 @@ Description: Raw obj files for MakeHuman hair.
 Package: makehuman-bodyparts-dev
 Architecture: all
 Depends: ${misc:Depends}, makehuman-bodyparts
-Description: Raw obj files for MakeHuman hair.
- These are the unprocessed obj files for MakeHuman hair. It is
+Description: Raw obj files for MakeHuman bodyparts.
+ These are the unprocessed obj files for MakeHuman bodyparts. It is
  unlikely you want to install these unless you plan to modify
- existing hair. Specifically you do not need this for making
- completely new hair.
+ existing bodyparts. Specifically you do not need this for making
+ completely new bodyparts.
 
 Package: makehuman-proxymeshes-dev
 Architecture: all
