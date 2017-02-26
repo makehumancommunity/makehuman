@@ -20,30 +20,35 @@ Description: MakeHuman integration scripts for Blender.
 Package: makehuman-targets
 Architecture: all
 Depends: ${misc:Depends}
+Conflicts: makehuman-data
 Description: Body modifiers for MakeHuman.
  These are all the official targets available for this version of MakeHuman.
 
 Package: makehuman-skins
 Architecture: all
 Depends: ${misc:Depends}
+Conflicts: makehuman-data
 Description: Skins for MakeHuman
  These are all the official human skins available for this version of MakeHuman.
 
 Package: makehuman-hair
 Architecture: all
 Depends: ${misc:Depends}
+Conflicts: makehuman-data
 Description: Hair for MakeHuman.
  These are all the official hair styles available for this version of MakeHuman.
 
 Package: makehuman-clothes
 Architecture: all
 Depends: ${misc:Depends}
+Conflicts: makehuman-data
 Description: Clothes for MakeHuman.
  These are all the official clothes available for this version of MakeHuman.
 
 Package: makehuman-bodyparts
 Architecture: all
 Depends: ${misc:Depends}
+Conflicts: makehuman-data
 Description: Bodyparts for MakeHuman.
  These are all the official body parts available for this version of MakeHuman.
  Body parts include things such as teeth, genitalia, eyes etc.
@@ -62,6 +67,7 @@ Architecture: all
 Depends: ${misc:Depends}, makehuman-targets, makehuman-skins, makehuman-hair, makehuman-clothes, makehuman-bodyparts, python2.7, python-numpy, python-opengl, python-qt4, python-qt4-gl
 Suggests: makehuman-blendertools, makehuman-docs
 Replaces: makehuman-nightly, makehuman-alpha, makehumansvn, makehumanhg, makehuman-unstable, makehuman-data
+Conflicts: makehuman-data
 Provides: makehuman
 Description: Free, open source tool for creating realistic 3D human characters.
  MakeHuman is a free, open source software which allows the creation of 

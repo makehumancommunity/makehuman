@@ -9,6 +9,7 @@ Homepage: http://www.makehuman.org
 Package: makehuman-targets-dev
 Architecture: all
 Depends: ${misc:Depends}, makehuman-targets
+Conflicts: makehuman-data
 Description: Raw targets for MakeHuman.
  These are the unprocessed targets for MakeHuman. It is unlikely
  you want to install these unless you plan to develop new targets
@@ -17,6 +18,7 @@ Description: Raw targets for MakeHuman.
 Package: makehuman-clothes-dev
 Architecture: all
 Depends: ${misc:Depends}, makehuman-clothes
+Conflicts: makehuman-data
 Description: Raw obj and mhclo files for MakeHuman clothes.
  These are the unprocessed obj files for MakeHuman clothes. It is
  unlikely you want to install these unless you plan to modify
@@ -26,6 +28,7 @@ Description: Raw obj and mhclo files for MakeHuman clothes.
 Package: makehuman-hair-dev
 Architecture: all
 Depends: ${misc:Depends}, makehuman-hair
+Conflicts: makehuman-data
 Description: Raw obj files for MakeHuman hair.
  These are the unprocessed obj files for MakeHuman hair. It is
  unlikely you want to install these unless you plan to modify
@@ -35,6 +38,7 @@ Description: Raw obj files for MakeHuman hair.
 Package: makehuman-bodyparts-dev
 Architecture: all
 Depends: ${misc:Depends}, makehuman-bodyparts
+Conflicts: makehuman-data
 Description: Raw obj files for MakeHuman bodyparts.
  These are the unprocessed obj files for MakeHuman bodyparts. It is
  unlikely you want to install these unless you plan to modify
@@ -44,6 +48,7 @@ Description: Raw obj files for MakeHuman bodyparts.
 Package: makehuman-proxymeshes-dev
 Architecture: all
 Depends: ${misc:Depends}, makehuman
+Conflicts: makehuman-data
 Description: Raw obj and proxy files for MakeHuman proxies.
  These are the unprocessed files for MakeHuman proxies. It is
  unlikely you want to install these unless you plan to modify
@@ -53,6 +58,7 @@ Description: Raw obj and proxy files for MakeHuman proxies.
 Package: makehuman-3dobjs-dev
 Architecture: all
 Depends: ${misc:Depends}, makehuman
+Conflicts: makehuman-data
 Description: Raw files for the base mesh.
  These are the unprocessed files for MakeHuman base mesh. It is
  unlikely you want to install these unless you plan to modify
