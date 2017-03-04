@@ -191,7 +191,7 @@ class CBoneAnim:
         if not isRotationMatrix(self.srcBone.matrix):
             print("* WARNING *\nSource %s not rotation matrix:\n%s" % (self.srcBone.name, self.srcBone.matrix))
         if not isRotationMatrix(self.aMatrix):
-            print("* WARNING *\nA %s not rotation matrix:\n%s" % (self.trgBone.name, self.aMatrix.matrix))
+            print("* WARNING *\nA %s not rotation matrix:\n%s" % (self.trgBone.name, self.aMatrix))
 
 
     def retarget(self, frame):
