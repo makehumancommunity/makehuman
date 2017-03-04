@@ -54,7 +54,7 @@ meshVersion = "hm08"                    # Version identifier of the basemesh
 ################################################################################
 
 __author__ = "Jonas Hauquier, Joel Palmius, Glynn Clements, Thomas Larsson et al."
-__copyright__ = "Copyright 2016 Data Collection AB and listed authors"
+__copyright__ = "Copyright 2017 Data Collection AB and listed authors"
 __credits__ = ["See http://www.makehuman.org/halloffame"]
 __license__ = "AGPLv3"
 __maintainer__ = "Joel Palmius, Jonas Hauquier"

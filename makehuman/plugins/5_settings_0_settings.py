@@ -10,7 +10,7 @@
 
 **Authors:**           Joel Palmius, Marc Flerackers, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2016
+**Copyright(c):**      MakeHuman Team 2001-2017
 
 **Licensing:**         AGPL3
 
@@ -169,7 +169,8 @@ class SettingsTaskView(gui3d.TaskView):
         
         languageFiles = gui3d.app.getLanguages()
         for language in languageFiles:
-            self.languageBox.addWidget(LanguageRadioButton(languages, language))
+            if not language.lower() == "master":
+                self.languageBox.addWidget(LanguageRadioButton(languages, language))
 
         @self.metric.mhEvent
         def onClicked(event):

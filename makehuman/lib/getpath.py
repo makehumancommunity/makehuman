@@ -10,7 +10,7 @@
 
 **Authors:**           Jonas Hauquier, Glynn Clements, Joel Palmius, Marc Flerackers
 
-**Copyright(c):**      MakeHuman Team 2001-2016
+**Copyright(c):**      MakeHuman Team 2001-2017
 
 **Licensing:**         AGPL3
 
@@ -51,6 +51,9 @@ def _unique_list(l):
     return [x for x in l if not (x in seen or seen.add(x))]
 
 PATH_ENCODINGS = _unique_list(map(lambda s:s.lower(), [sys.getfilesystemencoding(), sys.getdefaultencoding(), 'utf-8']))
+
+if sys.stdout.encoding is not None and sys.stdout.encoding.lower() not in PATH_ENCODINGS:
+    PATH_ENCODINGS.append(sys.stdout.encoding)
 
 def pathToUnicode(path):
     """
@@ -100,11 +103,10 @@ def stringToUnicode(string_, encodings):
 
     # Last-resort fallback
     fallback = unicode(string_, 'ascii', 'replace')
+
     import log
-    try:
-        log.warning('Failed to decode string "%s" to unicode (encodings tried: %s). Using fallback value: %s', string_, ', '.join(encodings), fallback)
-    except:
-        log.warning("Failed to decode string to unicode (encodings tried: %s). Using fallback value: %s", ', '.join(encodings), fallback)
+    log.warning("Failed to convert a string to unicode. The hex representation of the string was " + ":".join("{:02x}".format(ord(c)) for c in string_))
+
     return fallback
 
 def formatPath(path):

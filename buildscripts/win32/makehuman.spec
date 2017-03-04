@@ -11,7 +11,7 @@ MakeHuman pyinstaller spec file for Windows build
 
 **Authors:**           Jonas Hauquier, Benjamin A Lau, Joel Palmius
 
-**Copyright(c):**      MakeHuman Team 2001-2016
+**Copyright(c):**      MakeHuman Team 2001-2017
 
 **Licensing:**         AGPL3
 
@@ -145,7 +145,7 @@ appExecutable = exportPath( 'makehuman\makehuman.py' )
 
 a = Analysis([appExecutable] + i.getPluginFiles(),
              pathex= [ exportPath(p) for p in i.pathEx ],
-             hiddenimports=[],
+             hiddenimports=["skeleton_drawing"],
              hookspath=None,
              runtime_hooks=None
              )
@@ -241,3 +241,4 @@ elif sys.platform == 'win32':
         base = os.path.basename(zipfilename)
         dest = os.path.join(dist_dir,base)
         os.rename(zipfilename,dest)
+

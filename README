@@ -6,8 +6,9 @@ modelling of 3-Dimensional humanoid characters.
 This (https://bitbucket.org/MakeHuman/makehuman) is the official source 
 repository of the MakeHuman project.
 
-Official website: http://www.makehuman.org
-Development status: http://bugtracker.makehuman.org
+Official website: http://www.makehumancommunity.org
+
+Development status: http://bugtracker.makehumancommunity.org
 
 License
 -------
@@ -19,7 +20,8 @@ C of license.txt), you are allowed to instead use the CC0 license
 for exports.
 
 The human readable explanation of the license terms is here: 
-http://www.makehuman.org/content/license_explanation.html
+
+http://www.makehumancommunity.org/content/license_explanation.html
 
 Licenses for dependencies are included in the licenses folder.
 
@@ -38,12 +40,18 @@ Help and support
 ----------------
 
 For further help, have a look at our documentation at:
-http://www.makehuman.org/documentation 
+
+http://www.makehumancommunity.org/documentation 
+
 and frequently asked questions 
-http://www.makehuman.org/faq
+
+http://www.makehumancommunity.org/faq
 
 If you have other questions, feel free to ask them on our forums at:
-http://www.makehuman.org/forum/
+
+http://www.makehumancommunity.org/forum/
 
 Bugs can be reported on the project's bug tracker: 
-http://bugtracker.makehuman.org
+
+http://bugtracker.makehumancommunity.org
+

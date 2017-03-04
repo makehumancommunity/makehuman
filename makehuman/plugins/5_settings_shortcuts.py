@@ -10,7 +10,7 @@
 
 **Authors:**           Joel Palmius, Marc Flerackers
 
-**Copyright(c):**      MakeHuman Team 2001-2016
+**Copyright(c):**      MakeHuman Team 2001-2017
 
 **Licensing:**         AGPL3
 
@@ -101,6 +101,17 @@ class ShortcutsTaskView(gui3d.TaskView):
         add(actions.rendering)
         add(actions.help)
         add(actions.exit)
+
+        restorebox = gui.GroupBox('Restore Settings')
+        self.addLeftWidget(restorebox)
+        self.restoreBtn = gui.Button('Restore to defaults')
+        restorebox.addWidget(self.restoreBtn)
+
+        @self.restoreBtn.mhEvent
+        def onClicked(event):
+            gui3d.app.resetShortcuts()
+            self.updateShortcuts()
+
 
     def updateShortcuts(self):
         for w in self.widgets:

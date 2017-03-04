@@ -10,7 +10,7 @@
 
 **Authors:**           Joel Palmius, Marc Flerackers, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2016
+**Copyright(c):**      MakeHuman Team 2001-2017
 
 **Licensing:**         AGPL3
 
@@ -85,6 +85,18 @@ class RandomTaskView(gui3d.TaskView):
         #self.modify = toolbox.addWidget(gui.Button("Adjust current"))
 
         self.randomBtn = toolbox.addWidget(gui.Button("Randomize"))
+
+        restorebox = self.addLeftWidget(gui.GroupBox('Restore settings'))
+        self.restoreBtn = restorebox.addWidget(gui.Button('Restore to defaults'))
+
+        @self.restoreBtn.mhEvent
+        def onClicked(event):
+            self.macro.setChecked(True)
+            self.face.setChecked(True)
+            self.body.setChecked(True)
+            self.height.setChecked(False)
+            self.symmetry.setValue(value=0.7)
+
         @self.randomBtn.mhEvent
         def onClicked(event):
             randomize(self.human,
