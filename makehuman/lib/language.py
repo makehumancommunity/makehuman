@@ -12,7 +12,7 @@ Translation and localization module.
 
 **Authors:**           Joel Palmius, Marc Flerackers, Glynn Clements
 
-**Copyright(c):**      MakeHuman Team 2001-2016
+**Copyright(c):**      MakeHuman Team 2001-2017
 
 **Licensing:**         AGPL3
 

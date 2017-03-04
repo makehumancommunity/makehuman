@@ -12,7 +12,7 @@ Export to stereolithography format.
 
 **Authors:**           Joel Palmius
 
-**Copyright(c):**      MakeHuman Team 2001-2016
+**Copyright(c):**      MakeHuman Team 2001-2017
 
 **Licensing:**         AGPL3
 

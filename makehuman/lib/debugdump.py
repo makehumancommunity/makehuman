@@ -10,7 +10,7 @@
 
 **Authors:**           Joel Palmius
 
-**Copyright(c):**      MakeHuman Team 2001-2016
+**Copyright(c):**      MakeHuman Team 2001-2017
 
 **Licensing:**         AGPL3
 
@@ -75,8 +75,21 @@ class DebugDump(object):
             self.debug = open(self.debugpath, "a", encoding="utf-8")
 
     def write(self, msg, *args):
-        self.debug.write((msg % args) + "\n")
-        log.debug(msg, *args)
+        try:
+            log.debug(msg, *args)
+            self.debug.write((msg % args) + "\n")
+        except UnicodeDecodeError:
+            encs = [sys.stdout.encoding,sys.getfilesystemencoding(),sys.getdefaultencoding(),'utf-8']
+            msg = getpath.stringToUnicode(msg,encs)
+            uargs = []
+            for i in args:
+                if isinstance(i,str):
+                    uargs.append(getpath.stringToUnicode(i,encs))
+                else:
+                    uargs.append(i)
+
+            log.debug(msg, *uargs)
+            self.debug.write((msg % uargs) + "\n")
 
     def close(self):
         self.debug.close()
@@ -98,6 +111,7 @@ class DebugDump(object):
         self.write("IS RELEASE VERSION: %s", os.environ['MH_RELEASE'])
         self.write("DEFAULT ENCODING: %s", sys.getdefaultencoding())
         self.write("FILESYSTEM ENCODING: %s", sys.getfilesystemencoding())
+        self.write("STDOUT ENCODING: %s", sys.stdout.encoding)
         self.write("WORKING DIRECTORY: %s", getpath.pathToUnicode(os.getcwd()))
         self.write("HOME LOCATION: %s", getpath.pathToUnicode(getpath.getHomePath()))
         syspath = os.path.pathsep.join( [getpath.pathToUnicode(p) for p in sys.path] )

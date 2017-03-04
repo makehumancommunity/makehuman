@@ -10,7 +10,7 @@
 
 **Authors:**           Joel Palmius, Marc Flerackers, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2016
+**Copyright(c):**      MakeHuman Team 2001-2017
 
 **Licensing:**         AGPL3
 
@@ -1418,6 +1418,13 @@ class Human(guicommon.Object, animation.AnimatedMesh):
     def load(self, filename, update=True, strict=False):
         from codecs import open
 
+        def _compare_versions(mhmVersion,pgmVersion):
+            """ Return true if major+minor matches, false if they do not. Ignore patch number. """
+            import re
+            match1 = re.match("v(\d)\.(\d)",mhmVersion)
+            match2 = re.match("v(\d)\.(\d)",pgmVersion)
+            return match1.groups(1) == match2.groups(1) and match1.groups(2) == match2.groups(2)
+
         def _get_version(lineData):
             try:
                 for l in lineData:
@@ -1495,7 +1502,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
                         log.warning('Unknown property in MHM file: %s', lineData)
 
         version = _get_version(lines)
-        if version != getShortVersion(noSub=True):
+        if not _compare_versions(version, getShortVersion(noSub=True)):
             log.message("MHM file is of version %s, attempting to load with backward compatibility")
             import compat
             compat.loadMHM(version, lines, _load_property, strict)
