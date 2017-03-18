@@ -43,6 +43,11 @@ import io
 import re
 import subprocess
 
+try:
+    unicode
+except NameError:
+    unicode = str
+
 ## Version information #########################################################
 __version__ = "1.1.1"                   # Major, minor and patch version number
 release = False                         # False for nightly
@@ -628,7 +633,7 @@ Homepage: %s""" % (self.author, self.license, self.copyright, self.homepage)
                 l_val = index[i+1]
 
                 key = text[last:last+l_key].tostring()
-                val = text[last+l_key:last+l_key+l_val].tostring()
+                val = unicode(text[last+l_key:last+l_key+l_val].tostring(), 'utf8')
                 stringDict[key] = val
 
                 last += (l_key + l_val)

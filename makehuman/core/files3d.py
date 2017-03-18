@@ -71,6 +71,11 @@ import log
 import wavefront
 from getpath import isSubPath, getPath
 
+try:
+    unicode
+except NameError:
+    unicode = str
+
 def packStringList(strings):
     text = ''
     index = []
@@ -86,11 +91,11 @@ def unpackStringList(text, index):
     last = None
     for i in index:
         if last is not None:
-            name = text[last:i].tostring()
+            name = unicode(text[last:i].tostring(), 'utf-8')
             strings.append(name)
         last = i
     if last is not None:
-        name = text[last:].tostring()
+        name = unicode(text[last:].tostring(), 'utf8')
         strings.append(name)
 
     return strings
