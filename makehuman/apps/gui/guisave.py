@@ -38,7 +38,7 @@ Abstract
 
 This module implements the 'Files > Save' tab.
 """
-
+from __future__ import division
 import os
 
 import mh
@@ -61,7 +61,7 @@ def saveMHM(path):
     # Save square sized thumbnail
     size = min(G.windowWidth, G.windowHeight)
     img = mh.grabScreen(
-        (G.windowWidth - size) / 2, (G.windowHeight - size) / 2, size, size)
+        (G.windowWidth - size) // 2, (G.windowHeight - size) // 2, size, size)
 
     # Resize thumbnail to max 128x128
     if size > 128:
