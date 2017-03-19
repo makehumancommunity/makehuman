@@ -49,12 +49,6 @@ import makehuman
 import material
 import json
 
-try:
-    unicode
-except NameError:
-    unicode = str
-
-
 #
 #   Proxy types. Loop over simple proxy types to do all proxies.
 #   Some code use lowercase proxy types instead.
@@ -589,12 +583,12 @@ def loadBinaryProxy(path, human, type):
 
     proxy = Proxy(path, proxyType, human)
 
-    proxy.name = unicode(npzfile['name'].tostring(), 'utf8')
-    proxy.uuid = unicode(npzfile['uuid'].tostring(), 'utf8')
-    proxy.basemesh = unicode(npzfile['basemesh'].tostring(), 'utf8')
+    proxy.name = str(npzfile['name'].tostring(), 'utf8')
+    proxy.uuid = str(npzfile['uuid'].tostring(), 'utf8')
+    proxy.basemesh = str(npzfile['basemesh'].tostring(), 'utf8')
 
     if 'description' in npzfile:
-        proxy.description = unicode(npzfile['description'].tostring(), 'utf8')
+        proxy.description = str(npzfile['description'].tostring(), 'utf8')
 
     if 'version' in npzfile:
         proxy.version = int(npzfile['version'])
@@ -643,14 +637,14 @@ def loadBinaryProxy(path, human, type):
 
     proxy.material = material.Material(proxy.name)
     if 'material_file' in npzfile:
-        proxy._material_file = unicode(npzfile['material_file'].tostring(), 'utf8')
+        proxy._material_file = str(npzfile['material_file'].tostring(), 'utf8')
     if proxy.material_file:
         proxy.material.fromFile(proxy.material_file)
 
-    proxy._obj_file = unicode(npzfile['obj_file'].tostring(), 'utf8')
+    proxy._obj_file = str(npzfile['obj_file'].tostring(), 'utf8')
 
     if 'vertexBoneWeights_file' in npzfile:
-        proxy._vertexBoneWeights_file = unicode(npzfile['vertexBoneWeights_file'].tostring(), 'utf8')
+        proxy._vertexBoneWeights_file = str(npzfile['vertexBoneWeights_file'].tostring(), 'utf8')
         if proxy.vertexBoneWeights_file:
             from animation import VertexBoneWeights
             proxy.vertexBoneWeights = VertexBoneWeights.fromFile(proxy.vertexBoneWeights_file)
@@ -983,7 +977,7 @@ def peekMetadata(proxyFilePath, proxyType=None):
             # Binary proxy file
             npzfile = np.load(proxyFilePath)
 
-            uuid = unicode(npzfile['uuid'].tostring(), 'utf8')
+            uuid = str(npzfile['uuid'].tostring(), 'utf8')
             tags = set(_unpackStringList(npzfile['tags_str'], npzfile['tags_idx']))
             return (uuid, tags)
         except Exception as e:
@@ -1024,11 +1018,11 @@ def _unpackStringList(text, index):
     last = None
     for i in index:
         if last is not None:
-            name = unicode(text[last:i].tostring(), 'utf8')
+            name = str(text[last:i].tostring(), 'utf8')
             strings.append(name)
         last = i
     if last is not None:
-        name = unicode(text[last:].tostring(), 'utf8')
+        name = str(text[last:].tostring(), 'utf8')
         strings.append(name)
 
     return strings
