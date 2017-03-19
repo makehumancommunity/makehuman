@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """ 
@@ -35,6 +35,8 @@ Abstract
 
 TODO
 """
+
+from __future__ import division
 from core import G
 
 import numpy as np
@@ -816,14 +818,14 @@ def renderToBuffer(width, height, productionRender = True):
 
     # Now that framebuffer is bound, verify whether dimensions are within max supported dimensions
     maxWidth, maxHeight = glGetInteger(GL_MAX_VIEWPORT_DIMS)
-    aspect = float(height) // width
+    aspect = float(height) / width
     width = min(width, maxWidth)
     height = min(height, maxHeight)
     # Maintain original aspect ratio
     if aspect * width < height:
         height = int(aspect * width)
     else:
-        width = int(height // aspect)
+        width = int(height / aspect)
 
     # Create and bind renderbuffers
     renderbuffer = glGenRenderbuffers(1)    # We need a renderbuffer for both color and depth

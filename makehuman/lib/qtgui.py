@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -631,7 +631,7 @@ class ListItem(QtGui.QListWidgetItem):
             labelWidth -= self.listWidget().iconSize().width() + 10
             # pad size with 10px to account for margin between icon and text (this is an approximation)
 
-        if metrics.width(self.text)/2 > labelWidth:
+        if metrics.width(self.text)//2 > labelWidth:
             self.setToolTip(self.text)
         else:
             self.setToolTip("")

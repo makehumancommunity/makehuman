@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """ 
@@ -80,7 +80,7 @@ class AnimationTrack(object):
         self.license = makehuman.getAssetLicense()
         self.dataLen = len(poseData)
         self.nFrames = nFrames
-        self.nBones = int(self.dataLen/nFrames)
+        self.nBones = int(self.dataLen//nFrames)
 
         if self.nBones == 0:
             raise RuntimeError("Cannot create AnimationTrack %s: contains no or not enough data." % self.name)

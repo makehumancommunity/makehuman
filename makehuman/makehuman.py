@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -36,7 +36,7 @@ Abstract
 
 This file starts the MakeHuman python application.
 """
-from __future__ import print_function # Removes a bunch of warnings in PyCharm, though probably superfluous
+
 import sys
 import os
 import io

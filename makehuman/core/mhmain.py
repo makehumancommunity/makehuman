@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -607,7 +607,7 @@ class MHApplication(gui3d.Application, mh.Application):
         spacing = 1 if self.getSetting('units') == 'metric' else 3.048
 
         # Background grid
-        gridSize = int(200/spacing)
+        gridSize = int(200//spacing)
         if gridSize % 2 != 0:
             gridSize += 1
         if self.getSetting('units') == 'metric':
@@ -628,7 +628,7 @@ class MHApplication(gui3d.Application, mh.Application):
         self.addObject(self.backplaneGrid)
 
         # Ground grid
-        gridSize = int(20/spacing)
+        gridSize = int(20//spacing)
         if gridSize % 2 != 0:
             gridSize += 1
         groundGridMesh = geometry3d.GridMesh(gridSize, gridSize, spacing, offset = 0, plane = 1, subgrids = subgrids)

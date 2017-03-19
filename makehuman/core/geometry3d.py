@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """ 
@@ -360,9 +360,9 @@ class GridMesh(module3d.Object3D):
             size = size + vBoxes * (subgrids - 1) + hBoxes * (subgrids - 1)
         v = np.zeros((2 * size, 3), dtype = np.float32)
         f = np.zeros((size, 2), dtype = np.float32)
-        hBegin = (-(rows/2)) * spacing
+        hBegin = (-(rows//2)) * spacing
         hEnd = hBegin + (rows * spacing)
-        vBegin = (-(columns/2)) * spacing
+        vBegin = (-(columns//2)) * spacing
         vEnd = vBegin + (columns * spacing)
         # Horizontal lines
         for i in range(rows):

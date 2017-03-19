@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -38,7 +38,6 @@ Abstract
 
 This module implements the 'Files > Save' tab.
 """
-from __future__ import division
 import os
 
 import mh
