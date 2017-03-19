@@ -47,6 +47,8 @@ import io
 
 class Uniform(object):
     def __init__(self, index, name, pytype, dims):
+        if type(name) is bytes:
+            name = name.decode('utf-8')
         self.index = index
         self.name = name
         self.pytype = pytype
@@ -268,6 +270,7 @@ class Shader(object):
     @classmethod
     def glslVersionStr(cls):
         cls.glslVersion()
+        cls._glsl_version_str = OpenGL.GL.glGetString(OpenGL.GL.GL_SHADING_LANGUAGE_VERSION)
         return cls._glsl_version_str
 
     @classmethod
@@ -279,9 +282,12 @@ class Shader(object):
                 return cls._glsl_version
 
             cls._glsl_version_str = OpenGL.GL.glGetString(OpenGL.GL.GL_SHADING_LANGUAGE_VERSION)
+            # true string rather than byte string
+            cls._glsl_version_str = cls._glsl_version_str.decode("utf-8")
+            log.debug(cls._glsl_version_str)
             if cls._glsl_version_str:
                 import re
-                glsl_version = re.search('[0-9]+\.[0-9]+', str(cls._glsl_version_str)).group(0)
+                glsl_version = re.search('[0-9]+\.[0-9]+', cls._glsl_version_str).group(0)
                 glsl_v_major, glsl_v_minor = glsl_version.split('.')
             else:
                 glsl_v_major, glsl_v_minor = (0, 0)
