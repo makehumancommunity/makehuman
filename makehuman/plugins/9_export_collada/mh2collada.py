@@ -111,7 +111,7 @@ def exportCollada(filepath, config):
             fp = None
             log.error("Unable to open file for writing %s" % filepath)
 
-        date = time.strftime("%a, %d %b %Y %H:%M:%S +0000".encode('utf-8'), time.localtime()).decode('utf-8')
+        date = time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.localtime())
         # TODO revise to make this enum-like
         if config.yUpFaceZ or config.yUpFaceX:
             upvector = "Y_UP"
