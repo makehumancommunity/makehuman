@@ -67,9 +67,11 @@ def pathToUnicode(path):
     """
     if isinstance(path, str):
         return path
-    else:
+    elif path:
         # Approach for basestring type, as well as others such as QString
         return str(path, 'utf-8')
+    else:
+        return path
 
 ############## To be deleted  ##########################################################################################
 #def stringToUnicode(string_, encodings):
