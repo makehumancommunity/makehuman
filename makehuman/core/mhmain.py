@@ -154,7 +154,7 @@ class MHApplication(gui3d.Application, mh.Application):
         gui3d.Application.__init__(self)
         mh.Application.__init__(self)
 
-        self.shortcuts = {
+        self._default_shortcuts = {
             # Actions
             'undo':         (mh.Modifiers.CTRL, mh.Keys.z),
             'redo':         (mh.Modifiers.CTRL, mh.Keys.y),
@@ -193,6 +193,8 @@ class MHApplication(gui3d.Application, mh.Application):
             # Version check
             '_versionSentinel': (0, 0x87654321)
         }
+
+        self.shortcuts = dict(self._default_shortcuts)
 
         self.mouseActions = {
             (0, mh.Buttons.LEFT_MASK): self.mouseRotate,
@@ -1330,7 +1332,7 @@ class MHApplication(gui3d.Application, mh.Application):
     def resetShortcuts(self):
 
         self.shortcuts = dict(self._default_shortcuts)
-        for action, (modifier, key) in self.shortcuts.iteritems():
+        for action, (modifier, key) in self.shortcuts.items():
             action = getattr(self.actions, action, None)
             if action is not None:
                 mh.setShortcut(modifier, key, action)
