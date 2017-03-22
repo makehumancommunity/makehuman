@@ -282,21 +282,14 @@ class TagFilter(gui.GroupBox):
         if tag in self.tags:
             return
 
-        for t in self.tagToggles:
-            self.removeWidget(t)
         self.tags.add(tag)
-        toggle = gui.CheckBox(tag.capitalize())
+        toggle = self.addWidget(gui.CheckBox(tag.capitalize()))
         toggle.tag = tag
         self.tagToggles.append(toggle)
-        self.tagToggles.sort(key=lambda t: t.tag)
-        for t in self.tagToggles:
-            self.addWidget(t)
 
         @toggle.mhEvent
         def onClicked(event):
             self.setTagState(toggle.tag, toggle.selected)
-
-
 
     def addTags(self, tags):
         for tag in tags:
