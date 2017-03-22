@@ -555,8 +555,7 @@ class MocapError(Exception):
             value.split("\n") +
             ["" +
              "For corrective actions see:",
-             "http://www.makehuman.org/doc/node/",
-             "  makewalk_errors_and_corrective_actions.html"]
+             "http://www.makehumancommunity.org/wiki/Documentation:MakeWalk#Errors_and_Corrective_Actions"]
             )
         print("*** Mocap error ***")
         for line in _errorLines:
