@@ -36,8 +36,13 @@ Abstract
 TODO
 """
 
+from core import G
 from threading import Lock, Condition
-from PyQt4 import QtCore
+
+if G.hasPySide:
+    from PySide import QtCore
+else:
+    from PyQt4 import QtCore
 
 class Queue(object):
     def __init__(self):

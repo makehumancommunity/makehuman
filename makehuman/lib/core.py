@@ -36,6 +36,9 @@ Abstract
 TODO
 """
 
+import importlib
+import importlib.util
+
 class Globals(object):
     def __init__(self):
         self.app = None
@@ -46,5 +49,7 @@ class Globals(object):
         self.windowHeight = 600
         self.windowWidth = 800
         self.clearColor = (0.0, 0.0, 0.0, 0.0)
+        self.hasPySide = (importlib.util.find_spec("PySide") is not None)
 
 G = Globals()
+

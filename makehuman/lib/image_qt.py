@@ -38,8 +38,12 @@ TODO
 
 import os
 import numpy as np
+from core import G
 
-from PyQt4 import QtCore, QtGui
+if G.hasPySide:
+    from PySide import QtCore, QtGui
+else:
+    from PyQt4 import QtCore, QtGui
 
 def load(path):
     """
@@ -57,7 +61,12 @@ def load(path):
     w, h = im.width(), im.height()
     alpha = im.hasAlphaChannel()
     im = im.convertToFormat(QtGui.QImage.Format_ARGB32)
-    pixels = im.bits().asstring(h * w * 4)
+
+    if G.hasPySide:
+        pixels = bytes(im.bits())
+    else:
+        pixels = im.bits().asstring(h * w * 4)
+
     pixels = np.fromstring(pixels, dtype=np.uint32).reshape((h, w))
     del im
 
