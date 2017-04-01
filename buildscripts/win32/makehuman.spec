@@ -73,8 +73,8 @@ def distPath(subpath=""):
 
 def parseConfig(configPath):
     if os.path.isfile(configPath):
-        import ConfigParser
-        config = ConfigParser.ConfigParser()
+        import configparser
+        config = configparser.ConfigParser()
         config.read(configPath)
         return config
     else:
@@ -97,9 +97,9 @@ def configure(confpath):
 
   conf = parseConfig(confpath)
   if conf is None:
-    print "No config file at %s, using defaults or options passed on commandline." % confpath
+    print("No config file at %s, using defaults or options passed on commandline." % confpath)
   else:
-    print "Using config file at %s. NOTE: properties in config file will override any other settings!" % confpath
+    print("Using config file at %s. NOTE: properties in config file will override any other settings!" % confpath)
 
     hgpath = _conf_get(conf, 'General', 'hgPath', hgpath)
     package_name = _conf_get(conf, 'Win32', 'packageName', package_name)
@@ -124,7 +124,7 @@ i = exportInfo = build_prepare.export(sourcePath = hgRootPath(), exportFolder = 
 
 # Create config file for the Qt libraries to be able to load plugins
 # (such as for loading jpg and svg images)
-qtConf = open(i.applicationPath('qt.conf'), 'wb')
+qtConf = open(i.applicationPath('qt.conf'), 'wt')
 qtConf.write('[Paths]\nPrefix = .\nPlugins = qt4_plugins')
 qtConf.close()
 exportInfo.datas.append(os.path.join(i.rootSubpath, 'qt.conf'))
