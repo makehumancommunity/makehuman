@@ -45,6 +45,7 @@ if sys.platform == 'win32':
     import _winreg
 import log
 import getpath
+from core import G
 
 class DependencyError(Exception):
     def __init__(self, value):
@@ -151,9 +152,10 @@ class DebugDump(object):
     def appendQt(self):
         import qtui
         self.open()
-        self.write("PYQT.VERSION: %s", qtui.getQtVersionString())
-        self.write("PYQT.JPG_SUPPORT: %s", "supported" if qtui.supportsJPG() else "not supported")
-        self.write("PYQT.SVG_SUPPORT: %s", "supported" if qtui.supportsSVG() else "not supported")
+        self.write("USE PYSIDE INSTEAD OF PYQT: %s", str(G.hasPySide))
+        self.write("QT.VERSION: %s", qtui.getQtVersionString())
+        self.write("QT.JPG_SUPPORT: %s", "supported" if qtui.supportsJPG() else "not supported")
+        self.write("QT.SVG_SUPPORT: %s", "supported" if qtui.supportsSVG() else "not supported")
         py_plugin_path = os.path.pathsep.join( [getpath.pathToUnicode(p) for p in qtui.QtCore.QCoreApplication.libraryPaths()] )
         self.write("QT.PLUGIN_PATH: %s" % py_plugin_path)
         qt_plugin_path_env = os.environ['QT_PLUGIN_PATH'] if 'QT_PLUGIN_PATH' in os.environ else ""

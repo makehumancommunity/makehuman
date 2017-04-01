@@ -39,8 +39,12 @@ A Qt based filechooser widget.
 """
 
 import os
+from core import G
 
-from PyQt4 import QtCore, QtGui
+if G.hasPySide:
+    from PySide import QtCore, QtGui
+else:
+    from PyQt4 import QtCore, QtGui
 
 import qtgui as gui
 import mh
