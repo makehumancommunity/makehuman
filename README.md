@@ -1,21 +1,29 @@
 # makehuman_stable_python3
 
-This is (for now) just a playground to see if it would be viable to backport the python3 port to stable
+This is now a near viable to backport of the current MakeHuman 1.1.1 stable branch to a python3 dependency.  The port 
+includes support for the pyside binding to QT4.  This late addition recognizes the end of availability of the pyQt4 Python binding from Riverbank, and it allows testing proceed.  However, the intention is ultimately to move to QT5 support as final bugs are fixed.
+
+The testing vision for this code is to build a community release that includes the ported code and often-used user-contributed 
+plug-ins.  The utility of this integrated functionality is hoped to be sufficient to entice a larger cohort of testers who get
+value-added in exchange for the possibility of uncovering defficiencies in our port.
 
 ## Branches
 
-There are four branches here:
+There are four branches and some working developer branches:
 
-* bitbucket-stable: This is the code as it looks right now in the stable branch at bitbucket
-* bitbucket-default: This is the code as it looks right now in the default branch at bitbucket
-* old_python3_for_unstable: This is a raw import of the code from the makehuman_python3 repo
-* master: At the time of creating the repo, this is the same code as in bitbucket-stable. Master is the branch in which changes should be made (the other ones should only be touched if there is something new to import from bitbucket)
+* master: At the time of creating the repo, this is the same code as in bitbucket-stable. Master is the branch is the branch
+representing canonical development.
 
-## Diffs
+Reference branches
+* bitbucket-stable: This is the code as it looks right the stable branch at bitbucket
+* bitbucket-default: This is the code as it looks right default branch at bitbucket
+* old_python3_for_unstable: This is a raw import of the code from the makehuman_python3 repo (static reference to initial effort)
 
-Current latest diffs are:
+Developer branches
+* Aranuvir branch and user=plugins: Aranuvir 
+* stable-master: Rob Baer
+* pyside: Joel Palmius
 
-* [Changes from stable to default](http://www.jwp.se/files/stable_vs_unstable.diff): These are the difference between the "stable" and the "default" branches on bitbucket.
-* [Changes from default to python3](http://www.jwp.se/files/unstable_vs_python3.diff): These are what was changed between bitbucket's default and Rob's python 3 repo.
+A bug tracker for this port can be found at: http://bugtracker.makehumancommunity.org/projects/py3port/activity
 
-The diffs are not updated dynamically.
+Early binary builds for Windows platforms can be downloaded at: http://download.tuxfamily.org/makehuman/nightly/makehuman-python3-20170401-win32.zip
