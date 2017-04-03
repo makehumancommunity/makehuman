@@ -152,6 +152,7 @@ class ExportConfig(object):
     def copyTextureToNewLocation(self, filepath):
         import os
         import shutil
+        import getpath
 
         srcDir = os.path.abspath(os.path.expanduser(os.path.dirname(filepath)))
         filename = os.path.basename(filepath)
@@ -170,10 +171,10 @@ class ExportConfig(object):
             self._copiedFiles[filepath] = True
 
         if not self.useRelPaths:
-            return newpath
+            return getpath.formatPath(newpath)
         else:
             relpath = os.path.relpath(newpath, self.outFolder)
-            return str(os.path.normpath(relpath))
+            return getpath.formatPath(relpath)
 
 
     def goodName(self, name):
