@@ -8,7 +8,7 @@
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Joel Palimius, Aranuvir
+**Authors:**           Joel Palmius, Aranuvir
 
 **Copyright(c):**      MakeHuman Team 2001-2017
 
