@@ -1461,18 +1461,22 @@ class MHApplication(gui3d.Application, mh.Application):
         human = self.selectedHuman
         human.symmetryModeEnabled = self.actions.symmetry.isChecked()
 
-    def saveTarget(self, path=None):
-        """
-        Export the current modifications to the human as one single target,
-        relative to the basemesh.
-        """
-        if path is None:
-            path = mh.getPath("full_target.target")
-        if os.path.splitext(path)[1] != '.target':
-            raise RuntimeError("Cannot save target to file %s, expected a path to a .target file." % path)
-        human = self.selectedHuman
-        algos3d.saveTranslationTarget(human.meshData, path)
-        log.message("Full target exported to %s", path)
+    #def saveTarget(self, path=None):
+    #    """
+    #    Export the current modifications to the human as one single target,
+    #    relative to the basemesh.
+    #    """
+    #    if path is None:
+    #        path = mh.getPath("full_target.target")
+    #    if os.path.splitext(path)[1] != '.target':
+    #        raise RuntimeError("Cannot save target to file %s, expected a path to a .target file." % path)
+    #    human = self.selectedHuman
+    #    algos3d.saveTranslationTarget(human.meshData, path)
+    #    log.message("Full target exported to %s", path)
+
+    def goToSaveTarget(self):
+        mh.changeTask('Utilities', 'Save Targets')
+        self.redraw()
 
     def grabScreen(self):
         import datetime
@@ -1659,6 +1663,7 @@ class MHApplication(gui3d.Application, mh.Application):
         self.actions.zoomOut   = action('zoomOut',   self.getLanguageString('Zoom Out'),      self.zoomOut)
 
         self.actions.profiling = action('profiling', self.getLanguageString('Profiling'),     self.toggleProfiling, toggle=True)
+        self.actions.savetgt   = action('savetgt',   self.getLanguageString('Save Targets'), self.goToSaveTarget)
 
 
         # 1 - File toolbar
