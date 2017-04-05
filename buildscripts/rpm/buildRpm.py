@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -63,16 +63,16 @@ def buildRpm():
   global package_version
 
   if os.geteuid() == 0:
-    print "You are not allowed to run this script as root. You must run it as a normal user."
+    print("You are not allowed to run this script as root. You must run it as a normal user.")
     exit(1)
 
   rpmdir = os.path.dirname(os.path.abspath(__file__))         # / rpm build script root path
 
   hgrootdir = os.path.normpath(os.path.realpath( os.path.join(rpmdir, '..', '..') ))
 
-  print "HG root directory: " + hgrootdir
+  print("HG root directory: " + hgrootdir)
   if not os.path.isdir( os.path.join(hgrootdir, '.hg') ):
-    print "Error, the hg root folder %s does not contain .hg folder! Make sure you are running this script from buildscripts/rpm in the hg repository." % hgrootdir
+    print("Error, the hg root folder %s does not contain .hg folder! Make sure you are running this script from buildscripts/rpm in the hg repository." % hgrootdir)
     exit(1)
 
 
@@ -82,11 +82,11 @@ def buildRpm():
 
   # Folder where hg contents are exported and prepared for packaging (scripts are run)
   exportdir = os.path.normpath(os.path.realpath( os.path.join(hgrootdir, '..', 'mh-export-rpm') ))
-  print "Source export directory: " + exportdir
+  print("Source export directory: " + exportdir)
 
   homedir = os.getenv('HOME', None)
   if not homedir:
-    print "ERROR: cannot get HOME directory from $HOME environment var."
+    print("ERROR: cannot get HOME directory from $HOME environment var.")
     exit(1)
 
 
@@ -95,7 +95,7 @@ def buildRpm():
   try:
     import build_prepare
   except:
-    print "Failed to import build_prepare, expected to find it at %s. Make sure to run this script from hgroot/buildscripts/rpm/" % os.path.normpath(os.path.realpath(os.path.join(rpmdir, '..')))
+    print("Failed to import build_prepare, expected to find it at %s. Make sure to run this script from hgroot/buildscripts/rpm/" % os.path.normpath(os.path.realpath(os.path.join(rpmdir, '..'))))
     exit(1)
   if os.path.exists(exportdir):
     shutil.rmtree(exportdir)
@@ -142,17 +142,17 @@ def buildRpm():
     version = exportInfo.version.replace(" ", ".")
   else:
     version = package_version
-  print "RPM PACKAGE VERSION: %s\n" % version
+  print("RPM PACKAGE VERSION: %s\n" % version)
   os.environ["MH_VERSION"] = version
   os.environ["MH_EXPORT_PATH"] = exportdir
-  print '\n\nBuilding RPM package "%s" of version "%s"\n\n' % (os.environ["MH_PKG_NAME"], version)
+  print('\n\nBuilding RPM package "%s" of version "%s"\n\n' % (os.environ["MH_PKG_NAME"], version))
   subprocess.check_call(['bash', 'make_rpm.bash'])
 
 
 def parseConfig(configPath):
     if os.path.isfile(configPath):
-        import ConfigParser
-        config = ConfigParser.ConfigParser()
+        import configparser
+        config = configparser.ConfigParser()
         config.read(configPath)
         return config
     else:
@@ -170,9 +170,9 @@ def configure(confpath):
 
   conf = parseConfig(confpath)
   if conf is None:
-    print "No config file at %s, using defaults or options passed on commandline." % confpath
+    print("No config file at %s, using defaults or options passed on commandline." % confpath)
   else:
-    print "Using config file at %s. NOTE: properties in config file will override any other settings!" % confpath
+    print("Using config file at %s. NOTE: properties in config file will override any other settings!" % confpath)
 
     package_name = _conf_get(conf, 'Rpm', 'packageName', package_name)
     package_version = _conf_get(conf, 'Rpm', 'packageVersion', package_version)

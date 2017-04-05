@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -41,7 +41,7 @@ TODO
 
 import os.path
 import time
-import codecs
+import io
 import log
 import getpath
 import bvh
@@ -105,13 +105,13 @@ def exportCollada(filepath, config):
         progress(0.5, 0.55, "Exporting %s", filepath)
 
         try:
-            fp = codecs.open(filepath, 'w', encoding="utf-8")
+            fp = io.open(filepath, 'w', encoding="utf-8")
             log.message("Writing Collada file %s" % filepath)
         except:
             fp = None
             log.error("Unable to open file for writing %s" % filepath)
 
-        date = time.strftime(u"%a, %d %b %Y %H:%M:%S +0000".encode('utf-8'), time.localtime()).decode('utf-8')
+        date = time.strftime("%a, %d %b %Y %H:%M:%S +0000".encode('utf-8'), time.localtime()).decode('utf-8')
         # TODO revise to make this enum-like
         if config.yUpFaceZ or config.yUpFaceX:
             upvector = "Y_UP"

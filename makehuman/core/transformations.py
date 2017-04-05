@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # transformations.py
@@ -213,7 +213,7 @@ True
 
 """
 
-from __future__ import division, print_function
+
 
 import math
 import numpy
@@ -1705,7 +1705,7 @@ _AXES2TUPLE = {
     'rzxy': (1, 1, 0, 1), 'ryxy': (1, 1, 1, 1), 'ryxz': (2, 0, 0, 1),
     'rzxz': (2, 0, 1, 1), 'rxyz': (2, 1, 0, 1), 'rzyz': (2, 1, 1, 1)}
 
-_TUPLE2AXES = dict((v, k) for k, v in _AXES2TUPLE.items())
+_TUPLE2AXES = dict((v, k) for k, v in list(_AXES2TUPLE.items()))
 
 
 def vector_norm(data, axis=None, out=None):

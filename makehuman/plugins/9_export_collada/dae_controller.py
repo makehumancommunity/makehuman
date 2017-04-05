@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -86,7 +86,7 @@ def writeSkinController(fp, human, mesh, skel, config):
         parentWeights = rawWeights
     weights = mesh.getVertexWeights(parentWeights)
 
-    vertexWeights = [list() for _ in xrange(nVerts)]
+    vertexWeights = [list() for _ in range(nVerts)]
     skinWeights = []
     wn = 0
     boneNames = [ bone.name for bone in skel.getBones() ]
@@ -95,7 +95,7 @@ def writeSkinController(fp, human, mesh, skel, config):
             (verts,ws) = weights.data[boneName]
         except:
             (verts,ws) = ([], [])
-        wts = zip(verts, ws)
+        wts = list(zip(verts, ws))
         skinWeights += wts
         for (vn,_w) in wts:
             vertexWeights[int(vn)].append((bIdx,wn))

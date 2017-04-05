@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -85,7 +85,7 @@ class HumanObjectSelector(gui.QtGui.QWidget, gui.Widget):
             else:
                 return 'skin'
 
-        if self._selected in self.human.clothesProxies.keys():
+        if self._selected in list(self.human.clothesProxies.keys()):
             return self._selected
         else:
             return 'skin'
@@ -97,7 +97,7 @@ class HumanObjectSelector(gui.QtGui.QWidget, gui.Widget):
                 self._selected = value
             else:
                 self._selected = 'skin'
-        elif value in self.human.clothesProxies.keys():
+        elif value in list(self.human.clothesProxies.keys()):
             self._selected = value
         else:
             self._selected = 'skin'
@@ -167,7 +167,7 @@ class HumanObjectSelector(gui.QtGui.QWidget, gui.Widget):
             radioBtn.destroy()
         del self.objectSelector[self.humanObjectCount:]
 
-        for uuid,pxy in human.clothesProxies.items():
+        for uuid,pxy in list(human.clothesProxies.items()):
             self._addSelectorItem(uuid, pxy.name, self.clothesBox, (self.selected == uuid))
 
         '''

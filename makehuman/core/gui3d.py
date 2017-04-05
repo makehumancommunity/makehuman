@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -325,7 +325,7 @@ class Category(View):
             self._taskTab(task)
         self.task = self.tasks[0].name
 
-        categories = sorted(self.parent.categories.values(), key=lambda c: c.sortOrder)
+        categories = sorted(list(self.parent.categories.values()), key=lambda c: c.sortOrder)
         categoryOrder = categories.index(self)
         # Ensure that event order is per category, per task
         eventOrder = 1000 * categoryOrder + task.sortOrder
@@ -449,7 +449,7 @@ class Application(events3d.EventHandler):
             raise RuntimeError('The category is already attached')
 
         if sortOrder == None:
-            orders = [c.sortOrder for c in self.categories.values()]
+            orders = [c.sortOrder for c in list(self.categories.values())]
             o = 0
             while o in orders:
                 o = o +1
@@ -458,7 +458,7 @@ class Application(events3d.EventHandler):
         category.sortOrder = sortOrder
         self.categories[category.name] = category
 
-        categories = self.categories.values()
+        categories = list(self.categories.values())
         categories.sort(key = lambda c: c.sortOrder)
 
         category.tab = self.tabs.addTab(category.name, category.label or category.name, categories.index(category))
@@ -538,16 +538,16 @@ class Application(events3d.EventHandler):
         a plugin.
         """
         if category:
-            if not category in self.categories.keys():
+            if not category in list(self.categories.keys()):
                 raise RuntimeWarning('Category with name "%s" does not exist.' % category)
             c = self.getCategory(category)
-            if not task in c.tasksByName.keys():
+            if not task in list(c.tasksByName.keys()):
                 raise RuntimeWarning('Category "%s" does not contain a task with name "%s".' % (category, task))
             return c.getTaskByName(task)
         else:
             tasks = []
-            for c in self.categories.keys():
-                if task in self.getCategory(c).tasksByName.keys():
+            for c in list(self.categories.keys()):
+                if task in list(self.getCategory(c).tasksByName.keys()):
                     tasks.append(self.getCategory(c).tasksByName[task])
             if len(tasks) == 0:
                 raise RuntimeWarning('No task with name "%s" found.' % task)
@@ -650,7 +650,7 @@ class Application(events3d.EventHandler):
 
         self.fullscreen = event.fullscreen
 
-        for category in self.categories.itervalues():
+        for category in list(self.categories.values()):
             category.callEvent('onResized', event)
             for task in category.tasks:
                 task.callEvent('onResized', event)

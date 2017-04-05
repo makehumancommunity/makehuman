@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # ##### BEGIN GPL LICENSE BLOCK #####
@@ -41,27 +41,27 @@ Rad2Deg = 180/pi
 
 def printMat3(string, mat, pad=""):
     if not mat:
-        print("%s None" % string)
+        print(("%s None" % string))
         return
-    print("%s " % string)
+    print(("%s " % string))
     mc = "%s  [" % pad
     for m in range(3):
         s = mc
         for n in range(3):
             s += " %6.3f" % mat[m][n]
-        print(s+"]")
+        print((s+"]"))
 
 def printMat4(string, mat, pad=""):
     if not mat:
-        print("%s None" % string)
+        print(("%s None" % string))
         return
-    print("%s%s " % (pad, string))
+    print(("%s%s " % (pad, string)))
     mc = "%s  [" % pad
     for m in range(4):
         s = mc
         for n in range(4):
             s += " %6.3f" % mat[m][n]
-        print(s+"]")
+        print((s+"]"))
 
 #
 #  quadDict():
@@ -84,13 +84,13 @@ RigifyLayers = 27*[True] + 5*[False]
 
 def allBonesInList(list, rig):
     for bname in list:
-        if bname not in rig.pose.bones.keys():
+        if bname not in list(rig.pose.bones.keys()):
             return False
     return True
 
 
 def isMhxRig(rig):
-    return ('foot.rev.L' in rig.pose.bones.keys())
+    return ('foot.rev.L' in list(rig.pose.bones.keys()))
 
 def isDefaultRig(rig):
     return allBonesInList(['risorius03.L', 'shoulder01.R', "upperleg01.L", "upperleg02.L"], rig)
@@ -99,14 +99,14 @@ def isMbRig(rig):
     return allBonesInList(["LeftArm", "LeftArmRoll"], rig)
 
 def isMhx7Rig(rig):
-    return ('FootRev_L' in rig.pose.bones.keys())
+    return ('FootRev_L' in list(rig.pose.bones.keys()))
 
 def isRigify(rig):
-    return ('MCH-spine.flex' in rig.pose.bones.keys())
+    return ('MCH-spine.flex' in list(rig.pose.bones.keys()))
 
 
 def isMakeHumanRig(rig):
-    return ("MhAlpha8" in rig.keys())
+    return ("MhAlpha8" in list(rig.keys()))
 
 #
 #   nameOrNone(string):
@@ -183,7 +183,7 @@ def getAction(ob):
     try:
         return ob.animation_data.action
     except:
-        print("%s has no action" % ob)
+        print(("%s has no action" % ob))
         return None
 
 #
@@ -195,7 +195,7 @@ def deleteAction(act):
     if act.users == 0:
         bpy.data.actions.remove(act)
     else:
-        print("%s has %d users" % (act, act.users))
+        print(("%s has %d users" % (act, act.users)))
 
 #
 #   copyAction(act1, name):
@@ -280,7 +280,7 @@ def getActiveFramesBetweenMarkers(ob, scn):
         return getActiveFrames(ob)
     active = getActiveFrames0(ob)
     frames = []
-    for time in active.keys():
+    for time in list(active.keys()):
         if time >= minTime and time <= maxTime:
             frames.append(time)
     frames.sort()
@@ -323,7 +323,7 @@ def findFCurve(path, index, fcurves):
         if (fcu.data_path == path and
             fcu.array_index == index):
             return fcu
-    print('F-curve "%s" not found.' % path)
+    print(('F-curve "%s" not found.' % path))
     return None
 
 
@@ -475,7 +475,7 @@ def getObjectProblems(self, context):
             self.problems += "object rotation\n"
 
     vec = rig.scale - Vector((1,1,1))
-    print(vec, vec.length)
+    print((vec, vec.length))
     if vec.length > epsilon:
         if scn.McpApplyObjectTransforms:
             bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
@@ -517,16 +517,16 @@ def drawObjectProblems(self):
 #
 
 def startProgress(string):
-    print("%s (0 pct)" % string)
+    print(("%s (0 pct)" % string))
 
 
 def endProgress(string):
-    print("%s (100 pct)" % string)
+    print(("%s (100 pct)" % string))
 
 
 def showProgress(n, frame, nFrames, step=20):
     if n % step == 0:
-        print("%d (%.1f pct)" % (int(frame), (100.0*n)/nFrames))
+        print(("%d (%.1f pct)" % (int(frame), (100.0*n)/nFrames)))
 
 #
 #

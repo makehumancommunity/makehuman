@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -130,7 +130,7 @@ def exportObjFile(path, groupsAsMaterials, context):
             fp.write("f "+ (" ".join(faceLine)) +"\n")
 
     fp.close()
-    print("%s written" % path)
+    print(("%s written" % path))
     return
 
 
@@ -141,7 +141,7 @@ def writeNewGroup(fp, f, info, me, ob, groupsAsMaterials):
             gnum = f.material_index
             gname = me.materials[gnum].name
             mname1 = "skin"
-            for key in GroupMaterials.keys():
+            for key in list(GroupMaterials.keys()):
                 if key in gname:
                     mname1 = GroupMaterials[key]
                     break
@@ -162,7 +162,7 @@ def writeNewGroup(fp, f, info, me, ob, groupsAsMaterials):
 
         gn = -1
         nverts = len(f.vertices)
-        for (gn1,n) in nhits.items():
+        for (gn1,n) in list(nhits.items()):
             if n == nverts:
                 gn = gn1
                 break
@@ -190,13 +190,13 @@ def writeNewGroup(fp, f, info, me, ob, groupsAsMaterials):
 def zOrderFaces(me, faces):
     zGroupFaces = {}
     zGroupFaces[0] = []
-    for n in GroupZOrderSuffix.keys():
+    for n in list(GroupZOrderSuffix.keys()):
         zGroupFaces[n] = []
     for f in faces:
         group = me.materials[f.material_index].name
         suffix = group.split("-")[-1]
         zgroup = zGroupFaces[0]
-        for (prio,suffices) in GroupZOrderSuffix.items():
+        for (prio,suffices) in list(GroupZOrderSuffix.items()):
             if suffix in suffices:
                 zgroup = zGroupFaces[prio]
                 break

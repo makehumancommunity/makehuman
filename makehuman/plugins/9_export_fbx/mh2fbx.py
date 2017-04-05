@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -37,7 +37,7 @@ Fbx exporter
 """
 
 import os.path
-import codecs
+import io
 
 from core import G
 import log
@@ -95,11 +95,11 @@ def exportFbx(filepath, config):
     G.app.progress(0.5, text="Exporting %s" % filepath)
 
     if config.binary:
-        import fbx_binary
+        from . import fbx_binary
         root = fbx_binary.elem_empty(None, b"")
         fp = root
     else:
-        fp = codecs.open(filepath, "w", encoding="utf-8")
+        fp = io.open(filepath, "w", encoding="utf-8")
 
     fbx_utils.resetId()  # Reset global ID generator
     fbx_utils.setAbsolutePath(filepath)  # TODO fix this
@@ -178,7 +178,7 @@ def exportFbx(filepath, config):
     # TODO support binary FBX export
     fbx_anim.writeTakes(fp, action, config)
     if config.binary:
-        import encode_bin
+        from . import encode_bin
         root = fp
         encode_bin.write(filepath, root)
     else:

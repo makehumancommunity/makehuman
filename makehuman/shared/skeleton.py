@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -45,6 +45,7 @@ The skeleton supports skinning of a mesh using a list of vertex-to-bone
 assignments.
 """
 
+import io
 import math
 from math import pi
 
@@ -93,7 +94,7 @@ class Skeleton(object):
         import getpath
         import os
         self._clear()
-        skelData = json.load(open(filepath, 'rb'), object_pairs_hook=OrderedDict)
+        skelData = json.load(io.open(filepath, 'r'), object_pairs_hook=OrderedDict)
 
         self.name = skelData.get("name", self.name)
         self.version = int(skelData.get("version", self.version))
@@ -102,7 +103,7 @@ class Skeleton(object):
 
         self.license.fromJson(skelData)
 
-        for joint_name, v_idxs in skelData.get("joints", dict()).items():
+        for joint_name, v_idxs in list(skelData.get("joints", dict()).items()):
             if isinstance(v_idxs, list) and len(v_idxs) > 0:
                 self.joint_pos_idxs[joint_name] = v_idxs
 
@@ -113,14 +114,14 @@ class Skeleton(object):
         prev_len = -1   # anti-deadlock
         while(len(breadthfirst_bones) != len(skelData["bones"]) and prev_len != len(breadthfirst_bones)):
             prev_len = len(breadthfirst_bones)
-            for bone_name, bone_defs in skelData["bones"].items():
+            for bone_name, bone_defs in list(skelData["bones"].items()):
                 if bone_name not in breadthfirst_bones:
                     if not bone_defs.get("parent", None):
                         breadthfirst_bones.append(bone_name)
                     elif bone_defs["parent"] in breadthfirst_bones:
                         breadthfirst_bones.append(bone_name)
         if len(breadthfirst_bones) != len(skelData["bones"]):
-            missing = [bname for bname in skelData["bones"].keys() if bname not in breadthfirst_bones]
+            missing = [bname for bname in list(skelData["bones"].keys()) if bname not in breadthfirst_bones]
             log.warning("Some bones defined in file %s could not be added to skeleton %s, because they have an invalid parent bone (%s)", filepath, self.name, ', '.join(missing))
 
         for bone_name in breadthfirst_bones:
@@ -183,7 +184,7 @@ class Skeleton(object):
         jsondata["joints"] = self.joint_pos_idxs
         jsondata["planes"] = self.planes
 
-        f = open(filename, 'w')
+        f = io.open(filename, 'w')
         json.dump(jsondata, f, indent=4, separators=(',', ': '))
         f.close()
 
@@ -219,7 +220,7 @@ class Skeleton(object):
                 for rbname in bone.weight_reference_bones:
                     if rbname in referenceWeights.data:
                         vrts,wghs = referenceWeights.data[rbname]
-                        b_weights.extend( zip(vrts,wghs) )
+                        b_weights.extend( list(zip(vrts,wghs)) )
                         add_count += 1
                     else:
                         if not makehuman.isRelease():
@@ -243,7 +244,7 @@ class Skeleton(object):
                 if bone.name in referenceWeights.data:
                     # Implicitly map bone by name to reference skeleton weights
                     vrts,wghs = referenceWeights.data[bone.name]
-                    b_weights = zip(vrts,wghs)
+                    b_weights = list(zip(vrts,wghs))
                 else:
                     if not makehuman.isRelease():
                         # This warning is emitted when no matching bones in the reference skeleton can be found, and
@@ -405,7 +406,7 @@ class Skeleton(object):
 
         transferred_joints = dict()
         for bone in self.getBones():
-            if not isinstance(bone.roll, basestring):
+            if not isinstance(bone.roll, str):
                 if len(bone.reference_bones) > 0:
                     ref_bones = bone.reference_bones
                 else:
@@ -447,7 +448,7 @@ class Skeleton(object):
 
     def canonalizeBoneNames(self):
         newBones = {}
-        for bName, bone in self.bones.items():
+        for bName, bone in list(self.bones.items()):
             canonicalName = bName.lower().replace(' ','_').replace('-','_')
             bone.name = canonicalName
             newBones[bone.name] = bone
@@ -506,7 +507,7 @@ class Skeleton(object):
         return result
 
     def addBone(self, name, parentName, headJoint, tailJoint, roll=0, reference_bones=None, weight_reference_bones=None):
-        if name in self.bones.keys():
+        if name in list(self.bones.keys()):
             raise RuntimeError("The skeleton %s already contains a bone named %s." % (self.__repr__(), name))
         bone = Bone(self, name, parentName, headJoint, tailJoint, roll, reference_bones, weight_reference_bones)
         self.bones[name] = bone
@@ -614,7 +615,7 @@ class Skeleton(object):
             meshCoords_[:,:3] = meshCoords
             meshCoords = meshCoords_
             log.debug("Unoptimized data structure passed to skinMesh, this will incur performance penalty when used for animation.")
-        for bname, mapping in vertBoneMapping.items():
+        for bname, mapping in list(vertBoneMapping.items()):
             try:
                 verts,weights = mapping
                 bone = self.getBone(bname)
@@ -636,7 +637,7 @@ class Skeleton(object):
         return self.boneslist
 
     def __cacheGetBones(self):
-        from Queue import deque
+        from collections import deque
 
         result = []
         queue = deque(self.roots)
@@ -886,7 +887,7 @@ class Bone(object):
                 normal /= count
             else:
                 normal = np.asarray([0.0, 1.0, 0.0], dtype=np.float32)
-        elif isinstance(self.roll, basestring):
+        elif isinstance(self.roll, str):
             plane_name = self.roll  # TODO ugly.. why not call this something else than "roll"?
             normal = get_normal(self.skeleton, plane_name, self.planes)
             if np.allclose(normal, np.zeros(3), atol=1e-05):
@@ -1449,8 +1450,8 @@ def load(filename, mesh=None):
 
 def peekMetadata(filename):
     import json
-    skelData = json.load(open(filename, 'rb'))
+    skelData = json.load(io.open(filename, 'r'))
     desc = skelData.get("description", "")
     name = skelData.get("name", "Skeleton")
-    tags = set( map(lambda s: s.lower(), skelData.get("tags", [])) )
+    tags = set( [s.lower() for s in skelData.get("tags", [])] )
     return (name, desc, tags)

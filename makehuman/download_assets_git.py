@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -98,12 +98,12 @@ class DownloadAssetsGit:
         self.readOverridesFromEnvironment()
 
         if not os.path.isfile(self._git_command):
-            print "\n\n\nCould not find git command\n\n"
+            print("\n\n\nCould not find git command\n\n")
             sys.exit(1)
 
         if not sys.platform == 'win32':
             if not self.testGitLfs():
-                print "\n\n\nGIT LFS not detected. This routine requires LFS. See https://git-lfs.github.com/\n\n"
+                print("\n\n\nGIT LFS not detected. This routine requires LFS. See https://git-lfs.github.com/\n\n")
                 sys.exit(1)
 
         if os.path.isdir(self._git_official_clone_location):
@@ -115,12 +115,12 @@ class DownloadAssetsGit:
 
     def testGitLfs(self):
         args = [self._git_command,"lfs","install"]
-        print args
+        print(args)
 
         try:
             subprocess.check_call(args)
         except Exception as e:
-            print e
+            print(e)
             return False
 
         return True
@@ -140,24 +140,24 @@ class DownloadAssetsGit:
                 self._git_command = os.path.abspath(exe_file)    
 
     def cloneOfficialAssets(self):
-        print "Official repo did not exist locally, making a fresh clone"
+        print("Official repo did not exist locally, making a fresh clone")
         args = [self._git_command,"clone",self._git_official_assets_repo,self._git_official_clone_location]
-        print args
+        print(args)
         subprocess.check_call(args)
 
         os.chdir(self._git_official_clone_location)
 
         args = [self._git_command,"checkout",self._git_official_assets_branch]
-        print args
+        print(args)
         subprocess.check_call(args)
 
     def pullOfficialAssets(self):
-        print "Official repo already exists locally, doing a pull"
+        print("Official repo already exists locally, doing a pull")
 
         os.chdir(self._git_official_clone_location)
 
         args = [self._git_command,"pull","origin",self._git_official_assets_branch]
-        print args
+        print(args)
         subprocess.check_call(args)
 
     def copyOfficialAssets(self):
@@ -172,7 +172,7 @@ class DownloadAssetsGit:
                     fullname = os.path.relpath(os.path.join(root,name),os.path.join(self._git_official_clone_location,"base"))
                 dest = os.path.join(self._makehuman_data_directory,fullname)
                 if not os.path.isdir(dest):
-                    print "Creating directory " + dest
+                    print("Creating directory " + dest)
                     os.makedirs(dest)
 
             for name in files:
@@ -183,7 +183,7 @@ class DownloadAssetsGit:
                 source = os.path.abspath(os.path.join(self._git_official_clone_location,"base",fullname))
                 dest = os.path.abspath(os.path.join(self._makehuman_data_directory,fullname))
 
-                print "copying " + source + " to " + dest
+                print("copying " + source + " to " + dest)
                 shutil.copy2(source,dest)
 
         if self._copy_debug_assets:
@@ -196,7 +196,7 @@ class DownloadAssetsGit:
                         fullname = os.path.relpath(os.path.join(root,name),os.path.join(self._git_official_clone_location,"debug"))
                     dest = os.path.join(self._makehuman_data_directory,fullname)
                     if not os.path.isdir(dest):
-                        print "Creating directory " + dest
+                        print("Creating directory " + dest)
                         os.makedirs(dest)
     
                 for name in files:
@@ -207,7 +207,7 @@ class DownloadAssetsGit:
                     source = os.path.abspath(os.path.join(self._git_official_clone_location,"debug",fullname))
                     dest = os.path.abspath(os.path.join(self._makehuman_data_directory,fullname))
     
-                    print "copying " + source + " to " + dest
+                    print("copying " + source + " to " + dest)
                     shutil.copy2(source,dest)
 
 

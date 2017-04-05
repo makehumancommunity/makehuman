@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -138,7 +138,7 @@ class CustomTargetsTaskView(gui3d.TaskView):
             return
 
         # Invalidate any cached targets
-        for m in self.modifiers.values():
+        for m in list(self.modifiers.values()):
             for tpath,_ in m.targets:
                 algos3d.refreshCachedTarget(tpath)
 
@@ -153,7 +153,7 @@ class CustomTargetsTaskView(gui3d.TaskView):
             self.folderBox.removeWidget(child)
             child.destroy()
 
-        for mod in self.modifiers.values():
+        for mod in list(self.modifiers.values()):
             self.human.removeModifier(mod)
             
         self.modifiers = {}

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # ##### BEGIN GPL LICENSE BLOCK #####
@@ -80,7 +80,7 @@ def guessSrcArmatureFromList(rig, scn):
     bestMisses = 1000
 
     misses = {}
-    for name in _sourceArmatures.keys():
+    for name in list(_sourceArmatures.keys()):
         if name == "Automatic":
             continue
         amt = _sourceArmatures[name]
@@ -100,9 +100,9 @@ def guessSrcArmatureFromList(rig, scn):
         return best
     else:
         print("Number of misses:")
-        for (name, n) in misses.items():
-            print("  %14s: %2d" % (name, n))
-        print("Best bone map for armature %s:" % best.name)
+        for (name, n) in list(misses.items()):
+            print(("  %14s: %2d" % (name, n)))
+        print(("Best bone map for armature %s:" % best.name))
         amt = _sourceArmatures[best.name]
         for bone in rig.data.bones:
             try:
@@ -111,7 +111,7 @@ def guessSrcArmatureFromList(rig, scn):
             except KeyError:
                 string = " *** "
                 bname = "?"
-            print("%s %14s => %s" % (string, bone.name, bname))
+            print(("%s %14s => %s" % (string, bone.name, bname)))
         raise MocapError('Did not find matching armature. nMisses = %d' % bestMisses)
 
 #
@@ -137,7 +137,7 @@ def findSrcArmature(context, rig):
         amt.display("Source")
 
     rig.McpArmature = _srcArmature.name
-    print("Using matching armature %s." % rig.McpArmature)
+    print(("Using matching armature %s." % rig.McpArmature))
     clearCategory()
 
 #
@@ -157,7 +157,7 @@ def setArmature(rig, scn):
     else:
         raise MocapError("No source armature set")
     _srcArmature = _sourceArmatures[name]
-    print("Set source armature to %s" % name)
+    print(("Set source armature to %s" % name))
     return
 
 #
@@ -165,7 +165,7 @@ def setArmature(rig, scn):
 #
 
 def findSourceKey(bname, struct):
-    for bone in struct.keys():
+    for bone in list(struct.keys()):
         if bname == struct[bone]:
             return bone
     return None
@@ -204,7 +204,7 @@ def initSources(scn):
 
 
 def readSrcArmature(file, name):
-    print("Read source file", file)
+    print(("Read source file", file))
     fp = open(file, "r")
     status = 0
     armature = CArmature()
@@ -223,7 +223,7 @@ def readSrcArmature(file, name):
                 status = 0
                 armature.tposeFile = os.path.join("source_rigs", words[1])
             elif len(words) < 2 or key[-1] == ":":
-                print("Ignored illegal line", line)
+                print(("Ignored illegal line", line))
             elif status == 1:
                 for n in range(1,len(words)-1):
                     key += "_" + words[n]

@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -125,7 +125,7 @@ class Sorter(object):
             """
 
             self._methods = dict(methods)
-            self._fields = list(zip(*methods)[0])
+            self._fields = list(zip(*methods))[0]
 
         def extend(self, methods):
             """

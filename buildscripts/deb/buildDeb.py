@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -79,7 +79,7 @@ def _cp_files(folder, dest):
   for f in os.listdir(folder):
     fpath = os.path.join(folder, f)
     if os.path.isfile(fpath):
-      print "Copy %s to %s" % (fpath, os.path.join(dest, f))
+      print("Copy %s to %s" % (fpath, os.path.join(dest, f)))
       shutil.copy(fpath, os.path.join(dest, f))
 
 def _sed_replace(filepath, templateToken, replaceStr):
@@ -87,8 +87,8 @@ def _sed_replace(filepath, templateToken, replaceStr):
 
 def parseConfig(configPath):
     if os.path.isfile(configPath):
-        import ConfigParser
-        config = ConfigParser.ConfigParser()
+        import configparser
+        config = configparser.ConfigParser()
         config.read(configPath)
         return config
     else:
@@ -109,9 +109,9 @@ def configure(confpath):
 
   conf = parseConfig(confpath)
   if conf is None:
-    print "No config file at %s, using defaults or options passed on commandline." % confpath
+    print("No config file at %s, using defaults or options passed on commandline." % confpath)
   else:
-    print "Using config file at %s. NOTE: properties in config file will override any other settings!" % confpath
+    print("Using config file at %s. NOTE: properties in config file will override any other settings!" % confpath)
 
     hgpath = _conf_get(conf, 'General', 'hgPath', hgpath)
     package_name = _conf_get(conf, 'Deb', 'packageName', package_name)
@@ -130,13 +130,13 @@ def buildDeb(dest = None):
   global files_to_chmod_executable
 
   if os.geteuid() != 0:
-    print "WARNING: You are not root. You should be running this script with root permissions!"
+    print("WARNING: You are not root. You should be running this script with root permissions!")
 
   if dest is None:
     dest = os.getenv('makehuman_dest',0)
 
     if dest == 0:
-      print "You must explicitly set the makehuman_dest environment variable to point at a work directory, or specify it as argument. I will violently destroy and mutilate the contents of this directory."
+      print("You must explicitly set the makehuman_dest environment variable to point at a work directory, or specify it as argument. I will violently destroy and mutilate the contents of this directory.")
       exit(1)
 
   destdir = os.path.normpath(os.path.realpath(dest))          # Folder to build deb package to
@@ -147,13 +147,13 @@ def buildDeb(dest = None):
 
   debdir = os.path.dirname(os.path.abspath(__file__))         # / deb build script root path
 
-  print "Destination directory: " + destdir
+  print("Destination directory: " + destdir)
 
   hgrootdir = os.path.normpath(os.path.realpath( os.path.join(debdir, '..', '..') ))
 
-  print "HG root directory: " + hgrootdir
+  print("HG root directory: " + hgrootdir)
   if not os.path.isdir( os.path.join(hgrootdir, '.hg') ):
-    print "Error, the hg root folder %s does not contain .hg folder!" % hgrootdir
+    print("Error, the hg root folder %s does not contain .hg folder!" % hgrootdir)
     exit(1)
 
 
@@ -163,25 +163,25 @@ def buildDeb(dest = None):
 
   # Folder where hg contents are exported and prepared for packaging (scripts are run)
   exportdir = os.path.normpath(os.path.realpath( os.path.join(hgrootdir, '..', package_name + '-export-deb') ))
-  print "Source export directory: " + exportdir
+  print("Source export directory: " + exportdir)
 
 
-  print "\nABOUT TO PERFORM BUILD EXPORT\n"
-  print "to: %s" % os.path.normpath(os.path.realpath(exportdir))
+  print("\nABOUT TO PERFORM BUILD EXPORT\n")
+  print("to: %s" % os.path.normpath(os.path.realpath(exportdir)))
 
   # Export source to export folder and run scripts
   sys.path = [os.path.join(debdir, '..')] + sys.path
   try:
     import build_prepare
   except:
-    print "Failed to import build_prepare, expected to find it at %s. Make sure to run this script from hgroot/buildscripts/deb/" % os.path.normpath(os.path.realpath(os.path.join(debdir, '..')))
+    print("Failed to import build_prepare, expected to find it at %s. Make sure to run this script from hgroot/buildscripts/deb/" % os.path.normpath(os.path.realpath(os.path.join(debdir, '..'))))
     exit(1)
   if os.path.exists(exportdir):
     shutil.rmtree(exportdir)
   exportInfo = build_prepare.export(sourcePath = hgrootdir, exportFolder = exportdir)
 
   scriptdir = os.path.abspath( os.path.join(exportdir, 'makehuman') )    # .. Folder containing makehuman.py (source to package)
-  print "Makehuman directory: " + scriptdir
+  print("Makehuman directory: " + scriptdir)
 
   if not exportInfo.isRelease and not package_explicit:
     package_name = package_name + 'hg'
@@ -194,45 +194,45 @@ def buildDeb(dest = None):
   if not os.path.exists(controldir):
     os.mkdir(controldir)
 
-  print "Control directory: " + controldir
+  print("Control directory: " + controldir)
 
   srccontrol = os.path.join(debdir,"debian");                 # /debian   source of DEBIAN control templates
 
   if not os.path.exists(srccontrol):
-    print "The debian directory does not exist in the source deb folder. Something is likely horribly wrong. Eeeeek! Giving up and hiding..."
+    print("The debian directory does not exist in the source deb folder. Something is likely horribly wrong. Eeeeek! Giving up and hiding...")
     exit(1)
 
   bindir = os.path.join(target, "usr", "bin")
   if not os.path.exists(bindir):
     os.makedirs(bindir)
 
-  print "Bin directory: " + bindir
+  print("Bin directory: " + bindir)
 
   srcbin = os.path.join(debdir,"bin");                        # /bin    src executable file
 
   if not os.path.exists(srcbin):
-    print "The bin directory does not exist in the source deb folder. Something is likely horribly wrong. Eeeeek! Giving up and hiding..."
+    print("The bin directory does not exist in the source deb folder. Something is likely horribly wrong. Eeeeek! Giving up and hiding...")
     exit(1)
 
   docdir = os.path.join(target, "usr", "share", "doc", package_name)
   if not os.path.exists(docdir):
     os.makedirs(docdir)
 
-  print "Doc dir: " + docdir                                # /dest/share/doc/makehuman   docs export folder
+  print("Doc dir: " + docdir)                                # /dest/share/doc/makehuman   docs export folder
 
   applications = os.path.join(target, "usr", "share", "applications")  # /dest/share/applications   app shortcut export folder
   if not os.path.exists(applications):
     os.mkdir(applications)
 
-  print "Desktop shortcut dir: " + applications
+  print("Desktop shortcut dir: " + applications)
 
   programdir = os.path.join(target, "usr", "share", "makehuman")    # /dest/share/makehuman   export folder of mh app and data
   if os.path.exists(programdir):
     shutil.rmtree(programdir) # Cannot exist because copytree requires it
 
-  print "Program directory: " + programdir
+  print("Program directory: " + programdir)
 
-  print "\nABOUT TO COPY CONTENTS TO DEB DEST\n"
+  print("\nABOUT TO COPY CONTENTS TO DEB DEST\n")
 
   shutil.copytree(scriptdir, programdir)  # Copy exported makehuman/ folder to programdir
 
@@ -247,7 +247,7 @@ def buildDeb(dest = None):
   try:
     shutil.copy(os.path.join(programdir, 'data', 'VERSION'), os.path.join(docdir,"HGREV.txt"))
   except:
-    print "ERROR did not find data/VERSION file (%s)! Your build is incomplete!! Verify your build_prepare settings." % os.path.join(programdir, 'data', 'VERSION')
+    print("ERROR did not find data/VERSION file (%s)! Your build is incomplete!! Verify your build_prepare settings." % os.path.join(programdir, 'data', 'VERSION'))
     exit(1)
 
   # Copy files in src bin dir to dest bin dir (copy bash wrapper executable)
@@ -265,7 +265,7 @@ def buildDeb(dest = None):
   cut_p.stdout.close()
   # Retrieve output
   size = uniq_p.communicate()[0].strip().strip('\n')
-  print "\nPackage size: %s\n" % size
+  print("\nPackage size: %s\n" % size)
 
   if package_version is None:
     if exportInfo.isRelease:
@@ -276,7 +276,7 @@ def buildDeb(dest = None):
   else:
     ver = package_version
 
-  print "DEB PACKAGE VERSION: %s\n" % ver
+  print("DEB PACKAGE VERSION: %s\n" % ver)
 
   # Replace fields in control file template
   controlFile = os.path.join(controldir, 'control')
@@ -304,7 +304,7 @@ def buildDeb(dest = None):
       os.remove(logfile)
   branch_p = subprocess.Popen([hgpath,'branch'], stdout=subprocess.PIPE)
   branch = branch_p.communicate()[0].strip().strip('\n')
-  print "\nUsing HG branch: %s\n" % branch
+  print("\nUsing HG branch: %s\n" % branch)
 
   changelog_f = open(changelog, 'wb')
   subprocess.check_call([hgpath,'log','-b',branch], stdout=changelog_f)
@@ -327,7 +327,7 @@ def buildDeb(dest = None):
   try:
     subprocess.check_call(["chown", "-R", "0:0", target])
   except:
-    print "Failed to chown to root. Operation not permitted?"
+    print("Failed to chown to root. Operation not permitted?")
   try:
     subprocess.check_call(["chmod", "-R", "644", target])
     for path, dirs, files in os.walk(target):
@@ -336,10 +336,12 @@ def buildDeb(dest = None):
         try:
           subprocess.check_call(["chmod", "755", dpath])
         except:
-          print "Failed to chmod 755 folder %s" % dpath
+          print("Failed to chmod 755 folder %s" % dpath)
     subprocess.check_call(["chmod", "755", target])
   except:
-    print "Failed to chmod."
+    subprocess.check_call(["chmod", "755", target])
+  except:
+    print("Failed to chmod.")
 
   for x in files_to_chmod_executable:
     if os.path.exists(x):
@@ -363,13 +365,15 @@ def buildDeb(dest = None):
 
   debcmd = ["dpkg-deb", "-Z", "bzip2", "-z", "9", "-b", "../debroot", debfile]
 
-  print debcmd
+  print(debcmd)
   subprocess.check_call(debcmd)
 
-  print "\n\n\nPackage is now available in " + debfile + "\n"
-  print "If you are building for release, you should now run:\n"
-  print "  lintian " + debfile + "\n"
-  print "... in order to check the deb file.\n"
+  subprocess.check_call(debcmd)
+
+  print("\n\n\nPackage is now available in " + debfile + "\n")
+  print("If you are building for release, you should now run:\n")
+  print("  lintian " + debfile + "\n")
+  print("... in order to check the deb file.\n")
 
 
 def _parse_args():

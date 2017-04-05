@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """ 
@@ -61,7 +61,7 @@ from maketargetlib import *
 
 def usage():
     '''Print commandline usage information'''
-    print """\
+    print("""\
 Maketarget stand-alone console application.
 Options:
     -i --in     input obj or target
@@ -111,7 +111,7 @@ Usage scenarios:
         Load all target files in myfolder, apply each of them to base.obj while
         also adding foo1.target to the result. Save each combination to an obj 
         with the same name as the input target.
-"""
+""")
     
 
 def backupIfExists(path):
@@ -178,7 +178,7 @@ def getOutputName(inputFilename):
 def verbosePrint(msg):
     '''Print message when in verbose mode.'''
     if verbose:
-        print msg
+        print(msg)
     
 def performAdditionalCalculations(obj):
     '''Perform additional subs or adds on obj when specified in commandline.
@@ -193,7 +193,7 @@ def performAdditionalCalculations(obj):
 def processInputObj(obj, outputFile):
     '''Process input obj to output file. obj can either be an Obj instance
     or a str pointing to the obj file location.'''
-    if isinstance(obj, basestring):
+    if isinstance(obj, str):
         obj = Obj(obj)
         
     performAdditionalCalculations(obj)
@@ -213,7 +213,7 @@ def processInputObj(obj, outputFile):
         
 def processInputTarget(inputTarget, outputPath):
     '''Process input target.'''
-    if isinstance(inputTarget, basestring):
+    if isinstance(inputTarget, str):
         inputTarget = Target(inputTarget)
     
     # Apply input target on base
@@ -228,9 +228,9 @@ def parseArguments(args):
     
     try:
         opts, args = getopt.getopt(args, "i:o:s:a:d:hv", ["help", "out=", "in=", "dir=", "intype=", "outtype=", "add=", "sub=", "verbose"])
-    except getopt.GetoptError, err:
+    except getopt.GetoptError as err:
         # print help information and exit:
-        print str(err) # will print something like "option -g not recognized"
+        print(str(err)) # will print something like "option -g not recognized"
         usage()
         sys.exit(2)
 
@@ -442,39 +442,39 @@ def sanityCheckInput():
             
 def verboseDetailProcess():
     '''Give detailed overview of the process to be performed.'''
-    print "\nInput:"
-    print "------"
+    print("\nInput:")
+    print("------")
     if inputDir:
         if inType == "obj":
-            print "  All OBJs from directory: %s"% inputDir
+            print("  All OBJs from directory: %s"% inputDir)
         else:
-            print "  All targets from directory: %s"% inputDir
+            print("  All targets from directory: %s"% inputDir)
     elif inputTarget:
-        print "  Target: %s"% inputTarget
+        print("  Target: %s"% inputTarget)
     elif inputObj:
-        print "  OBJ: %s"% inputObj
+        print("  OBJ: %s"% inputObj)
     else:
-        print "  Only using base.obj as input."
+        print("  Only using base.obj as input.")
             
     if len(targetsToSubtract) >0 or len(targetsToAdd) >0:
-        print "\nExtra operations:"
-        print "------------------"
+        print("\nExtra operations:")
+        print("------------------")
         if len(targetsToAdd) >0:
-            print "  Add targets: %s"% ", ".join(targetsToAdd)
+            print("  Add targets: %s"% ", ".join(targetsToAdd))
         if len(targetsToSubtract) >0:
-            print "  Subtract targets: %s"% ", ".join(targetsToSubtract)
+            print("  Subtract targets: %s"% ", ".join(targetsToSubtract))
 
-    print "\nOutput:"
-    print "--------"
+    print("\nOutput:")
+    print("--------")
     if outType == "obj":
-        print "  Output type: OBJ"
+        print("  Output type: OBJ")
     else:
-        print "  Output type: target"
+        print("  Output type: target")
     if inputDir:
-        print "  Output files: %s/*%s"% (inputDir, outputExtension)
+        print("  Output files: %s/*%s"% (inputDir, outputExtension))
     elif outputPath:
-        print "  Output to file: %s"% outputPath
-    print "\n"
+        print("  Output to file: %s"% outputPath)
+    print("\n")
     
     
 procCallBacks = list()
@@ -557,15 +557,15 @@ if __name__ == "__main__":
 
     ## for DEBUGging
     if DEBUG:
-        print "MakeTarget (v%s) (DEBUG)"% str(VERSION)
+        print("MakeTarget (v%s) (DEBUG)"% str(VERSION))
         main(sys.argv[1:])
         sys.exit()
     ###
 
     try:
-        print "MakeTarget (v%s)"% str(VERSION)
+        print("MakeTarget (v%s)"% str(VERSION))
         main(sys.argv[1:])
-        print "All done"
+        print("All done")
         sys.exit()
     except Exception as e:
         # Error handling: print message to terminal
@@ -581,6 +581,6 @@ if __name__ == "__main__":
         else:
             msg = str(e)
 
-        print "Error: "+msg
+        print("Error: "+msg)
         sys.exit(errorCode)
 

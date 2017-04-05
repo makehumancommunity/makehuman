@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -55,8 +55,8 @@ class HumanFileSort(fc.FileSort):
     def getMeta(self, filename):
         meta = {}
 
-        from codecs import open
-        f = open(filename, 'rU', encoding="utf-8")
+        import io
+        f = io.open(filename, 'rU', encoding="utf-8")
         for line in f:
             lineData = line.split()
             field = lineData[0]

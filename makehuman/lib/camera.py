@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """ 
@@ -401,7 +401,7 @@ class Camera(events3d.EventHandler):
         top, bottom.
         """
         rot = self.getRotation()
-        for axis in xrange(3):
+        for axis in range(3):
             if (rot[axis] % 360 ) not in [0, 90, 180, 270]:
                 return False
         return True
@@ -633,7 +633,7 @@ class OrbitalCamera(Camera):
         self.addTranslation(2, offset[2])
 
     def setPosition(self, translation):
-        for i in xrange(3):
+        for i in range(3):
             self.translation[i] = translation[i]
             if self.translation[i] < -1.0:
                 self.translation[i] = -1.0
@@ -660,7 +660,7 @@ class OrbitalCamera(Camera):
         if self.pickedPos is not None:
             if not self.scaleTranslations and -amount < 0.0:
                 amount = abs(amount) / max(1.0, min(5.0, self.zoomFactor))
-                for i in xrange(3):
+                for i in range(3):
                     if self.translation[i] < 0.0:
                         self.translation[i] += amount
                         self.translation[i] = min(self.translation[i], 0.0)
@@ -672,7 +672,7 @@ class OrbitalCamera(Camera):
                 #amount = abs(amount) / self.zoomFactor
                 amount = abs(amount) / max(1.0, min(5.0, self.zoomFactor))
                 #amount = abs(amount) / max(1.0, 0.3 * self.zoomFactor)
-                for i in xrange(3):
+                for i in range(3):
                     if self.translation[i] < self.pickedPos[i]:
                         self.translation[i] += amount
                         self.translation[i] = min(self.translation[i], self.pickedPos[i])

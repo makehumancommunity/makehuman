@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """ 
@@ -48,6 +48,9 @@ VERSION = "1.2"
 
 '''The minimum distance a vert from original has to be moved before it is added
 in a target.'''
+
+import io
+
 EPSILON = 0.001
 EPSILON_SQUARED = EPSILON*EPSILON
 
@@ -93,7 +96,7 @@ class Vector3(object):
         if isinstance(other, Vector3):
             return Vector3(self.x+other.x, self.y+other.y, self.z+other.z)
         else:
-            raise TypeError, "unsupported operand type for +"
+            raise TypeError("unsupported operand type for +")
             
     def add(self, other):
         '''Faster in-place addition'''
@@ -106,7 +109,7 @@ class Vector3(object):
         if isinstance(other, Vector3):
             return Vector3(self.x-other.x, self.y-other.y, self.z-other.z)
         else:
-            raise TypeError, "unsupported operand type for -"
+            raise TypeError("unsupported operand type for -")
             
     def sub(self, other):
         '''Faster in-place subtraction'''
@@ -169,7 +172,7 @@ class Obj(object):
             e = Exception("Target contains more vertices (%d) than this obj (%d)."% (target.getMaxVertIndex(), self.getNbVerts()))
             e.errCode = -1
             raise e
-        for index, vertDiff in target.verts.items():
+        for index, vertDiff in list(target.verts.items()):
             self.verts[index].sub(vertDiff)
             
     def addTarget(self, target):
@@ -178,7 +181,7 @@ class Obj(object):
             e = Exception("Target contains more vertices (%d) than this obj (%d)."% (target.getMaxVertIndex(), self.getNbVerts()))
             e.errCode = -1
             raise e
-        for index, vertDiff in target.verts.items():
+        for index, vertDiff in list(target.verts.items()):
             self.verts[index].add(vertDiff)
         
     def _loadVerts(self, path):
@@ -192,7 +195,7 @@ class Obj(object):
             *string*. A string containing the operating system path to the
             file that contains the wavefront obj.
         """
-        fd = open(path)
+        fd = io.open(path)
         data = fd.readline()
         lineNb = 0
         try:
@@ -215,8 +218,8 @@ class Obj(object):
         
     def write(self, outPath):
         '''Writes full .obj back to file using altered vertices and original data from the obj.'''
-        outfile = open(outPath, 'wb') # write binary to enforce unix line-endings on windows
-        infile = open(self.filepath, 'r')
+        outfile = io.open(outPath, 'wb') # write binary to enforce unix line-endings on windows
+        infile = io.open(self.filepath, 'r')
         vertsWritten = False
         inData = infile.readline()
         while inData:
@@ -269,7 +272,7 @@ class Target(object):
         
     def _loadVerts(self, path):
         '''Load vertices in this target from the specified file.'''
-        fd = open(path)
+        fd = io.open(path)
         data = fd.readline()
         lineNb = 0
         try:
@@ -310,7 +313,7 @@ class Target(object):
 
     def write(self, outPath):
         '''Write this target to specified file.'''
-        outfile = open(outPath, 'wb') # write binary to enforce unix line-endings on windows
+        outfile = io.open(outPath, 'wb') # write binary to enforce unix line-endings on windows
         for index in self.verts:
             vert = self.verts[index]
             outfile.write("%d %s %s %s\n"% (index, self.formatFloat(vert.x), self.formatFloat(vert.y), self.formatFloat(vert.z)))

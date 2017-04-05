@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -210,7 +210,7 @@ class MHM10Loader(object):
     def getModifierMapping(self):
         if self.modifier_mapping is None:
             self.modifier_mapping = dict()
-            f = open(getpath.getSysDataPath('modifiers/mh_1-0_modifier_mapping.csv'), 'rb')
+            f = io.open(getpath.getSysDataPath('modifiers/mh_1-0_modifier_mapping.csv'), 'r')
             csvreader = csv.reader(f, delimiter=',', quotechar='"')
             for r_idx, row in enumerate(csvreader):
                 if r_idx == 0:

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # ##### BEGIN GPL LICENSE BLOCK #####
@@ -31,7 +31,7 @@ import gzip
 
 def loadJson(filepath):
     try:
-        with gzip.open(filepath, 'rb') as fp:
+        with gzip.open(filepath, 'r') as fp:
             bytes = fp.read()
     except IOError:
         bytes = None
@@ -92,7 +92,7 @@ def encodeJsonData(data, pad=""):
         if data == {}:
             return "{}"
         string = "{"
-        for key,value in data.items():
+        for key,value in list(data.items()):
             string += "\n    %s\"%s\" : " % (pad, key) + encodeJsonData(value, pad+"    ") + ","
         return string[:-1] + "\n%s}" % pad
 

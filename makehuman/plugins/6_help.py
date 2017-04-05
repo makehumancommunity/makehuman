@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -47,21 +47,21 @@ class HelpTaskView(gui3d.TaskView):
 
     def __init__(self, category):
         
-        gui3d.TaskView.__init__(self, category, 'Help')
+        gui3d.TaskView.__init__(self, category, u"Help")
 
-        aboutBox = self.addLeftWidget(gui.GroupBox('About MakeHuman'))
-        self.aboutButton = aboutBox.addWidget(gui.Button("About"))
-        self.websiteButton = aboutBox.addWidget(gui.Button("Website"))
-        self.facebookButton = aboutBox.addWidget(gui.Button("FaceBook page")) 
+        aboutBox = self.addLeftWidget(gui.GroupBox(u"About MakeHuman"))
+        self.aboutButton = aboutBox.addWidget(gui.Button(u"About"))
+        self.websiteButton = aboutBox.addWidget(gui.Button(u"Website"))
+        self.facebookButton = aboutBox.addWidget(gui.Button(u"FaceBook page"))
 
-        optionsBox = self.addLeftWidget(gui.GroupBox('Support'))
-        self.forumButton = optionsBox.addWidget(gui.Button("Forum")) 
-        self.manualButton = optionsBox.addWidget(gui.Button("Wiki"))
-        self.reportBugButton = optionsBox.addWidget(gui.Button("Report bug"))
-        self.requestFeatureButton = optionsBox.addWidget(gui.Button("Request feature"))
+        optionsBox = self.addLeftWidget(gui.GroupBox(u"Support"))
+        self.forumButton = optionsBox.addWidget(gui.Button(u"Forum"))
+        self.manualButton = optionsBox.addWidget(gui.Button(u"Wiki"))
+        self.reportBugButton = optionsBox.addWidget(gui.Button(u"Report bug"))
+        self.requestFeatureButton = optionsBox.addWidget(gui.Button(u"Request feature"))
 
-        copyBox = self.addLeftWidget(gui.GroupBox('Copy to clipboard'))
-        self.versionButton = copyBox.addWidget(gui.Button('Version String'))
+        copyBox = self.addLeftWidget(gui.GroupBox(u"Copy to clipboard"))
+        self.versionButton = copyBox.addWidget(gui.Button(u"Version String"))
 
         @self.aboutButton.mhEvent
         def onClicked(event):
@@ -69,40 +69,41 @@ class HelpTaskView(gui3d.TaskView):
 
         @self.websiteButton.mhEvent
         def onClicked(event):
-            webbrowser.open('http://www.makehumancommunity.org')
+            webbrowser.open("http://www.makehumancommunity.org")
 
         @self.manualButton.mhEvent
         def onClicked(event):
-            webbrowser.open('http://www.makehumancommunity.org/wiki/Main_Page')
+            webbrowser.open("http://www.makehumancommunity.org/wiki/Main_Page")
         
         @self.reportBugButton.mhEvent
         def onClicked(event):
-            webbrowser.open('http://bugtracker.makehumancommunity.org/issues/new?project_id=makehuman')
+            webbrowser.open("http://bugtracker.makehumancommunity.org/issues/new?project_id=makehuman")
           
         @self.requestFeatureButton.mhEvent
         def onClicked(event):
-            webbrowser.open('http://bugtracker.makehumancommunity.org/issues/new?project_id=makehuman&issue[tracker_id]=2')
+            webbrowser.open("http://bugtracker.makehumancommunity.org/issues/new?project_id=makehuman&issue[tracker_id]=2")
             
         @self.forumButton.mhEvent
         def onClicked(event):
-            webbrowser.open('http://www.makehumancommunity.org/forum')
+            webbrowser.open("http://www.makehumancommunity.org/forum")
             
         @self.facebookButton.mhEvent
         def onClicked(event):
-            webbrowser.open('https://www.facebook.com/makehuman/')
+            webbrowser.open("https://www.facebook.com/makehuman/")
 
         @self.versionButton.mhEvent
         def onClicked(event):
-            version_string ='v' + mh.getVersionDigitsStr()  + ' ' + os.getenv('HGBRANCH','') \
-                            + ' (r' + os.getenv('HGREVISION','') + ' ' + os.getenv('HGNODEID','') + ')'
+            version_string = u"v" + mh.getVersionDigitsStr() + u" " + os.getenv(u"HGBRANCH", u"") \
+                             + u" (r" + os.getenv(u"HGREVISION", u"") + " " + os.getenv(u"HGNODEID", u"") + ")"
             gui3d.app.clipboard().setText(version_string)
             
     def onShow(self, event):
+    
         gui3d.TaskView.onShow(self, event)
         self.manualButton.setFocus()
 
 def load(app):
-    category = app.getCategory('Help')
+    category = app.getCategory(u"Help")
     taskview = category.addTask(HelpTaskView(category))
 
 def unload(app):

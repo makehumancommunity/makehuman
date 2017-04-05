@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """ 
@@ -301,7 +301,7 @@ class Object3D(object):
 
         # Filter out and remap masked faces
         fvert = self.fvert[self.face_mask]
-        for i in xrange(self.vertsPerPrimitive):
+        for i in range(self.vertsPerPrimitive):
             fvert[:,i] = other._inverse_parent_map[fvert[:,i]]
 
         # Filter out and remap unused UVs
@@ -309,7 +309,7 @@ class Object3D(object):
         uv_idx = np.unique(fuvs.reshape(-1))
         inverse_uv_idx = - np.ones(self.texco.shape[0], dtype=np.int32)
         inverse_uv_idx[uv_idx] = np.arange(self.texco.shape[0], dtype=np.int32)
-        for i in xrange(self.vertsPerPrimitive):
+        for i in range(self.vertsPerPrimitive):
             fuvs[:,i] = inverse_uv_idx[fuvs[:,i]]
 
         other.setUVs(self.texco[uv_idx])
@@ -703,7 +703,7 @@ class Object3D(object):
         # Store number of valid columns per line in vface
         self.nfaces[ix] = n.astype(np.uint8)
         try:
-            for i in xrange(len(ix)):
+            for i in range(len(ix)):
                 # Unfortunately these type of slices require a python loop
                 self.vface[ix[i],:n[i]] = fi[first[i]:][:n[i]]
         except Exception as e:
@@ -731,7 +731,7 @@ class Object3D(object):
 
         from collections import OrderedDict
         weights = OrderedDict()
-        for bname, (verts,wghts) in parentWeights.data.items():
+        for bname, (verts,wghts) in list(parentWeights.data.items()):
             vgroup = []
             empty = True
             for (v,wt) in zip(verts,wghts):
@@ -1039,7 +1039,7 @@ class Object3D(object):
         """
         The names of the facegroups available on this mesh.
         """
-        return self._groups_rev.keys()
+        return list(self._groups_rev.keys())
 
     def getGroupMaskForGroups(self, groupNames):
         groups = np.zeros(len(self._faceGroups), dtype=bool)

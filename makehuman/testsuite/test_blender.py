@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -46,7 +46,7 @@ import subprocess
 import os.path
 
 def runTest(suite):
-    for blenderv, blenderexec in blender.items():
+    for blenderv, blenderexec in list(blender.items()):
         testBlender(blenderv, blenderexec, suite)
 
 def getPath():

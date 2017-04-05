@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -143,7 +143,7 @@ class ProxyChooserTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         self.filechooser.setIconSize(50,50)
         self.filechooser.enableAutoRefresh(False)
-        if not isinstance(self.getFileExtension(), basestring) and \
+        if not isinstance(self.getFileExtension(), str) and \
            len(self.getFileExtension()) > 1:
             self.filechooser.mutexExtensions = True
         #self.addLeftWidget(self.filechooser.createSortBox())
@@ -614,7 +614,7 @@ class ProxyChooserTaskView(gui3d.TaskView, filecache.MetadataCacher):
         return self._proxyFilePerUuid[uuid]
 
     def _loadUuidLookup(self):
-        items = [ (values[1], path) for (path, values) in self._filecache.items() ]
+        items = [ (values[1], path) for (path, values) in list(self._filecache.items()) ]
         self._proxyFilePerUuid = dict()
         for (_uuid, path) in items:
             if _uuid in self._proxyFilePerUuid and self._proxyFilePerUuid[_uuid] != path:

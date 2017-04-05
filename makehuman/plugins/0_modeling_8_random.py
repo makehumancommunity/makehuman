@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -59,7 +59,7 @@ class RandomizeAction(gui3d.Action):
     def _assignModifierValues(self, valuesDict):
         _tmp = self.human.symmetryModeEnabled
         self.human.symmetryModeEnabled = False
-        for mName, val in valuesDict.items():
+        for mName, val in list(valuesDict.items()):
             try:
                 self.human.getModifier(mName).setValue(val)
             except:

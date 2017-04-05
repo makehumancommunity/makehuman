@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -110,7 +110,7 @@ def RasterizeTriangles(dst, coords, shader):
     maxy = cmax[:,1]
 
     progress = Progress(len(coords), None).HighFrequency(200)
-    for i in xrange(len(coords)):
+    for i in range(len(coords)):
         ixy = np.mgrid[miny[i]:maxy[i],minx[i]:maxx[i]].transpose([1,2,0])[:,:,::-1]
         xy = ixy + 0.5
         uvw = np.sum(perp[i,None,None,:,:] * xy[:,:,None,:], axis=-1) - base[i,None,None,:]
@@ -242,7 +242,7 @@ def mapImage(imgMesh, mesh, leftTop, rightBottom):
     if mh.hasRenderSkin():
         try:
             return mapImageGL(imgMesh.mesh.object3d.textureTex, mesh, leftTop, rightBottom)
-        except Exception, e:
+        except Exception as e:
             log.debug(e)
             log.debug("Hardware skin rendering failed, falling back to software render.")
             return mapImageSoft(mh.Image(imgMesh.getTexture()), mesh, leftTop, rightBottom)
@@ -378,7 +378,7 @@ def mapLighting(lightpos = (-10.99, 20.0, 20.0), mesh = None, res = (1024, 1024)
     if mh.hasRenderSkin():
         try:
             return mapLightingGL(lightpos, mesh, res, border)
-        except Exception, e:
+        except Exception as e:
             log.debug(e)
             log.debug("Hardware skin rendering failed, falling back to software render.")
             return mapLightingSoft(lightpos, mesh, res, border)
@@ -451,7 +451,7 @@ def mapMask(dimensions = (1024, 1024), mesh = None):
             return mh.renderSkin(dimensions, mesh.vertsPerPrimitive,
                                  mesh.r_texco, index = mesh.index,
                                  clearColor = (0, 0, 0, 0))
-        except Exception, e:
+        except Exception as e:
             log.debug(e)
             log.debug("Hardware skin rendering failed, falling back to software render.")
             return mapMaskSoft(dimensions, mesh)
@@ -514,7 +514,7 @@ def rasterizeHLines(dstImg, edges, delta):
     data = dstImg.data[::-1]
 
     progress = Progress(len(x0), None)
-    for i in xrange(len(x0)):
+    for i in range(len(x0)):
         x = np.arange(x0[i], x1[i])
         y = m[i] * (x + 0.5) + c[i]
         data[np.floor(y).astype(int),x,:] = 255
@@ -542,7 +542,7 @@ def rasterizeVLines(dstImg, edges, delta):
     data = dstImg.data[::-1]
 
     progress = Progress(len(y0), None)
-    for i in xrange(len(y0)):
+    for i in range(len(y0)):
         y = np.arange(y0[i], y1[i]) + 0.5
         x = m[i] * y + c[i]
         data[y.astype(int),np.floor(x).astype(int),:] = 255
@@ -653,7 +653,7 @@ def mapUV():
     if mh.hasRenderSkin():
         try:
             return mapUVGL()
-        except Exception, e:
+        except Exception as e:
             log.debug(e)
             log.debug("Hardware skin rendering failed, falling back to software render.")
             return mapUVSoft()

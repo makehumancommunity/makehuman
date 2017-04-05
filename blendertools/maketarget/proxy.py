@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -126,7 +126,7 @@ class CProxy:
     def updateWeights(self, srcWeights):
         rlen = len(self.refVerts)
         trgWeights = {}
-        for n,refVert in self.refVerts.items():
+        for n,refVert in list(self.refVerts.items()):
             trgWeights[n] = refVert.updateWeight(srcWeights)
         return trgWeights
 
@@ -139,7 +139,7 @@ class CProxy:
         except:
             tmpl = None
         if tmpl == None:
-            print("*** Cannot open %s" % realpath)
+            print(("*** Cannot open %s" % realpath))
             return None
 
         status = 0

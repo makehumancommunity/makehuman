@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """ 
@@ -44,6 +44,7 @@ The MakeHuman data structures are transposed into renderman objects.
 from getpath import getPath, getSysPath, getSysDataPath
 import os
 import numpy as np
+import io
 import subprocess
 import projection
 import time
@@ -82,9 +83,9 @@ class RMRMaterial:
 
     def writeRibCode(self, file):
         file.write('\t\t%s "%s" '%(self.type,self.name))
-        #print "Writing %s material"%(self.name)
+        #print (Writing %s material"%(self.name))
         for p in self.parameters:
-            #print p.name, p.val
+            #print (p.name, p.val)
             if p.type == "float":
                 file.write('"%s %s" [%f] '%(p.type, p.name, p.val))
             if p.type == "string":
@@ -100,10 +101,10 @@ class RMRMaterial:
                 newParamater = False
                 p.val = val
         if newParamater == True:
-            #print "Setting paramater %s with value %s"%(name, str(val))
+            #print ("Setting paramater %s with value %s"%(name, str(val)))
             self.parameters.append(MaterialParameter(pType, name, val))
             #for p in  self.parameters:
-                #print p.name, p.val
+                #print (p.name, p.val)
 
 
 
@@ -210,8 +211,8 @@ class RMRLight:
 
     def placeShadowCamera(self, ribfile):
         direction = self.lookAt - self.position
-        #print "VIEW",self.lookAt, self.position
-        #print "DIRECTION: ", direction
+        #print ("VIEW",self.lookAt, self.position)
+        #print ("DIRECTION: ", direction)
         self.shadowProjection(ribfile)
         if self.roll:
             self.shadowRotate(ribfile,-self.roll, 0.0, 0.0, 1.0);
@@ -260,7 +261,7 @@ class RMRObject:
 
     def writeRibCode(self, ribPath ):
 
-        #print "ribPath = ", ribPath
+        #print ("ribPath = ", ribPath)
         facesUVvalues = self.meshData.texco #TODO usa direttamente self.
 
         ribObjFile = file(ribPath, 'w')
@@ -314,8 +315,8 @@ class RMRHuman(RMRObject):
             self.hairtexture =  os.path.splitext(os.path.basename(self.human.hairObj.getTexture()))[0]
             self.hairMat = RMRMaterial("hairpoly")
             self.hairMat.parameters.append(MaterialParameter("string", "colortexture", self.hairtexture+".png"))
-            #print "HAIRTEXTURE",  self.hairtexture
-        #print "BASETEXTURE",  self.basetexture
+            #print ("HAIRTEXTURE",  self.hairtexture)
+        #print ("BASETEXTURE",  self.basetexture)
         
         
         
@@ -562,10 +563,10 @@ class RMRScene:
         self.lights = []
         RMRLight.lightCounter = 0
         path = os.path.join(lightsFolderPath,lightFile)
-        fileDescriptor = open(path)
+        fileDescriptor = io.open(path)
 
         for data in fileDescriptor:
-            #print data
+            #print (data)
             dataList = data.split()
             fromX = float(dataList[0])
             fromY = float(dataList[1])
@@ -600,13 +601,13 @@ class RMRScene:
         self.humanCharacter.subObjectsInit()
 
         #if len(self.humanCharacter.subObjects) < 1:
-            #print "Warning: AO calculation on 0 objects"
+            #print ("Warning: AO calculation on 0 objects")
 
         ribfile = file(fName, 'w')
         #if not bakeMode:
-            #print "Writing world"
+            #print( "Writing world")
         for subObj in self.humanCharacter.subObjects:
-            #print "rendering....", subObj.name
+            #print ("rendering....", subObj.name)
             ribPath = os.path.join(self.ribsPath, subObj.name + '.rib')
             ribfile.write('\tAttributeBegin\n')
             subObj.writeRibCode(ribPath)
@@ -624,7 +625,7 @@ class RMRScene:
         #    ribfile.write('\tSurface "null"\n')
         #ribfile.write('\tAttributeEnd\n')
         #else:
-            #print "Writing bake world"
+            #print ("Writing bake world")
             #ribfile.write('\tAttributeBegin\n')
             #ribfile.write('\tSurface "bakelightmap" "string bakefilename" "%s" "string texturename" "%s"\n'%(self.bakeTMPTexture, self.humanCharacter.basetexture+".png"))
             #ribPath = os.path.join(self.ribsPath, 'skin.rib')
@@ -873,14 +874,14 @@ class RenderThread(Thread):
             #for line in renderProc.stdout:
               #pass
               
-            #print "Rendering finished ", renderProc.stdout
+            #print ("Rendering finished ", renderProc.stdout)
         """
             
         """
         for filename, status in self.filenames:
 
             command = '%s "%s"' % ('aqsis -progress -progressformat="progress %f %p %s %S" -v 0', filename)
-            #print command
+            #print (command)
             renderProc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, universal_newlines=True)
 
             mh.callAsync(lambda:self.app.progress(0.0, status))

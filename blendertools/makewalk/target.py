@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # ##### BEGIN GPL LICENSE BLOCK #####
@@ -76,7 +76,7 @@ def getTargetArmature(rig, scn):
     setCategory("Identify Target Rig")
     ensureTargetInited(scn)
     selectAndSetRestPose(rig, scn)
-    bones = rig.data.bones.keys()
+    bones = list(rig.data.bones.keys())
 
     if scn.McpAutoTargetRig:
         name = guessTargetArmatureFromList(rig, bones, scn)
@@ -111,10 +111,10 @@ def getTargetArmature(rig, scn):
         _target = name
         (boneAssoc, _ikBones, rig.McpTPoseFile) = _targetInfo[name]
         if not testTargetRig(name, rig, boneAssoc):
-            print("WARNING:\nTarget armature %s does not match armature %s.\nBones:" % (rig.name, name))
+            print(("WARNING:\nTarget armature %s does not match armature %s.\nBones:" % (rig.name, name)))
             for pair in boneAssoc:
-                print("  %s : %s" % pair)
-        print("Target armature %s" % name)
+                print(("  %s : %s" % pair))
+        print(("Target armature %s" % name))
 
         for pb in rig.pose.bones:
             pb.McpBone = pb.McpParent = ""
@@ -122,7 +122,7 @@ def getTargetArmature(rig, scn):
             try:
                 rig.pose.bones[bname].McpBone = mhx
             except KeyError:
-                print("  ", bname)
+                print(("  ", bname))
                 pass
 
         clearCategory()
@@ -146,7 +146,7 @@ def guessTargetArmatureFromList(rig, bones, scn):
     elif isMhx7Rig(rig):
         return "MH-alpha7"
     elif False:
-        for name in _targetInfo.keys():
+        for name in list(_targetInfo.keys()):
             if name not in ["MHX", "Default", "MB", "Rigify", "MH-alpha7"]:
                 (boneAssoc, _ikBones, _tpose) = _targetInfo[name]
                 if testTargetRig(name, rig, boneAssoc):
@@ -157,14 +157,14 @@ def guessTargetArmatureFromList(rig, bones, scn):
 
 def testTargetRig(name, rig, rigBones):
     from .armature import validBone
-    print("Testing %s" % name)
+    print(("Testing %s" % name))
     for (bname, mhxname) in rigBones:
         try:
             pb = rig.pose.bones[bname]
         except KeyError:
             pb = None
         if pb is None or not validBone(pb):
-            print("  Did not find bone %s (%s)" % (bname, mhxname))
+            print(("  Did not find bone %s (%s)" % (bname, mhxname)))
             return False
     return True
 
@@ -252,7 +252,7 @@ def initTargets(scn):
 
 
 def readTrgArmature(file, name):
-    print("Read target file", file)
+    print(("Read target file", file))
     fp = open(file, "r")
     status = 0
     bones = []
@@ -274,7 +274,7 @@ def readTrgArmature(file, name):
                 status = 0
                 tpose = os.path.join("target_rigs", words[1])
             elif len(words) != 2:
-                print("Ignored illegal line", line)
+                print(("Ignored illegal line", line))
             elif status == 1:
                 bones.append( (words[0], nameOrNone(words[1])) )
             elif status == 2:
@@ -334,7 +334,7 @@ def saveTargetFile(filepath, context):
     if scn.McpSaveTargetTPose:
         fp.write("T-pose:\t%s-tpose.json\n" % name)
     fp.close()
-    print("Saved %s" % filepath)
+    print(("Saved %s" % filepath))
 
     if scn.McpSaveTargetTPose:
         tposePath = fname + "-tpose.json"

@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """ 
@@ -40,6 +40,7 @@ Data handlers for skeletal animation.
 
 import math
 import numpy as np
+import io
 import log
 import makehuman
 
@@ -139,10 +140,10 @@ class AnimationTrack(object):
         old_pose = skel.getPose()
         self._data_baked = np.zeros((self.dataLen, 3, 4))
 
-        for f_idx in xrange(self.nFrames):
+        for f_idx in range(self.nFrames):
             i = f_idx * self.nBones
             skel.setPose(self._data[i:i+self.nBones])
-            for b_idx in xrange(self.nBones):
+            for b_idx in range(self.nBones):
                 idx = i + b_idx
                 self._data_baked[idx,:,:] = bones[b_idx].matPoseVerts[:3,:4]
             progress.step("Baking animation frame %s", f_idx+1)
@@ -154,7 +155,7 @@ class AnimationTrack(object):
         Scale the animation with the specified scale.
         This means scaling the transformation portion of this animation.
         """
-        for f_idx in xrange(self.nFrames):
+        for f_idx in range(self.nFrames):
             frameData = self.getAtFramePos(f_idx, noBake=True)
             frameData[:,:3,3] *= scale
             self.resetBaked()
@@ -252,7 +253,7 @@ class AnimationTrack(object):
         count = 0
         for frameI in range(0,self.dataLen,self.nBones):
             if count == 0:
-                indxs.extend(range(frameI,frameI+self.nBones))
+                indxs.extend(list(range(frameI,frameI+self.nBones)))
             count = (count + 1) % dropFrames
         data = self.data[indxs]
         self.data = data
@@ -292,7 +293,7 @@ class Pose(AnimationTrack):
         """
         from collections import OrderedDict
         import json
-        mhupb = json.load(open(filename, 'rb'), object_pairs_hook=OrderedDict)
+        mhupb = json.load(io.open(filename, 'r'), object_pairs_hook=OrderedDict)
         self.name = mhupb['name']
         self.description = mhupb.get('description', '')
         self.tags = set([t.lower() for t in mhupb.get('tags', [])])
@@ -301,7 +302,7 @@ class Pose(AnimationTrack):
         if len(self.unitposes) == 0:
             raise RuntimeError("Cannot load pose: unit_poses dict needs to contain at least one entry")
 
-        self._data = poseUnit.getBlendedPose(self.unitposes.keys(), self.unitposes.values(), only_data=True)
+        self._data = poseUnit.getBlendedPose(list(self.unitposes.keys()), list(self.unitposes.values()), only_data=True)
         self.dataLen = len(self._data)
         self.nFrames = 1
         self.nBones = self.dataLen
@@ -331,7 +332,7 @@ class PoseUnit(AnimationTrack):
         return self._poseNames
 
     def getUnitPose(self, name):
-        if isinstance(name, basestring):
+        if isinstance(name, str):
             frame_idx = self._poseNames.index(name)
         else:
             frame_idx = name
@@ -353,10 +354,10 @@ class PoseUnit(AnimationTrack):
     def _cacheAffectedBones(self):
         self._affectedBones = []
 
-        for f_idx in xrange(self.nFrames):
+        for f_idx in range(self.nFrames):
             frameData = self.getAtFramePos(f_idx)
             self._affectedBones.append( [] )
-            for b_idx in xrange(self.nBones):
+            for b_idx in range(self.nBones):
                 if not isRest(frameData[b_idx]):
                     self._affectedBones[f_idx].append(b_idx)
 
@@ -370,7 +371,7 @@ class PoseUnit(AnimationTrack):
 
         REST_QUAT = np.asarray([1,0,0,0], dtype=np.float32)
 
-        if isinstance(poses[0], basestring):
+        if isinstance(poses[0], str):
             f_idxs = [self.getPoseNames().index(pname) for pname in poses]
         else:
             f_idxs = poses
@@ -386,7 +387,7 @@ class PoseUnit(AnimationTrack):
                 f_idxs.append(0)
             weights /= t
 
-        #print zip([self.getPoseNames()[_f] for _f in f_idxs],weights)
+        #print (zip([self.getPoseNames()[_f] for _f in f_idxs],weights))
 
         result = emptyPose(self.nBones)
         m = np.identity(4, dtype=np.float32)
@@ -394,12 +395,12 @@ class PoseUnit(AnimationTrack):
         m2 = np.identity(4, dtype=np.float32)
 
         if len(f_idxs) == 1:
-            for b_idx in xrange(self.nBones):
+            for b_idx in range(self.nBones):
                 m[:3, :4] = self.getAtFramePos(f_idxs[0], True)[b_idx]
                 q = tm.quaternion_slerp(REST_QUAT, tm.quaternion_from_matrix(m, True), float(weights[0]))
                 result[b_idx] = tm.quaternion_matrix( q )[:3,:4]
         else:
-            for b_idx in xrange(self.nBones):
+            for b_idx in range(self.nBones):
                 m1[:3, :4] = self.getAtFramePos(f_idxs[0], True)[b_idx]
                 m2[:3, :4] = self.getAtFramePos(f_idxs[1], True)[b_idx]
                 q1 = tm.quaternion_slerp(REST_QUAT, tm.quaternion_from_matrix(m1, True), float(weights[0]))
@@ -524,7 +525,7 @@ class VertexBoneWeights(object):
         """
         from collections import OrderedDict
         import json
-        weightsData = json.load(open(filename, 'rb'), object_pairs_hook=OrderedDict)
+        weightsData = json.load(io.open(filename, 'r'), object_pairs_hook=OrderedDict)
         log.message("Loaded vertex weights %s from file %s", weightsData.get('name', 'unnamed'), filename)
         result = VertexBoneWeights(weightsData['weights'], vertexCount, rootBone)
         result.license.fromJson(weightsData)
@@ -552,8 +553,8 @@ class VertexBoneWeights(object):
             """
             from collections import OrderedDict
             result = OrderedDict()
-            for bone_name, (v_idxs, v_wghts) in data.items():
-                result[bone_name] = zip(v_idxs.tolist(), v_wghts.tolist())
+            for bone_name, (v_idxs, v_wghts) in list(data.items()):
+                result[bone_name] = list(zip(v_idxs.tolist(), v_wghts.tolist()))
             return result
 
         jsondata = {'weights': _format_output(self.data),
@@ -563,7 +564,7 @@ class VertexBoneWeights(object):
                    }
         jsondata.update(self.license.asDict())
 
-        f = open(filename, 'w')
+        f = io.open(filename, 'w')
         json.dump(jsondata, f, indent=4, separators=(',', ': '))
         f.close()
 
@@ -621,7 +622,7 @@ class VertexBoneWeights(object):
 
     def _calculate_num_weights(self):
         self._wCounts = np.zeros(self._vertexCount, dtype=np.uint32)
-        for bname, wghts in self._data.items():
+        for bname, wghts in list(self._data.items()):
             vs, _ = wghts
             self._wCounts[vs] += 1
         self._nWeights = max(self._wCounts)
@@ -640,7 +641,7 @@ class VertexBoneWeights(object):
         """
         WEIGHT_THRESHOLD = 1e-4  # Threshold for including bone weight
 
-        first_entry = vertexWeightsDict.keys()[0] if len(vertexWeightsDict) > 0 else None
+        first_entry = list(vertexWeightsDict.keys())[0] if len(vertexWeightsDict) > 0 else None
         if len(vertexWeightsDict) > 0 and \
            len(vertexWeightsDict[first_entry]) == 2 and \
            isinstance(vertexWeightsDict[first_entry], tuple) and \
@@ -651,18 +652,18 @@ class VertexBoneWeights(object):
             if vertexCount is not None:
                 self._vertexCount = vertexCount
             else:
-                self._vertexCount = max([vn for vg in vertexWeightsDict.values() for vn in vg[0]])+1
+                self._vertexCount = max([vn for vg in list(vertexWeightsDict.values()) for vn in vg[0]])+1
             return vertexWeightsDict
 
         if vertexCount is not None:
             vcount = vertexCount
         else:
-            vcount = max([vn for vg in vertexWeightsDict.values() for vn,_ in vg])+1
+            vcount = max([vn for vg in list(vertexWeightsDict.values()) for vn,_ in vg])+1
         self._vertexCount = vcount
 
         # Normalize weights and put them in np format
         wtot = np.zeros(vcount, np.float32)
-        for vgroup in vertexWeightsDict.values():
+        for vgroup in list(vertexWeightsDict.values()):
             for item in vgroup:
                 vn,w = item
                 # Calculate total weight per vertex
@@ -670,7 +671,7 @@ class VertexBoneWeights(object):
 
         from collections import OrderedDict
         boneWeights = OrderedDict()
-        for bname,vgroup in vertexWeightsDict.items():
+        for bname,vgroup in list(vertexWeightsDict.items()):
             if len(vgroup) == 0:
                 continue
             weights = []
@@ -699,7 +700,7 @@ class VertexBoneWeights(object):
             boneWeights[bname] = (verts, weights)
 
         # Assign unweighted vertices to root bone with weight 1
-        if rootBone not in boneWeights.keys():
+        if rootBone not in list(boneWeights.keys()):
             vs = []
             ws = []
         else:
@@ -726,7 +727,7 @@ class VertexBoneWeights(object):
         """
         if vertexCount is None:
             vertexCount = 0
-            for bname, mapping in vertBoneMapping.items():
+            for bname, mapping in list(vertBoneMapping.items()):
                 verts,weights = mapping
                 vertexCount = max(max(verts), vertexCount)
             if vertexCount:
@@ -770,7 +771,7 @@ class VertexBoneWeights(object):
         # Convert weights from indexed by bone to indexed by vertex index
         _ws = dict()
         b_lookup = dict([(b.name,b_idx) for b_idx,b in enumerate(skel.getBones())])
-        for bname, mapping in vertBoneMapping.items():
+        for bname, mapping in list(vertBoneMapping.items()):
             try:
                 b_idx = b_lookup[bname]
                 verts,weights = mapping
@@ -802,12 +803,12 @@ class VertexBoneWeights(object):
                 # Re-normalize weights
                 weightvals = np.asarray( [e[0] for e in _ws[v_idx]], dtype=np.float32)
                 weightvals /= np.sum(weightvals)
-                for i in xrange(nWeights):
+                for i in range(nWeights):
                     _ws[v_idx][i] = (weightvals[i], _ws[v_idx][i][1])
             else:
                 _ws[v_idx] = sorted(_ws[v_idx], reverse=True)
 
-        for v_idx, wghts in _ws.items():
+        for v_idx, wghts in list(_ws.items()):
             for i, (w, bidx) in enumerate(wghts):
                 compiled_vertweights[v_idx]['wght%s' % (i+1)] = w
                 compiled_vertweights[v_idx]['b_idx%s' % (i+1)] = bidx
@@ -868,10 +869,10 @@ class AnimatedMesh(object):
         return self.__animations[name]
 
     def hasAnimation(self, name):
-        return name in self.__animations.keys()
+        return name in list(self.__animations.keys())
 
     def getAnimations(self):
-        return self.__animations.keys()
+        return list(self.__animations.keys())
 
     def removeAnimations(self, update=True):
         self.resetToRestPose(update)
@@ -1249,14 +1250,14 @@ def loadPoseFromMhpFile(filepath, skel):
     """
     import log
     import os
-    from codecs import open
+    import io
 
     log.message("Loading MHP file %s", filepath)
-    fp = open(filepath, "rU", encoding="utf-8")
+    fp = io.open(filepath, "rU", encoding="utf-8")
     valid_file = False
 
     boneMap = skel.getBoneToIdxMapping()
-    nBones = len(boneMap.keys())
+    nBones = len(list(boneMap.keys()))
     poseMats = np.zeros((nBones,4,4),dtype=np.float32)
     poseMats[:] = np.identity(4, dtype=np.float32)
 

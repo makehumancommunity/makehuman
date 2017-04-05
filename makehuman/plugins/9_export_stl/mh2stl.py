@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -79,8 +79,8 @@ def exportStlAscii(filepath, config, exportJoints = False):
     objects = human.getObjects(True)
     meshes = [o.mesh.clone(1,True) for o in objects]
 
-    from codecs import open
-    fp = open(filepath, 'w', encoding="utf-8")
+    import io
+    fp = io.open(filepath, 'w', encoding="utf-8")
     solid = name.replace(' ','_')
     fp.write('solid %s\n' % solid)
 
@@ -88,7 +88,7 @@ def exportStlAscii(filepath, config, exportJoints = False):
     objprog = Progress(len(meshes))
 
     def chunked_enumerate(chunk_size, offs, list_):
-        return zip(range(offs,offs+chunk_size), list_[offs:offs+chunk_size])
+        return list(zip(list(range(offs,offs+chunk_size)), list_[offs:offs+chunk_size]))
 
     for mesh in meshes:
         coord = config.scale*mesh.coord + config.offset
@@ -142,7 +142,7 @@ def exportStlBinary(filepath, config, exportJoints = False):
     objects = human.getObjects(True)
     meshes = [o.mesh.clone(1,True) for o in objects]
 
-    fp = open(filepath, 'wb')
+    fp = io.open(filepath, 'wb')
     fp.write('\x00' * 80)
     fp.write(struct.pack('<I', 0))
     count = 0

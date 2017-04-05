@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -143,25 +143,25 @@ class Color(object):
 
     # Scalar operators work both with iterables as well as single values
     def __mul__(self, other):
-        if isinstance(other, (int, float, long, bool)):
+        if isinstance(other, (int, float, bool)):
             return type(self)(self.r * other, self.g * other, self.b * other)
         else:
             return type(self)(self.r * other[0], self.g * other[1], self.b * other[2])
 
     def __rmul__(self, other):
-        if isinstance(other, (int, float, long, bool)):
+        if isinstance(other, (int, float, bool)):
             return type(self)(other * self.r, other * self.g, other * self.b)
         else:
             return type(self)(other[0] * self.r, other[1] * self.g, other[2] * self.b)
 
     def __div__(self, other):
-        if isinstance(other, (int, float, long, bool)):
+        if isinstance(other, (int, float, bool)):
             return type(self)(self.r / other, self.g / other, self.b / other)
         else:
             return type(self)(self.r / other[0], self.g / other[1], self.b / other[2])
 
     def __rdiv__(self, other):
-        if isinstance(other, (int, float, long, bool)):
+        if isinstance(other, (int, float, bool)):
             return type(self)(other / self.r, other / self.g, other / self.b)
         else:
             return type(self)(other[0] / self.r, other[1] / self.g, other[2] / self.b)
@@ -327,10 +327,10 @@ class Material(object):
         """
         Parse .mhmat file and set as the properties of this material.
         """
-        from codecs import open
+        import io
         log.debug("Loading material from file %s", filename)
         try:
-            f = open(filename, "rU", encoding="utf-8")
+            f = io.open(filename, "rU", encoding="utf-8")
         except:
             f = None
         if f == None:
@@ -498,10 +498,10 @@ class Material(object):
             return formatPath(filename)
 
     def toFile(self, filename, comments = []):
-        from codecs import open
+        import io
 
         try:
-            f = open(filename, 'w', encoding='utf-8')
+            f = io.open(filename, 'w', encoding='utf-8')
         except:
             f = None
         if f == None:
@@ -580,7 +580,7 @@ class Material(object):
 
         hasShaderParam = False
         global _materialShaderParams
-        for name, param in self.shaderParameters.items():
+        for name, param in list(self.shaderParameters.items()):
             if name not in _materialShaderParams:
                 hasShaderParam = True
                 import image
@@ -589,7 +589,7 @@ class Material(object):
                         f.write("shaderParam %s %s\n" % (name, self._texPath(param.sourcePath, filedir)) )
                 elif isinstance(param, list):
                     f.write("shaderParam %s %s\n" % (name, " ".join([str(p) for p in param])) )
-                elif isinstance(param, basestring) and not isNumeric(param):
+                elif isinstance(param, str) and not isNumeric(param):
                     # Assume param is a path
                     f.write("shaderParam %s %s\n" % (name, self._texPath(param, filedir)) )
                 else:
@@ -604,7 +604,7 @@ class Material(object):
                 f.write("shaderDefine %s\n" % define)
         if hasShaderDefine: f.write('\n')
 
-        for name, value in self.shaderConfig.items():
+        for name, value in list(self.shaderConfig.items()):
             f.write("shaderConfig %s %s\n" % (name, value) )
 
         f.close()
@@ -993,7 +993,7 @@ class Material(object):
 
     def getShaderObj(self):
         import sys
-        if 'shader' not in sys.modules.keys():
+        if 'shader' not in list(sys.modules.keys()):
             # Don't import shader module in application if it is not loaded yet
             # Avoid unneeded dependency on OpenGL/shader modules
             return None
@@ -1060,7 +1060,7 @@ class Material(object):
 
         if isinstance(value, list):
             value = [float(v) for v in value]
-        elif isinstance(value, basestring):
+        elif isinstance(value, str):
             if isNumeric(value):
                 value = float(value)
             else:
@@ -1135,7 +1135,7 @@ class Material(object):
 
 
     def _getTexture(self, texture):
-        if isinstance(texture, basestring):
+        if isinstance(texture, str):
             return getFilePath(texture, self.filepath)
         else:
             return texture
@@ -1161,13 +1161,13 @@ class Material(object):
         if includeUniforms:
             uniformSamplers = OrderedDict()
             usedByShader = self.shaderUniforms
-            for name, param in self.shaderParameters.items():
+            for name, param in list(self.shaderParameters.items()):
                 if name not in _materialShaderParams and \
                    (includeUnused or name in usedByShader):
                     import image
                     if isinstance(param, image.Image) and includeInMemory:
                         uniformSamplers[name] = param
-                    elif isinstance(param, basestring) and not isNumeric(param):
+                    elif isinstance(param, str) and not isNumeric(param):
                         # Assume param is a path
                         uniformSamplers[name] = param
             result.update(uniformSamplers)
@@ -1338,7 +1338,7 @@ class Material(object):
                 del textures[t]
 
         progress = Progress(len(textures))
-        for tName,tPath in textures.items():
+        for tName,tPath in list(textures.items()):
             progress.step("Exporting texture %s", tName)
             import image
             if isinstance(tPath, image.Image):
@@ -1382,7 +1382,7 @@ def getSkinBlender():
     return _autoSkinBlender
 
 def getFilePath(filename, folder = None):
-    if not filename or not isinstance(filename, basestring):
+    if not filename or not isinstance(filename, str):
         return filename
 
     searchPaths = []
@@ -1444,8 +1444,8 @@ class UVMap:
 
 
 def loadUvObjFile(filepath):
-    from codecs import open
-    fp = open(filepath, "rU", encoding="utf-8")
+    import io
+    fp = io.open(filepath, "rU", encoding="utf-8")
     uvs = []
     fuvs = []
     for line in fp:
@@ -1460,9 +1460,9 @@ def loadUvObjFile(filepath):
     return uvs,fuvs
 
 def peekMetadata(filename):
-    from codecs import open
+    import io
     try:
-        f = open(filename, "rU", encoding="utf-8")
+        f = io.open(filename, "rU", encoding="utf-8")
     except:
         f = None
     if f == None:

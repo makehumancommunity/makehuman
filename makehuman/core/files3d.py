@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """ 
@@ -208,7 +208,7 @@ def loadMesh(path, loadColors=1, maxFaces=None, obj=None):
                 # Only write compiled binary meshes to user data path
                 try:
                     saveBinaryMesh(obj, npzpath)
-                except StandardError:
+                except Exception:
                     log.notice('unable to save compiled mesh: %s', npzpath)
             else:
                 log.debug('Not writing compiled meshes to system paths (%s).', npzpath)

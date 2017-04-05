@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -70,13 +70,13 @@ def compileProxy(path, human):
         try:
             proxy_ = proxy.loadTextProxy(human, path, type=None)
         except:
-            print 'Could not load proxy file %s.' % path
+            print('Could not load proxy file %s.' % path)
             import traceback
             traceback.print_exc(file=sys.stdout)
             return False
         proxy.saveBinaryProxy(proxy_, npzpath)
     except:
-        print 'Unable to save compiled proxy for file %s' % path
+        print('Unable to save compiled proxy for file %s' % path)
         import traceback
         traceback.print_exc(file=sys.stdout)
         if os.path.isfile(npzpath):
@@ -96,6 +96,6 @@ if __name__ == '__main__':
     for allProxies in allFiles:
         for (i, path) in enumerate(allProxies):
             compileProxy(path, human)
-            print "[%.0f%% done] converted proxy %s" % (100*(float(i)/float(len(allProxies))), path)
+            print("[%.0f%% done] converted proxy %s" % (100*(float(i)/float(len(allProxies))), path))
 
-    print "All done."
+    print("All done.")

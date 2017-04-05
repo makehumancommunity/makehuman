@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -80,7 +80,7 @@ def writeMaterial(ob, folder):
                 matfile = writeMaterialFile(fp, mat, name, outdir)
             finally:
                 fp.close()
-            print("%s created" % filepath)
+            print(("%s created" % filepath))
             return os.path.basename(filepath)
     return None
 
@@ -90,7 +90,7 @@ def writeMaterialFile(fp, mat, name, outdir):
     Write a material (.mhmat) file in the output folder.
     Also copies all textures to the output folder
     """
-
+    # py3 integer divide
     fp.write(
         '# MakeHuman Material definition\n' +
         '\n' +
@@ -99,7 +99,7 @@ def writeMaterialFile(fp, mat, name, outdir):
         '// Color shading attributes\n'
         'diffuseColor  %.4g %.4g %.4g\n' % tuple(mat.diffuse_intensity * mat.diffuse_color) +
         'specularColor  %.4g %.4g %.4g\n' % tuple(mat.specular_intensity * mat.specular_color) +
-        'shininess %.4g\n' % max(0, min(mat.specular_hardness/255, 1)) +
+        'shininess %.4g\n' % max(0, min(mat.specular_hardness // 255, 1)) +
         'opacity %.4g\n' % mat.alpha +
         '\n' +
         '// Textures and properties\n')
@@ -137,7 +137,7 @@ def writeMaterialFile(fp, mat, name, outdir):
             useDisplacement = "true"
 
         trgpath = os.path.join(outdir, texpath)
-        print("Copy texture %s => %s" % (srcpath, trgpath))
+        print(("Copy texture %s => %s" % (srcpath, trgpath)))
         try:
             shutil.copy(srcpath, trgpath)
         except FileNotFoundError:

@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -128,7 +128,7 @@ class BackgroundChooser(gui3d.TaskView):
 
         self.filenames = {}    # Stores (filename, aspect)
         self.transformations = {} # Stores ((posX,posY), scaleY)
-        for side in self.sides.keys():
+        for side in list(self.sides.keys()):
             self.filenames[side] = None
             self.transformations[side] = [(0.0, 0.0), 1.0]
 
@@ -136,7 +136,7 @@ class BackgroundChooser(gui3d.TaskView):
 
         self.opacity = 40
 
-        for viewName, rot in self.sides.items():
+        for viewName, rot in list(self.sides.items()):
             if rot is not None:
                 rv = [0, 0, 0]
                 angle = 0.0
@@ -219,12 +219,12 @@ class BackgroundChooser(gui3d.TaskView):
 
         @self.opacitySlider.mhEvent
         def onChanging(value):
-            for obj in self.planeMeshes.values():
+            for obj in list(self.planeMeshes.values()):
                 obj.mesh.setColor([255, 255, 255, 2.55*value])
         @self.opacitySlider.mhEvent
         def onChange(value):
             self.opacity = value
-            for obj in self.planeMeshes.values():
+            for obj in list(self.planeMeshes.values()):
                 obj.mesh.setColor([255, 255, 255, 2.55*value])
         @self.foregroundTggl.mhEvent
         def onClicked(value):
@@ -249,7 +249,7 @@ class BackgroundChooser(gui3d.TaskView):
 
         @self.dragButton.mhEvent
         def onClicked(event):
-            for obj in self.planeMeshes.values():
+            for obj in list(self.planeMeshes.values()):
                 obj.mesh.setPickable(self.dragButton.selected)
             gui3d.app.selectedHuman.mesh.setPickable(not self.dragButton.selected)
             mh.redraw()
@@ -288,7 +288,7 @@ class BackgroundChooser(gui3d.TaskView):
 
     def getCurrentSide(self):
         rot = gui3d.app.modelCamera.getRotation()
-        for (side, rotation) in self.sides.items():
+        for (side, rotation) in list(self.sides.items()):
             if rot == rotation:
                 return side
         # Indicates an arbitrary non-defined view
@@ -312,7 +312,7 @@ class BackgroundChooser(gui3d.TaskView):
             priority = 100
         else:
             priority = -90
-        for obj in self.planeMeshes.values():
+        for obj in list(self.planeMeshes.values()):
             obj.mesh.priority = priority
         mh.redraw()
 
@@ -320,7 +320,7 @@ class BackgroundChooser(gui3d.TaskView):
         return self.planeMeshes['front'].mesh.priority == 100
 
     def isBackgroundSet(self):
-        for bgFile in self.filenames.values():
+        for bgFile in list(self.filenames.values()):
             if bgFile:
                 return True
         return False
@@ -336,7 +336,7 @@ class BackgroundChooser(gui3d.TaskView):
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
-        text = language.language.getLanguageString(u'If you want backgrounds to show up here, place the images in %s') % self.backgroundsFolder
+        text = language.language.getLanguageString('If you want backgrounds to show up here, place the images in %s') % self.backgroundsFolder
         gui3d.app.prompt('Info', text, 'OK', helpId='backgroundHelp')
         gui3d.app.statusPersist(text)
         self.opacitySlider.setValue(self.opacity)
@@ -362,7 +362,7 @@ class BackgroundChooser(gui3d.TaskView):
 
     def onHumanChanging(self, event):
         if event.change == 'reset':
-            for side in self.sides.keys():
+            for side in list(self.sides.keys()):
                 self.filenames[side] = None
                 self.transformations[side] = [(0.0, 0.0), 1.0]
             self.setBackgroundEnabled(False)
@@ -372,7 +372,7 @@ class BackgroundChooser(gui3d.TaskView):
         return self.planeMeshes[ self.getCurrentSide() ]
 
     def setBackgroundImage(self, side):
-        for obj in self.planeMeshes.values():
+        for obj in list(self.planeMeshes.values()):
             obj.hide()
 
         if not side:
@@ -459,7 +459,7 @@ class BackgroundChooser(gui3d.TaskView):
                 log.error("Unknown background option: %s", (' '.join( values[1:]) ))
 
     def saveHandler(self, human, file):
-        for side in self.sides.keys():
+        for side in list(self.sides.keys()):
             side_data = self.filenames.get(side)
             backgrounds = 0
             if side_data is not None:

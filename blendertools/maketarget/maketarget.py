@@ -82,7 +82,7 @@ def setSettings(context):
         print("Alpha 8 mesh detected")
         ob.MhMeshVersion = "alpha8"
     else:
-        print("Unknown mesh version with %d verts" % len(ob.data.vertices))
+        print(("Unknown mesh version with %d verts" % len(ob.data.vertices)))
         ob.MhMeshVersion = ""
 
 
@@ -130,7 +130,7 @@ def addMaterial(ob, index, name, color, verts):
         mat = bpy.data.materials.new(name=name)
     ob.data.materials.append(mat)
     if mat.name != name:
-        print("WARNING: duplicate material %s => %s" % (name, mat.name))
+        print(("WARNING: duplicate material %s => %s" % (name, mat.name)))
     mat.diffuse_color = color
     for f in ob.data.polygons:
         vn = f.vertices[0]
@@ -187,10 +187,10 @@ def loadAndApplyTarget(context):
 
     ob = context.object
     props = {}
-    for key in ob.keys():
+    for key in list(ob.keys()):
         props[key] = ob[key]
     applyTargets(context)
-    for key in props.keys():
+    for key in list(props.keys()):
         ob[key] = props[key]
     ob.name = bodytype.split("-")[1]
     ob.shape_key_add(name="Basis")
@@ -263,8 +263,8 @@ def deleteIrrelevant(ob, affect):
         ob.MhMeshVertsDeleted = True
         ob.MhIrrelevantDeleted = True
         ob.MhAffectOnly = affect
-        print("Deleted verts: %d -> %d" % (first, last))
-        print("# Verts: %d -> %d" % (nVerts, len(ob.data.vertices)))
+        print(("Deleted verts: %d -> %d" % (first, last)))
+        print(("# Verts: %d -> %d" % (nVerts, len(ob.data.vertices))))
 
 
 class VIEW3D_OT_DeleteIrrelevantButton(bpy.types.Operator):
@@ -468,7 +468,7 @@ def loadStatueMinusPose(context):
         if pb:
             relMats[vg.index] = pb.matrix * pb.bone.matrix_local.inverted()
         else:
-            print("Skipping vertexgroup %s" % vg.name)
+            print(("Skipping vertexgroup %s" % vg.name))
             relMats[vg.index] = Matrix().identity()
 
     svs = statue.data.vertices
@@ -500,26 +500,26 @@ def loadStatueMinusPose(context):
             xdiff = skey.data[vn].co - ovs[vn].co
 
             if False and vn in [8059]:
-                print("\nVert", vn, diff.length, xdiff.length)
-                print("det", relmat.determinant())
-                print("d (%.4f %.4f %.4f)" % tuple(diff))
-                print("xd (%.4f %.4f %.4f)" % tuple(xdiff))
+                print(("\nVert", vn, diff.length, xdiff.length))
+                print(("det", relmat.determinant()))
+                print(("d (%.4f %.4f %.4f)" % tuple(diff)))
+                print(("xd (%.4f %.4f %.4f)" % tuple(xdiff)))
                 checkRotationMatrix(relmat)
-                print("Rel", relmat)
-                print("Inv", relmat.inverted())
+                print(("Rel", relmat))
+                print(("Inv", relmat.inverted()))
 
                 s = pvs[vn].co
-                print("s ( %.4f  %.4f  %.4f)" % (s[0],s[1],s[2]))
-                print("x ( %.4f  %.4f  %.4f)" % (x[0],x[1],x[2]))
-                print("y ( %.4f  %.4f  %.4f)" % (y[0],y[1],y[2]))
-                print("z ( %.4f  %.4f  %.4f)" % (z[0],z[1],z[2]))
+                print(("s ( %.4f  %.4f  %.4f)" % (s[0],s[1],s[2])))
+                print(("x ( %.4f  %.4f  %.4f)" % (x[0],x[1],x[2])))
+                print(("y ( %.4f  %.4f  %.4f)" % (y[0],y[1],y[2])))
+                print(("z ( %.4f  %.4f  %.4f)" % (z[0],z[1],z[2])))
                 o = ovs[vn].co
-                print("o (%.4f %.4f %.4f)" % (o[0],o[1],o[2]))
-                print("r (%.4f %.4f %.4f)" % tuple(skey.data[vn].co))
+                print(("o (%.4f %.4f %.4f)" % (o[0],o[1],o[2])))
+                print(("r (%.4f %.4f %.4f)" % tuple(skey.data[vn].co)))
 
                 for g in v.groups:
-                    print("\nGrp %d %f %f" % (g.group, g.weight, relMats[g.group].determinant()))
-                    print("Rel", relMats[g.group])
+                    print(("\nGrp %d %f %f" % (g.group, g.weight, relMats[g.group].determinant())))
+                    print(("Rel", relMats[g.group]))
 
     #scn.objects.unlink(statue)
     scn.objects.unlink(posed)
@@ -529,7 +529,7 @@ def checkRotationMatrix(mat):
     for n in range(3):
         vec = mat.col[n]
         if abs(vec.length-1) > 0.1:
-            print("No rot %d %f\n%s" % (n, vec.length, mat))
+            print(("No rot %d %f\n%s" % (n, vec.length, mat)))
             return True
     return False
 
@@ -616,7 +616,7 @@ def doSaveTarget(context, filepath):
 
     (fname,ext) = os.path.splitext(filepath)
     filepath = fname + ".target"
-    print("Saving target %s to %s" % (ob, filepath))
+    print(("Saving target %s to %s" % (ob, filepath)))
     if False and ob.MhMeshVertsDeleted and ob.MhAffectOnly != 'All':
         first,last = settings.affectedVerts[ob.MhAffectOnly]
         before,after = readLines(filepath, first,last)
@@ -646,7 +646,7 @@ def getDefaultComments():
     try:
         fp = open(filepath, "rU")
     except:
-        print("Could not open %s" % filepath)
+        print(("Could not open %s" % filepath))
         return []
     comments = []
     for line in fp:
@@ -690,9 +690,9 @@ def evalVertLocations(ob):
     for skey in ob.data.shape_keys.key_blocks:
         if (skey.name == "Basis" or
             (ob.MhZeroOtherTargets and skey != ob.active_shape_key)):
-            print("Skipped", skey.name)
+            print(("Skipped", skey.name))
             continue
-        print("Adding", skey.name)
+        print(("Adding", skey.name))
         for n,v in enumerate(skey.data):
             bv = ob.data.vertices[n]
             vec = v.co - bv.co
@@ -767,7 +767,7 @@ def applyTargets(context):
     bpy.ops.object.mode_set(mode='OBJECT')
     verts = evalVertLocations(ob)
     utils.removeShapeKeys(ob)
-    for prop in ob.keys():
+    for prop in list(ob.keys()):
         del ob[prop]
     for v in ob.data.vertices:
         v.co = verts[v.index]
@@ -803,7 +803,7 @@ def pruneTarget(ob, filepath):
     for vn,string in after:
         if vn < settings.nTotalVerts and ob.data.vertices[vn].select:
             lines.append((vn, string))
-    print("Pruning", len(before), len(after), len(lines))
+    print(("Pruning", len(before), len(after), len(lines)))
     fp = open(filepath, "w", encoding="utf-8", newline="\n")
     for vn,string in lines:
         fp.write(str(vn) + " " + string)
@@ -819,7 +819,7 @@ def pruneFolder(ob, folder):
         else:
             (name,ext) = os.path.splitext(file)
             if ext == ".target":
-                print("Prune", path)
+                print(("Prune", path))
                 pruneTarget(ob, path)
 
 
@@ -865,7 +865,7 @@ class VIEW3D_OT_PruneTargetFileButton(bpy.types.Operator, ExportHelper):
 
 def batchFitTargets(context, folder):
     global Comments
-    print("Batch", folder)
+    print(("Batch", folder))
     for fname in os.listdir(folder):
         (root, ext) = os.path.splitext(fname)
         file = os.path.join(folder, fname)
@@ -915,7 +915,7 @@ class VIEW3D_OT_BatchFitButton(bpy.types.Operator):
 
 def batchRenderTargets(context, folder, opengl, outdir):
     global Comments
-    print("Batch render", folder)
+    print(("Batch render", folder))
     for fname in os.listdir(folder):
         (root, ext) = os.path.splitext(fname)
         file = os.path.join(folder, fname)
@@ -977,7 +977,7 @@ def fitTarget(context):
     if not mh.proxy:
         path = ob.ProxyFile
         if path:
-            print("Rereading %s" % path)
+            print(("Rereading %s" % path))
             mh.proxy = CProxy()
             mh.proxy.read(path)
         else:
@@ -1036,7 +1036,7 @@ def discardAllTargets(context):
 def checkValid(ob):
     nShapes = utils.shapeKeyLen(ob)
     if nShapes != ob["NTargets"]+1:
-        print("Consistency problem:\n  %d shapes, %d targets" % (nShapes, ob["NTargets"]))
+        print(("Consistency problem:\n  %d shapes, %d targets" % (nShapes, ob["NTargets"])))
         return False
     return True
 
@@ -1174,13 +1174,13 @@ def symmetrizeTarget(context, left2right, mirror):
     verts = ob.active_shape_key.data
     nVerts = len(verts)
 
-    for vn in Mid2Mid.keys():
+    for vn in list(Mid2Mid.keys()):
         if vn >= nVerts:
             break
         v = verts[vn]
         v.co[0] = 0
 
-    for (lvn,rvn) in Left2Right.items():
+    for (lvn,rvn) in list(Left2Right.items()):
         if lvn >= nVerts or rvn >= nVerts:
             break
         lv = verts[lvn].co
@@ -1207,12 +1207,12 @@ def symmetrizeTarget(context, left2right, mirror):
     bpy.ops.mesh.select_all(action='DESELECT')
     bpy.ops.object.mode_set(mode='OBJECT')
 
-    for vn in Mid2Mid.keys():
+    for vn in list(Mid2Mid.keys()):
         if vn >= nVerts:
             break
         bverts[vn].select = selected[vn]
 
-    for (lvn,rvn) in Left2Right.items():
+    for (lvn,rvn) in list(Left2Right.items()):
         if lvn >= nVerts or rvn >= nVerts:
             break
         if mirror:

@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -41,6 +41,7 @@ import events3d
 import numpy as np
 import matrix
 import material
+import collections
 
 class Action(object):
     def __init__(self, name):
@@ -141,7 +142,7 @@ class Object(events3d.EventHandler):
 
     @property
     def view(self):
-        if not self._view or not callable(self._view):
+        if not self._view or not isinstance(self._view, collections.Callable):
             return None
         return self._view()
 

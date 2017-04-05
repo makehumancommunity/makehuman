@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -41,7 +41,7 @@ Quickly retrieve values from the build_prepare.out file from commandline.
 import sys
 
 def parse(filepath, variable):
-    f = open(filepath, 'rb')
+    f = open(filepath, 'r')
     for line in f:
         if line.startswith('  '):
             tokens = [t.strip() for t in line.split(':')]
@@ -82,4 +82,4 @@ if __name__ == '__main__':
     if args.get('token', None) is not None and result:
         result = result.split(' ')[args.get('token')]
 
-    print result
+    print(result)

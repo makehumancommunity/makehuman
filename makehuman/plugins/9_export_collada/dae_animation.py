@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -58,7 +58,7 @@ def writeLibraryAnimations(fp, human, skel, animations, config):
 
     joined_anim = animations[0]
     for anim in animations[1:]:
-        print 'join anims'
+        print('join anims')
         joined_anim = animation.joinAnimations(joined_anim, anim)
 
     fp.write('\n  <library_animations>\n')
@@ -94,7 +94,7 @@ def writeAnimationBone(fp, bone, anim, config):
         '        <float_array id="%s_pose_matrix-input-array" count="%d">' % (aname, anim.nFrames))
 
     # TIME POINTS
-    timepoints = np.asarray(range(anim.nFrames), dtype=np.float32) * (1.0/anim.frameRate)
+    timepoints = np.asarray(list(range(anim.nFrames)), dtype=np.float32) * (1.0/anim.frameRate)
     fp.write(' '.join(["%g" % t for t in timepoints]))
 
     fp.write(
@@ -111,7 +111,7 @@ def writeAnimationBone(fp, bone, anim, config):
     string = '          '
     relmat = bone.getRelativeMatrix(config.meshOrientation, config.localBoneAxis, config.offset)
     restmat = bone.getRestMatrix(config.meshOrientation, config.localBoneAxis, config.offset)
-    #print bone.index, anim.nBones
+    #print (bone.index, anim.nBones)
     mats = anim.data[bone.index::anim.nBones]  # Get all pose matrices for this bone
     I = np.identity(4, dtype=np.float32)
     parents = []
@@ -170,7 +170,7 @@ def writeAnimationBone(fp, bone, anim, config):
         return 180*rad/3.14
     I = np.identity(4, dtype=np.float32)
     I[:3,:3] = mats[0,:3,:3]
-    print bone.name, map(_to_degrees, tm.euler_from_matrix(I))
+    print(bone.name, list(map(_to_degrees, tm.euler_from_matrix(I))))
 
     fp.write(
         '</float_array>\n' +

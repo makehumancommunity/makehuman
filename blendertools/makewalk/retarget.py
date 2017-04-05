@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # ##### BEGIN GPL LICENSE BLOCK #####
@@ -69,7 +69,7 @@ class CAnimation:
                 trgBone = trgRig.pose.bones[trgName]
                 srcBone = srcRig.pose.bones[srcName]
             except KeyError:
-                print("  -", trgName, srcName)
+                print(("  -", trgName, srcName))
                 continue
             banim = self.boneAnims[trgName] = CBoneAnim(srcBone, trgBone, self, scn)
 
@@ -86,10 +86,10 @@ class CAnimation:
         t_pose.setTPose(self.srcRig, scn)
         selectAndSetRestPose(self.trgRig, scn)
         t_pose.setTPose(self.trgRig, scn)
-        for banim in self.boneAnims.values():
+        for banim in list(self.boneAnims.values()):
             banim.insertTPoseFrame()
         scn.frame_set(0)
-        for banim in self.boneAnims.values():
+        for banim in list(self.boneAnims.values()):
             banim.getTPoseMatrix()
 
 
@@ -98,7 +98,7 @@ class CAnimation:
         try:
             for frame in frames:
                 scn.frame_set(frame)
-                for banim in self.boneAnims.values():
+                for banim in list(self.boneAnims.values()):
                     banim.retarget(frame)
         finally:
             unhideObjects(objects)
@@ -141,12 +141,12 @@ class CBoneAnim:
 
 
     def printResult(self, frame):
-        print(
+        print((
             "Retarget %s => %s\n" % (self.srcBone.name, self.trgBone.name) +
             "S %s\n" % self.srcBone.matrix +
             "T %s\n" % self.trgBone.matrix +
             "R %s\n" % (self.trgBone.matrix * self.srcBone.matrix.inverted())
-            )
+            ))
 
 
     def getParent(self, pb, anim):
@@ -187,11 +187,11 @@ class CBoneAnim:
     def getTPoseMatrix(self):
         self.aMatrix =  self.srcBone.matrix.inverted() * self.trgBone.matrix
         if not isRotationMatrix(self.trgBone.matrix):
-            print("* WARNING *\nTarget %s not rotation matrix:\n%s" % (self.trgBone.name, self.trgBone.matrix))
+            print(("* WARNING *\nTarget %s not rotation matrix:\n%s" % (self.trgBone.name, self.trgBone.matrix)))
         if not isRotationMatrix(self.srcBone.matrix):
-            print("* WARNING *\nSource %s not rotation matrix:\n%s" % (self.srcBone.name, self.srcBone.matrix))
+            print(("* WARNING *\nSource %s not rotation matrix:\n%s" % (self.srcBone.name, self.srcBone.matrix)))
         if not isRotationMatrix(self.aMatrix):
-            print("* WARNING *\nA %s not rotation matrix:\n%s" % (self.trgBone.name, self.aMatrix))
+            print(("* WARNING *\nA %s not rotation matrix:\n%s" % (self.trgBone.name, self.aMatrix)))
 
 
     def retarget(self, frame):
@@ -219,13 +219,13 @@ class CBoneAnim:
         if self.name == "upper_arm.L":
             print()
             print(self)
-            print("S ", self.srcMatrix)
-            print("T ", self.trgMatrix)
-            print(self.parent.name)
-            print("TP", self.parent.trgMatrix)
-            print("M1", mat1)
-            print("M2", mat2)
-            print("MB2", self.trgBone.matrix)
+            print(("S ", self.srcMatrix))
+            print(("T ", self.trgMatrix))
+            print((self.parent.name))
+            print(("TP", self.parent.trgMatrix))
+            print(("M1", mat1))
+            print(("M2", mat2))
+            print(("MB2", self.trgBone.matrix))
 
 
 def getLocks(pb, scn):
@@ -345,7 +345,7 @@ def retargetAnimation(context, srcRig, trgRig):
 
     source.ensureSourceInited(scn)
     source.setArmature(srcRig, scn)
-    print("Retarget %s --> %s" % (srcRig.name, trgRig.name))
+    print(("Retarget %s --> %s" % (srcRig.name, trgRig.name)))
 
     target.ensureTargetInited(scn)
     boneAssoc = target.getTargetArmature(trgRig, scn)
@@ -473,7 +473,7 @@ def loadRetargetSimplify(context, filepath):
     from . import load
     from .fkik import limbsBendPositive
 
-    print("\nLoad and retarget %s" % filepath)
+    print(("\nLoad and retarget %s" % filepath))
     time1 = time.clock()
     scn = context.scene
     trgRig = context.object
@@ -496,7 +496,7 @@ def loadRetargetSimplify(context, filepath):
     finally:
         restoreTargetData(trgRig, data)
     time2 = time.clock()
-    print("%s finished in %.3f s" % (filepath, time2-time1))
+    print(("%s finished in %.3f s" % (filepath, time2-time1)))
     return
 
 

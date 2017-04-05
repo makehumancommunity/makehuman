@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -42,7 +42,7 @@ import module3d
 import codecs
 import math
 import numpy as np
-from codecs import open  # TODO should Wavefront OBJ files contain unicode characters, or would it be better to strip them?
+import io  # TODO should Wavefront OBJ files contain unicode characters, or would it be better to strip them?
 
 def loadObjFile(path, obj = None):
     """
@@ -54,7 +54,7 @@ def loadObjFile(path, obj = None):
         name = os.path.splitext( os.path.basename(path) )[0]
         obj = module3d.Object3D(name)
 
-    objFile = open(path, 'rU', encoding="utf-8")
+    objFile = io.open(path, 'rU', encoding="utf-8")
 
     fg = None
     mtl = None
@@ -134,7 +134,7 @@ def loadObjFile(path, obj = None):
     # Sanity check for loose vertices
     strayVerts = []
     referencedVerts = set([ v for fvert in fverts for v in fvert ])
-    for vIdx in xrange(len(verts)):
+    for vIdx in range(len(verts)):
         if vIdx not in referencedVerts:
             strayVerts.append(vIdx)
     if len(strayVerts) > 0:
@@ -160,7 +160,7 @@ def writeObjFile(path, meshes, writeMTL=True, config=None, filterMaskedFaces=Tru
     if isinstance(path, file):
         fp = path
     else:
-        fp = open(path, 'w', encoding="utf-8")
+        fp = io.open(path, 'w', encoding="utf-8")
 
 
     fp.write(

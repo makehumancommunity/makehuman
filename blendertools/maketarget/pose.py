@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -72,7 +72,7 @@ def saveMhpFile(context, filepath):
         root = rig.pose.bones[roots[0]]
         writeMhpBones(fp, root, None)
         fp.close()
-        print("Mhp file %s saved" % mhppath)
+        print(("Mhp file %s saved" % mhppath))
 
 
 def writeMhpBones(fp, pb, log):
@@ -182,7 +182,7 @@ def loadMhpFile(context, filepath):
             else:
                 raise MHError("Unknown line in mcp file:\n%s" % line)
         fp.close()
-        print("Mhp file %s loaded" % mhppath)
+        print(("Mhp file %s loaded" % mhppath))
 
 
 
@@ -275,7 +275,7 @@ def saveBvhFile(context, filepath):
            root_transform_only = True
            )
         scn.objects.active = ob
-        print("Saved %s" % bvhpath)
+        print(("Saved %s" % bvhpath))
         return True
     else:
         return False
@@ -321,14 +321,14 @@ def loadBvhFile(context, filepath):
         scn.objects.active = ob
         scn.objects.unlink(tmp)
         del tmp
-        print("Loaded %s" % bvhpath)
+        print(("Loaded %s" % bvhpath))
         return True
     else:
         return False
 
 
 def copyPose(src, trg):
-    for name,srcBone in src.pose.bones.items():
+    for name,srcBone in list(src.pose.bones.items()):
         trgBone = trg.pose.bones[srcBone.name]
         s = srcBone.matrix_basis
         t = trgBone.matrix_basis.copy()
@@ -423,7 +423,7 @@ def readWeights(filepath, nVerts):
     fp.close()
 
     normedWeights = {}
-    for vn,data in weights.items():
+    for vn,data in list(weights.items()):
         wsum = 0.0
         for bone,w in data:
             wsum += w

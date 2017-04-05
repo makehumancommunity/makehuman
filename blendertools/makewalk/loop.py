@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # ##### BEGIN GPL LICENSE BLOCK #####
@@ -48,7 +48,7 @@ def normalizeRotCurves(scn, rig, fcurves, frames):
     for n,frame in enumerate(frames):
         scn.frame_set(frame)
         showProgress(n, frame, nFrames)
-        for (name, pb) in hasQuat.items():
+        for (name, pb) in list(hasQuat.items()):
             pb.rotation_quaternion.normalize()
             pb.keyframe_insert("rotation_quaternion", group=name)
 
@@ -86,8 +86,8 @@ def loopFCurves(context):
             if isLocation(mode) and name in iknames:
                 ikbones[name] = rig.pose.bones[name]
 
-        for pb in ikbones.values():
-            print("IK bone %s" % pb.name)
+        for pb in list(ikbones.values()):
+            print(("IK bone %s" % pb.name))
             scn.frame_set(minTime)
             head0 = pb.head.copy()
             scn.frame_set(maxTime)
@@ -245,14 +245,14 @@ def stitchActions(context):
 
     first1,last1 = getActionExtent(act1)
     first2,last2 = getActionExtent(act2)
-    frames1 = range(first1, frame1)
-    frames2 = range(frame2, last2+1)
-    frames = range(first1, last2+shift+1)
+    frames1 = list(range(first1, frame1))
+    frames2 = list(range(frame2, last2+1))
+    frames = list(range(first1, last2+shift+1))
     bmats1,_ = getBaseMatrices(act1, frames1, rig, True)
     bmats2,useLoc = getBaseMatrices(act2, frames2, rig, True)
 
     deletes = []
-    for bname in bmats2.keys():
+    for bname in list(bmats2.keys()):
         try:
             bmats1[bname]
         except KeyError:
@@ -262,7 +262,7 @@ def stitchActions(context):
 
     orders = {}
     locks = {}
-    for bname in bmats2.keys():
+    for bname in list(bmats2.keys()):
         pb = rig.pose.bones[bname]
         orders[bname],locks[bname] = getLocks(pb, scn)
 
@@ -273,7 +273,7 @@ def stitchActions(context):
 
         if frame <= frame1-delta:
             n1 = frame - first1
-            for bname,mats in bmats1.items():
+            for bname,mats in list(bmats1.items()):
                 pb = rig.pose.bones[bname]
                 mat = mats[n1]
                 if useLoc[bname]:
@@ -282,7 +282,7 @@ def stitchActions(context):
 
         elif frame >= frame1:
             n2 = frame - frame1
-            for bname,mats in bmats2.items():
+            for bname,mats in list(bmats2.items()):
                 pb = rig.pose.bones[bname]
                 mat = mats[n2]
                 if useLoc[bname]:
@@ -293,7 +293,7 @@ def stitchActions(context):
             n1 = frame - first1
             n2 = frame - frame1 + delta
             eps = factor*n2
-            for bname,mats2 in bmats2.items():
+            for bname,mats2 in list(bmats2.items()):
                 pb = rig.pose.bones[bname]
                 mats1 = bmats1[bname]
                 mat1 = mats1[n1]
@@ -373,7 +373,7 @@ def getBaseMatrices(act, frames, rig, useAll):
 
     basemats = {}
     useLoc = {}
-    for bname,fcurves in eulerFcurves.items():
+    for bname,fcurves in list(eulerFcurves.items()):
         useLoc[bname] = False
         order = rig.pose.bones[bname].rotation_mode
         fcu0,fcu1,fcu2 = fcurves
@@ -382,7 +382,7 @@ def getBaseMatrices(act, frames, rig, useAll):
             euler = Euler((fcu0.evaluate(frame), fcu1.evaluate(frame), fcu2.evaluate(frame)))
             rmats.append(euler.to_matrix().to_4x4())
 
-    for bname,fcurves in quatFcurves.items():
+    for bname,fcurves in list(quatFcurves.items()):
         useLoc[bname] = False
         fcu0,fcu1,fcu2,fcu3 = fcurves
         rmats = basemats[bname] = []
@@ -390,7 +390,7 @@ def getBaseMatrices(act, frames, rig, useAll):
             quat = Quaternion((fcu0.evaluate(frame), fcu1.evaluate(frame), fcu2.evaluate(frame), fcu3.evaluate(frame)))
             rmats.append(quat.to_matrix().to_4x4())
 
-    for bname,fcurves in locFcurves.items():
+    for bname,fcurves in list(locFcurves.items()):
         useLoc[bname] = True
         fcu0,fcu1,fcu2 = fcurves
         tmats = []
@@ -425,7 +425,7 @@ def shiftBoneFCurves(rig, scn):
     deltaMat = {}
     orders = {}
     locks = {}
-    for bname,bmats in basemats.items():
+    for bname,bmats in list(basemats.items()):
         pb = rig.pose.bones[bname]
         bmat = bmats[0]
         deltaMat[pb.name] = pb.matrix_basis * bmat.inverted()
@@ -434,7 +434,7 @@ def shiftBoneFCurves(rig, scn):
     for n,frame in enumerate(frames[1:]):
         scn.frame_set(frame)
         showProgress(n, frame, nFrames)
-        for bname,bmats in basemats.items():
+        for bname,bmats in list(basemats.items()):
             pb = rig.pose.bones[bname]
             mat = deltaMat[pb.name] * bmats[n+1]
             mat = correctMatrixForLocks(mat, orders[bname], locks[bname], pb, scn.McpUseLimits)
@@ -444,7 +444,7 @@ def shiftBoneFCurves(rig, scn):
 
 
 def printmat(mat):
-    print("   (%.4f %.4f %.4f %.4f)" % tuple(mat.to_quaternion()))
+    print(("   (%.4f %.4f %.4f %.4f)" % tuple(mat.to_quaternion())))
 
 
 class VIEW3D_OT_McpShiftBoneFCurvesButton(bpy.types.Operator):

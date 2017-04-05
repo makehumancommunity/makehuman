@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -67,7 +67,7 @@ def exportUVs(context):
     scn = context.scene
     ob = context.object
     (outpath, outfile) = mc.getFileName(ob, scn.MhUvsDir, "mhuv")
-    print("Creating UV file %s" % outfile)
+    print(("Creating UV file %s" % outfile))
     fp= open(outfile, "w", encoding="utf-8", newline="\n")
     printClothesHeader(fp, scn)
     fp.write("name %s\n" % ob.name.replace(" ","_"))
@@ -77,7 +77,7 @@ def exportUVs(context):
         fp.write("material %s\n" % matfile)
     printMhcloUvLayers(fp, ob, scn, False, offset=1)
     fp.close()
-    print("File %s written" % outfile)
+    print(("File %s written" % outfile))
 
 
 def exportHelperUVs(context):
@@ -132,12 +132,12 @@ def unwrapObject(ob, context):
 #
 
 def printItems(struct):
-    for (key,value) in struct.items():
-        print(key, value)
+    for (key,value) in list(struct.items()):
+        print((key, value))
 
 
 def projectUVs(bob, pob, context):
-    print("Projecting %s => %s" % (bob.name, pob.name))
+    print(("Projecting %s => %s" % (bob.name, pob.name)))
     (bob1, data) = restoreData(context)
     scn = context.scene
 
@@ -216,14 +216,14 @@ def projectUVs(bob, pob, context):
                 uvf.set(n, uv)
 
     (bVertList, bPairList, bEdgeList) = getSeams(bob, bTexFaces, context.scene)
-    for (en,fcs) in pSeamEdgeFaces.items():
+    for (en,fcs) in list(pSeamEdgeFaces.items()):
         pe = pob.data.edges[en]
         for m in range(2):
             pv = pverts[pe.vertices[m]]
             be = findClosestEdge(pv, bEdgeList, bverts, bedges)
             for pf in fcs:
                 fn = pf.index
-                for (n, rmd) in remains[fn].items():
+                for (n, rmd) in list(remains[fn].items()):
                     if rmd:
                         (uvf, pvn, vt, uv0) = rmd
                         if pv.index == pvn:
@@ -277,7 +277,7 @@ def getTexFaces(me, ln):
 
 def modifyTexFaces(meFaces, texFaces):
     from . import helpers
-    for idx,uvs in helpers.TexFaces.items():
+    for idx,uvs in list(helpers.TexFaces.items()):
         texFaces[idx].uvs = uvs
 
 
@@ -351,8 +351,8 @@ def getSeamVertFaceUv(pv, pe, pf, pVertTexVerts, pTexVertUv, be, bEdgeFaces, bTe
     bv1.select = True
     pv.select = True
     print(uv)
-    print("  ", buv0)
-    print("  ", buv1)
+    print(("  ", buv0))
+    print(("  ", buv1))
     foo
 
     return uv
@@ -424,10 +424,10 @@ def isSeam(vn0, vn1, f0, f1, vertTexVerts):
         return False
     else:
         return True
-        print("%d %s" % (vt00, uv00))
-        print("%d %s" % (vt01, uv01))
-        print("%d %s" % (vt10, uv10))
-        print("%d %s" % (vt11, uv11))
+        print(("%d %s" % (vt00, uv00)))
+        print(("%d %s" % (vt01, uv01)))
+        print(("%d %s" % (vt10, uv10)))
+        print(("%d %s" % (vt11, uv11)))
 
 
 def createFaceTable(verts, faces):
@@ -508,7 +508,7 @@ def autoSeams(context):
         print("Associate base and proxy verts. This can be slow.")
         for bv in bob.data.vertices:
             if bv.index % 1000 == 0:
-                print(bv.index)
+                print((bv.index))
             mindist = 1e12
             best = None
             for pv in pob.data.vertices:
@@ -518,7 +518,7 @@ def autoSeams(context):
                     mindist = vec.length
             closest[bv.index] = best
         saveClosest(closest)
-    for pv in closest.values():
+    for pv in list(closest.values()):
         pass
         #pv.select = True
 
@@ -560,8 +560,8 @@ def findEdge(verts, vertEdges):
         if e in vertEdges[vn2]:
             return e
     print(verts)
-    print(vertEdges[vn1])
-    print(vertEdges[vn2])
+    print((vertEdges[vn1]))
+    print((vertEdges[vn2]))
     raise RuntimeError("Cannot find edge")
 
 
@@ -596,7 +596,7 @@ def saveClosest(closest):
     fname = settingsFile("closest")
     fp = mc.openOutputFile(fname)
     if fp:
-        for bvn,pv in closest.items():
+        for bvn,pv in list(closest.items()):
             fp.write("%d %d\n" % (bvn, pv.index))
         fp.close()
 
@@ -607,7 +607,7 @@ def readClosets(pob):
     try:
         fp = open(fname, "rU")
     except FileNotFoundError:
-        print("Did not find %s." % fname)
+        print(("Did not find %s." % fname))
         return closest
     for line in fp:
         words = line.split()
@@ -656,8 +656,8 @@ def setSeams(context):
         best.use_seam = True
         best.select = True
         if se.index % 100 == 0:
-            print(se.index)
-    print("Seams set for object %s\n" % clothing.name)
+            print((se.index))
+    print(("Seams set for object %s\n" % clothing.name))
     return
 
 

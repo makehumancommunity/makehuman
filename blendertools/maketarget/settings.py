@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -55,7 +55,7 @@ def readDefaultSettings(context, tool):
     try:
         fp = open(fname, "rU")
     except:
-        print("Did not find %s. Using default settings" % fname)
+        print(("Did not find %s. Using default settings" % fname))
         return
 
     scn = context.scene

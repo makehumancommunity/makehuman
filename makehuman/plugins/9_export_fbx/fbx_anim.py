@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -51,11 +51,11 @@ TimeStep = 1528921092
 # TODO write an AnimationLayer for each animation!
 
 def countObjects(action):
-    return 2 + 3*len(action.keys())
+    return 2 + 3*len(list(action.keys()))
 
 
 def writeObjectDefs(fp, action, config):
-    ncurves = len(action.keys())
+    ncurves = len(list(action.keys()))
 
     properties_stack = [
         ("Description", "p_string", ""),
@@ -90,7 +90,7 @@ def writeObjectDefs(fp, action, config):
         fbx_binary.fbx_template_generate(elem, "AnimationCurve", 3*ncurves)
         return
 
-    import fbx_utils
+    from . import fbx_utils
 
     fp.write(
 """
@@ -143,7 +143,7 @@ def writeObjectProps(fp, action, skel, config):
         '    AnimationLayer: %d, "%s", "" {\n' % (lid, lkey) +
         '    }\n')
 
-    for bname in action.keys():
+    for bname in list(action.keys()):
         bone = skel.getBone(bname)
         writeAnimation(fp, bone, action, config)
 
@@ -229,7 +229,7 @@ def writeAnimationCurve(fp, idx, coord, bone, channel, data):
 def writeLinks(fp, action, config):
     ooLink(fp, 'AnimLayer::Layer0', 'AnimStack::Take_001', config)
 
-    for bname in action.keys():
+    for bname in list(action.keys()):
         for channel,type in [
                 ("T","Lcl Translation"),
                 ("R","Lcl Rotation"),
@@ -250,7 +250,7 @@ def writeLinks(fp, action, config):
 
 def writeTakes(fp, action, config):
     if config.binary:
-        import fbx_binary
+        from . import fbx_binary
         fbx_binary.fbx_takes_element(fp)
         return
 
@@ -264,7 +264,7 @@ Takes:  {
 """)
 
     if action:
-        npoints = len(action.values()[0])
+        npoints = len(list(action.values())[0])
         fp.write(
             '   Take: "Take_001" {\n' +
             '       FileName: "Take_001.tak"\n' +

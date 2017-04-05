@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -38,6 +38,7 @@ Development tool for blending unit poses together in an expression pose.
 
 import os
 import json
+import io
 
 import algos3d
 import gui3d
@@ -59,10 +60,10 @@ class ExprSlider(gui.Slider):
         self.taskview = taskview
 
     def _changed(self, value):
-        #print 'caller', self
+        #print ('caller', self)
         self.callEvent('onChange', self)
         # TODO temporary
-        print json.dumps(dict([(m,v) for m, v in self.taskview.modifiers.iteritems() if v != 0]))
+        print(json.dumps(dict([(m,v) for m, v in self.taskview.modifiers.items() if v != 0])))
         self.taskview.sliderChanged()
 
     def _changing(self, value):
@@ -132,7 +133,7 @@ class ExpressionMixerTaskView(gui3d.TaskView):
     def updatePose(self):
         posenames = []
         posevalues = []
-        for pname,pval in self.modifiers.items():
+        for pname,pval in list(self.modifiers.items()):
             if pval != 0:
                 posenames.append(pname)
                 posevalues.append(pval)
@@ -150,11 +151,11 @@ class ExpressionMixerTaskView(gui3d.TaskView):
         self.base_bvh = bvh.load(getpath.getSysDataPath('poseunits/face-poseunits.bvh'), allowTranslation="none")
         self.base_anim = self.base_bvh.createAnimationTrack(self.human.getBaseSkeleton(), name="Expression-Face-PoseUnits")
 
-        poseunit_json = json.load(open(getpath.getSysDataPath('poseunits/face-poseunits.json'),'rb'), object_pairs_hook=OrderedDict)
+        poseunit_json = json.load(io.open(getpath.getSysDataPath('poseunits/face-poseunits.json'),'r'), object_pairs_hook=OrderedDict)
         self.poseunit_names = poseunit_json['framemapping']
         log.message('unit pose frame count:%s', len(self.poseunit_names))
 
-        self.modifiers = dict(zip(self.poseunit_names, len(self.poseunit_names)*[0.0]))
+        self.modifiers = dict(list(zip(self.poseunit_names, len(self.poseunit_names)*[0.0])))
         self.base_poseunit = animation.PoseUnit(self.base_anim.name, self.base_anim.data[:self.base_anim.nBones*len(self.poseunit_names)], self.poseunit_names)
 
         self._load_gui()
@@ -185,7 +186,7 @@ class ExpressionMixerTaskView(gui3d.TaskView):
         self.sliderChanged()
 
     def sliderChanged(self):
-        if sum(v for m, v in self.modifiers.iteritems()) == 0:
+        if sum(v for m, v in self.modifiers.items()) == 0:
             self.saveBtn.setEnabled(False)
         else:
             self.saveBtn.setEnabled(True)
@@ -208,7 +209,7 @@ class ExpressionMixerTaskView(gui3d.TaskView):
 
     def saveCurrentPose(self, filename):
         import makehuman
-        unitpose_values = dict([(m,v) for m, v in self.modifiers.iteritems() if v != 0])
+        unitpose_values = dict([(m,v) for m, v in self.modifiers.items() if v != 0])
         if len(unitpose_values) == 0:
             raise RuntimeError("Requires at least one pose to be specified")
         tags = [t.strip() for t in self.tagsField.getValue().split(';')]
@@ -222,7 +223,7 @@ class ExpressionMixerTaskView(gui3d.TaskView):
                  "license": self.licenseField.getValue(),
                  "homepage": self.websiteField.getValue()
                 }
-        json.dump(data, open(filename, 'w'), indent=4)
+        json.dump(data, io.open(filename, 'w'), indent=4)
         log.message("Saved pose as %s" % filename)
 
     def resetTargets(self):

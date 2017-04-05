@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -43,7 +43,7 @@ class CSettings(mh.CSettings):
         mh.CSettings.__init__(self, version)
 
         if version == "alpha7":
-            self.topOfSkirt    = range(16691,16707)
+            self.topOfSkirt    = list(range(16691,16707))
 
             self.bodyPartVerts = {
                 "Body" : ((13868, 14308), (881, 13137), (10854, 10981)),
@@ -108,7 +108,7 @@ def getFileName(pob, folder, ext):
     outdir = '%s/%s' % (folder, name)
     outdir = os.path.realpath(os.path.expanduser(outdir))
     if not os.path.exists(outdir):
-        print("Creating directory %s" % outdir)
+        print(("Creating directory %s" % outdir))
         try:
             os.makedirs(outdir)
         except FileNotFoundError:
@@ -118,7 +118,7 @@ def getFileName(pob, folder, ext):
 
 
 def openOutputFile(filepath):
-    print("Create file \"%s\"" % filepath)
+    print(("Create file \"%s\"" % filepath))
     try:
         return open(filepath, "w", encoding="utf-8", newline="\n")
     except IOError:
@@ -126,7 +126,7 @@ def openOutputFile(filepath):
 
 
 def openInputFile(filepath):
-    print("Read file \"%s\"" % filepath)
+    print(("Read file \"%s\"" % filepath))
     try:
         return open(filepath, "rU")
     except IOError:

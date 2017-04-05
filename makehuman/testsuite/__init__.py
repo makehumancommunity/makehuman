@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -55,7 +55,7 @@ def runAll():
     global suite
     suite = TestSuite()
 
-    import test_blender
+    from . import test_blender
     test_blender.runTest(suite)
 
     printResults()
@@ -73,12 +73,13 @@ def printResults():
             warning += 1
         elif status.lower() == 'error':
             failed += 1
-            print 'Test %s %s FAILED: %s' % (result[0], result[1], result[3])
+            print('Test %s %s FAILED: %s' % (result[0], result[1], result[3]))
         else:
-            print "Test error: unknown status: %s" % status
+            print("Test error: unknown status: %s" % status)
 
-    print "Test results:"
+    print("Test results:")
     total = success + warning + failed
-    print "Successful: %s/%s (%s%%)" % (success, total, int((float(success)/total)*100))
-    print "Failed: %s/%s (%s%%)" % (failed, total, int((float(failed)/total)*100))
-    print "Warnings: %s/%s (%s%%)" % (warning, total, int((float(warning)/total)*100))
+    total = success + warning + failed
+    print("Successful: %s/%s (%s%%)" % (success, total, int((float(success)/total)*100)))
+    print("Failed: %s/%s (%s%%)" % (failed, total, int((float(failed)/total)*100)))
+    print("Warnings: %s/%s (%s%%)" % (warning, total, int((float(warning)/total)*100)))

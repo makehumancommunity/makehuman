@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -35,6 +35,7 @@ Abstract
 
 TODO
 """
+import io
 
 # We need this for gui controls
 import gui3d
@@ -44,9 +45,7 @@ import material
 import gui
 import log
 import os
-from cStringIO import StringIO
 from core import G
-from codecs import open
 
 class ScriptingView(gui3d.TaskView):
 
@@ -76,7 +75,7 @@ class ScriptingView(gui3d.TaskView):
                 return
 
             if(os.path.exists(filename)):
-                contents = open(filename, 'rU', encoding="utf-8").read()
+                contents = io.open(filename, 'rU', encoding="utf-8").read()
                 self.scriptText.setText(contents)
                 dlg = gui.Dialog()
                 dlg.prompt("Load script","File was loaded in an acceptable manner","OK")
@@ -91,7 +90,7 @@ class ScriptingView(gui3d.TaskView):
             if not filename:
                 return
 
-            with open(filename, "w", encoding="utf-8") as f:
+            with io.open(filename, "w", encoding="utf-8") as f:
                 f.write(self.scriptText.getText())
             dlg = gui.Dialog()
             dlg.prompt("Save script","File was written in an acceptable manner","OK")
@@ -604,8 +603,8 @@ class Scripting():
 
     def printDetailStack(self):
         log.message("SCRIPT: printDetailStack()")
-        for target in self.human.targetsDetailStack.keys():
-            print str(self.human.targetsDetailStack[target]) + "\t" + target
+        for target in list(self.human.targetsDetailStack.keys()):
+            print(str(self.human.targetsDetailStack[target]) + "\t" + target)
 
     def setAge(self,age):
         log.message("SCRIPT: setAge(" + str(age) + ")")
@@ -630,8 +629,8 @@ class Scripting():
     def getModelingParameters(self):
         log.message("SCRIPT: getModelingParameters()")
         modifierNamesList = sorted( self.human.modifierNames )
-        print "Modifier names:"
-        print "\n".join( modifierNamesList )
+        print("Modifier names:")
+        print("\n".join( modifierNamesList ))
 
     def updateModelingParameter(self, parameterName, value):
         log.message("SCRIPT: updateModelingParameter(parameterName, value)")
@@ -642,7 +641,7 @@ class Scripting():
 
     def updateModelingParameters(self, dictOfParameterNameAndValue):
         log.message("SCRIPT: updateModelingParameters("+str(dictOfParameterNameAndValue)+")")
-        for key, value in dictOfParameterNameAndValue.iteritems():
+        for key, value in dictOfParameterNameAndValue.items():
             modifier = self.human.getModifier(key)
             modifier.setValue(value)
         self.human.applyAllTargets()
@@ -773,33 +772,33 @@ class Scripting():
         log.message("SCRIPT: printCameraInfo()")
 
         # TODO update to new camera
-        print "eyeX:\t" + str(self.cam.eyeX)
-        print "eyeY:\t" + str(self.cam.eyeY)
-        print "eyeZ:\t" + str(self.cam.eyeZ)
-        print "focusX:\t" + str(self.cam.focusX)
-        print "focusY:\t" + str(self.cam.focusY)
-        print "focusZ:\t" + str(self.cam.focusZ)
-        print "upX:\t" + str(self.cam.upX)
-        print "upY:\t" + str(self.cam.upY)
-        print "upZ:\t" + str(self.cam.upZ)
+        print("eyeX:\t" + str(self.cam.eyeX))
+        print("eyeY:\t" + str(self.cam.eyeY))
+        print("eyeZ:\t" + str(self.cam.eyeZ))
+        print("focusX:\t" + str(self.cam.focusX))
+        print("focusY:\t" + str(self.cam.focusY))
+        print("focusZ:\t" + str(self.cam.focusZ))
+        print("upX:\t" + str(self.cam.upX))
+        print("upY:\t" + str(self.cam.upY))
+        print("upZ:\t" + str(self.cam.upZ))
 
     def printPositionInfo(self):
         log.message("SCRIPT: printPositionInfo()")
 
         pos = self.human.getPosition();
 
-        print "posX:\t" + str(pos[0])
-        print "posY:\t" + str(pos[2])
-        print "posZ:\t" + str(pos[1])
+        print("posX:\t" + str(pos[0]))
+        print("posY:\t" + str(pos[2]))
+        print("posZ:\t" + str(pos[1]))
 
     def printRotationInfo(self):
         log.message("SCRIPT: printRotationInfo()")
 
         rot = self.human.getRotation();
 
-        print "rotX:\t" + str(rot[0])
-        print "rotY:\t" + str(rot[2])
-        print "rotZ:\t" + str(rot[1])
+        print("rotX:\t" + str(rot[0]))
+        print("rotY:\t" + str(rot[2]))
+        print("rotZ:\t" + str(rot[1]))
 
     def getZoom(self):
         log.message("SCRIPT: getZoom()")
@@ -818,7 +817,7 @@ class Scripting():
 MHScript = None
 
 def executeScript(scriptSource):
-    print scriptSource
+    print(scriptSource)
     try:
         exec(scriptSource)
         dlg = gui.Dialog()

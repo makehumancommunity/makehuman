@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -82,7 +82,7 @@ def isOkHuman(ob):
 
 
 def getLastVertices():
-    vlist = [ vs[1] for vs in theSettings.vertices.values()]
+    vlist = [ vs[1] for vs in list(theSettings.vertices.values())]
     vlist.append(theSettings.nTotalVerts)
     vlist.sort()
     return vlist
@@ -356,7 +356,7 @@ def findBestVerts(scn, humanGroup, pExactIndex, hum, clo):
         gname = bg.name
         if mv:
             if pv.index % 100 == 0:
-                print(pv.index, mv.index, mindist, gname, pindex, bindex)
+                print((pv.index, mv.index, mindist, gname, pindex, bindex))
         else:
             msg = (
             "Failed to find vert %d in group %s.\n" % (pv.index, gname) +
@@ -390,10 +390,10 @@ def findBestVerts(scn, humanGroup, pExactIndex, hum, clo):
         # rigid[vn] = False
 
     rgfaces = {}
-    for idx in humanGroup.keys():
+    for idx in list(humanGroup.keys()):
         bg,bverts = humanGroup[idx]
         if isRigidVGroup(bg):
-            print("RIGID", bg.name)
+            print(("RIGID", bg.name))
             if len(bverts) != 3:
                 raise MHError("Human vertex group \"%s\"\nmust contain exactly three vertices" % humanGroup[idx].name)
             v0,v1,v2 = bverts
@@ -548,11 +548,11 @@ def cornerWeights(pv, v0, v1, v2, hum, clo):
 
     det = a00*a11 - a01*a10
     if abs(det) < 1e-20:
-        print("Clothes vert %d mapped to degenerate triangle (det = %g) with corners" % (pv.index, det))
-        print("r0 ( %.6f  %.6f  %.6f )" % (r0[0], r0[1], r0[2]))
-        print("r1 ( %.6f  %.6f  %.6f )" % (r1[0], r1[1], r1[2]))
-        print("r2 ( %.6f  %.6f  %.6f )" % (r2[0], r2[1], r2[2]))
-        print("A [ %.6f %.6f ]\n  [ %.6f %.6f ]" % (a00,a01,a10,a11))
+        print(("Clothes vert %d mapped to degenerate triangle (det = %g) with corners" % (pv.index, det)))
+        print(("r0 ( %.6f  %.6f  %.6f )" % (r0[0], r0[1], r0[2])))
+        print(("r1 ( %.6f  %.6f  %.6f )" % (r1[0], r1[1], r1[2])))
+        print(("r2 ( %.6f  %.6f  %.6f )" % (r2[0], r2[1], r2[2])))
+        print(("A [ %.6f %.6f ]\n  [ %.6f %.6f ]" % (a00,a01,a10,a11)))
         selectVerts([pv], clo)
         selectVerts([v0, v1, v2], hum)
         raise MHError("Singular matrix in cornerWeights")
@@ -687,7 +687,7 @@ def writeClothes(context, hum, clo, data, matfile):
     printDeleteVerts(fp, hum)
     printMhcloUvLayers(fp, clo, scn, True)
     fp.close()
-    print("%s done" % outfile)
+    print(("%s done" % outfile))
 
 
 def writeShear(fp, string, vnums, hverts, useDistance):
@@ -756,7 +756,7 @@ def reexportMhclo(context):
     matfile = materials.writeMaterial(clo, scn.MhClothesDir)
 
     lines = []
-    print("Reading clothes file %s" % outfile)
+    print(("Reading clothes file %s" % outfile))
     fp = open(outfile, "r")
     for line in fp:
         lines.append(line)
@@ -784,7 +784,7 @@ def reexportMhclo(context):
             fp.write(line)
     printMhcloUvLayers(fp, clo, scn, True)
     fp.close()
-    print("%s written" % outfile)
+    print(("%s written" % outfile))
     return
 
 
@@ -913,12 +913,12 @@ def exportObjFile(context):
         fp.write("\n".join(flist))
 
     fp.close()
-    print(objfile, "exported")
+    print((objfile, "exported"))
 
     npzfile = os.path.splitext(objfile)[0] + ".npz"
     try:
         os.remove(npzfile)
-        print(npzfile, "removed")
+        print((npzfile, "removed"))
     except FileNotFoundError:
         pass
 
@@ -1144,13 +1144,13 @@ def checkNoTriangles(scn, ob):
             strayVerts[vn] = False
             nPoles[vn] += 1
 
-    stray = [vn for vn in strayVerts.keys() if strayVerts[vn]]
+    stray = [vn for vn in list(strayVerts.keys()) if strayVerts[vn]]
     if len(stray) > 0:
         highlightVerts(scn, ob, stray)
         msg = "Object %s\ncan not be used for clothes creation\nbecause it has stray verts:\n  %s" % (ob.name, stray)
         raise MHError(msg)
 
-    excess = [vn for vn in nPoles.keys() if nPoles[vn] > 8]
+    excess = [vn for vn in list(nPoles.keys()) if nPoles[vn] > 8]
     if len(excess) > 0:
         highlightVerts(scn, ob, excess)
         msg = "Object %s\ncan not be used for clothes creation\nbecause it has verts with more than 8 poles:\n  %s" % (ob.name, excess)
@@ -1258,8 +1258,8 @@ def rightVGroupOnLeftSide(ob, sign, gname, suffixes):
                 if v.co[0]*sign > 1.0:  # 1 dm into wrong territory. Should maybe be smaller.
                     for g in v.groups:
                         if g.group == gn:
-                            print(ob, sign, gname, suffixes)
-                            print(vgrp.name, v.index, v.co)
+                            print((ob, sign, gname, suffixes))
+                            print((vgrp.name, v.index, v.co))
                             return ("%s vertex on wrong side in vertex group %s" % (gname, vgrp.name))
     return ""
 
@@ -1280,7 +1280,7 @@ def checkSingleVertexGroups(clo, scn):
                         if vg.name == "Exact":
                             n -= 1
                         else:
-                            print("  ", vg.name)
+                            print(("  ", vg.name))
             if n != 1:
                 vn = v.index
                 scn.objects.active = clo
@@ -1379,7 +1379,7 @@ def writeValue(ext, arg, exclude, pad, depth, fp):
         return
 
     if ext == 'end':
-        print("RENAME end", arg)
+        print(("RENAME end", arg))
         ext = '\\ end'
 
     typ = type(arg)
@@ -1414,7 +1414,7 @@ def writeValue(ext, arg, exclude, pad, depth, fp):
             return
         if (type(r) == float) and (type(g) == float) and (type(b) == float):
             fp.write("%s%s (%.4f,%.4f,%.4f) ;\n" % (pad, ext, r, g, b))
-            print(ext, arg)
+            print((ext, arg))
     return
 
 ###################################################################################
@@ -1497,10 +1497,10 @@ def setZDepth(scn):
 def printVertNums(context):
     ob = context.object
     bpy.ops.object.mode_set(mode='OBJECT')
-    print("Verts in ", ob)
+    print(("Verts in ", ob))
     for v in ob.data.vertices:
         if v.select:
-            print(v.index)
+            print((v.index))
     print("End verts")
     bpy.ops.object.mode_set(mode='EDIT')
 
@@ -1534,7 +1534,7 @@ def deleteHelpers(context):
 
 def autoVertexGroupsIfNecessary(ob, type='Selected', htype='Default'):
     if len(ob.vertex_groups) == 0:
-        print("Found no vertex groups for %s." % ob)
+        print(("Found no vertex groups for %s." % ob))
         autoVertexGroups(ob, type, htype)
 
 
@@ -1550,7 +1550,7 @@ def autoVertexGroups(ob, type, htype):
         verts = getHumanVerts(ob.data, type, htype)
     else:
         verts = ob.data.vertices
-    for v in verts.values():
+    for v in list(verts.values()):
         vn = v.index
         if v.co[0] > 0.01:
             left.add([vn], 1.0, 'REPLACE')
@@ -1563,9 +1563,9 @@ def autoVertexGroups(ob, type, htype):
                 left.add([vn], 1.0, 'REPLACE')
                 right.add([vn], 1.0, 'REPLACE')
     if ob.MhHuman:
-        print("Vertex groups auto assigned to human %s, part %s." % (ob, type.lower()))
+        print(("Vertex groups auto assigned to human %s, part %s." % (ob, type.lower())))
     else:
-        print("Vertex groups auto assigned to clothing %s" % ob)
+        print(("Vertex groups auto assigned to clothing %s" % ob))
 
 
 def getHumanVerts(me, type, htype):
@@ -1594,7 +1594,7 @@ def getHelperVerts(me, htype):
         checkEnoughVerts(me, htype, theSettings.clothesVerts[0])
         for vn in range(theSettings.clothesVerts[0], theSettings.clothesVerts[1]):
             verts[vn] = me.vertices[vn]
-    elif htype in vnums.keys():
+    elif htype in list(vnums.keys()):
         checkEnoughVerts(me, htype, vnums[htype][0])
         for vn in range(vnums[htype][0], vnums[htype][1]):
             verts[vn] = me.vertices[vn]
@@ -1640,7 +1640,7 @@ def selectHumanPart(ob, btype, htype):
     if isOkHuman(ob):
         clearSelection()
         verts = getHumanVerts(ob.data, btype, htype)
-        for v in verts.values():
+        for v in list(verts.values()):
             v.select = True
         bpy.ops.object.mode_set(mode='EDIT')
     else:
@@ -1659,7 +1659,7 @@ def clearSelection():
 
 
 def checkAndUnVertexDiamonds(context, ob):
-    print("Unvertex diamonds in %s" % ob)
+    print(("Unvertex diamonds in %s" % ob))
     scn = context.scene
     bpy.ops.object.mode_set(mode='OBJECT')
     scn.objects.active = ob
@@ -1711,7 +1711,7 @@ def readDefaultSettings(context):
     try:
         fp = open(fname, "rU")
     except FileNotFoundError:
-        print("Did not find %s. Using default settings" % fname)
+        print(("Did not find %s. Using default settings" % fname))
         return
 
     scn = context.scene
@@ -1738,7 +1738,7 @@ def saveDefaultSettings(context):
     fname = settingsFile("settings")
     fp = mc.openOutputFile(fname)
     scn = context.scene
-    for (prop, value) in scn.items():
+    for (prop, value) in list(scn.items()):
         if prop[0:2] == "MC":
             if type(value) == int:
                 fp.write("%s int %s\n" % (prop, value))
@@ -1789,7 +1789,7 @@ class VIEW3D_OT_TestClothesButton(bpy.types.Operator):
             testMhcloFile(context, self.properties.filepath)
         except MHError:
             handleMHError(context)
-        print("%s loaded" % self.properties.filepath)
+        print(("%s loaded" % self.properties.filepath))
         return {'FINISHED'}
 
     def invoke(self, context, event):
@@ -1881,7 +1881,7 @@ def init():
     bpy.types.Scene.MCSelfClothed = BoolProperty(default=False)
 
     enums = []
-    for name in theSettings.vertices.keys():
+    for name in list(theSettings.vertices.keys()):
         enums.append((name,name,name))
 
     bpy.types.Scene.MCKeepVertsUntil = EnumProperty(

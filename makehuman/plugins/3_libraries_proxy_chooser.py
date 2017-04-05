@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -56,8 +56,8 @@ class ProxyFileSort(fc.FileSort):
 
         faces = 0
         try:
-            from codecs import open
-            f = open(filename.replace('.proxy', '.obj'), 'rU', encoding="utf-8")
+            import io
+            f = io.open(filename.replace('.proxy', '.obj'), 'rU', encoding="utf-8")
             for line in f:
                 lineData = line.split()
                 if lineData and lineData[0] == 'f':

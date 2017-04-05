@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -41,7 +41,8 @@ A generic cache for storing metadata for files
 import os
 import getpath
 import log
-import cPickle as pickle
+import pickle as pickle
+import io
 
 CACHE_FORMAT_VERSION = 1  # You can use any type, strings or ints, only equality test is done on these
 
@@ -66,7 +67,7 @@ class FileCache(object):
 
     def save(self):
         """Save filecache to file"""
-        f = open(self.filepath, "wb")
+        f = io.open(self.filepath, "wb")
         pickle.dump(self, f, protocol=2)
         f.close()
 
@@ -79,7 +80,7 @@ class FileCache(object):
         """
         Remove non-existing entries from this cache
         """
-        for fileId in self._cache.keys():
+        for fileId in list(self._cache.keys()):
             if not os.path.exists(fileId):
                 try:
                     del self._cache[fileId]
@@ -130,7 +131,7 @@ class FileCache(object):
         fileExts = [f[1:].lower() if f.startswith('.') else f.lower() for f in fileExts]
 
         files = []
-        oldEntries = dict((key, True) for key in self._cache.keys()) # lookup dict for old entries in cache
+        oldEntries = dict((key, True) for key in list(self._cache.keys())) # lookup dict for old entries in cache
         for folder in paths:
             files.extend(getpath.search(folder, fileExts, recursive=True, mutexExtensions=True))
         for filepath in files:
@@ -154,7 +155,7 @@ class FileCache(object):
 
         if removeOldEntries:
             """Remove entries from cache that no longer exist"""
-            for key in oldEntries.keys():
+            for key in list(oldEntries.keys()):
                 try:
                     del self._cache[key]
                 except:
@@ -170,10 +171,10 @@ class FileCache(object):
         return len(self._cache)
 
     def items(self):
-        return self._cache.items()
+        return list(self._cache.items())
 
     def keys(self):
-        return self._cache.keys()
+        return list(self._cache.keys())
 
 
 class MetadataCacher(object):
@@ -265,7 +266,7 @@ class MetadataCacher(object):
 
     def getAllTags(self):
         result = set()
-        for (path, metadata) in self._filecache.items():
+        for (path, metadata) in list(self._filecache.items()):
             tags = self.getTagsFromMetadata(metadata[1:])
             result = result.union(tags)
         return result
@@ -321,7 +322,7 @@ def loadCache(filepath, expected_version=None):
 
     try:
         if os.path.isfile(filepath):
-            f = open(filepath, "rb")
+            f = io.open(filepath, "rb")
             result = pickle.load(f)
             f.close()
             if result.version != expected_version:

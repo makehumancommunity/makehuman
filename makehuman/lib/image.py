@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -104,7 +104,7 @@ class Image(object):
             if isinstance(data, Image):
                 # Share data between images.
                 self._data = data.data
-            elif isinstance(data, basestring):
+            elif isinstance(data, str):
                 self._data = image_lib.load(data)
             else:   # Data array.
                 self._data = data
@@ -348,7 +348,7 @@ def _isQPixmap(img):
     loaded in the application.
     """
     import sys
-    if "PyQt4" in sys.modules.keys():
+    if "PyQt4" in list(sys.modules.keys()):
         import image_qt
         return isinstance(img, image_qt.QtGui.QPixmap)
     else:

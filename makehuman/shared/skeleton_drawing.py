@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """ 
@@ -138,9 +138,9 @@ def getVertBoneMapping(skel, skeletonMesh):
 
     offset = 0
     for bone in skel.getBones():    # We assume that skeleton mesh has bones in breadt-first order
-        verts = range(offset, offset + nVertsPerBone)
+        verts = list(range(offset, offset + nVertsPerBone))
         weights = np.repeat(1, nVertsPerBone)
-        vertBoneMapping[bone.name] = zip(verts, weights)
+        vertBoneMapping[bone.name] = list(zip(verts, weights))
         offset = offset + nVertsPerBone
     return VertexBoneWeights(vertBoneMapping)# , nVertsPerBone*skel.getBoneCount())
 

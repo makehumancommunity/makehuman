@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -110,7 +110,7 @@ class ExportTaskView(gui3d.TaskView):
                     if not gui3d.app.prompt("File exists", "The file already exists. Overwrite?", "Yes", "No"):
                         break;
                 exporter.export(gui3d.app.selectedHuman, filename)
-                gui3d.app.status([u'The mesh has been exported to',u' %s.'], dir)
+                gui3d.app.status(['The mesh has been exported to',' %s.'], dir)
                 self.showOverwriteWarning = False
                 break
             else:
@@ -192,7 +192,7 @@ class ExportTaskView(gui3d.TaskView):
         if not self._requiresUpdate:
             return
 
-        for group in self.boxes.keys():
+        for group in list(self.boxes.keys()):
             for eIdx, r in enumerate(self.boxes[group].children):
                 self.boxes[group].removeWidget(r)
 

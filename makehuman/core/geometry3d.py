@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """ 
@@ -365,7 +365,7 @@ class GridMesh(module3d.Object3D):
         vBegin = (-(columns/2)) * spacing
         vEnd = vBegin + (columns * spacing)
         # Horizontal lines
-        for i in xrange(rows):
+        for i in range(rows):
             pos = hBegin + (i * spacing)
             if plane == 1:
                 v[2*i]    = [pos, offset, vBegin      ]
@@ -376,7 +376,7 @@ class GridMesh(module3d.Object3D):
             f[i] = [2*i, 2*i +1]
 
         # Vertical lines
-        for i in xrange(columns):
+        for i in range(columns):
             pos = vBegin + (i * spacing)
             if plane == 1:
                 v[2* (rows+i)   ] = [hBegin,       offset, pos]
@@ -394,8 +394,8 @@ class GridMesh(module3d.Object3D):
             spacing = float(spacing) / self.subgrids
 
             # Horizontal lines
-            sub = self.mainGridEnd/2
-            for i in xrange(hBoxes*(subgrids-1)):
+            sub = self.mainGridEnd//2
+            for i in range(hBoxes*(subgrids-1)):
                 boxOffset = (spacing * (i // (subgrids-1)))
                 pos = spacing + hBegin + (i * spacing) + boxOffset
                 if plane == 1:
@@ -408,7 +408,7 @@ class GridMesh(module3d.Object3D):
 
             # Vertical lines
             sub += hBoxes*(subgrids-1)
-            for i in xrange(vBoxes*(subgrids-1)):
+            for i in range(vBoxes*(subgrids-1)):
                 boxOffset = (spacing * (i // (subgrids-1)))
                 pos = spacing + vBegin + (i * spacing) + boxOffset
                 if plane == 1:
@@ -481,9 +481,9 @@ class GridMesh(module3d.Object3D):
                 mask = self.face_mask
                 #mask = np.ones(self.getFaceCount(), dtype=np.bool)
                 if subgridVisible:
-                    mask[self.mainGridEnd/2:] = True
+                    mask[self.mainGridEnd//2:] = True
                 else:
-                    mask[self.mainGridEnd/2:] = False
+                    mask[self.mainGridEnd//2:] = False
                 self.changeFaceMask(mask)
                 self.updateIndexBufferFaces()
 

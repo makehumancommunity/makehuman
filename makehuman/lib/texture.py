@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -62,7 +62,7 @@ class Texture(object):
             except Exception as e:
                 log.error("Failed to write GL debug info to debug dump: %s", format(str(e)))
         if cls._powers is None:
-            cls._powers = [2**i for i in xrange(20)]
+            cls._powers = [2**i for i in range(20)]
 
         self.textureId = glGenTextures(1)
         self.width = 0
@@ -81,7 +81,7 @@ class Texture(object):
     def __del__(self):
         try:
             glDeleteTextures(self.textureId)
-        except StandardError:
+        except Exception:
             pass
 
     @staticmethod
@@ -161,7 +161,7 @@ class Texture(object):
         log.debug('initTexture: %s, %s, %s', width, height, use_mipmaps)
 
     def loadImage(self, image):
-        if isinstance(image, (str, unicode)):
+        if isinstance(image, str):
             image = Image(image)
 
         pixels = image.flip_vertical().data
@@ -172,7 +172,7 @@ class Texture(object):
         if not self.textureId:
             raise RuntimeError("Texture is empty, cannot load a sub texture into it")
 
-        if isinstance(image, (str, unicode)):
+        if isinstance(image, str):
             image = Image(image)
 
         internalFormat, format = self.getFormat(image.components)
@@ -235,7 +235,7 @@ def getTexture(path, cache=None):
             try:
                 img = Image(path=path)
                 texture.loadImage(img)
-            except RuntimeError, text:
+            except RuntimeError as text:
                 log.error("%s", text, exc_info=True)
                 return
             else:
@@ -245,7 +245,7 @@ def getTexture(path, cache=None):
             log.debug("Creating new texture for image %s.", path)
             img = Image(path=path)
             texture = Texture(img)
-        except RuntimeError, text:
+        except RuntimeError as text:
             log.error("Error loading texture %s", path, exc_info=True)
             texture = False
         else:
@@ -264,7 +264,7 @@ def reloadTextures():
     for path in _textureCache:
         try:
             _textureCache[path].loadImage(path)
-        except RuntimeError, _:
+        except RuntimeError as _:
             log.error("Error loading texture %s", path, exc_info=True)
 
 def reloadTexture(path):
@@ -279,6 +279,6 @@ def reloadTexture(path):
         return
     try:
         _textureCache[path].loadImage(path)
-    except RuntimeError, text:
+    except RuntimeError as text:
         log.error("Error loading texture %s", path, exc_info=True)
 

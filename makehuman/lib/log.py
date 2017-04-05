@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -48,6 +48,7 @@ from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL
 
 from core import G
 from getpath import getPath, getSysDataPath
+import collections
 
 NOTICE = 25
 MESSAGE = logging.INFO
@@ -86,9 +87,9 @@ def _toUnicode(msg, *args):
         else:
             raise
 
-    if isinstance(msg_, unicode):
+    if isinstance(msg_, str):
         return msg_
-    elif isinstance(msg_, basestring):
+    elif isinstance(msg_, str):
         try:
             return msg_.decode(sys.getdefaultencoding())
         except UnicodeError:
@@ -145,7 +146,7 @@ def notice(format, *args, **kwargs):
     logging.log(NOTICE, format, *args, **kwargs)
 '''
 try:
-    exec(code.compile_command(_notice_src, logging.info.func_code.co_filename))
+    exec(code.compile_command(_notice_src, logging.info.__code__.co_filename))
 except:
     def notice(format, *args, **kwargs):
         logging.log(NOTICE, format, *args, **kwargs)
@@ -220,7 +221,7 @@ def _logger_notice(self, msg, *args, **kwargs):
     self.log(NOTICE, msg, *args, **kwargs)
 '''
 try:
-    exec(code.compile_command(_logger_notice_src, logging.info.func_code.co_filename))
+    exec(code.compile_command(_logger_notice_src, logging.info.__code__.co_filename))
 except:
     def _logger_notice(self, format, *args, **kwargs):
         self.log(NOTICE, format, *args, **kwargs)
@@ -259,7 +260,7 @@ def init():
     config()
 
     # Compatibility test for Python 2.6 logging module
-    if hasattr(logging, "captureWarnings") and callable(logging.captureWarnings):
+    if hasattr(logging, "captureWarnings") and isinstance(logging.captureWarnings, collections.Callable):
         logging.captureWarnings(True)
 
     try:

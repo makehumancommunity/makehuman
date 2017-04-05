@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -44,7 +44,7 @@ import numpy as np
 import os
 import zipfile
 import fnmatch
-from codecs import open
+import io
 
 def getAllFiles(rootPath, filterStrArr):
     result = [ None ]*len(filterStrArr)
@@ -87,15 +87,15 @@ if __name__ == '__main__':
                     os.remove(lname)
                 os.remove(iname)
                 os.remove(vname)
-                print "[%.0f%% done] converted target %s" % (100*(float(i)/float(len(allTargets))), path)
-            except None, e:
+                print("[%.0f%% done] converted target %s" % (100*(float(i)/float(len(allTargets))), path))
+            except None as e:
                 raise e
-                print 'error converting target %s' % path
+                print('error converting target %s' % path)
 
-    print "Writing images list"
-    with open('data/images.list', 'w', encoding="utf-8") as f:
+    print("Writing images list")
+    with io.open('data/images.list', 'w', encoding="utf-8") as f:
         allImages = allFiles[1]
         for path in allImages:
             path = path.replace('\\','/')
             f.write(path + '\n')
-    print "All done."
+    print("All done.")

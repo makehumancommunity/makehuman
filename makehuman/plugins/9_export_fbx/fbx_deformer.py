@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -203,7 +203,7 @@ def writeDeformer(fp, name, config):
         fbx_binary.fbx_data_deformer(elem, key, id, properties)
         return
 
-    import fbx_utils
+    from . import fbx_utils
 
     fp.write(
 '    Deformer: %d, "%s", "Skin" {' % (id, key) +

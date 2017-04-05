@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -37,7 +37,8 @@ Definitions of scene objects and the scene class.
 .mhscene file structure.
 """
 
-import cPickle as pickle
+import pickle as pickle
+import io
 
 import log
 import managed_file
@@ -85,7 +86,7 @@ class SceneObject(object):
         self._attributes = sorted(attributes.keys())
         self._attrver = {}
 
-        for (attrname, attr) in attributes.items():
+        for (attrname, attr) in list(attributes.items()):
 
             # Version control system for backwards compatibility
             # with older mhscene files.
@@ -205,7 +206,7 @@ class Scene(object):
         log.debug('Loading scene file: %s', path)
 
         try:
-            hfile = open(path, 'rb')
+            hfile = io.open(path, 'rb')
         except IOError as e:
             log.warning('Could not load %s: %s', path, e[1])
             return False
@@ -227,7 +228,7 @@ class Scene(object):
                 self.environment.load(hfile)
                 nlig = pickle.load(hfile)
                 self.lights = []
-                for i in xrange(nlig):
+                for i in range(nlig):
                     light = Light(self)
                     light.load(hfile)
                     self.lights.append(light)
@@ -255,7 +256,7 @@ class Scene(object):
         log.debug('Saving scene file: %s', path)
 
         try:
-            hfile = open(path, 'wb')
+            hfile = io.open(path, 'wb')
         except IOError as e:
             log.warning('Could not save %s: %s', path, e[1])
             return False

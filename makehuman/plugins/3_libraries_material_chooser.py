@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -117,7 +117,7 @@ class MaterialTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     def applyClothesMaterial(self, uuid, filename):
         human = self.human
-        if uuid not in human.clothesProxies.keys():
+        if uuid not in list(human.clothesProxies.keys()):
             log.warning("Cannot set material for clothes with UUID %s, no such item", uuid)
             return False
         clo = human.clothesProxies[uuid].object
@@ -129,7 +129,7 @@ class MaterialTaskView(gui3d.TaskView, filecache.MetadataCacher):
         Get the currently set material for clothing item with specified UUID.
         """
         human = self.human
-        if uuid not in human.clothesProxies.keys():
+        if uuid not in list(human.clothesProxies.keys()):
             return None
         clo = human.clothesProxies[uuid].object
         return clo.material.filename
@@ -227,7 +227,7 @@ class MaterialTaskView(gui3d.TaskView, filecache.MetadataCacher):
                 filepath = self.getMaterialPath(filepath, proxy.file)
                 proxy.object.material = material.fromFile(filepath)
                 return
-            elif not uuid in human.clothesProxies.keys():
+            elif not uuid in list(human.clothesProxies.keys()):
                 if strict:
                     raise RuntimeError("Could not load material for proxy with uuid %s (%s)! No such proxy." % (uuid, name))
                 log.error("Could not load material for proxy with uuid %s (%s)! No such proxy.", uuid, name)
@@ -272,7 +272,7 @@ class MaterialTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     def saveHandler(self, human, file):
         file.write('skinMaterial %s\n' % self.getRelativeMaterialPath(human.material.filename))
-        for name, pxy in human.clothesProxies.items():
+        for name, pxy in list(human.clothesProxies.items()):
             clo = pxy.object
             if clo:
                 proxy = human.clothesProxies[name]

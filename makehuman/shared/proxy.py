@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -37,6 +37,7 @@ TODO
 """
 
 import os
+import io
 import math
 import numpy as np
 from core import G
@@ -192,7 +193,7 @@ class Proxy:
         Reconstruct reverse vertex (and weights) mapping
         """
         self.vertWeights = {}
-        for pxy_vIdx in xrange(self.ref_vIdxs.shape[0]):
+        for pxy_vIdx in range(self.ref_vIdxs.shape[0]):
             _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 0], pxy_vIdx, self.weights[pxy_vIdx, 0])
             _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 1], pxy_vIdx, self.weights[pxy_vIdx, 1])
             _addProxyVertWeight(self.vertWeights, self.ref_vIdxs[pxy_vIdx, 2], pxy_vIdx, self.weights[pxy_vIdx, 2])
@@ -274,7 +275,7 @@ class Proxy:
         WEIGHT_THRESHOLD = 1e-4  # Threshold for including bone weight
         weights = OrderedDict()
 
-        for bname, (indxs, wghts) in humanWeights.data.items():
+        for bname, (indxs, wghts) in list(humanWeights.data.items()):
             vgroup = []
             empty = True
             for (v,wt) in zip(indxs, wghts):
@@ -318,7 +319,7 @@ def loadProxy(human, path, type="Clothes"):
                 try:
                     log.message('Compiling binary proxy file %s', npzpath)
                     saveBinaryProxy(proxy, npzpath)
-                except StandardError:
+                except Exception:
                     log.notice('unable to save compiled proxy: %s', npzpath, exc_info=True)
                     if os.path.isfile(npzpath):
                         # Remove file again, in case an empty file is left
@@ -335,9 +336,9 @@ def loadProxy(human, path, type="Clothes"):
     return proxy
 
 def loadTextProxy(human, filepath, type="Clothes"):
-    from codecs import open
+    import io
     try:
-        fp = open(filepath, "rU", encoding="utf-8")
+        fp = io.open(filepath, "rU", encoding="utf-8")
     except IOError:
         log.error("*** Cannot open %s", filepath)
         return None
@@ -505,7 +506,7 @@ def saveBinaryProxy(proxy, path):
     def _properPath(path):
         return getpath.getJailedPath(path, folder)
 
-    fp = open(path, 'wb')
+    fp = io.open(path, 'wb')
     tagStr, tagIdx = _packStringList(proxy.tags)
     uvStr,uvIdx = _packStringList([ _properPath(proxy.uvLayers[k]) for k in sorted(proxy.uvLayers.keys()) ])
 
@@ -545,7 +546,7 @@ def saveBinaryProxy(proxy, path):
     proxy.tmatrix.toNumpyStruct(vars_)
 
     special_poses = []
-    for posetype, posename in proxy.special_pose.items():
+    for posetype, posename in list(proxy.special_pose.items()):
         special_poses.append(posetype)
         special_poses.append(posename)
     specialposeStr, specialposeIdx = _packStringList(special_poses)
@@ -787,8 +788,8 @@ class TMatrix:
         """Deserialize TMatrix from npz file"""
         def _unpack_scales(scales, vidxs):
             scaleData = [None, None, None]
-            for i in xrange(3):
-                if i >= min(len(scales), len(vidxs)/2):
+            for i in range(3):
+                if i >= min(len(scales), len(vidxs)//2):
                     break
                 scale = scales[i]
                 if not math.isnan(scale):
@@ -798,8 +799,8 @@ class TMatrix:
 
         def _unpack_shears(shears, vidxs):
             shearData = [None, None, None]
-            for i in xrange(3):
-                if i >= min(len(scales)/2, len(vidxs)/2):
+            for i in range(3):
+                if i >= min(len(shears)//2, len(vidxs)//2):
                     break
                 shear1, shear2 = shears[i*2], shears[i*2+1]
                 vidx1, vidx2 = vidxs[i*2], vidxs[i*2+1]
@@ -985,8 +986,8 @@ def peekMetadata(proxyFilePath, proxyType=None):
             log.warning("Problem loading metadata from binary proxy, trying ASCII file: %s", e, exc_info=showTrace)
 
     # ASCII proxy file
-    from codecs import open
-    fp = open(proxyFilePath, 'rU', encoding="utf-8")
+    import io
+    fp = io.open(proxyFilePath, 'rU', encoding="utf-8")
     uuid = None
     tags = set()
     for line in fp:
@@ -1042,7 +1043,7 @@ def _getFilePath(filename, folder = None, altExtensions=None):
                 path = os.path.splitext(aPath)[0]+orgExt
                 return getpath.formatPath(path)
 
-    if not filename or not isinstance(filename, basestring):
+    if not filename or not isinstance(filename, str):
         return filename
 
     searchPaths = []

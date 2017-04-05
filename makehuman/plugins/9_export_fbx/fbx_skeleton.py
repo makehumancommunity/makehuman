@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -149,7 +149,7 @@ def writeObjectDefs(fp, meshes, skel, config):
             fbx_binary.fbx_template_generate(elem, "NodeAttribute", nBones, "FbxSkeleton", skel_properties)
         return
 
-    import fbx_utils
+    from . import fbx_utils
     fp.write(
 """
     ObjectType: "Model" {
@@ -206,7 +206,7 @@ def writeNodeAttributeProp(fp, bone, config):
         fbx_binary.fbx_data_skeleton_bone_node(elem, key, id, properties)
         return
 
-    import fbx_utils
+    from . import fbx_utils
     fp.write(
 '    NodeAttribute: %d, "%s", "LimbNode" {' % (id, key) + """
         Properties70:  {
@@ -233,7 +233,7 @@ def writeNodeProp(fp, skel, config):
         fbx_binary.fbx_data_skeleton_model(elem, key, id, properties)
         return
 
-    import fbx_utils
+    from . import fbx_utils
     fp.write(
 '    Model: %d, "%s", "Null" {' % (id, key) +
 """
@@ -248,7 +248,7 @@ def writeNodeProp(fp, skel, config):
 
 
 def writeBoneProp(fp, bone, config):
-    import fbx_utils
+    from . import fbx_utils
     id,key = getId("Model::%s" % bone.name)
 
     mat = bone.getRelativeMatrix(config.meshOrientation, config.localBoneAxis, config.offset)

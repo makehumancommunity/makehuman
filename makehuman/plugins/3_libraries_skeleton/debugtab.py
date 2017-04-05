@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -187,7 +187,7 @@ class SkeletonDebugLibrary(gui3d.TaskView):
                     vcolors[v_offset:v_offset+3,:3] = PLANE_COLORS[p_idx]
                     fgroups[v_offset/3] = fg.idx
                     v_offset += 3
-            elif isinstance(bone.roll, basestring):
+            elif isinstance(bone.roll, str):
                 plane_name = bone.roll
                 plane_joints = bone.planes[plane_name]
 

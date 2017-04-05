@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -67,7 +67,7 @@ def writeObjectDefs(fp, meshes, nShapes, config):
         fbx_binary.fbx_template_generate(elem, "Geometry", (nMeshes + nShapes), "FbxMesh", properties)
         return
 
-    import fbx_utils
+    from . import fbx_utils
     fp.write(
 '    ObjectType: "Geometry" {\n' +
 '       Count: %d' % (nMeshes + nShapes) +
@@ -113,7 +113,7 @@ def writeGeometryProp(fp, mesh, config):
     else:
         indexString = ",".join( ['%d,%d,%d' % (fv[0],fv[1],-1-fv[2]) for fv in mesh.fvert] )
 
-    import fbx_utils
+    from . import fbx_utils
     fp.write(
         '    Geometry: %d, "%s", "Mesh" {\n' % (id, key) +
         '        Properties70:  {\n' +
@@ -233,9 +233,9 @@ def writeUvs2(fp, mesh):
         uvString.append(",".join( ['%.4f,%.4f' % (tuple(mesh.texco[vt])) for vt in fuv] ))
     uvString = ",".join(uvString)
     if mesh.vertsPerPrimitive == 4:
-        indexString = ",".join( ['%d,%d,%d,%d' % (4*n,4*n+1,4*n+2,4*n+3) for n in xrange(nUvFaces)] )
+        indexString = ",".join( ['%d,%d,%d,%d' % (4*n,4*n+1,4*n+2,4*n+3) for n in range(nUvFaces)] )
     else:
-        indexString = ",".join( ['%d,%d,%d' % (4*n,4*n+1,4*n+2) for n in xrange(nUvFaces)] )
+        indexString = ",".join( ['%d,%d,%d' % (4*n,4*n+1,4*n+2) for n in range(nUvFaces)] )
 
     fp.write(
         '        LayerElementUV: 0 {\n' +
@@ -273,7 +273,7 @@ def writeMeshProp(fp, mesh, config):
         fbx_binary.fbx_data_model_element(elem, key, id, properties)
         return
 
-    import fbx_utils
+    from . import fbx_utils
     fp.write(
 '    Model: %d, "%s", "Mesh" {' % (id, key) +
 """

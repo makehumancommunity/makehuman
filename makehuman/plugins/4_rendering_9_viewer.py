@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -75,7 +75,7 @@ class ViewerTaskView(gui3d.TaskView):
             self.image.setImage(self.path)
 
     def setImage(self, path):
-        if isinstance(path, basestring):
+        if isinstance(path, str):
             self.path = path
         else:
             self.path = None

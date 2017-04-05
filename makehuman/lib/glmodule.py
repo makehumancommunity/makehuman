@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """ 
@@ -40,6 +40,7 @@ from core import G
 import numpy as np
 
 import OpenGL
+import OpenGL.GLU
 OpenGL.ERROR_CHECKING = G.args.get('debugopengl', False)
 OpenGL.ERROR_LOGGING = G.args.get('debugopengl', False)
 OpenGL.FULL_LOGGING = G.args.get('fullloggingopengl', False)
@@ -96,8 +97,8 @@ def grabScreen(x, y, width, height, filename = None, productionRender=False):
     if width != rwidth or height != rheight:
         surf = np.zeros((height, width, 3), dtype = np.uint8) + 127
         surf[...] = surface[:1,:1,:]
-        dx0 = (width - rwidth) / 2
-        dy0 = (height - rheight) / 2
+        dx0 = (width - rwidth) // 2
+        dy0 = (height - rheight) // 2
         dx1 = dx0 + rwidth
         dy1 = dy0 + rheight
         surf[dy0:dy1,dx0:dx1] = surface
@@ -118,7 +119,7 @@ pickingBufferDirty = True
 def updatePickingBuffer():
     width = G.windowWidth
     height = G.windowHeight
-    rwidth = (width + 3) / 4 * 4
+    rwidth = (width + 3) // 4 * 4
 
     # Resize the buffer in case the window size has changed
     global pickingBuffer
@@ -226,7 +227,7 @@ def reshape(w, h):
         glMatrixMode(GL_MODELVIEW)
 
         updatePickingBuffer()
-    except StandardError:
+    except Exception:
         log.error('gl.reshape', exc_info=True)
 
 def getMousePos():
@@ -433,7 +434,7 @@ def drawMesh(obj):
             else:
                 glBindTexture(GL_TEXTURE_2D, TEX_NOT_FOUND.textureId)
             if have_activeTexture:
-                for gl_tex_idx in xrange(GL_TEXTURE0 + 1, GL_TEXTURE0 + MAX_TEXTURE_UNITS):
+                for gl_tex_idx in range(GL_TEXTURE0 + 1, GL_TEXTURE0 + MAX_TEXTURE_UNITS):
                     glActiveTexture(gl_tex_idx)
                     glBindTexture(GL_TEXTURE_2D, 0)
                     glDisable(GL_TEXTURE_2D)
@@ -441,7 +442,7 @@ def drawMesh(obj):
                     glDisable(GL_TEXTURE_1D)
         else:
             # Disable all textures (when in fixed function textureless shading mode)
-            for gl_tex_idx in xrange(GL_TEXTURE0, GL_TEXTURE0 + MAX_TEXTURE_UNITS):
+            for gl_tex_idx in range(GL_TEXTURE0, GL_TEXTURE0 + MAX_TEXTURE_UNITS):
                 if have_activeTexture:
                     glActiveTexture(gl_tex_idx)
                 glBindTexture(GL_TEXTURE_2D, 0)
@@ -815,14 +816,14 @@ def renderToBuffer(width, height, productionRender = True):
 
     # Now that framebuffer is bound, verify whether dimensions are within max supported dimensions
     maxWidth, maxHeight = glGetInteger(GL_MAX_VIEWPORT_DIMS)
-    aspect = float(height) / width
+    aspect = float(height) // width
     width = min(width, maxWidth)
     height = min(height, maxHeight)
     # Maintain original aspect ratio
     if aspect * width < height:
         height = int(aspect * width)
     else:
-        width = int(height / aspect)
+        width = int(height // aspect)
 
     # Create and bind renderbuffers
     renderbuffer = glGenRenderbuffers(1)    # We need a renderbuffer for both color and depth
@@ -1031,7 +1032,7 @@ def draw(productionRender = False):
         else:
             _draw(productionRender)
         return True
-    except StandardError:
+    except Exception:
         log.error('gl.draw', exc_info=True)
         return False
 

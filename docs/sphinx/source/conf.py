@@ -56,8 +56,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'MakeHuman'
-copyright = u'2015, MHteam'
+project = 'MakeHuman'
+copyright = '2015, MHteam'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -202,8 +202,8 @@ htmlhelp_basename = 'MakeHumandoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'MakeHuman.tex', u'MakeHuman python API',
-   u'MHteam', 'manual'),
+  ('index', 'MakeHuman.tex', 'MakeHuman python API',
+   'MHteam', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -230,7 +230,7 @@ latex_logo = "_static/logo.png"
 #latex_domain_indices = True
 
 #Additional package in the preamble
-latex_elements = {'preamble' : "\usepackage{latexsym}\n\usepackage{amssymb}\n\usepackage{txfonts}"}
+latex_elements = {'preamble' : "\\usepackage{latexsym}\n\\usepackage{amssymb}\n\\usepackage{txfonts}"}
 
 
 # -- Options for manual page output --------------------------------------------
@@ -238,8 +238,8 @@ latex_elements = {'preamble' : "\usepackage{latexsym}\n\usepackage{amssymb}\n\us
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'makehuman', u'MakeHuman python API',
-     [u'MHteam'], 1)
+    ('index', 'makehuman', 'MakeHuman python API',
+     ['MHteam'], 1)
 ]
 
 # -- Options for pngmath -------------------------------------------------------

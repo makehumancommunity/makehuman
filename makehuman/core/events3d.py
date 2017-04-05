@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -209,7 +209,7 @@ class EventHandler(object):
                 profiler.accum('method(event)', globals(), locals())
             else:
                 method(event)
-        except Exception, _:
+        except Exception as _:
             log.warning('Exception during event %s', eventType, exc_info=True)
             self.eventFailed(EventHandler._depth)
         EventHandler._depth -= 1

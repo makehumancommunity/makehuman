@@ -24,7 +24,7 @@ import array
 import datetime
 import log
 
-from fbx_utils import *
+from .fbx_utils import *
 
 # Units convertors!
 convert_sec_to_ktime = units_convertor("second", "ktime")
@@ -219,7 +219,7 @@ def fbx_data_element_custom_properties(props, bid):
     """
     Store custom properties of blender ID bid (any mapping-like object, in fact) into FBX properties props.
     """
-    for k, v in bid.items():
+    for k, v in list(bid.items()):
         list_val = getattr(v, "to_list", lambda: None)()
 
         if isinstance(v, str):

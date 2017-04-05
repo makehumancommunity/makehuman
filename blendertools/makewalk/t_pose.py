@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # ##### BEGIN GPL LICENSE BLOCK #####
@@ -50,7 +50,7 @@ def applyRestPose(context, value):
 
         reallySelect(ob, scn)
         if ob != context.object:
-            raise StandardError("Context switch did not take:\nob = %s\nc.ob = %s\nc.aob = %s" %
+            raise Exception("Context switch did not take:\nob = %s\nc.ob = %s\nc.aob = %s" %
                 (ob, context.object, context.active_object))
 
         if (ob.McpArmatureName == rig.name and
@@ -133,7 +133,7 @@ TPose = {
 }
 
 def autoTPose(rig, scn):
-    print("Auto T-pose", rig.name)
+    print(("Auto T-pose", rig.name))
     selectAndSetRestPose(rig, scn)
     for pb in rig.pose.bones:
         try:
@@ -304,7 +304,7 @@ def loadPose(rig, filename):
     if filename:
         filepath = os.path.join(os.path.dirname(__file__), filename)
         filepath = os.path.normpath(filepath)
-        print("Loading %s" % filepath)
+        print(("Loading %s" % filepath))
         struct = loadJson(filepath)
         rig.McpTPoseFile = filename
     else:
@@ -382,7 +382,7 @@ def savePose(context, filepath):
     if os.path.splitext(filepath)[1] != ".json":
         filepath = filepath + ".json"
     filepath = os.path.join(os.path.dirname(__file__), filepath)
-    print("Saving %s" % filepath)
+    print(("Saving %s" % filepath))
     saveJson(struct, filepath)
 
 

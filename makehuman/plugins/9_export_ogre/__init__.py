@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -36,8 +36,9 @@ Abstract
 Exporter plugin for the Ogre3d mesh format.
 """
 
-import mh2ogre
+from . import mh2ogre
 from export import Exporter, ExportConfig
+import imp
 
 class OgreConfig(ExportConfig):
 
@@ -59,7 +60,7 @@ class ExporterOgre(Exporter):
         self.orderPriority = 60.0
 
     def export(self, human, filename):
-        reload(mh2ogre) # TODO ?
+        imp.reload(mh2ogre) # TODO ?
         cfg = self.getConfig()
         cfg.setHuman(human)
         mh2ogre.exportOgreMesh(filename("mesh.xml"), cfg)

@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -60,6 +60,7 @@ import os
 import numpy as np
 import log
 from getpath import getSysDataPath, canonicalPath
+import io
 
 _targetBuffer = {}
 
@@ -123,7 +124,7 @@ class Target(object):
         import makehuman
         data = []
         license = defaultTargetLicense()
-        with open(name, 'rU') as fd:
+        with io.open(name, 'rU') as fd:
             for line in fd:
                 line = line.strip()
                 if line.startswith('#'):
@@ -223,7 +224,7 @@ class Target(object):
                 np.save(lname, license)
                 return iname, vname, lname
             return iname, vname, None
-        except StandardError, _:
+        except Exception as _:
             log.error('error saving %s', name)
 
     def _load(self, name):
@@ -231,7 +232,7 @@ class Target(object):
         logger.debug('loading target %s', name)
         try:
             self._load_binary(name)
-        except StandardError, _:
+        except Exception as _:
             self._load_text(name)
         logger.debug('loaded target %s', name)
 
@@ -452,8 +453,8 @@ def saveTranslationTarget(obj, targetPath, groupToSave=None, epsilon=0.001):
     nVertsExported = len(vertsToSave)
 
     try:
-        with open(targetPath, 'w') as fileDescriptor:
-            for i in xrange(nVertsExported):
+        with io.open(targetPath, 'w') as fileDescriptor:
+            for i in range(nVertsExported):
                 fileDescriptor.write('%d %f %f %f\n' % (vertsToSave[i], delta[i,0], delta[i,1], delta[i,2]))
 
         if nVertsExported == 0:

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -34,7 +34,7 @@ Abstract
 --------
 
 """
-
+# TODO: update documentation for WIKI cited below
 bl_info = {
     "name": "Make Target",
     "author": "Thomas Larsson",
@@ -43,11 +43,11 @@ bl_info = {
     "location": "View3D > Properties > Make Target",
     "description": "Make MakeHuman Target",
     "warning": "",
-    'wiki_url': "http://web.archive.org/web/20141013235052/www.makehuman.org/doc/node/mhblendertools_maketarget.html",
+    'wiki_url': "http://www.makehumancommunity.org/wiki/Documentation:MHBlenderTools:_MakeTarget",
     "category": "MakeHuman"}
 
 if "bpy" in locals():
-    print("Reloading maketarget v %d.%d.%d" % bl_info["version"])
+    print(("Reloading maketarget v %d.%d.%d" % bl_info["version"]))
     import imp
 
     imp.reload(mh)
@@ -64,7 +64,7 @@ if "bpy" in locals():
     #imp.reload(perfect)
     imp.reload(export_mh_obj)
 else:
-    print("Loading maketarget v %d.%d.%d" % bl_info["version"])
+    print(("Loading maketarget v %d.%d.%d" % bl_info["version"]))
     import bpy
     import os
     from bpy.props import *

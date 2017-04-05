@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -48,31 +48,31 @@ def sync(hgRoot, hgUrl=None):
     if not os.path.isdir(hgRoot):
         raise RuntimeError('Faulty hg root repository , folder does not exist (%s)' % hgRoot)
 
-    print "Synching with HG repository"
+    print ("Synching with HG repository")
 
     if hgUrl is None:
         hgrepo = HG_REPO
     else:
         hgrepo = hgUrl
-        print "Pulling from alternate repository %s" % hgUrl
+        print ("Pulling from alternate repository %s" % hgUrl)
 
     cwd = os.path.normpath(os.path.realpath( hgRoot ))
     try:
         # Try with python-hglib
         import hglib
-        print "Using python-hglib"
+        print ("Using python-hglib")
         hgclient = hglib.open(cwd)
         branch = hgclient.branch()
-        print "HG using branch %s" % branch
+        print ("HG using branch %s" % branch)
         if not hgclient.pull(update=True):
-            print "Failed to pull -u using hglib"
+            print ("Failed to pull -u using hglib")
             raise RuntimeError("Failed to pull -u using hglib")
     except:
         # If hglib is not installed, resort to commandline calls
-        print "Using hg commandline tools"
+        print ("Using hg commandline tools")
         import subprocess
         branch = subprocess.Popen(["hg","-q","branch"], stdout=subprocess.PIPE, stderr=sys.stderr, cwd=cwd).communicate()[0].strip()
-        print "HG using branch %s" % branch
+        print ("HG using branch %s" % branch)
         subprocess.check_call(["hg", "pull", "-u", hgrepo], cwd=cwd)
 
 def _parse_args():
@@ -98,4 +98,4 @@ if __name__ == '__main__':
     if args.get('hgpath', None) is None:
         raise RuntimeError("hgpath argument not specified")
 
-    print sync(args['hgpath'], args.get('hgurl', None))
+    print (sync(args['hgpath'], args.get('hgurl', None)))

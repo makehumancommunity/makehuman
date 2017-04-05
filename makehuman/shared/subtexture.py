@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -125,7 +125,7 @@ class LayeredImage(Image):
         if not self.layers: return (0, 0)
         b = self.layers[0].borders[2:3]
         for layer in self.layers[1:]:
-            for i in xrange(1):
+            for i in range(1):
                 b[i] = max(b[i], layer.borders[i + 2])
         return b
 

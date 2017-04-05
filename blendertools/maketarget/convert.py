@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -147,10 +147,10 @@ class VIEW3D_OT_SetSourceVGroupButton(bpy.types.Operator):
 #----------------------------------------------------------
 
 def readConverter(scn):
-    print("Reading %s" % mt.baseObjFile)
+    print(("Reading %s" % mt.baseObjFile))
     baseVerts = readBaseObj(mt.baseObjFile)
 
-    print("Reading %s" % mt.convertMhcloFile)
+    print(("Reading %s" % mt.convertMhcloFile))
     proxy = CProxy()
     proxy.read(mt.convertMhcloFile)
 
@@ -173,7 +173,7 @@ def readBaseObj(filepath):
 
 def copyVerts(verts):
     newverts = {}
-    for n,v in verts.items():
+    for n,v in list(verts.items()):
         newverts[n] = v.copy()
     return newverts
 
@@ -237,12 +237,12 @@ def readTarget(filepath, verts):
 
 def saveTarget(trgVerts, filepath):
     fp = open(filepath, "w", encoding="utf-8", newline="\n")
-    for vn,trgVert in trgVerts.items():
+    for vn,trgVert in list(trgVerts.items()):
         if trgVert.length() > Epsilon:
             co = trgVert.co
             fp.write("%d %s %s %s\n" % (vn, round(co[0]), round(co[1]), round(co[2])))
     fp.close()
-    print("Target %s saved" % (filepath))
+    print(("Target %s saved" % (filepath)))
 
 #----------------------------------------------------------
 #   Convert vertex groups
@@ -312,7 +312,7 @@ def saveVGroups(vgroups, before, after, filepath):
     for line in after:
         fp.write(line)
     fp.close()
-    print("VGroup file %s saved" % (filepath))
+    print(("VGroup file %s saved" % (filepath)))
 
 #----------------------------------------------------------
 #   Convert clothes

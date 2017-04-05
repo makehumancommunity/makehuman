@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -240,7 +240,7 @@ class Object3D(object):
             else:
                 try:
                     self._shaderObj = self.object.shaderObj
-                except (Exception, RuntimeError), e:
+                except (Exception, RuntimeError) as e:
                     self._shaderObj = False
                     log.error(e, exc_info=True)
                     log.warning("Failed to initialize shader (%s), falling back to fixed function shading.", self._shaderPath)

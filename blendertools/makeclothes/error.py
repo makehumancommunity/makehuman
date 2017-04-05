@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -71,7 +71,7 @@ class MHError(Exception):
     def __init__(self, value):
         global theMessage
         theMessage = value
-        print("ERROR:", theMessage)
+        print(("ERROR:", theMessage))
         bpy.ops.mhclo.error('INVOKE_DEFAULT')
 
     def __str__(self):

@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -94,7 +94,7 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
         self.measureMesh = module3d.Object3D('measure', 2)
         self.measureMesh.createFaceGroup('measure')
 
-        count = max([len(vertIdx) for vertIdx in self.ruler.Measures.values()])
+        count = max([len(vertIdx) for vertIdx in list(self.ruler.Measures.values())])
 
         self.measureMesh.setCoords(np.zeros((count, 3), dtype=np.float32))
         self.measureMesh.setUVs(np.zeros((1, 2), dtype=np.float32))
@@ -120,7 +120,7 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
         return measure
 
     def hideAllBoxes(self):
-        for box in self.groupBoxes.values():
+        for box in list(self.groupBoxes.values()):
             box.hide()
 
     def onShow(self, event):
@@ -332,7 +332,7 @@ class Ruler:
         Verify currectness of ruler specification
         """
         names = []
-        for n,v in self.Measures.items():
+        for n,v in list(self.Measures.items()):
             if len(v) % 2 != 0:
                 names.append(n)
         if len(names) > 0:

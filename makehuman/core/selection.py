@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -129,8 +129,8 @@ class SelectionColorMap:
         :return: The selected face group.
         :rtype: :py:class:`module3d.FaceGroup`
         """
-
-        IDkey = picked[0] / 8 | picked[1] / 8 << 5 | picked[2] / 8 << 10  # 555
+        # Force integer divide
+        IDkey = picked[0] // 8 | picked[1] // 8 << 5 | picked[2] // 8 << 10  # 555
 
         # print "DEBUG COLOR PICKED: %s,%s,%s %s"%(picked[0], picked[1], picked[2], IDkey)
 
@@ -138,9 +138,9 @@ class SelectionColorMap:
             groupSelected = self.colorIDToFaceGroup[IDkey]
         except:
 
-            # print groupSelected.name
+            # print (groupSelected.name)
             #this print should only come on while debugging color picking
-            #print 'Color %s (%s) not found' % (IDkey, picked)
+            #print ('Color %s (%s) not found' % (IDkey, picked))
             groupSelected = None
         return groupSelected
 
@@ -161,7 +161,7 @@ class SelectionColorMap:
             return (facegroupPicked, objPicked)
         else:
             #this print should only be made while debugging picking
-            #print 'not a clickable zone'
+            #print ('not a clickable zone')
             return None
     
 selectionColorMap = SelectionColorMap()

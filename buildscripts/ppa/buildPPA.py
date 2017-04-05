@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -83,7 +83,7 @@ def _cp_files(folder, dest):
   for f in os.listdir(folder):
     fpath = os.path.join(folder, f)
     if os.path.isfile(fpath):
-      print "Copy %s to %s" % (fpath, os.path.join(dest, f))
+      print("Copy %s to %s" % (fpath, os.path.join(dest, f)))
       shutil.copy(fpath, os.path.join(dest, f))
 
 def _cp_pattern(srcFolder, destFolder, extIncludingDot):
@@ -104,7 +104,7 @@ def _cp_pattern(srcFolder, destFolder, extIncludingDot):
         destDir = os.path.dirname(destFile)
         if not os.path.exists(destDir):
           os.makedirs(destDir)
-          #print destDir
+          #print (destDir)
         shutil.copy(srcFile, destFile)
 
 def _sed_replace(filepath, templateToken, replaceStr):
@@ -112,8 +112,8 @@ def _sed_replace(filepath, templateToken, replaceStr):
 
 def parseConfig(configPath):
     if os.path.isfile(configPath):
-        import ConfigParser
-        config = ConfigParser.ConfigParser()
+        import configparser
+        config = configparser.ConfigParser()
         config.read(configPath)
         return config
     else:
@@ -129,10 +129,10 @@ def configure(confpath):
 
   conf = parseConfig(confpath)
   if conf is None:
-    print "PPA build requires a build.conf file. %s " % confpath
+    print("PPA build requires a build.conf file. %s " % confpath)
     sys.exit(1)
   else:
-    print "Using config file at %s. NOTE: properties in config file will override any other settings!" % confpath
+    print("Using config file at %s. NOTE: properties in config file will override any other settings!" % confpath)
 
     settings["hgpath"] = _conf_get(conf, 'General', 'hgPath', settings["hgpath"])
     settings["package_version"] = _conf_get(conf, 'PPA', 'packageVersion', settings["package_version"])
@@ -142,7 +142,7 @@ def configure(confpath):
     settings["performUpload"] = _conf_get(conf, 'PPA', 'performUpload', settings["performUpload"])
 
   if settings["package_sub"] is None or settings["package_version"] is None:
-    print "build.conf is incorrect"
+    print("build.conf is incorrect")
     sys.exit(1)
 
   settings["timestamp"] = time.strftime("%Y%m%d%H%M%S")
@@ -150,23 +150,23 @@ def configure(confpath):
 
 def configurePaths():
 
-  print settings
+  print(settings)
 
-  print "### Starting to configure locations ###\n"
+  print("### Starting to configure locations ###\n")
 
   # Where is the build root?
-  print "Build root: " + settings["build_root"]
+  print("Build root: " + settings["build_root"])
 
   # Where is the buildPPA script?
   settings["location_of_script"] = os.path.dirname(os.path.abspath(__file__))
-  print "Script location: " + settings["location_of_script"]
+  print("Script location: " + settings["location_of_script"])
 
   # Where is the source code located?
   settings["source_root"] = os.path.realpath( os.path.join(settings["location_of_script"], '..', '..') )
-  print "Source root: " + settings["source_root"]
+  print("Source root: " + settings["source_root"])
   if not os.path.isdir( os.path.join(settings["source_root"], '.hg') ):
-    print "Error, the hg root folder %s does not contain .hg folder!" % settings["source_root"]
-    print "Giving up.\n\n";
+    print("Error, the hg root folder %s does not contain .hg folder!" % settings["source_root"])
+    print("Giving up.\n\n");
     sys.exit(1)
 
   # We can now read build.conf
@@ -176,36 +176,39 @@ def configurePaths():
   settings["build_prepare_destination"] = os.path.realpath( os.path.join(settings["build_root"],'build_prepare') )
   if not os.path.exists(settings["build_prepare_destination"]):
       os.mkdir(settings["build_prepare_destination"])
-  print "Build_prepare destination: " + settings["build_prepare_destination"]
+  print("Build_prepare destination: " + settings["build_prepare_destination"])
 
   # Where do we find deb build configuration files
   settings["deb_config_location"] = os.path.join(settings["location_of_script"],"packages")
-  print "Location of deb build config files: " + settings["deb_config_location"]
+  print("Location of deb build config files: " + settings["deb_config_location"])
 
   # Staging area for building source and binary debs
   settings["deb_staging_location"] = os.path.join(settings["build_root"],"deb_staging") 
-  print "Staging area for deb build process: " + settings["deb_staging_location"]
+
+  # Staging area for building source and binary debs
+  settings["deb_staging_location"] = os.path.join(settings["build_root"],"deb_staging") 
+  print("Staging area for deb build process: " + settings["deb_staging_location"])
   shutil.copytree(settings["deb_config_location"],settings["deb_staging_location"])
 
   # Final destination for specific build configs
   settings["main_deb_def"] = os.path.join(settings["deb_staging_location"],"makehuman")
-  print "Target deb definition dir for main: " + settings["main_deb_def"]
+  print("Target deb definition dir for main: " + settings["main_deb_def"])
   settings["dev_deb_def"] = os.path.join(settings["deb_staging_location"],"makehuman-dev")
-  print "Target deb definition dir for dev: " + settings["dev_deb_def"]
+  print("Target deb definition dir for dev: " + settings["dev_deb_def"])
 
   # Changelog locations
   settings["main_changelog"] = os.path.join(settings["main_deb_def"],"debian","changelog")
-  print "Main changelog: " + settings["main_changelog"]
+  print("Main changelog: " + settings["main_changelog"])
   settings["dev_changelog"] = os.path.join(settings["dev_deb_def"],"debian","changelog")
-  print "Dev changelog: " + settings["dev_changelog"]
+  print("Dev changelog: " + settings["dev_changelog"])
 
   # Directory with extra files to copy
   settings["extras_location"] = os.path.join(settings["location_of_script"],"extras")
-  print "Location of various extra files: " + settings["extras_location"]
+  print("Location of various extra files: " + settings["extras_location"])
 
   # Where to copy extra files
   settings["extras_destination"] = os.path.join(settings["build_prepare_destination"],"extras")
-  print "Destination for extras: " + settings["extras_destination"]
+  print("Destination for extras: " + settings["extras_destination"])
 
   # Staging area for files not managed by build_prepare
   settings["manual_export_location"] = os.path.realpath( os.path.join(settings["build_root"],'export_dev') )
@@ -215,7 +218,7 @@ def configurePaths():
 
   # Location of makehuman in source root
   settings["makehuman_source_root"] = os.path.join(settings["source_root"],"makehuman")
-  print "Export dir for *-dev files: " + settings["manual_export_location"];
+  print("Export dir for *-dev files: " + settings["manual_export_location"]);
 
   # .orig tarballs to create
   fn = "makehuman_" + settings["package_version"]
@@ -223,35 +226,35 @@ def configurePaths():
   fn = fn + ".orig.tar.gz"
 
   settings["main_tar_file"] = os.path.abspath(os.path.join(settings["deb_staging_location"], fn))
-  print "Main source tarball: " + settings["main_tar_file"]
+  print("Main source tarball: " + settings["main_tar_file"])
 
   fn = "makehuman-dev_" + settings["package_version"]
   fn = fn + "+" + settings["timestamp"]
   fn = fn + ".orig.tar.gz"
 
   settings["dev_tar_file"] = os.path.abspath(os.path.join(settings["deb_staging_location"], fn))
-  print "Dev source tarball: " + settings["dev_tar_file"]
+  print("Dev source tarball: " + settings["dev_tar_file"])
   
   # Final destination for source deb
   settings["source_final_dest"] = os.path.join(settings["build_root"],"dist_ppa")
-  print "Final destination for source deb definition: " + settings["source_final_dest"]
+  print("Final destination for source deb definition: " + settings["source_final_dest"])
 
   # Final destination for source deb
   settings["binary_final_dest"] = os.path.join(settings["build_root"],"dist_deb")
-  print "Final destination for binary deb files: " + settings["binary_final_dest"]
+  print("Final destination for binary deb files: " + settings["binary_final_dest"])
 
-  print "\n### Finished configuring locations ###\n"
-  print ""
+  print("\n### Finished configuring locations ###\n")
+  print("")
 
 def buildSourceTree(dest = None):
   if os.geteuid() != 0:
-    print "WARNING: You are not root. You should be running this script with root permissions!"
+    print("WARNING: You are not root. You should be running this script with root permissions!")
 
   if dest is None:
     dest = os.getenv('makehuman_dest',0)
 
     if dest == 0:
-      print "You must explicitly set the makehuman_dest environment variable to point at a work directory, or specify it as argument. I will violently destroy and mutilate the contents of this directory."
+      print("You must explicitly set the makehuman_dest environment variable to point at a work directory, or specify it as argument. I will violently destroy and mutilate the contents of this directory.")
       exit(1)
 
   settings["build_root"] = os.path.normpath(os.path.realpath(dest))          # Folder to build deb package to
@@ -263,15 +266,15 @@ def buildSourceTree(dest = None):
   configurePaths();
 
 
-  print "\nABOUT TO PERFORM BUILD EXPORT\n"
-  print "to: %s" % os.path.normpath(os.path.realpath(settings["build_prepare_destination"]))
+  print("\nABOUT TO PERFORM BUILD EXPORT\n")
+  print("to: %s" % os.path.normpath(os.path.realpath(settings["build_prepare_destination"])))
 
   # Export source to export folder and run scripts
   sys.path = [os.path.join(settings["location_of_script"], '..')] + sys.path
   try:
     import build_prepare
   except:
-    print "Failed to import build_prepare, expected to find it at %s. Make sure to run this script from hgroot/buildscripts/deb/" % os.path.normpath(os.path.realpath(os.path.join(settings["location_of_script"], '..')))
+    print("Failed to import build_prepare, expected to find it at %s. Make sure to run this script from hgroot/buildscripts/deb/" % os.path.normpath(os.path.realpath(os.path.join(settings["location_of_script"], '..'))))
     exit(1)
   if os.path.exists(settings["build_prepare_destination"]):
     shutil.rmtree(settings["build_prepare_destination"])
@@ -279,12 +282,12 @@ def buildSourceTree(dest = None):
 
   #os.remove(os.path.join(settings["build_prepare_destination"], 'makehuman', 'blendertools'ender.bat'))
 
-  print "\nABOUT TO COPY CONTENTS\n"
+  print("\nABOUT TO COPY CONTENTS\n")
 
   try:
     subprocess.check_call(["chown", "-R", "0:0", settings["build_prepare_destination"]])
   except:
-    print "Failed to chown to root. Operation not permitted?"
+    print("Failed to chown to root. Operation not permitted?")
   try:
     subprocess.check_call(["chmod", "-R", "644", settings["build_prepare_destination"]])
     for path, dirs, files in os.walk(settings["build_prepare_destination"]):
@@ -293,11 +296,11 @@ def buildSourceTree(dest = None):
         try:
           subprocess.check_call(["chmod", "755", dpath])
         except:
-          print "Failed to chmod 755 folder %s" % dpath
+          print("Failed to chmod 755 folder %s" % dpath)
     subprocess.check_call(["chmod", "755", settings["build_prepare_destination"]])
   except Exception as e:
-    print "Failed to chmod " + settings["build_prepare_destination"]
-    print e
+    print("Failed to chmod " + settings["build_prepare_destination"])
+    print(e)
 
   for x in files_to_chmod_executable:
     if os.path.exists(x):
@@ -306,16 +309,16 @@ def buildSourceTree(dest = None):
   shutil.copytree(settings["extras_location"],settings["extras_destination"])
 
 
-  print "\nCOPYING RAW TARGETS FOR -dev\n"
+  print("\nCOPYING RAW TARGETS FOR -dev\n")
   _cp_pattern(settings["makehuman_source_root"],settings["manual_export_location"],".target")
 
-  print "\nCOPYING RAW OBJS FOR -dev\n"
+  print("\nCOPYING RAW OBJS FOR -dev\n")
   _cp_pattern(settings["makehuman_source_root"],settings["manual_export_location"],".obj")
 
-  print "\nCOPYING RAW MHCLO FOR -dev\n"
+  print("\nCOPYING RAW MHCLO FOR -dev\n")
   _cp_pattern(settings["makehuman_source_root"],settings["manual_export_location"],".mhclo")
 
-  print "\nCOPYING RAW PROXIES FOR -dev\n"
+  print("\nCOPYING RAW PROXIES FOR -dev\n")
   _cp_pattern(settings["makehuman_source_root"],settings["manual_export_location"],".proxy")
 
   dummy = os.path.join(settings["manual_export_location"],"dummy.txt")
@@ -326,7 +329,7 @@ def buildSourceTree(dest = None):
   try:
     subprocess.check_call(["chown", "-R", "0:0", settings["manual_export_location"]])
   except:
-    print "Failed to chown to root. Operation not permitted?"
+    print("Failed to chown to root. Operation not permitted?")
   try:
     subprocess.check_call(["chmod", "-R", "644", settings["manual_export_location"]])
     for path, dirs, files in os.walk(settings["manual_export_location"]):
@@ -335,37 +338,37 @@ def buildSourceTree(dest = None):
         try:
           subprocess.check_call(["chmod", "755", dpath])
         except:
-          print "Failed to chmod 755 folder %s" % dpath
+          print("Failed to chmod 755 folder %s" % dpath)
     subprocess.check_call(["chmod", "755", settings["manual_export_location"]])
   except Exception as e:
-    print "Failed to chmod " + settings["manual_export_location"]
-    print e
+    print("Failed to chmod " + settings["manual_export_location"])
+    print(e)
 
 
 def createSourceTarballs():
-  print "\nABOUT TO CREATE SOURCE TARBALL FOR BUILD_PREPARE DATA\n\n";
+  print("\nABOUT TO CREATE SOURCE TARBALL FOR BUILD_PREPARE DATA\n\n");
 
   os.chdir(settings["build_prepare_destination"])
 
-  print "Tarfile: " + settings["main_tar_file"]
-  print "CWD: " + os.getcwd()
+  print("Tarfile: " + settings["main_tar_file"])
+  print("CWD: " + os.getcwd())
 
   subprocess.check_call(["tar","-C",settings["build_prepare_destination"],"-czf", settings["main_tar_file"], "makehuman","README","extras"])
 
-  print "\nABOUT TO CREATE SOURCE TARBALL FOR -DEV DATA\n\n";
+  print("\nABOUT TO CREATE SOURCE TARBALL FOR -DEV DATA\n\n");
 
   os.chdir(settings["manual_export_location"])
 
 
-  print "Tarfile: " + settings["dev_tar_file"]
-  print "CWD: " + os.getcwd()
+  print("Tarfile: " + settings["dev_tar_file"])
+  print("CWD: " + os.getcwd())
 
   subprocess.check_call(["tar","-C",settings["manual_export_location"],"-cvzf", settings["dev_tar_file"], "data", "dummy.txt"])
 
 
 def createSourceDebs():
 
-  print "\nWRITING CHANGELOGS\n"
+  print("\nWRITING CHANGELOGS\n")
 
   #ts = Mon, 01 Jun 2015 15:17:49 +0200
 
@@ -382,17 +385,17 @@ def createSourceDebs():
     text_file.write(" -- " + settings["signString"] + "  " + ts + "\n\n")
 
 
-  print "\nSTARTING TO BUILD SOURCE DEB DEFINITIONS\n"
+  print("\nSTARTING TO BUILD SOURCE DEB DEFINITIONS\n")
   
-  print "Unpacking " + settings["main_tar_file"]
+  print("Unpacking " + settings["main_tar_file"])
   subprocess.check_call(["tar","-C",settings["main_deb_def"],"-xzf", settings["main_tar_file"]])
 
-  print "Unpacking " + settings["dev_tar_file"]
+  print("Unpacking " + settings["dev_tar_file"])
   subprocess.check_call(["tar","-C",settings["dev_deb_def"],"-xzf", settings["dev_tar_file"]])
 
   os.chdir(settings["main_deb_def"])
 
-  print "Debuilding in " + os.getcwd()
+  print("Debuilding in " + os.getcwd())
 
   if not settings["performSign"] is None and not settings["performSign"]:
     subprocess.check_call(["debuild","-S","-sa","-uc","-us"])
@@ -401,7 +404,7 @@ def createSourceDebs():
 
   os.chdir(settings["dev_deb_def"])
 
-  print "Debuilding in " + os.getcwd()
+  print("Debuilding in " + os.getcwd())
 
   if not settings["performSign"] is None and not settings["performSign"]:
     subprocess.check_call(["debuild","-S","-sa","-uc","-us"])
@@ -410,25 +413,25 @@ def createSourceDebs():
 
   os.makedirs(settings["source_final_dest"])
 
-  print "Copying source deb output to " + settings["source_final_dest"]
+  print("Copying source deb output to " + settings["source_final_dest"])
 
   for f in glob.glob(settings["deb_staging_location"] + "/*ppa*"):
-    print f                                                                                                                                        
+    print(f)                                                                                                                                        
     shutil.copy(f, settings["source_final_dest"])
 
-  print "Copying source tarballs to " + settings["source_final_dest"]
+  print("Copying source tarballs to " + settings["source_final_dest"])
 
   for f in glob.glob(settings["deb_staging_location"] + "/*.orig.*"):
-    print f                                                                                                                                        
+    print(f)                                                                                                                                        
     shutil.copy(f, settings["source_final_dest"])
 
 
 def createBinaryDebs():
-  print "\nSTARTING TO BUILD DEB FILES\n"
+  print("\nSTARTING TO BUILD DEB FILES\n")
   
   os.chdir(settings["main_deb_def"])
 
-  print "Debuilding in " + os.getcwd()
+  print("Debuilding in " + os.getcwd())
 
   if not settings["performSign"] is None and not settings["performSign"]:
     subprocess.check_call(["debuild","-uc","-us"])
@@ -437,7 +440,7 @@ def createBinaryDebs():
 
   os.chdir(settings["dev_deb_def"])
 
-  print "Debuilding in " + os.getcwd()
+  print("Debuilding in " + os.getcwd())
 
   if not settings["performSign"] is None and not settings["performSign"]:
     subprocess.check_call(["debuild","-uc","-us"])
@@ -446,10 +449,10 @@ def createBinaryDebs():
 
   os.makedirs(settings["binary_final_dest"])
 
-  print "Copying deb files to " + settings["binary_final_dest"]
+  print("Copying deb files to " + settings["binary_final_dest"])
 
   for f in glob.glob(settings["deb_staging_location"] + "/*.deb"):
-    print f                                                                                                                                        
+    print(f)                                                                                                                                        
     shutil.copy(f, settings["binary_final_dest"])
 
 

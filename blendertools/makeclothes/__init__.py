@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -36,6 +36,7 @@ Abstract
 Utility for making clothes to MH characters.
 """
 
+# TODO: Review the documentation pointed to by the URL below
 bl_info = {
     "name": "Make Clothes",
     "author": "Thomas Larsson",
@@ -44,12 +45,12 @@ bl_info = {
     "location": "View3D > Properties > Make MH clothes",
     "description": "Make clothes and UVs for MakeHuman characters",
     "warning": "",
-    'wiki_url': "http://web.archive.org/web/20150317163903/www.makehuman.org/doc/node/mhblendertools_makeclothes.html",
+    'wiki_url': "http://www.makehumancommunity.org/wiki/Documentation:MHBlenderTools:MakeClothes",
     "category": "MakeHuman"}
 
 
 if "bpy" in locals():
-    print("Reloading makeclothes v %d.%d.%d" % bl_info["version"])
+    print(("Reloading makeclothes v %d.%d.%d" % bl_info["version"]))
     import imp
     imp.reload(maketarget)
     imp.reload(mc)
@@ -57,7 +58,7 @@ if "bpy" in locals():
     imp.reload(makeclothes)
     imp.reload(project)
 else:
-    print("Loading makeclothes v %d.%d.%d" % bl_info["version"])
+    print(("Loading makeclothes v %d.%d.%d" % bl_info["version"]))
     import bpy
     import os
     from bpy.props import *
@@ -359,7 +360,7 @@ class OBJECT_OT_ExportMaterialButton(bpy.types.Operator):
         setObjectMode(context)
         try:
             matfile = materials.writeMaterial(context.object, context.scene.MhClothesDir)
-            print("Exported \"%s\"" % matfile)
+            print(("Exported \"%s\"" % matfile))
         except MHError:
             handleMHError(context)
         return{'FINISHED'}
@@ -384,7 +385,7 @@ class OBJECT_OT_CopyVertLocsButton(bpy.types.Operator):
         src = context.object
         for trg in context.scene.objects:
             if trg != src and trg.select and trg.type == 'MESH':
-                print("Copy vertex locations from %s to %s" % (src.name, trg.name))
+                print(("Copy vertex locations from %s to %s" % (src.name, trg.name)))
                 for n,sv in enumerate(src.data.vertices):
                     tv = trg.data.vertices[n]
                     tv.co = sv.co
@@ -451,7 +452,7 @@ class OBJECT_OT_MakeHumanButton(bpy.types.Operator):
                         )
             else:
                 ob.MhHuman = False
-            print("Object %s: Human = %s" % (ob.name, ob.MhHuman))
+            print(("Object %s: Human = %s" % (ob.name, ob.MhHuman)))
         except MHError:
             handleMHError(context)
         return{'FINISHED'}

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -117,9 +117,9 @@ class MHAppExporter(object):
 
         self.config = parseConfig(self.sourceFile(BUILD_CONF_FILE_PATH))
         if self.config is None:
-            print "No config file at %s, using defaults or options passed on commandline." % self.sourceFile(BUILD_CONF_FILE_PATH)
+            print("No config file at %s, using defaults or options passed on commandline." % self.sourceFile(BUILD_CONF_FILE_PATH))
         else:
-            print "Using config file at %s. NOTE: properties in config file will override any other settings!" % self.sourceFile(BUILD_CONF_FILE_PATH)
+            print("Using config file at %s. NOTE: properties in config file will override any other settings!" % self.sourceFile(BUILD_CONF_FILE_PATH))
 
             global HG_PATH
             HG_PATH = _conf_get(self.config, 'General', 'hgPath', HG_PATH)
@@ -175,71 +175,71 @@ class MHAppExporter(object):
 
         # TODO perform hg pull?
 
-        print 'Creating folder %s' % self.targetFile()
+        print('Creating folder %s' % self.targetFile())
         os.makedirs(self.targetFile())
 
-        print "Exporting"
-        print "  from: %s" % self.sourceFile()
-        print "  to:   %s\n" % self.targetFile()
+        print("Exporting")
+        print("  from: %s" % self.sourceFile())
+        print("  to:   %s\n" % self.targetFile())
 
-        print "\n\n%s build\n\n" % ("RELEASE" if self.isRelease() else "NIGHTLY")
+        print("\n\n%s build\n\n" % ("RELEASE" if self.isRelease() else "NIGHTLY"))
 
         # Obtain exact revision
         # TODO perhaps try to obtain hg tags instead of node id for releases
         if not self.HGREV or not self.REVID:
             self.HGREV, self.REVID = self.processRevision()
         self.VERSION = self.getVersion()
-        print "Retrieved version information: %s (revision info: r%s %s [%s])\n" % (self.VERSION, self.HGREV, self.REVID, os.environ['HGREVISION_SOURCE'])
+        print("Retrieved version information: %s (revision info: r%s %s [%s])\n" % (self.VERSION, self.HGREV, self.REVID, os.environ['HGREVISION_SOURCE']))
 
         # Run scripts to prepare assets
         if not self.skipScripts:
             self.runScripts()
 
         self.exportHGFiles()
-        print "\n"
+        print("\n")
 
         # Export other non-hg files
         self.exportCompiledAssets(self.sourceFile())
-        print "\n"
+        print("\n")
 
         # Create extra folders
-        print "Creating extra folders"
+        print("Creating extra folders")
         for f in CREATE_FOLDERS:
             try:
-                print self.targetFile(f)
+                print(self.targetFile(f))
                 os.makedirs(self.targetFile(f))
             except:
                 pass
-        print "\n"
+        print("\n")
 
         # Perform post-remove step
-        print "Post removing excluded folders"
+        print("Post removing excluded folders")
         for f in POST_REMOVE:
             if not os.path.exists(self.targetFile(f)):
                 continue
-            print "Post-removing excluded file from export folder %s" % f
+            print("Post-removing excluded file from export folder %s" % f)
             if os.path.isdir(self.targetFile(f)):
                 shutil.rmtree(self.targetFile(f))
             else:
                 os.remove(self.targetFile(f))
-        print "\n"
+        print("\n")
 
         # Perform post-copy step
-        print "Post copying extra included files"
+        print("Post copying extra included files")
         for f in COPY_ALL:
             if not os.path.exists(self.sourceFile(f)):
                 continue
-            print "Post-including file or folder %s" % f
+            print("Post-including file or folder %s" % f)
             _recursive_cp(self.sourceFile(f), self.targetFile(f))
-        print "\n"
+        print("\n")
 
         # Write VERSION file to export folder
-        print "Writing data/VERSION file to export folder with contents: %s:%s\n" % (self.HGREV, self.REVID)
+        print("Writing data/VERSION file to export folder with contents: %s:%s\n" % (self.HGREV, self.REVID))
         self.writeVersionFile(self.HGREV, self.REVID)
 
         # If RELEASE status or version-sub was set in config, update it in exported mh source file
         if (self.IS_RELEASE is not None) or (self.VERSION_SUB is not None) :
-            f = open(self.targetFile('makehuman/makehuman.py'), 'rb')
+            f = open(self.targetFile('makehuman/makehuman.py'), 'r')
             release_replaced = False
             versionsub_replaced = False
             lines = []
@@ -247,19 +247,19 @@ class MHAppExporter(object):
                 if self.IS_RELEASE is not None and not release_replaced and line.strip().startswith('release ='):
                     line = line.replace('release = True', 'release = %s' % self.IS_RELEASE)
                     line = line.replace('release = False', 'release = %s' % self.IS_RELEASE)
-                    print "Replaced release declaration in makehuman/makehuman.py at line %s." % (lIdx+1)
+                    print("Replaced release declaration in makehuman/makehuman.py at line %s." % (lIdx+1))
                     release_replaced = True
                 if self.VERSION_SUB is not None and not versionsub_replaced and line.strip().startswith('versionSub ='):
                     import re
                     line = re.sub(r'versionSub = ".*"','versionSub = "%s"' % self.VERSION_SUB, line)
-                    print "Replaced version-sub declaration in makehuman/makehuman.py at line %s." % (lIdx+1)
+                    print("Replaced version-sub declaration in makehuman/makehuman.py at line %s." % (lIdx+1))
                     versionsub_replaced = True
                 lines.append(line)
             f.close()
             f = open(self.targetFile('makehuman/makehuman.py'), 'wb')
             f.write(''.join(lines))
             f.close()
-            print '\n'
+            print('\n')
 
         # Re-arrange folders
         for f in os.listdir( self.targetFile() ):
@@ -268,16 +268,16 @@ class MHAppExporter(object):
             path = self.targetFile(f)
             if os.path.isdir(path):
                 # Move folder in new root folder
-                print "Moving folder %s into new root %s" % (f, REARRANGE_ROOT_FOLDER)
+                print("Moving folder %s into new root %s" % (f, REARRANGE_ROOT_FOLDER))
                 shutil.move(path, self.targetFile(os.path.join(REARRANGE_ROOT_FOLDER, f)))
         '''
         # Move all contents of new root folder into dist root (overwrite if needed)
         _fixOnFinish = []
         for f in os.listdir( self.targetFile(REARRANGE_ROOT_FOLDER) ):
             path = self.targetFile(os.path.join(REARRANGE_ROOT_FOLDER, f))
-            print "Moving %s to root" % os.path.join(REARRANGE_ROOT_FOLDER, f)
+            print ("Moving %s to root" % os.path.join(REARRANGE_ROOT_FOLDER, f))
             if os.path.exists(self.targetFile(f)):
-                #print "WARNING: overwriting folder of file %s with %s" % (f, os.path.join(REARRANGE_ROOT_FOLDER, f))
+                #print ("WARNING: overwriting folder of file %s with %s" % (f, os.path.join(REARRANGE_ROOT_FOLDER, f)))
                 _fixOnFinish.append(f)
                 shutil.move(path, self.targetFile(f+'--fixOnFinish'))
             else:
@@ -287,7 +287,7 @@ class MHAppExporter(object):
         for f in _fixOnFinish:
             shutil.move(self.targetFile(f+'--fixOnFinish'), self.targetFile(f))
         '''
-        print "\n"
+        print("\n")
 
         resultInfo = ExportInfo(self.VERSION, self.HGREV, self.REVID, self.targetFile(), self.isRelease())
         resultInfo.rootSubpath = REARRANGE_ROOT_FOLDER
@@ -332,7 +332,7 @@ class MHAppExporter(object):
         return getpath.isSubPath(subpath, path)
 
     def runProcess(self, args):
-        print "Running %s from %s" % (args, self.getCWD())
+        print("Running %s from %s" % (args, self.getCWD()))
         return subprocess.check_call(args, cwd=self.getCWD())
 
     def runScripts(self):
@@ -341,33 +341,33 @@ class MHAppExporter(object):
             try:
                 self.runProcess( ["python","download_assets.py"] )
             except subprocess.CalledProcessError:
-                print "check that download_assets.py is working correctly"
+                print("check that download_assets.py is working correctly")
                 sys.exit(1)
-            print "\n"
+            print("\n")
 
         ###COMPILE TARGETS
         try:
             self.runProcess( ["python","compile_targets.py"] )
         except subprocess.CalledProcessError:
-            print "check that compile_targets.py is working correctly"
+            print("check that compile_targets.py is working correctly")
             sys.exit(1)
-        print "\n"
+        print("\n")
 
         ###COMPILE MODELS
         try:
             self.runProcess( ["python","compile_models.py"] )
         except subprocess.CalledProcessError:
-            print "check that compile_models.py is working correctly"
+            print("check that compile_models.py is working correctly")
             sys.exit(1)
-        print "\n"
+        print("\n")
 
         ###COMPILE PROXIES
         try:
             self.runProcess( ["python","compile_proxies.py"] )
         except subprocess.CalledProcessError:
-            print "check that compile_proxies.py is working correctly"
+            print("check that compile_proxies.py is working correctly")
             sys.exit(1)
-        print "\n"
+        print("\n")
 
     def getExcludes(self):
         if self.isRelease():
@@ -376,14 +376,14 @@ class MHAppExporter(object):
             return EXCLUDES
 
     def exportHGFiles(self):
-        print "Exporting files from hg repo (hg archive)"
+        print("Exporting files from hg repo (hg archive)")
         excludes = self.getExcludes()
         exclarg = [item for pair in zip(len(excludes)*['--exclude'], excludes) for item in pair]
 
         try:
             self.runProcess( [HG_PATH, "archive"] + exclarg + [self.targetFile()])
         except Exception as e:
-            print "An error happened attempting to run 'hg archive'. Is Mercurial (commandline-tools) installed?"
+            print("An error happened attempting to run 'hg archive'. Is Mercurial (commandline-tools) installed?")
             raise e
 
         # Because the --excludes option does not appear to be working all too well (at least not with wildcards):
@@ -391,14 +391,14 @@ class MHAppExporter(object):
         files = []
         _recursive_glob(self.targetFile(), self.getExcludes(), files)
         for f in files:
-            print "Removing excluded file from export folder %s" % f
+            print("Removing excluded file from export folder %s" % f)
             if os.path.isdir(self.targetFile(f)):
                 shutil.rmtree(self.targetFile(f))
             else:
                 os.remove(self.targetFile(f))
 
     def exportCompiledAssets(self, path):
-        print "Copying extra files in source tree"
+        print("Copying extra files in source tree")
         # Gather files
         files = []
         _recursive_glob(path, ASSET_INCLUDES, files)
@@ -412,7 +412,7 @@ class MHAppExporter(object):
             targetDir = os.path.dirname(self.targetFile(f))
             if not os.path.isdir(targetDir):
                 os.makedirs(targetDir)
-            print "Copying %s" % self.sourceFile(f)
+            print("Copying %s" % self.sourceFile(f))
             shutil.copy(self.sourceFile(f), self.targetFile(f))
 
     def processRevision(self):
@@ -428,7 +428,7 @@ class MHAppExporter(object):
                 REVID = rIn[1].strip()
                 vfile.close()
             except:
-                print 'Warning: no VERSION file found, HG revision unknown'
+                print('Warning: no VERSION file found, HG revision unknown')
                 HGREV = '?'
                 REVID = 'UNKNOWN'
 
@@ -549,14 +549,14 @@ def _recursive_cp(src, dest):
     # Copy permissions and times
     try:
         shutil.copystat(src, dest)
-    except OSError, e:
+    except OSError as e:
         # Copying file access times may fail on Windows (WindowsError)
         pass
 
 def parseConfig(configPath):
     if os.path.isfile(configPath):
-        import ConfigParser
-        config = ConfigParser.ConfigParser()
+        import configparser
+        config = configparser.ConfigParser()
         config.read(configPath)
         return config
     else:
@@ -607,4 +607,4 @@ if __name__ == '__main__':
     if args.get('targetPath', None) is None:
         raise RuntimeError("targetPath argument not specified")
 
-    print export(args['sourcePath'], args['targetPath'], args.get('skiphg', False), args.get('skipscripts', False), args.get('nodownload', False))
+    print(export(args['sourcePath'], args['targetPath'], args.get('skiphg', False), args.get('skipscripts', False), args.get('nodownload', False)))

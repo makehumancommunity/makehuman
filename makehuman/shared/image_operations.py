@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """ 
@@ -282,14 +282,14 @@ Mask manipulation
 def growMask(img, radius = 1, step = 1):
     """Grow a mask by a number of pixels."""
     out = Image(img)
-    for i in xrange(int(float(radius)/float(step)+0.5)):
+    for i in range(int(float(radius)/float(step)+0.5)):
         out = expandMask(out, False, step)
     return out
 
 def shrinkMask(img, radius = 1, step = 1):
     """Shrink a mask by a number of pixels."""
     out = Image(img)
-    for i in xrange(int(float(radius)/float(step)+0.5)):
+    for i in range(int(float(radius)/float(step)+0.5)):
         out = expandMask(out, True, step)
     return out
 
@@ -310,7 +310,7 @@ def expand(img, mask, pixels):
     image and mask.
     """
 
-    for i in xrange(int(pixels+0.5)):
+    for i in range(int(pixels+0.5)):
         expansion = jitterSum(img.data).astype(float)/255.0
         expmask = jitterSum(mask.data > 0)
         newmask = (expmask == 0).astype(numpy.uint8)

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # ##### BEGIN GPL LICENSE BLOCK #####
@@ -450,7 +450,7 @@ def getMyDocuments():
             name, type = winreg.QueryValueEx(k, 'Personal')
 
             if type == 1:
-                print("Found My Documents folder: %s" % name)
+                print(("Found My Documents folder: %s" % name))
                 return name
         except Exception as e:
             print("Did not find path to My Documents folder")
@@ -483,7 +483,7 @@ def loadDefaults(context):
     try:
         fp = open(filename, "r")
     except:
-        print("Unable to open %s for reading" % filename)
+        print(("Unable to open %s for reading" % filename))
         return
     for line in fp:
         words = line.split()
@@ -495,7 +495,7 @@ def loadDefaults(context):
             val = words[1]
         context.scene[words[0]] = val
     fp.close()
-    print("Defaults loaded from %s" % filename)
+    print(("Defaults loaded from %s" % filename))
     return
 
 #
@@ -509,13 +509,13 @@ def saveDefaults(context):
     try:
         fp = open(filename, "w", encoding="utf-8", newline="\n")
     except:
-        print("Unable to open %s for writing" % filename)
+        print(("Unable to open %s for writing" % filename))
         return
-    for (key,value) in context.scene.items():
+    for (key,value) in list(context.scene.items()):
         if key[:3] == "Mcp":
             fp.write("%s %s\n" % (key, value))
     fp.close()
-    print("Defaults saved to %s" % filename)
+    print(("Defaults saved to %s" % filename))
     return
 
 

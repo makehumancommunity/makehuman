@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # ##### BEGIN GPL LICENSE BLOCK #####
@@ -117,14 +117,14 @@ def deleteAction(context):
         act = None
     if not act:
         raise MocapError("Did not find action %s" % scn.McpActions)
-    print('Delete action', act)
+    print(('Delete action', act))
     act.use_fake_user = False
     if act.users == 0:
-        print("Deleting", act)
+        print(("Deleting", act))
         n = findActionNumber(act.name)
         _actions.pop(n)
         bpy.data.actions.remove(act)
-        print('Action', act, 'deleted')
+        print(('Action', act, 'deleted'))
         listAllActions(context)
         #del act
     else:
@@ -190,7 +190,7 @@ def setCurrentAction(context, prop):
     name = getattr(context.scene, prop)
     act = getAction(name)
     context.object.animation_data.action = act
-    print("Action set to %s" % act)
+    print(("Action set to %s" % act))
     return
 
 

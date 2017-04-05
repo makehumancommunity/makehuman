@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -193,7 +193,7 @@ class ClothesTaskView(proxychooser.ProxyChooserTaskView):
             self.oldPxyMats = dict()
             xray_mat = material.fromFile(getpath.getSysDataPath('materials/xray.mhmat'))
             for pxy in self.human.getProxies(includeHumanProxy=False):
-                print pxy.type
+                print(pxy.type)
                 if pxy.type == 'Eyes':
                     # Don't X-ray the eyes, it looks weird
                     continue

@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -39,6 +39,7 @@ Eye chooser library.
 import gui3d
 import mh
 import proxychooser
+import log
 
 class EyesTaskView(proxychooser.ProxyChooserTaskView):
 
@@ -66,6 +67,7 @@ class EyesTaskView(proxychooser.ProxyChooserTaskView):
             # Load initial eyes
             self.selectProxy(mh.getSysDataPath("eyes/high-poly/high-poly.mhclo"))
             # Reset default material on eyes (in case it was changed)
+            log.debug("Eye material reset to %s", self.getSelection()[0].material)
             self.getObjects()[0].material = self.getSelection()[0].material
 
 
@@ -85,6 +87,7 @@ def load(app):
     taskview.registerLoadSaveHandlers()
 
     # Load initial eyes
+    log.debug("According to mh.getSysDataPath here's high poly eyes %s", mh.getSysDataPath("eyes/high-poly/high-poly.mhclo"))
     taskview.selectProxy(mh.getSysDataPath("eyes/high-poly/high-poly.mhclo"))
 
 # This method is called when the plugin is unloaded from makehuman

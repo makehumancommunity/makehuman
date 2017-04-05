@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -154,7 +154,7 @@ def writeObjectDefs(fp, meshes, config):
         fbx_binary.fbx_template_generate(elem, "Video", nImages, "FbxVideo", properties_vid)
         return
 
-    import fbx_utils
+    from . import fbx_utils
     fp.write(
 """
     ObjectType: "Material" {
@@ -233,7 +233,7 @@ def writeMaterial(fp, mesh, config):
         fbx_binary.fbx_data_material(elem, key, id, properties)
         return
 
-    import fbx_utils
+    from . import fbx_utils
 
     fp.write(
 '    Material: %d, "%s", "" {' % (id, key) + """
@@ -271,7 +271,7 @@ def writeTexture(fp, filepath, channel, config):
         fbx_binary.fbx_data_texture_file_element(elem, tkey, tid, vkey, vid, filepath, relpath, properties_tex, properties_vid)
         return
 
-    import fbx_utils
+    from . import fbx_utils
 
     fp.write(
 '    Video: %d, "%s", "Clip" {' % (vid, vkey) + """

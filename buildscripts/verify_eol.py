@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -59,13 +59,13 @@ def check_dos_eol(path):
     global _recurse_files
     result = []
     for f in _recurse_get_ascii_files(path):
-        if "\r\n" in open(f, 'rb').read():
+        if "\r\n" in open(f, 'r').read():
             result.append( f )
     return result
 
 def fix_dos_eol(filepaths):
     for f in filepaths:
-        fh = open(f, 'rb')
+        fh = open(f, 'r')
         contents = fh.read()
         fh.close()
         contents = contents.replace('\r\n', '\n')
@@ -126,13 +126,13 @@ if __name__ == '__main__':
     fix = args.get('fix', False)
     detected = check_dos_eol(path)
     if len(detected) > 0:
-        print "Files containing DOS line endings:"
-        print "\n".join( detected )
+        print("Files containing DOS line endings:")
+        print("\n".join( detected ))
 
     if fix:
-        print "\nFixing files..."
+        print("\nFixing files...")
         fix_dos_eol(detected)
-        print "All done"
+        print("All done")
     else:
         if len(detected) > 0:
             sys.exit(1)

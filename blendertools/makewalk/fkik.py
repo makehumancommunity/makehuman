@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # ##### BEGIN GPL LICENSE BLOCK #####
@@ -80,7 +80,7 @@ def matchPoseTwist(pb, src):
 def printMatrix(string,mat):
     print(string)
     for i in range(4):
-        print("    %.4g %.4g %.4g %.4g" % tuple(mat[i]))
+        print(("    %.4g %.4g %.4g %.4g" % tuple(mat[i])))
 
 
 def matchIkLeg(legIk, toeFk, mBall, mToe, mHeel):
@@ -747,7 +747,7 @@ def printHand(context):
         '''
         footIk = rig.pose.bones["foot.ik.L"]
         print(footIk)
-        print(footIk.matrix)
+        print((footIk.matrix))
 
 
 class VIEW3D_OT_PrintHandsButton(bpy.types.Operator):

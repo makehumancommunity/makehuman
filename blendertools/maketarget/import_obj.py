@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -90,7 +90,7 @@ def importObj(filepath, context, addBasisKey=True):
     scn = context.scene
     obname = utils.nameFromPath(filepath)
     fp = open(filepath, "rU")
-    print("Importing %s" % filepath)
+    print(("Importing %s" % filepath))
 
     verts = []
     faces = []
@@ -134,7 +134,7 @@ def importObj(filepath, context, addBasisKey=True):
                 materials[name] = matlist
         else:
             pass
-    print("%s successfully imported" % filepath)
+    print(("%s successfully imported" % filepath))
     fp.close()
 
     me = bpy.data.meshes.new(obname)

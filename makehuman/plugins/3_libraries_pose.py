@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -114,8 +114,8 @@ class PoseLibraryTaskView(gui3d.TaskView, filecache.MetadataCacher):
         name = os.path.splitext(os.path.basename(filename))[0]
         description = ""
         license = mh.getAssetLicense()
-        from codecs import open
-        f = open(filename, encoding='utf-8')
+        import io
+        f = io.open(filename, encoding='utf-8')
         for l in f.read().split('\n'):
             l = l.strip()
             l = l.split()

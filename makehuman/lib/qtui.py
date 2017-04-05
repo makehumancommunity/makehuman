@@ -661,7 +661,7 @@ class LogWindow(qtgui.ListView):
         self.updateView()
 
     def updateView(self):
-        for i in xrange(self.count()):
+        for i in range(self.count()):
             ilevel = self.getItemData(i)
             self.showItem(i, ilevel >= self.level)
             self.setItemColor(i, log.getLevelColor(ilevel))
@@ -762,9 +762,11 @@ class Application(QtGui.QApplication, events3d.EventHandler):
             orders = [h.sortOrder for h in self.eventHandlers]
             o = max(orders) +1
             handler.sortOrder = o
+        #else:
+        #    handler.sortOrder = sortOrder
 
         self.eventHandlers.append(handler)
-        self.eventHandlers.sort(key = lambda h: h.sortOrder)
+        #self.eventHandlers.sort(key = lambda h: h.sortOrder)
 
     def callEventHandlers(self, event_type, event):
         for handler in self.eventHandlers:
@@ -799,15 +801,15 @@ class Application(QtGui.QApplication, events3d.EventHandler):
         self._postAsync(AsyncEvent(func, args, kwargs))
 
 def getSaveFileName(directory, filter = "All files (*.*)"):
-    return unicode(QtGui.QFileDialog.getSaveFileName(
+    return str(QtGui.QFileDialog.getSaveFileName(
         G.app.mainwin, directory = directory, filter = filter))
 
 def getOpenFileName(directory, filter = "All files (*.*)"):
-    return unicode(QtGui.QFileDialog.getOpenFileName(
+    return str(QtGui.QFileDialog.getOpenFileName(
         G.app.mainwin, directory = directory, filter = filter))
 
 def getExistingDirectory(directory):
-    return unicode(QtGui.QFileDialog.getExistingDirectory(
+    return str(QtGui.QFileDialog.getExistingDirectory(
         G.app.mainwin, directory = directory))
 
 def setShortcut(modifier, key, action):

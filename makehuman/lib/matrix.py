@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -151,7 +151,7 @@ def lookat(eye, target, up):
     return M * T
 
 def viewport(x, y, w, h):
-    x, y, w, h = map(float, (x, y, w, h))
+    x, y, w, h = list(map(float, (x, y, w, h)))
     return np.matrix([[w/2, 0  , 0  ,x+w/2],
                       [0  , h/2, 0  ,y+h/2],
                       [0  , 0  , 0.5,  0.5],

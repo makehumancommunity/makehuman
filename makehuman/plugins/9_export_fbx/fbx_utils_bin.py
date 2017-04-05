@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # ##### BEGIN GPL LICENSE BLOCK #####
@@ -195,14 +195,14 @@ def similar_values_iter(v1, v2, e=1e-6):
 
 def vcos_transformed_gen(raw_cos, m=None):
     # Note: we could most likely get much better performances with numpy, but will leave this as TODO for now.
-    gen = zip(*(iter(raw_cos),) * 3)
+    gen = list(zip(*(iter(raw_cos),) * 3))
     return gen if m is None else (m * Vector(v) for v in gen)
 
 def nors_transformed_gen(raw_nors, m=None):
     # Great, now normals are also expected 4D!
     # XXX Back to 3D normals for now!
     # gen = zip(*(iter(raw_nors),) * 3 + (_infinite_gen(1.0),))
-    gen = zip(*(iter(raw_nors),) * 3)
+    gen = list(zip(*(iter(raw_nors),) * 3))
     return gen if m is None else (m * Vector(v) for v in gen)
 
 
@@ -496,7 +496,7 @@ def elem_props_template_init(templates, template_type):
     if tmpl is not None:
         written = tmpl.written[0]
         props = tmpl.properties
-        ret = OrderedDict((name, [val, ptype, anim, written]) for name, (val, ptype, anim) in props.items())
+        ret = OrderedDict((name, [val, ptype, anim, written]) for name, (val, ptype, anim) in list(props.items()))
     return ret
 
 
@@ -529,7 +529,7 @@ def elem_props_template_finalize(template, elem):
     subtypes in each and every elements, if they are not overriden by that element.
     Yes, hairy, FBX that is to say. When they could easily support several subtypes per template... :(
     """
-    for name, (value, ptype_name, animatable, written) in template.items():
+    for name, (value, ptype_name, animatable, written) in list(template.items()):
         if written:
             continue
         ptype = FBX_PROPERTIES_DEFINITIONS[ptype_name]

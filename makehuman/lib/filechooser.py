@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -214,7 +214,7 @@ class FileSort(Sorter):
         Override Sorter.getFields to append the MetaFields at the result.
         """
 
-        return super(FileSort, self).fields() + self.metaFields
+        return list(super(FileSort, self).fields()) + self.metaFields
 
     def getMethod(self, field):
         """
@@ -428,7 +428,7 @@ class FileChooserBase(QtGui.QWidget, gui.Widget):
         gui.Widget.__init__(self)
 
         self.setPaths(path)
-        if isinstance(extensions, basestring):
+        if isinstance(extensions, str):
             self.extensions = [extensions]
         else:
             self.extensions = extensions
@@ -495,7 +495,7 @@ class FileChooserBase(QtGui.QWidget, gui.Widget):
                               mutexExtensions = self.mutexExtensions)
 
     def clearList(self):
-        for i in xrange(self.children.count()):
+        for i in range(self.children.count()):
             child = self.children.itemAt(0)
             self._removeListItem(child)
 

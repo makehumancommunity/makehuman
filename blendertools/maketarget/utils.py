@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -120,7 +120,7 @@ def getModule(modname):
         return sys.modules[modname]
     except KeyError:
         pass
-    print("Trying to load %s" % modname)
+    print(("Trying to load %s" % modname))
     fp, pathname, description = imp.find_module(modname)
     try:
         imp.load_module(modname, fp, pathname, description)
@@ -137,7 +137,7 @@ def getNumpy(string):
     except:
         numpy = None
         mh.foundNumpy = False
-        print("Failed to load numpy. %s will not work" % string)
+        print(("Failed to load numpy. %s will not work" % string))
     return numpy
 
 #----------------------------------------------------------
@@ -193,7 +193,7 @@ def removeShapeKeys(ob):
 
 
 def printVec(string, vec):
-    print(string, "(%.4f %.4f %.4f)" % (vec[0], vec[1], vec[2]))
+    print((string, "(%.4f %.4f %.4f)" % (vec[0], vec[1], vec[2])))
 
 
 #----------------------------------------------------------
@@ -212,7 +212,7 @@ def getMyDocuments():
             name, type = winreg.QueryValueEx(k, 'Personal')
 
             if type == 1:
-                print("Found My Documents folder: %s" % name)
+                print(("Found My Documents folder: %s" % name))
                 return name
         except Exception as e:
             print("Did not find path to My Documents folder")
@@ -235,7 +235,7 @@ def getMHBlenderDirectory():
 def loadTarget(filepath, context, irrelevant=[], offset=0):
     realpath = os.path.realpath(os.path.expanduser(filepath))
     fp = open(realpath, "rU")
-    print("Loading target %s, ignoring: %s" % (realpath, irrelevant))
+    print(("Loading target %s, ignoring: %s" % (realpath, irrelevant)))
 
     ob = context.object
     bpy.ops.object.mode_set(mode='EDIT')
@@ -269,7 +269,7 @@ def loadTarget(filepath, context, irrelevant=[], offset=0):
                     index -= offset
 
             if index >= nverts:
-                print("Stopped loading at index %d" % index)
+                print(("Stopped loading at index %d" % index))
                 break
             dx = float(words[1])
             dy = float(words[2])

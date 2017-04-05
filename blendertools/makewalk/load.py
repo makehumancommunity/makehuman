@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 # ##### BEGIN GPL LICENSE BLOCK #####
@@ -76,7 +76,7 @@ class CNode:
             c = '*'
         else:
             c = ' '
-        print("%s%s%10s (%8.3f %8.3f %8.3f)" % (c, pad, self.name, vec[0], vec[1], vec[2]))
+        print(("%s%s%10s (%8.3f %8.3f %8.3f)" % (c, pad, self.name, vec[0], vec[1], vec[2])))
         for child in self.children:
             child.display(pad+"  ")
         return
@@ -251,7 +251,7 @@ def readBvhFile(context, filepath, scn, scan):
     time2 = time.clock()
     endProgress("Bvh file %s loaded in %.3f s" % (filepath, time2-time1))
     if frameno == 1:
-        print("Warning: No frames in range %d -- %d." % (startFrame, endFrame))
+        print(("Warning: No frames in range %d -- %d." % (startFrame, endFrame)))
     renameBvhRig(rig, filepath)
     rig.McpIsSourceRig = True
     clearCategory()
@@ -390,7 +390,7 @@ def renameBones(srcRig, scn):
         srcName = srcBone.name
         trgName = getSourceBoneName(srcName)
         if isinstance(trgName, tuple):
-            print("BUG. Target name is tuple:", trgName)
+            print(("BUG. Target name is tuple:", trgName))
             trgName = trgName[0]
         eb = ebones[srcName]
         if trgName:
@@ -415,7 +415,7 @@ def renameBones(srcRig, scn):
 def renameBvhRig(srcRig, filepath):
     base = os.path.basename(filepath)
     (filename, ext) = os.path.splitext(base)
-    print("File", filename, len(filename))
+    print(("File", filename, len(filename)))
     if len(filename) > 12:
         words = filename.split('_')
         if len(words) == 1:
@@ -427,7 +427,7 @@ def renameBvhRig(srcRig, filepath):
             name += word
     else:
         name = 'Y_' + filename
-    print("Name", name)
+    print(("Name", name))
 
     srcRig.name = name
     adata = srcRig.animation_data
@@ -474,7 +474,7 @@ def rescaleRig(scn, trgRig, srcRig):
         trgScale = upleg.length
     srcScale = srcRig.data.bones['thigh.L'].length
     scale = trgScale/srcScale
-    print("Rescale %s with factor %f" % (srcRig.name, scale))
+    print(("Rescale %s with factor %f" % (srcRig.name, scale)))
     scn.McpBvhScale = scale
 
     bpy.ops.object.mode_set(mode='EDIT')
@@ -572,7 +572,7 @@ class VIEW3D_OT_RenameBvhButton(bpy.types.Operator):
             renameAndRescaleBvh(context, srcRig, trgRig)
             if scn.McpRescale:
                 simplify.rescaleFCurves(context, srcRig, scn.McpRescaleFactor)
-            print("%s renamed" % srcRig.name)
+            print(("%s renamed" % srcRig.name))
         except MocapError:
             bpy.ops.mcp.error('INVOKE_DEFAULT')
         return{'FINISHED'}
@@ -605,7 +605,7 @@ class VIEW3D_OT_LoadAndRenameBvhButton(bpy.types.Operator, ImportHelper):
             renameAndRescaleBvh(context, srcRig, trgRig)
             if scn.McpRescale:
                 simplify.rescaleFCurves(context, srcRig, scn.McpRescaleFactor)
-            print("%s loaded and renamed" % srcRig.name)
+            print(("%s loaded and renamed" % srcRig.name))
         except MocapError:
             bpy.ops.mcp.error('INVOKE_DEFAULT')
         finally:

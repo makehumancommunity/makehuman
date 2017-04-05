@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -83,7 +83,7 @@ class FileModifiedEvent(events3d.Event):
         return "FileModifiedEvent: file: %s, flag state: %s, previous flag state: %s, reasons: %s" % (
             self.file.path, repr(self.value), repr(self.oldvalue), repr(self.reasons))
 
-    def __nonzero__(self):
+    def __bool__(self):
         """Boolean representation of the event. Returns its .value member."""
         return self.value
 
@@ -188,7 +188,7 @@ class File(events3d.EventHandler):
 
     def _associate(self, path, reason, extrareason=None, data=None):
         """Internal method that associates the File object with a path."""
-        if isinstance(path, basestring):
+        if isinstance(path, str):
             path = os.path.normpath(path)
 
         event = FileModifiedEvent(self, False, self._modified, reason, data)

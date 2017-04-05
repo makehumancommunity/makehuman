@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -43,6 +43,7 @@ from OpenGL.GL.ARB.texture_multisample import *
 import texture
 import log
 from core import G
+import io
 
 class Uniform(object):
     def __init__(self, index, name, pytype, dims):
@@ -127,7 +128,7 @@ class VectorUniform(Uniform):
         if len(self.dims) > 1:
             self.glfunc(self.index, 1, GL_TRUE, values)
         else:
-            self.glfunc(self.index, len(values)/self.dims[0], values)
+            self.glfunc(self.index, len(values)//self.dims[0], values)
 
     def update(self, pgm):
         values = np.zeros(self.dims, dtype=self.dtype)
@@ -280,7 +281,7 @@ class Shader(object):
             cls._glsl_version_str = OpenGL.GL.glGetString(OpenGL.GL.GL_SHADING_LANGUAGE_VERSION)
             if cls._glsl_version_str:
                 import re
-                glsl_version = re.search('[0-9]+\.[0-9]+', cls._glsl_version_str).group(0)
+                glsl_version = re.search('[0-9]+\.[0-9]+', str(cls._glsl_version_str)).group(0)
                 glsl_v_major, glsl_v_minor = glsl_version.split('.')
             else:
                 glsl_v_major, glsl_v_minor = (0, 0)
@@ -308,12 +309,12 @@ class Shader(object):
     def __del__(self):
         try:
             self.delete()
-        except StandardError:
+        except Exception:
             pass
 
     @staticmethod
     def createShader(file, type, defines = [], defineables = None):
-        with open(file, 'rU') as f:
+        with io.open(file, 'rU') as f:
             source = f.read()
         if "#version" not in source:
             log.warning("The shader source in %s does not contain an explicit GLSL version declaration. This could cause problems with some compilers.", file)
@@ -426,7 +427,7 @@ class Shader(object):
             self.delete()
             return
 
-        self.vertexTangentAttrId = glGetAttribLocation(self.shaderId, 'tangent')
+        self.vertexTangentAttrId = glGetAttribLocation(self.shaderId, b'tangent')
 
         self.uniforms = None
         self.glUniforms = []
@@ -436,9 +437,9 @@ class Shader(object):
         if self.uniforms is None:
             parameterCount = glGetProgramiv(self.shaderId, GL_ACTIVE_UNIFORMS)
             self.uniforms = []
-            for index in xrange(parameterCount):
+            for index in range(parameterCount):
                 name, size, type = glGetActiveUniform(self.shaderId, index)
-                if name.startswith('gl_'):
+                if name.startswith(b'gl_'):
                     log.debug("Shader: adding built-in uniform %s", name)
                     self.glUniforms.append(name)
                     continue
@@ -464,7 +465,7 @@ class Shader(object):
             uniform.set(value)
 
         # Disable other texture units
-        for gl_tex_idx in xrange(GL_TEXTURE0 + SamplerUniform.currentSampler, 
+        for gl_tex_idx in range(GL_TEXTURE0 + SamplerUniform.currentSampler, 
                                  GL_TEXTURE0 + glmodule.MAX_TEXTURE_UNITS):
             glActiveTexture(gl_tex_idx)
             glBindTexture(GL_TEXTURE_2D, 0)
@@ -507,14 +508,14 @@ def getShader(path, defines=[], cache=None):
             try:
                 shader.initShader()
                 shader.modified = mtime
-            except RuntimeError, _:
+            except RuntimeError as _:
                 log.error("Error loading shader %s", cacheName, exc_info=True)
                 shader = False
     else:
         try:
             shader = Shader(path, defines)
             shader.modified = mtime
-        except RuntimeError, _:
+        except RuntimeError as _:
             log.error("Error loading shader %s", path, exc_info=True)
             shader = False
 
@@ -527,7 +528,7 @@ def reloadShaders():
         if _shaderCache[path]:
             try:
                 _shaderCache[path].initShader()
-            except RuntimeError, _:
+            except RuntimeError as _:
                 log.error("Error loading shader %s", path, exc_info=True)
                 _shaderCache[path] = False
         else:
