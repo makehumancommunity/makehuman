@@ -1930,11 +1930,11 @@ class BrowseButton(Button):
             path = os.path.join(path, self.filename)
 
         if self.mode == 'open':
-            path = pathToUnicode(str(QtGui.QFileDialog.getOpenFileName(G.app.mainwin, directory=path, filter=self.filter)))
+            path = pathToUnicode(str(QtGui.QFileDialog.getOpenFileName(G.app.mainwin, directory=self.directory, filter=self.filter)))
         elif self.mode == 'save':
-            path = pathToUnicode(str(QtGui.QFileDialog.getSaveFileName(G.app.mainwin, directory=path, filter=self.filter)))
+            path = pathToUnicode(str(QtGui.QFileDialog.getSaveFileName(G.app.mainwin, directory=self.directory, filter=self.filter)))
         elif self.mode == 'dir':
-            path = pathToUnicode(str(QtGui.QFileDialog.getExistingDirectory(G.app.mainwin, directory=path)))
+            path = pathToUnicode(str(QtGui.QFileDialog.getExistingDirectory(G.app.mainwin, directory=self.directory)))
 
         if path:
             if self.mode == 'dir': self.directory = path

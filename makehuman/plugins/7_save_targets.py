@@ -67,10 +67,10 @@ class SaveTargetsTaskView(gui3d.TaskView):
         self.saveButton = gui.Button('Save')
         self.saveBox.addWidget(self.saveButton)
 
-        self.saveAtButton = gui.BrowseButton(label='Save At ...', mode='save')
-        self.saveAtButton.path = os.path.join(self.dirName,  self.fileName)
-        self.saveAtButton.setFilter('MakeHuman Target ( *.target )')
-        self.saveBox.addWidget(self.saveAtButton)
+        self.saveAsButton = gui.BrowseButton(label='Save As ...', mode='save')
+        self.saveAsButton.path = os.path.join(self.dirName,  self.fileName)
+        self.saveAsButton.setFilter('MakeHuman Target ( *.target )')
+        self.saveBox.addWidget(self.saveAsButton)
 
         self.createShortCut()
 
@@ -78,7 +78,7 @@ class SaveTargetsTaskView(gui3d.TaskView):
         def onClicked(event):
             self.quickSave()
 
-        @self.saveAtButton.mhEvent
+        @self.saveAsButton.mhEvent
         def onClicked(path):
             if path:
                 if not path.lower().endswith('.target'):
@@ -89,7 +89,7 @@ class SaveTargetsTaskView(gui3d.TaskView):
                 else:
                     self.saveTargets(path)
                     self.nameEdit.setText(self.fileName)
-                    self.saveAtButton.path = path
+                    self.saveAsButton.path = path
                     G.app.statusPersist('Saving Directory: ' + self.dirName)
 
     def quickSave(self):
@@ -117,7 +117,7 @@ class SaveTargetsTaskView(gui3d.TaskView):
 
     def onChange(self):
         self.fileName = self.nameEdit.text
-        self.saveAtButton.path = os.path.join(self.dirName, self.fileName)
+        self.saveAsButton.path = os.path.join(self.dirName, self.fileName)
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
@@ -128,7 +128,6 @@ class SaveTargetsTaskView(gui3d.TaskView):
         G.app.statusPersist('')
 
     def createShortCut(self):
-
         action = gui.Action('savetgt', language.getLanguageString('Save Targets'), self.quickSave)
         G.app.mainwin.addAction(action)
         mh.setShortcut(mh.Modifiers.ALT, mh.Keys.t, action)
