@@ -40,7 +40,9 @@ import gui, gui3d
 import os
 import getpath as gp
 import algos3d
+import mh
 from core import G
+from language import language
 
 class SaveTargetsTaskView(gui3d.TaskView):
 
@@ -70,22 +72,11 @@ class SaveTargetsTaskView(gui3d.TaskView):
         self.saveAtButton.setFilter('MakeHuman Target ( *.target )')
         self.saveBox.addWidget(self.saveAtButton)
 
+        self.createShortCut()
+
         @self.saveButton.mhEvent
         def onClicked(event):
-            path = os.path.join(self.dirName, self.fileName)
-            overwrite = True
-            dialog = gui.Dialog()
-
-            if not path.lower().endswith('.target'):
-                error_msg = 'Cannot save target to file: {0:s}\n Expected a path to a .target file'.format(path)
-                dialog.prompt(title='Error', text=error_msg, button1Label='OK')
-                return
-            else:
-                if os.path.exists(path):
-                    msg = 'File {0:s} already exists. Overwrite?'.format(path)
-                    overwrite = dialog.prompt(title='Warning', text=msg, button1Label='YES', button2Label='NO' )
-                if overwrite:
-                    self.saveTargets(path)
+            self.quickSave()
 
         @self.saveAtButton.mhEvent
         def onClicked(path):
@@ -100,6 +91,23 @@ class SaveTargetsTaskView(gui3d.TaskView):
                     self.nameEdit.setText(self.fileName)
                     self.saveAtButton.path = path
                     G.app.statusPersist('Saving Directory: ' + self.dirName)
+
+    def quickSave(self):
+        path = os.path.join(self.dirName, self.fileName)
+        overwrite = True
+        dialog = gui.Dialog()
+
+        if not path.lower().endswith('.target'):
+            error_msg = 'Cannot save target to file: {0:s}\n Expected a path to a .target file'.format(path)
+            dialog.prompt(title='Error', text=error_msg, button1Label='OK')
+            return
+        else:
+            if os.path.exists(path):
+                msg = 'File {0:s} already exists. Overwrite?'.format(path)
+                overwrite = dialog.prompt(title='Warning', text=msg, button1Label='YES', button2Label='NO')
+            if overwrite:
+                self.saveTargets(path)
+
 
     def saveTargets(self, path):
         human = G.app.selectedHuman
@@ -118,6 +126,12 @@ class SaveTargetsTaskView(gui3d.TaskView):
     def onHide(self, event):
         gui3d.TaskView.onHide(self, event)
         G.app.statusPersist('')
+
+    def createShortCut(self):
+
+        action = gui.Action('savetgt', language.getLanguageString('Save Targets'), self.quickSave)
+        G.app.mainwin.addAction(action)
+        mh.setShortcut(mh.Modifiers.ALT, mh.Keys.t, action)
 
 def load(app):
     category = app.getCategory('Utilities')

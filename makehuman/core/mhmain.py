@@ -167,7 +167,6 @@ class MHApplication(gui3d.Application, mh.Application):
             'exit':         (mh.Modifiers.CTRL, mh.Keys.q),
             'stereo':       (mh.Modifiers.CTRL, mh.Keys.w),
             'wireframe':    (mh.Modifiers.CTRL, mh.Keys.f),
-            'savetgt':      (mh.Modifiers.ALT, mh.Keys.t),
             'qexport':      (mh.Modifiers.ALT, mh.Keys.e),
             'smooth':       (mh.Modifiers.ALT, mh.Keys.s),
             'grab':         (mh.Modifiers.ALT, mh.Keys.g),
@@ -1474,10 +1473,6 @@ class MHApplication(gui3d.Application, mh.Application):
     #    algos3d.saveTranslationTarget(human.meshData, path)
     #    log.message("Full target exported to %s", path)
 
-    def goToSaveTarget(self):
-        mh.changeTask('Utilities', 'Save Targets')
-        self.redraw()
-
     def grabScreen(self):
         import datetime
         grabPath = mh.getPath('grab')
@@ -1663,8 +1658,6 @@ class MHApplication(gui3d.Application, mh.Application):
         self.actions.zoomOut   = action('zoomOut',   self.getLanguageString('Zoom Out'),      self.zoomOut)
 
         self.actions.profiling = action('profiling', self.getLanguageString('Profiling'),     self.toggleProfiling, toggle=True)
-        self.actions.savetgt   = action('savetgt',   self.getLanguageString('Save Targets'), self.goToSaveTarget)
-
 
         # 1 - File toolbar
         toolbar = self.file_toolbar = mh.addToolBar("File")
