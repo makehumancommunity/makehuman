@@ -99,7 +99,7 @@ class TargetsTaskView(gui3d.TaskView):
             path = self.targets.getItemPath(item)
             log.message('target: %s', path)
             if item.text not in self.items:
-                self.items.update({item.text : [item, path]})
+                self.items[item.text] = [item, path]
                 self.showTarget(path)
             else:
                 self.clearColor()

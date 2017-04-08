@@ -445,7 +445,7 @@ class OrbitalCamera(Camera):
         self.scaleTranslations = True  # Enable to make translations depend on zoom factor (only work when zoomed in)
 
         # Ortho mode
-        self._projection = 0    # TODO properly test with projection mode as well
+        self.projection = 0    # TODO properly test with projection mode as well
 
         self._horizontalRotation = 0.0
         self._verticalInclination = 0.0

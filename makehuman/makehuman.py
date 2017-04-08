@@ -403,6 +403,9 @@ def make_user_dir():
     userDataDir = getpath.getPath('data')
     if not os.path.isdir(userDataDir):
         os.makedirs(userDataDir)
+    userPluginsDir = getpath.getPath('plugins')
+    if not os.path.isdir(userPluginsDir):
+        os.makedirs(userPluginsDir)
 
 def init_logging():
     import log

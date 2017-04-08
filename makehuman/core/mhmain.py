@@ -120,7 +120,8 @@ class PluginsTaskView(gui3d.TaskView):
         self.scroll.setWidget(self.pluginsBox)
 
         for module in sorted(gui3d.app.modules):
-            self.pluginsBox.addWidget(PluginCheckBox(module))
+            if module not in gui3d.app.getSetting('activeUserPlugins'):
+                self.pluginsBox.addWidget(PluginCheckBox(module))
 
 class SymmetryAction(gui3d.Action):
     def __init__(self, human, direction):
@@ -219,6 +220,7 @@ class MHApplication(gui3d.Application, mh.Application):
                     "7_shell",
                     "7_targets",
                 ],
+                'activeUserPlugins': [],
                 'rtl': False,
                 'invertMouseWheel': False,
                 'lowspeed': 1,
@@ -244,6 +246,7 @@ class MHApplication(gui3d.Application, mh.Application):
                 'invertMouseWheel':False,
                 'language':'english',
                 'excludePlugins':[],
+                'activeUserPlugins': [],
                 'rtl': False,
                 'sliderImages': True,
                 'guiTheme': 'makehuman',
@@ -501,6 +504,12 @@ class MHApplication(gui3d.Application, mh.Application):
 
         # Load plugins not starting with _
         pluginsToLoad = glob.glob(mh.getSysPath(os.path.join("plugins/",'[!_]*.py')))
+        userPlugins = glob.glob(mh.getPath(os.path.join("plugins/", '[!_]*.py')))
+        if userPlugins:
+            for userPlugin in userPlugins:
+                name = os.path.splitext(os.path.basename(userPlugin))[0]
+                if name in self.getSetting('activeUserPlugins'):
+                    pluginsToLoad.append(mh.getRelativePath(userPlugin, mh.getPath(), False))
 
         # Load plugin packages (folders with a file called __init__.py)
         for fname in os.listdir(mh.getSysPath("plugins/")):
@@ -509,7 +518,15 @@ class MHApplication(gui3d.Application, mh.Application):
                 if os.path.isdir(folder) and ("__init__.py" in os.listdir(folder)):
                     pluginsToLoad.append(folder)
 
+        for fname in os.listdir(mh.getPath("plugins/")):
+            if fname[0] != "_":
+                if fname in self.getSetting('activeUserPlugins'):
+                    folder = os.path.join("plugins", fname)
+                    if os.path.isdir(mh.getPath(folder)) and ("__init__.py" in os.listdir(mh.getPath(folder))):
+                        pluginsToLoad.append(folder)
+
         pluginsToLoad.sort()
+
 
         fprog = Progress(len(pluginsToLoad))
         for path in pluginsToLoad:
@@ -525,7 +542,7 @@ class MHApplication(gui3d.Application, mh.Application):
                 #module = imp.load_source(name, path)
 
                 module = None
-                fp, pathname, description = imp.find_module(name, ["plugins/"])
+                fp, pathname, description = imp.find_module(name, ["plugins/", mh.getPath("plugins/")])
                 try:
                     module = imp.load_module(name, fp, pathname, description)
                 finally:
