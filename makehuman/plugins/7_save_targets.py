@@ -131,6 +131,8 @@ class SaveTargetsTaskView(gui3d.TaskView):
         action = gui.Action('savetgt', language.getLanguageString('Save Targets'), self.quickSave)
         G.app.mainwin.addAction(action)
         mh.setShortcut(mh.Modifiers.ALT, mh.Keys.t, action)
+        toolbar = G.app.file_toolbar
+        toolbar.addAction(action)
 
 def load(app):
     category = app.getCategory('Utilities')
