@@ -40,11 +40,14 @@ Prepares an export folder ready to build packages from.
 
 ### Configuration ##############################################################
 
+# Path to git executable
+GIT_PATH = "git"
+
 # Path to hg executable
 HG_PATH = "hg"
 
 # Filter of files from source folder to exclude (glob syntax)
-EXCLUDES = ['.hgignore', '.hgtags', '.hgeol', '*.target', '*.obj', '*.pyc', '*.mhclo', '*.proxy', '*.pyd', 'maketarget-standalone', 'plugins/4_rendering_mitsuba', 'plugins/4_rendering_povray', 'plugins/4_rendering_aqsis.py', 'plugins/0_modeling_5_editing.py', 'plugins/3_libraries_animation.py', 'compile_*.py', 'build_prepare.py', 'download_assets.py', 'download_assets_git.py', '*~', '*.bak', 'setup.nsi', 'clean*.sh', 'makehuman.sh', 'makehuman/makehuman', 'pylintrc', 'clean*.bat', 'makehuman/docs', 'makehuman/icons/*psd', 'makehuman/icons/*bmp', 'makehuman/icons/*ico', 'makehuman/icons/*icns', 'makehuman/icons/*xcf', 'makehuman/icons/makehuman.svg', 'makehuman.rc', '*_contents.txt', 'buildscripts', '.build_prepare.out']
+EXCLUDES = ['.gitignore','.hgignore', '.hgtags', '.hgeol', '*.target', '*.obj', '*.pyc', '*.mhclo', '*.proxy', '*.pyd', 'maketarget-standalone', 'plugins/4_rendering_mitsuba', 'plugins/4_rendering_povray', 'plugins/4_rendering_aqsis.py', 'plugins/0_modeling_5_editing.py', 'plugins/3_libraries_animation.py', 'compile_*.py', 'build_prepare.py', 'download_assets.py', 'download_assets_git.py', '*~', '*.bak', 'setup.nsi', 'clean*.sh', 'makehuman.sh', 'makehuman/makehuman', 'pylintrc', 'clean*.bat', 'makehuman/docs', 'makehuman/icons/*psd', 'makehuman/icons/*bmp', 'makehuman/icons/*ico', 'makehuman/icons/*icns', 'makehuman/icons/*xcf', 'makehuman/icons/makehuman.svg', 'makehuman.rc', '*_contents.txt', 'buildscripts', '.build_prepare.out']
 # Same as above, but applies to release mode only
 EXCLUDES_RELEASE = ['testsuite']
 
@@ -122,7 +125,10 @@ class MHAppExporter(object):
             print("Using config file at %s. NOTE: properties in config file will override any other settings!" % self.sourceFile(BUILD_CONF_FILE_PATH))
 
             global HG_PATH
+            global GIT_PATH
+
             HG_PATH = _conf_get(self.config, 'General', 'hgPath', HG_PATH)
+            GIT_PATH = _conf_get(self.config, 'General', 'gitPath', GIT_PATH)
 
             hgrev = _conf_get(self.config, 'BuildPrepare', 'hgRev', None)
             if hgrev is not None:
@@ -162,8 +168,8 @@ class MHAppExporter(object):
 
     def export(self):
         # Sanity checks
-        if not os.path.isdir(self.sourceFile('.hg')):
-            raise RuntimeError("The export folder %s is not found, the source folder argument should be the root of the hg repository." % self.sourceFile('.hg'))
+        if not os.path.isdir(self.sourceFile('.hg')) and not os.path.isdir(self.sourceFile('.git')):
+            raise RuntimeError("The export folder %s is not found, the source folder argument should be the root of the hg or git repository." % self.sourceFile('.hg'))
         if self.isSubPath(self.targetFile(), self.sourceFile()):
             raise RuntimeError("The export folder is a subfolder of the source folder, this is not allowed.")
         if os.path.exists(self.targetFile()):
@@ -195,7 +201,11 @@ class MHAppExporter(object):
         if not self.skipScripts:
             self.runScripts()
 
-        self.exportHGFiles()
+        if not os.path.isdir(self.sourceFile('.hg')):
+            self.exportGITFiles()
+        else:
+            self.exportHGFiles()
+
         print("\n")
 
         # Export other non-hg files
@@ -296,7 +306,7 @@ class MHAppExporter(object):
         resultInfo.mainExecutable = os.path.join(REARRANGE_ROOT_FOLDER, MAIN_EXECUTABLE)
 
         # Write export info to file for easy retrieving by external processes
-        f = open(self.sourceFile('.build_prepare.out'), 'wb')
+        f = open(self.sourceFile('.build_prepare.out'), 'wt')
         f.write(str(resultInfo))
         f.close()
 
@@ -388,6 +398,24 @@ class MHAppExporter(object):
 
         # Because the --excludes option does not appear to be working all too well (at least not with wildcards):
         # Gather files
+        files = []
+        _recursive_glob(self.targetFile(), self.getExcludes(), files)
+        for f in files:
+            print("Removing excluded file from export folder %s" % f)
+            if os.path.isdir(self.targetFile(f)):
+                shutil.rmtree(self.targetFile(f))
+            else:
+                os.remove(self.targetFile(f))
+
+    def exportGITFiles(self):
+        print("Exporting files from git repo")
+
+        tf = self.targetFile()
+        if os.path.exists(tf):
+            shutil.rmtree(tf);
+
+        shutil.copytree(self.sourceFile(),tf, ignore=shutil.ignore_patterns(".git",".idea","__pycache__"))
+
         files = []
         _recursive_glob(self.targetFile(), self.getExcludes(), files)
         for f in files:
@@ -597,7 +625,6 @@ def _parse_args():
 
     argOptions = vars(parser.parse_args())
     return argOptions
-
 
 if __name__ == '__main__':
     args = _parse_args()
