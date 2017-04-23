@@ -225,20 +225,20 @@ elif sys.platform == 'win32':
         upx=True,
         name='makehuman')
     target_dir = hgRootPath('buildscripts\win32\dist\makehuman')
-    if package_explicit and not package_version is None and not package_name is None:
-        label = package_name + "-" + package_version
-    else:
-        label = package_name + "-" + VERSION_FN;
-    zipfilename = distPath('%s-win32.zip' % label)
-    zip = zipfile.ZipFile(zipfilename, 'w', zipfile.ZIP_DEFLATED)
-    rootlen = len(target_dir) + 1
-    for base, dirs, files in os.walk(target_dir):
-        for file in files:
-            fn = os.path.join(base, file)
-            zip.write(fn, fn[rootlen:])
-    zip.close()
-    if not dist_dir is None:
-        base = os.path.basename(zipfilename)
-        dest = os.path.join(dist_dir,base)
-        os.rename(zipfilename,dest)
+#    if package_explicit and not package_version is None and not package_name is None:
+#        label = package_name + "-" + package_version
+#    else:
+#        label = package_name + "-" + VERSION_FN;
+#    zipfilename = distPath('%s-win32.zip' % label)
+#    zip = zipfile.ZipFile(zipfilename, 'w', zipfile.ZIP_DEFLATED)
+#    rootlen = len(target_dir) + 1
+#    for base, dirs, files in os.walk(target_dir):
+#        for file in files:
+#            fn = os.path.join(base, file)
+#            zip.write(fn, fn[rootlen:])
+#    zip.close()
+#    if not dist_dir is None:
+#        base = os.path.basename(zipfilename)
+#        dest = os.path.join(dist_dir,base)
+#        os.rename(zipfilename,dest)
 
