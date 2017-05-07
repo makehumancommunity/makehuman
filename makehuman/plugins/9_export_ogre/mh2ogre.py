@@ -45,7 +45,7 @@ __docformat__ = 'restructuredtext'
 
 import os
 from progress import Progress
-import codecs
+import io
 import transformations
 import log
 
