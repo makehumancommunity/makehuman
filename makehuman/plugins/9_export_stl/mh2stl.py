@@ -87,8 +87,8 @@ def exportStlAscii(filepath, config, exportJoints = False):
     progress(0.3, 0.99, "Writing Objects")
     objprog = Progress(len(meshes))
 
-    def chunked_enumerate(chunk_size, offs, list_):
-        return list(zip(list(range(offs,offs+chunk_size)), list_[offs:offs+chunk_size]))
+    def chunked_enumerate(offs, chunk_size, list_):
+        return zip(range(offs, offs + chunk_size), list_[offs:offs + chunk_size])
 
     for mesh in meshes:
         coord = config.scale*mesh.coord + config.offset
