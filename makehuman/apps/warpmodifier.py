@@ -149,7 +149,7 @@ class WarpModifier (humanmodifier.UniversalModifier):
             return [f for f in factors if targets._value_cat.get(f, 'unknown') not in self.getFixedFactors()]
         else:
             # Factors is a dict of (macro variable category, variable name paris)
-            return dict([(v,f) for v,f in list(factors.items()) if v not in self.getFixedFactors()])
+            return dict([(v,f) for v,f in factors.items() if v not in self.getFixedFactors()])
 
     # TODO add extended debug printing for warpmodifiers
 
@@ -221,7 +221,7 @@ class WarpModifier (humanmodifier.UniversalModifier):
 
     def traceReference(self):
         log.debug("self.refCharPaths:")
-        for key,value in list(self.refCharPaths.items()):
+        for key,value in self.refCharPaths.items():
             log.debug("  %s: %s" % (key, value))
 
     # Reference keypoints
@@ -264,7 +264,7 @@ class WarpModifier (humanmodifier.UniversalModifier):
 
 
         # Traverse targets on stack
-        for charpath,value in list(self.human.targetsDetailStack.items()):
+        for charpath,value in self.human.targetsDetailStack.items():
             if 'expression' in charpath:
                 # TODO remove this stupid hack
                 continue
@@ -293,7 +293,7 @@ class WarpModifier (humanmodifier.UniversalModifier):
 
         refTargets = self.referenceTargets
         tWeights = humanmodifier.getTargetWeights(refTargets, factors, ignoreNotfound = True)
-        for tpath, tweight in list(tWeights.items()):
+        for tpath, tweight in tWeights.items():
             srcChar = algos3d.getTarget(self.human.meshData, tpath)
             dstVerts = srcChar.verts[srcVerts]
             srcCharCoord[dstVerts] += tweight * srcChar.data[srcVerts]
@@ -302,7 +302,7 @@ class WarpModifier (humanmodifier.UniversalModifier):
         # The warp target
         warpTargets = self.targets
         tWeights = humanmodifier.getTargetWeights(warpTargets, factors, ignoreNotfound = True)
-        for tpath, tweight in list(tWeights.items()):
+        for tpath, tweight in tWeights.items():
             srcTrg = readTarget(tpath)
             addTargetVerts(srcTargetCoord, tweight, srcTrg)
 
@@ -313,14 +313,14 @@ class WarpModifier (humanmodifier.UniversalModifier):
 
     def toReferenceFactors(self, factors):
         vars_per_cat = dict()
-        for (varName, varValue) in list(factors.items()):
+        for (varName, varValue) in factors.items():
             varCateg = targets._value_cat.get(varName, 'unknown')
             if varCateg not in vars_per_cat:
                 vars_per_cat[varCateg] = []
             vars_per_cat[varCateg].append(varName)
 
         result = dict()
-        for (varCateg, varList) in list(vars_per_cat.items()):
+        for (varCateg, varList) in vars_per_cat.items():
             if varCateg in self.getFixedFactors():
                 # Replace fixed variables to reference target
                 value = sum([factors[v] for v in varList])
@@ -339,7 +339,7 @@ def resetWarpBuffer():
     if human.hasWarpTargets:
         if debug:
             log.debug("WARP RESET")
-        for path,target in list(algos3d._targetBuffer.items()):
+        for path,target in algos3d._targetBuffer.items():
             if isinstance(target, WarpTarget):
                 if debug:
                     log.debug("  DEL %s" % path)

@@ -211,7 +211,7 @@ def loadModifierTaskViews(filename, human, category, taskviewClass=None):
     data = json.load(io.open(filename, 'r'), object_pairs_hook=OrderedDict)
     taskViews = []
     # Create task views
-    for taskName, taskViewProps in list(data.items()):
+    for taskName, taskViewProps in data.items():
         sName = taskViewProps.get('saveName', None)
         label = taskViewProps.get('label', None)
         taskView = taskviewClass(category, taskName, label, sName)
@@ -220,7 +220,7 @@ def loadModifierTaskViews(filename, human, category, taskviewClass=None):
         category.addTask(taskView)
 
         # Create sliders
-        for sliderCategory, sliderDefs in list(taskViewProps['modifiers'].items()):
+        for sliderCategory, sliderDefs in taskViewProps['modifiers'].items():
             for sDef in sliderDefs:
                 modifierName = sDef['mod']
                 modifier = human.getModifier(modifierName)
