@@ -258,7 +258,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         """
         import warpmodifier
         log.debug("human.targetsDetailStack:")
-        for path,value in list(self.targetsDetailStack.items()):
+        for path,value in self.targetsDetailStack.items():
             try:
                 target = algos3d._targetBuffer[canonicalPath(path)]
             except KeyError:
@@ -281,7 +281,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         """
         import warpmodifier
         log.debug("algos3d.targetBuffer:")
-        for path,target in list(algos3d._targetBuffer.items()):
+        for path,target in algos3d._targetBuffer.items():
             if isinstance(target, warpmodifier.WarpTarget):
                 stars = " *** "
             else:
@@ -1028,7 +1028,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
                 # Update dependency map
                 reverseMapping = dict()
-                for k,v in list(self._modifier_varMapping.items()):
+                for k,v in self._modifier_varMapping.items():
                     if v not in reverseMapping:
                         reverseMapping[v] = []
                     reverseMapping[v].append(k)
@@ -1099,7 +1099,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
         # Apply targets to seedmesh coordinates
         itprog = Progress(len(self.targetsDetailStack))
-        for (targetPath, morphFactor) in list(self.targetsDetailStack.items()):
+        for (targetPath, morphFactor) in self.targetsDetailStack.items():
             algos3d.loadTranslationTarget(self.meshData, targetPath, morphFactor, None, 0, 0)
             itprog.step()
 

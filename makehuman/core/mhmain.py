@@ -568,7 +568,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def unloadPlugins(self):
 
-        for name, module in list(self.modules.items()):
+        for name, module in self.modules.items():
             if module is None:
                 continue
             try:
@@ -924,7 +924,7 @@ class MHApplication(gui3d.Application, mh.Application):
                 if 'version' in settings and settings['version'] == mh.getVersionDigitsStr():
                     # Only load settings for this specific version
                     del settings['version']
-                    for setting_name, value in list(settings.items()):
+                    for setting_name, value in settings.items():
                         try:
                             self.setSetting(setting_name, value)
                         except:
@@ -952,13 +952,13 @@ class MHApplication(gui3d.Application, mh.Application):
 
         with inFile("mouse.ini") as f:
             mouseActions = dict([(method.__name__, shortcut)
-                                 for shortcut, method in list(self.mouseActions.items())])
+                                 for shortcut, method in self.mouseActions.items()])
             for line in f:
                 modifier, button, method = line.strip().split(' ')
                 if hasattr(self, method):
                     mouseActions[method] = (int(modifier), int(button))
             self.mouseActions = dict([(shortcut, getattr(self, method))
-                                      for method, shortcut in list(mouseActions.items())])
+                                      for method, shortcut in mouseActions.items()])
 
         with inFile("help.ini") as f:
             helpIds = set()
@@ -979,11 +979,11 @@ class MHApplication(gui3d.Application, mh.Application):
                 f.write(mh.formatINI(settings))
 
             with outFile("shortcuts.ini") as f:
-                for action, shortcut in list(self.shortcuts.items()):
+                for action, shortcut in self.shortcuts.items():
                     f.write('%d %d %s\n' % (shortcut[0], shortcut[1], action))
 
             with outFile("mouse.ini") as f:
-                for mouseAction, method in list(self.mouseActions.items()):
+                for mouseAction, method in self.mouseActions.items():
                     f.write('%d %d %s\n' % (mouseAction[0], mouseAction[1], method.__name__))
 
             if self.dialog is not None:
@@ -1096,7 +1096,7 @@ class MHApplication(gui3d.Application, mh.Application):
             action.setIcon(gui.Action.getIcon(action.name))
 
     def getLookAndFeelStyles(self):
-        return [ str(style) for style in list(gui.QtGui.QStyleFactory.keys()) ]
+        return [ str(style) for style in gui.QtGui.QStyleFactory.keys() ]
 
     def setLookAndFeel(self, platform):
         style = gui.QtGui.QStyleFactory.create(platform)
@@ -1328,7 +1328,7 @@ class MHApplication(gui3d.Application, mh.Application):
             from glmodule import setSceneLighting
             setSceneLighting(self.scene)
 
-        for category in list(self.categories.values()):
+        for category in self.categories.values():
             self.callEventHandlers('onSceneChanged', event)
 
     # Shortcuts
@@ -1336,7 +1336,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         shortcut = (modifier, key)
 
-        if shortcut in list(self.shortcuts.values()):
+        if shortcut in self.shortcuts.values():
             self.prompt('Warning', 'This combination is already in use.', 'OK', helpId='shortcutWarning')
             return False
 
@@ -1366,7 +1366,7 @@ class MHApplication(gui3d.Application, mh.Application):
             return False
 
         # Remove old entry
-        for s, m in list(self.mouseActions.items()):
+        for s, m in self.mouseActions.items():
             if m == method:
                 del self.mouseActions[s]
                 break
@@ -1380,7 +1380,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def getMouseAction(self, method):
 
-        for mouseAction, m in list(self.mouseActions.items()):
+        for mouseAction, m in self.mouseActions.items():
             if m == method:
                 return mouseAction
 
@@ -1729,7 +1729,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
 
     def createShortcuts(self):
-        for action, (modifier, key) in list(self.shortcuts.items()):
+        for action, (modifier, key) in self.shortcuts.items():
             action = getattr(self.actions, action, None)
             if action is not None:
                 mh.setShortcut(modifier, key, action)
