@@ -100,8 +100,6 @@ class ProxyTaskView(proxychooser.ProxyChooserTaskView):
             # Deselect previously selected proxy
             self.deselectProxy(None, suppressSignal = True)
 
-        self.filechooser.selectItem(mhclofile)
-
         if not mhclofile:
             self.signalChange()
             return
@@ -118,9 +116,6 @@ class ProxyTaskView(proxychooser.ProxyChooserTaskView):
 
         if self.descriptionWidget:
             self.descrLbl.setText(pxy.description)
-
-        # Add to selection
-        self.selectedProxies.append(pxy)
 
         self.filechooser.selectItem(mhclofile)
 
