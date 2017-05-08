@@ -1505,7 +1505,6 @@ class FileEntryView(QtGui.QWidget, Widget):
 
 class SplashScreen(QtGui.QSplashScreen):
     def __init__(self, image, version=""):
-        print('Debug    :', G.args.get('splashnotmodal'))
         if G.args.get('splashontop') == True:
             super(SplashScreen, self).__init__(G.app.mainwin, getPixmap(image), QtCore.Qt.WindowStaysOnTopHint)
         else:
