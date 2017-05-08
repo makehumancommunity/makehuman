@@ -1505,7 +1505,11 @@ class FileEntryView(QtGui.QWidget, Widget):
 
 class SplashScreen(QtGui.QSplashScreen):
     def __init__(self, image, version=""):
-        super(SplashScreen, self).__init__(G.app.mainwin, getPixmap(image), QtCore.Qt.WindowStaysOnTopHint)
+        print('Debug    :', G.args.get('splashnotmodal'))
+        if G.args.get('splashontop') == True:
+            super(SplashScreen, self).__init__(G.app.mainwin, getPixmap(image), QtCore.Qt.WindowStaysOnTopHint)
+        else:
+            super(SplashScreen, self).__init__(G.app.mainwin, getPixmap(image))
         self._stdout = sys.stdout
         self.messageRect = QtCore.QRect(354, 531, 432, 41)
         self.messageAlignment = QtCore.Qt.AlignLeft
