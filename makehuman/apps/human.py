@@ -46,6 +46,7 @@ from getpath import getSysDataPath, canonicalPath
 import log
 import material
 import animation
+import sys
 
 from makehuman import getBasemeshVersion, getShortVersion, getVersionStr, getVersion
 
