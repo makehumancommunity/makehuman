@@ -847,6 +847,9 @@ def writeStuff(fp, clo, context, matfile):
     '''
 
     pc = getPoleCount(clo)
+    if pc > 8:
+        msg = "Object %s\nhas verts with more than 8 poles.Max is %s poles." % (clo.name, pc)
+        addWarning(msg)
     fp.write("max_pole %d\n" % pc)
     if matfile:
         fp.write("material %s\n" % matfile)
@@ -1149,11 +1152,6 @@ def checkNoTriangles(scn, ob):
         highlightVerts(scn, ob, stray)
         msg = "Object %s\ncan not be used for clothes creation\nbecause it has stray verts:\n  %s" % (ob.name, stray)
         raise MHError(msg)
-
-    excess = [nPoles[vn] for vn in list(nPoles.keys()) if nPoles[vn] > 8]
-    if len(excess) > 0:
-        msg = "Object %s\nhas verts with more than 8 poles.\nMax is %s poles" % (ob.name, max(excess))
-        addWarning(msg)
 
 
 def highlightVerts(scn, ob, verts):
