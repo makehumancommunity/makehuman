@@ -614,7 +614,7 @@ class ProxyChooserTaskView(gui3d.TaskView, filecache.MetadataCacher):
         return self._proxyFilePerUuid[uuid]
 
     def _loadUuidLookup(self):
-        items = [ (values[1], path) for (path, values) in list(self._filecache.items()) ]
+        items = [ (values[1], path) for (path, values) in self._filecache.items() ]
         self._proxyFilePerUuid = dict()
         for (_uuid, path) in items:
             if _uuid in self._proxyFilePerUuid and self._proxyFilePerUuid[_uuid] != path:

@@ -141,6 +141,7 @@ class ProfilingTaskView(gui3d.TaskView):
     def __init__(self, category):
         super(ProfilingTaskView, self).__init__(category, 'Profile')
         self.profile = None
+        self.data = None
 
         self.sortKey = 'prim'
         self.sortDir = 0
@@ -187,11 +188,12 @@ class ProfilingTaskView(gui3d.TaskView):
         self.data.sort(key = Stat.key(self.sortKey), reverse = self.sortDir == 0)
 
     def update(self):
-        self.sort()
-        self.table.setRowCount(len(self.data))
-        for row, stat in enumerate(self.data):
-            for col, value in enumerate(stat.data):
-                self.table.setItem(row, col, value)
+        if self.data:
+            self.sort()
+            self.table.setRowCount(len(self.data))
+            for row, stat in enumerate(self.data):
+                 for col, value in enumerate(stat.data):
+                    self.table.setItem(row, col, value)
 
     def setProfile(self, profile):
         self.profile = profile

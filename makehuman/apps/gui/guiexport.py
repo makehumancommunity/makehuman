@@ -192,7 +192,7 @@ class ExportTaskView(gui3d.TaskView):
         if not self._requiresUpdate:
             return
 
-        for group in list(self.boxes.keys()):
+        for group in self.boxes.keys():
             for eIdx, r in enumerate(self.boxes[group].children):
                 self.boxes[group].removeWidget(r)
 

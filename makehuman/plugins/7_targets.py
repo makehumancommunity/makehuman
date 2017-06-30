@@ -74,24 +74,56 @@ class TargetsTree(gui.TreeView):
 class TargetsTaskView(gui3d.TaskView):
     def __init__(self, category):
         super(TargetsTaskView, self).__init__(category, 'Targets')
-        self.targets = self.addTopWidget(TargetsTree())
+
+        self.items = {}
+
+        self.left.child.setSizePolicy(gui.SizePolicy.MinimumExpanding, gui.SizePolicy.MinimumExpanding)
+
         self.clear = self.addLeftWidget(gui.Button('Clear'))
+
+        self.targets = self.addLeftWidget(TargetsTree())
+        self.targets.setHeaderHidden(True)
+        self.targets.resizeColumnToContents(0)
+        self.targets.setSizePolicy(gui.SizePolicy.Ignored, gui.SizePolicy.Expanding)
+        self.left.layout.setStretchFactor(self.targets, 1)
+
+        self.itemsBox = gui.GroupBox('Selected Tragets:')
+        self.itemsList = gui.TextView('')
+        self.itemsList.setWordWrap(False)
+        self.itemsList.setSizePolicy(gui.SizePolicy.Ignored, gui.SizePolicy.Preferred)
+        self.itemsBox.addWidget(self.itemsList)
+        self.addRightWidget(self.itemsBox)
 
         @self.targets.mhEvent
         def onActivate(item):
             path = self.targets.getItemPath(item)
             log.message('target: %s', path)
-            self.showTarget(path)
-            mh.changeCategory('Modelling')
+            if item.text not in self.items:
+                self.items[item.text] = [item, path]
+                self.showTarget(path)
+            else:
+                self.clearColor()
+                del self.items[item.text]
+                item.setSelected(False)
+                for itm in self.items:
+                    self.showTarget(self.items[itm][1])
+            itemsString = '\n'.join(key.split('.')[0] for key in sorted(self.items))
+            for key in self.items:
+                self.items[key][0].setSelected(True)
+            self.itemsList.setText(itemsString)
 
         @self.targets.mhEvent
         def onExpand(item):
             self.targets.populate(item)
+            self.targets.resizeColumnToContents(0)
 
         @self.clear.mhEvent
         def onClicked(event):
             self.clearColor()
-            mh.changeCategory('Modelling')
+            self.itemsList.setText('')
+            for key in self.items:
+                self.items[key][0].setSelected(False)
+            self.items.clear()
 
     def clearColor(self):
         mesh = G.app.selectedHuman.meshData
@@ -116,10 +148,21 @@ class TargetsTaskView(gui3d.TaskView):
         mesh.markCoords(target.verts, colr = True)
         mesh.sync_all()
 
+    def onShow(self, event):
+        gui3d.TaskView.onShow(self, event)
+        gui3d.app.actions.wireframe.setDisabled(True)
+        if not gui3d.app.actions.wireframe.isChecked():
+            G.app.selectedHuman.setSolid(False)
+
+    def onHide(self, event):
+        gui3d.TaskView.onHide(self, event)
+        if not gui3d.app.actions.wireframe.isChecked():
+            G.app.selectedHuman.setSolid(True)
+        gui3d.app.actions.wireframe.setDisabled(False)
+
 def load(app):
     category = app.getCategory('Utilities')
     taskview = category.addTask(TargetsTaskView(category))
 
 def unload(app):
     pass
-

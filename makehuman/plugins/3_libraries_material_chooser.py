@@ -227,6 +227,27 @@ class MaterialTaskView(gui3d.TaskView, filecache.MetadataCacher):
                 filepath = self.getMaterialPath(filepath, proxy.file)
                 proxy.object.material = material.fromFile(filepath)
                 return
+            elif human.eyebrowsProxy and human.eyebrowsProxy.getUuid() == uuid:
+                proxy = human.eyebrowsProxy
+                filepath = self.getMaterialPath(filepath, proxy.file)
+                proxy.object.material = material.fromFile(filepath)
+                return
+            elif human.eyelashesProxy and human.eyelashesProxy.getUuid() == uuid:
+                proxy = human.eyelashesProxy
+                filepath = self.getMaterialPath(filepath, proxy.file)
+                proxy.object.material = material.fromFile(filepath)
+                return
+            elif human.teethProxy and human.teethProxy.getUuid() == uuid:
+                proxy = human.teethProxy
+                filepath = self.getMaterialPath(filepath, proxy.file)
+                proxy.object.material = material.fromFile(filepath)
+                return
+            elif human.tongueProxy and human.tongueProxy.getUuid() == uuid:
+                proxy = human.tongueProxy
+                filepath = self.getMaterialPath(filepath, proxy.file)
+                proxy.object.material = material.fromFile(filepath)
+                return
+
             elif not uuid in list(human.clothesProxies.keys()):
                 if strict:
                     raise RuntimeError("Could not load material for proxy with uuid %s (%s)! No such proxy." % (uuid, name))
@@ -289,6 +310,27 @@ class MaterialTaskView(gui3d.TaskView, filecache.MetadataCacher):
             eyesObj = proxy.object
             materialPath = self.getRelativeMaterialPath(eyesObj.material.filename, proxy.file)
             file.write('material %s %s %s\n' % (proxy.name, proxy.getUuid(), materialPath))
+        if human.eyebrowsProxy:
+            proxy = human.eyebrowsProxy
+            eyebrowsObj = proxy.object
+            materialPath = self.getRelativeMaterialPath(eyebrowsObj.material.filename, proxy.file)
+            file.write('material %s %s %s\n' % (proxy.name, proxy.getUuid(), materialPath))
+        if human.eyelashesProxy:
+            proxy = human.eyelashesProxy
+            eyelashesObj = proxy.object
+            materialPath = self.getRelativeMaterialPath(eyelashesObj.material.filename, proxy.file)
+            file.write('material %s %s %s\n' % (proxy.name, proxy.getUuid(), materialPath))
+        if human.teethProxy:
+            proxy = human.teethProxy
+            teethObj = proxy.object
+            materialPath = self.getRelativeMaterialPath(teethObj.material.filename, proxy.file)
+            file.write('material %s %s %s\n' % (proxy.name, proxy.getUuid(), materialPath))
+        if human.tongueProxy:
+            proxy = human.tongueProxy
+            tongueObj = proxy.object
+            materialPath = self.getRelativeMaterialPath(tongueObj.material.filename, proxy.file)
+            file.write('material %s %s %s\n' % (proxy.name, proxy.getUuid(), materialPath))
+
 
 
 # This method is called when the plugin is loaded into makehuman

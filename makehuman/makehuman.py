@@ -403,6 +403,9 @@ def make_user_dir():
     userDataDir = getpath.getPath('data')
     if not os.path.isdir(userDataDir):
         os.makedirs(userDataDir)
+    userPluginsDir = getpath.getPath('plugins')
+    if not os.path.isdir(userPluginsDir):
+        os.makedirs(userPluginsDir)
 
 def init_logging():
     import log
@@ -437,6 +440,7 @@ def parse_arguments():
     parser.add_argument("--debugopengl", action="store_true", help="enable OpenGL error checking and logging (slow)")
     parser.add_argument("--fullloggingopengl", action="store_true", help="log all OpenGL calls (very slow)")
     parser.add_argument("--debugnumpy", action="store_true", help="enable numpy runtime error messages")
+    parser.add_argument("-s", "--splashontop", action="store_true", help="splash always on top during startup")
     parser.add_argument("--home-location", action="store", metavar='', help="set alternative home path", type=str)
     
     if not isRelease():

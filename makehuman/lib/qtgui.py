@@ -1505,7 +1505,10 @@ class FileEntryView(QtGui.QWidget, Widget):
 
 class SplashScreen(QtGui.QSplashScreen):
     def __init__(self, image, version=""):
-        super(SplashScreen, self).__init__(G.app.mainwin, getPixmap(image), QtCore.Qt.WindowStaysOnTopHint)
+        if G.args.get('splashontop') == True:
+            super(SplashScreen, self).__init__(G.app.mainwin, getPixmap(image), QtCore.Qt.WindowStaysOnTopHint)
+        else:
+            super(SplashScreen, self).__init__(G.app.mainwin, getPixmap(image))
         self._stdout = sys.stdout
         self.messageRect = QtCore.QRect(354, 531, 432, 41)
         self.messageAlignment = QtCore.Qt.AlignLeft
@@ -1930,11 +1933,11 @@ class BrowseButton(Button):
             path = os.path.join(path, self.filename)
 
         if self.mode == 'open':
-            path = pathToUnicode(str(QtGui.QFileDialog.getOpenFileName(G.app.mainwin, directory=path, filter=self.filter)))
+            path = pathToUnicode(str(QtGui.QFileDialog.getOpenFileName(G.app.mainwin, directory=self.directory, filter=self.filter)))
         elif self.mode == 'save':
-            path = pathToUnicode(str(QtGui.QFileDialog.getSaveFileName(G.app.mainwin, directory=path, filter=self.filter)))
+            path = pathToUnicode(str(QtGui.QFileDialog.getSaveFileName(G.app.mainwin, directory=self.directory, filter=self.filter)))
         elif self.mode == 'dir':
-            path = pathToUnicode(str(QtGui.QFileDialog.getExistingDirectory(G.app.mainwin, directory=path)))
+            path = pathToUnicode(str(QtGui.QFileDialog.getExistingDirectory(G.app.mainwin, directory=self.directory)))
 
         if path:
             if self.mode == 'dir': self.directory = path
