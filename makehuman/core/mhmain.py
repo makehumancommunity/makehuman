@@ -219,6 +219,7 @@ class MHApplication(gui3d.Application, mh.Application):
                     "7_scripting",
                     "7_shell",
                     "7_targets",
+                    "7_save_targets"
                 ],
                 'activeUserPlugins': [],
                 'rtl': False,

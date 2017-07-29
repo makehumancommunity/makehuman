@@ -41,6 +41,7 @@ import os
 import getpath as gp
 import algos3d
 import mh
+import log
 from core import G
 from language import language
 
@@ -63,6 +64,9 @@ class SaveTargetsTaskView(gui3d.TaskView):
         self.saveBox.addWidget(self.nameEdit)
 
         space = self.saveBox.addWidget(gui.TextView(''))
+
+        self.stripBaseTarget = gui.CheckBox('Strip base targets', False)
+        self.saveBox.addWidget(self.stripBaseTarget)
 
         self.saveButton = gui.Button('Save')
         self.saveBox.addWidget(self.saveButton)
@@ -92,6 +96,7 @@ class SaveTargetsTaskView(gui3d.TaskView):
                     self.saveAsButton.path = path
                     G.app.statusPersist('Saving Directory: ' + self.dirName)
 
+
     def quickSave(self):
         path = os.path.join(self.dirName, self.fileName)
         overwrite = True
@@ -100,20 +105,33 @@ class SaveTargetsTaskView(gui3d.TaskView):
         if not path.lower().endswith('.target'):
             error_msg = 'Cannot save target to file: {0:s}\n Expected a path to a .target file'.format(path)
             dialog.prompt(title='Error', text=error_msg, button1Label='OK')
+            log.error('cannot save tagets to %s. Not a .target file.', path)
             return
         else:
             if os.path.exists(path):
                 msg = 'File {0:s} already exists. Overwrite?'.format(path)
                 overwrite = dialog.prompt(title='Warning', text=msg, button1Label='YES', button2Label='NO')
+                if overwrite:
+                    log.message('overwriting %s ...', path)
             if overwrite:
                 self.saveTargets(path)
 
 
     def saveTargets(self, path):
         human = G.app.selectedHuman
+        targetPath = os.path.dirname(__file__) + '/universal-base.target'
+        baseTarget = algos3d.getTarget(human.meshData, targetPath)
+        if self.stripBaseTarget.selected:
+            log.message('stripping base targets ...')
+            baseTarget.apply(human.meshData, morphFactor=1.0)
+
         algos3d.saveTranslationTarget(human.meshData, path)
+        log.message('saving target to %s',path)
         self.fileName = os.path.basename(path)
         self.dirName = os.path.dirname(path)
+        if self.stripBaseTarget.selected:
+            baseTarget.apply(human.meshData, morphFactor=-1.0)
+
 
     def onChange(self):
         self.fileName = self.nameEdit.text
@@ -133,10 +151,3 @@ class SaveTargetsTaskView(gui3d.TaskView):
         mh.setShortcut(mh.Modifiers.ALT, mh.Keys.t, action)
         toolbar = G.app.file_toolbar
         toolbar.addAction(action)
-
-def load(app):
-    category = app.getCategory('Utilities')
-    taskview = category.addTask(SaveTargetsTaskView(category))
-
-def unload(app):
-    pass
