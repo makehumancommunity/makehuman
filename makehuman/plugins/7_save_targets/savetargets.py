@@ -65,8 +65,8 @@ class SaveTargetsTaskView(gui3d.TaskView):
 
         space = self.saveBox.addWidget(gui.TextView(''))
 
-        self.stripBaseTarget = gui.CheckBox('Strip base targets', False)
-        self.saveBox.addWidget(self.stripBaseTarget)
+        self.stripBaseTargets = gui.CheckBox('Strip base targets', False)
+        self.saveBox.addWidget(self.stripBaseTargets)
 
         self.saveButton = gui.Button('Save')
         self.saveBox.addWidget(self.saveButton)
@@ -120,17 +120,17 @@ class SaveTargetsTaskView(gui3d.TaskView):
     def saveTargets(self, path):
         human = G.app.selectedHuman
         targetPath = os.path.dirname(__file__) + '/universal-base.target'
-        baseTarget = algos3d.getTarget(human.meshData, targetPath)
-        if self.stripBaseTarget.selected:
+        universalBaseTarget = algos3d.getTarget(human.meshData, targetPath)
+        if self.stripBaseTargets.selected:
             log.message('stripping base targets ...')
-            baseTarget.apply(human.meshData, morphFactor=1.0)
+            universalBaseTarget.apply(human.meshData, morphFactor=1.0)
 
         algos3d.saveTranslationTarget(human.meshData, path)
         log.message('saving target to %s',path)
         self.fileName = os.path.basename(path)
         self.dirName = os.path.dirname(path)
-        if self.stripBaseTarget.selected:
-            baseTarget.apply(human.meshData, morphFactor=-1.0)
+        if self.stripBaseTargets.selected:
+            universalBaseTarget.apply(human.meshData, morphFactor=-1.0)
 
 
     def onChange(self):
