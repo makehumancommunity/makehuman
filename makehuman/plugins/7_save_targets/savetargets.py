@@ -141,7 +141,7 @@ class SaveTargetsTaskView(gui3d.TaskView):
             file_path = os.path.join(dir_path, 'meta.target')
             self.saveTargets(file_path, True)
             result = algos3d._targetBuffer.pop(gp.canonicalPath(file_path), None)
-            print('Debug   :', result, file_path)
+            
 
         @self.saveDiffButton.mhEvent
         def onClicked(event):
