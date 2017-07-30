@@ -35,12 +35,28 @@ Abstract
 
 TODO
 """
-
+import os
+import log
 from .savetargets import SaveTargetsTaskView
+
 
 def load(app):
     category = app.getCategory('Utilities')
     taskview = category.addTask(SaveTargetsTaskView(category))
 
+
 def unload(app):
-    pass
+    meta_file_path = os.path.join(os.path.dirname(__file__), 'cache', 'meta.target')
+
+    if os.path.isfile(meta_file_path):
+        try:
+            os.remove(meta_file_path)
+        except:
+            log.error('cannot delete meta target file : %',  meta_file_path)
+
+    if os.path.isdir(os.path.dirname(meta_file_path)):
+        try:
+            os.rmdir(os.path.dirname(meta_file_path))
+        except:
+            log.error('cannot delete 7_save_target cache : %',  os.path.dirname(meta_file_path))
+

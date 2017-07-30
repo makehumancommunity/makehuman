@@ -36,7 +36,8 @@ Abstract
 TODO
 """
 
-import gui, gui3d
+import gui
+import gui3d
 import os
 import getpath as gp
 import algos3d
@@ -44,6 +45,17 @@ import mh
 import log
 from core import G
 from language import language
+
+universalBaseTargets = ['universal-female-young-averagemuscle-averageweight.target',
+                        'universal-male-young-averagemuscle-averageweight.target']
+
+baseTargets = ['african-female-young.target',
+               'african-male-young.target',
+               'asian-female-young.target',
+               'asian-male-young.target',
+               'caucasian-female-young.target',
+               'caucasian-male-young.target']
+
 
 class SaveTargetsTaskView(gui3d.TaskView):
 
@@ -54,6 +66,9 @@ class SaveTargetsTaskView(gui3d.TaskView):
         self.fileName = 'full_target.target'
         self.dirName = gp.getDataPath('custom')
 
+        self.diffFileName = 'diff_target.target'
+        self.diffDirName = gp.getDataPath('custom')
+
         self.saveBox = gui.GroupBox('Save Model as Target')
         self.addLeftWidget(self.saveBox)
 
@@ -63,9 +78,7 @@ class SaveTargetsTaskView(gui3d.TaskView):
         self.nameEdit.textChanged.connect(self.onChange)
         self.saveBox.addWidget(self.nameEdit)
 
-        space = self.saveBox.addWidget(gui.TextView(''))
-
-        self.stripBaseTargets = gui.CheckBox('Strip base targets', False)
+        self.stripBaseTargets = gui.CheckBox('Strip Base Targets', True)
         self.saveBox.addWidget(self.stripBaseTargets)
 
         self.saveButton = gui.Button('Save')
@@ -75,6 +88,27 @@ class SaveTargetsTaskView(gui3d.TaskView):
         self.saveAsButton.path = os.path.join(self.dirName,  self.fileName)
         self.saveAsButton.setFilter('MakeHuman Target ( *.target )')
         self.saveBox.addWidget(self.saveAsButton)
+
+        self.saveDiffBox = gui.GroupBox('Save Diff Target')
+        self.addLeftWidget(self.saveDiffBox)
+
+        self.diffNameEdit = gui.TextEdit(self.diffFileName)
+        self.diffNameEdit.textChanged.connect(self.onDiffChange)
+        self.saveDiffBox.addWidget(self.diffNameEdit)
+
+        self.diffStripBaseTargets = gui.CheckBox('Strip Base Targets', True)
+        self.saveDiffBox.addWidget(self.diffStripBaseTargets)
+
+        self.setBaseButton = gui.Button('Set Base')
+        self.saveDiffBox.addWidget(self.setBaseButton)
+
+        self.saveDiffButton = gui.Button('Save')
+        self.saveDiffBox.addWidget(self.saveDiffButton)
+
+        self.saveDiffAsButton = gui.BrowseButton(label='Save As ...', mode='save')
+        self.saveDiffAsButton.path = os.path.join(self.diffDirName, self.diffFileName)
+        self.saveDiffAsButton.setFilter('MakeHuman Target ( *.target )')
+        self.saveDiffBox.addWidget(self.saveDiffAsButton)
 
         self.createShortCut()
 
@@ -91,11 +125,80 @@ class SaveTargetsTaskView(gui3d.TaskView):
                     dialog.prompt(title='Error', text=error_msg, button1Label='OK')
                     return
                 else:
-                    self.saveTargets(path)
+                    self.saveTargets(path, self.stripBaseTargets.selected)
+                    self.fileName = os.path.basename(path)
+                    self.dirName = os.path.dirname(path)
                     self.nameEdit.setText(self.fileName)
                     self.saveAsButton.path = path
-                    G.app.statusPersist('Saving Directory: ' + self.dirName)
+                    G.app.statusPersist('Saving Target Directory: ' + self.dirName +
+                                        '   Saving Diff Targets Directory: ' + self.diffDirName)
 
+        @self.setBaseButton.mhEvent
+        def onClicked(event):
+            dir_path = os.path.join(os.path.dirname(__file__), 'cache')
+            if not os.path.isdir(dir_path):
+                os.mkdir(dir_path)
+            file_path = os.path.join(dir_path, 'meta.target')
+            self.saveTargets(file_path, True)
+            result = algos3d._targetBuffer.pop(gp.canonicalPath(file_path), None)
+            print('Debug   :', result, file_path)
+
+        @self.saveDiffButton.mhEvent
+        def onClicked(event):
+            meta_file_path = os.path.join(os.path.dirname(__file__), 'cache', 'meta.target')
+            if not os.path.isfile(meta_file_path):
+                error_msg = 'No Base Target defined.\nPress "Set Base"'
+                dialog = gui.Dialog()
+                dialog.prompt(title='Error', text=error_msg, button1Label='OK')
+                log.warning(error_msg)
+            else:
+                path = os.path.join(self.diffDirName, self.diffFileName)
+                overwrite = True
+                dialog = gui.Dialog()
+
+                if not path.lower().endswith('.target'):
+                    error_msg = 'Cannot save target to file: {0:s}\n Expected a path to a .target file'.format(path)
+                    dialog.prompt(title='Error', text=error_msg, button1Label='OK')
+                    log.error('cannot save tagets to %s. Not a .target file.', path)
+                    return
+                else:
+                    if os.path.exists(path):
+                        msg = 'File {0:s} already exists. Overwrite?'.format(path)
+                        overwrite = dialog.prompt(title='Warning', text=msg, button1Label='YES', button2Label='NO')
+                        if overwrite:
+                            log.message('overwriting %s ...', path)
+                    if overwrite:
+                        human = G.app.selectedHuman
+                        target = algos3d.getTarget(human.meshData, meta_file_path)
+                        target.apply(human.meshData, -1)
+                        self.saveTargets(path, self.stripBaseTargets.selected)
+                        target.apply(human.meshData, 1)
+
+        @self.saveDiffAsButton.mhEvent
+        def onClicked(path):
+            meta_file_path = os.path.join(os.path.dirname(__file__), 'cache', 'meta.target')
+            if not os.path.isfile(meta_file_path):
+                error_msg = 'No Base Target defined.\nPress "Set Base"'
+                dialog = gui.Dialog()
+                dialog.prompt(title='Error', text=error_msg, button1Label='OK')
+                log.warning(error_msg)
+            else:
+                if path:
+                    if not path.lower().endswith('.target'):
+                        error_msg = 'Cannot save diff target to file: {0:s}\n Expected a path to a .target file'.format(path)
+                        dialog = gui.Dialog()
+                        dialog.prompt(title='Error', text=error_msg, button1Label='OK')
+                        return
+                    else:
+                        human = G.app.selectedHuman
+                        target = algos3d.getTarget(human.meshData, meta_file_path)
+                        target.apply(human.meshData, -1)
+                        self.saveTargets(path, self.diffStripBaseTargets.selected)
+                        target.apply(human.meshData, 1)
+                        self.diffFileName = os.path.basename(path)
+                        self.diffDirName = os.path.dirname(path)
+                        self.diffNameEdit.setText(self.fileName)
+                        self.saveDiffAsButton.path = path
 
     def quickSave(self):
         path = os.path.join(self.dirName, self.fileName)
@@ -114,32 +217,50 @@ class SaveTargetsTaskView(gui3d.TaskView):
                 if overwrite:
                     log.message('overwriting %s ...', path)
             if overwrite:
-                self.saveTargets(path)
+                self.saveTargets(path, self.stripBaseTargets.selected)
 
+    def stripTargets(self, obj, action=-1):
+        for targetName in universalBaseTargets:
+            filename = os.path.join(gp.getSysDataPath('targets/macrodetails'), targetName)
+            target = algos3d.getTarget(obj, filename)
+            if target:
+                target.apply(obj, action * 1 / len(universalBaseTargets))
+        for targetName in baseTargets:
+            filename = os.path.join(gp.getSysDataPath('targets/macrodetails'), targetName)
+            target = algos3d.getTarget(obj, filename)
+            if target:
+                target.apply(obj, action * 1 / len(baseTargets))
 
-    def saveTargets(self, path):
+    def unstripTargets(self, obj):
+        self.stripTargets(obj, action=1)
+
+    def saveTargets(self, path, strip=True):
         human = G.app.selectedHuman
-        targetPath = os.path.dirname(__file__) + '/universal-base.target'
-        universalBaseTarget = algos3d.getTarget(human.meshData, targetPath)
-        if self.stripBaseTargets.selected:
-            log.message('stripping base targets ...')
-            universalBaseTarget.apply(human.meshData, morphFactor=1.0)
+
+        if strip:
+            self.stripTargets(human.meshData)
 
         algos3d.saveTranslationTarget(human.meshData, path)
-        log.message('saving target to %s',path)
+        log.message('saving target to %s', path)
         self.fileName = os.path.basename(path)
         self.dirName = os.path.dirname(path)
-        if self.stripBaseTargets.selected:
-            universalBaseTarget.apply(human.meshData, morphFactor=-1.0)
 
+        if strip:
+            self.unstripTargets(human.meshData)
 
     def onChange(self):
         self.fileName = self.nameEdit.text
         self.saveAsButton.path = os.path.join(self.dirName, self.fileName)
 
+    def onDiffChange(self):
+        self.diffFileName = self.diffNameEdit.text
+        self.saveAsButton.path = os.path.join(self.dirName, self.fileName)
+
+
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
-        G.app.statusPersist('Saving Directory: ' + self.dirName)
+        G.app.statusPersist('Saving Target Directory: ' + self.dirName +
+                            '   Saving Diff Targets Directory: ' + self.diffDirName)
 
     def onHide(self, event):
         gui3d.TaskView.onHide(self, event)
