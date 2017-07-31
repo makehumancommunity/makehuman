@@ -96,8 +96,6 @@ class SaveTargetsTaskView(gui3d.TaskView):
         self.diffNameEdit.textChanged.connect(self.onDiffChange)
         self.saveDiffBox.addWidget(self.diffNameEdit)
 
-        self.diffStripBaseTargets = gui.CheckBox('Strip Base Targets', True)
-        self.saveDiffBox.addWidget(self.diffStripBaseTargets)
 
         self.setBaseButton = gui.Button('Set Base')
         self.saveDiffBox.addWidget(self.setBaseButton)
@@ -139,9 +137,8 @@ class SaveTargetsTaskView(gui3d.TaskView):
             if not os.path.isdir(dir_path):
                 os.mkdir(dir_path)
             file_path = os.path.join(dir_path, 'meta.target')
-            self.saveTargets(file_path, True)
-            result = algos3d._targetBuffer.pop(gp.canonicalPath(file_path), None)
-            
+            self.saveTargets(file_path, False)
+            algos3d._targetBuffer.pop(gp.canonicalPath(file_path), None)
 
         @self.saveDiffButton.mhEvent
         def onClicked(event):
@@ -171,7 +168,7 @@ class SaveTargetsTaskView(gui3d.TaskView):
                         human = G.app.selectedHuman
                         target = algos3d.getTarget(human.meshData, meta_file_path)
                         target.apply(human.meshData, -1)
-                        self.saveTargets(path, self.stripBaseTargets.selected)
+                        self.saveTargets(path, False)
                         target.apply(human.meshData, 1)
 
         @self.saveDiffAsButton.mhEvent
@@ -193,11 +190,11 @@ class SaveTargetsTaskView(gui3d.TaskView):
                         human = G.app.selectedHuman
                         target = algos3d.getTarget(human.meshData, meta_file_path)
                         target.apply(human.meshData, -1)
-                        self.saveTargets(path, self.diffStripBaseTargets.selected)
+                        self.saveTargets(path, False)
                         target.apply(human.meshData, 1)
                         self.diffFileName = os.path.basename(path)
                         self.diffDirName = os.path.dirname(path)
-                        self.diffNameEdit.setText(self.fileName)
+                        self.diffNameEdit.setText(self.diffFileName)
                         self.saveDiffAsButton.path = path
 
     def quickSave(self):
@@ -254,8 +251,7 @@ class SaveTargetsTaskView(gui3d.TaskView):
 
     def onDiffChange(self):
         self.diffFileName = self.diffNameEdit.text
-        self.saveAsButton.path = os.path.join(self.dirName, self.fileName)
-
+        self.saveDiffAsButton.path = os.path.join(self.dirName, self.fileName)
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
