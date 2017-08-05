@@ -59,4 +59,3 @@ def unload(app):
             os.rmdir(os.path.dirname(meta_file_path))
         except:
             log.error('cannot delete 7_save_target cache : %',  os.path.dirname(meta_file_path))
-

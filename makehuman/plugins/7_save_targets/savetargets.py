@@ -96,7 +96,6 @@ class SaveTargetsTaskView(gui3d.TaskView):
         self.diffNameEdit.textChanged.connect(self.onDiffChange)
         self.saveDiffBox.addWidget(self.diffNameEdit)
 
-
         self.setBaseButton = gui.Button('Set Base')
         self.saveDiffBox.addWidget(self.setBaseButton)
 
@@ -196,6 +195,8 @@ class SaveTargetsTaskView(gui3d.TaskView):
                         self.diffDirName = os.path.dirname(path)
                         self.diffNameEdit.setText(self.diffFileName)
                         self.saveDiffAsButton.path = path
+                        G.app.statusPersist('Saving Target Directory: ' + self.dirName +
+                                            '   Saving Diff Targets Directory: ' + self.diffDirName)
 
     def quickSave(self):
         path = os.path.join(self.dirName, self.fileName)
@@ -205,7 +206,7 @@ class SaveTargetsTaskView(gui3d.TaskView):
         if not path.lower().endswith('.target'):
             error_msg = 'Cannot save target to file: {0:s}\n Expected a path to a .target file'.format(path)
             dialog.prompt(title='Error', text=error_msg, button1Label='OK')
-            log.error('cannot save tagets to %s. Not a .target file.', path)
+            log.error('cannot save tagets to %s. not a .target file.', path)
             return
         else:
             if os.path.exists(path):
