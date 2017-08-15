@@ -222,12 +222,12 @@ class SaveTargetsTaskView(gui3d.TaskView):
             filename = os.path.join(gp.getSysDataPath('targets/macrodetails'), targetName)
             target = algos3d.getTarget(obj, filename)
             if target:
-                target.apply(obj, action * 1 / len(universalBaseTargets))
+                target.apply(obj, action * 1.0 / len(universalBaseTargets))
         for targetName in baseTargets:
             filename = os.path.join(gp.getSysDataPath('targets/macrodetails'), targetName)
             target = algos3d.getTarget(obj, filename)
             if target:
-                target.apply(obj, action * 1 / len(baseTargets))
+                target.apply(obj, action * 1.0 / len(baseTargets))
 
     def unstripTargets(self, obj):
         self.stripTargets(obj, action=1)
