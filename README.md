@@ -19,7 +19,7 @@ Reference branches
 * bitbucket-default: This is the code as it looks in the default branch at bitbucket
 
 Developer branches
-* Aranuvir branch and user=plugins: Aranuvir 
+* Aranuvir's branch
 
 A bug tracker for this port can be found at: http://bugtracker.makehumancommunity.org/projects/py3port/activity
 
