@@ -46,16 +46,22 @@ def load(app):
 
 
 def unload(app):
-    meta_file_path = os.path.join(os.path.dirname(__file__), 'cache', 'meta.target')
 
-    if os.path.isfile(meta_file_path):
-        try:
-            os.remove(meta_file_path)
-        except:
-            log.error('cannot delete meta target file : %',  meta_file_path)
+    category = app.getCategory('Utilities')
+    taskview = category.getTaskByName('Save Targets')
 
-    if os.path.isdir(os.path.dirname(meta_file_path)):
+
+    if os.path.isfile(taskview.metaFile):
         try:
-            os.rmdir(os.path.dirname(meta_file_path))
-        except:
-            log.error('cannot delete 7_save_target cache : %',  os.path.dirname(meta_file_path))
+            os.remove(taskview.metaFile)
+        except OSError as e:
+            log.error('Cannot delete meta target file: %s',  format(taskview.metaFile))
+
+    if os.path.isdir(taskview.metaFilePath):
+        try:
+            os.rmdir(taskview.metaFilePath)
+        except OSError as e:
+            if e.errno == 39:
+                log.warning('Cannot delete save targets cache: %s. Folder still in use...', format(taskview.metaFilePath))
+            else:
+                log.error('Cannot delete save targets cache: %s', format(taskview.metaFilePath))

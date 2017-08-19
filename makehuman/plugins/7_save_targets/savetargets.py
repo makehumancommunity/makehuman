@@ -45,6 +45,7 @@ import mh
 import log
 from core import G
 from language import language
+from uuid import uuid4
 
 universalBaseTargets = ['universal-female-young-averagemuscle-averageweight.target',
                         'universal-male-young-averagemuscle-averageweight.target']
@@ -62,6 +63,10 @@ class SaveTargetsTaskView(gui3d.TaskView):
     def __init__(self, category):
 
         super(SaveTargetsTaskView, self).__init__(category, 'Save Targets')
+
+        metaFileID = str(uuid4()) + '.target'
+        self.metaFilePath = os.path.join(os.path.dirname(__file__), '__cache__')
+        self.metaFile = os.path.join(self.metaFilePath, metaFileID)
 
         self.fileName = 'full_target.target'
         self.dirName = gp.getDataPath('custom')
@@ -117,9 +122,10 @@ class SaveTargetsTaskView(gui3d.TaskView):
         def onClicked(path):
             if path:
                 if not path.lower().endswith('.target'):
-                    error_msg = 'Cannot save target to file: {0:s}\n Expected a path to a .target file'.format(path)
+                    error_msg = 'Cannot save target to file: {0:s}\nExpected a path to a .target file'.format(path)
                     dialog = gui.Dialog()
                     dialog.prompt(title='Error', text=error_msg, button1Label='OK')
+                    log.error('Cannot save targets to %s. Not a .target file.', path)
                     return
                 else:
                     self.saveTargets(path, self.stripBaseTargets.selected)
@@ -132,18 +138,14 @@ class SaveTargetsTaskView(gui3d.TaskView):
 
         @self.setBaseButton.mhEvent
         def onClicked(event):
-            dir_path = os.path.join(os.path.dirname(__file__), 'cache')
-            if not os.path.isdir(dir_path):
-                os.mkdir(dir_path)
-            file_path = os.path.join(dir_path, 'meta.target')
-            self.saveTargets(file_path, False)
-            algos3d._targetBuffer.pop(gp.canonicalPath(file_path), None)
+            if not os.path.isdir(self.metaFilePath):
+                os.mkdir(self.metaFilePath)
+            self.saveTargets(self.metaFile, False)
 
         @self.saveDiffButton.mhEvent
         def onClicked(event):
-            meta_file_path = os.path.join(os.path.dirname(__file__), 'cache', 'meta.target')
-            if not os.path.isfile(meta_file_path):
-                error_msg = 'No Base Target defined.\nPress "Set Base"'
+            if not os.path.isfile(self.metaFile):
+                error_msg = 'No Base Model defined.\nPress "Set Base"'
                 dialog = gui.Dialog()
                 dialog.prompt(title='Error', text=error_msg, button1Label='OK')
                 log.warning(error_msg)
@@ -153,41 +155,40 @@ class SaveTargetsTaskView(gui3d.TaskView):
                 dialog = gui.Dialog()
 
                 if not path.lower().endswith('.target'):
-                    error_msg = 'Cannot save target to file: {0:s}\n Expected a path to a .target file'.format(path)
+                    error_msg = 'Cannot save target to file: {0:s}\nExpected a path to a .target file'.format(path)
                     dialog.prompt(title='Error', text=error_msg, button1Label='OK')
-                    log.error('cannot save tagets to %s. Not a .target file.', path)
+                    log.error('Cannot save targets to %s. Not a .target file.', path)
                     return
                 else:
                     if os.path.exists(path):
                         msg = 'File {0:s} already exists. Overwrite?'.format(path)
                         overwrite = dialog.prompt(title='Warning', text=msg, button1Label='YES', button2Label='NO')
                         if overwrite:
-                            log.message('overwriting %s ...', path)
+                            log.message('Overwriting %s ...', path)
                     if overwrite:
                         human = G.app.selectedHuman
-                        target = algos3d.getTarget(human.meshData, meta_file_path)
+                        target = algos3d.getTarget(human.meshData, self.metaFile)
                         target.apply(human.meshData, -1)
                         self.saveTargets(path, False)
                         target.apply(human.meshData, 1)
 
         @self.saveDiffAsButton.mhEvent
         def onClicked(path):
-            meta_file_path = os.path.join(os.path.dirname(__file__), 'cache', 'meta.target')
-            if not os.path.isfile(meta_file_path):
-                error_msg = 'No Base Target defined.\nPress "Set Base"'
+            if not os.path.isfile(self.metaFile):
+                error_msg = 'No Base Model defined.\nPress "Set Base"'
                 dialog = gui.Dialog()
                 dialog.prompt(title='Error', text=error_msg, button1Label='OK')
                 log.warning(error_msg)
             else:
                 if path:
                     if not path.lower().endswith('.target'):
-                        error_msg = 'Cannot save diff target to file: {0:s}\n Expected a path to a .target file'.format(path)
+                        error_msg = 'Cannot save diff target to file: {0:s}\nExpected a path to a .target file'.format(path)
                         dialog = gui.Dialog()
                         dialog.prompt(title='Error', text=error_msg, button1Label='OK')
                         return
                     else:
                         human = G.app.selectedHuman
-                        target = algos3d.getTarget(human.meshData, meta_file_path)
+                        target = algos3d.getTarget(human.meshData, self.metaFile)
                         target.apply(human.meshData, -1)
                         self.saveTargets(path, False)
                         target.apply(human.meshData, 1)
@@ -204,16 +205,16 @@ class SaveTargetsTaskView(gui3d.TaskView):
         dialog = gui.Dialog()
 
         if not path.lower().endswith('.target'):
-            error_msg = 'Cannot save target to file: {0:s}\n Expected a path to a .target file'.format(path)
+            error_msg = 'Cannot save target to file: {0:s}\nExpected a path to a .target file'.format(path)
             dialog.prompt(title='Error', text=error_msg, button1Label='OK')
-            log.error('cannot save tagets to %s. not a .target file.', path)
+            log.error('Cannot save targets to %s. Not a .target file.', path)
             return
         else:
             if os.path.exists(path):
                 msg = 'File {0:s} already exists. Overwrite?'.format(path)
                 overwrite = dialog.prompt(title='Warning', text=msg, button1Label='YES', button2Label='NO')
                 if overwrite:
-                    log.message('overwriting %s ...', path)
+                    log.message('Overwriting %s ...', path)
             if overwrite:
                 self.saveTargets(path, self.stripBaseTargets.selected)
 
@@ -239,7 +240,7 @@ class SaveTargetsTaskView(gui3d.TaskView):
             self.stripTargets(human.meshData)
 
         algos3d.saveTranslationTarget(human.meshData, path)
-        log.message('saving target to %s', path)
+        log.message('Saving target to %s', path)
         self.fileName = os.path.basename(path)
         self.dirName = os.path.dirname(path)
 
