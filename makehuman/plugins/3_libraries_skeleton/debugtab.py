@@ -198,13 +198,13 @@ class SkeletonDebugLibrary(gui3d.TaskView):
                 p3 = skel.getJointPosition(j3, self.human, in_rest)[:3] * skel.scale
                 verts[v_offset:v_offset+3] = [p1, p2, p3]
                 vcolors[v_offset:v_offset+3,:3] = PLANE_COLORS[0]
-                fgroups[v_offset/3] = fg.idx
+                fgroups[v_offset//3] = fg.idx
                 v_offset += 3
             else:
                 p1 = p2 = p3 = [0.0, 0.0, 0.0]
                 verts[v_offset:v_offset+3] = [p1, p2, p3]
                 vcolors[v_offset:v_offset+3,:3] = [255, 0, 0]
-                fgroups[v_offset/3] = fg.idx
+                fgroups[v_offset//3] = fg.idx
                 v_offset += 3
 
         self.planesMesh.setCoords(verts)
