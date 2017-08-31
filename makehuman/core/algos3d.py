@@ -454,6 +454,7 @@ def saveTranslationTarget(obj, targetPath, groupToSave=None, epsilon=0.001):
 
     try:
         with io.open(targetPath, 'w') as fileDescriptor:
+            fileDescriptor.write('%s\n\n\n' % str(defaultTargetLicense()))
             for i in range(nVertsExported):
                 fileDescriptor.write('%d %f %f %f\n' % (vertsToSave[i], delta[i,0], delta[i,1], delta[i,2]))
 

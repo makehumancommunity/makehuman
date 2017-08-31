@@ -46,6 +46,11 @@ import log
 from core import G
 from language import language
 from uuid import uuid4
+if G.hasPySide:
+    from PySide import QtGui
+else:
+    from PyQt4 import QtGui
+
 
 universalBaseTargets = ['universal-female-young-averagemuscle-averageweight.target',
                         'universal-male-young-averagemuscle-averageweight.target']
@@ -57,12 +62,26 @@ baseTargets = ['african-female-young.target',
                'caucasian-female-young.target',
                'caucasian-male-young.target']
 
+info_message = """Save target saves the current state of all targets applied to the default start up mesh as one global\
+ target. The strip option will remove all targets that constitute the default mesh from the global target. This is\
+ mandatory when reusing the global target inside MakeHuman. For usage on the base mesh in MakeTarget uncheck the strip\
+ option.\n\nSave diff target saves the data difference of two models as a global target. First create or load a model\
+ and press \"Set Base\". Then create or load a second model. Pressing \"Save diff target\" will create a global target,\
+ which can transform the first model into the second one. The resulting global diff target is absolutely specific to the\
+ first model and will not work on any other model.\n\nThe default license of the saved global targets will be AGPL3.\
+ The license can be changed by the user if the global target only contains data from custom targets, though licenses\
+ from other custom targets need to be taken into account."""
+
 
 class SaveTargetsTaskView(gui3d.TaskView):
 
     def __init__(self, category):
 
         super(SaveTargetsTaskView, self).__init__(category, 'Save Targets')
+
+        mainPanel = QtGui.QWidget()
+        layout = QtGui.QVBoxLayout()
+        mainPanel.setLayout(layout)
 
         metaFileID = str(uuid4()) + '.target'
         self.metaFilePath = os.path.join(os.path.dirname(__file__), '__cache__')
@@ -75,7 +94,9 @@ class SaveTargetsTaskView(gui3d.TaskView):
         self.diffDirName = gp.getDataPath('custom')
 
         self.saveBox = gui.GroupBox('Save Model as Target')
-        self.addLeftWidget(self.saveBox)
+        layout.addWidget(self.saveBox)
+
+        layout.addSpacing(15)
 
         label = self.saveBox.addWidget(gui.TextView('Filename:'))
 
@@ -95,7 +116,9 @@ class SaveTargetsTaskView(gui3d.TaskView):
         self.saveBox.addWidget(self.saveAsButton)
 
         self.saveDiffBox = gui.GroupBox('Save Diff Target')
-        self.addLeftWidget(self.saveDiffBox)
+        layout.addWidget(self.saveDiffBox)
+
+        layout.addSpacing(15)
 
         self.diffNameEdit = gui.TextEdit(self.diffFileName)
         self.diffNameEdit.textChanged.connect(self.onDiffChange)
@@ -111,6 +134,16 @@ class SaveTargetsTaskView(gui3d.TaskView):
         self.saveDiffAsButton.path = os.path.join(self.diffDirName, self.diffFileName)
         self.saveDiffAsButton.setFilter('MakeHuman Target ( *.target )')
         self.saveDiffBox.addWidget(self.saveDiffAsButton)
+
+        infoBox = gui.GroupBox('Info')
+        layout.addWidget(infoBox)
+        infoText = gui.TextView(info_message)
+        infoText.setWordWrap(True)
+        infoBox.setSizePolicy(gui.SizePolicy.Ignored, gui.SizePolicy.Preferred)
+        infoBox.addWidget(infoText)
+
+        layout.addStretch()
+        self.addLeftWidget(mainPanel)
 
         self.createShortCut()
 
