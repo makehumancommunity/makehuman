@@ -188,7 +188,7 @@ def getLanguages():
         langDirFiles = langDirFiles + os.listdir(getDataPath('languages'))
     except:
         pass
-    return ['english'] + sorted([os.path.basename(filename).replace('.json', '') for filename in langDirFiles if filename.split(os.extsep)[-1] == "json"])
+    return ['english'] + [os.path.basename(filename).replace('.json', '') for filename in sorted(langDirFiles) if filename.split(os.extsep)[-1] == "json"]
 
 
 language = Language()
