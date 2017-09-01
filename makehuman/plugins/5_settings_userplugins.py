@@ -66,9 +66,9 @@ class UserPluginsTaskView(gui3d.TaskView):
 
     def __init__(self, category):
 
-        info_msg = u"Install new plugins by either copying to the user plugins folder or using the built in installer. "\
-                   u"The installer only handles plugin packages in plain zip file format. To (de-)activate a plugin "\
-                   u"it must be (un-)checked in the list. Changes only come into effect after MakeHuman is restarted."
+        info_msg = "Install new plugins by either copying to the user plugins folder or using the built in installer. "\
+                   "The installer only handles plugin packages in plain zip file format. To (de-)activate a plugin "\
+                   "it must be (un-)checked in the list. Changes only come into effect after MakeHuman is restarted."
 
         gui3d.TaskView.__init__(self, category, 'User Plugins')
 
