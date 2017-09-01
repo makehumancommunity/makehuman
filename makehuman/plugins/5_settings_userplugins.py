@@ -43,6 +43,7 @@ import glob
 import zipfile
 import log
 import getpath
+import shutil
 
 class UserPluginCheckBox(gui.CheckBox):
 
@@ -66,9 +67,10 @@ class UserPluginsTaskView(gui3d.TaskView):
 
     def __init__(self, category):
 
-        info_msg = "Install new plugins by either copying to the user plugins folder or using the built in installer. "\
-                   "The installer only handles plugin packages in plain zip file format. To (de-)activate a plugin "\
-                   "it must be (un-)checked in the list. Changes only come into effect after MakeHuman is restarted."
+        info_msg = "Install new plugins by either copying to the user plugins folder or using the built in installer.\n"\
+                   "The installer only handles Python script files and plugin packages in plain zip file format."\
+                   "\n\nTo (de-)activate a plugin it must be (un-)checked in the list. Changes only come into effect" \
+                   " after MakeHuman is restarted."
 
         gui3d.TaskView.__init__(self, category, 'User Plugins')
 
@@ -81,6 +83,8 @@ class UserPluginsTaskView(gui3d.TaskView):
 
         gui3d.app.setSetting('activeUserPlugins', activePlugins)
         gui3d.app.saveSettings()
+
+        self.home = os.path.expanduser('~')
 
         self.scroll = self.addTopWidget(gui.VScrollArea())
         self.userPluginBox = gui.GroupBox('User Plugins')
@@ -96,8 +100,10 @@ class UserPluginsTaskView(gui3d.TaskView):
         self.addLeftWidget(self.installWidget)
 
         self.installBox = gui.GroupBox('')
-        self.installButton = gui.Button('Install Zipped Plugins')
-        self.installBox.addWidget(self.installButton)
+        self.installPyButton = gui.Button('Install Plugin File')
+        self.installBox.addWidget(self.installPyButton)
+        self.installZipButton = gui.Button('Install Zipped Plugin')
+        self.installBox.addWidget(self.installZipButton)
         installWidgetLayout.addWidget(self.installBox)
 
         self.reloadBox = gui.GroupBox('')
@@ -113,30 +119,49 @@ class UserPluginsTaskView(gui3d.TaskView):
         installWidgetLayout.addWidget(self.infoBox)
         installWidgetLayout.addStretch(1)
 
-        @self.installButton.mhEvent
+        @self.installZipButton.mhEvent
         def onClicked(event):
             filename = None
             home = os.path.expanduser('~')
             filename = getpath.pathToUnicode(gui.QtWidgets.QFileDialog.getOpenFileName(gui3d.app.mainwin, directory=home,
                                              filter='Zip files ( *.zip );; All files ( *.* )'))
             dest_path = getpath.getPath('plugins')
-            if filename:
+            if os.path.isfile(filename):
                 result = self.decompress(filename, dest_path)
                 if result == 1:
-                    gui3d.app.prompt('Error', 'Not a zip file {0}'.format(filename), 'OK')
+                    gui3d.app.prompt('Error', 'Not a zip file {0:s}'.format(filename), 'OK')
                 elif result == 3:
-                    gui3d.app.prompt('Warning', 'Potentially dangerous zip file, containing files with unsuitable path. '\
+                    gui3d.app.prompt('Warning', 'Potentially dangerous zip file, containing files with unsuitable path. '
                                                 'Inspect/fix the zip file before usage!', 'OK')
                 elif result == -1:
-                    gui3d.app.prompt('Error', 'Zip file {0} contains exiting files.'.format(filename), 'OK')
+                    gui3d.app.prompt('Error', 'Zip file {0:s} contains exiting files.'.format(filename), 'OK')
                 elif result == 0:
                     gui3d.app.prompt('Info', 'The plugin copied successfully. To activate check '
-                                               'the plugin in the list and restart MakeHuman.', 'OK', helpId='installPluginHelp' )
+                                     'the plugin in the list and restart MakeHuman.', 'OK', helpId='installPluginHelp' )
                     for child in self.userPluginBox.children:
                         self.userPluginBox.removeWidget(child)
                     updatePlugins = self.getUserPlugins()
                     for i, plugin in enumerate(updatePlugins):
                         self.userPluginBox.addWidget(UserPluginCheckBox(plugin), row = i, alignment=gui.QtCore.Qt.AlignTop)
+            self.home = os.path.dirname(filename)
+
+        @self.installPyButton.mhEvent
+        def onClicked(event):
+            filename = getpath.pathToUnicode(gui.QtGui.QFileDialog.getOpenFileName(gui3d.app.mainwin, directory=self.home,
+                                             filter='Python files ( *.py );; All files ( *.* )'))
+            if os.path.isfile(filename) and os.path.splitext(filename)[1] == '.py':
+                try:
+                    shutil.copy2(filename, getpath.getPath('plugins'))
+                except OSError as e:
+                    gui3d.app.prompt('Error', 'Failed to copy {0:s} to user plugins folder', 'OK')
+                for child in self.userPluginBox.children:
+                    self.userPluginBox.removeWidget(child)
+                updatePlugins = self.getUserPlugins()
+                for i, plugin in enumerate(updatePlugins):
+                    self.userPluginBox.addWidget(UserPluginCheckBox(plugin), row=i, alignment=gui.QtCore.Qt.AlignTop)
+                gui3d.app.prompt('Info', 'The plugin copied successfully. To activate check '
+                                 'the plugin in the list and restart MakeHuman.', 'OK', helpId='installPluginHelp')
+            self.home = os.path.dirname(filename)
 
         @self.reloadButton.mhEvent
         def onClicked(event):
