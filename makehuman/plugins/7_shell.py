@@ -50,7 +50,7 @@ import log
 if G.hasPySide:
     from PySide import QtCore, QtGui
 else:
-    from PyQt4 import QtCore, QtGui
+    from PyQt5 import QtCore, QtGui, QtWidgets
 
 MAX_COMPLETIONS = -1
 
@@ -66,8 +66,8 @@ class ShellTaskView(gui3d.TaskView):
         self.history = []
         self.histitem = None
 
-        self.main = self.addTopWidget(QtGui.QWidget())
-        self.layout = QtGui.QGridLayout(self.main)
+        self.main = self.addTopWidget(QtWidgets.QWidget())
+        self.layout = QtWidgets.QGridLayout(self.main)
         self.layout.setRowStretch(0, 0)
         self.layout.setRowStretch(1, 0)
         self.layout.setColumnStretch(0, 1)
@@ -75,8 +75,8 @@ class ShellTaskView(gui3d.TaskView):
 
         self.text = gui.DocumentEdit()
         self.text.setSizePolicy(
-            QtGui.QSizePolicy.Expanding,
-            QtGui.QSizePolicy.Expanding)
+            QtWidgets.QSizePolicy.Expanding,
+            QtWidgets.QSizePolicy.Expanding)
         self.layout.addWidget(self.text, 0, 0, 1, 2)
 
         self.line = ShellTextEdit()
