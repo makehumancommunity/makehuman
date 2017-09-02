@@ -44,7 +44,7 @@ from core import G
 if G.hasPySide:
     from PySide import QtCore, QtGui
 else:
-    from PyQt4 import QtCore, QtGui
+    from PyQt5 import QtCore, QtGui, QtWidgets
 
 import qtgui as gui
 import mh
@@ -94,18 +94,18 @@ class FileChooserRectangle(gui.Button):
         self.owner = owner
         self.file = file
 
-        self.layout = QtGui.QGridLayout(self)
-        self.layout.setSizeConstraint(QtGui.QLayout.SetMinimumSize)
+        self.layout = QtWidgets.QGridLayout(self)
+        self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
 
         image = self._imageCache[imagePath]
-        self.preview = QtGui.QLabel()
+        self.preview = QtWidgets.QLabel()
         self.preview.setPixmap(getpath.pathToUnicode(image))
         self.layout.addWidget(self.preview, 0, 0)
         self.layout.setRowStretch(0, 1)
         self.layout.setColumnMinimumWidth(0, self._size[0])
         self.layout.setRowMinimumHeight(0, self._size[1])
 
-        self.label = QtGui.QLabel()
+        self.label = QtWidgets.QLabel()
         self.label.setText(label)
         self.label.setMinimumWidth(1)
         self.layout.addWidget(self.label, 1, 0)
@@ -115,7 +115,7 @@ class FileChooserRectangle(gui.Button):
         self.owner.selection = self.file
         self.owner.callEvent('onFileSelected', self.file)
 
-class FlowLayout(QtGui.QLayout):
+class FlowLayout(QtWidgets.QLayout):
     def __init__(self, parent = None):
         super(FlowLayout, self).__init__(parent)
         self._children = []
@@ -425,7 +425,7 @@ class MhmatFileLoader(FileHandler):
                 return mat.diffuseTexture
         return thumb
 
-class FileChooserBase(QtGui.QWidget, gui.Widget):
+class FileChooserBase(QtWidgets.QWidget, gui.Widget):
 
     def __init__(self, path, extensions, sort = FileSort(), doNotRecurse = False):
         super(FileChooserBase, self).__init__()
@@ -611,28 +611,28 @@ class FileChooser(FileChooserBase):
             imgPath = getpath.getSysDataPath('notfound.thumb')
             self.notFoundImage = imgPath
 
-        self.layout = QtGui.QGridLayout(self)
+        self.layout = QtWidgets.QGridLayout(self)
 
         self.sortBox = self.createSortBox()
         self.layout.addWidget(self.sortBox, 0, 0)
         self.layout.setRowStretch(0, 0)
         self.layout.setColumnStretch(0, 0)
 
-        self.layout.addWidget(QtGui.QWidget(), 1, 0)
+        self.layout.addWidget(QtWidgets.QWidget(), 1, 0)
 
-        self.files_sc = QtGui.QScrollArea()
+        self.files_sc = QtWidgets.QScrollArea()
         self.files_sc.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.files_sc.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
         self.layout.addWidget(self.files_sc, 0, 1, 2, -1)
         self.layout.setRowStretch(1, 1)
         self.layout.setColumnStretch(1, 1)
 
-        self.files = QtGui.QWidget()
+        self.files = QtWidgets.QWidget()
         self.files_sc.installEventFilter(self)
         self.files_sc.setWidget(self.files)
         self.files_sc.setWidgetResizable(True)
         self.children = FlowLayout(self.files)
-        self.children.setSizeConstraint(QtGui.QLayout.SetMinimumSize)
+        self.children.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
 
         self.layout.addWidget(self.location, 2, 0, 1, -1)
         self.layout.setRowStretch(2, 0)
@@ -658,7 +658,7 @@ class ListFileChooser(FileChooserBase):
         self.multiSelect = multiSelect
         self.noneItem = noneItem
 
-        self.layout = QtGui.QGridLayout(self)
+        self.layout = QtWidgets.QGridLayout(self)
         self.mainBox = gui.GroupBox(name)
         self.children = gui.ListView()
         if self.multiSelect:
@@ -669,13 +669,13 @@ class ListFileChooser(FileChooserBase):
         self.layout.setSpacing(0)
         self.layout.setContentsMargins(0,0,0,0)
 
-        self.children.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.MinimumExpanding)
+        self.children.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.MinimumExpanding)
         self.children.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
 
         self.children.setVerticalScrollingEnabled(verticalScrolling)
 
         # Remove frame and background color from list widget (native theme)
-        self.children.setFrameShape(QtGui.QFrame.NoFrame)
+        self.children.setFrameShape(QtWidgets.QFrame.NoFrame)
         palette = QtGui.QPalette()
         palette.setColor(QtGui.QPalette.Base, QtGui.QColor(255,255,255,0))
         self.children.setPalette(palette)

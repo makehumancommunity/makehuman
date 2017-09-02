@@ -44,7 +44,7 @@ from core import G
 if G.hasPySide:
     from PySide import QtCore, QtGui, QtSvg
 else:
-    from PyQt4 import QtCore, QtGui, QtSvg
+    from PyQt5 import QtCore, QtGui, QtSvg, QtWidgets
 
 import events3d
 import language
@@ -116,7 +116,7 @@ class TabsBase(Widget):
     def __init__(self):
         super(TabsBase, self).__init__()
         self.tabBar().setExpanding(False)
-        self.connect(self, QtCore.SIGNAL('currentChanged(int)'), self.tabChanged)
+        self.currentChanged[int].connect(self.tabChanged)
         self._tabs_by_idx = {}
         self._tabs_by_name = {}
 
@@ -154,9 +154,9 @@ class TabsBase(Widget):
     def onTabSelected(self, event):
         pass
 
-class Tabs(QtGui.QTabWidget, TabsBase):
+class Tabs(QtWidgets.QTabWidget, TabsBase):
     def __init__(self, parent = None):
-        QtGui.QTabWidget.__init__(self, parent)
+        QtWidgets.QTabWidget.__init__(self, parent)
         TabsBase.__init__(self)
 
     def _makeTab(self, tab, idx=None):
@@ -177,9 +177,9 @@ class Tabs(QtGui.QTabWidget, TabsBase):
         if tab:
             tab.child.tabChanged(tab.child.currentIndex())
 
-class TabBar(QtGui.QTabBar, TabsBase):
+class TabBar(QtWidgets.QTabBar, TabsBase):
     def __init__(self, parent = None):
-        QtGui.QTabBar.__init__(self, parent)
+        QtWidgets.QTabBar.__init__(self, parent)
         TabsBase.__init__(self)
         self.setDrawBase(False)
 
@@ -197,12 +197,12 @@ class TabBar(QtGui.QTabBar, TabsBase):
     def addTab(self, name, label, idx = None):
         return super(TabBar, self)._addTab(name, label, idx)
 
-class GroupBox(QtGui.QGroupBox, Widget):
+class GroupBox(QtWidgets.QGroupBox, Widget):
     def __init__(self, label = ''):
         label = getLanguageString(label) if label else ''
-        QtGui.QGroupBox.__init__(self, label)
+        QtWidgets.QGroupBox.__init__(self, label)
         Widget.__init__(self)
-        self.layout = QtGui.QGridLayout(self)
+        self.layout = QtWidgets.QGridLayout(self)
 
     def __str__(self):
         return "%s - %s" % (type(self), str(self.title()))
@@ -231,7 +231,7 @@ class GroupBox(QtGui.QGroupBox, Widget):
 
 # PyQt doesn't implement QProxyStyle so we have to do all this ...
 
-class SliderStyle(QtGui.QCommonStyle):
+class SliderStyle(QtWidgets.QCommonStyle):
     def __init__(self, parent):
         self.__parent = parent
         super(SliderStyle, self).__init__()
@@ -270,7 +270,7 @@ class SliderStyle(QtGui.QCommonStyle):
         return self.__parent.polish(*args, **kwargs)
 
     def styleHint(self, hint, option=None, widget=None, returnData=None):
-        if hint == QtGui.QStyle.SH_Slider_AbsoluteSetButtons:
+        if hint == QtWidgets.QStyle.SH_Slider_AbsoluteSetButtons:
             return QtCore.Qt.LeftButton | QtCore.Qt.MidButton | QtCore.Qt.RightButton
         return self.__parent.styleHint(hint, option, widget, returnData)
 
@@ -286,7 +286,7 @@ class SliderStyle(QtGui.QCommonStyle):
     def sizeFromContents(self, ct, opt, contentsSize, widget = None):
         return self.__parent.sizeFromContents(ct, opt, contentsSize, widget)
 
-class NarrowLineEdit(QtGui.QLineEdit):
+class NarrowLineEdit(QtWidgets.QLineEdit):
     def __init__(self, width=4, *args, **kwargs):
         super(NarrowLineEdit, self).__init__(*args, **kwargs)
         self.__cols = width
@@ -302,11 +302,11 @@ class NarrowLineEdit(QtGui.QLineEdit):
         opt = QtGui.QStyleOptionFrameV2()
         self.initStyleOption(opt)
         return self.style().sizeFromContents(
-            QtGui.QStyle.CT_LineEdit, opt,
-            QtCore.QSize(w, h).expandedTo(QtGui.QApplication.globalStrut()),
+            QtWidgets.QStyle.CT_LineEdit, opt,
+            QtCore.QSize(w, h).expandedTo(QtWidgets.QApplication.globalStrut()),
             self)
 
-class _QSlider(QtGui.QSlider):
+class _QSlider(QtWidgets.QSlider):
     """
     Mock object around QSlider that allows catching mouse press events and
     relaying them to the parent widget.
@@ -322,7 +322,7 @@ class _QSlider(QtGui.QSlider):
                 return
         super(_QSlider, self).mousePressEvent(event)
 
-class Slider(QtGui.QWidget, Widget):
+class Slider(QtWidgets.QWidget, Widget):
     _imageCache = {}
     _show_images = False
     _instances = set()
@@ -353,16 +353,16 @@ class Slider(QtGui.QWidget, Widget):
         self.slider.setMaximum(self.scale)
         self.slider.setValue(self._f2i(value))
         self.slider.setTracking(False)
-        self.connect(self.slider, QtCore.SIGNAL('sliderMoved(int)'), self._changing)
-        self.connect(self.slider, QtCore.SIGNAL('valueChanged(int)'), self._changed)
-        self.connect(self.slider, QtCore.SIGNAL('sliderReleased()'), self._released)
-        self.connect(self.slider, QtCore.SIGNAL('sliderPressed()'), self._pressed)
+        self.slider.sliderMoved[int].connect(self._changing)
+        self.slider.valueChanged[int].connect(self._changed)
+        self.slider.sliderReleased.connect(self._released)
+        self.slider.sliderPressed.connect(self._pressed)
         self.slider.installEventFilter(self)
 
-        self.label = QtGui.QLabel(self.text)
+        self.label = QtWidgets.QLabel(self.text)
         # Decrease vertical gap between label and slider
         #self.label.setContentsMargins(0, 0, 0, -1)
-        self.layout = QtGui.QGridLayout(self)
+        self.layout = QtWidgets.QGridLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setColumnMinimumWidth(1, 1)
         self.layout.setColumnStretch(0, 1)
@@ -374,7 +374,7 @@ class Slider(QtGui.QWidget, Widget):
             self.label.hide()
 
         if image is not None:
-            self.image = QtGui.QLabel()
+            self.image = QtWidgets.QLabel()
             self.image.setPixmap(self._getImage(image))
             self.layout.addWidget(self.image, 0, 0, 1, -1)
         else:
@@ -390,10 +390,10 @@ class Slider(QtGui.QWidget, Widget):
         if self.valueConverter:
             self.edit = NarrowLineEdit(5)
             self.edit.installEventFilter(self)
-            self.connect(self.edit, QtCore.SIGNAL('returnPressed()'), self._enter)
+            self.edit.returnPressed.connect(self._enter)
             self.layout.addWidget(self.edit, 1, 1, 1, 1)
             if hasattr(self.valueConverter, 'units'):
-                self.units = QtGui.QLabel(self.valueConverter.units)
+                self.units = QtWidgets.QLabel(self.valueConverter.units)
                 self.layout.addWidget(self.units, 1, 2, 1, 1)
             else:
                 self.units = None
@@ -534,7 +534,7 @@ class Slider(QtGui.QWidget, Widget):
 class ButtonBase(Widget):
     def __init__(self):
         Widget.__init__(self)
-        self.connect(self, QtCore.SIGNAL('clicked(bool)'), self._clicked)
+        self.clicked[bool].connect(self._clicked)
 
     def getLabel(self):
         return str(self.text())
@@ -556,20 +556,20 @@ class ButtonBase(Widget):
     def onClicked(self, event):
         pass
 
-class Button(QtGui.QPushButton, ButtonBase):
+class Button(QtWidgets.QPushButton, ButtonBase):
     def __init__(self, label=None, selected=False):
         label = getLanguageString(label)
         super(Button, self).__init__(label)
         ButtonBase.__init__(self)
 
-class CheckBox(QtGui.QCheckBox, ButtonBase):
+class CheckBox(QtWidgets.QCheckBox, ButtonBase):
     def __init__(self, label=None, selected=False):
         label = getLanguageString(label)
         super(CheckBox, self).__init__(label)
         ButtonBase.__init__(self)
         self.setChecked(selected)
 
-class RadioButton(QtGui.QRadioButton, ButtonBase):
+class RadioButton(QtWidgets.QRadioButton, ButtonBase):
     groups = {}
 
     def __init__(self, group, label=None, selected=False):
@@ -588,7 +588,7 @@ class RadioButton(QtGui.QRadioButton, ButtonBase):
         if id(group) in type(self).groups:
             rbgroup = type(self).groups[id(group)]
         else:
-            rbgroup = QtGui.QButtonGroup()
+            rbgroup = QtWidgets.QButtonGroup()
             rbgroup.setExclusive(True)
             type(self).groups[id(group)] = rbgroup
         rbgroup.addButton(self)
@@ -610,7 +610,7 @@ class RadioButton(QtGui.QRadioButton, ButtonBase):
             if radio.selected:
                 return radio
 
-class ListItem(QtGui.QListWidgetItem):
+class ListItem(QtWidgets.QListWidgetItem):
     def __init__(self, label, tooltip = True):
         super(ListItem, self).__init__(label)
         self.__hasCheckbox = False
@@ -689,13 +689,13 @@ class ListItem(QtGui.QListWidgetItem):
                 return True
         return False
 
-class ListView(QtGui.QListWidget, Widget):
+class ListView(QtWidgets.QListWidget, Widget):
     def __init__(self):
         super(ListView, self).__init__()
         Widget.__init__(self)
         self._vertical_scrolling = True
-        self.connect(self, QtCore.SIGNAL('itemActivated(QListWidgetItem *)'), self._activate)
-        self.connect(self, QtCore.SIGNAL('itemClicked(QListWidgetItem *)'), self._clicked)
+        self.itemActivated[QListWidgetItem].connect(self._activate)
+        self.itemClicked[QListWidgetItem].connect(self._clicked)
 
     def _activate(self, item):
         self.callEvent('onActivate', item)
@@ -795,12 +795,12 @@ class ListView(QtGui.QListWidget, Widget):
         self.item(row).setHidden(not state)
 
     def allowMultipleSelection(self, allow):
-        self.setSelectionMode(QtGui.QAbstractItemView.MultiSelection
+        self.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection
                               if allow else
-                              QtGui.QAbstractItemView.SingleSelection)
+                              QtWidgets.QAbstractItemView.SingleSelection)
 
     def allowsMultipleSelection(self):
-        return self.selectionMode() == QtGui.QAbstractItemView.MultiSelection
+        return self.selectionMode() == QtWidgets.QAbstractItemView.MultiSelection
 
     def getItems(self):
         return [ self.item(row) for row in range(self.count()) ]
@@ -814,7 +814,7 @@ class ListView(QtGui.QListWidget, Widget):
 
         self.callEvent('onClearSelection', None)
 
-class TextView(QtGui.QLabel, Widget):
+class TextView(QtWidgets.QLabel, Widget):
     def __init__(self, label = ''):
         label = getLanguageString(label)
         super(TextView, self).__init__(label)
@@ -840,13 +840,13 @@ def floatValidator(text):
 def filenameValidator(text):
     return not text or len(set(text) & set('\\/:*?"<>|')) == 0
 
-class TextEdit(QtGui.QLineEdit, Widget):
+class TextEdit(QtWidgets.QLineEdit, Widget):
     def __init__(self, text='', validator = None):
         super(TextEdit, self).__init__(text)
         Widget.__init__(self)
         self.setValidator(validator)
-        self.connect(self, QtCore.SIGNAL('textEdited(QString)'), self._textChanged)
-        self.connect(self, QtCore.SIGNAL('returnPressed()'), self._enter)
+        self.textEdited['QString'].connect(self._textChanged)
+        self.returnPressed.connect(self._enter)
         self.installEventFilter(self)
 
     @property
@@ -932,11 +932,11 @@ class TextEdit(QtGui.QLineEdit, Widget):
     def _key_down(self):
         self.callEvent('onDownArrow', None)
 
-class DocumentEdit(QtGui.QTextEdit, Widget):
-    NoWrap          = QtGui.QTextEdit.NoWrap
-    WidgetWidth     = QtGui.QTextEdit.WidgetWidth
-    FixedPixelWidth = QtGui.QTextEdit.FixedPixelWidth
-    FixedColumnWidth= QtGui.QTextEdit.FixedColumnWidth
+class DocumentEdit(QtWidgets.QTextEdit, Widget):
+    NoWrap          = QtWidgets.QTextEdit.NoWrap
+    WidgetWidth     = QtWidgets.QTextEdit.WidgetWidth
+    FixedPixelWidth = QtWidgets.QTextEdit.FixedPixelWidth
+    FixedColumnWidth= QtWidgets.QTextEdit.FixedColumnWidth
 
     def __init__(self, text=''):
         super(DocumentEdit, self).__init__(text)
@@ -957,7 +957,7 @@ class DocumentEdit(QtGui.QTextEdit, Widget):
     def getText(self):
         return str(super(DocumentEdit, self).toPlainText())
 
-class ProgressBar(QtGui.QProgressBar, Widget):
+class ProgressBar(QtWidgets.QProgressBar, Widget):
     def __init__(self, visible=True):
         super(ProgressBar, self).__init__()
         Widget.__init__(self)
@@ -968,7 +968,7 @@ class ProgressBar(QtGui.QProgressBar, Widget):
         max_ = self.maximum()
         self.setValue(min_ + progress * (max_ - min_))
 
-class ShortcutEdit(QtGui.QLabel, Widget):
+class ShortcutEdit(QtWidgets.QLabel, Widget):
     def __init__(self, shortcut):
         if shortcut is not None:
             modifiers, key = shortcut
@@ -978,7 +978,7 @@ class ShortcutEdit(QtGui.QLabel, Widget):
         super(ShortcutEdit, self).__init__(text)
         self.setAutoFillBackground(True)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
-        self.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Raised)
+        self.setFrameStyle(QtWidgets.QFrame.Panel | QtWidgets.QFrame.Raised)
         self.installEventFilter(self)
 
     def onFocus(self, arg):
@@ -1017,12 +1017,12 @@ class ShortcutEdit(QtGui.QLabel, Widget):
     def onChanged(self, shortcut):
         pass
 
-class MouseActionEdit(QtGui.QLabel, Widget):
+class MouseActionEdit(QtWidgets.QLabel, Widget):
     def __init__(self, shortcut):
         modifiers, button = shortcut
         text = self.shortcutToLabel(modifiers, button)
         super(MouseActionEdit, self).__init__(text)
-        self.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Raised)
+        self.setFrameStyle(QtWidgets.QFrame.Panel | QtWidgets.QFrame.Raised)
 
     def setShortcut(self, shortcut):
         modifiers, button = shortcut
@@ -1060,17 +1060,17 @@ class MouseActionEdit(QtGui.QLabel, Widget):
     def onChanged(self, shortcut):
         pass
 
-class StackedBox(QtGui.QStackedWidget, Widget):
+class StackedBox(QtWidgets.QStackedWidget, Widget):
     def __init__(self):
         super(StackedBox, self).__init__()
         Widget.__init__(self)
         self.layout().setAlignment(QtCore.Qt.AlignTop)
         self.autoResize = False
-        self.connect(self, QtCore.SIGNAL('currentChanged(int)'), self.widgetChanged)
+        self.currentChanged[int].connect(self.widgetChanged)
 
     def addWidget(self, widget):
-        w = QtGui.QWidget()
-        layout = QtGui.QVBoxLayout(w)
+        w = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout(w)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(widget)
         layout.addStretch()
@@ -1100,51 +1100,51 @@ class StackedBox(QtGui.QStackedWidget, Widget):
         if self.autoResize:
             for i in range(self.count()):
                 w = self.widget(i)
-                if w: w.setSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Ignored)
+                if w: w.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Ignored)
             w = self.widget(self.currentIndex())
-            if w: w.setSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+            if w: w.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         else:
             for i in range(self.count()):
                 w = self.widget(i)
-                if w: w.setSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+                if w: w.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         self.layout().activate()
 
     def widgetChanged(self, widgetIdx):
         self._updateSize()
 
-class Dialog(QtGui.QDialog):
+class Dialog(QtWidgets.QDialog):
     def __init__(self, parent = None):
         super(Dialog, self).__init__(parent)
         self.setModal(True)
 
         self.helpIds = set()
 
-        icon = self.style().standardIcon(QtGui.QStyle.SP_MessageBoxWarning)
+        icon = self.style().standardIcon(QtWidgets.QStyle.SP_MessageBoxWarning)
 
-        self.layout = QtGui.QGridLayout(self)
+        self.layout = QtWidgets.QGridLayout(self)
         self.layout.setColumnStretch(0, 0)
         self.layout.setColumnStretch(1, 1)
         self.layout.setColumnStretch(2, 0)
         self.layout.setColumnStretch(3, 0)
 
-        self.icon = QtGui.QLabel()
+        self.icon = QtWidgets.QLabel()
         self.icon.setPixmap(icon.pixmap(64))
         self.layout.addWidget(self.icon, 0, 0, 2, 1)
 
         self.text = TextView()
         self.layout.addWidget(self.text, 0, 1, 1, -1)
 
-        self.check = QtGui.QCheckBox(getLanguageString("Don't show this again"))
+        self.check = QtWidgets.QCheckBox(getLanguageString("Don't show this again"))
         self.layout.addWidget(self.check, 1, 1, 1, -1)
 
-        self.button1 = QtGui.QPushButton()
+        self.button1 = QtWidgets.QPushButton()
         self.layout.addWidget(self.button1, 2, 2)
 
-        self.button2 = QtGui.QPushButton()
+        self.button2 = QtWidgets.QPushButton()
         self.layout.addWidget(self.button2, 2, 3)
 
-        self.connect(self.button1, QtCore.SIGNAL('clicked(bool)'), self.accept)
-        self.connect(self.button2, QtCore.SIGNAL('clicked(bool)'), self.reject)
+        self.button1.clicked[bool].connect(self.accept)
+        self.button2.clicked[bool].connect(self.reject)
 
     def prompt(self, title, text, button1Label, button2Label=None, button1Action=None, button2Action=None, helpId=None, fmtArgs = None):
         if helpId in self.helpIds:
@@ -1180,19 +1180,19 @@ class Dialog(QtGui.QDialog):
         if helpId and self.check.isChecked():
             self.helpIds.add(helpId)
 
-        if which == QtGui.QDialog.Accepted:
+        if which == QtWidgets.QDialog.Accepted:
             if button1Action:
                 button1Action()
             return True
-        elif which == QtGui.QDialog.Rejected:
+        elif which == QtWidgets.QDialog.Rejected:
             if button2Action:
                 button2Action()
             return False
 
 
-class AboutBox(QtGui.QMessageBox):
+class AboutBox(QtWidgets.QMessageBox):
     def __init__(self, parent, title, text):
-        super(AboutBox, self).__init__(title, text, QtGui.QMessageBox.Information, 0, 0, 0, parent)
+        super(AboutBox, self).__init__(title, text, QtWidgets.QMessageBox.Information, 0, 0, 0, parent)
 
         if sys.platform == 'darwin':
             self.setWindowFlags(QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowSystemMenuHint)
@@ -1207,13 +1207,13 @@ class AboutBox(QtGui.QMessageBox):
         leftMargin, topMargin, rightMargin, bottomMargin = self.getContentsMargins()
         width = fm.width('0') * chars_per_line + 4 + leftMargin + rightMargin
 
-        horizontalSpacer = QtGui.QSpacerItem(width, 0, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        horizontalSpacer = QtWidgets.QSpacerItem(width, 0, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         layout = self.layout()
         layout.addItem(horizontalSpacer, layout.rowCount(), 0, 1, layout.columnCount())
 
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
-class AboutBoxScrollbars(QtGui.QDialog):
+class AboutBoxScrollbars(QtWidgets.QDialog):
     def __init__(self, parent, title, text, versiontext):
         super(AboutBoxScrollbars, self).__init__(parent)
 
@@ -1229,7 +1229,7 @@ class AboutBoxScrollbars(QtGui.QDialog):
 
         self.setWindowTitle(title)
 
-        label = QtGui.QLabel(self)
+        label = QtWidgets.QLabel(self)
         label.setText(_replace_urls(text).replace('\n', '<br>'))
         label.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignLeft)
         label.setOpenExternalLinks(True)
@@ -1241,33 +1241,33 @@ class AboutBoxScrollbars(QtGui.QDialog):
             label.setContentsMargins(2, 0, 0, 0)
             label.setIndent(9)
 
-        versionLabel = QtGui.QLabel(self)
+        versionLabel = QtWidgets.QLabel(self)
         versionLabel.setText(versiontext)
         versionLabel.setContentsMargins(0, 0, 0, 10)
         f = versionLabel.font()
         f.setBold(True)
         versionLabel.setFont(f)
 
-        iconLabel = QtGui.QLabel(self)
-        iconLabel.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        iconLabel = QtWidgets.QLabel(self)
+        iconLabel.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         iconLabel.setPixmap(icon.pixmap(size))
         iconLabel.setContentsMargins(5, 0, 5, 0)
 
-        scroll = QtGui.QScrollArea(self)
+        scroll = QtWidgets.QScrollArea(self)
         scroll.setWidget(label)
         scroll.setWidgetResizable(True)
 
-        buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok)
-        self.connect(buttonBox, QtCore.SIGNAL("accepted()"), self.close)
-        buttonBox.button(QtGui.QDialogButtonBox.Ok).setDefault(True)
+        buttonBox = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok)
+        buttonBox.accepted.connect(self.close)
+        buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setDefault(True)
         buttonBox.setContentsMargins(0, 0, 10, 0)
 
-        grid = QtGui.QGridLayout()
+        grid = QtWidgets.QGridLayout()
         if sys.platform == 'darwin':
             grid.addWidget(versionLabel, 0, 1, 1, 1, QtCore.Qt.AlignTop)
             grid.addWidget(iconLabel, 0, 0, 2, 1, QtCore.Qt.AlignTop)
         else:
-            grid.setMargin(0)
+            grid.setContentsMargins(0, 0, 0, 0)
             grid.setVerticalSpacing(8)
             grid.setHorizontalSpacing(0)
             self.setContentsMargins(0, 15, 0, 20)
@@ -1290,10 +1290,10 @@ class AboutBoxScrollbars(QtGui.QDialog):
         fm = QtGui.QFontMetrics(label.font())
         leftMargin, topMargin, rightMargin, bottomMargin = self.getContentsMargins()
         width = fm.width('#') * chars_per_line + 4 + leftMargin + rightMargin
-        horizontalSpacer = QtGui.QSpacerItem(width, 0, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        horizontalSpacer = QtWidgets.QSpacerItem(width, 0, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         grid.addItem(horizontalSpacer, 3, 0, 1, 0)
 
-        grid.setSizeConstraint(QtGui.QLayout.SetNoConstraint)
+        grid.setSizeConstraint(QtWidgets.QLayout.SetNoConstraint)
         self.setLayout(grid)
 
         self.setModal(True)
@@ -1303,7 +1303,7 @@ class AboutBoxScrollbars(QtGui.QDialog):
         self.resize(size)
 
 
-class FileEntryView(QtGui.QWidget, Widget):
+class FileEntryView(QtWidgets.QWidget, Widget):
     """Widget for entering paths and filenames.
 
     It can be used in file save / load task views,
@@ -1361,12 +1361,12 @@ class FileEntryView(QtGui.QWidget, Widget):
 
         self.browse = BrowseButton()
 
-        self.edit = QtGui.QLineEdit()
+        self.edit = QtWidgets.QLineEdit()
         self.edit.setValidator(
             QtGui.QRegExpValidator(QtCore.QRegExp(r'[^\/:*?"<>|]*'), None))
 
         buttonLabel = getLanguageString(buttonLabel)
-        self.confirm = QtGui.QPushButton(buttonLabel)
+        self.confirm = QtWidgets.QPushButton(buttonLabel)
 
         # Register events
 
@@ -1391,20 +1391,17 @@ class FileEntryView(QtGui.QWidget, Widget):
                 self.path = pathToUnicode(path)
                 self._confirm('browse')
 
-        self.connect(self.edit, QtCore.SIGNAL(' returnPressed()'),
-            lambda: self._confirm('return'))
+        self.edit.returnPressed.connect(lambda: self._confirm('return'))
 
-        self.connect(self.edit, QtCore.SIGNAL('textEdited(QString)'),
-            lambda s: self.callEvent('onChange', str(s)))
+        self.edit.textEdited['QString'].connect(lambda s: self.callEvent('onChange', str(s)))
 
-        self.connect(self.confirm, QtCore.SIGNAL('clicked(bool)'),
-            lambda _: self._confirm('button'))
+        self.confirm.clicked[bool].connect(lambda _: self._confirm('button'))
 
         # Create GUI
 
-        self.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Fixed)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Fixed)
 
-        self.layout = QtGui.QGridLayout(self)
+        self.layout = QtWidgets.QGridLayout(self)
 
         self.layout.addWidget(self.browse, 0, 0)
         self.layout.setColumnStretch(0, 0)
@@ -1503,7 +1500,7 @@ class FileEntryView(QtGui.QWidget, Widget):
         self.edit.setFocus()
 
 
-class SplashScreen(QtGui.QSplashScreen):
+class SplashScreen(QtWidgets.QSplashScreen):
     def __init__(self, image, version=""):
         if G.args.get('splashontop') == True:
             super(SplashScreen, self).__init__(G.app.mainwin, getPixmap(image), QtCore.Qt.WindowStaysOnTopHint)
@@ -1562,11 +1559,11 @@ class SplashScreen(QtGui.QSplashScreen):
         painter.setBrush(QtGui.QBrush(color))
         painter.drawRect(pRect.x()+progressedWidth, pRect.y(), pRect.width()-progressedWidth, pRect.height())
 
-class StatusBar(QtGui.QStatusBar, Widget):
+class StatusBar(QtWidgets.QStatusBar, Widget):
     def __init__(self):
         super(StatusBar, self).__init__()
         Widget.__init__(self)
-        self._perm = QtGui.QLabel()
+        self._perm = QtWidgets.QLabel()
         self.addWidget(self._perm, 1)
         self.duration = 2000
 
@@ -1592,11 +1589,11 @@ class StatusBar(QtGui.QStatusBar, Widget):
         text = text % args
         self._perm.setText(text)
 
-class VScrollLayout(QtGui.QLayout):
+class VScrollLayout(QtWidgets.QLayout):
     def __init__(self, parent = None):
         super(VScrollLayout, self).__init__(parent)
         self.setContentsMargins(0, 0, 0, 0)
-        self.setSizeConstraint(QtGui.QLayout.SetNoConstraint)
+        self.setSizeConstraint(QtWidgets.QLayout.SetNoConstraint)
         self._child = None
         self._position = 0
 
@@ -1658,9 +1655,9 @@ class VScrollLayout(QtGui.QLayout):
         rect = rect.adjusted(left, top, -right, -bottom)
         rect.adjust(0, -self._position, 0, -self._position)
         # log.debug("%x", int(self._child.widget().sizePolicy().horizontalPolicy()))
-        if not self._child.widget().sizePolicy().horizontalPolicy() & QtGui.QSizePolicy.ExpandFlag:
+        if not self._child.widget().sizePolicy().horizontalPolicy() & QtWidgets.QSizePolicy.ExpandFlag:
             rect.setWidth(size.width())
-        if not self._child.widget().sizePolicy().verticalPolicy() & QtGui.QSizePolicy.ExpandFlag:
+        if not self._child.widget().sizePolicy().verticalPolicy() & QtWidgets.QSizePolicy.ExpandFlag:
             rect.setHeight(size.height())
         else:
             rect.setHeight(max(rect.height(), size.height()))
@@ -1696,7 +1693,7 @@ class VScrollLayout(QtGui.QLayout):
         left, top, right, bottom = self.getContentsMargins()
         return self._child.sizeHint().height() + top + bottom
 
-class Viewport(QtGui.QWidget):
+class Viewport(QtWidgets.QWidget):
     def __init__(self):
         super(Viewport, self).__init__()
         self.setContentsMargins(0, 0, 0, 0)
@@ -1719,23 +1716,23 @@ class Viewport(QtGui.QWidget):
     def setPosition(self, value):
         self._layout.setPosition(value)
 
-class VScrollArea(QtGui.QWidget, Widget):
+class VScrollArea(QtWidgets.QWidget, Widget):
     def __init__(self):
         super(VScrollArea, self).__init__()
         Widget.__init__(self)
 
         self._viewport = Viewport()
-        self._scrollbar = QtGui.QScrollBar(QtCore.Qt.Vertical)
+        self._scrollbar = QtWidgets.QScrollBar(QtCore.Qt.Vertical)
         self._scrollbar.setRange(0, 0)
         self._scrollbar.setMinimumHeight(0)
         self._scrollbar.setSingleStep(10)
-        self._layout = QtGui.QBoxLayout(QtGui.QBoxLayout.RightToLeft, self)
+        self._layout = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.RightToLeft, self)
         self._layout.addWidget(self._scrollbar, 0)
         self._layout.addWidget(self._viewport, 1)
         self._layout.setContentsMargins(0, 0, 0, 0)
         self._scrollbar.setTracking(True)
         self._widget = None
-        self.connect(self._scrollbar, QtCore.SIGNAL('valueChanged(int)'), self._changed)
+        self._scrollbar.valueChanged[int].connect(self._changed)
 
     def setWidget(self, widget):
         if self._widget is not None:
@@ -1783,7 +1780,7 @@ class VScrollArea(QtGui.QWidget, Widget):
         """
         return str(self.metaObject().className())
 
-class TreeItem(QtGui.QTreeWidgetItem):
+class TreeItem(QtWidgets.QTreeWidgetItem):
     def __init__(self, text, parent=None, isDir=False):
         super(TreeItem, self).__init__([text])
         self.text = text
@@ -1791,10 +1788,10 @@ class TreeItem(QtGui.QTreeWidgetItem):
         self.isDir = isDir
         if self.isDir:
             self.setIcon(0, TreeView._dirIcon)
-            self.setChildIndicatorPolicy(QtGui.QTreeWidgetItem.ShowIndicator)
+            self.setChildIndicatorPolicy(QtWidgets.QTreeWidgetItem.ShowIndicator)
         else:
             self.setIcon(0, TreeView._fileIcon)
-            self.setChildIndicatorPolicy(QtGui.QTreeWidgetItem.DontShowIndicator)
+            self.setChildIndicatorPolicy(QtWidgets.QTreeWidgetItem.DontShowIndicator)
 
     def addChild(self, text, isDir=False):
         item = TreeItem(text, self, isDir)
@@ -1806,19 +1803,19 @@ class TreeItem(QtGui.QTreeWidgetItem):
         super(TreeItem, self).addChildren(items)
         return items
 
-class TreeView(QtGui.QTreeWidget, Widget):
+class TreeView(QtWidgets.QTreeWidget, Widget):
     _dirIcon = None
     _fileIcon = None
 
     def __init__(self, parent = None):
         super(TreeView, self).__init__(parent)
         Widget.__init__(self)
-        self.connect(self, QtCore.SIGNAL('itemActivated(QTreeWidgetItem *,int)'), self._activate)
-        self.connect(self, QtCore.SIGNAL('itemExpanded(QTreeWidgetItem *)'), self._expand)
+        self.itemActivated[QTreeWidgetItem, int].connect(self._activate)
+        self.itemExpanded[QTreeWidgetItem].connect(self._expand)
         if TreeView._dirIcon is None:
-            TreeView._dirIcon = self.style().standardIcon(QtGui.QStyle.SP_DirIcon)
+            TreeView._dirIcon = self.style().standardIcon(QtWidgets.QStyle.SP_DirIcon)
         if TreeView._fileIcon is None:
-            TreeView._fileIcon = self.style().standardIcon(QtGui.QStyle.SP_FileIcon)
+            TreeView._fileIcon = self.style().standardIcon(QtWidgets.QStyle.SP_FileIcon)
 
     def addTopLevel(self, text, isDir=True):
         item = TreeItem(text, None, isDir)
@@ -1833,13 +1830,13 @@ class TreeView(QtGui.QTreeWidget, Widget):
         if item.isDir:
             self.callEvent('onExpand', item)
 
-class SpinBox(QtGui.QSpinBox, Widget):
+class SpinBox(QtWidgets.QSpinBox, Widget):
     def __init__(self, value, parent = None):
         super(SpinBox, self).__init__(parent)
         Widget.__init__(self)
         self.setRange(0, 99999)
         self.setValue(value)
-        self.connect(self, QtCore.SIGNAL('valueChanged(int)'), self._changed)
+        self.valueChanged[int].connect(self._changed)
 
     def _changed(self, value):
         self.callEvent('onChange', value)
@@ -1933,11 +1930,11 @@ class BrowseButton(Button):
             path = os.path.join(path, self.filename)
 
         if self.mode == 'open':
-            path = pathToUnicode(str(QtGui.QFileDialog.getOpenFileName(G.app.mainwin, directory=self.directory, filter=self.filter)))
+            path = pathToUnicode(str(QtWidgets.QFileDialog.getOpenFileName(G.app.mainwin, directory=self.directory, filter=self.filter)))[0]
         elif self.mode == 'save':
-            path = pathToUnicode(str(QtGui.QFileDialog.getSaveFileName(G.app.mainwin, directory=self.directory, filter=self.filter)))
+            path = pathToUnicode(str(QtWidgets.QFileDialog.getSaveFileName(G.app.mainwin, directory=self.directory, filter=self.filter)))[0]
         elif self.mode == 'dir':
-            path = pathToUnicode(str(QtGui.QFileDialog.getExistingDirectory(G.app.mainwin, directory=self.directory)))
+            path = pathToUnicode(str(QtWidgets.QFileDialog.getExistingDirectory(G.app.mainwin, directory=self.directory)))
 
         if path:
             if self.mode == 'dir': self.directory = path
@@ -1975,12 +1972,12 @@ class ColorPickButton(Button):
 
     def _clicked(self, state):
         currentColor = qColorFromColor(self.color)
-        pickedColor = QtGui.QColorDialog.getColor(currentColor)
+        pickedColor = QtWidgets.QColorDialog.getColor(currentColor)
         if pickedColor.isValid():
             self.color = colorFromQColor(pickedColor)
             self.callEvent('onClicked', self.color)
 
-class Action(QtGui.QAction, Widget):
+class Action(QtWidgets.QAction, Widget):
     _groups = {}
 
     @classmethod
@@ -2032,7 +2029,7 @@ class Action(QtGui.QAction, Widget):
             self.setActionGroup(self.getGroup(group))
         if toggle:
             self.setCheckable(True)
-        self.connect(self, QtCore.SIGNAL('triggered(bool)'), self._activate)
+        self.triggered[bool].connect(self._activate)
 
     @property
     def text(self):
@@ -2045,7 +2042,7 @@ class Action(QtGui.QAction, Widget):
     def _activate(self, checked):
         self.method()
 
-class ActionGroup(QtGui.QActionGroup):
+class ActionGroup(QtWidgets.QActionGroup):
     def __init__(self):
         super(ActionGroup, self).__init__(G.app.mainwin)
 
@@ -2062,26 +2059,26 @@ class Actions(object):
         return iter(self._order)
 
 class SizePolicy(object):
-    Fixed               = QtGui.QSizePolicy.Fixed
-    Minimum             = QtGui.QSizePolicy.Minimum
-    Maximum             = QtGui.QSizePolicy.Maximum
-    Preferred           = QtGui.QSizePolicy.Preferred
-    Expanding           = QtGui.QSizePolicy.Expanding
-    MinimumExpanding    = QtGui.QSizePolicy.MinimumExpanding
-    Ignored             = QtGui.QSizePolicy.Ignored
+    Fixed               = QtWidgets.QSizePolicy.Fixed
+    Minimum             = QtWidgets.QSizePolicy.Minimum
+    Maximum             = QtWidgets.QSizePolicy.Maximum
+    Preferred           = QtWidgets.QSizePolicy.Preferred
+    Expanding           = QtWidgets.QSizePolicy.Expanding
+    MinimumExpanding    = QtWidgets.QSizePolicy.MinimumExpanding
+    Ignored             = QtWidgets.QSizePolicy.Ignored
 
-class TableItem(QtGui.QTableWidgetItem):
+class TableItem(QtWidgets.QTableWidgetItem):
     def setUserData(self, data):
         self.setData(QtCore.Qt.UserRole, data)
 
     def getUserData(self):
-        return self.data(QtCore.Qt.UserRole).toPyObject()
+        return self.data(QtCore.Qt.UserRole)
 
     @property
     def text(self):
         return str(super(TableItem, self).text())
 
-class TableView(QtGui.QTableWidget, Widget):
+class TableView(QtWidgets.QTableWidget, Widget):
     def __init__(self):
         super(TableView, self).__init__()
         Widget.__init__(self)
@@ -2095,13 +2092,13 @@ class TableView(QtGui.QTableWidget, Widget):
     def getItemData(self, row, col):
         return self.item(row, col).getUserData()
 
-class ImageView(QtGui.QLabel, QtGui.QScrollArea, Widget):
+class ImageView(QtWidgets.QLabel, QtWidgets.QScrollArea, Widget):
     def __init__(self):
         super(ImageView, self).__init__()
         Widget.__init__(self)
         self.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop)
         self.setMinimumSize(50,50)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHeightForWidth(True)
         self.setSizePolicy(sizePolicy)
         #self.setScaledContents(True)
@@ -2154,15 +2151,15 @@ class ImageView(QtGui.QLabel, QtGui.QScrollArea, Widget):
             self._pixmap.save (fname)
 
 
-class ZoomableImageView(QtGui.QScrollArea, Widget):
+class ZoomableImageView(QtWidgets.QScrollArea, Widget):
     def __init__(self):
-        QtGui.QScrollArea.__init__(self)
+        QtWidgets.QScrollArea.__init__(self)
         Widget.__init__(self)
-        self.imageLabel = QtGui.QLabel()
+        self.imageLabel = QtWidgets.QLabel()
         self.imageLabel.setBackgroundRole(QtGui.QPalette.Base)
         self.imageLabel.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop)
         self.imageLabel.setMinimumSize(5,5)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Ignored)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         sizePolicy.setHeightForWidth(True)
         self.imageLabel.setSizePolicy(sizePolicy)
         self.imageLabel.setScaledContents(True)

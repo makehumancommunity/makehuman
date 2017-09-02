@@ -44,7 +44,7 @@ from core import G
 if G.hasPySide:
     from PySide import QtCore, QtGui, QtOpenGL
 else:
-    from PyQt4 import QtCore, QtGui, QtOpenGL
+    from PyQt5 import QtCore, QtGui, QtOpenGL, QtWidgets
 
 import glmodule as gl
 import events3d
@@ -199,7 +199,7 @@ class Canvas(QtOpenGL.QGLWidget):
         self.setAttribute(QtCore.Qt.WA_KeyCompression, False)
         self.setMouseTracking(True)
         self.setMinimumHeight(5)
-        self.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Ignored)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
 
     def getMousePos(self):
         """
@@ -239,7 +239,7 @@ class Canvas(QtOpenGL.QGLWidget):
 
         x = ev.x()
         y = ev.y()
-        d = ev.delta()
+        d = ev.angleDelta().y()
         t = time.time()
 
         if g_mousewheel_t is None or t - g_mousewheel_t > MOUSEWHEEL_PICK_TIMEOUT:
@@ -306,7 +306,7 @@ class Canvas(QtOpenGL.QGLWidget):
         gl.reshape(w, h)
         G.app.callEvent('onResizedCallback', events3d.ResizeEvent(w, h, False))
 
-class VLayout(QtGui.QLayout):
+class VLayout(QtWidgets.QLayout):
     def __init__(self, parent = None):
         super(VLayout, self).__init__(parent)
         self._children = []
@@ -369,11 +369,11 @@ class TaskPanel(qtgui.VScrollArea):
     def __init__(self):
         super(TaskPanel, self).__init__()
         self.setMinimumHeight(250)
-        self.child = QtGui.QWidget()
+        self.child = QtWidgets.QWidget()
         self.child.setContentsMargins(0, 0, 0, 0)
-        self.child.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Preferred)
+        self.child.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred)
         self.setWidget(self.child)
-        self.layout = QtGui.QBoxLayout(QtGui.QBoxLayout.TopToBottom, self.child)
+        self.layout = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.TopToBottom, self.child)
 
     def addWidget(self, widget, *args, **kwargs):
         self.layout.addWidget(widget, *args, **kwargs)
@@ -382,11 +382,11 @@ class TaskPanel(qtgui.VScrollArea):
     def removeWidget(self, widget):
         self.layout.removeWidget(widget)
 
-class CategoryPanel(QtGui.QWidget, qtgui.Widget):
+class CategoryPanel(QtWidgets.QWidget, qtgui.Widget):
     def __init__(self):
         super(CategoryPanel, self).__init__()
         qtgui.Widget.__init__(self)
-        self.layout = QtGui.QBoxLayout(QtGui.QBoxLayout.BottomToTop, self)
+        self.layout = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.BottomToTop, self)
 
     def addWidget(self, widget, *args, **kwargs):
         self.layout.addWidget(widget, *args, **kwargs)
@@ -421,7 +421,7 @@ def supportedImageFormats():
     """
     return [ str(s).lower() for s in QtGui.QImageReader.supportedImageFormats() ]
 
-class Frame(QtGui.QMainWindow):
+class Frame(QtWidgets.QMainWindow):
     title = "MakeHuman"
 
     def __init__(self, app, size):
@@ -447,19 +447,19 @@ class Frame(QtGui.QMainWindow):
 
         self.statusBar = qtgui.StatusBar()
         self.setStatusBar(self.statusBar)
-        self.central = QtGui.QWidget()
+        self.central = QtWidgets.QWidget()
         self.setCentralWidget(self.central)
         self.create()
 
     def panel(self):
-        widget = QtGui.QWidget()
+        widget = QtWidgets.QWidget()
         widget.setAttribute(QtCore.Qt.WA_OpaquePaintEvent, False)
         widget.setAutoFillBackground(True)
         widget.setContentsMargins(0, 0, 0, 0)
         return widget
 
     def create(self):
-        self.v_layout = QtGui.QGridLayout(self.central)
+        self.v_layout = QtWidgets.QGridLayout(self.central)
         self.v_layout.setContentsMargins(0, 0, 0, 0)
         self.v_layout.setSpacing(0)
 
@@ -467,42 +467,42 @@ class Frame(QtGui.QMainWindow):
         self.v_layout.addWidget(self.tab_panel, 0, 0)
         self.v_layout.setRowStretch(0, 0)
 
-        self.tab_layout = QtGui.QGridLayout(self.tab_panel)
+        self.tab_layout = QtWidgets.QGridLayout(self.tab_panel)
         self.tab_layout.setContentsMargins(0, 0, 0, 0)
         self.tabs = qtgui.Tabs()
         self.tab_layout.addWidget(self.tabs)
 
-        self.h_layout = QtGui.QGridLayout()
+        self.h_layout = QtWidgets.QGridLayout()
         self.h_layout.setContentsMargins(0, 0, 0, 0)
         self.h_layout.setSpacing(0)
         self.v_layout.addLayout(self.h_layout, 1, 0)
         self.v_layout.setRowStretch(1, 1)
 
         self.b_panel = self.panel()
-        self.bottom = QtGui.QBoxLayout(QtGui.QBoxLayout.BottomToTop, self.b_panel)
+        self.bottom = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.BottomToTop, self.b_panel)
         self.v_layout.addWidget(self.b_panel, 2, 0)
         self.v_layout.setRowStretch(2, 0)
 
         self.l_panel = self.panel()
-        self.left_top = QtGui.QStackedLayout(self.l_panel)
+        self.left_top = QtWidgets.QStackedLayout(self.l_panel)
         self.h_layout.addWidget(self.l_panel, 0, 0)
         self.h_layout.setColumnStretch(0, 0)
 
-        self.t_layout = QtGui.QBoxLayout(QtGui.QBoxLayout.TopToBottom)
+        self.t_layout = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.TopToBottom)
         self.h_layout.addLayout(self.t_layout, 0, 1)
         self.h_layout.setColumnStretch(1, 1)
 
         self.t_panel = self.panel()
         self.top = VLayout(self.t_panel)
-        self.top.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
+        self.top.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
         self.t_layout.addWidget(self.t_panel)
-        self.t_panel.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Maximum)
+        self.t_panel.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Maximum)
 
         self.canvas = Canvas(self, app = self.app)
         self.t_layout.addWidget(self.canvas)
 
         self.r_panel = self.panel()
-        self.right_top    = QtGui.QStackedLayout(self.r_panel)
+        self.right_top    = QtWidgets.QStackedLayout(self.r_panel)
         self.h_layout.addWidget(self.r_panel, 0, 2)
         self.h_layout.setColumnStretch(2, 0)
 
@@ -515,21 +515,21 @@ class Frame(QtGui.QMainWindow):
         if event.type() == QtCore.QEvent.WindowStateChange:
             if 'normal geometry' in self.windowState:
                 self.normalStateGeometry = self.storeGeometry()
-        QtGui.QMainWindow.changeEvent(self, event)
+        QtWidgets.QMainWindow.changeEvent(self, event)
 
     def resizeEvent(self, event):
         """QMainWindow method override that is called when
         the widget is resized."""
         if 'normal geometry' in self.windowState:
             self.normalStateGeometry = self.storeGeometry()
-        QtGui.QMainWindow.resizeEvent(self, event)
+        QtWidgets.QMainWindow.resizeEvent(self, event)
 
     def moveEvent(self, event):
         """QMainWindow method override that is called when
         the widget is moved."""
         if 'normal geometry' in self.windowState:
             self.normalStateGeometry = self.storeGeometry()
-        QtGui.QMainWindow.moveEvent(self, event)
+        QtWidgets.QMainWindow.moveEvent(self, event)
 
     def addPanels(self):
         left = TaskPanel()
@@ -559,7 +559,7 @@ class Frame(QtGui.QMainWindow):
         if widget is None:
             widget = self
         widget.updateGeometry()
-        for child in QtGui.QWidget.children(widget):
+        for child in QtWidgets.QWidget.children(widget):
             if child.isWidgetType():
                 self.refreshLayout(child)
 
@@ -590,7 +590,7 @@ class Frame(QtGui.QMainWindow):
 
     def getWindowState(self):
         """Return a set of window state strings that apply to the frame."""
-        return self._asWindowStateSet(QtGui.QMainWindow.windowState(self))
+        return self._asWindowStateSet(QtWidgets.QMainWindow.windowState(self))
 
     def setWindowState(self, state):
         """Set the window state according to a window state set
@@ -683,7 +683,7 @@ class AsyncEvent(QtCore.QEvent):
         self.args = args
         self.kwargs = kwargs
 
-class Application(QtGui.QApplication, events3d.EventHandler):
+class Application(QtWidgets.QApplication, events3d.EventHandler):
     def __init__(self):
         super(Application, self).__init__(sys.argv)
         self.mainwin = None
@@ -805,15 +805,15 @@ class Application(QtGui.QApplication, events3d.EventHandler):
         self._postAsync(AsyncEvent(func, args, kwargs))
 
 def getSaveFileName(directory, filter = "All files (*.*)"):
-    return str(QtGui.QFileDialog.getSaveFileName(
+    return str(QtWidgets.QFileDialog.getSaveFileName(
         G.app.mainwin, directory = directory, filter = filter))
 
 def getOpenFileName(directory, filter = "All files (*.*)"):
-    return str(QtGui.QFileDialog.getOpenFileName(
+    return str(QtWidgets.QFileDialog.getOpenFileName(
         G.app.mainwin, directory = directory, filter = filter))
 
 def getExistingDirectory(directory):
-    return str(QtGui.QFileDialog.getExistingDirectory(
+    return str(QtWidgets.QFileDialog.getExistingDirectory(
         G.app.mainwin, directory = directory))
 
 def setShortcut(modifier, key, action):
