@@ -67,9 +67,9 @@ If the following content is contained in a plain text file called \"tags.txt\"..
     c:\MakeHuman\objectlibrary\obj7.obj sheyenne indian aboriginal
     ...
 
-the following examples illustrate the use of the load search and save functions:
+    the following examples illustrate the use of the load search and save functions:
 
-::
+    ::
 
     r1 = loadRecord('tags.txt', 'c:\MakeHuman\objectlibrary\obj2.obj')
     // Sets r1 to be the list [\"c:\MakeHuman\objectlibrary\obj2.obj\",\"leg\",\"calf\",\"muscular\"]
@@ -185,9 +185,10 @@ def saveRecord(archivePath, recordToSave):
       
     recordToSave:     
       *string*.  The record to save.
-    """
 
-   import io
+      """
+
+import io
     time1 = time.time()
     recordID = recordToSave.split()[0]
     records = []
