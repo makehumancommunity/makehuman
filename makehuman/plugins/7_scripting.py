@@ -55,19 +55,28 @@ class ScriptingView(gui3d.TaskView):
         self.directory = os.getcwd()
         self.filename =  None
 
+        scriptingHome = mh.getPath('scripts')
+        if not os.path.exists(scriptingHome):
+            try:
+                os.mkdir(scriptingHome)
+            except OSError:
+                scriptingHome = mh.getPath()
+
         box = self.addLeftWidget(gui.GroupBox('Script'))
 
         self.scriptText = self.addTopWidget(gui.DocumentEdit())
-        self.scriptText.setText('');
+        self.scriptText.setText('')
 
         self.scriptText.setLineWrapMode(gui.DocumentEdit.NoWrap)
 
         self.loadButton = box.addWidget(gui.BrowseButton(mode='open'), 0, 0)
         self.loadButton.setLabel('Load ...')
-        self.loadButton.directory = mh.getPath()
+        self.loadButton.directory = scriptingHome
         self.saveButton = box.addWidget(gui.BrowseButton(mode='save'), 0, 1)
         self.saveButton.setLabel('Save ...')
-        self.saveButton.directory = mh.getPath()
+        self.saveButton.directory = scriptingHome
+
+
 
         @self.loadButton.mhEvent
         def onClicked(filename):
@@ -174,7 +183,7 @@ class ScriptingView(gui3d.TaskView):
                 text = "# incrementingFilename(<file name base>, [file extension], [pad length])\n"
                 text = text + "#\n"
                 text = text + "# This will return a file name containing a numerical component which increases by one for each call.\n"
-                text = text + "# The default file extension is \".png\". The default pad length is 4. For example, the following lines:\n";
+                text = text + "# The default file extension is \".png\". The default pad length is 4. For example, the following lines:\n"
                 text = text + "#\n"
                 text = text + "# print incrementingFilename(\"test\",\".target\",3) + \"\\n\"\n"
                 text = text + "# print incrementingFilename(\"test\",\".target\",3) + \"\\n\"\n"
@@ -350,7 +359,7 @@ class ScriptingView(gui3d.TaskView):
                 text = text + "#\n"
                 text = text + "# Sets the Y position of the model of the model in 3d space, where 0.0 is centered.\n"
                 text = text + "# Note that the depth of the scene is clipped, so if you move the model too far back\n"
-                text = text + "# it will disappear. You will most likely want to use zoom instead of Y position.\n\n";
+                text = text + "# it will disappear. You will most likely want to use zoom instead of Y position.\n\n"
                 text = text + "MHScript.setPositionY(2.0)\n\n"
                 self.scriptText.addText(text)
 
@@ -366,7 +375,7 @@ class ScriptingView(gui3d.TaskView):
                 text = text + "#\n"
                 text = text + "# Modifies Y position of the model of the model in 3d space.\n"
                 text = text + "# Note that the depth of the scene is clipped, so if you move the model too far back\n"
-                text = text + "# it will disappear. You will most likely want to use zoom instead of Y position.\n\n";
+                text = text + "# it will disappear. You will most likely want to use zoom instead of Y position.\n\n"
                 text = text + "MHScript.modifyPositionY(-0.1)\n\n"
                 self.scriptText.addText(text)
 
@@ -484,8 +493,8 @@ class ScriptingExecuteTab(gui3d.TaskView):
 
         @self.execButton.mhEvent
         def onClicked(event):
-            #width = G.windowWidth;
-            #height = G.windowHeight;
+            #width = G.windowWidth
+            #height = G.windowHeight
 
             global MHScript
             global scriptingView
@@ -504,8 +513,8 @@ class ScriptingExecuteTab(gui3d.TaskView):
 
         @self.getButton.mhEvent
         def onClicked(event):
-            width = G.windowWidth;
-            height = G.windowHeight;
+            width = G.windowWidth
+            height = G.windowHeight
             self.widthEdit.setText(str(width))
             self.heightEdit.setText(str(height))
 
@@ -538,11 +547,11 @@ class ScriptingExecuteTab(gui3d.TaskView):
             central = qmainwin.centralWidget() 
             cWidth = central.frameSize().width()
             cHeight = central.frameSize().height()
-            width = G.windowWidth;
-            height = G.windowHeight;
+            width = G.windowWidth
+            height = G.windowHeight
 
-            xdiff = desiredWidth - width;
-            ydiff = desiredHeight - height;
+            xdiff = desiredWidth - width
+            ydiff = desiredHeight - height
 
             cWidth = cWidth + xdiff
             cHeight = cHeight + ydiff
@@ -553,7 +562,7 @@ class ScriptingExecuteTab(gui3d.TaskView):
 class Scripting():
     def __init__(self):
         self.human = gui3d.app.selectedHuman
-        self.fileIncrement = 0;
+        self.fileIncrement = 0
         self.modelPath = mh.getPath('models')
         self.cam = G.app.modelCamera
         if(not os.path.exists(self.modelPath)):
@@ -583,20 +592,20 @@ class Scripting():
 
     def screenShot(self,fileName):
         log.message("SCRIPT: screenShot(" + fileName + ")")
-        width = G.windowWidth;
-        height = G.windowHeight;
-        width = width - 3;
-        height = height - 3;
+        width = G.windowWidth
+        height = G.windowHeight
+        width = width - 3
+        height = height - 3
         mh.grabScreen(1,1,width,height,fileName)
 
     def incrementingFilename(self,basename,suffix=".png",width=4):
-        fn = basename;
-        i = width - 1;
+        fn = basename
+        i = width - 1
         self.fileIncrement += 1
         while(i > 0):       
-            power = 10**i;
+            power = 10**i
             if(self.fileIncrement < power):
-                fn = fn + "0";
+                fn = fn + "0"
             i -= 1
         fn = fn + str(self.fileIncrement) + suffix
         return fn        
@@ -785,7 +794,7 @@ class Scripting():
     def printPositionInfo(self):
         log.message("SCRIPT: printPositionInfo()")
 
-        pos = self.human.getPosition();
+        pos = self.human.getPosition()
 
         print("posX:\t" + str(pos[0]))
         print("posY:\t" + str(pos[2]))
@@ -794,7 +803,7 @@ class Scripting():
     def printRotationInfo(self):
         log.message("SCRIPT: printRotationInfo()")
 
-        rot = self.human.getRotation();
+        rot = self.human.getRotation()
 
         print("rotX:\t" + str(rot[0]))
         print("rotY:\t" + str(rot[2]))
