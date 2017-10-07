@@ -135,6 +135,9 @@ class SaveTargetsTaskView(gui3d.TaskView):
         self.saveDiffAsButton.setFilter('MakeHuman Target ( *.target )')
         self.saveDiffBox.addWidget(self.saveDiffAsButton)
 
+        self.clearButton = gui.Button(label='Clear Cache')
+        self.saveDiffBox.addWidget((self.clearButton))
+
         infoBox = gui.GroupBox('Info')
         layout.addWidget(infoBox)
         infoText = gui.TextView(info_message)
@@ -231,6 +234,15 @@ class SaveTargetsTaskView(gui3d.TaskView):
                         self.saveDiffAsButton.path = path
                         G.app.statusPersist('Saving Target Directory: ' + self.dirName +
                                             '   Saving Diff Targets Directory: ' + self.diffDirName)
+
+        @self.clearButton.mhEvent
+        def onClicked(sevent):
+            for file in os.listdir(path=self.metaFilePath):
+                if file:
+                    try:
+                        os.remove(os.path.join(self.metaFilePath, file))
+                    except os.error as e:
+                        pass
 
     def quickSave(self):
         path = os.path.join(self.dirName, self.fileName)
