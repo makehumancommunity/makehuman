@@ -348,7 +348,7 @@ def _isQPixmap(img):
     loaded in the application.
     """
     import sys
-    if "PyQt4" in list(sys.modules.keys()) or "PySide" in list(sys.modules.keys()):
+    if "PyQt4" in list(sys.modules.keys()):
         import image_qt
         return isinstance(img, image_qt.QtGui.QPixmap)
     else:

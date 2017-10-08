@@ -41,10 +41,7 @@ import os
 import log
 from core import G
 
-if G.hasPySide:
-    from PySide import QtCore, QtGui, QtOpenGL
-else:
-    from PyQt5 import QtCore, QtGui, QtOpenGL, QtWidgets
+from PyQt5 import QtCore, QtGui, QtOpenGL, QtWidgets
 
 import glmodule as gl
 import events3d

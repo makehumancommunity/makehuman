@@ -41,10 +41,7 @@ import os
 import re
 from core import G
 
-if G.hasPySide:
-    from PySide import QtCore, QtGui, QtSvg
-else:
-    from PyQt5 import QtCore, QtGui, QtSvg, QtWidgets
+from PyQt5 import QtCore, QtGui, QtSvg, QtWidgets
 
 import events3d
 import language

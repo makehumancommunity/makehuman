@@ -188,7 +188,7 @@ def saveRecord(archivePath, recordToSave):
 
       """
 
-import io
+    import io
     time1 = time.time()
     recordID = recordToSave.split()[0]
     records = []
