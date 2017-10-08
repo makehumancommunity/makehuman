@@ -296,7 +296,7 @@ class NarrowLineEdit(QtWidgets.QLineEdit):
         h = max(fm.height(), 14) + 2 + textMargins.top() + textMargins.bottom() + topMargin + bottomMargin
         w = fm.width('0') * self.__cols + 4 + textMargins.left() + textMargins.right() + leftMargin + rightMargin
 
-        opt = QtGui.QStyleOptionFrameV2()
+        opt = QtWidgets.QStyleOptionFrame()
         self.initStyleOption(opt)
         return self.style().sizeFromContents(
             QtWidgets.QStyle.CT_LineEdit, opt,
@@ -691,8 +691,8 @@ class ListView(QtWidgets.QListWidget, Widget):
         super(ListView, self).__init__()
         Widget.__init__(self)
         self._vertical_scrolling = True
-        self.itemActivated[QListWidgetItem].connect(self._activate)
-        self.itemClicked[QListWidgetItem].connect(self._clicked)
+        self.itemActivated[QtWidgets.QListWidgetItem].connect(self._activate)
+        self.itemClicked[QtWidgets.QListWidgetItem].connect(self._clicked)
 
     def _activate(self, item):
         self.callEvent('onActivate', item)
@@ -1807,8 +1807,8 @@ class TreeView(QtWidgets.QTreeWidget, Widget):
     def __init__(self, parent = None):
         super(TreeView, self).__init__(parent)
         Widget.__init__(self)
-        self.itemActivated[QTreeWidgetItem, int].connect(self._activate)
-        self.itemExpanded[QTreeWidgetItem].connect(self._expand)
+        self.itemActivated[QtWidgets.QTreeWidgetItem, int].connect(self._activate)
+        self.itemExpanded[QtWidgets.QTreeWidgetItem].connect(self._expand)
         if TreeView._dirIcon is None:
             TreeView._dirIcon = self.style().standardIcon(QtWidgets.QStyle.SP_DirIcon)
         if TreeView._fileIcon is None:

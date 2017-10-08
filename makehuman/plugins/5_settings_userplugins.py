@@ -90,8 +90,8 @@ class UserPluginsTaskView(gui3d.TaskView):
         for i, plugin in enumerate(userPlugins):
             self.userPluginBox.addWidget(UserPluginCheckBox(plugin), row=i, alignment=gui.QtCore.Qt.AlignTop)
 
-        self.installWidget = gui.QtGui.QWidget()
-        installWidgetLayout = gui.QtGui.QVBoxLayout()
+        self.installWidget = gui.QtWidgets.QWidget()
+        installWidgetLayout = gui.QtWidgets.QVBoxLayout()
         self.installWidget.setLayout(installWidgetLayout)
         self.addLeftWidget(self.installWidget)
 
@@ -117,7 +117,7 @@ class UserPluginsTaskView(gui3d.TaskView):
         def onClicked(event):
             filename = None
             home = os.path.expanduser('~')
-            filename = getpath.pathToUnicode(gui.QtGui.QFileDialog.getOpenFileName(gui3d.app.mainwin, directory=home,
+            filename = getpath.pathToUnicode(gui.QtWidgets.QFileDialog.getOpenFileName(gui3d.app.mainwin, directory=home,
                                              filter='Zip files ( *.zip );; All files ( *.* )'))
             dest_path = getpath.getPath('plugins')
             if filename:
