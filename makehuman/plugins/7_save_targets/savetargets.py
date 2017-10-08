@@ -156,7 +156,7 @@ class SaveTargetsTaskView(gui3d.TaskView):
 
         @self.saveAsButton.mhEvent
         def onClicked(path):
-            if path:
+            if os.path.exists(path):
                 if not path.lower().endswith('.target'):
                     error_msg = 'Cannot save target to file: {0:s}\nExpected a path to a .target file'.format(path)
                     dialog = gui.Dialog()
@@ -216,7 +216,7 @@ class SaveTargetsTaskView(gui3d.TaskView):
                 dialog.prompt(title='Error', text=error_msg, button1Label='OK')
                 log.warning(error_msg)
             else:
-                if path:
+                if os.path.exists(path):
                     if not path.lower().endswith('.target'):
                         error_msg = 'Cannot save diff target to file: {0:s}\nExpected a path to a .target file'.format(path)
                         dialog = gui.Dialog()
