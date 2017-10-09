@@ -48,14 +48,15 @@ import io
 class Uniform(object):
     def __init__(self, pgm, index, name, pytype, dims):
         if type(name) is bytes:
-            name = name.decode('utf-8')
+            self.name = name.decode('utf-8')
+        else:
+            self.name = name
         self.index = index
-        self.name = name
         self.pytype = pytype
         self.dims = dims
         self.values = None
         self.pgm = pgm
-        self.location = glGetUniformLocation(self.pgm, self.name)
+        self.location = glGetUniformLocation(self.pgm, name)
 
     def __call__(self, index, values):
         raise NotImplementedError
