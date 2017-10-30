@@ -65,7 +65,6 @@ class ViewerTaskView(gui3d.TaskView):
             filename = mh.getSaveFileName(os.path.splitext(self.path)[0],
                                           'PNG Image (*.png);;JPEG Image (*.jpg);;Thumbnail (*.thumb);;All files (*.*)')
             if filename:
-                print('Debug  :', os.path.splitext(filename)[1].lower())
                 if os.path.splitext(filename)[1].lower() == '.thumb':
                     self.image.save(filename, iformat='PNG')
                 else:
