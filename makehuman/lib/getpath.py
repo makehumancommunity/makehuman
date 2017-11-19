@@ -38,6 +38,7 @@ Utility module for finding the user home path.
 
 import sys
 import os
+from xdg_parser import XDG_PATHS
 
 __home_path = None
 
@@ -134,7 +135,11 @@ def getPath(subPath = ""):
 
     # Unix/Linux
     else:
-        path = os.path.join(path, "makehuman")
+        doc_folder = XDG_PATHS.get('DOCUMENTS', '')
+        if os.path.isdir(doc_folder) and not os.environ.get("MH_HOME_LOCATION", None):
+            path = os.path.join(doc_folder, "makehuman")
+        else:
+            path = os.path.join(path, "makehuman")
 
     path = os.path.join(path, 'v1py3')
 
