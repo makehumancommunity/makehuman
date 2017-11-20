@@ -1921,7 +1921,7 @@ class BrowseButton(Button):
     def _clicked(self, state):
         self.callEvent('beforeBrowse', None)
 
-        path = self.getExistingPath(self.path)
+        path = self.getExistingPath(self.directory)
         if self.mode == 'save' and self.filename:
             # Don't discard filename when saving
             path = os.path.join(path, self.filename)
