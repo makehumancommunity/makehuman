@@ -150,6 +150,14 @@ class SaveTargetsTaskView(gui3d.TaskView):
 
         self.createShortCut()
 
+        @self.saveAsButton.mhEvent
+        def beforeBrowse(event):
+            self.saveAsButton.path = os.path.join(self.dirName, self.fileName)
+
+        @self.saveDiffAsButton.mhEvent
+        def beforeBrowse(event):
+            self.saveDiffAsButton.path = os.path.join(self.dirName, self.fileName)
+
         @self.saveButton.mhEvent
         def onClicked(event):
             self.quickSave()
@@ -210,13 +218,13 @@ class SaveTargetsTaskView(gui3d.TaskView):
 
         @self.saveDiffAsButton.mhEvent
         def onClicked(path):
-            if not os.path.isfile(self.metaFile):
-                error_msg = 'No Base Model defined.\nPress "Set Base"'
-                dialog = gui.Dialog()
-                dialog.prompt(title='Error', text=error_msg, button1Label='OK')
-                log.warning(error_msg)
-            else:
-                if os.path.exists(path):
+            if path:
+                if not os.path.isfile(self.metaFile):
+                    error_msg = 'No Base Model defined.\nPress "Set Base"'
+                    dialog = gui.Dialog()
+                    dialog.prompt(title='Error', text=error_msg, button1Label='OK')
+                    log.warning(error_msg)
+                else:
                     if not path.lower().endswith('.target'):
                         error_msg = 'Cannot save diff target to file: {0:s}\nExpected a path to a .target file'.format(path)
                         dialog = gui.Dialog()
