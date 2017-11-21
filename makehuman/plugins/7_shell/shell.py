@@ -10,7 +10,7 @@
 
 **Authors:**           Glynn Clements, Jonas Hauquier, Aranuvir
 
-**Copyright(c):**      MakeHuman Team 2001-2015
+**Copyright(c):**      MakeHuman Team 2001-2017
 
 **Licensing:**         AGPL3
 
