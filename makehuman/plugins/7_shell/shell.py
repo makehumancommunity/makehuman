@@ -46,6 +46,8 @@ import gui
 import gui3d
 from core import G
 import importlib.util
+import mh
+from language import language
 
 hasIpython = (importlib.util.find_spec('qtconsole') != None) and (importlib.util.find_spec('IPython') != None)
 if hasIpython:
@@ -60,6 +62,7 @@ class ShellTextEdit(gui.TextEdit):
         return True
 
 class ShellTaskView(gui3d.TaskView):
+
     def __init__(self, category):
         super(ShellTaskView, self).__init__(category, 'Shell')
         self.globals = {'G': G}
@@ -69,6 +72,11 @@ class ShellTaskView(gui3d.TaskView):
         if hasIpython:
             # Use the more advanced Ipython console
             self.console = self.addTopWidget(ipythonconsole.IPythonConsoleWidget())
+
+            action = gui.Action('ishell', language.getLanguageString('IPython shell'), self.gotoshell)
+            G.app.mainwin.addAction(action)
+            mh.setShortcut(mh.Modifiers.CTRL, mh.Keys.i, action)
+
             return
 
         # Fall back to old console
@@ -154,6 +162,9 @@ class ShellTaskView(gui3d.TaskView):
         @self.line.mhEvent
         def onDownArrow(_dummy):
             self.downArrow()
+
+    def gotoshell(self):
+        mh.changeTask('Utilities', 'Shell')
 
     def getSuggestions(self, line):
         from rlcompleter import Completer
