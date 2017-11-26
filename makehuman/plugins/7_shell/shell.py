@@ -45,7 +45,12 @@ from PyQt4 import QtCore, QtGui
 import gui
 import gui3d
 from core import G
-from . import ipythonconsole
+import importlib.util
+
+hasIpython = (importlib.util.find_spec('qtconsole') != None) and (importlib.util.find_spec('IPython') != None)
+if hasIpython:
+    from . import ipythonconsole
+
 
 MAX_COMPLETIONS = -1
 
@@ -61,7 +66,7 @@ class ShellTaskView(gui3d.TaskView):
         self.history = []
         self.histitem = None
 
-        if ipythonconsole:
+        if hasIpython:
             # Use the more advanced Ipython console
             self.console = self.addTopWidget(ipythonconsole.IPythonConsoleWidget())
             return
@@ -219,5 +224,3 @@ class ShellTaskView(gui3d.TaskView):
         if self.console is None:
             return
         self.console.set_theme(G.app.theme)
-
-

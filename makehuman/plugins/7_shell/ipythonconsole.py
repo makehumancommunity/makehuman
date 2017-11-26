@@ -39,7 +39,7 @@ Abstract
 Ipython qtconsole for embedding in MakeHuman
 """
 
-import os
+
 import imp
 from pygments.formatters import HtmlFormatter
 from pygments.style import StyleMeta
