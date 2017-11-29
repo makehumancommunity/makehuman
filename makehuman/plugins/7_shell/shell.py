@@ -73,7 +73,10 @@ class ShellTaskView(gui3d.TaskView):
             # Use the more advanced Ipython console
             self.console = self.addTopWidget(ipythonconsole.IPythonConsoleWidget())
 
-            action = gui.Action('ishell', language.getLanguageString('IPython shell'), self.gotoshell)
+            def gotoshell():
+                mh.changeTask('Utilities', 'Shell')
+
+            action = gui.Action('ishell', language.getLanguageString('IPython shell'), gotoshell)
             G.app.mainwin.addAction(action)
             mh.setShortcut(mh.Modifiers.CTRL, mh.Keys.i, action)
 
@@ -162,9 +165,6 @@ class ShellTaskView(gui3d.TaskView):
         @self.line.mhEvent
         def onDownArrow(_dummy):
             self.downArrow()
-
-    def gotoshell(self):
-        mh.changeTask('Utilities', 'Shell')
 
     def getSuggestions(self, line):
         from rlcompleter import Completer
