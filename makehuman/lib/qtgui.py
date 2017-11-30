@@ -1921,26 +1921,24 @@ class BrowseButton(Button):
     def _clicked(self, state):
         self.callEvent('beforeBrowse', None)
 
-        path = self.getExistingPath(self.directory)
+        path = self.getExistingPath(self.path)
         if self.mode == 'save' and self.filename:
             # Don't discard filename when saving
             path = os.path.join(path, self.filename)
 
         if self.mode == 'open':
-            path = QtWidgets.QFileDialog.getOpenFileName(G.app.mainwin, directory=self.directory, filter=self.filter)
+            path = QtGui.QFileDialog.getOpenFileName(G.app.mainwin, directory=self.directory, filter=self.filter)
         elif self.mode == 'save':
-            path = QtWidgets.QFileDialog.getSaveFileName(G.app.mainwin, directory=self.directory, filter=self.filter)
+            path = QtGui.QFileDialog.getSaveFileName(G.app.mainwin, directory=self.directory, filter=self.filter)
         elif self.mode == 'dir':
-            path = QtWidgets.QFileDialog.getExistingDirectory(G.app.mainwin, directory=self.directory)
+            path = QtGui.QFileDialog.getExistingDirectory(G.app.mainwin, directory=self.directory)
 
         if path:
             if isinstance(path, tuple):
                 path = path[0]
-            path = pathToUnicode(path)
             if self.mode == 'dir': self.directory = path
-            else: self.path = path
+            else: self.path = pathToUnicode(path)
         self.callEvent('onClicked', path)
-
 
 class ColorPickButton(Button):
     """
