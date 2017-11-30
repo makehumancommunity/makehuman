@@ -69,7 +69,7 @@ class ShellTaskView(gui3d.TaskView):
         self.history = []
         self.histitem = None
 
-        if hasIpython:
+        if False:
             # Use the more advanced Ipython console
             self.console = self.addTopWidget(ipythonconsole.IPythonConsoleWidget())
 
@@ -104,6 +104,10 @@ class ShellTaskView(gui3d.TaskView):
 
         self.clear = gui.Button("Clear")
         self.layout.addWidget(self.clear, 1, 1, 1, 1)
+
+        action = gui.Action('shell', language.getLanguageString('Default shell'), self.gotodefaultshel)
+        G.app.mainwin.addAction(action)
+        mh.setShortcut(mh.Modifiers.SHIFT, mh.Keys.s, action)
 
         @self.line.mhEvent
         def onActivate(text):
@@ -165,6 +169,10 @@ class ShellTaskView(gui3d.TaskView):
         @self.line.mhEvent
         def onDownArrow(_dummy):
             self.downArrow()
+
+    def gotodefaultshel(self):
+        mh.changeTask('Utilities', 'Shell')
+
 
     def getSuggestions(self, line):
         from rlcompleter import Completer
