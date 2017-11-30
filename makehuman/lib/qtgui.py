@@ -1927,13 +1927,16 @@ class BrowseButton(Button):
             path = os.path.join(path, self.filename)
 
         if self.mode == 'open':
-            path = pathToUnicode(str(QtWidgets.QFileDialog.getOpenFileName(G.app.mainwin, directory=self.directory, filter=self.filter)))[0]
+            path = QtWidgets.QFileDialog.getOpenFileName(G.app.mainwin, directory=self.directory, filter=self.filter)
         elif self.mode == 'save':
-            path = pathToUnicode(str(QtWidgets.QFileDialog.getSaveFileName(G.app.mainwin, directory=self.directory, filter=self.filter)))[0]
+            path = QtWidgets.QFileDialog.getSaveFileName(G.app.mainwin, directory=self.directory, filter=self.filter)
         elif self.mode == 'dir':
-            path = pathToUnicode(str(QtWidgets.QFileDialog.getExistingDirectory(G.app.mainwin, directory=self.directory)))
+            path = QtWidgets.QFileDialog.getExistingDirectory(G.app.mainwin, directory=self.directory)
 
         if path:
+            if isinstance(path, tuple):
+                path = path[0]
+            path = pathToUnicode(path)
             if self.mode == 'dir': self.directory = path
             else: self.path = path
         self.callEvent('onClicked', path)
