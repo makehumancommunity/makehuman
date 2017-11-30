@@ -121,47 +121,6 @@ def getBasemeshVersion():
     """
     return meshVersion
 
-######################## To be deleted ##########################################################################
-#def str(msg, *args, **kwargs):
-#    """
-#    Override default unicode constructor to try and resolve some issues with
-#    mismatched string codecs.
-#    Perhaps this is overkill, but better safe than sorry.
-#    """
-#    try:
-#        # First attempt the builtin unicode() function without interference
-#        return __builtins__.str(msg, *args, **kwargs)
-#    except:
-#        pass
-#    try:
-#        # In case msg is an exception, attempt to decode its message
-#        return str(msg.message)
-#    except:
-#        pass
-#    try:
-#        # Try decoding as utf-8 bytestring
-#        return __builtins__.str(msg, encoding="utf-8")
-#    except:
-#        pass
-#    try:
-#        # Try guessing system default encoding and decode as such
-#        import locale
-#        return __builtins__.str(msg, encoding=locale.getpreferredencoding())
-#    except:
-#        pass
-#    try:
-#        # Attempt using filesystem encoding
-#        import sys
-#        return __builtins__.str(msg, encoding=sys.getfilesystemencoding())
-#    except:
-#        pass
-#    try:
-#        # Attempt to decode object's __str__ into unicode
-#        return str(msg).decode("utf-8", errors="replace")
-#    except:
-#        pass
-#    return "unable to encode message"
-##################################################################################################################
 
 def getCwd():
     """

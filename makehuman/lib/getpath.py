@@ -42,20 +42,6 @@ from core import G
 
 __home_path = None
 
-########### To be deleted ##############################################################################################
-#def _unique_list(l):
-#    """
-#    Create a list that maintains order of original list, but with duplicates
-#    removed. First occurrence of each duplicate is used as its position.
-#    """
-#    seen = set()
-#    return [x for x in l if not (x in seen or seen.add(x))]
-#
-#PATH_ENCODINGS = _unique_list([s.lower() for s in [sys.getfilesystemencoding(), sys.getdefaultencoding(), 'utf-8']])
-#
-#if sys.stdout.encoding is not None and sys.stdout.encoding.lower() not in PATH_ENCODINGS:
-#    PATH_ENCODINGS.append(sys.stdout.encoding)
-########################################################################################################################
 
 def pathToUnicode(path):
     """
@@ -73,48 +59,6 @@ def pathToUnicode(path):
     else:
         return path
 
-############## To be deleted  ##########################################################################################
-#def stringToUnicode(string_, encodings):
-#    """
-#    Decode a string to a unicode representation. Attempts to use the encodings
-#    in the order in which they are specified. Implements fallback when no
-#    encoding is valid.
-#    """
-#    if isinstance(string_, str):
-#        # Is already unicode
-#        return string_
-#
-#    for encoding in encodings:
-#        try:
-#            result = str(string_, encoding, 'strict')
-#        except UnicodeDecodeError:
-#            pass
-#        except TypeError:
-#            # "decoding Unicode is not supported"
-#            break
-#
-#    try:
-#        str_ = str(string_, 'utf-8', 'strict')
-#        for encoding in encodings:
-#            try:
-#                return str_.decode(encoding, 'strict')
-#            except UnicodeDecodeError:
-#                pass
-#    except UnicodeDecodeError:
-#        pass
-#    except TypeError:
-#        # "decoding Unicode is not supported"
-#        pass
-#
-#    # Last-resort fallback
-#    fallback = str(string_, 'ascii', 'replace')
-#    import log
-#    try:
-#        log.warning('Failed to decode string "%s" to unicode (encodings tried: %s). Using fallback value: %s', string_, ', '.join(encodings), fallback)
-#    except:
-#        log.warning("Failed to decode string to unicode (encodings tried: %s). Using fallback value: %s", ', '.join(encodings), fallback)
-#    return fallback
-########################################################################################################################
 
 def formatPath(path):
     if path is None:

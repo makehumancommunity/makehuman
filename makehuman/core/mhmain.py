@@ -1475,19 +1475,6 @@ class MHApplication(gui3d.Application, mh.Application):
         human = self.selectedHuman
         human.symmetryModeEnabled = self.actions.symmetry.isChecked()
 
-    #def saveTarget(self, path=None):
-    #    """
-    #    Export the current modifications to the human as one single target,
-    #    relative to the basemesh.
-    #    """
-    #    if path is None:
-    #        path = mh.getPath("full_target.target")
-    #    if os.path.splitext(path)[1] != '.target':
-    #        raise RuntimeError("Cannot save target to file %s, expected a path to a .target file." % path)
-    #    human = self.selectedHuman
-    #    algos3d.saveTranslationTarget(human.meshData, path)
-    #    log.message("Full target exported to %s", path)
-
     def grabScreen(self):
         import datetime
         grabPath = mh.getPath('grab')
