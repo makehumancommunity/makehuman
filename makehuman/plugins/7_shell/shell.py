@@ -69,7 +69,7 @@ class ShellTaskView(gui3d.TaskView):
         self.history = []
         self.histitem = None
 
-        if False:
+        if hasIpython:
             # Use the more advanced Ipython console
             self.console = self.addTopWidget(ipythonconsole.IPythonConsoleWidget())
 
