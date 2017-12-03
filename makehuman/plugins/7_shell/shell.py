@@ -105,7 +105,7 @@ class ShellTaskView(gui3d.TaskView):
         self.clear = gui.Button("Clear")
         self.layout.addWidget(self.clear, 1, 1, 1, 1)
 
-        action = gui.Action('shell', language.getLanguageString('Default shell'), self.gotodefaultshel)
+        action = gui.Action('shell', language.getLanguageString('Default shell'), self.gotodefaultshell)
         G.app.mainwin.addAction(action)
         mh.setShortcut(mh.Modifiers.SHIFT, mh.Keys.s, action)
 
@@ -170,7 +170,7 @@ class ShellTaskView(gui3d.TaskView):
         def onDownArrow(_dummy):
             self.downArrow()
 
-    def gotodefaultshel(self):
+    def gotodefaultshell(self):
         mh.changeTask('Utilities', 'Shell')
 
 
