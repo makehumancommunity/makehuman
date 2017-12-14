@@ -120,9 +120,7 @@ class FBXElem:
 
     def add_string(self, data):
         if isinstance(data, str):
-            data = data.encode('ascii')
-        if isinstance(data, str):
-            data = bytes(data)
+            data = bytes(data, encoding='utf-8')
         assert(isinstance(data, bytes))
         data = pack('<I', len(data)) + data
 

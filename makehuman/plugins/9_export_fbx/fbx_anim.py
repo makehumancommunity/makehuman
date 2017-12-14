@@ -51,11 +51,11 @@ TimeStep = 1528921092
 # TODO write an AnimationLayer for each animation!
 
 def countObjects(action):
-    return 2 + 3*len(list(action.keys()))
+    return 2 + 3*len(action.keys())
 
 
 def writeObjectDefs(fp, action, config):
-    ncurves = len(list(action.keys()))
+    ncurves = len(action.keys())
 
     properties_stack = [
         ("Description", "p_string", ""),
@@ -143,7 +143,7 @@ def writeObjectProps(fp, action, skel, config):
         '    AnimationLayer: %d, "%s", "" {\n' % (lid, lkey) +
         '    }\n')
 
-    for bname in list(action.keys()):
+    for bname in action.keys():
         bone = skel.getBone(bname)
         writeAnimation(fp, bone, action, config)
 
@@ -229,7 +229,7 @@ def writeAnimationCurve(fp, idx, coord, bone, channel, data):
 def writeLinks(fp, action, config):
     ooLink(fp, 'AnimLayer::Layer0', 'AnimStack::Take_001', config)
 
-    for bname in list(action.keys()):
+    for bname in action.keys():
         for channel,type in [
                 ("T","Lcl Translation"),
                 ("R","Lcl Rotation"),

@@ -219,7 +219,7 @@ def fbx_data_element_custom_properties(props, bid):
     """
     Store custom properties of blender ID bid (any mapping-like object, in fact) into FBX properties props.
     """
-    for k, v in list(bid.items()):
+    for k, v in bid.items():
         list_val = getattr(v, "to_list", lambda: None)()
 
         if isinstance(v, str):
@@ -380,7 +380,7 @@ def fbx_data_mesh_element(objectsParent, key, id, properties, coord, fvert, vnor
     uvindex = 0
     lay_uv = elem_data_single_int32(geom, b"LayerElementUV", uvindex)
     elem_data_single_int32(lay_uv, b"Version", FBX_GEOMETRY_UV_VERSION)
-    elem_data_single_string_unicode(lay_uv, b"Name", (name+"_UV").encode())
+    elem_data_single_string_unicode(lay_uv, b"Name", name+"_UV")
     elem_data_single_string(lay_uv, b"MappingInformationType", b"ByPolygonVertex")
     elem_data_single_string(lay_uv, b"ReferenceInformationType", b"IndexToDirect")
 
@@ -468,7 +468,7 @@ def fbx_data_model_element(objectsParent, key, id, properties):
 
 def fbx_data_material(objectsParent, key, id, properties):
     fbx_mat = elem_data_single_int64(objectsParent, b"Material", id)
-    fbx_mat.add_string(fbx_name_class(key))
+    fbx_mat.add_string(fbx_name_class(key.encode()))
     fbx_mat.add_string(b"")
 
     elem_data_single_int32(fbx_mat, b"Version", 102)
@@ -577,7 +577,7 @@ def fbx_data_skeleton_model(objectsParent, key, id, properties):
 
 def fbx_data_deformer(objectsParent, key, id, properties):
     fbx_skin = elem_data_single_int64(objectsParent, b"Deformer", id)
-    fbx_skin.add_string(fbx_name_class(key))
+    fbx_skin.add_string(fbx_name_class(key.encode()))
     fbx_skin.add_string(b"Skin")
 
     props = elem_properties(fbx_skin)
@@ -591,7 +591,7 @@ def fbx_data_deformer(objectsParent, key, id, properties):
 def fbx_data_subdeformer(objectsParent, key, id, indices, weights, bindmat, bindinv):
     # Create the cluster.
     fbx_clstr = elem_data_single_int64(objectsParent, b"Deformer", id)
-    fbx_clstr.add_string(fbx_name_class(key))
+    fbx_clstr.add_string(fbx_name_class(key.encode()))
     fbx_clstr.add_string(b"Cluster")
 
     elem_data_single_int32(fbx_clstr, b"Version", FBX_DEFORMER_CLUSTER_VERSION)

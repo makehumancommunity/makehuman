@@ -496,7 +496,7 @@ def elem_props_template_init(templates, template_type):
     if tmpl is not None:
         written = tmpl.written[0]
         props = tmpl.properties
-        ret = OrderedDict((name, [val, ptype, anim, written]) for name, (val, ptype, anim) in list(props.items()))
+        ret = OrderedDict((name, [val, ptype, anim, written]) for name, (val, ptype, anim) in props.items())
     return ret
 
 
@@ -529,7 +529,7 @@ def elem_props_template_finalize(template, elem):
     subtypes in each and every elements, if they are not overriden by that element.
     Yes, hairy, FBX that is to say. When they could easily support several subtypes per template... :(
     """
-    for name, (value, ptype_name, animatable, written) in list(template.items()):
+    for name, (value, ptype_name, animatable, written) in template.items():
         if written:
             continue
         ptype = FBX_PROPERTIES_DEFINITIONS[ptype_name]
@@ -575,6 +575,6 @@ def fbx_template_generate(definitionsNode, objectType_name, users_count, propert
 
 def fbx_name_class(name, cls=None):
     if cls is None:
-        cls,name = name.split('::')
+        cls,name = name.split(b'::')
     return FBX_NAME_CLASS_SEP.join((name, cls))
 
