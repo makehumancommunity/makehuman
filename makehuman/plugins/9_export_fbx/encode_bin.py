@@ -128,8 +128,9 @@ class FBXElem:
         self.props.append(data)
 
     def add_string_unicode(self, data):
-        assert(isinstance(data, str))
-        data = data.encode('utf8')
+        if isinstance(data, str):
+            data = data.encode('utf8')
+        assert(isinstance(data, bytes))
         data = pack('<I', len(data)) + data
 
         self.props_type.append(data_types.STRING)
@@ -317,7 +318,7 @@ def write(fn, elem_root, version=None):
         from . import fbx_utils
         version = fbx_utils.FBX_VERSION
 
-    with io.open(fn, 'wb') as f:
+    with open(fn, 'wb') as f:
         write = f.write
         tell = f.tell
 

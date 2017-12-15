@@ -62,9 +62,19 @@ def writeObjectDefs(fp, meshes, nShapes, config):
     ]
 
     if config.binary:
+
+        properties = [
+            (b"Color", b"p_color_rgb", [0.8, 0.8, 0.8]),
+            (b"BBoxMin", b"p_vector_3d", [0, 0, 0]),
+            (b"BBoxMax", b"p_vector_3d", [0, 0, 0]),
+            (b"Primary Visibility", b"p_bool", True),
+            (b"Casts Shadows", b"p_bool", True),
+            (b"Receive Shadows", b"p_bool", True)
+        ]
+
         from . import fbx_binary
-        elem = fbx_binary.get_child_element(fp, 'Definitions')
-        fbx_binary.fbx_template_generate(elem, "Geometry", (nMeshes + nShapes), "FbxMesh", properties)
+        elem = fbx_binary.get_child_element(fp, b'Definitions')
+        fbx_binary.fbx_template_generate(elem, b"Geometry", (nMeshes + nShapes), b"FbxMesh", properties)
         return
 
     from . import fbx_utils
@@ -102,8 +112,12 @@ def writeGeometryProp(fp, mesh, config):
     ]
 
     if config.binary:
+        key = key.encode('utf-8')
+        properties = [
+            (b"MHName", b"p_string", b"%sMesh" % bytes(mesh.name,encoding='utf-8'), False, True)
+        ]
         from . import fbx_binary
-        elem = fbx_binary.get_child_element(fp, 'Objects')
+        elem = fbx_binary.get_child_element(fp, b'Objects')
         fbx_binary.fbx_data_mesh_element(elem, key, id, properties, coord, mesh.fvert, mesh.vnorm, mesh.texco, mesh.fuvs)
         return
 
@@ -268,8 +282,16 @@ def writeMeshProp(fp, mesh, config):
     ]
 
     if config.binary:
+        properties = [
+            (b"RotationActive", b"p_bool", 1),
+            (b"InheritType", b"p_enum", 1),
+            (b"ScalingMax", b"p_vector_3d", [0, 0, 0]),
+            (b"DefaultAttributeIndex", b"p_integer", 0),
+            (b"MHName", b"p_string", mesh.name, False, True)
+        ]
+        key = key.encode()
         from . import fbx_binary
-        elem = fbx_binary.get_child_element(fp, 'Objects')
+        elem = fbx_binary.get_child_element(fp, b'Objects')
         fbx_binary.fbx_data_model_element(elem, key, id, properties)
         return
 

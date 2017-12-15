@@ -141,12 +141,93 @@ def writeObjectDefs(fp, meshes, skel, config):
     ]
 
     if config.binary:
+
+        properties = [
+            (b"QuaternionInterpolate", b"p_enum", 0),
+            (b"RotationOffset", b"p_vector_3d", [0, 0, 0]),
+            (b"RotationPivot", b"p_vector_3d", [0, 0, 0]),
+            (b"ScalingOffset", b"p_vector_3d", [0, 0, 0]),
+            (b"ScalingPivot", b"p_vector_3d", [0, 0, 0]),
+            (b"TranslationActive", b"p_bool", 0),
+            (b"TranslationMin", b"p_vector_3d", [0, 0, 0]),
+            (b"TranslationMax", b"p_vector_3d", [0, 0, 0]),
+            (b"TranslationMinX", b"p_bool", 0),
+            (b"TranslationMinY", b"p_bool", 0),
+            (b"TranslationMinZ", b"p_bool", 0),
+            (b"TranslationMaxX", b"p_bool", 0),
+            (b"TranslationMaxY", b"p_bool", 0),
+            (b"TranslationMaxZ", b"p_bool", 0),
+            (b"RotationOrder", b"p_enum", 0),
+            (b"RotationSpaceForLimitOnly", b"p_bool", 0),
+            (b"RotationStiffnessX", b"p_double", 0),
+            (b"RotationStiffnessY", b"p_double", 0),
+            (b"RotationStiffnessZ", b"p_double", 0),
+            (b"AxisLen", b"p_double", 10),
+            (b"PreRotation", b"p_vector_3d", [0, 0, 0]),
+            (b"PostRotation", b"p_vector_3d", [0, 0, 0]),
+            (b"RotationActive", b"p_bool", 0),
+            (b"RotationMin", b"p_vector_3d", [0, 0, 0]),
+            (b"RotationMax", b"p_vector_3d", [0, 0, 0]),
+            (b"RotationMinX", b"p_bool", 0),
+            (b"RotationMinY", b"p_bool", 0),
+            (b"RotationMinZ", b"p_bool", 0),
+            (b"RotationMaxX", b"p_bool", 0),
+            (b"RotationMaxY", b"p_bool", 0),
+            (b"RotationMaxZ", b"p_bool", 0),
+            (b"InheritType", b"p_enum", 0),
+            (b"ScalingActive", b"p_bool", 0),
+            (b"ScalingMin", b"p_vector_3d", [0, 0, 0]),
+            (b"ScalingMax", b"p_vector_3d", [1, 1, 1]),
+            (b"ScalingMinX", b"p_bool", 0),
+            (b"ScalingMinY", b"p_bool", 0),
+            (b"ScalingMinZ", b"p_bool", 0),
+            (b"ScalingMaxX", b"p_bool", 0),
+            (b"ScalingMaxY", b"p_bool", 0),
+            (b"ScalingMaxZ", b"p_bool", 0),
+            (b"GeometricTranslation", b"p_vector_3d", [0, 0, 0]),
+            (b"GeometricRotation", b"p_vector_3d", [0, 0, 0]),
+            (b"GeometricScaling", b"p_vector_3d", [1, 1, 1]),
+            (b"MinDampRangeX", b"p_double", 0),
+            (b"MinDampRangeY", b"p_double", 0),
+            (b"MinDampRangeZ", b"p_double", 0),
+            (b"MaxDampRangeX", b"p_double", 0),
+            (b"MaxDampRangeY", b"p_double", 0),
+            (b"MaxDampRangeZ", b"p_double", 0),
+            (b"MinDampStrengthX", b"p_double", 0),
+            (b"MinDampStrengthY", b"p_double", 0),
+            (b"MinDampStrengthZ", b"p_double", 0),
+            (b"MaxDampStrengthX", b"p_double", 0),
+            (b"MaxDampStrengthY", b"p_double", 0),
+            (b"MaxDampStrengthZ", b"p_double", 0),
+            (b"PreferedAngleX", b"p_double", 0),
+            (b"PreferedAngleY", b"p_double", 0),
+            (b"PreferedAngleZ", b"p_double", 0),
+            (b"LookAtProperty", b"p_object", None),
+            (b"UpVectorProperty", b"p_object", None),
+            (b"Show", b"p_bool", 1),
+            (b"NegativePercentShapeSupport", b"p_bool", 1),
+            (b"DefaultAttributeIndex", b"p_integer", -1),
+            (b"Freeze", b"p_bool", 0),
+            (b"LODBox", b"p_bool", 0),
+            (b"Lcl Translation", b"p_lcl_translation", [0, 0, 0], True),
+            (b"Lcl Rotation", b"p_lcl_rotation", [0, 0, 0], True),
+            (b"Lcl Scaling", b"p_lcl_scaling", [1, 1, 1], True),
+            (b"Visibility", b"p_visibility", 1, True),
+            (b"Visibility Inheritance", b"p_visibility_inheritance", 1)
+        ]
+
+        skel_properties = [
+            (b"Color", b"p_color_rgb", [0.8, 0.8, 0.8]),
+            (b"Size", b"p_double", 100),
+            (b"LimbLength", b"p_double", 1)  # TODO this property had special "H" flag, is this required?
+        ]
+
         from . import fbx_binary
-        elem = fbx_binary.get_child_element(fp, 'Definitions')
-        fbx_binary.fbx_template_generate(elem, "Model", nModels, "FbxNode", properties)
+        elem = fbx_binary.get_child_element(fp, b'Definitions')
+        fbx_binary.fbx_template_generate(elem, b"Model", nModels, b"FbxNode", properties)
 
         if skel:
-            fbx_binary.fbx_template_generate(elem, "NodeAttribute", nBones, "FbxSkeleton", skel_properties)
+            fbx_binary.fbx_template_generate(elem, b"NodeAttribute", nBones, b"FbxSkeleton", skel_properties)
         return
 
     from . import fbx_utils
@@ -201,8 +282,12 @@ def writeNodeAttributeProp(fp, bone, config):
     ]
 
     if config.binary:
+        properties = [
+            (b"Size", b"p_double", 1),
+            (b"LimbLength", b"p_double", bone.length)  # TODO what to do with "H" flag?
+        ]
         from . import fbx_binary
-        elem = fbx_binary.get_child_element(fp, 'Objects')
+        elem = fbx_binary.get_child_element(fp, b'Objects')
         fbx_binary.fbx_data_skeleton_bone_node(elem, key, id, properties)
         return
 
@@ -228,8 +313,16 @@ def writeNodeProp(fp, skel, config):
     ]
 
     if config.binary:
+
+        properties = [
+            (b"RotationActive", b"p_bool", 1),
+            (b"InheritType", b"p_enum", 1),
+            (b"ScalingMax", b"p_vector_3d", [0, 0, 0]),
+            (b"MHName", b"p_string", skel.name, False, True)
+        ]
+
         from . import fbx_binary
-        elem = fbx_binary.get_child_element(fp, 'Objects')
+        elem = fbx_binary.get_child_element(fp, b'Objects')
         fbx_binary.fbx_data_skeleton_model(elem, key, id, properties)
         return
 
@@ -267,8 +360,20 @@ def writeBoneProp(fp, bone, config):
     ]
 
     if config.binary:
+
+        properties = [
+            (b"RotationActive", b"p_bool", 1),
+            (b"InheritType", b"p_enum", 1),
+            (b"ScalingMax", b"p_vector_3d", [0, 0, 0]),
+            (b"DefaultAttributeIndex", b"p_integer", 0),
+            (b"Lcl Translation", b"p_lcl_translation", list(trans), True),
+            (b"Lcl Rotation", b"p_lcl_rotation", [e[0] * R, e[1] * R, e[2] * R], True),
+            (b"Lcl Scaling", b"p_lcl_scaling", [1, 1, 1], True),
+            (b"MHName", b"p_string", bone.name, False, True),
+        ]
+
         from . import fbx_binary
-        elem = fbx_binary.get_child_element(fp, 'Objects')
+        elem = fbx_binary.get_child_element(fp, b'Objects')
         fbx_binary.fbx_data_skeleton_bone_model(elem, key, id, properties)
         return
 
