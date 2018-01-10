@@ -1264,8 +1264,8 @@ class AboutBoxScrollbars(QtGui.QDialog):
         if sys.platform == 'darwin':
             grid.addWidget(versionLabel, 0, 1, 1, 1, QtCore.Qt.AlignTop)
             grid.addWidget(iconLabel, 0, 0, 2, 1, QtCore.Qt.AlignTop)
-        else:
-            grid.setMargin(0)
+        else:        
+            #grid.setMargin(0)  <-- PySide doesn't support this
             grid.setVerticalSpacing(8)
             grid.setHorizontalSpacing(0)
             self.setContentsMargins(0, 15, 0, 20)
