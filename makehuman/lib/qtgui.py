@@ -647,7 +647,9 @@ class ListItem(QtGui.QListWidgetItem):
         self.setData(QtCore.Qt.UserRole, data)
 
     def getUserData(self):
-        return self.data(QtCore.Qt.UserRole).toPyObject()
+        #This seems PyQT-specific and does not work with pyside
+        #return self.data(QtCore.Qt.UserRole).toPyObject()
+        return self.data(QtCore.Qt.UserRole)
 
     def setText(self, text):
         super(ListItem, self).setText(text)
