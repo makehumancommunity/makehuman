@@ -56,7 +56,7 @@ import getpath
 
 class DownloadAssetsGit:
 
-    _git_official_assets_repo = "https://github.com/makehumancommunity/official_assets_11x.git"
+    _git_official_assets_repo = "https://github.com/makehumancommunity/makehuman-assets.git"
     _git_official_assets_branch = "master"
 
     _git_community_assets_repo = "https://github.com/makehumancommunity/communityassets.git"
