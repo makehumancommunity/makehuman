@@ -716,6 +716,8 @@ class Application(QtGui.QApplication, events3d.EventHandler):
         gl.OnExit()
 
     def stop(self):
+        print("ABOUT TO STOP APPLICATION")
+        self.messages.stop()
         self.callEvent('onStop', None)
         sys.exit()
         
