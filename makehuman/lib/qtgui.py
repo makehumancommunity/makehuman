@@ -40,11 +40,7 @@ import sys
 import os
 import re
 from core import G
-
-if G.hasPySide:
-    from PySide import QtCore, QtGui, QtSvg
-else:
-    from PyQt4 import QtCore, QtGui, QtSvg
+from PySide import QtCore, QtGui, QtSvg
 
 import events3d
 import language

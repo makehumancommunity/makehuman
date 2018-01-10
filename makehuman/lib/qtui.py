@@ -39,11 +39,7 @@ import sys
 import os
 import log
 from core import G
-
-if G.hasPySide:
-    from PySide import QtCore, QtGui, QtOpenGL
-else:
-    from PyQt4 import QtCore, QtGui, QtOpenGL
+from PySide import QtCore, QtGui, QtOpenGL
 
 import glmodule as gl
 import events3d

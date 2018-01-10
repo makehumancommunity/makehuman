@@ -64,6 +64,9 @@ def logLevelToStr(levelCode):
     if levelCode in LEVEL_TO_STR:
         return LEVEL_TO_STR[levelCode]
     else:
+        print("UNKNOWN LEVEL CODE:")
+        print(levelCode)
+        print(type(levelCode))
         levels = sorted(LEVEL_TO_STR.keys())
         i = 0
         while i < len(levels) and levelCode < levels[i]:

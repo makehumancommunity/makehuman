@@ -152,7 +152,6 @@ class DebugDump(object):
     def appendQt(self):
         import qtui
         self.open()
-        self.write("USE PYSIDE INSTEAD OF PYQT: %s", str(G.hasPySide))
         self.write("QT.VERSION: %s", qtui.getQtVersionString())
         self.write("QT.JPG_SUPPORT: %s", "supported" if qtui.supportsJPG() else "not supported")
         self.write("QT.SVG_SUPPORT: %s", "supported" if qtui.supportsSVG() else "not supported")
