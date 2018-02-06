@@ -39,10 +39,7 @@ TODO
 from core import G
 from threading import Lock, Condition
 
-if G.hasPySide:
-    from PySide import QtCore
-else:
-    from PyQt4 import QtCore
+from PyQt5 import QtCore
 
 class Queue(object):
     def __init__(self):

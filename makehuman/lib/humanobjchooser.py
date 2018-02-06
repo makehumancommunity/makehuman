@@ -38,12 +38,8 @@ Abstract
 A widget for selecting the human object or any of the proxies attached to it.
 """
 
-from core import G
 
-if G.hasPySide:    
-    from PySide import QtCore, QtGui
-else:
-    from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 import qtgui as gui
 import log
@@ -51,7 +47,7 @@ import log
 import proxy
 
 
-class HumanObjectSelector(gui.QtGui.QWidget, gui.Widget):
+class HumanObjectSelector(gui.QtWidgets.QWidget, gui.Widget):
     """
     A widget for selecting the human object or any of the proxies attached to it.
     """
@@ -61,7 +57,7 @@ class HumanObjectSelector(gui.QtGui.QWidget, gui.Widget):
         self.human = human
         self._selected = 'skin'
 
-        self.layout = gui.QtGui.QGridLayout(self)
+        self.layout = gui.QtWidgets.QGridLayout(self)
 
         self.objectSelector = []
         self.humanBox = gui.GroupBox('Human')

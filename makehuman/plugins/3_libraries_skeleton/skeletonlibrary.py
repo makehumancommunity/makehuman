@@ -133,11 +133,11 @@ class SkeletonLibrary(gui3d.TaskView, filecache.MetadataCacher):
 
         self.infoBox = self.addLeftWidget(gui.GroupBox('Rig info'))
         self.boneCountLbl = self.infoBox.addWidget(gui.TextView('Bones: '))
-        self.infoBox.setSizePolicy(gui.QtGui.QSizePolicy.Preferred, gui.QtGui.QSizePolicy.Maximum)
+        self.infoBox.setSizePolicy(gui.QtWidgets.QSizePolicy.Preferred, gui.QtWidgets.QSizePolicy.Maximum)
 
         descBox = self.addLeftWidget(gui.GroupBox('Description'))
         self.descrLbl = descBox.addWidget(gui.TextView(''))
-        self.descrLbl.setSizePolicy(gui.QtGui.QSizePolicy.Ignored, gui.QtGui.QSizePolicy.Preferred)
+        self.descrLbl.setSizePolicy(gui.QtWidgets.QSizePolicy.Ignored, gui.QtWidgets.QSizePolicy.Preferred)
         self.descrLbl.setWordWrap(True)
 
         self.xray_mat = None

@@ -63,10 +63,13 @@ class ViewerTaskView(gui3d.TaskView):
                     os.makedirs(mh.getPath('render'))
                 self.path = mh.getPath('render')
             filename = mh.getSaveFileName(os.path.splitext(self.path)[0],
-                                          'PNG Image (*.png);;JPEG Image (*.jpg);;All files (*.*)')
+                                          'PNG Image (*.png);;JPEG Image (*.jpg);;Thumbnail (*.thumb);;All files (*.*)')
             if filename:
+                if os.path.splitext(filename)[1].lower() == '.thumb':
+                    self.image.save(filename, iformat='PNG')
+                else:
+                    self.image.save(filename)
                 self.path = os.path.dirname(filename)
-                self.image.save(filename)
 
         @self.refrBtn.mhEvent
         def onClicked(event):

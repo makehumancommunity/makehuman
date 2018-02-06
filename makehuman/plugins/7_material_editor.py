@@ -823,12 +823,12 @@ class BooleanValue(gui.CheckBox):
     def setValue(self, value):
         self.setChecked(value)
 
-class TextureValue(gui.QtGui.QWidget, gui.Widget):
+class TextureValue(gui.QtWidgets.QWidget, gui.Widget):
     def __init__(self, parent, value, defaultPath = None):
         super(TextureValue, self).__init__()
         self.parent = parent
 
-        self.layout = gui.QtGui.QGridLayout(self)
+        self.layout = gui.QtWidgets.QGridLayout(self)
         self.imageView = gui.ImageView()
         self.browseBtn = gui.BrowseButton()
         self.browseBtn.setFilter("Image Files (*.png *.jpg *.bmp)")
