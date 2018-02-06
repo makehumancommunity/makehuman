@@ -157,7 +157,7 @@ def writeObjFile(path, meshes, writeMTL=True, config=None, filterMaskedFaces=Tru
     if not isinstance(meshes, list):
         meshes = [meshes]
 
-    if isinstance(path, file):
+    if isinstance(path, io.IOBase):
         fp = path
     else:
         fp = io.open(path, 'w', encoding="utf-8")
