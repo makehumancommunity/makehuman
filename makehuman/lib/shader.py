@@ -46,7 +46,7 @@ from core import G
 import io
 
 class Uniform(object):
-    def __init__(self, index, name, pytype, dims):
+    def __init__(self, pgm, index, name, pytype, dims):
         if type(name) is bytes:
             name = name.decode('utf-8')
         self.index = index
@@ -54,11 +54,13 @@ class Uniform(object):
         self.pytype = pytype
         self.dims = dims
         self.values = None
+        self.pgm = pgm
+        self.location = glGetUniformLocation(self.pgm, self.name)
 
     def __call__(self, index, values):
         raise NotImplementedError
 
-    def update(self, pgm):
+    def update(self):
         pass
 
 class VectorUniform(Uniform):
@@ -114,9 +116,9 @@ class VectorUniform(Uniform):
             cls.uniformTypes2.clear()
         return type in cls.uniformTypes
 
-    def __init__(self, index, name, type):
+    def __init__(self, pgm, index, name, type):
         dims, dtype, pytype, glfunc, glquery = self.uniformTypes[type]
-        super(VectorUniform, self).__init__(index, name, pytype, dims)
+        super(VectorUniform, self).__init__(pgm, index, name, pytype, dims)
         self.type = type
         self.dtype = dtype
         self.glfunc = glfunc
@@ -128,13 +130,13 @@ class VectorUniform(Uniform):
             return
         values = np.asarray(data, dtype=self.dtype).reshape(self.dims)
         if len(self.dims) > 1:
-            self.glfunc(self.index, 1, GL_TRUE, values)
+            self.glfunc(self.location, 1, GL_TRUE, values)
         else:
-            self.glfunc(self.index, len(values)//self.dims[0], values)
+            self.glfunc(self.location, len(values) // self.dims[0], values)
 
-    def update(self, pgm):
+    def update(self):
         values = np.zeros(self.dims, dtype=self.dtype)
-        self.glquery(pgm, self.index, values)
+        self.glquery(self.pgm, self.location, values)
         if len(self.dims) > 1:
             values = values.T
         self.values = values
@@ -142,7 +144,6 @@ class VectorUniform(Uniform):
         return self.values
 
 class SamplerUniform(Uniform):
-
     textureTargets = {
         GL_SAMPLER_1D:                                  GL_TEXTURE_1D,
         GL_SAMPLER_2D:                                  GL_TEXTURE_2D,
@@ -182,13 +183,13 @@ class SamplerUniform(Uniform):
         GL_UNSIGNED_INT_SAMPLER_2D_RECT:                GL_TEXTURE_RECTANGLE,
         }
 
-    if 'GL_IMAGE_1D' in globals():    
+    if 'GL_IMAGE_1D' in globals():
         try:
             textureTargets2 = {
                 GL_IMAGE_1D:                                    GL_TEXTURE_1D,
                 GL_IMAGE_2D:                                    GL_TEXTURE_2D,
                 GL_IMAGE_3D:                                    GL_TEXTURE_3D,
-                GL_IMAGE_2D_RECT:                               GL_TEXTURE_2D_RECTANGLE,
+                GL_IMAGE_2D_RECT:                               GL_TEXTURE_RECTANGLE,
                 GL_IMAGE_CUBE:                                  GL_TEXTURE_CUBE_MAP,
                 GL_IMAGE_BUFFER:                                GL_TEXTURE_BUFFER,
                 GL_IMAGE_1D_ARRAY:                              GL_TEXTURE_1D_ARRAY,
@@ -198,7 +199,7 @@ class SamplerUniform(Uniform):
                 GL_INT_IMAGE_1D:                                GL_TEXTURE_1D,
                 GL_INT_IMAGE_2D:                                GL_TEXTURE_2D,
                 GL_INT_IMAGE_3D:                                GL_TEXTURE_3D,
-                GL_INT_IMAGE_2D_RECT:                           GL_TEXTURE_2D_RECTANGLE,
+                GL_INT_IMAGE_2D_RECT:                           GL_TEXTURE_RECTANGLE,
                 GL_INT_IMAGE_CUBE:                              GL_TEXTURE_CUBE_MAP,
                 GL_INT_IMAGE_BUFFER:                            GL_TEXTURE_BUFFER,
                 GL_INT_IMAGE_1D_ARRAY:                          GL_TEXTURE_1D_ARRAY,
@@ -208,7 +209,7 @@ class SamplerUniform(Uniform):
                 GL_UNSIGNED_INT_IMAGE_1D:                       GL_TEXTURE_1D,
                 GL_UNSIGNED_INT_IMAGE_2D:                       GL_TEXTURE_2D,
                 GL_UNSIGNED_INT_IMAGE_3D:                       GL_TEXTURE_3D,
-                GL_UNSIGNED_INT_IMAGE_2D_RECT:                  GL_TEXTURE_2D_RECTANGLE,
+                GL_UNSIGNED_INT_IMAGE_2D_RECT:                  GL_TEXTURE_RECTANGLE,
                 GL_UNSIGNED_INT_IMAGE_CUBE:                     GL_TEXTURE_CUBE_MAP,
                 GL_UNSIGNED_INT_IMAGE_BUFFER:                   GL_TEXTURE_BUFFER,
                 GL_UNSIGNED_INT_IMAGE_1D_ARRAY:                 GL_TEXTURE_1D_ARRAY,
@@ -226,9 +227,9 @@ class SamplerUniform(Uniform):
             cls.textureTargets2.clear()
         return type in cls.textureTargets
 
-    def __init__(self, index, name, type):
+    def __init__(self, pgm, index, name, type):
         target = self.textureTargets[type]
-        super(SamplerUniform, self).__init__(index, name, str, (1,))
+        super(SamplerUniform, self).__init__(pgm, index, name, str, (1,))
         self.target = target
 
     def set(self, data):
@@ -246,7 +247,7 @@ class SamplerUniform(Uniform):
                 glBindTexture(self.target, 0)
             else:
                 glBindTexture(self.target, tex.textureId)
-        glUniform1i(self.index, cls.currentSampler)
+        glUniform1i(self.location, cls.currentSampler)
         cls.currentSampler += 1
 
     @classmethod
@@ -373,7 +374,7 @@ class Shader(object):
         This is to ensure that any #version statements remain the first
         instruction in the shader source, conform with the GLSL spec.
         If no #version statement is found, the full source will be in the second
-        string, allowing #define statements to be inserted at the top of the 
+        string, allowing #define statements to be inserted at the top of the
         source.
         NOTE: For this to work correctly, #version effectively needs to be the
         first instruction in the shader source, but this is usually enforced by
@@ -450,17 +451,18 @@ class Shader(object):
                     self.glUniforms.append(name)
                     continue
                 if VectorUniform.check(type):
-                    uniform = VectorUniform(index, name, type)
+                    uniform = VectorUniform(self.shaderId, index, name, type)
                 elif SamplerUniform.check(type):
-                    uniform = SamplerUniform(index, name, type)
-                uniform.update(self.shaderId)
+                    uniform = SamplerUniform(self.shaderId, index, name, type)
+                # probably superfluous, to be deleted:
+                # uniform.update()
                 self.uniforms.append(uniform)
 
         return self.uniforms
 
     def updateUniforms(self):
         for uniform in self.getUniforms():
-            uniform.update(self.shaderId)
+            uniform.update()
 
     def setUniforms(self, params):
         import glmodule
@@ -471,8 +473,8 @@ class Shader(object):
             uniform.set(value)
 
         # Disable other texture units
-        for gl_tex_idx in range(GL_TEXTURE0 + SamplerUniform.currentSampler, 
-                                 GL_TEXTURE0 + glmodule.MAX_TEXTURE_UNITS):
+        for gl_tex_idx in range(GL_TEXTURE0 + SamplerUniform.currentSampler,
+                                GL_TEXTURE0 + glmodule.MAX_TEXTURE_UNITS):
             glActiveTexture(gl_tex_idx)
             glBindTexture(GL_TEXTURE_2D, 0)
             glDisable(GL_TEXTURE_2D)
@@ -527,7 +529,7 @@ def getShader(path, defines=[], cache=None):
 
     cache[cacheName] = shader
     return shader
-    
+
 def reloadShaders():
     log.message('Reloading shaders')
     for path in _shaderCache:
