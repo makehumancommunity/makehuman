@@ -40,11 +40,7 @@ import sys
 import os
 import re
 from core import G
-
-if G.hasPySide:
-    from PySide import QtCore, QtGui, QtSvg
-else:
-    from PyQt4 import QtCore, QtGui, QtSvg
+from PySide import QtCore, QtGui, QtSvg
 
 import events3d
 import language
@@ -647,7 +643,9 @@ class ListItem(QtGui.QListWidgetItem):
         self.setData(QtCore.Qt.UserRole, data)
 
     def getUserData(self):
-        return self.data(QtCore.Qt.UserRole).toPyObject()
+        #This seems PyQT-specific and does not work with pyside
+        #return self.data(QtCore.Qt.UserRole).toPyObject()
+        return self.data(QtCore.Qt.UserRole)
 
     def setText(self, text):
         super(ListItem, self).setText(text)
@@ -1266,8 +1264,8 @@ class AboutBoxScrollbars(QtGui.QDialog):
         if sys.platform == 'darwin':
             grid.addWidget(versionLabel, 0, 1, 1, 1, QtCore.Qt.AlignTop)
             grid.addWidget(iconLabel, 0, 0, 2, 1, QtCore.Qt.AlignTop)
-        else:
-            grid.setMargin(0)
+        else:        
+            #grid.setMargin(0)  <-- PySide doesn't support this
             grid.setVerticalSpacing(8)
             grid.setHorizontalSpacing(0)
             self.setContentsMargins(0, 15, 0, 20)

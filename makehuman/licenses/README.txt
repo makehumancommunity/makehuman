@@ -5,7 +5,7 @@ Dependencies, included in packaged versions:
 
 LIBRARY         LICENSE TYPE        FILE WITH LICENSE    HOMEPAGE
 --------------  ---------------     -------------------  ------------------
-pyQt            GPLv3               pyQt4-license.txt    http://www.riverbankcomputing.co.uk
+PySide          LGPLv2.1            pyside-license.txt   https://github.com/pyside/PySide
 Qt4             LGPLv2.1            qt4-license.txt      http://www.qt-project.org
 numpy           BSD (3-clause)      numpy-license.txt    http://www.numpy.org
 pyOpenGL        BSD (3-clause)      pyOpenGL-license.txt http://pyopengl.sourceforge.net

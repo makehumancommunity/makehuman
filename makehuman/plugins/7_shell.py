@@ -47,10 +47,7 @@ import gui
 from core import G
 import log
 
-if G.hasPySide:
-    from PySide import QtCore, QtGui
-else:
-    from PyQt4 import QtCore, QtGui
+from PySide import QtCore, QtGui
 
 MAX_COMPLETIONS = -1
 

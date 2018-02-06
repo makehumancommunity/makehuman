@@ -39,11 +39,7 @@ TODO
 import os
 import numpy as np
 from core import G
-
-if G.hasPySide:
-    from PySide import QtCore, QtGui
-else:
-    from PyQt4 import QtCore, QtGui
+from PySide import QtCore, QtGui
 
 def load(path):
     """

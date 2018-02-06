@@ -755,7 +755,7 @@ makes use of.\n"""
     license_folder = getpath.getSysPath('licenses')
     if not os.path.isdir(license_folder):
         return result + _error("Error: external licenses folder is not found, this is an incomplete MakeHuman distribution!")
-    external_licenses = [ ("PyQt4", ("pyQt4-license.txt", "http://www.riverbankcomputing.co.uk", "GPLv3")),
+    external_licenses = [ ("PySide", ("pyside-license.txt", "https://github.com/pyside/PySide", "LGPLv2.1")),
                           ("Qt4", ("qt4-license.txt", "http://www.qt-project.org", "LGPLv2.1")),
                           ("Numpy", ("numpy-license.txt", "http://www.numpy.org", "BSD (3-clause)")),
                           ("PyOpenGL", ("pyOpenGL-license.txt", "http://pyopengl.sourceforge.net", "BSD (3-clause)")),

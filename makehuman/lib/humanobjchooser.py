@@ -39,11 +39,7 @@ A widget for selecting the human object or any of the proxies attached to it.
 """
 
 from core import G
-
-if G.hasPySide:    
-    from PySide import QtCore, QtGui
-else:
-    from PyQt4 import QtCore, QtGui
+from PySide import QtCore, QtGui
 
 import qtgui as gui
 import log
