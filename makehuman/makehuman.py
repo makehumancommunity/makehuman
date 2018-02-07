@@ -399,8 +399,6 @@ def parse_arguments():
     parser.add_argument("--debugopengl", action="store_true", help="enable OpenGL error checking and logging (slow)")
     parser.add_argument("--fullloggingopengl", action="store_true", help="log all OpenGL calls (very slow)")
     parser.add_argument("--debugnumpy", action="store_true", help="enable numpy runtime error messages")
-    parser.add_argument("-s", "--splashontop", action="store_true", help="splash always on top during startup")
-    parser.add_argument("--home-location", action="store", metavar='', help="set alternative home path", type=str)
     
     if not isRelease():
         parser.add_argument("-t", "--runtests", action="store_true", help="run test suite (for developers)")
@@ -495,7 +493,7 @@ class LicenseInfo(object):
         """
         self.author = "MakeHuman Team"
         self.license = "AGPL3"
-        self.homepage = "http://www.makehuman.org"
+        self.homepage = "http://www.makehumancommunity.org"
         self.copyright = "(c) MakeHuman.org 2001-2017"
         self._keys = ["author", "license", "copyright", "homepage"]
         self._customized = False
@@ -748,9 +746,6 @@ def main():
 
     try:
         set_sys_path()
-        args = parse_arguments()
-        from core import G
-        G.args = args
         make_user_dir()
         get_platform_paths()
         redirect_standard_streams()
@@ -758,6 +753,7 @@ def main():
         os.environ['MH_VERSION'] = getVersionStr()
         os.environ['MH_SHORT_VERSION'] = getShortVersion()
         os.environ['MH_MESH_VERSION'] = getBasemeshVersion()
+        args = parse_arguments()
         init_logging()
     except Exception as e:
         print("error: " + format(str(e)), file=sys.stderr)
@@ -771,10 +767,11 @@ def main():
     os.environ['MH_RELEASE'] = "Yes" if isRelease() else "No"
 
     debug_dump()
-    
-           
+    from core import G
+    G.args = args
+
     # Set numpy properties
-    if not G.args.get('debugnumpy', False):
+    if not args.get('debugnumpy', False):
         import numpy
         # Suppress runtime errors
         numpy.seterr(all = 'ignore')
