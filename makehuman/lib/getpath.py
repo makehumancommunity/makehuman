@@ -38,7 +38,6 @@ Utility module for finding the user home path.
 
 import sys
 import os
-from core import G
 
 __home_path = None
 
@@ -88,11 +87,10 @@ def getHomePath():
     """
     # Cache the home path
     global __home_path
-    
-    if G.args.get("home_location") is not None:
-        __home_path = formatPath(G.args.get("home_location"))
-        if os.path.isdir(__home_path) is False:
-            raise RuntimeError("Invalid path in command line option")
+
+    alt_home_path = os.environ.get("MH_HOME_LOCATION", '')
+    if os.path.exists(alt_home_path):
+        __home_path = alt_home_path
             
     if __home_path is not None:
         return __home_path
