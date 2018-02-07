@@ -46,7 +46,7 @@ from PyQt5 import QtCore, QtGui, QtOpenGL, QtWidgets
 import glmodule as gl
 import events3d
 import qtgui
-import queue
+import mhqueue
 import time
 import getpath
 
@@ -700,7 +700,7 @@ class Application(QtWidgets.QApplication, events3d.EventHandler):
         import debugdump
         debugdump.dump.appendQt()
 
-        self.messages = queue.Manager(self._postAsync)
+        self.messages = mhqueue.Manager(self._postAsync)
         self.mainwin = Frame(self, (G.windowWidth, G.windowHeight))
         self.statusBar = self.mainwin.statusBar
         self.progressBar = self.mainwin.progressBar
@@ -802,7 +802,7 @@ class Application(QtWidgets.QApplication, events3d.EventHandler):
         self._postAsync(AsyncEvent(func, args, kwargs))
 
 def getSaveFileName(directory, filter = "All files (*.*)"):
-    path = QtWidgets.QFileDialog.getSaveFileName(G.app.mainwin, directory = directory, filter = filter)
+    path =QtWidgets.QFileDialog.getSaveFileName(G.app.mainwin, directory = directory, filter = filter)
     if isinstance(path, tuple):
         path = path[0]
     return path

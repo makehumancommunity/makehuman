@@ -1499,10 +1499,7 @@ class FileEntryView(QtWidgets.QWidget, Widget):
 
 class SplashScreen(QtWidgets.QSplashScreen):
     def __init__(self, image, version=""):
-        if G.args.get('splashontop') == True:
-            super(SplashScreen, self).__init__(G.app.mainwin, getPixmap(image), QtCore.Qt.WindowStaysOnTopHint)
-        else:
-            super(SplashScreen, self).__init__(G.app.mainwin, getPixmap(image))
+        super(SplashScreen, self).__init__(G.app.mainwin, getPixmap(image))
         self._stdout = sys.stdout
         self.messageRect = QtCore.QRect(354, 531, 432, 41)
         self.messageAlignment = QtCore.Qt.AlignLeft
@@ -1921,23 +1918,26 @@ class BrowseButton(Button):
     def _clicked(self, state):
         self.callEvent('beforeBrowse', None)
 
-        path = self.getExistingPath(self.directory)
+        path = self.getExistingPath(self.path)
         if self.mode == 'save' and self.filename:
             # Don't discard filename when saving
             path = os.path.join(path, self.filename)
 
         if self.mode == 'open':
-            path = QtGui.QFileDialog.getOpenFileName(G.app.mainwin, directory=self.directory, filter=self.filter)
+            path = QtWidgets.QFileDialog.getOpenFileName(G.app.mainwin, directory=self.directory, filter=self.filter)
         elif self.mode == 'save':
-            path = QtGui.QFileDialog.getSaveFileName(G.app.mainwin, directory=self.directory, filter=self.filter)
+            path = QtWidgets.QFileDialog.getSaveFileName(G.app.mainwin, directory=self.directory, filter=self.filter)
         elif self.mode == 'dir':
-            path = QtGui.QFileDialog.getExistingDirectory(G.app.mainwin, directory=self.directory)
+            path = QtWidgets.QFileDialog.getExistingDirectory(G.app.mainwin, directory=self.directory)
+
 
         if path:
             if isinstance(path, tuple):
                 path = path[0]
-            if self.mode == 'dir': self.directory = path
-            else: self.path = pathToUnicode(path)
+            if self.mode == 'dir':
+                self.directory = path
+            else:
+                self.path = pathToUnicode(path)
         self.callEvent('onClicked', path)
 
 class ColorPickButton(Button):
