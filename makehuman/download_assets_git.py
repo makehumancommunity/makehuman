@@ -167,7 +167,7 @@ class DownloadAssetsGit:
         for root, dirs, files in os.walk('base'): 
             
             for name in dirs:
-                fullname = name;
+                fullname = name
                 if root != "base":
                     fullname = os.path.relpath(os.path.join(root,name),os.path.join(self._git_official_clone_location,"base"))
                 dest = os.path.join(self._makehuman_data_directory,fullname)
@@ -176,7 +176,7 @@ class DownloadAssetsGit:
                     os.makedirs(dest)
 
             for name in files:
-                fullname = name;
+                fullname = name
                 if root != "base":
                     fullname = os.path.relpath(os.path.join(root,name),os.path.join(self._git_official_clone_location,"base"))
 
@@ -191,7 +191,7 @@ class DownloadAssetsGit:
             for root, dirs, files in os.walk('debug'): 
             
                 for name in dirs:
-                    fullname = name;
+                    fullname = name
                     if root != "debug":
                         fullname = os.path.relpath(os.path.join(root,name),os.path.join(self._git_official_clone_location,"debug"))
                     dest = os.path.join(self._makehuman_data_directory,fullname)
@@ -200,7 +200,7 @@ class DownloadAssetsGit:
                         os.makedirs(dest)
     
                 for name in files:
-                    fullname = name;
+                    fullname = name
                     if root != "debug":
                         fullname = os.path.relpath(os.path.join(root,name),os.path.join(self._git_official_clone_location,"debug"))
     

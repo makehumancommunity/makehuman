@@ -9,7 +9,7 @@ PYLINT="pylint3"
 
 import os
 
-pythonfiles = [];
+pythonfiles = []
 
 for dirName, subdirList, fileList in os.walk("."):
     for fname in fileList:
