@@ -99,15 +99,16 @@ class SaveTaskView(gui3d.TaskView):
         @self.fileentry.mhEvent
         def onFileSelected(event):
             path = event.path
-            if not path.lower().endswith(".mhm"):
-                path += ".mhm"
-            if event.source in ('return', 'button') and \
-                os.path.exists(path) and \
-                path != G.app.currentFile.path:
-                G.app.prompt("File exists", "The file already exists. Overwrite?", 
-                    "Yes", "No", lambda: saveMHM(path))
-            else:
-                saveMHM(path)
+            if os.path.exists(path):
+                if not path.lower().endswith(".mhm"):
+                    path += ".mhm"
+                if event.source in ('return', 'button') and \
+                    os.path.exists(path) and \
+                    path != G.app.currentFile.path:
+                    G.app.prompt("File exists", "The file already exists. Overwrite?",
+                        "Yes", "No", lambda: saveMHM(path))
+                else:
+                    saveMHM(path)
 
     def onShow(self, event):
         """Handler for the TaskView onShow event.
