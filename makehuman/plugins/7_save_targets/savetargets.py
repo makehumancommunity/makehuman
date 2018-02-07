@@ -46,10 +46,7 @@ import log
 from core import G
 from language import language
 from uuid import uuid4
-if G.hasPySide:
-    from PySide import QtGui
-else:
-    from PyQt4 import QtGui
+from PyQt5 import QtWidgets
 
 
 universalBaseTargets = ['universal-female-young-averagemuscle-averageweight.target',
@@ -79,8 +76,8 @@ class SaveTargetsTaskView(gui3d.TaskView):
 
         super(SaveTargetsTaskView, self).__init__(category, 'Save Targets')
 
-        mainPanel = QtGui.QWidget()
-        layout = QtGui.QVBoxLayout()
+        mainPanel = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout()
         mainPanel.setLayout(layout)
 
         metaFileID = str(uuid4()) + '.target'
