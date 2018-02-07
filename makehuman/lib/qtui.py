@@ -802,19 +802,19 @@ class Application(QtWidgets.QApplication, events3d.EventHandler):
         self._postAsync(AsyncEvent(func, args, kwargs))
 
 def getSaveFileName(directory, filter = "All files (*.*)"):
-    path = QtGui.QFileDialog.getSaveFileName(G.app.mainwin, directory = directory, filter = filter)
+    path = QtWidgets.QFileDialog.getSaveFileName(G.app.mainwin, directory = directory, filter = filter)
     if isinstance(path, tuple):
         path = path[0]
     return path
 
 def getOpenFileName(directory, filter = "All files (*.*)"):
-    path = QtGui.QFileDialog.getOpenFileName(G.app.mainwin, directory = directory, filter = filter)
+    path = QtWidgets.QFileDialog.getOpenFileName(G.app.mainwin, directory = directory, filter = filter)
     if isinstance(path, tuple):
         path = path[0]
     return path
 
 def getExistingDirectory(directory):
-    path = QtGui.QFileDialog.getExistingDirectory(G.app.mainwin, directory = directory)
+    path = QtWidgets.QFileDialog.getExistingDirectory(G.app.mainwin, directory = directory)
     if isinstance(path, tuple):
         path = path[0]
     return path
