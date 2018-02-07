@@ -270,10 +270,11 @@ def OnInit():
         # Start with writing relevant info to the debug dump in case stuff goes
         # wrong at a later time
         debugdump.dump.appendGL()
-        debugdump.dump.appendMessage("GL.VENDOR: " + glGetString(GL_VENDOR))
-        debugdump.dump.appendMessage("GL.RENDERER: " + glGetString(GL_RENDERER))
-        debugdump.dump.appendMessage("GL.VERSION: " + glGetString(GL_VERSION))
-        debugdump.dump.appendMessage("GLSL.VERSION: " + Shader.glslVersionStr())
+        debugdump.dump.appendMessage("GL.VENDOR: " + str(glGetString(GL_VENDOR), encoding='UTF-8'))
+        debugdump.dump.appendMessage("GL.RENDERER: " + str(glGetString(GL_RENDERER), encoding='UTF-8'))
+        debugdump.dump.appendMessage("GL.VERSION: " + str(glGetString(GL_VERSION), encoding='UTF-8'))
+        debugdump.dump.appendMessage("GLSL.VERSION: " + str(Shader.glslVersionStr(), encoding='UTF-8'))
+
     except Exception as e:
         log.error("Failed to write GL debug info to debug dump: %s", format(str(e)))
 
