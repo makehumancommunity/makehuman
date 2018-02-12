@@ -50,6 +50,9 @@ import getpath
 
 import makehuman
 import getpath
+
+from mhversion import MHVersion
+
 if False and makehuman.isBuild():
     # Set absolute Qt plugin path programatically on frozen deployment to fix
     # crashes when Qt is on DLL PATH in windows.
@@ -417,7 +420,8 @@ def supportedImageFormats():
     return [ str(s).lower() for s in QtGui.QImageReader.supportedImageFormats() ]
 
 class Frame(QtGui.QMainWindow):
-    title = "MakeHuman"
+    mhv = MHVersion()
+    title = mhv.fullTitle
 
     def __init__(self, app, size):
         self.app = app
