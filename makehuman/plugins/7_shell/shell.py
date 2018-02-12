@@ -8,7 +8,7 @@
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Glynn Clements
+**Authors:**           Glynn Clements, Jonas Hauquier, Aranuvir
 
 **Copyright(c):**      MakeHuman Team 2001-2017
 
@@ -29,6 +29,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+**Coding Standards:**  See http://www.makehuman.org/node/165
 
 Abstract
 --------
@@ -36,18 +37,22 @@ Abstract
 TODO
 """
 
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 import sys
 import traceback
 
-import gui3d
-import gui
-from core import G
-import log
+from PyQt4 import QtCore, QtGui
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+import gui
+import gui3d
+from core import G
+import importlib.util
+import mh
+from language import language
+
+hasIpython = (importlib.util.find_spec('qtconsole') != None) and (importlib.util.find_spec('IPython') != None)
+if hasIpython:
+    from . import ipythonconsole
+
 
 MAX_COMPLETIONS = -1
 
@@ -57,14 +62,30 @@ class ShellTextEdit(gui.TextEdit):
         return True
 
 class ShellTaskView(gui3d.TaskView):
+
     def __init__(self, category):
         super(ShellTaskView, self).__init__(category, 'Shell')
         self.globals = {'G': G}
         self.history = []
         self.histitem = None
 
-        self.main = self.addTopWidget(QtWidgets.QWidget())
-        self.layout = QtWidgets.QGridLayout(self.main)
+        if hasIpython:
+            # Use the more advanced Ipython console
+            self.console = self.addTopWidget(ipythonconsole.IPythonConsoleWidget())
+
+            def gotoshell():
+                mh.changeTask('Utilities', 'Shell')
+
+            action = gui.Action('ishell', language.getLanguageString('IPython shell'), gotoshell)
+            G.app.mainwin.addAction(action)
+            mh.setShortcut(mh.Modifiers.CTRL, mh.Keys.i, action)
+
+            return
+
+        # Fall back to old console
+        self.console = None
+        self.main = self.addTopWidget(QtGui.QWidget())
+        self.layout = QtGui.QGridLayout(self.main)
         self.layout.setRowStretch(0, 0)
         self.layout.setRowStretch(1, 0)
         self.layout.setColumnStretch(0, 1)
@@ -83,6 +104,10 @@ class ShellTaskView(gui3d.TaskView):
 
         self.clear = gui.Button("Clear")
         self.layout.addWidget(self.clear, 1, 1, 1, 1)
+
+        action = gui.Action('shell', language.getLanguageString('Default shell'), self.gotodefaultshell)
+        G.app.mainwin.addAction(action)
+        mh.setShortcut(mh.Modifiers.SHIFT, mh.Keys.s, action)
 
         @self.line.mhEvent
         def onActivate(text):
@@ -144,6 +169,10 @@ class ShellTaskView(gui3d.TaskView):
         @self.line.mhEvent
         def onDownArrow(_dummy):
             self.downArrow()
+
+    def gotodefaultshell(self):
+        mh.changeTask('Utilities', 'Shell')
+
 
     def getSuggestions(self, line):
         from rlcompleter import Completer
@@ -210,10 +239,7 @@ class ShellTaskView(gui3d.TaskView):
             self.histitem += 1
             self.line.setText(self.history[self.histitem])
 
-def load(app):
-    category = app.getCategory('Utilities')
-    taskview = category.addTask(ShellTaskView(category))
-
-def unload(app):
-    pass
-
+    def onThemeChanged(self, event):
+        if self.console is None:
+            return
+        self.console.set_theme(G.app.theme)
