@@ -59,6 +59,8 @@ import language
 import log
 import contextlib
 
+from mhversion import MHVersion
+
 @contextlib.contextmanager
 def outFile(path):
     import io
@@ -1141,17 +1143,12 @@ class MHApplication(gui3d.Application, mh.Application):
         filename = self.currentFile.name
         if filename is None:
             filename = "Untitled"
-        if mh.isRelease():
-            from getpath import pathToUnicode
-            self.setCaption(
-                "MakeHuman %s - [%s][*]" %
-                (mh.getVersionStr(), pathToUnicode(filename)))
-        else:
-            from getpath import pathToUnicode
-            self.setCaption(
-                "MakeHuman r%s (%s) - [%s][*]" %
-                (os.environ['HGREVISION'], os.environ['HGNODEID'], 
-                pathToUnicode(filename)))
+
+        mhv = MHVersion()
+
+        from getpath import pathToUnicode
+        self.setCaption("%s - [%s][*]" % (mhv.fullTitle, pathToUnicode(filename)))
+
         self.mainwin.setWindowModified(self.currentFile.modified)
 
     # Global status bar
