@@ -62,7 +62,7 @@ class MHVersion:
             if self.isRelease:
                 self.fullTitle = self.title + " " + self.version
             else:
-                self.fullTitle = self.title + " " + self.currentBranch + ":" + self.currentShortCommit
+                self.fullTitle = self.title + " (" + self.currentBranch + ":" + self.currentShortCommit + ")"
 
     def _checkForGitInfo(self):
 
