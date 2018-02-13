@@ -12,7 +12,7 @@ Simple parser for the build_prepare output file
 
 **Authors:**           Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2015
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 
