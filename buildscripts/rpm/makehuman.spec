@@ -13,7 +13,7 @@ BuildRequires:  python
 Vendor:         MakeHuman.org
 Packager:       Joel Palmius <joepal1976@hotmail.com>
 Provides:       makehuman
-Requires:       python >= 2.7, numpy, PyOpenGL, PyQt4
+Requires:       python3, python3-numpy python3-pyopengl python3-QtPy
 Source:         PACKAGE_NAME-VER-1.tar.gz
 BuildArch:      noarch
 Summary:        Free, open source tool for creating realistic 3D human characters.
@@ -34,7 +34,7 @@ Wavefront .obj, Stereolithography (.stl).
  The output characters are licensed under the CC0 license, one of the most 
 liberal license for output content. This means that artists are given the 
 freedom to use their creations for both commercial and non-commercial 
-purposes. The copyright © 2001-2015 is retained by the MakeHuman™ Team 
+purposes. The copyright © 2001-2018 is retained by the MakeHuman™ Team 
 (makehuman.org) which grants you permission to use released code under the GNU 
 Affero General Public License 3.0 (AGPL).
 
