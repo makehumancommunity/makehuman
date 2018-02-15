@@ -131,7 +131,10 @@ def getBranchFromFile():
             with io.open(headFile,'rU') as f:
                 line = f.readline()
                 if line:
-                    branch = line.split('/')[-1].strip()
+                    if line.startswith('ref'):
+                        branch = line.split('/')[-1].strip()
+                    else:
+                        branch = 'HEAD'
 
     return branch
 
@@ -144,7 +147,10 @@ def getCommitFromFile(short = True):
 
     if _gitdir and branch:
 
-        commitFile = os.path.join(_gitdir, 'refs', 'heads', branch)
+        if branch == 'HEAD':
+            commitFile = os.path.join(_gitdir, 'HEAD')
+        else:
+            commitFile = os.path.join(_gitdir, 'refs', 'heads', branch)
 
         if os.path.isfile(commitFile):
 
