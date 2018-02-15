@@ -80,5 +80,9 @@ class MHVersion:
             if not commit is None:
                 self.currentShortCommit = commit
 
+            commit = gitutils.getCurrentCommit(False)
+            if not commit is None:
+                self.currentLongCommit = commit
+
     def _checkForVersionFile(self):
         pass
