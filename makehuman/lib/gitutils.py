@@ -40,6 +40,7 @@ import sys
 import os
 import getpath
 import subprocess
+import io
 
 _gitcmd = None
 _gitdir = None
@@ -115,6 +116,47 @@ def _setup():
     if _gitcmd is None:
         findPathToGit()
 
+def getBranchFromFile():
+
+    global _gitdir
+
+    branch = None
+
+    if _gitdir:
+
+        headFile = os.path.join(_gitdir, 'HEAD')
+
+        if os.path.isfile(headFile):
+
+            with io.open(headFile,'rU') as f:
+                line = f.readline()
+                if line:
+                    branch = line.split('/')[-1].strip()
+
+    return branch
+
+def getCommitFromFile(short = True):
+
+    global _gitdir
+
+    branch = getBranchFromFile()
+    commit = None
+
+    if _gitdir and branch:
+
+        commitFile = os.path.join(_gitdir, 'refs', 'heads', branch)
+
+        if os.path.isfile(commitFile):
+
+            with io.open(commitFile, 'rU') as f:
+                commit = f.readline().strip()
+
+    if short and commit:
+        return commit[:8]
+    else:
+        return commit
+
+
 def getCurrentBranch():
 
     global _gitcmd
@@ -122,12 +164,19 @@ def getCurrentBranch():
 
     _setup()
 
+    branch = None
+
     if _gitcmd is None:
-        return None
+
+        if _gitdir:
+            branch = getBranchFromFile()
+            return branch
+
+        else:
+            return None
 
     args = [_gitcmd, "rev-parse", "--abbrev-ref", "HEAD"]
 
-    branch = None
 
     try:
         branch = subprocess.check_output(args)
@@ -151,7 +200,12 @@ def getCurrentCommit(short = True):
     _setup()
 
     if _gitcmd is None:
-        return None
+
+        if _gitdir:
+            commit = getCommitFromFile(short)
+            return commit
+        else:
+            return None
 
     args = [_gitcmd, "rev-parse"]
     if short:
