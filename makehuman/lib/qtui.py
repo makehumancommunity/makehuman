@@ -46,7 +46,7 @@ from PyQt5 import QtCore, QtGui, QtOpenGL, QtWidgets
 import glmodule as gl
 import events3d
 import qtgui
-import mhqueue
+import eventqueue
 import time
 import getpath
 
@@ -700,7 +700,7 @@ class Application(QtWidgets.QApplication, events3d.EventHandler):
         import debugdump
         debugdump.dump.appendQt()
 
-        self.messages = mhqueue.Manager(self._postAsync)
+        self.messages = eventqueue.Manager(self._postAsync)
         self.mainwin = Frame(self, (G.windowWidth, G.windowHeight))
         self.statusBar = self.mainwin.statusBar
         self.progressBar = self.mainwin.progressBar
