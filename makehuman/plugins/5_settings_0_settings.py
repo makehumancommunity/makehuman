@@ -51,7 +51,7 @@ class SettingCheckbox(gui.CheckBox):
     def onClicked(self, event):
         self.updated()
 
-    def update(self, value):
+    def updateButton(self, value):
         if value is None:
             self.setChecked(gui3d.app.getSettingDefault(self.setting_name))
         else:
@@ -73,9 +73,9 @@ class ThemeRadioButton(gui.RadioButton):
         super(ThemeRadioButton, self).__init__(group, label, checked)
 
     def onClicked(self, event):
-        self.updated()
+        self.updatedButton()
 
-    def update(self, value):
+    def updateButton(self, value):
         self.setChecked(value)
         self.updated()
 
@@ -101,7 +101,7 @@ class LanguageRadioButton(gui.RadioButton):
         self.updated()
         gui3d.app.prompt('Info', 'You need to restart for your language changes to be applied.', 'OK', helpId='languageHelp')
 
-    def update(self, value):
+    def updateButton(self, value):
         self.setChecked(value)
         self.updated()
 
@@ -188,7 +188,7 @@ class SettingsTaskView(gui3d.TaskView):
 
     def updateGui(self):
         for checkbox in self.checkboxes:
-            checkbox.update(checkbox.currentValue())
+            checkbox.updateButton(checkbox.currentValue())
 
         use_metric = gui3d.app.getSetting('units') == 'metric'
         if use_metric:
@@ -202,12 +202,12 @@ class SettingsTaskView(gui3d.TaskView):
         lang = gui3d.app.getSetting('language')
         for radioBtn in self.languageBox.children:
             if radioBtn.language == lang:
-                radioBtn.update(True)
+                radioBtn.updateButton(True)
 
         theme = gui3d.app.getSetting('guiTheme')
         for radioBtn in self.themesBox.children:
             if radioBtn.theme == theme:
-                radioBtn.update(True)
+                radioBtn.updateButton(True)
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
