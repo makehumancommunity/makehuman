@@ -99,7 +99,7 @@ class SaveTaskView(gui3d.TaskView):
         @self.fileentry.mhEvent
         def onFileSelected(event):
             path = event.path
-            if os.path.exists(path):
+            if path:
                 if not path.lower().endswith(".mhm"):
                     path += ".mhm"
                 if event.source in ('return', 'button') and \
