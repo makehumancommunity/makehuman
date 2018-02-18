@@ -73,7 +73,7 @@ class ThemeRadioButton(gui.RadioButton):
         super(ThemeRadioButton, self).__init__(group, label, checked)
 
     def onClicked(self, event):
-        self.updatedButton()
+        self.updated()
 
     def updateButton(self, value):
         self.setChecked(value)
