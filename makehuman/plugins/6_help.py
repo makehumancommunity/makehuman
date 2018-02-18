@@ -55,6 +55,7 @@ class HelpTaskView(gui3d.TaskView):
         self.facebookButton = aboutBox.addWidget(gui.Button('FaceBook page'))
 
         optionsBox = self.addLeftWidget(gui.GroupBox('Support'))
+        self.faqButton = optionsBox.addWidget(gui.Button('FAQ'))
         self.forumButton = optionsBox.addWidget(gui.Button('Forum'))
         self.manualButton = optionsBox.addWidget(gui.Button('Wiki'))
         self.reportBugButton = optionsBox.addWidget(gui.Button('Report bug'))
@@ -82,7 +83,11 @@ class HelpTaskView(gui3d.TaskView):
         @self.requestFeatureButton.mhEvent
         def onClicked(event):
             webbrowser.open('http://bugtracker.makehumancommunity.org/issues/new?project_id=makehuman&issue[tracker_id]=2')
-            
+
+        @self.faqButton.mhEvent
+        def onClicked(event):
+            webbrowser.open('http://www.makehumancommunity.org/wiki/FAQ:Index')
+
         @self.forumButton.mhEvent
         def onClicked(event):
             webbrowser.open('http://www.makehumancommunity.org/forum')
