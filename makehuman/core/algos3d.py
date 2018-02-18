@@ -95,11 +95,15 @@ class Target(object):
         self.name = name
         self.morphFactor = -1
 
-        try:
-            self._load(self.name)
-        except Exception as e:
+        if self.name:
+            try:
+                self._load(self.name)
+            except Exception as e:
+                self.verts = []
+                log.error('Unable to open %s (%s)', name, e)
+                return
+        else:
             self.verts = []
-            log.error('Unable to open %s (%s)', name, e)
             return
 
         self.faces = obj.getFacesForVertices(self.verts)
