@@ -40,7 +40,7 @@ TODO
 import sys
 import traceback
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 import gui
 import gui3d
@@ -84,8 +84,8 @@ class ShellTaskView(gui3d.TaskView):
 
         # Fall back to old console
         self.console = None
-        self.main = self.addTopWidget(QtGui.QWidget())
-        self.layout = QtGui.QGridLayout(self.main)
+        self.main = self.addTopWidget(QtWidgets.QWidget())
+        self.layout = QtWidgets.QGridLayout(self.main)
         self.layout.setRowStretch(0, 0)
         self.layout.setRowStretch(1, 0)
         self.layout.setColumnStretch(0, 1)

@@ -55,7 +55,7 @@ from qtconsole.inprocess import QtInProcessKernelManager
 from IPython.lib import guisupport
 
 
-from PyQt4 import QtCore, QtGui, QtSvg
+from PyQt5 import QtCore, QtGui, QtSvg, QtWidgets
 
 class _QIPythonWidget(RichJupyterWidget):
     """ Convenience class for a live IPython console widget.
@@ -118,11 +118,11 @@ def pygments_style_to_css(style):
     return HtmlFormatter(style=style).get_style_defs('.highlight')
 
 
-class IPythonConsoleWidget(QtGui.QWidget, gui.Widget):
+class IPythonConsoleWidget(QtWidgets.QWidget, gui.Widget):
     """ An interactive shell widget using the ipython qt console """
     def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
-        layout = QtGui.QVBoxLayout(self)
+        QtWidgets.QWidget.__init__(self, parent)
+        layout = QtWidgets.QVBoxLayout(self)
         self.ipyConsole = _QIPythonWidget(customBanner="Welcome to MakeHuman's embedded Jupyter console\n")
 
         self.set_theme(G.app.theme)
