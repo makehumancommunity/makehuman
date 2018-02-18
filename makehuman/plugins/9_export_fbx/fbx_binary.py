@@ -27,13 +27,13 @@ import log
 from .fbx_utils import *
 
 # Units convertors!
-convert_sec_to_ktime = units_convertor("second", "ktime")
-convert_sec_to_ktime_iter = units_convertor_iter("second", "ktime")
+convert_sec_to_ktime = units_convertor(b"second", b"ktime")
+convert_sec_to_ktime_iter = units_convertor_iter(b"second", b"ktime")
 
-convert_mm_to_inch = units_convertor("millimeter", "inch")
+convert_mm_to_inch = units_convertor(b"millimeter", b"inch")
 
-convert_rad_to_deg = units_convertor("radian", "degree")
-convert_rad_to_deg_iter = units_convertor_iter("radian", "degree")
+convert_rad_to_deg = units_convertor(b"radian", b"degree")
+convert_rad_to_deg_iter = units_convertor_iter(b"radian", b"degree")
 
 
 # ##### Templates #####
@@ -47,9 +47,9 @@ def fbx_template_def_globalsettings(scene, settings, override_defaults=None, nbr
 
 def fbx_template_def_null(scene, settings, override_defaults=None, nbr_users=0):
     props = OrderedDict((
-        (b"Color", ((0.8, 0.8, 0.8), "p_color_rgb", False)),
-        (b"Size", (100.0, "p_double", False)),
-        (b"Look", (1, "p_enum", False)),  # Cross (0 is None, i.e. invisible?).
+        (b"Color", ((0.8, 0.8, 0.8), b"p_color_rgb", False)),
+        (b"Size", (100.0, b"p_double", False)),
+        (b"Look", (1, b"p_enum", False)),  # Cross (0 is None, i.e. invisible?).
     ))
     if override_defaults is not None:
         props.update(override_defaults)
@@ -65,12 +65,12 @@ def fbx_template_def_bone(scene, settings, override_defaults=None, nbr_users=0):
 
 def fbx_template_def_geometry(scene, settings, override_defaults=None, nbr_users=0):
     props = OrderedDict((
-        (b"Color", ((0.8, 0.8, 0.8), "p_color_rgb", False)),
-        (b"BBoxMin", ((0.0, 0.0, 0.0), "p_vector_3d", False)),
-        (b"BBoxMax", ((0.0, 0.0, 0.0), "p_vector_3d", False)),
-        (b"Primary Visibility", (True, "p_bool", False)),
-        (b"Casts Shadows", (True, "p_bool", False)),
-        (b"Receive Shadows", (True, "p_bool", False)),
+        (b"Color", ((0.8, 0.8, 0.8), b"p_color_rgb", False)),
+        (b"BBoxMin", ((0.0, 0.0, 0.0), b"p_vector_3d", False)),
+        (b"BBoxMax", ((0.0, 0.0, 0.0), b"p_vector_3d", False)),
+        (b"Primary Visibility", (True, b"p_bool", False)),
+        (b"Casts Shadows", (True, b"p_bool", False)),
+        (b"Receive Shadows", (True, b"p_bool", False)),
     ))
     if override_defaults is not None:
         props.update(override_defaults)
@@ -80,35 +80,35 @@ def fbx_template_def_geometry(scene, settings, override_defaults=None, nbr_users
 def fbx_template_def_material(scene, settings, override_defaults=None, nbr_users=0):
     # WIP...
     props = OrderedDict((
-        (b"ShadingModel", ("Phong", "p_string", False)),
-        (b"MultiLayer", (False, "p_bool", False)),
+        (b"ShadingModel", (b"Phong", b"p_string", False)),
+        (b"MultiLayer", (False, b"p_bool", False)),
         # Lambert-specific.
-        (b"EmissiveColor", ((0.0, 0.0, 0.0), "p_color", True)),
-        (b"EmissiveFactor", (1.0, "p_number", True)),
-        (b"AmbientColor", ((0.2, 0.2, 0.2), "p_color", True)),
-        (b"AmbientFactor", (1.0, "p_number", True)),
-        (b"DiffuseColor", ((0.8, 0.8, 0.8), "p_color", True)),
-        (b"DiffuseFactor", (1.0, "p_number", True)),
-        (b"TransparentColor", ((0.0, 0.0, 0.0), "p_color", True)),
-        (b"TransparencyFactor", (0.0, "p_number", True)),
-        (b"Opacity", (1.0, "p_number", True)),
-        (b"NormalMap", ((0.0, 0.0, 0.0), "p_vector_3d", False)),
-        (b"Bump", ((0.0, 0.0, 0.0), "p_vector_3d", False)),
-        (b"BumpFactor", (1.0, "p_double", False)),
-        (b"DisplacementColor", ((0.0, 0.0, 0.0), "p_color_rgb", False)),
-        (b"DisplacementFactor", (1.0, "p_double", False)),
-        (b"VectorDisplacementColor", ((0.0, 0.0, 0.0), "p_color_rgb", False)),
-        (b"VectorDisplacementFactor", (1.0, "p_double", False)),
+        (b"EmissiveColor", ((0.0, 0.0, 0.0), b"p_color", True)),
+        (b"EmissiveFactor", (1.0, b"p_number", True)),
+        (b"AmbientColor", ((0.2, 0.2, 0.2), b"p_color", True)),
+        (b"AmbientFactor", (1.0, b"p_number", True)),
+        (b"DiffuseColor", ((0.8, 0.8, 0.8), b"p_color", True)),
+        (b"DiffuseFactor", (1.0, b"p_number", True)),
+        (b"TransparentColor", ((0.0, 0.0, 0.0), b"p_color", True)),
+        (b"TransparencyFactor", (0.0, b"p_number", True)),
+        (b"Opacity", (1.0, b"p_number", True)),
+        (b"NormalMap", ((0.0, 0.0, 0.0), b"p_vector_3d", False)),
+        (b"Bump", ((0.0, 0.0, 0.0), b"p_vector_3d", False)),
+        (b"BumpFactor", (1.0, b"p_double", False)),
+        (b"DisplacementColor", ((0.0, 0.0, 0.0), b"p_color_rgb", False)),
+        (b"DisplacementFactor", (1.0, b"p_double", False)),
+        (b"VectorDisplacementColor", ((0.0, 0.0, 0.0), b"p_color_rgb", False)),
+        (b"VectorDisplacementFactor", (1.0, b"p_double", False)),
         # Phong-specific.
-        (b"SpecularColor", ((0.2, 0.2, 0.2), "p_color", True)),
-        (b"SpecularFactor", (1.0, "p_number", True)),
+        (b"SpecularColor", ((0.2, 0.2, 0.2), b"p_color", True)),
+        (b"SpecularFactor", (1.0, b"p_number", True)),
         # Not sure about the name, importer uses this (but ShininessExponent for tex prop name!)
         # And in fbx exported by sdk, you have one in template, the other in actual material!!! :/
         # For now, using both.
-        (b"Shininess", (20.0, "p_number", True)),
-        (b"ShininessExponent", (20.0, "p_number", True)),
-        (b"ReflectionColor", ((0.0, 0.0, 0.0), "p_color", True)),
-        (b"ReflectionFactor", (1.0, "p_number", True)),
+        (b"Shininess", (20.0, b"p_number", True)),
+        (b"ShininessExponent", (20.0, b"p_number", True)),
+        (b"ReflectionColor", ((0.0, 0.0, 0.0), b"p_color", True)),
+        (b"ReflectionFactor", (1.0, b"p_number", True)),
     ))
     if override_defaults is not None:
         props.update(override_defaults)
@@ -119,24 +119,24 @@ def fbx_template_def_texture_file(scene, settings, override_defaults=None, nbr_u
     # WIP...
     # XXX Not sure about all names!
     props = OrderedDict((
-        (b"TextureTypeUse", (0, "p_enum", False)),  # Standard.
-        (b"AlphaSource", (2, "p_enum", False)),  # Black (i.e. texture's alpha), XXX name guessed!.
-        (b"Texture alpha", (1.0, "p_double", False)),
-        (b"PremultiplyAlpha", (True, "p_bool", False)),
-        (b"CurrentTextureBlendMode", (1, "p_enum", False)),  # Additive...
-        (b"CurrentMappingType", (0, "p_enum", False)),  # UV.
-        (b"UVSet", ("default", "p_string", False)),  # UVMap name.
-        (b"WrapModeU", (0, "p_enum", False)),  # Repeat.
-        (b"WrapModeV", (0, "p_enum", False)),  # Repeat.
-        (b"UVSwap", (False, "p_bool", False)),
-        (b"Translation", ((0.0, 0.0, 0.0), "p_vector_3d", False)),
-        (b"Rotation", ((0.0, 0.0, 0.0), "p_vector_3d", False)),
-        (b"Scaling", ((1.0, 1.0, 1.0), "p_vector_3d", False)),
-        (b"TextureRotationPivot", ((0.0, 0.0, 0.0), "p_vector_3d", False)),
-        (b"TextureScalingPivot", ((0.0, 0.0, 0.0), "p_vector_3d", False)),
+        (b"TextureTypeUse", (0, b"p_enum", False)),  # Standard.
+        (b"AlphaSource", (2, b"p_enum", False)),  # Black (i.e. texture's alpha), XXX name guessed!.
+        (b"Texture alpha", (1.0, b"p_double", False)),
+        (b"PremultiplyAlpha", (True, b"p_bool", False)),
+        (b"CurrentTextureBlendMode", (1, b"p_enum", False)),  # Additive...
+        (b"CurrentMappingType", (0, b"p_enum", False)),  # UV.
+        (b"UVSet", (b"default", b"p_string", False)),  # UVMap name.
+        (b"WrapModeU", (0, b"p_enum", False)),  # Repeat.
+        (b"WrapModeV", (0, b"p_enum", False)),  # Repeat.
+        (b"UVSwap", (False, b"p_bool", False)),
+        (b"Translation", ((0.0, 0.0, 0.0), b"p_vector_3d", False)),
+        (b"Rotation", ((0.0, 0.0, 0.0), b"p_vector_3d", False)),
+        (b"Scaling", ((1.0, 1.0, 1.0), b"p_vector_3d", False)),
+        (b"TextureRotationPivot", ((0.0, 0.0, 0.0), b"p_vector_3d", False)),
+        (b"TextureScalingPivot", ((0.0, 0.0, 0.0), b"p_vector_3d", False)),
         # Not sure about those two...
-        (b"UseMaterial", (False, "p_bool", False)),
-        (b"UseMipMap", (False, "p_bool", False)),
+        (b"UseMaterial", (False, b"p_bool", False)),
+        (b"UseMipMap", (False, b"p_bool", False)),
     ))
     if override_defaults is not None:
         props.update(override_defaults)
@@ -159,11 +159,11 @@ def fbx_template_def_deformer(scene, settings, override_defaults=None, nbr_users
 
 def fbx_template_def_animstack(scene, settings, override_defaults=None, nbr_users=0):
     props = OrderedDict((
-        (b"Description", ("", "p_string", False)),
-        (b"LocalStart", (0, "p_timestamp", False)),
-        (b"LocalStop", (0, "p_timestamp", False)),
-        (b"ReferenceStart", (0, "p_timestamp", False)),
-        (b"ReferenceStop", (0, "p_timestamp", False)),
+        (b"Description", (b"", b"p_string", False)),
+        (b"LocalStart", (0, b"p_timestamp", False)),
+        (b"LocalStop", (0, b"p_timestamp", False)),
+        (b"ReferenceStart", (0, b"p_timestamp", False)),
+        (b"ReferenceStop", (0, b"p_timestamp", False)),
     ))
     if override_defaults is not None:
         props.update(override_defaults)
@@ -172,15 +172,15 @@ def fbx_template_def_animstack(scene, settings, override_defaults=None, nbr_user
 
 def fbx_template_def_animlayer(scene, settings, override_defaults=None, nbr_users=0):
     props = OrderedDict((
-        (b"Weight", (100.0, "p_number", True)),
-        (b"Mute", (False, "p_bool", False)),
-        (b"Solo", (False, "p_bool", False)),
-        (b"Lock", (False, "p_bool", False)),
-        (b"Color", ((0.8, 0.8, 0.8), "p_color_rgb", False)),
-        (b"BlendMode", (0, "p_enum", False)),
-        (b"RotationAccumulationMode", (0, "p_enum", False)),
-        (b"ScaleAccumulationMode", (0, "p_enum", False)),
-        (b"BlendModeBypass", (0, "p_ulonglong", False)),
+        (b"Weight", (100.0, b"p_number", True)),
+        (b"Mute", (False, b"p_bool", False)),
+        (b"Solo", (False, b"p_bool", False)),
+        (b"Lock", (False, b"p_bool", False)),
+        (b"Color", ((0.8, 0.8, 0.8), b"p_color_rgb", False)),
+        (b"BlendMode", (0, b"p_enum", False)),
+        (b"RotationAccumulationMode", (0, b"p_enum", False)),
+        (b"ScaleAccumulationMode", (0, b"p_enum", False)),
+        (b"BlendModeBypass", (0, b"p_ulonglong", False)),
     ))
     if override_defaults is not None:
         props.update(override_defaults)
@@ -189,7 +189,7 @@ def fbx_template_def_animlayer(scene, settings, override_defaults=None, nbr_user
 
 def fbx_template_def_animcurvenode(scene, settings, override_defaults=None, nbr_users=0):
     props = OrderedDict((
-        (FBX_ANIM_PROPSGROUP_NAME.encode(), (None, "p_compound", False)),
+        (FBX_ANIM_PROPSGROUP_NAME.encode(), (None, b"p_compound", False)),
     ))
     if override_defaults is not None:
         props.update(override_defaults)
@@ -219,17 +219,17 @@ def fbx_data_element_custom_properties(props, bid):
     """
     Store custom properties of blender ID bid (any mapping-like object, in fact) into FBX properties props.
     """
-    for k, v in list(bid.items()):
+    for k, v in bid.items():
         list_val = getattr(v, "to_list", lambda: None)()
 
         if isinstance(v, str):
-            elem_props_set(props, "p_string", k.encode(), v, custom=True)
+            elem_props_set(props, b"p_string", k.encode(), v, custom=True)
         elif isinstance(v, int):
-            elem_props_set(props, "p_integer", k.encode(), v, custom=True)
+            elem_props_set(props, b"p_integer", k.encode(), v, custom=True)
         elif isinstance(v, float):
-            elem_props_set(props, "p_double", k.encode(), v, custom=True)
+            elem_props_set(props, b"p_double", k.encode(), v, custom=True)
         elif list_val and len(list_val) == 3:
-            elem_props_set(props, "p_vector", k.encode(), list_val, custom=True)
+            elem_props_set(props, b"p_vector", k.encode(), list_val, custom=True)
 
 
 def fbx_data_bindpose_element(objectsParent, key, id, count):
@@ -255,10 +255,10 @@ def fbx_data_pose_node_element(bindposeParent, key, id, bindmat):
 
 def fbx_data_mesh_element(objectsParent, key, id, properties, coord, fvert, vnorm, texco, fuv):
     geom = elem_data_single_int64(objectsParent, b"Geometry", id)  #get_fbx_uuid_from_key(key))
-    geom.add_string(fbx_name_class(key.encode()))
+    geom.add_string(fbx_name_class(key))
     geom.add_string(b"Mesh")
 
-    name = key.split('::')[1]
+    name = key.split(b'::')[1]
 
     props = elem_properties(geom)
 
@@ -297,7 +297,7 @@ def fbx_data_mesh_element(objectsParent, key, id, properties, coord, fvert, vnor
 
     lay_nor = elem_data_single_int32(geom, b"LayerElementNormal", 0)
     elem_data_single_int32(lay_nor, b"Version", FBX_GEOMETRY_NORMAL_VERSION)
-    elem_data_single_string(lay_nor, b"Name", (name+"_Normal").encode())
+    elem_data_single_string(lay_nor, b"Name", name+b"_Normal")
     elem_data_single_string(lay_nor, b"MappingInformationType", b"ByPolygonVertex")
     elem_data_single_string(lay_nor, b"ReferenceInformationType", b"IndexToDirect")
 
@@ -380,7 +380,7 @@ def fbx_data_mesh_element(objectsParent, key, id, properties, coord, fvert, vnor
     uvindex = 0
     lay_uv = elem_data_single_int32(geom, b"LayerElementUV", uvindex)
     elem_data_single_int32(lay_uv, b"Version", FBX_GEOMETRY_UV_VERSION)
-    elem_data_single_string_unicode(lay_uv, b"Name", (name+"_UV").encode())
+    elem_data_single_string_unicode(lay_uv, b"Name", name+b"_UV")
     elem_data_single_string(lay_uv, b"MappingInformationType", b"ByPolygonVertex")
     elem_data_single_string(lay_uv, b"ReferenceInformationType", b"IndexToDirect")
 
@@ -394,7 +394,7 @@ def fbx_data_mesh_element(objectsParent, key, id, properties, coord, fvert, vnor
     # Face's materials.
     lay_mat = elem_data_single_int32(geom, b"LayerElementMaterial", 0)
     elem_data_single_int32(lay_mat, b"Version", FBX_GEOMETRY_MATERIAL_VERSION)
-    elem_data_single_string(lay_mat, b"Name", (name+"_Material").encode())
+    elem_data_single_string(lay_mat, b"Name", name+b"_Material")
 
     elem_data_single_string(lay_mat, b"MappingInformationType", b"AllSame")
     elem_data_single_string(lay_mat, b"ReferenceInformationType", b"IndexToDirect")
@@ -403,7 +403,7 @@ def fbx_data_mesh_element(objectsParent, key, id, properties, coord, fvert, vnor
     # Face's textures -perhaps obsolete.
     lay_tex = elem_data_single_int32(geom, b"LayerElementTexture", 0)
     elem_data_single_int32(lay_tex, b"Version", 101)
-    elem_data_single_string(lay_tex, b"Name", (name+"_Texture").encode())
+    elem_data_single_string(lay_tex, b"Name", name+b"_Texture")
 
     elem_data_single_string(lay_tex, b"MappingInformationType", b"ByPolygonVertex")
     elem_data_single_string(lay_tex, b"ReferenceInformationType", b"IndexToDirect")
@@ -453,7 +453,7 @@ def fbx_data_mesh_element(objectsParent, key, id, properties, coord, fvert, vnor
 
 def fbx_data_model_element(objectsParent, key, id, properties):
     mod = elem_data_single_int64(objectsParent, b"Model", id)
-    mod.add_string(fbx_name_class(key.encode()))
+    mod.add_string(fbx_name_class(key))
     mod.add_string(b"Mesh")
 
     elem_data_single_int32(mod, b"Version", FBX_MODELS_VERSION)
@@ -462,17 +462,17 @@ def fbx_data_model_element(objectsParent, key, id, properties):
     for pname, ptype, value, animatable, custom in get_properties(properties):
         elem_props_set(props, ptype, pname, value, animatable, custom)
 
-    elem_data_single_string(mod, b"Shading", "Y")
-    elem_data_single_string(mod, b"Culling", "CullingOff")
+    elem_data_single_string(mod, b"Shading", b"Y")
+    elem_data_single_string(mod, b"Culling", b"CullingOff")
 
 
 def fbx_data_material(objectsParent, key, id, properties):
     fbx_mat = elem_data_single_int64(objectsParent, b"Material", id)
-    fbx_mat.add_string(fbx_name_class(key))
+    fbx_mat.add_string(fbx_name_class(key.encode()))
     fbx_mat.add_string(b"")
 
     elem_data_single_int32(fbx_mat, b"Version", 102)
-    elem_data_single_string(fbx_mat, b"ShadingModel", "phong")
+    elem_data_single_string(fbx_mat, b"ShadingModel", b"phong")
     elem_data_single_int32(fbx_mat, b"MultiLayer", 0)
 
     props = elem_properties(fbx_mat)
@@ -514,7 +514,7 @@ def fbx_data_texture_file_element(objectsParent, key, id, video_key, video_id, t
 
     elem_data_single_float32_array(fbx_tex, b"ModelUVTranslation", [0,0])
     elem_data_single_float32_array(fbx_tex, b"ModelUVScaling", [1,1])
-    elem_data_single_string(fbx_tex, b"Texture_Alpha_Source", "None")
+    elem_data_single_string(fbx_tex, b"Texture_Alpha_Source", b"None")
     elem_data_single_int32_array(fbx_tex, b"Cropping", [0,0,0,0])
 
     props = elem_properties(fbx_tex)
@@ -522,7 +522,7 @@ def fbx_data_texture_file_element(objectsParent, key, id, video_key, video_id, t
         elem_props_set(props, ptype, pname, value, animatable, custom)
 
     # UseMaterial should always be ON imho.
-    elem_props_set(props, "p_bool", b"UseMaterial", True)
+    elem_props_set(props, b"p_bool", b"UseMaterial", True)
 
 
 def fbx_data_skeleton_bone_model(objectsParent, key, id, properties):
@@ -536,7 +536,7 @@ def fbx_data_skeleton_bone_model(objectsParent, key, id, properties):
     fbx_bo.add_string(b"LimbNode")
     elem_data_single_int32(fbx_bo, b"Version", FBX_MODELS_VERSION)
     elem_data_single_bool(fbx_bo, b"Shading", True)
-    elem_data_single_string(fbx_bo, b"Culling", "CullingOff")
+    elem_data_single_string(fbx_bo, b"Culling", b"CullingOff")
 
     props = elem_properties(fbx_bo)
     for pname, ptype, value, animatable, custom in get_properties(properties):
@@ -568,7 +568,7 @@ def fbx_data_skeleton_model(objectsParent, key, id, properties):
     fbx_bo.add_string(b"Null")
     elem_data_single_int32(fbx_bo, b"Version", FBX_MODELS_VERSION)
     elem_data_single_bool(fbx_bo, b"Shading", True)
-    elem_data_single_string(fbx_bo, b"Culling", "CullingOff")
+    elem_data_single_string(fbx_bo, b"Culling", b"CullingOff")
 
     props = elem_properties(fbx_bo)
     for pname, ptype, value, animatable, custom in get_properties(properties):
@@ -577,7 +577,7 @@ def fbx_data_skeleton_model(objectsParent, key, id, properties):
 
 def fbx_data_deformer(objectsParent, key, id, properties):
     fbx_skin = elem_data_single_int64(objectsParent, b"Deformer", id)
-    fbx_skin.add_string(fbx_name_class(key))
+    fbx_skin.add_string(fbx_name_class(key.encode()))
     fbx_skin.add_string(b"Skin")
 
     props = elem_properties(fbx_skin)
@@ -591,7 +591,7 @@ def fbx_data_deformer(objectsParent, key, id, properties):
 def fbx_data_subdeformer(objectsParent, key, id, indices, weights, bindmat, bindinv):
     # Create the cluster.
     fbx_clstr = elem_data_single_int64(objectsParent, b"Deformer", id)
-    fbx_clstr.add_string(fbx_name_class(key))
+    fbx_clstr.add_string(fbx_name_class(key.encode()))
     fbx_clstr.add_string(b"Cluster")
 
     elem_data_single_int32(fbx_clstr, b"Version", FBX_DEFORMER_CLUSTER_VERSION)
@@ -618,9 +618,9 @@ def fbx_header_elements(root, config, filepath, time=None):
     time is expected to be a datetime.datetime object, or None (using now() in this case).
     """
     import makehuman
-    app_vendor = "MakeHuman.org"
-    app_name = "MakeHuman"
-    app_ver = makehuman.getVersionStr()
+    app_vendor = b"MakeHuman.org"
+    app_name = b"MakeHuman"
+    app_ver = makehuman.getVersionStr().encode('utf-8')
 
     # ##### Start of FBXHeaderExtension element.
     header_ext = elem_empty(root, b"FBXHeaderExtension")
@@ -645,7 +645,7 @@ def fbx_header_elements(root, config, filepath, time=None):
     elem_data_single_int32(elem, b"Millisecond", time.microsecond // 1000)
 
     # The FBX converter refuses to load the character unless this is the creator.
-    elem_data_single_string_unicode(header_ext, b"Creator", "FBX SDK/FBX Plugins version 2013.3")
+    elem_data_single_string_unicode(header_ext, b"Creator", b"FBX SDK/FBX Plugins version 2013.3")
     #elem_data_single_string_unicode(header_ext, b"Creator", "%s - %s" % (app_name, app_ver))
 
     # 'SceneInfo' seems mandatory to get a valid FBX file...
@@ -665,19 +665,19 @@ def fbx_header_elements(root, config, filepath, time=None):
     elem_data_single_string(meta_data, b"Comment", b"")
 
     props = elem_properties(scene_info)
-    elem_props_set(props, "p_string_url", b"DocumentUrl", filepath)    # TODO set to current export filename?
-    elem_props_set(props, "p_string_url", b"SrcDocumentUrl", filepath)
+    elem_props_set(props, b"p_string_url", b"DocumentUrl", filepath)    # TODO set to current export filename?
+    elem_props_set(props, b"p_string_url", b"SrcDocumentUrl", filepath)
     original = elem_props_compound(props, b"Original")
-    original("p_string", b"ApplicationVendor", app_vendor)
-    original("p_string", b"ApplicationName", app_name)
-    original("p_string", b"ApplicationVersion", app_ver)
-    original("p_datetime", b"DateTime_GMT", "")
-    original("p_string", b"FileName", "")
+    original(b"p_string", b"ApplicationVendor", app_vendor)
+    original(b"p_string", b"ApplicationName", app_name)
+    original(b"p_string", b"ApplicationVersion", app_ver)
+    original(b"p_datetime", b"DateTime_GMT", b"")
+    original(b"p_string", b"FileName", b"")
     lastsaved = elem_props_compound(props, b"LastSaved")
-    lastsaved("p_string", b"ApplicationVendor", app_vendor)
-    lastsaved("p_string", b"ApplicationName", app_name)
-    lastsaved("p_string", b"ApplicationVersion", app_ver)
-    lastsaved("p_datetime", b"DateTime_GMT", "")
+    lastsaved(b"p_string", b"ApplicationVendor", app_vendor)
+    lastsaved(b"p_string", b"ApplicationName", app_name)
+    lastsaved(b"p_string", b"ApplicationVersion", app_ver)
+    lastsaved(b"p_datetime", b"DateTime_GMT", b"")
 
     # ##### End of FBXHeaderExtension element.
 
@@ -686,12 +686,12 @@ def fbx_header_elements(root, config, filepath, time=None):
 
     # CreationTime is replaced by dummy value currently, but anyway...
     elem_data_single_string_unicode(root, b"CreationTime",
-                                    "{:04}-{:02}-{:02} {:02}:{:02}:{:02}:{:03}"
+                                    bytes("{:04}-{:02}-{:02} {:02}:{:02}:{:02}:{:03}"
                                     "".format(time.year, time.month, time.day, time.hour, time.minute, time.second,
-                                              time.microsecond * 1000))
+                                              time.microsecond * 1000), encoding='utf-8'))
 
     #elem_data_single_string_unicode(root, b"Creator", "%s - %s" % (app_name, app_ver))
-    elem_data_single_string_unicode(root, b"Creator", "FBX SDK/FBX Plugins version 2013.3 build=20120911")
+    elem_data_single_string_unicode(root, b"Creator", b"FBX SDK/FBX Plugins version 2013.3 build=20120911")
 
     # ##### Start of GlobalSettings element.
     global_settings = elem_empty(root, b"GlobalSettings")
@@ -705,24 +705,24 @@ def fbx_header_elements(root, config, filepath, time=None):
     # Currently not sure about that, but looks like default unit of FBX is cm...
     #scale_factor = 10.0/config.scale  # MH scales the mesh coordinates, the scale factor is a constant
     scale_factor = 10
-    elem_props_set(props, "p_integer", b"UpAxis", up_axis[0])
-    elem_props_set(props, "p_integer", b"UpAxisSign", up_axis[1])
-    elem_props_set(props, "p_integer", b"FrontAxis", front_axis[0])
-    elem_props_set(props, "p_integer", b"FrontAxisSign", front_axis[1])
-    elem_props_set(props, "p_integer", b"CoordAxis", coord_axis[0])
-    elem_props_set(props, "p_integer", b"CoordAxisSign", coord_axis[1])
-    elem_props_set(props, "p_integer", b"OriginalUpAxis", -1)
-    elem_props_set(props, "p_integer", b"OriginalUpAxisSign", 1)
-    elem_props_set(props, "p_double", b"UnitScaleFactor", scale_factor)
-    elem_props_set(props, "p_double", b"OriginalUnitScaleFactor", scale_factor)
-    elem_props_set(props, "p_color_rgb", b"AmbientColor", (0.0, 0.0, 0.0))
-    elem_props_set(props, "p_string", b"DefaultCamera", "Producer Perspective")
+    elem_props_set(props, b"p_integer", b"UpAxis", up_axis[0])
+    elem_props_set(props, b"p_integer", b"UpAxisSign", up_axis[1])
+    elem_props_set(props, b"p_integer", b"FrontAxis", front_axis[0])
+    elem_props_set(props, b"p_integer", b"FrontAxisSign", front_axis[1])
+    elem_props_set(props, b"p_integer", b"CoordAxis", coord_axis[0])
+    elem_props_set(props, b"p_integer", b"CoordAxisSign", coord_axis[1])
+    elem_props_set(props, b"p_integer", b"OriginalUpAxis", -1)
+    elem_props_set(props, b"p_integer", b"OriginalUpAxisSign", 1)
+    elem_props_set(props, b"p_double", b"UnitScaleFactor", scale_factor)
+    elem_props_set(props, b"p_double", b"OriginalUnitScaleFactor", scale_factor)
+    elem_props_set(props, b"p_color_rgb", b"AmbientColor", (0.0, 0.0, 0.0))
+    elem_props_set(props, b"p_string", b"DefaultCamera", b"Producer Perspective")
 
     # Global timing data.
-    elem_props_set(props, "p_enum", b"TimeMode", 0)
-    elem_props_set(props, "p_timestamp", b"TimeSpanStart", 0)
-    elem_props_set(props, "p_timestamp", b"TimeSpanStop", 46186158000)
-    elem_props_set(props, "p_double", b"CustomFrameRate", -1)
+    elem_props_set(props, b"p_enum", b"TimeMode", 0)
+    elem_props_set(props, b"p_timestamp", b"TimeSpanStart", 0)
+    elem_props_set(props, b"p_timestamp", b"TimeSpanStop", 46186158000)
+    elem_props_set(props, b"p_double", b"CustomFrameRate", -1)
 
     # ##### End of GlobalSettings element.
 
@@ -739,12 +739,12 @@ def fbx_documents_elements(root, name, id):
     elem_data_single_int32(docs, b"Count", 1)
 
     doc = elem_data_single_int64(docs, b"Document", id)
-    doc.add_string_unicode("Scene")
-    doc.add_string_unicode("Scene")
+    doc.add_string_unicode(b"Scene")
+    doc.add_string_unicode(b"Scene")
 
     props = elem_properties(doc)
-    elem_props_set(props, "p_object", b"SourceObject")
-    elem_props_set(props, "p_string", b"ActiveAnimStackName", "")
+    elem_props_set(props, b"p_object", b"SourceObject")
+    elem_props_set(props, b"p_string", b"ActiveAnimStackName", b"")
 
     # XXX Some kind of ID? Offset?
     #     Anyway, as long as we have only one doc, probably not an issue.

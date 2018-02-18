@@ -147,11 +147,73 @@ def writeObjectDefs(fp, meshes, config):
     ]
 
     if config.binary:
+        properties_mat = [
+            (b"ShadingModel", b"p_string", b"Phong"),
+            (b"MultiLayer", b"p_bool", 0),
+            (b"EmissiveColor", b"p_color", [0, 0, 0], True),
+            (b"EmissiveFactor", b"p_number", 1, True),
+            (b"AmbientColor", b"p_color", [0.2, 0.2, 0.2], True),
+            (b"AmbientFactor", b"p_number", 1, True),
+            (b"DiffuseColor", b"p_color", [0.8, 0.8, 0.8], True),
+            (b"DiffuseFactor", b"p_number", 1, True),
+            (b"Bump", b"p_vector_3d", [0, 0, 0]),
+            (b"NormalMap", b"p_vector_3d", [0, 0, 0]),
+            (b"BumpFactor", b"p_double", 1),
+            (b"TransparentColor", b"p_color", [0, 0, 0], True),
+            (b"TransparencyFactor", b"p_number", 0, True),
+            (b"DisplacementColor", b"p_color_rgb", [0, 0, 0]),
+            (b"DisplacementFactor", b"p_double", 1),
+            (b"VectorDisplacementColor", b"p_color_rgb", [0, 0, 0]),
+            (b"VectorDisplacementFactor", b"p_double", 1),
+            (b"SpecularColor", b"p_color", [0.2, 0.2, 0.2], True),
+            (b"SpecularFactor", b"p_number", 1, True),
+            (b"ShininessExponent", b"p_number", 20, True),
+            (b"ReflectionColor", b"p_color", [0, 0, 0], True),
+            (b"ReflectionFactor", b"p_number", 1, True)
+        ]
+
+        properties_tex = [
+            (b"TextureTypeUse", b"p_enum", 0),
+            (b"Texture alpha", b"p_number", 1, True),
+            (b"CurrentMappingType", b"p_enum", 0),
+            (b"WrapModeU", b"p_enum", 0),
+            (b"WrapModeV", b"p_enum", 0),
+            (b"UVSwap", b"p_bool", 0),
+            (b"PremultiplyAlpha", b"p_bool", 1),
+            (b"Translation", b"p_vector", [0, 0, 0], True),
+            (b"Rotation", b"p_vector", [0, 0, 0], True),
+            (b"Scaling", b"p_vector", [1, 1, 1], True),
+            (b"TextureRotationPivot", b"p_vector_3d", [0, 0, 0]),
+            (b"TextureScalingPivot", b"p_vector_3d", [0, 0, 0]),
+            (b"CurrentTextureBlendMode", b"p_enum", 1),
+            (b"UVSet", b"p_string", b"default"),
+            (b"UseMaterial", b"p_bool", 0),
+            (b"UseMipMap", b"p_bool", 0)
+        ]
+
+        properties_vid = [
+            (b"ImageSequence", b"p_bool", 0),
+            (b"ImageSequenceOffset", b"p_integer", 0),
+            (b"FrameRate", b"p_double", 0),
+            (b"LastFrame", b"p_integer", 0),
+            (b"Width", b"p_integer", 0),
+            (b"Height", b"p_integer", 0),
+            (b"Path", b"p_string_xrefurl", ""),
+            (b"StartFrame", b"p_integer", 0),
+            (b"StopFrame", b"p_integer", 0),
+            (b"PlaySpeed", b"p_double", 0),
+            (b"Offset", b"p_timestamp", 0),
+            (b"InterlaceMode", b"p_enum", 0),
+            (b"FreeRunning", b"p_bool", 0),
+            (b"Loop", b"p_bool", 0),
+            (b"AccessMode", b"p_enum", 0)
+        ]
+
         from . import fbx_binary
-        elem = fbx_binary.get_child_element(fp, 'Definitions')
-        fbx_binary.fbx_template_generate(elem, "Material", nMaterials, "FbxSurfacePhong", properties_mat)
-        fbx_binary.fbx_template_generate(elem, "Texture", nTextures, "FbxFileTexture", properties_tex)
-        fbx_binary.fbx_template_generate(elem, "Video", nImages, "FbxVideo", properties_vid)
+        elem = fbx_binary.get_child_element(fp, b'Definitions')
+        fbx_binary.fbx_template_generate(elem, b"Material", nMaterials, b"FbxSurfacePhong", properties_mat)
+        fbx_binary.fbx_template_generate(elem, b"Texture", nTextures, b"FbxFileTexture", properties_tex)
+        fbx_binary.fbx_template_generate(elem, b"Video", nImages, b"FbxVideo", properties_vid)
         return
 
     from . import fbx_utils
@@ -228,8 +290,20 @@ def writeMaterial(fp, mesh, config):
     ]
 
     if config.binary:
+        properties = [
+            (b"DiffuseColor", b"p_color", mat.diffuseColor.asTuple(), b"A"),
+            (b"Diffuse", b"p_vector_3d", mat.diffuseColor.asTuple(), b"A"),
+            (b"SpecularColor", b"p_color", mat.specularColor.asTuple(), b"A"),
+            (b"Specular", b"p_vector_3d", mat.specularColor.asTuple(), b"A"),
+            (b"Shininess", b"p_double", mat.shininess, b"A"),
+            (b"Reflectivity", b"p_double", 0, b"A"),
+            (b"Emissive", b"p_vector_3d", mat.emissiveColor.asTuple(), b"A"),
+            (b"Ambient", b"p_vector_3d", mat.ambientColor.asTuple(), b"A"),
+            (b"TransparencyFactor", b"p_number", mat.transparencyMapIntensity, True, b"A"),
+            (b"Opacity", b"p_double", mat.opacity, b"A")
+        ]
         from . import fbx_binary
-        elem = fbx_binary.get_child_element(fp, 'Objects')
+        elem = fbx_binary.get_child_element(fp, b'Objects')
         fbx_binary.fbx_data_material(elem, key, id, properties)
         return
 
@@ -266,8 +340,16 @@ def writeTexture(fp, filepath, channel, config):
     ]
 
     if config.binary:
+        properties_vid = [
+            (b"Path", b"p_string_url", filepath)
+        ]
+
+        properties_tex = [
+            (b"MHName", b"p_string", tkey, False, True)
+        ]
+
         from . import fbx_binary
-        elem = fbx_binary.get_child_element(fp, 'Objects')
+        elem = fbx_binary.get_child_element(fp, b'Objects')
         fbx_binary.fbx_data_texture_file_element(elem, tkey, tid, vkey, vid, filepath, relpath, properties_tex, properties_vid)
         return
 
