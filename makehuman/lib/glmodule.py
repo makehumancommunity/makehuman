@@ -904,7 +904,8 @@ def renderToBuffer(width, height, productionRender = True):
     # Restore viewport dimensions to those of the window
     G.windowWidth = oldWidth
     G.windowHeight = oldHeight
-    glPushAttrib(GL_VIEWPORT_BIT)
+    # glPushAttrib(GL_VIEWPORT_BIT)
+    glPopAttrib()
     glViewport(0, 0, oldWidth, oldHeight)
 
     return surface
@@ -985,7 +986,8 @@ def renderAlphaMask(width, height, productionRender = True):
     # Restore viewport dimensions to those of the window
     G.windowWidth = oldWidth
     G.windowHeight = oldHeight
-    glPushAttrib(GL_VIEWPORT_BIT)
+    #glPushAttrib(GL_VIEWPORT_BIT)
+    glPopAttrib()
     glViewport(0, 0, oldWidth, oldHeight)
 
     return surface
