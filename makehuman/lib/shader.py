@@ -40,6 +40,7 @@ import os.path
 import numpy as np
 from OpenGL.GL import *
 from OpenGL.GL.ARB.texture_multisample import *
+from OpenGL import GL
 import texture
 import log
 from core import G
@@ -145,6 +146,9 @@ class VectorUniform(Uniform):
         return self.values
 
 class SamplerUniform(Uniform):
+
+    currentSampler = 0
+
     textureTargets = {
         GL_SAMPLER_1D:                                  GL_TEXTURE_1D,
         GL_SAMPLER_2D:                                  GL_TEXTURE_2D,
@@ -285,7 +289,7 @@ class Shader(object):
 
             cls._glsl_version_str = OpenGL.GL.glGetString(OpenGL.GL.GL_SHADING_LANGUAGE_VERSION)
             # true string rather than byte string
-            cls._glsl_version_str = cls._glsl_version_str.decode("utf-8")
+            cls._glsl_version_str = str(cls._glsl_version_str, encoding='utf-8')
             log.debug(cls._glsl_version_str)
             if cls._glsl_version_str:
                 import re
