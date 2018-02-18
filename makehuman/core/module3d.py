@@ -308,9 +308,7 @@ class Object3D(object):
         fuvs = self.fuvs[self.face_mask]
         uv_idx = np.unique(fuvs.reshape(-1))
         inverse_uv_idx = - np.ones(self.texco.shape[0], dtype=np.int32)
-        #inverse_uv_idx[uv_idx] = np.arange(self.texco.shape[0], dtype=np.int32)
-        interval = np.arange(self.texco.shape[0], dtype=np.int32)
-        inverse_uv_idx[uv_idx] = interval[uv_idx]
+        inverse_uv_idx[uv_idx] = np.arange(self.texco.shape[0], dtype=np.int32)
         for i in range(self.vertsPerPrimitive):
             fuvs[:,i] = inverse_uv_idx[fuvs[:,i]]
 
