@@ -44,7 +44,7 @@ import mh
 import gui
 import gui3d
 from core import G
-from getpath import pathToUnicode
+from getpath import pathToUnicode, formatPath
 
 
 def saveMHM(path):
@@ -72,7 +72,7 @@ def saveMHM(path):
     #G.app.clearUndoRedo()
 
     # Remember last save folder
-    gui3d.app.setSetting('savedir', os.path.dirname(path))
+    gui3d.app.setSetting('savedir', formatPath(os.path.dirname(path)))
 
     G.app.status('Your model has been saved to %s.', path)
 

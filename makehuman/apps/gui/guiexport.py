@@ -42,6 +42,7 @@ import mh
 import gui
 import gui3d
 import log
+from getpath import formatPath
 
 
 class ExportTaskView(gui3d.TaskView):
@@ -96,7 +97,7 @@ class ExportTaskView(gui3d.TaskView):
                 os.makedirs(dir)
 
             # Remember last used export folder
-            gui3d.app.setSetting('exportdir', dir)
+            gui3d.app.setSetting('exportdir', formatPath(dir))
 
             def filename(targetExt, different = False):
                 if not different and ext != '' and ('.' + targetExt.lower()) != ext.lower():

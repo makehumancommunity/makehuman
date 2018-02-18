@@ -40,6 +40,7 @@ import mh
 import gui3d
 import filechooser as fc
 import qtgui as gui
+from getpath import formatPath
 
 
 class HumanFileSort(fc.FileSort):
@@ -89,7 +90,7 @@ class LoadTaskView(gui3d.TaskView):
             self.filechooser.setPaths([event.path])
             self.filechooser.refresh()
             # Remember load folder
-            gui3d.app.setSetting('loaddir', event.path)
+            gui3d.app.setSetting('loaddir', formatPath(event.path))
 
         loadpath = gui3d.app.getSetting('loaddir')
         self.filechooser = fc.IconListFileChooser(loadpath, 'mhm', 'thumb', mh.getSysDataPath('notfound.thumb'), sort=HumanFileSort())
