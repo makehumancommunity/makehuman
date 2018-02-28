@@ -99,6 +99,7 @@ def getVersionStr(verbose=True, full=False):
     if isRelease() and not full:
         return _versionStr()
     else:
+        from mhversion import MHVersion
         mhv = MHVersion()
         return mhv.currentBranch + ":" + mhv.currentShortCommit
 
