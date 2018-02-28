@@ -571,7 +571,6 @@ def main():
         make_user_dir()
         get_platform_paths()
         redirect_standard_streams()
-        get_hg_revision()
         os.environ['MH_VERSION'] = getVersionStr()
         os.environ['MH_SHORT_VERSION'] = getShortVersion()
         os.environ['MH_MESH_VERSION'] = getBasemeshVersion()
