@@ -22,12 +22,15 @@
 # Git branch to use for version information (default: use gitutils to deduce)
 #gitBranch=master
 
+# Location where to clone the assets repository (default: makehuman user home)
+#assetRepoLocation=/home/joepal/source/makehuman/nightly-builds/official_assets
+
 # Title to use inside MakeHuman, used for writing to version info
 # (default: use the defaults from MHVersion)
 #title=makehuman test build
 
 # MakeHuman version (default: use the defaults from MHVersion)
-#version
+#version=1.1.2
 
 # Release status (default: not specified, obtained from declaration
 # in makehuman/makehuman.py) If set replaces contents of that file in export. 

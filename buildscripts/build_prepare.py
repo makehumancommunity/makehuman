@@ -108,6 +108,7 @@ class MHAppExporter(object):
         self.targetFolder = exportFolder
         self.skipScripts = skipScripts
         self.noDownload = noDownload
+        self.assetRepoLocation = None
 
         sys.path = [self.sourceFile('makehuman'), self.sourceFile('makehuman/lib')] + sys.path
 
@@ -118,6 +119,11 @@ class MHAppExporter(object):
         self.VERSION = None
         self.IS_RELEASE = None
         self.VERSION_SUB = None
+
+        self.overrideTitle = None
+        self.overrideVersion = None
+        self.overrideGitBranch = None
+        self.overrideGitCommit = None
 
         def _conf_get(config, section, option, defaultVal):
             try:
@@ -149,6 +155,12 @@ class MHAppExporter(object):
             noDownload = _conf_get(self.config, 'BuildPrepare', 'noDownload', None)
             if noDownload is not None:
                 self.noDownload = noDownload.lower() in ['yes', 'true']
+
+            self.assetRepoLocation = _conf_get(self.config, 'BuildPrepare', 'assetRepoLocation', None)
+            self.overrideTitle = _conf_get(self.config, 'BuildPrepare', 'title', None)
+            self.overrideVersion = _conf_get(self.config, 'BuildPrepare', 'version', None)
+            self.overrideGitBranch = _conf_get(self.config, 'BuildPrepare', 'gitBranch', None)
+            self.overrideGitCommit = _conf_get(self.config, 'BuildPrepare', 'gitCommit', None)
 
     def isRelease(self):
         if self.IS_RELEASE is not None:
@@ -319,6 +331,8 @@ class MHAppExporter(object):
         if not self.noDownload:
             ###DOWNLOAD ASSETS
             try:
+                if not self.assetRepoLocation is None:
+                    os.environ["GIT_OFFICIAL_CLONE_LOCATION"] = self.assetRepoLocation
                 self.runProcess( [pythonCmd,"download_assets_git.py"] )
             except subprocess.CalledProcessError:
                 print("check that download_assets_git.py is working correctly")
@@ -398,6 +412,20 @@ class MHAppExporter(object):
             os.makedirs(os.path.dirname( versionFile ))
 
         mhv = mhversion.MHVersion()
+
+        if not self.overrideVersion is None:
+            mhv.version = self.overrideVersion
+
+        if not self.overrideTitle is None:
+            mhv.title = self.overrideTitle
+
+        if not self.overrideGitBranch is None:
+            mhv.currentBranch = self.overrideGitBranch
+
+        if not self.overrideGitCommit is None:
+            mhv.currentShortCommit = self.overrideGitcommit
+            mhv.currentLongCommit = self.overrideGitcommit
+
         mhv.writeVersionFile(versionFile)
 
 class ExportInfo(object):
