@@ -94,7 +94,7 @@ class MHVersion:
         if os.path.exists(path):
             jsonin = None
             with open(path,'r') as f:
-                jsonin = json.get(f)
+                jsonin = json.load(f)
 
             if not jsonin is None:
                 if "currentShortCommit" in jsonin:
@@ -111,6 +111,9 @@ class MHVersion:
 
                 if "version" in jsonin:
                     self.version = jsonin["version"]
+
+                if "isRelease" in jsonin:
+                    self.isRelease = jsonin["isRelease"]
 
     def writeVersionFile(self, overrideVersionPath=None):
         path = overrideVersionPath
@@ -135,6 +138,9 @@ class MHVersion:
 
         if not self.version is None:
             out["version"] = self.version
+
+        if not self.isRelease is None:
+            out["isRelease"] = self.isRelease
 
         with open(path,'w') as f:
             json.dump(out,f, sort_keys=True, indent=4)
