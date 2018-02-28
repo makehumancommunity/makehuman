@@ -42,10 +42,11 @@ import getpath
 import subprocess
 import gitutils
 import makehuman
+import json
 
 class MHVersion:
 
-    def __init__(self):
+    def __init__(self, versionPath = None):
 
         self.currentShortCommit = "UNKNOWN"
         self.currentLongCommit = "UNKNOWN"
@@ -54,6 +55,7 @@ class MHVersion:
         self.version = makehuman.getVersionDigitsStr()
         self.isRelease = makehuman.isRelease()
         self.fullTitle = None
+        self.versionPath = versionPath
 
         self._checkForGitInfo()
         self._checkForVersionFile()
@@ -85,4 +87,55 @@ class MHVersion:
                 self.currentLongCommit = commit
 
     def _checkForVersionFile(self):
-        pass
+        path = self.versionPath
+        if path is None:
+            path = getpath.getSysDataPath("VERSION")
+
+        if os.path.exists(path):
+            jsonin = None
+            with open(path,'r') as f:
+                jsonin = json.get(f)
+
+            if not jsonin is None:
+                if "currentShortCommit" in jsonin:
+                    self.currentShortCommit = jsonin["currentShortCommit"]
+
+                if "currentLongCommit" in jsonin:
+                    self.currentLongCommit = jsonin["currentLongCommit"]
+
+                if "currentBranch" in jsonin:
+                    self.currentBranch = jsonin["currentBranch"]
+
+                if "title" in jsonin:
+                    self.title = jsonin["title"]
+
+                if "version" in jsonin:
+                    self.version = jsonin["version"]
+
+    def writeVersionFile(self, overrideVersionPath=None):
+        path = overrideVersionPath
+        if path is None:
+            path = self.versionPath
+        if path is None:
+            path = getpath.getSysDataPath("VERSION")
+
+        out = dict()
+
+        if not self.currentShortCommit is None and not self.currentShortCommit == "UNKNOWN":
+            out["currentShortCommit"] = self.currentShortCommit
+
+        if not self.currentLongCommit is None and not self.currentLongCommit == "UNKNOWN":
+            out["currentLongCommit"] = self.currentLongCommit
+
+        if not self.currentBranch is None and not self.currentBranch == "UNKNOWN":
+            out["currentBranch"] = self.currentBranch
+
+        if not self.title is None and not self.title == "MakeHuman Community":
+            out["title"] = self.title
+
+        if not self.version is None:
+            out["version"] = self.version
+
+        with open(path,'w') as f:
+            json.dump(out,f, sort_keys=True, indent=4)
+
