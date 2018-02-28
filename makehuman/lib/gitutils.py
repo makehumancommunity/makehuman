@@ -81,6 +81,7 @@ def _findPathToGitUnixoid():
     global _gitdir
 
     for path in os.environ["PATH"].split(os.pathsep):
+        print(path)
         path = path.strip('"')
         exe_file = os.path.join(path, 'git')
         if os.path.isfile(exe_file):
@@ -233,4 +234,53 @@ def getCurrentCommit(short = True):
         commit = None
 
     return commit
+
+def hasGitLFSSupport():
+
+    global _gitcmd
+    global _gitdir
+
+    args = [_gitcmd,"lfs","install"]
+
+    try:
+        subprocess.check_call(args)
+    except Exception as e:
+        print(e)
+        return False
+
+    return True
+ 
+def cloneRepo(repoUrl,repoDest,branch="master"):
+
+    global _gitcmd
+    global _gitdir
+
+    currentwd = os.getcwd()
+
+    args = [_gitcmd,"clone",repoUrl,repoDest]
+    subprocess.check_call(args)
+
+    os.chdir(repoDest)
+
+    args = [_gitcmd,"checkout",branch]
+    subprocess.check_call(args)
+
+    os.chdir(currentwd)
+
+def pullRepo(repoLoc,branch="master"):
+
+    global _gitcmd
+    global _gitdir
+
+    currentwd = os.getcwd()
+    os.chdir(repoLoc)
+
+    args = [_gitcmd,"checkout",branch]
+    subprocess.check_call(args)
+
+    args = [_gitcmd,"pull","origin",branch]
+    subprocess.check_call(args)
+
+    os.chdir(currentwd)
+
 
