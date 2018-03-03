@@ -164,7 +164,7 @@ class UserPluginsTaskView(gui3d.TaskView):
             self.home = os.path.dirname(filename)
 
         @self.reloadButton.mhEvent
-        def onClicked(event):ma
+        def onClicked(event):
             for child in self.userPluginBox.children:
                 self.userPluginBox.removeWidget(child)
             updatePlugins = self.getUserPlugins()
