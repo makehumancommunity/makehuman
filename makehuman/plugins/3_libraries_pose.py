@@ -156,6 +156,9 @@ class PoseLibraryTaskView(gui3d.TaskView, filecache.MetadataCacher):
             anim = self.loadMhp(filepath)
         elif os.path.splitext(filepath)[1].lower() == '.bvh':
             anim = self.loadBvh(filepath, convertFromZUp="auto")
+            if not anim:
+                log.error('Cannot load animation from %s' % filepath)
+                return
         else:
             log.error("Cannot load pose file %s: File type unknown." % filepath)
             return
@@ -172,6 +175,11 @@ class PoseLibraryTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     def loadBvh(self, filepath, convertFromZUp="auto"):
         bvh_file = bvh.load(filepath, convertFromZUp)
+        if COMPARE_BONE not in bvh_file.joints:
+            msg = 'The pose file cannot be used. It uses a rig different from MakeHuman\'s defualt rig'
+            G.app.prompt('Error', msg, 'OK')
+            log.error('Pose file %s does not use the default rig.' % filepath)
+            return None
         anim = bvh_file.createAnimationTrack(self.human.getBaseSkeleton())
         if "root" in bvh_file.joints:
             posedata = anim.getAtFramePos(0, noBake=True)
