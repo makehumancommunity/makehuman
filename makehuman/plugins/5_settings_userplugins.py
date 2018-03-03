@@ -153,7 +153,7 @@ class UserPluginsTaskView(gui3d.TaskView):
                 try:
                     shutil.copy2(filename, getpath.getPath('plugins'))
                 except OSError as e:
-                    gui3d.app.prompt('Error', 'Failed to copy {0:s} to user plugins folder', 'OK')
+                    gui3d.app.prompt('Error', 'Failed to copy {0:s} to user plugins folder'.format(filename), 'OK')
                 for child in self.userPluginBox.children:
                     self.userPluginBox.removeWidget(child)
                 updatePlugins = self.getUserPlugins()
@@ -164,7 +164,7 @@ class UserPluginsTaskView(gui3d.TaskView):
             self.home = os.path.dirname(filename)
 
         @self.reloadButton.mhEvent
-        def onClicked(event):
+        def onClicked(event):ma
             for child in self.userPluginBox.children:
                 self.userPluginBox.removeWidget(child)
             updatePlugins = self.getUserPlugins()
