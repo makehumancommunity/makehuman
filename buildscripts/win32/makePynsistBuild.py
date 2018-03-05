@@ -101,7 +101,8 @@ rootdir = os.path.abspath(os.path.join(build_scripts,".."))
 icons = os.path.join(rootdir,"makehuman","icons")
 
 iconSrc = os.path.join(icons,"makehuman-large.ico")
-iconDst os.path.join(exportDir,"makehuman.ico")
+iconDst = os.path.join(exportDir,"makehuman.ico")
 
 shutil.copy(wrapperSrc,wrapperDst)
+shutil.copy(iconSrc,iconDst)
 
