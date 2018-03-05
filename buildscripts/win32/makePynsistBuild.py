@@ -93,3 +93,8 @@ pynsist = pynsist.replace("TITLE",title)
 with open(pynsistOut,'w') as f:
     f.write(pynsist)
 
+wrapperSrc = os.path.join(build_scripts,'win32','mhstartwrapper.py')
+wrapperDst = os.path.join(exportDir,'mhstartwrapper.py')
+
+shutil.copy(wrapperSrc,wrapperDst)
+
