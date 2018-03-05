@@ -52,7 +52,7 @@ EXCLUDES = ['.gitignore','.hgignore', '.hgtags', '.hgeol', '*.target', '*.obj', 
 EXCLUDES_RELEASE = ['testsuite']
 
 # Include filter for additional asset files (not on hg) to copy (glob syntax)
-ASSET_INCLUDES = ['*.npz', '*.mhpxy', '*.list', '*.thumb', '*.png', '*.json', '*.csv', '*.meta', '*.mhskel', '*.mhw', '*.mhmat', '*.mhclo', '*.proxy', 'glsl/*.txt', 'languages/*.ini', "*.bvh", "*.mhm", "*.qss", "*.mht", "*.svg", "*.mhpose", "icons/makehuman_bg.svg", "icons/makehuman.png", "icons/makehuman-large*", "logging.ini"]
+ASSET_INCLUDES = ['*.npz', '*.mhpxy', '*.list', '*.thumb', '*.png', '*.json', '*.csv', '*.meta', '*.mhskel', '*.mhw', '*.mhmat', '*.mhclo', '*.proxy', 'glsl/*.txt', 'languages/*.ini', "*.bvh", "*.mhm", "*.qss", "*.mht", "*.svg", "*.mhpose", "icons/makehuman_bg.svg", "icons/makehuman.png", "logging.ini"]
 
 # Even if empty, create these folders (relative to export path)
 CREATE_FOLDERS = ['makehuman/data/backgrounds', 'makehuman/data/clothes', 'makehuman/data/teeth', 'makehuman/data/eyelashes', 'makehuman/data/tongue']

@@ -97,5 +97,11 @@ with open(pynsistOut,'w') as f:
 wrapperSrc = os.path.join(build_scripts,'win32','mhstartwrapper.py')
 wrapperDst = os.path.join(exportDir,'mhstartwrapper.py')
 
+rootdir = os.path.abspath(os.path.join(build_scripts,".."))
+icons = os.path.join(rootdir,"makehuman","icons")
+
+iconSrc = os.path.join(icons,"makehuman-large.ico")
+iconDst os.path.join(exportDir,"makehuman.ico")
+
 shutil.copy(wrapperSrc,wrapperDst)
 
