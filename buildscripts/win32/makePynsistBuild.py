@@ -42,6 +42,7 @@ import os
 import sys
 import configparser
 import datetime
+import shutil
 
 pathname = os.path.dirname(sys.argv[0])
 build_scripts = os.path.abspath(os.path.join(pathname,'..'))
