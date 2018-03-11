@@ -81,7 +81,6 @@ def _findPathToGitUnixoid():
     global _gitdir
 
     for path in os.environ["PATH"].split(os.pathsep):
-        print(path)
         path = path.strip('"')
         exe_file = os.path.join(path, 'git')
         if os.path.isfile(exe_file):
