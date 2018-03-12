@@ -40,11 +40,11 @@ from core import G
 from getpath import getPath, getDataPath, getSysDataPath, getSysPath, getRelativePath
 from makehuman import getVersion, getVersionStr, getBasemeshVersion, getShortVersion, isRelease, isBuild, getVersionDigitsStr, getCopyrightMessage, getAssetLicense, getThirdPartyLicenses, getSoftwareLicense, getCredits
 
-from glmodule import grabScreen, hasRenderSkin, renderSkin, getPickedColor, hasRenderToRenderbuffer, renderToBuffer, renderAlphaMask
+#from glmodule import grabScreen, hasRenderSkin, renderSkin, getPickedColor, hasRenderToRenderbuffer, renderToBuffer, renderAlphaMask
 
 from image import Image
-from texture import Texture, getTexture, reloadTextures
-from shader import Shader
+#from texture import Texture, getTexture, reloadTextures
+#from shader import Shader
 from camera import Camera, OrbitalCamera
 
 from qtui import Keys, Buttons, Modifiers, Application

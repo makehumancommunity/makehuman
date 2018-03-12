@@ -787,9 +787,9 @@ class MHApplication(gui3d.Application, mh.Application):
         self.splash.close()
         self.splash = None
 
-        if not self.args.get('noshaders', False) and \
-          ( not mh.Shader.supported() or mh.Shader.glslVersion() < (1,20) ):
-            self.prompt('Warning', 'Your system does not support OpenGL shaders (GLSL v1.20 required).\nOnly simple shading will be available.', 'Ok', None, None, None, 'glslWarning')
+        #if not self.args.get('noshaders', False) and \
+        #  ( not mh.Shader.supported() or mh.Shader.glslVersion() < (1,20) ):
+        #    self.prompt('Warning', 'Your system does not support OpenGL shaders (GLSL v1.20 required).\nOnly simple shading will be available.', 'Ok', None, None, None, 'glslWarning')
 
         # Restore main window size and position
         geometry = self.getSetting('windowGeometry')

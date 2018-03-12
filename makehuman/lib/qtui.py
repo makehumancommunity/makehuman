@@ -41,19 +41,16 @@ import os
 import log
 from core import G
 
-from PyQt5 import QtCore, QtGui, QtOpenGL, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 
-import glmodule as gl
 import events3d
 import qtgui
 import eventqueue
-import time
-import getpath
-
 import makehuman
 import getpath
 
 from mhversion import MHVersion
+from qtglui import Canvas
 
 if False and makehuman.isBuild():
     # Set absolute Qt plugin path programatically on frozen deployment to fix
@@ -175,136 +172,6 @@ g_mouse_pos = None
 gg_mouse_pos = None
 g_mousewheel_t = None
 
-class Canvas(QtOpenGL.QGLWidget):
-    def __init__(self, parent, app):
-        self.app = app
-        self.blockRedraw = False
-        format = QtOpenGL.QGLFormat()
-        format.setAlpha(True)
-        format.setDepthBufferSize(24)
-        format.setSampleBuffers(True)
-        format.setSamples(4)
-        super(Canvas, self).__init__(format, parent)
-        self.create()
-
-    def create(self):
-        G.canvas = self
-        self.setFocusPolicy(QtCore.Qt.TabFocus)
-        self.setFocus()
-        self.setAutoBufferSwap(False)
-        self.setAutoFillBackground(False)
-        self.setAttribute(QtCore.Qt.WA_NativeWindow)
-        self.setAttribute(QtCore.Qt.WA_NoSystemBackground, False)
-        self.setAttribute(QtCore.Qt.WA_OpaquePaintEvent)
-        self.setAttribute(QtCore.Qt.WA_KeyCompression, False)
-        self.setMouseTracking(True)
-        self.setMinimumHeight(5)
-        self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
-
-    def getMousePos(self):
-        """
-        Get mouse position relative to this rendering canvas. 
-        Returns None if mouse is outside canvas.
-        """
-        relPos = self.mapFromGlobal(QtGui.QCursor().pos())
-        if relPos.x() < 0 or relPos.x() > G.windowWidth:
-            return None
-        if relPos.y() < 0 or relPos.y() > G.windowHeight:
-            return None
-        return (relPos.x(), relPos.y())
-
-    def mousePressEvent(self, ev):
-        self.mouseUpDownEvent(ev, "onMouseDownCallback")
-
-    def mouseReleaseEvent(self, ev):
-        self.mouseUpDownEvent(ev, "onMouseUpCallback")
-
-    def mouseUpDownEvent(self, ev, direction):
-        global gg_mouse_pos
-
-        x = ev.x()
-        y = ev.y()
-        b = ev.button()
-
-        gg_mouse_pos = x, y
-
-        G.app.callEvent(direction, events3d.MouseEvent(b, x, y))
-
-        # Update screen
-        self.update()
-
-    def wheelEvent(self, ev):
-        global gg_mouse_pos
-        global g_mousewheel_t
-
-        x = ev.x()
-        y = ev.y()
-        d = ev.angleDelta().y()
-        t = time.time()
-
-        if g_mousewheel_t is None or t - g_mousewheel_t > MOUSEWHEEL_PICK_TIMEOUT:
-            gg_mouse_pos = x, y
-        else:
-            x = y = None
-
-        b = 1 if d > 0 else -1
-        G.app.callEvent('onMouseWheelCallback', events3d.MouseWheelEvent(b, x, y))
-
-        if g_mousewheel_t is None or t - g_mousewheel_t > MOUSEWHEEL_PICK_TIMEOUT:
-            # Update screen
-            self.update()
-
-        g_mousewheel_t = t
-
-    def mouseMoveEvent(self, ev):
-        global gg_mouse_pos, g_mouse_pos
-
-        x = ev.x()
-        y = ev.y()
-
-        if gg_mouse_pos is None:
-            gg_mouse_pos = x, y
-
-        if g_mouse_pos is None:
-            self.app.callAsync(self.handleMouse)
-
-        g_mouse_pos = (x, y)
-
-    def handleMouse(self):
-        global gg_mouse_pos, g_mouse_pos
-
-        if g_mouse_pos is None:
-            return
-
-        ox, oy = gg_mouse_pos
-        (x, y) = g_mouse_pos
-        g_mouse_pos = None
-        xrel = x - ox
-        yrel = y - oy
-        gg_mouse_pos = x, y
-
-        buttons = int(G.app.mouseButtons())
-
-        G.app.callEvent('onMouseMovedCallback', events3d.MouseEvent(buttons, x, y, xrel, yrel))
-
-        if buttons:
-            self.update()
-
-    def initializeGL(self):
-        gl.OnInit()
-
-    def paintGL(self):
-        if self.blockRedraw:
-            self.app.logger_redraw.debug('paintGL (blocked)')
-            return
-        self.app.logger_redraw.debug('paintGL')
-        gl.renderToCanvas()
-
-    def resizeGL(self, w, h):
-        G.windowHeight = h
-        G.windowWidth = w
-        gl.reshape(w, h)
-        G.app.callEvent('onResizedCallback', events3d.ResizeEvent(w, h, False))
 
 class VLayout(QtWidgets.QLayout):
     def __init__(self, parent = None):
@@ -720,7 +587,7 @@ class Application(QtWidgets.QApplication, events3d.EventHandler):
         self.callAsync(self.started)
         self.messages.start()
         self.exec_()
-        gl.OnExit()
+        #gl.OnExit()
 
     def stop(self):
         self.callEvent('onStop', None)
