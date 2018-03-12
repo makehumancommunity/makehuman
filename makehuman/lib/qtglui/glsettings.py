@@ -88,7 +88,7 @@ class GLSettings(object):
         profile.setVersion(self.openGLProfileMajor, self.openGLProfileMinor)
 
         # All GL widgets will theoretically share this context
-        context = openGLWidget.context()
+        self.context = openGLWidget.context()
 
         # Fetch a "functions" instance matching the OpenGL version we're using
         #
