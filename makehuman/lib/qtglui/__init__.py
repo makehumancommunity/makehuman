@@ -36,9 +36,9 @@ Abstract
 TODO
 """
 
-__all__ = ['Canvas','Shader']
+__all__ = ['Canvas','Shader','Texture','TextureCache']
 
 from .canvas import Canvas
 from .shader import Shader
-
-
+from .texture import Texture
+from .texturecache import TextureCache

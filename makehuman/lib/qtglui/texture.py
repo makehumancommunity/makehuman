@@ -8,7 +8,7 @@
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Joel Palmius
+**Authors:**           Glynn Clements
 
 **Copyright(c):**      MakeHuman Team 2001-2017
 
@@ -43,22 +43,29 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QOpenGLWidget
 
 from core import G
+from getpath import *
+from image import Image
 
-class Shader(object):
+NOTFOUND_TEXTURE = getSysDataPath('textures/texture_notfound.png')
 
-    def __init__(self, path, defines = []):
+class Texture(object):
 
-        super(Shader, self).__init__()
+    def __init__(self, image = None, size = None, components = 4):
+        if image is not None:
+            self.loadImage(image)
+        elif size is not None:
+            width, height = size
+            self.initTexture(width, height, components)
 
-        self.path = path
+    def initTexture(self, width, height, components=4, pixels=None):
+        # TODO: adapt from lib/texture.py
+        pass
 
-        self.vertexId = None
-        self.fragmentId = None
-        self.shaderId = None
-        self.modified = None
-        self.uniforms = None
-        self.defines = defines
-        self.vertexTangentAttrId = None
+    def loadImage(self, image):
+        if isinstance(image, str):
+            image = Image(image)
 
+        pixels = image.flip_vertical().data
 
-# TODO: adapt from lib/shader.py
+        self.initTexture(image.width, image.height, image.components, pixels)
+

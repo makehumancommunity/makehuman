@@ -8,7 +8,7 @@
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
-**Authors:**           Joel Palmius
+**Authors:**           Glynn Clements
 
 **Copyright(c):**      MakeHuman Team 2001-2017
 
@@ -43,22 +43,13 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QOpenGLWidget
 
 from core import G
+from getpath import *
+from image import Image
 
-class Shader(object):
+class TextureCache(object):
 
-    def __init__(self, path, defines = []):
-
-        super(Shader, self).__init__()
-
-        self.path = path
-
-        self.vertexId = None
-        self.fragmentId = None
-        self.shaderId = None
-        self.modified = None
-        self.uniforms = None
-        self.defines = defines
-        self.vertexTangentAttrId = None
+    def __init__(self):
+        pass
 
 
-# TODO: adapt from lib/shader.py
+# TODO: refactor module-level functions in lib/texture into methods of TextureCache
