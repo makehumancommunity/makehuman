@@ -38,6 +38,7 @@ TODO
 
 import log
 from core import G
+from qtglui import Shader
 
 class Object3D(object):
     """
@@ -225,9 +226,9 @@ class Object3D(object):
 
     @property
     def shaderObj(self):
-        import shader
-        if not shader.Shader.supported():
-            return None
+
+        # TODO: use new shader under qtglui
+        
         if self._shaderPath != self.object.shader:
             self._shaderObj = None
         if self._shaderObj is False:
