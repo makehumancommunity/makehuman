@@ -60,6 +60,7 @@ import log
 from texture import Texture, getTexture, NOTFOUND_TEXTURE
 from shader import Shader
 import profiler
+import sys
 
 g_primitiveMap = [GL_POINTS, GL_LINES, GL_TRIANGLES, GL_QUADS]
 
@@ -67,6 +68,10 @@ TEX_NOT_FOUND = False
 MAX_TEXTURE_UNITS = 0
 
 def grabScreen(x, y, width, height, filename = None, productionRender=False):
+
+    print("DO NOT CALL METHODS IN GLMODULE, ONLY USE REFACTORED METHODS")
+    sys.exit(1)
+
     if width <= 0 or height <= 0:
         raise RuntimeError("width or height is 0")
 
@@ -119,6 +124,10 @@ pickingBuffer = None
 pickingBufferDirty = True
 
 def updatePickingBuffer():
+
+    print("DO NOT CALL METHODS IN GLMODULE, ONLY USE REFACTORED METHODS")
+    sys.exit(1)
+
     width = G.windowWidth
     height = G.windowHeight
     rwidth = (width + 3) // 4 * 4
@@ -266,6 +275,10 @@ def A(*args):
     return np.array(list(args), dtype=np.float32)
 
 def OnInit():
+
+    print("NEVER RUN GLMODULE INIT")
+    sys.exit(1)
+
     try:
         # Start with writing relevant info to the debug dump in case stuff goes
         # wrong at a later time
@@ -355,6 +368,10 @@ def OnInit():
         log.error('Unable to load texture %s, this might cause errors.', NOTFOUND_TEXTURE)
 
 def OnExit():
+
+    print("DO NOT CALL METHODS IN GLMODULE, ONLY USE REFACTORED METHODS")
+    sys.exit(1)
+
     # Deactivate the pointers to vertex and normal array
     glDisableClientState(GL_VERTEX_ARRAY)
     glDisableClientState(GL_NORMAL_ARRAY)
@@ -367,6 +384,10 @@ def setSceneLighting(scene):
     Set lighting based on a scene config.
     """
     # Set global scene ambient
+
+    print("DO NOT CALL METHODS IN GLMODULE, ONLY USE REFACTORED METHODS")
+    sys.exit(1)
+
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, A(scene.environment.ambience, 1.0))
 
     # TODO support skybox
@@ -409,6 +430,10 @@ def transformObject(obj):
     glMultMatrixd(np.ascontiguousarray(m.T))
 
 def drawMesh(obj):
+
+    print("DO NOT CALL METHODS IN GLMODULE, ONLY USE REFACTORED METHODS")
+    sys.exit(1)
+
     if not obj.visibility:
         return
 
@@ -626,6 +651,10 @@ def drawMesh(obj):
     glPopMatrix()
 
 def pickMesh(obj):
+
+    print("DO NOT CALL METHODS IN GLMODULE, ONLY USE REFACTORED METHODS")
+    sys.exit(1)
+
     if not obj.visibility:
         return
     if not obj.pickable:
@@ -694,6 +723,9 @@ def hasRenderToRenderbuffer():
 def renderSkin(dst, vertsPerPrimitive, verts, index = None, objectMatrix = None,
                texture = None, UVs = None, textureMatrix = None,
                color = None, clearColor = None):
+
+    print("DO NOT CALL METHODS IN GLMODULE, ONLY USE REFACTORED METHODS")
+    sys.exit(1)
 
     if isinstance(dst, Texture):
         glBindTexture(GL_TEXTURE_2D, dst.textureId)
@@ -812,6 +844,9 @@ def renderToBuffer(width, height, productionRender = True):
     Verify whether OpenGL drivers support renderbuffers using 
     hasRenderToRenderbuffer().
     """
+    print("DO NOT CALL METHODS IN GLMODULE, ONLY USE REFACTORED METHODS")
+    sys.exit(1)
+
     # Create and bind framebuffer
     framebuffer = glGenFramebuffers(1)
     #glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer)
@@ -917,6 +952,9 @@ def renderAlphaMask(width, height, productionRender = True):
     Verify whether OpenGL drivers support renderbuffers using 
     hasRenderToRenderbuffer().
     """
+    print("DO NOT CALL METHODS IN GLMODULE, ONLY USE REFACTORED METHODS")
+    sys.exit(1)
+
     # Create and bind framebuffer
     framebuffer = glGenFramebuffers(1)
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer)
@@ -993,6 +1031,10 @@ def renderAlphaMask(width, height, productionRender = True):
     return surface
 
 def drawMeshes(pickMode, productionRender = False):
+
+    print("DO NOT CALL METHODS IN GLMODULE, ONLY USE REFACTORED METHODS")
+    sys.exit(1)
+
     if G.world is None:
         return
 
@@ -1031,6 +1073,10 @@ def _draw(productionRender = False):
     drawEnd()
 
 def draw(productionRender = False):
+
+    print("DO NOT CALL METHODS IN GLMODULE, ONLY USE REFACTORED METHODS")
+    sys.exit(1)
+
     try:
         if profiler.active():
             profiler.accum('_draw()', globals(), locals())
@@ -1042,6 +1088,10 @@ def draw(productionRender = False):
         return False
 
 def renderToCanvas():
+
+    print("DO NOT CALL METHODS IN GLMODULE, ONLY USE REFACTORED METHODS")
+    sys.exit(1)
+
     if draw():
         G.canvas.swapBuffers()
         # Indicate that picking buffer is out of sync with rendered frame (deferred update)
