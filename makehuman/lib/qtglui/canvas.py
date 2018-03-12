@@ -61,7 +61,7 @@ class Canvas(QOpenGLWidget):
     def __init__(self, parent=None, app=None):
 
         self.app = app
-        
+
         super(Canvas, self).__init__(parent)
 
         self.object = 0

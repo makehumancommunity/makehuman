@@ -36,9 +36,9 @@ Abstract
 TODO
 """
 
-__all__ = ['mhglcanvas','mhglshader','Canvas','Shader']
+__all__ = ['Canvas','Shader']
 
-from .mhglcanvas import Canvas
-from .mhglshader import Shader
+from .canvas import Canvas
+from .shader import Shader
 
 
