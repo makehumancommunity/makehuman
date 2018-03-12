@@ -46,6 +46,8 @@ from PyQt5.QtCore import *
 
 from core import G
 
+from .glsettings import GLSettings
+
 import math
 import sys
 
@@ -61,6 +63,7 @@ class Canvas(QOpenGLWidget):
     def __init__(self, parent=None, app=None):
 
         self.app = app
+        self._glsettings = GLSettings()
 
         super(Canvas, self).__init__(parent)
 
@@ -103,14 +106,10 @@ class Canvas(QOpenGLWidget):
 
     def initializeGL(self):
 
-        profile = QOpenGLVersionProfile()
-        profile.setVersion(2, 0)
+        self.gl = self._glsettings.initializeGL(self)
 
-        self.gl = self.context().versionFunctions(profile)
-        self.gl.initializeOpenGLFunctions()
-
-        self.setClearColor(self.trolltechPurple.darker())
         self.object = self.makeObject()
+
         self.gl.glShadeModel(self.gl.GL_FLAT)
         self.gl.glEnable(self.gl.GL_DEPTH_TEST)
         self.gl.glEnable(self.gl.GL_CULL_FACE)
@@ -232,9 +231,6 @@ class Canvas(QOpenGLWidget):
         while angle > 360 * 16:
             angle -= 360 * 16
         return angle
-
-    def setClearColor(self, c):
-        self.gl.glClearColor(c.redF(), c.greenF(), c.blueF(), c.alphaF())
 
     def setColor(self, c):
         self.gl.glColor4f(c.redF(), c.greenF(), c.blueF(), c.alphaF())
