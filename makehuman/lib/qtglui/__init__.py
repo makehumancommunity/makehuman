@@ -50,6 +50,13 @@ A brief overview of what the different modules do, and how to use them:
 * TextureCache, in texturecache.py (moved and adapted from lib/texture.py): This caches image textures so they don't
   have to be reloaded from disk (mostly unported as of yet)
 
+* ScreenObject in screenobject.py (moved from core/guicommon.py) and DrawableObject in drawableobject.py (moved from
+  lib/object3d.py). There are several layers of objects and meshes wrapped around one another, and using static calls.
+  As far as I can see, there is also an object3d (which is different from lib/object3d) in core/module3d.py. The core
+  problem here is that the object hierarchy is an impenetrable mess, not that there is complexity stemming from GL
+  per se. For now I've simply moved things which seemed to have to do with drawing on the screen, into the qtglui
+  folder. But in order to make these things comprehensible, I think some of it should be rewritten from scratch.
+
 Some basic principles:
 
 In the new version of the GL code, PyOpenGL should not be used directly anywhere. Theoretically, we will not even
