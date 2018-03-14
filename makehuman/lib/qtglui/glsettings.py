@@ -46,49 +46,23 @@ from PyQt5.QtCore import *
 
 from core import G
 
-_was_initialized = False
+_contextInstances = dict()
 
-class GLSettings(object):
+class _GLSettings(object):
 
-    def __init__(self):
-
-        # Reuse this after first initialization
-        self.gl = None
+    def __init__(self, openGLContext):
 
         self.setDefaults()
         self.readOverridesFromSettings()
 
-    def setDefaults(self):
+        if not isinstance(openGLContext, QOpenGLContext):
+            raise ValueError('Expected openGLContext parameter to be of type QOpenGLContext')
 
-        # Medium gray
-        self.backgroundColor = QColor.fromRgb(128,128,128,255)
-
-        # OpenGL version 2.0 (2004)... probably way too conservative
-        self.openGLProfileMajor = 2
-        self.openGLProfileMinor = 0
-
-        pass
-
-    def readOverridesFromSettings(self):
-        pass
-
-    def initializeGL(self, openGLWidget):
-
-        global _was_initialized
-
-        if not isinstance(openGLWidget, QOpenGLWidget):
-            raise ValueError('Expected openGLWidget parameter to be of type QOpenGLWidget')
-
-        if _was_initialized:
-            raise ValueError('Attempting to initialize GL a second time. This is probably a bad idea.')
-
-        _was_initialized = True
+        # All GL widgets in the same window will theoretically share this context
+        self.context = openGLContext
 
         profile = QOpenGLVersionProfile()
         profile.setVersion(self.openGLProfileMajor, self.openGLProfileMinor)
-
-        # All GL widgets will theoretically share this context
-        self.context = openGLWidget.context()
 
         # Fetch a "functions" instance matching the OpenGL version we're using
         #
@@ -104,4 +78,34 @@ class GLSettings(object):
         # Set background color
         self.gl.glClearColor(r,g,b,a)
 
+
+    def setDefaults(self):
+
+        # Medium gray
+        self.backgroundColor = QColor.fromRgb(128,128,128,255)
+
+        # OpenGL version 2.0 (2004)... probably way too conservative
+        self.openGLProfileMajor = 2
+        self.openGLProfileMinor = 0
+
+        pass
+
+    def readOverridesFromSettings(self):
+        pass
+
+    def getGLFunctions(self):
+
         return self.gl
+
+def GLSettings(openGLContext):
+    global _contextInstances
+
+    if not isinstance(openGLContext, QOpenGLContext):
+        raise ValueError('Expected openGLContext parameter to be of type QOpenGLContext')
+
+    if not openGLContext in _contextInstances:
+        _contextInstances[openGLContext] = _GLSettings(openGLContext)
+
+    return _contextInstances[openGLContext]
+
+

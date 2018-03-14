@@ -62,8 +62,8 @@ class Canvas(QOpenGLWidget):
 
     def __init__(self, parent=None, app=None):
 
+        print("\n\nINITIALIZATION OF GL CANVAS STARTS HERE\n\n")
         self.app = app
-        self._glsettings = GLSettings()
 
         super(Canvas, self).__init__(parent)
 
@@ -106,7 +106,8 @@ class Canvas(QOpenGLWidget):
 
     def initializeGL(self):
 
-        self.gl = self._glsettings.initializeGL(self)
+        self._glsettings = GLSettings(self.context())
+        self.gl = self._glsettings.getGLFunctions()
 
         self.object = self.makeObject()
 
