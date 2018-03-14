@@ -46,7 +46,6 @@ from core import G
 import mh
 from progress import Progress
 import files3d
-import gui3d
 import geometry3d
 import animation3d
 import human
@@ -55,11 +54,14 @@ import guifiles
 import managed_file
 import algos3d
 import gui
+import gui3d
 import language
 import log
 import contextlib
 
 from mhversion import MHVersion
+from qtglui import Action
+from qtglui import ScreenObject
 
 @contextlib.contextmanager
 def outFile(path):
@@ -125,7 +127,7 @@ class PluginsTaskView(gui3d.TaskView):
             if module not in gui3d.app.getSetting('activeUserPlugins'):
                 self.pluginsBox.addWidget(PluginCheckBox(module))
 
-class SymmetryAction(gui3d.Action):
+class SymmetryAction(Action):
     def __init__(self, human, direction):
         super(SymmetryAction, self).__init__('Apply symmetry %s' % ("left" if direction == 'l' else "right"))
         self.human = human
@@ -640,7 +642,7 @@ class MHApplication(gui3d.Application, mh.Application):
         backGridMesh.setSubColor(self.gridSubColor)
         backGridMesh.restrictVisibleToCamera = True
         backGridMesh.minSubgridZoom = (1.0/spacing) * float(subgrids)/5
-        self.backplaneGrid = gui3d.Object(backGridMesh)
+        self.backplaneGrid = ScreenObject(backGridMesh)
         self.backplaneGrid.excludeFromProduction = True
         self.backplaneGrid.placeAtFeet = True
         self.backplaneGrid.lockRotation = True
@@ -656,7 +658,7 @@ class MHApplication(gui3d.Application, mh.Application):
         groundGridMesh.setMainColor(self.gridColor)
         groundGridMesh.setSubColor(self.gridSubColor)
         groundGridMesh.minSubgridZoom = (1.0/spacing) * float(subgrids)/5
-        self.groundplaneGrid = gui3d.Object(groundGridMesh)
+        self.groundplaneGrid = ScreenObject(groundGridMesh)
         self.groundplaneGrid.excludeFromProduction = True
         self.groundplaneGrid.placeAtFeet = True
         self.groundplaneGrid.setShadeless(1)
@@ -677,7 +679,7 @@ class MHApplication(gui3d.Application, mh.Application):
         mesh.setColors(self.bgBottomLeftColor, self.bgBottomRightColor, 
                        self.bgTopRightColor, self.bgTopLeftColor)
 
-        self.backgroundGradient = gui3d.Object(mesh)
+        self.backgroundGradient = ScreenObject(mesh)
         self.backgroundGradient.priority = -200
         self.backgroundGradient.excludeFromProduction = True
         self.backgroundGradient.setShadeless(1)

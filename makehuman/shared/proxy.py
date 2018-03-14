@@ -49,6 +49,8 @@ import makehuman
 import material
 import json
 
+from qtglui import ScreenObject
+
 #
 #   Proxy types. Loop over simple proxy types to do all proxies.
 #   Some code use lowercase proxy types instead.
@@ -157,7 +159,6 @@ class Proxy:
 
     def loadMeshAndObject(self, human):
         import files3d
-        import guicommon
 
         mesh = files3d.loadMesh(self.obj_file, maxFaces = self.max_pole)
         if not mesh:
@@ -166,7 +167,7 @@ class Proxy:
         mesh.priority = self.z_depth           # Set render order
         mesh.setCameraProjection(0)             # Set to model camera
 
-        obj = self.object = guicommon.Object(mesh, human.getPosition())
+        obj = self.object = ScreenObject(mesh, human.getPosition())
         obj.proxy = self
         obj.material = self.material
         obj.setRotation(human.getRotation())
