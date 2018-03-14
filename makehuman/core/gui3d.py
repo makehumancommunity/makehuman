@@ -49,7 +49,7 @@ import selection
 
 #from guicommon import Object, Action
 #from qtglui import ScreenObject
-#from qtglui import Action
+from qtglui import Action
 
 class View(events3d.EventHandler):
 
