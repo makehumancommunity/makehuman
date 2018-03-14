@@ -66,9 +66,13 @@ what should manage most GL stuff.
 
 """
 
-__all__ = ['Canvas','Shader','Texture','TextureCache']
+__all__ = ['Canvas','Shader','Texture','TextureCache','ScreenObject','DrawableObject','Action']
 
 from .canvas import Canvas
 from .shader import Shader
 from .texture import Texture
 from .texturecache import TextureCache
+from .screenobject import ScreenObject
+from .screenobject import Action
+from .drawableobject import DrawableObject
+

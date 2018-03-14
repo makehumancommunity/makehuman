@@ -47,7 +47,9 @@ import mh
 import log
 import selection
 
-from guicommon import Object, Action
+#from guicommon import Object, Action
+#from qtglui import ScreenObject
+#from qtglui import Action
 
 class View(events3d.EventHandler):
 

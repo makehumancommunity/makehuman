@@ -38,7 +38,6 @@ TODO
 
 import numpy as np
 import algos3d
-import guicommon
 from core import G
 from progress import Progress
 import events3d
@@ -49,12 +48,13 @@ import animation
 import sys
 
 from makehuman import getBasemeshVersion, getShortVersion, getVersionStr, getVersion
+from qtglui import ScreenObject
 
 
-class Human(guicommon.Object, animation.AnimatedMesh):
+class Human(ScreenObject, animation.AnimatedMesh):
 
     def __init__(self, mesh):
-        guicommon.Object.__init__(self, mesh)
+        ScreenObject.__init__(self, mesh)
 
         self.hasWarpTargets = False
 
@@ -386,7 +386,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
     def setPosition(self, position):
         dv = [x-y for x, y in zip(position, self.getPosition())]
-        guicommon.Object.setPosition(self, position)
+        ScreenObject.setPosition(self, position)
         for obj in self.getProxyObjects():
             if obj:
                 obj.setPosition([x+y for x, y in zip(obj.getPosition(), dv)])
@@ -394,7 +394,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         self.callEvent('onTranslated', self)
 
     def setRotation(self, rotation):
-        guicommon.Object.setRotation(self, rotation)
+        ScreenObject.setRotation(self, rotation)
         for obj in self.getProxyObjects():
             if obj:
                 obj.setRotation(rotation)
@@ -402,7 +402,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         self.callEvent('onRotated', self)
 
     def setSolid(self, *args, **kwargs):
-        guicommon.Object.setSolid(self, *args, **kwargs)
+        ScreenObject.setSolid(self, *args, **kwargs)
         for obj in self.getProxyObjects():
             if obj:
                 obj.setSolid(*args, **kwargs)
@@ -413,7 +413,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             progress = Progress([len(self.mesh.coord)] +
                                 [len(obj.mesh.coord) for obj in proxies])
 
-            guicommon.Object.setSubdivided(self, flag, *args, **kwargs)
+            ScreenObject.setSubdivided(self, flag, *args, **kwargs)
             progress.step()
 
             for obj in proxies:

@@ -43,6 +43,8 @@ import matrix
 import material
 import collections
 
+from .drawableobject import DrawableObject
+
 class Action(object):
     def __init__(self, name):
         self.name = name
@@ -53,8 +55,8 @@ class Action(object):
     def undo(self):
         return True
 
-# Wrapper around Object3D
-class Object(events3d.EventHandler):
+# Wrapper around DrawableObject
+class ScreenObject(events3d.EventHandler):
 
     """
     An object on the screen.
@@ -101,7 +103,7 @@ class Object(events3d.EventHandler):
         self.setUVMap(mesh.material.uvMap)
 
     def __str__(self):
-        return "<guicommon.Object %s>" % self.name
+        return "<ScreenObject %s>" % self.name
 
     # TODO
     def clone(self):
@@ -122,15 +124,13 @@ class Object(events3d.EventHandler):
 
     @staticmethod
     def attachMesh(mesh):
-        import object3d
         import selection
         selection.selectionColorMap.assignSelectionID(mesh)
-        object3d.Object3D.attach(mesh)
+        DrawableObject.attach(mesh)
 
     @staticmethod
     def detachMesh(mesh):
-        import object3d
-        object3d.Object3D.detach(mesh)
+        DrawableObject.detach(mesh)
 
     def _meshes(self):
         for mesh in (self.__seedMesh,

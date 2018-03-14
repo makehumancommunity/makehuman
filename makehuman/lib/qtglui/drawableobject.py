@@ -37,10 +37,11 @@ TODO
 """
 
 import log
+import sys
 from core import G
-from qtglui import Shader
+from .shader import Shader
 
-class Object3D(object):
+class DrawableObject(object):
     """
     Represents an object renderable by OpenGL (glmodule)
     """
@@ -210,7 +211,7 @@ class Object3D(object):
         return self.object.sz
 
     def __str__(self):
-        return "<Object3D %s>" % self.name
+        return "<DrawableObject %s>" % self.name
 
     def getShaderChanged(self):
         return self.shader_mtime != self.material.shaderChanged
@@ -283,10 +284,14 @@ class Object3D(object):
         return self.parent._faceGroups[idx].color
 
     def draw(self, *args, **kwargs):
+        print("TODO: Never call the old gl module")
+        sys.exit(1)
         import glmodule
         return glmodule.drawMesh(self, *args, **kwargs)
 
     def pick(self, *args, **kwargs):
+        print("TODO: Never call the old gl module")
+        sys.exit(1)
         import glmodule
         return glmodule.pickMesh(self, *args, **kwargs)
 

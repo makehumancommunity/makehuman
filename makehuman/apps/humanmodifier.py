@@ -39,7 +39,6 @@ TODO
 __docformat__ = 'restructuredtext'
 
 import algos3d
-import guicommon
 from core import G
 import events3d
 import operator
@@ -49,6 +48,8 @@ import io
 import targets
 from functools import reduce
 
+from qtglui import ScreenObject
+from qtglui import Action
 
 # Gender
 # -
@@ -101,7 +102,7 @@ from functools import reduce
 # dependencies will be updated (this is a performance feature)
 realtimeDependencyUpdates = ['macrodetails', 'macrodetails-universal']
 
-class ModifierAction(guicommon.Action):
+class ModifierAction(Action):
     def __init__(self, modifier, before, after, postAction):
         super(ModifierAction, self).__init__('Change modifier')
         self.human = modifier.human
