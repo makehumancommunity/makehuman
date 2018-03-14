@@ -115,6 +115,8 @@ class Canvas(QOpenGLWidget):
         self.gl.glEnable(self.gl.GL_DEPTH_TEST)
         self.gl.glEnable(self.gl.GL_CULL_FACE)
 
+        print("\n\nAT THIS POINT THE GL CONTEXT SHOULD BE FULLY SET UP\n\n")
+
     def paintGL(self):
         self.gl.glClear(
                 self.gl.GL_COLOR_BUFFER_BIT | self.gl.GL_DEPTH_BUFFER_BIT)
