@@ -6,6 +6,11 @@ The testing vision for this code is to build a community release that includes t
 plug-ins.  We hope that the utility of this integrated functionality is sufficient to entice a larger cohort of testers who get
 value-added in exchange for the possibility of uncovering deficiencies in our port. When  testing verifies it's robustness it should a suitable replacement for the current bitbucket code extending the future of MakeHuman beyond the Python 2 "end-of-life".
 
+## Support requests:
+If you have any questions about the software and its usage, please make a request in our forum:
+http://www.makehumancommunity.org/forum
+We are not going to answer support requests on the bug tracker!
+
 ## Current status
 
 WARNING: THE CODE IN THIS REPOSITORY IS CURRENTLY NOT FIT FOR PRODUCTION USE!
