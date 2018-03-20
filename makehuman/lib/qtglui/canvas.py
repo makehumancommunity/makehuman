@@ -48,11 +48,12 @@ from core import G
 
 from .glsettings import GLSettings
 
-import math
-import sys
+import files3d
+import mh
 
 gg_mouse_pos = None
 g_mouse_pos = None
+
 
 class Canvas(QOpenGLWidget):
 
@@ -76,6 +77,10 @@ class Canvas(QOpenGLWidget):
 
         self.trolltechGreen = QColor.fromCmykF(0.40, 0.0, 1.0, 0.0)
         self.trolltechPurple = QColor.fromCmykF(0.39, 0.39, 0.0, 0.0)
+
+        self.testCubeMesh = files3d.loadMesh(mh.getSysDataPath("3dobjs/TestCubeQuads.obj"))
+
+        G.app.TESTCUBE = self.testCubeMesh
 
     def minimumSizeHint(self):
         return QSize(50, 50)
@@ -109,7 +114,7 @@ class Canvas(QOpenGLWidget):
         self._glsettings = GLSettings(self.context())
         self.gl = self._glsettings.getGLFunctions()
 
-        self.object = self.makeObject()
+        self.object = self.drawTestCube()
 
         self.gl.glShadeModel(self.gl.GL_FLAT)
         self.gl.glEnable(self.gl.GL_DEPTH_TEST)
@@ -128,6 +133,7 @@ class Canvas(QOpenGLWidget):
         self.gl.glCallList(self.object)
 
     def resizeGL(self, width, height):
+
         side = min(width, height)
         if side < 0:
             return
@@ -137,7 +143,10 @@ class Canvas(QOpenGLWidget):
 
         self.gl.glMatrixMode(self.gl.GL_PROJECTION)
         self.gl.glLoadIdentity()
-        self.gl.glOrtho(-0.5, +0.5, +0.5, -0.5, 4.0, 15.0)
+
+        ratio = width / height
+
+        self.gl.glOrtho(-0.5 * ratio, +0.5 * ratio, +0.5, -0.5, 4.0, 15.0)
         self.gl.glMatrixMode(self.gl.GL_MODELVIEW)
 
     def mousePressEvent(self, event):
@@ -156,77 +165,34 @@ class Canvas(QOpenGLWidget):
 
         self.lastPos = event.pos()
 
-    def makeObject(self):
+    def drawTestCube(self):
         genList = self.gl.glGenLists(1)
         self.gl.glNewList(genList, self.gl.GL_COMPILE)
-
         self.gl.glBegin(self.gl.GL_QUADS)
 
-        x1 = +0.06
-        y1 = -0.14
-        x2 = +0.14
-        y2 = -0.06
-        x3 = +0.08
-        y3 = +0.00
-        x4 = +0.30
-        y4 = +0.22
+        r = 1.0
+        g = 0.0
+        b = 0.0
 
-        self.quad(x1, y1, x2, y2, y2, x2, y1, x1)
-        self.quad(x3, y3, x4, y4, y4, x4, y3, x3)
+        scale = 0.1
 
-        self.extrude(x1, y1, x2, y2)
-        self.extrude(x2, y2, y2, x2)
-        self.extrude(y2, x2, y1, x1)
-        self.extrude(y1, x1, x1, y1)
-        self.extrude(x3, y3, x4, y4)
-        self.extrude(x4, y4, y4, x4)
-        self.extrude(y4, x4, y3, x3)
+        for face in self.testCubeMesh.fvert:
 
-        NumSectors = 200
+            r = r - 0.1
+            b = b + 0.1
 
-        for i in range(NumSectors):
-            angle1 = (i * 2 * math.pi) / NumSectors
-            x5 = 0.30 * math.sin(angle1)
-            y5 = 0.30 * math.cos(angle1)
-            x6 = 0.20 * math.sin(angle1)
-            y6 = 0.20 * math.cos(angle1)
+            self.gl.glColor3f(r, g, b)
 
-            angle2 = ((i + 1) * 2 * math.pi) / NumSectors
-            x7 = 0.20 * math.sin(angle2)
-            y7 = 0.20 * math.cos(angle2)
-            x8 = 0.30 * math.sin(angle2)
-            y8 = 0.30 * math.cos(angle2)
-
-            self.quad(x5, y5, x6, y6, x7, y7, x8, y8)
-
-            self.extrude(x6, y6, x7, y7)
-            self.extrude(x8, y8, x5, y5)
+            for vertexIndex in face:
+                x = self.testCubeMesh.coord[vertexIndex][0] * scale
+                y = self.testCubeMesh.coord[vertexIndex][1] * scale
+                z = self.testCubeMesh.coord[vertexIndex][2] * scale
+                self.gl.glVertex3d(x, y, z)
 
         self.gl.glEnd()
         self.gl.glEndList()
 
         return genList
-
-    def quad(self, x1, y1, x2, y2, x3, y3, x4, y4):
-        self.setColor(self.trolltechGreen)
-
-        self.gl.glVertex3d(x1, y1, -0.05)
-        self.gl.glVertex3d(x2, y2, -0.05)
-        self.gl.glVertex3d(x3, y3, -0.05)
-        self.gl.glVertex3d(x4, y4, -0.05)
-
-        self.gl.glVertex3d(x4, y4, +0.05)
-        self.gl.glVertex3d(x3, y3, +0.05)
-        self.gl.glVertex3d(x2, y2, +0.05)
-        self.gl.glVertex3d(x1, y1, +0.05)
-
-    def extrude(self, x1, y1, x2, y2):
-        self.setColor(self.trolltechGreen.darker(250 + int(100 * x1)))
-
-        self.gl.glVertex3d(x1, y1, +0.05)
-        self.gl.glVertex3d(x2, y2, +0.05)
-        self.gl.glVertex3d(x2, y2, -0.05)
-        self.gl.glVertex3d(x1, y1, -0.05)
 
     def normalizeAngle(self, angle):
         while angle < 0:
