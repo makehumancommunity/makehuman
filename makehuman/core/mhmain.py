@@ -38,8 +38,7 @@ Main application GUI component.
 
 import sys
 import os
-import glob
-import imp
+import importlib.util
 import io
 
 from core import G
@@ -505,69 +504,66 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def loadPlugins(self):
 
-        # Load plugins not starting with _
-        pluginsToLoad = glob.glob(mh.getSysPath(os.path.join("plugins/",'[!_]*.py')))
-        userPlugins = glob.glob(mh.getPath(os.path.join("plugins/", '[!_]*.py')))
-        if userPlugins:
-            for userPlugin in userPlugins:
-                name = os.path.splitext(os.path.basename(userPlugin))[0]
-                if name in self.getSetting('activeUserPlugins'):
-                    pluginsToLoad.append(mh.getRelativePath(userPlugin, mh.getPath(), False))
+        pluginsToLoad = dict()
 
-        # Load plugin packages (folders with a file called __init__.py)
-        for fname in os.listdir(mh.getSysPath("plugins/")):
-            if fname[0] != "_":
-                folder = os.path.join("plugins", fname)
-                if os.path.isdir(folder) and ("__init__.py" in os.listdir(folder)):
-                    pluginsToLoad.append(folder)
+        sys_path = os.path.abspath(mh.getSysPath('plugins'))
+        user_path = mh.getPath('plugins')
 
-        for fname in os.listdir(mh.getPath("plugins/")):
-            if fname[0] != "_":
-                if fname in self.getSetting('activeUserPlugins'):
-                    folder = os.path.join("plugins", fname)
-                    if os.path.isdir(mh.getPath(folder)) and ("__init__.py" in os.listdir(mh.getPath(folder))):
-                        pluginsToLoad.append(folder)
+        for file in os.listdir(sys_path):
 
-        pluginsToLoad.sort()
+            location = os.path.join(sys_path, file)
 
+            if os.path.isdir(location) and not file.startswith('_'):
+                pLocation = os.path.join(location, '__init__.py')
+                if os.path.isfile(pLocation):
+                    pluginsToLoad[file] = pLocation
 
-        fprog = Progress(len(pluginsToLoad))
-        for path in pluginsToLoad:
-            self.loadPlugin(path)
-            fprog.step()
+            elif os.path.isfile(location) and file.endswith('.py') and not file.startswith('_'):
+                name = file.strip('.py')
+                pluginsToLoad[name] = location
 
-    def loadPlugin(self, path):
+        for file in os.listdir(user_path):
 
-        try:
-            name, ext = os.path.splitext(os.path.basename(path))
-            if name not in self.getSetting('excludePlugins'):
+            location = os.path.join(user_path, file)
+
+            if os.path.isdir(location) and not file.startswith('_') and file in self.getSetting('activeUserPlugins'):
+                pLocation = os.path.join(location, '__init__.py')
+                if os.path.isfile(pLocation):
+                    pluginsToLoad[file] = pLocation
+
+            elif os.path.isfile(location) and file.endswith('.py') and not file.startswith('_') and file in self.getSetting('activeUserPlugins'):
+                name = file.strip('.py')
+                pluginsToLoad[name] = location
+
+        for name in sorted(pluginsToLoad.keys()):
+            self.loadPlugin(name=name, location=pluginsToLoad.get(name))
+
+    def loadPlugin(self, name, location):
+
+        if not name in self.getSetting('excludePlugins'):
+
+            try:
                 log.message('Importing plugin %s', name)
-                #module = imp.load_source(name, path)
+                spec = importlib.util.spec_from_file_location(name=name, location=location)
+                if not spec:
+                    log.message("Could not import plugin: %s", name)
+                else:
+                    module = importlib.util.module_from_spec(spec)
+                    sys.modules[name] = module
 
-                module = None
-                fp, pathname, description = imp.find_module(name, ["plugins/", mh.getPath("plugins/")])
-                try:
-                    module = imp.load_module(name, fp, pathname, description)
-                finally:
-                    if fp:
-                        fp.close()
-                if module is None:
-                    log.message("Could not import plugin %s", name)
-                    return
+                    spec.loader.exec_module(module)
+                    self.modules[name] = module
 
-                self.modules[name] = module
-                log.message('Imported plugin %s', name)
-                log.message('Loading plugin %s', name)
-                module.load(self)
-                log.message('Loaded plugin %s', name)
+                    log.message('Imported plugin %s', name)
 
-                # Process all non-user-input events in the queue to make sure
-                # any callAsync events are run.
-                self.processEvents()
-            else:
-                self.modules[name] = None
-        except Exception as _:
-            log.warning('Could not load %s', name, exc_info=True)
+                    log.message('Loading plugin %s', name)
+                    module.load(self)
+                    log.message('Loaded plugin %s', name)
+
+                    self.processEvents()
+
+            except:
+                log.warning('Could not load %s', name, exc_info=True)
 
     def unloadPlugins(self):
 
