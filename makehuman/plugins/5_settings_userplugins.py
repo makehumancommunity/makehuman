@@ -123,7 +123,7 @@ class UserPluginsTaskView(gui3d.TaskView):
         def onClicked(event):
 
             filename = getpath.pathToUnicode(gui.QtWidgets.QFileDialog.getOpenFileName(gui3d.app.mainwin, directory=self.home,
-                                             filter='Zip files ( *.zip );; All files ( *.* )'))
+                                             filter='Zip files ( *.zip );; All files ( *.* )')[0])
 
             dest_path = getpath.getPath('plugins')
             if os.path.isfile(filename):
@@ -148,7 +148,7 @@ class UserPluginsTaskView(gui3d.TaskView):
         @self.installPyButton.mhEvent
         def onClicked(event):
             filename = getpath.pathToUnicode(gui.QtWidgets.QFileDialog.getOpenFileName(gui3d.app.mainwin, directory=self.home,
-                                             filter='Python files ( *.py );; All files ( *.* )'))
+                                             filter='Python files ( *.py );; All files ( *.* )')[0])
             if os.path.isfile(filename) and os.path.splitext(filename)[1] == '.py':
                 try:
                     shutil.copy2(filename, getpath.getPath('plugins'))
