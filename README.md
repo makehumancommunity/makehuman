@@ -8,7 +8,7 @@ value-added in exchange for the possibility of uncovering deficiencies in our po
 
 ## Support requests:
 If you have any questions about the software and its usage, please make a request in our forum:
-http://www.makehumancommunity.org/forum
+http://www.makehumancommunity.org/forum.
 We are not going to answer support requests on the bug tracker!
 
 ## Current status
@@ -19,8 +19,7 @@ If you want a stable release of MakeHuman, see http://www.makehumancommunity.org
 
 This said, the code in the master branch will work if a few basic requirements are met:
 
-* NumPy must be at the most version 1.12.1. Versions 1.13.0 and later will not work.
-* You must use a graphics card capable of using the opengl calls MH rely on. It is currently not easy to say exactly which these are, but a rule of thumb is that discreet graphics cards from nVidia will work, whereas integrated chips from intel are likely to not work. 
+* You must use a graphics card capable of using the opengl calls MH rely on. It is currently not easy to say exactly which these are. 
 
 ## Getting started
 
@@ -31,11 +30,12 @@ If you rather run the code from source:
 * Install git (https://git-scm.com/) with LFS support (https://git-lfs.github.com/). Modern git clients have LFS support included per default. 
 * Make sure the command "git" is available via the PATH variable.
 * Install python 3.5.x or later from https://www.python.org/ (or via your system's package management)
-* Figure out how to run "pip": https://pip.pypa.io/en/stable/ (it should have been installed automatically by python)
+* Figure out how to run "pip": https://pip.pypa.io/en/stable/ (it should have been installed automatically by python), but on Linux use your default package menagemnt system
 * Use "pip" to install dependencies:
-  * "pip install numpy==1.12.1"
-  * "pip install pyqt5"
   * "pip install numpy"
+  * "pip install PyQt5"
+  * "pip install PyOpenGL"
+* on Debian based systems you need to install: python3-numpy, python3-opengl, python3-pyqt5, python3-pyqt5.opengl, python3-pyqt5.qtsvg
 * Use git to clone https://github.com/makehumancommunity/makehuman.git (or download the source as a zip)
 * Run the "download\_assets\_git.py" script in the "makehuman" subdirectory of the source code.
 * Optionally also run:

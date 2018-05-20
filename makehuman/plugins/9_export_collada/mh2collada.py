@@ -4,7 +4,7 @@
 """
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
@@ -14,7 +14,7 @@
 
 **Licensing:**         AGPL3
 
-    This file is part of MakeHuman (www.makehuman.org).
+    This file is part of MakeHuman (www.makehumancommunity.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -121,7 +121,7 @@ def exportCollada(filepath, config):
             '<COLLADA version="1.4.0" xmlns="http://www.collada.org/2005/11/COLLADASchema">\n' +
             '  <asset>\n' +
             '    <contributor>\n' +
-            '      <author>www.makehuman.org</author>\n' +
+            '      <author>www.makehumancommunity.org</author>\n' +
             '    </contributor>\n' +
             '    <created>%s</created>\n' % date +
             '    <modified>%s</modified>\n' % date +

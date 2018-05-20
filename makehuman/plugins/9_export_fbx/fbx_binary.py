@@ -659,7 +659,7 @@ def fbx_header_elements(root, config, filepath, time=None):
     elem_data_single_int32(meta_data, b"Version", FBX_SCENEINFO_VERSION)
     elem_data_single_string(meta_data, b"Title", b"")
     elem_data_single_string(meta_data, b"Subject", b"")
-    elem_data_single_string(meta_data, b"Author", b"www.makehuman.org")
+    elem_data_single_string(meta_data, b"Author", b"www.makehumancommunity.org")
     elem_data_single_string(meta_data, b"Keywords", b"")
     elem_data_single_string(meta_data, b"Revision", b"")
     elem_data_single_string(meta_data, b"Comment", b"")
