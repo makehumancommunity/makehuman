@@ -106,12 +106,12 @@ class UserPluginsTaskView(gui3d.TaskView):
         installBox.addWidget(self.installZipButton)
         installWidgetLayout.addWidget(installBox)
 
-        reloadBox = gui.GroupBox('')
+        actionsBox = gui.GroupBox('')
         self.reloadButton = gui.Button('Reload Plugins Folder')
-        reloadBox.addWidget(self.reloadButton)
+        actionsBox.addWidget(self.reloadButton)
         self.activateButton = gui.Button('Activate Plugins')
-        reloadBox.addWidget(self.activateButton)
-        installWidgetLayout.addWidget(reloadBox)
+        actionsBox.addWidget(self.activateButton)
+        installWidgetLayout.addWidget(actionsBox)
 
         infoBox = gui.GroupBox('Info')
         infoText = gui.TextView(info_msg)
@@ -130,17 +130,17 @@ class UserPluginsTaskView(gui3d.TaskView):
             dest_path = getpath.getPath('plugins')
             if os.path.isfile(filename):
                 result = decompress(filename, dest_path)
-                if result == 1:
-                    gui3d.app.prompt('Error', 'Not a zip file {0:s}'.format(filename), 'OK')
+                if result == 0:
+                    gui3d.app.prompt('Info', 'The plugin copied successfully. To activate, check '
+                                     'the plugin in the list and press the "Activate"-Button or restart MakeHuman.',
+                                     'OK', helpId='installPluginHelp')
                 elif result == 3:
                     gui3d.app.prompt('Warning', 'Potentially dangerous zip file, containing files with unsuitable path. '
                                                 'Inspect/fix the zip file before usage!', 'OK')
                 elif result == 4:
                     gui3d.app.prompt('Error', 'Zip file {0:s} contains exiting files.'.format(filename), 'OK')
-                elif result == 0:
-                    gui3d.app.prompt('Info', 'The plugin copied successfully. To activate, check '
-                                     'the plugin in the list and press the "Activate"-Button or restart MakeHuman.',
-                                     'OK', helpId='installPluginHelp')
+                elif result == 1:
+                    gui3d.app.prompt('Error', 'Not a zip file {0:s}'.format(filename), 'OK')
                     self.updatePluginList()
             self.home = os.path.dirname(filename)
 
@@ -196,7 +196,7 @@ def getUserPlugins():
                 pluginsToLoad[file] = pLocation
 
         elif os.path.isfile(location) and file.endswith('.py') and not file.startswith('_'):
-            name = file.strip('.py')
+            name = os.path.splitext(file)[0]
             pluginsToLoad[name] = location
 
     return pluginsToLoad
