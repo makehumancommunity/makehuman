@@ -519,7 +519,7 @@ class MHApplication(gui3d.Application, mh.Application):
                     pluginsToLoad[file] = pLocation
 
             elif os.path.isfile(location) and file.endswith('.py') and not file.startswith('_'):
-                name = file.strip('.py')
+                name = os.path.splitext(file)[0]
                 pluginsToLoad[name] = location
 
         for file in os.listdir(user_path):
@@ -532,7 +532,7 @@ class MHApplication(gui3d.Application, mh.Application):
                     pluginsToLoad[file] = pLocation
 
             elif os.path.isfile(location) and file.endswith('.py') and not file.startswith('_') and file in self.getSetting('activeUserPlugins'):
-                name = file.strip('.py')
+                name = os.path.splitext(file)[0]
                 pluginsToLoad[name] = location
 
         for name in sorted(pluginsToLoad.keys()):
@@ -564,6 +564,9 @@ class MHApplication(gui3d.Application, mh.Application):
 
             except:
                 log.warning('Could not load %s', name, exc_info=True)
+
+        else:
+            self.modules[name] = None
 
     def unloadPlugins(self):
 
