@@ -40,7 +40,6 @@ Rad2Deg = 180/pi
 #
 
 def printMat3(string, mat, pad=""):
-def printMat3(string, mat, pad=""):
     if not mat:
         print(("%s None" % string))
         return
