@@ -87,7 +87,7 @@ class TargetsTaskView(gui3d.TaskView):
         self.targets.setSizePolicy(gui.SizePolicy.Ignored, gui.SizePolicy.Expanding)
         self.left.layout.setStretchFactor(self.targets, 1)
 
-        self.itemsBox = gui.GroupBox('Selected Tragets:')
+        self.itemsBox = gui.GroupBox('Selected Targets:')
         self.itemsList = gui.TextView('')
         self.itemsList.setWordWrap(False)
         self.itemsList.setSizePolicy(gui.SizePolicy.Ignored, gui.SizePolicy.Preferred)
