@@ -547,6 +547,7 @@ class MHApplication(gui3d.Application, mh.Application):
                 spec = importlib.util.spec_from_file_location(name=name, location=location)
                 if not spec:
                     log.message("Could not import plugin: %s", name)
+                    return False
                 else:
                     module = importlib.util.module_from_spec(spec)
                     sys.modules[name] = module
@@ -561,12 +562,15 @@ class MHApplication(gui3d.Application, mh.Application):
                     log.message('Loaded plugin %s', name)
 
                     self.processEvents()
+                    return True
 
             except:
                 log.warning('Could not load %s', name, exc_info=True)
+                return False
 
         else:
             self.modules[name] = None
+            return False
 
     def unloadPlugins(self):
 
