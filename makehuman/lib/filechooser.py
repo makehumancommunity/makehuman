@@ -265,6 +265,7 @@ class FileSortRadioButton(gui.RadioButton):
         self.chooser.sortBy = self.field
         self.chooser.refresh()
 
+
 class TagFilter(gui.GroupBox):
     def __init__(self):
         super(TagFilter, self).__init__('Tag filter')
@@ -283,13 +284,23 @@ class TagFilter(gui.GroupBox):
             return
 
         self.tags.add(tag)
-        toggle = self.addWidget(gui.CheckBox(tag.capitalize()))
+        toggle = gui.CheckBox(tag.capitalize())
         toggle.tag = tag
         self.tagToggles.append(toggle)
 
         @toggle.mhEvent
         def onClicked(event):
             self.setTagState(toggle.tag, toggle.selected)
+
+    def showTags(self):
+        if self.tagToggles:
+            for toggle in sorted(self.tagToggles, key=lambda t: t.tag):
+                self.addWidget(toggle)
+
+    def removeTags(self):
+        if self.tagToggles:
+            for toggle in self.tagToggles:
+                self.removeWidget(toggle)
 
     def addTags(self, tags):
         for tag in tags:
@@ -398,6 +409,7 @@ class TaggedFileLoader(FileHandler):
         """
         Load tags from mhclo file.
         """
+        self.fileChooser.removeTags()
         for file in files:
             label = getpath.pathToUnicode( os.path.basename(file) )
             if len(self.fileChooser.extensions) > 0:
@@ -405,6 +417,7 @@ class TaggedFileLoader(FileHandler):
             label = label[0].capitalize() + label[1:]
             tags = self.library.getTags(filename = file)
             self.fileChooser.addItem(file, label, self.getPreview(file), tags)
+        self.fileChooser.showTags()
 
 class MhmatFileLoader(FileHandler):
 
@@ -554,6 +567,14 @@ class FileChooserBase(QtWidgets.QWidget, gui.Widget):
         if self.tagFilter:
             self.tagFilter.addTags(tags)
         return None
+
+    def showTags(self):
+        if self.tagFilter:
+            self.tagFilter.showTags()
+
+    def removeTags(self):
+        if self.tagFilter:
+            self.tagFilter.removeTags()
 
     def removeItem(self, file):
         listItem = self._getListItem(file)
