@@ -232,6 +232,7 @@ class MHApplication(gui3d.Application, mh.Application):
                 'highspeed': 5,
                 'realtimeNormalUpdates': False,
                 'units': 'metric',
+                'real_weight': False,
                 'guiTheme': 'makehuman',
                 'restoreWindowSize': True,
                 'windowGeometry': ''
@@ -245,6 +246,7 @@ class MHApplication(gui3d.Application, mh.Application):
                 'lowspeed': 1,
                 'highspeed': 5,
                 'units':'metric',
+                'real_weight': False,
                 'invertMouseWheel':False,
                 'language':'english',
                 'excludePlugins':[],
