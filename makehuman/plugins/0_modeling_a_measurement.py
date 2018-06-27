@@ -182,22 +182,30 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
 
     def syncGUIStats(self):
         self.syncStatistics()
+        self.showMacroStatus()
         #self.syncBraSizes()
 
     def syncStatistics(self):
+
+        def getMeasureString(val):
+            if G.app.getSetting('units') == 'metric':
+                result = '%.2f cm' % val
+            else:
+                result = '%.2f in' % (val * 0.393700787)
+            return result
+
         human = G.app.selectedHuman
 
-        height = human.getHeightCm()
-        if G.app.getSetting('units') == 'metric':
-            height = '%.2f cm' % height
-        else:
-            height = '%.2f in' % (height * 0.393700787)
+        height = getMeasureString(human.getHeightCm())
+        chest = getMeasureString(self.getMeasure('measure/measure-bust-circ-decr|incr'))
+        waist = getMeasureString(self.getMeasure('measure/measure-waist-circ-decr|incr'))
+        hips = getMeasureString(self.getMeasure('measure/measure-hips-circ-decr|incr'))
 
         lang = language.language
         self.height.setTextFormat(lang.getLanguageString('Height') + ': %s', height)
-        self.chest.setTextFormat(lang.getLanguageString('Chest') + ': %s', self.getMeasure('measure/measure-bust-circ-decr|incr'))
-        self.waist.setTextFormat(lang.getLanguageString('Waist') + ': %s', self.getMeasure('measure/measure-waist-circ-decr|incr'))
-        self.hips.setTextFormat(lang.getLanguageString('Hips') + ': %s', self.getMeasure('measure/measure-hips-circ-decr|incr'))
+        self.chest.setTextFormat(lang.getLanguageString('Chest') + ': %s', chest)
+        self.waist.setTextFormat(lang.getLanguageString('Waist') + ': %s', waist)
+        self.hips.setTextFormat(lang.getLanguageString('Hips') + ': %s', hips)
 
     def syncBraSizes(self):
         # TODO unused
