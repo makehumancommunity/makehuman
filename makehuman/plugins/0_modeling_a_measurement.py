@@ -73,7 +73,7 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
         self.uk = self.braBox.addWidget(gui.TextView('UK: '))
         '''
 
-    def addSlider(self, sliderCategory, slider, enabledCondition):
+    def addSlider(self, sliderCategory, slider, enabledCondition=None):
         super(MeasureTaskView, self).addSlider(sliderCategory, slider, enabledCondition)
 
         slider.valueConverter = MeasurementValueConverter(self, slider.modifier)
@@ -132,10 +132,11 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
 
         self.syncGUIStats()
         self.updateMeshes()
-        human = G.app.selectedHuman
+        #human = G.app.selectedHuman
 
     def onHide(self, event):
-        human = G.app.selectedHuman
+        #human = G.app.selectedHuman
+        self.setStatus('')
 
     def onSliderFocus(self, slider):
         self.lastActive = slider
@@ -167,6 +168,7 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
         if G.app.currentTask == self:
             self.updateMeshes()
             self.syncSliders()
+            self.syncGUIStats()
 
     def onHumanTranslated(self, event):
         self.measureObject.setPosition(G.app.selectedHuman.getPosition())
