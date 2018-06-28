@@ -191,12 +191,15 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
             if G.app.getSetting('units') == 'metric':
                 result = '%.2f cm' % val
             else:
-                result = '%.2f in' % (val * 0.393700787)
+                result = '%.2f in' % val
             return result
 
         human = G.app.selectedHuman
 
-        height = getMeasureString(human.getHeightCm())
+        meshHight = human.getHeightCm()
+        if G.app.getSetting('units') == 'imperial':
+            meshHight *= 0.393700787
+        height = getMeasureString(meshHight)
         chest = getMeasureString(self.getMeasure('measure/measure-bust-circ-decr|incr'))
         waist = getMeasureString(self.getMeasure('measure/measure-waist-circ-decr|incr'))
         hips = getMeasureString(self.getMeasure('measure/measure-hips-circ-decr|incr'))
