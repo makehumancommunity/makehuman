@@ -46,19 +46,19 @@ import shutil
 
 class UserPluginCheckBox(gui.CheckBox):
 
-    def __init__(self, module, path=''):
-        super(UserPluginCheckBox, self).__init__(module, module in gui3d.app.getSetting('activeUserPlugins'))
-        self.module = module
+    def __init__(self, name, path=''):
+        super(UserPluginCheckBox, self).__init__(name, name in gui3d.app.getSetting('activeUserPlugins'))
+        self.name = name
         self.path = path
 
     def onClicked(self, event):
         if self.selected:
             includes = gui3d.app.getSetting('activeUserPlugins')
-            includes.append(self.module)
+            includes.append(self.name)
             gui3d.app.setSetting('activeUserPlugins', includes)
         else:
             includes = gui3d.app.getSetting('activeUserPlugins')
-            includes.remove(self.module)
+            includes.remove(self.name)
             gui3d.app.setSetting('activeUserPlugins', includes)
 
         gui3d.app.saveSettings()
@@ -78,21 +78,20 @@ class UserPluginsTaskView(gui3d.TaskView):
         activePlugins = gui3d.app.getSetting('activeUserPlugins')
 
         for plugin in activePlugins:
-            if plugin not in self.userPlugins:
+            if plugin not in [k for k, _ in self.userPlugins]:
                 activePlugins.remove(plugin)
 
         gui3d.app.setSetting('activeUserPlugins', activePlugins)
         gui3d.app.saveSettings()
 
-        self.home = os.path.expanduser('~')
+        self.home = getpath.getHomePath()
 
         scroll = self.addTopWidget(gui.VScrollArea())
         self.userPluginBox = gui.GroupBox('User Plugins')
         self.userPluginBox.setSizePolicy(gui.SizePolicy.MinimumExpanding, gui.SizePolicy.Preferred)
         scroll.setWidget(self.userPluginBox)
 
-        for i, plugin in enumerate(sorted(self.userPlugins.keys())):
-            self.userPluginBox.addWidget(UserPluginCheckBox(plugin, self.userPlugins.get(plugin)), row=i, alignment=gui.QtCore.Qt.AlignTop)
+        self.updatePluginList()
 
         installWidget = gui.QtWidgets.QWidget()
         installWidgetLayout = gui.QtWidgets.QVBoxLayout()
@@ -177,14 +176,13 @@ class UserPluginsTaskView(gui3d.TaskView):
         for child in self.userPluginBox.children:
             self.userPluginBox.removeWidget(child)
         updatePlugins = getUserPlugins()
-        for i, plugin in enumerate(sorted(updatePlugins.keys())):
-            self.userPluginBox.addWidget(UserPluginCheckBox(plugin, updatePlugins.get(plugin)), row=i,
-                                         alignment=gui.QtCore.Qt.AlignTop)
+        for i, (name, location) in enumerate(sorted(updatePlugins, key=lambda plugin: plugin[0])):
+            self.userPluginBox.addWidget(UserPluginCheckBox(name, location), row=i, alignment=gui.QtCore.Qt.AlignTop)
 
 
 def getUserPlugins():
 
-    pluginsToLoad = {}
+    pluginsToLoad = []
     user_path = getpath.getPath('plugins')
 
     for file in os.listdir(user_path):
@@ -194,11 +192,11 @@ def getUserPlugins():
         if os.path.isdir(location) and not file.startswith('_'):
             pLocation = os.path.join(location, '__init__.py')
             if os.path.isfile(pLocation):
-                pluginsToLoad[file] = pLocation
+                pluginsToLoad.append((file, pLocation))
 
         elif os.path.isfile(location) and file.endswith('.py') and not file.startswith('_'):
             name = os.path.splitext(file)[0]
-            pluginsToLoad[name] = location
+            pluginsToLoad.append((name, location))
 
     return pluginsToLoad
 

@@ -506,7 +506,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def loadPlugins(self):
 
-        pluginsToLoad = dict()
+        pluginsToLoad = []
 
         sys_path = os.path.abspath(mh.getSysPath('plugins'))
         user_path = mh.getPath('plugins')
@@ -518,11 +518,11 @@ class MHApplication(gui3d.Application, mh.Application):
             if os.path.isdir(location) and not file.startswith('_'):
                 pLocation = os.path.join(location, '__init__.py')
                 if os.path.isfile(pLocation):
-                    pluginsToLoad[file] = pLocation
+                    pluginsToLoad.append((file, pLocation))
 
             elif os.path.isfile(location) and file.endswith('.py') and not file.startswith('_'):
                 name = os.path.splitext(file)[0]
-                pluginsToLoad[name] = location
+                pluginsToLoad.append((name, location))
 
         for file in os.listdir(user_path):
 
@@ -531,14 +531,14 @@ class MHApplication(gui3d.Application, mh.Application):
             if os.path.isdir(location) and not file.startswith('_') and file in self.getSetting('activeUserPlugins'):
                 pLocation = os.path.join(location, '__init__.py')
                 if os.path.isfile(pLocation):
-                    pluginsToLoad[file] = pLocation
+                    pluginsToLoad.append((file, pLocation))
 
             elif os.path.isfile(location) and file.endswith('.py') and not file.startswith('_') and file in self.getSetting('activeUserPlugins'):
                 name = os.path.splitext(file)[0]
-                pluginsToLoad[name] = location
+                pluginsToLoad.append((name, location))
 
-        for name in sorted(pluginsToLoad.keys()):
-            self.loadPlugin(name=name, location=pluginsToLoad.get(name))
+        for name, location in sorted(pluginsToLoad, key=lambda plugin: plugin[0]):
+            self.loadPlugin(name=name, location=location)
 
     def loadPlugin(self, name, location):
 
