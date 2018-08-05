@@ -38,9 +38,24 @@ Utility module for finding the user home path.
 
 import sys
 import os
+import io
 
 __home_path = None
 
+if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
+
+    configFile = os.path.expanduser('~/.config/makehuman.conf')
+    configPath = ''
+
+    if os.path.isfile(configFile):
+        with io.open(configFile, 'r') as f:
+            configPath = f.readline().strip()
+
+        if os.path.isdir(configPath):
+            __home_path = configPath
+
+elif sys.platform.startswith('win32'):
+    pass
 
 def pathToUnicode(path):
     """
