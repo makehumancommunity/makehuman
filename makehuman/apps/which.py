@@ -47,7 +47,7 @@ def which(program):
     """
     Checks whether a program exists, similar to http://en.wikipedia.org/wiki/Which_(Unix)
     """
-    if sys.platform == "win32" and not program.endswith(".exe"):
+    if sys.platform.startswith('win') and not program.endswith(".exe"):
         program += ".exe"
         
     log.message("looking for %s", program)

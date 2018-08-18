@@ -135,7 +135,7 @@ def set_sys_path():
     Append local module folders to python search path.
     """
     #[BAL 07/11/2013] make sure we're in the right directory
-    if sys.platform != 'darwin': # Causes issues with py2app builds on MAC
+    if not sys.platform.startswith('darwin'): # Causes issues with py2app builds on MAC
         os.chdir(getCwd())
     syspath = ["./", "./lib", "./apps", "./shared", "./apps/gui","./core"]
     syspath.extend(sys.path)
@@ -154,7 +154,7 @@ def get_platform_paths():
 
     home = getpath.getPath()
 
-    if sys.platform == 'win32':
+    if sys.platform.startswith('win'):
         stdout_filename = os.path.join(home, "python_out.txt")
         stderr_filename = os.path.join(home, "python_err.txt")
 

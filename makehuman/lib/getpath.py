@@ -96,7 +96,7 @@ def getHomePath():
         return __home_path
 
     # Windows
-    if sys.platform == 'win32':
+    if sys.platform.startswith('win'):
         import winreg
         keyname = r'Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders'
         #name = 'Personal'
@@ -124,7 +124,7 @@ def getPath(subPath = ""):
     path = getHomePath()
 
     # Windows
-    if sys.platform == 'win32':
+    if sys.platform.startswith('win'):
         path = os.path.join(path, "makehuman")
 
     # MAC OSX

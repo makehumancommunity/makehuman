@@ -57,7 +57,7 @@ def findPathToGit():
         _gitcmd = os.environ['GIT_COMMAND']
         return _gitcmd
 
-    if sys.platform == 'win32':
+    if sys.platform.startswith('win'):
         _findPathToGitWindows()
     else:
         _findPathToGitUnixoid()

@@ -1726,7 +1726,7 @@ class MHApplication(gui3d.Application, mh.Application):
         mh.Application.OnInit(self)
 
         #[BAL 07/14/2013] work around focus bug in PyQt on OS X
-        if sys.platform == 'darwin':
+        if sys.platform.startswith('darwin'):
             G.app.mainwin.raise_()
 
         self.setLanguage("english")
@@ -1745,7 +1745,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.splash = gui.SplashScreen(self.getThemeResource('images', 'splash.png'), mh.getVersionDigitsStr())
         self.splash.show()
-        if sys.platform != 'darwin':
+        if not sys.platform.startswith('darwin'):
             self.mainwin.hide()  # Fix for OSX crash thanks to Francois (issue #593)
 
         self.tabs = self.mainwin.tabs
