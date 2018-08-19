@@ -44,7 +44,7 @@ import gui3d
 import gui
 import log
 from qtui import getExistingDirectory
-from getpath import getHomePath
+from getpath import getHomePath, formatPath
 
 class SettingCheckbox(gui.CheckBox):
     def __init__(self, label, settingName, postAction=None):
@@ -173,7 +173,9 @@ class SettingsTaskView(gui3d.TaskView):
                 gui3d.app.statusPersist('Home Folder Location: Default')
             else:
                 filePath = getConfigPath('makehuman.conf')
-                homePath = getExistingDirectory(getHomePath())
+                homePath = formatPath(getExistingDirectory(getHomePath()))
+                if sys.platform.startswith('darwin') or sys.platform.startswith('linux') and not os.path.isdir(getConfigPath('')):
+                    os.makedirs(getConfigPath(''))
                 if os.path.isdir(homePath) and os.path.isdir(getConfigPath('')):
                     with io.open(filePath, 'w') as f:
                         f.writelines(homePath + '\n')
@@ -276,9 +278,13 @@ def unload(app):
 
 
 def getConfigPath(filename = ''):
-    if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
+    if sys.platform.startswith('linux'):
         return os.path.expanduser(os.path.join('~/.config', filename))
+    elif sys.platform.startswith('darwin'):
+        return os.path.expanduser(os.path.join('~/Library/Application Support/MakeHuman', filename))
     elif sys.platform.startswith('win32'):
+        return os.path.join(os.getenv('LOCALAPPDATA',''), filename)
+    else:
         return ''
 
 def hasConfigFile():
