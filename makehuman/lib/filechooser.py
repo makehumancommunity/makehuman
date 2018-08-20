@@ -268,7 +268,7 @@ class FileSortRadioButton(gui.RadioButton):
 
 class TagFilter(gui.GroupBox):
     def __init__(self):
-        super(TagFilter, self).__init__('Tag filter')
+        super(TagFilter, self).__init__('Tag filter [Mode : ' + mh.getSetting('tagsMode') + ']')
         self.tags = set()
         self.selectedTags = set()
         self.tagToggles = []
@@ -291,6 +291,10 @@ class TagFilter(gui.GroupBox):
         @toggle.mhEvent
         def onClicked(event):
             self.setTagState(toggle.tag, toggle.selected)
+
+    def onShow(self, event):
+        super(TagFilter, self).onShow(event)
+        self.setTitle('Tag filter [Mode : ' + mh.getSetting('tagsMode') + ']')
 
     def showTags(self):
         if self.tagToggles:
@@ -336,24 +340,28 @@ class TagFilter(gui.GroupBox):
         return len(self.getSelectedTags()) > 0
 
     def filter(self, items):
-        mode = mh.G.app.getSetting('tagsMode')
+        mode = mh.getSetting('tagsMode')
         if not self.filterActive():
             for item in items:
                 item.setHidden(False)
             return
 
         for item in items:
-            #if len(self.selectedTags.intersection(file.tags)) > 0:  # OR
-            if mode == 'AND':
-                if len(self.selectedTags.intersection(item.tags)) == len(self.selectedTags):  # AND
-                    item.setHidden(False)
-                else:
-                    item.setHidden(True)
-            elif mode == 'OR':
+            if mode == 'OR':
                 if len(self.selectedTags.intersection(item.tags)) > 0:
                     item.setHidden(False)
                 else:
                     item.setHidden(True)
+            elif mode == 'AND':
+                if len(self.selectedTags.intersection(item.tags)) == len(self.selectedTags):
+                    item.setHidden(False)
+                else:
+                    item.setHidden(True)
+            elif mode == 'NOT':
+                if len(self.selectedTags.intersection((item.tags))) > 0:
+                    item.setHidden(True)
+                else:
+                    item.setHidden(False)
 
 class FileHandler(object):
     def __init__(self):

@@ -144,6 +144,7 @@ class SettingsTaskView(gui3d.TaskView):
         tagsBox = self.addLeftWidget(gui.GroupBox('Tags Mode'))
         self.or_mode = tagsBox.addWidget(gui.RadioButton(tagsModes, 'OR', gui3d.app.getSetting('tagsMode') == 'OR'))
         self.and_mode = tagsBox.addWidget(gui.RadioButton(tagsModes, 'AND', gui3d.app.getSetting('tagsMode') == 'AND'))
+        self.not_mode = tagsBox.addWidget(gui.RadioButton(tagsModes, 'NOT', gui3d.app.getSetting('tagsMode') == 'NOT'))
 
         startupBox = self.addLeftWidget(gui.GroupBox('Startup'))
         self.preload = startupBox.addWidget(SettingCheckbox("Preload macro targets", 'preloadTargets'))
@@ -210,6 +211,10 @@ class SettingsTaskView(gui3d.TaskView):
         @self.or_mode.mhEvent
         def onClicked(event):
             gui3d.app.setSetting('tagsMode', 'OR')
+
+        @self.not_mode.mhEvent
+        def onClicked(event):
+            gui3d.app.setSetting('tagsMode', 'NOT')
 
         self.updateGui()
 

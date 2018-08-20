@@ -102,3 +102,9 @@ def removeTimer(id):
 
 def callAsync(func, *args, **kwargs):
     G.app.callAsync(func, *args, **kwargs)
+
+def getSetting(setting_name):
+    return G.app.getSetting(setting_name)
+
+def setSetting(setting_name, value):
+    G.app.setSetting(setting_name, value)
