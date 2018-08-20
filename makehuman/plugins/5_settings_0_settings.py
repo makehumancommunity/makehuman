@@ -140,6 +140,11 @@ class SettingsTaskView(gui3d.TaskView):
         self.rel_weight = weightBox.addWidget(gui.RadioButton(weights, 'Relative Weight', not gui3d.app.getSetting('real_weight')))
         self.real_weight = weightBox.addWidget(gui.RadioButton(weights, 'Real Weight', gui3d.app.getSetting('real_weight')))
 
+        tagsModes = []
+        tagsBox = self.addLeftWidget(gui.GroupBox('Tags Mode'))
+        self.or_mode = tagsBox.addWidget(gui.RadioButton(tagsModes, 'OR', gui3d.app.getSetting('tagsMode') == 'OR'))
+        self.and_mode = tagsBox.addWidget(gui.RadioButton(tagsModes, 'AND', gui3d.app.getSetting('tagsMode') == 'AND'))
+
         startupBox = self.addLeftWidget(gui.GroupBox('Startup'))
         self.preload = startupBox.addWidget(SettingCheckbox("Preload macro targets", 'preloadTargets'))
 
@@ -197,6 +202,14 @@ class SettingsTaskView(gui3d.TaskView):
         @self.real_weight.mhEvent
         def onClicked(event):
             gui3d.app.setSetting('real_weight', True)
+
+        @self.and_mode.mhEvent
+        def onClicked(event):
+            gui3d.app.setSetting('tagsMode', 'AND')
+
+        @self.or_mode.mhEvent
+        def onClicked(event):
+            gui3d.app.setSetting('tagsMode', 'OR')
 
         self.updateGui()
 

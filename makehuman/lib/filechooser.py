@@ -336,6 +336,7 @@ class TagFilter(gui.GroupBox):
         return len(self.getSelectedTags()) > 0
 
     def filter(self, items):
+        mode = mh.G.app.getSetting('tagsMode')
         if not self.filterActive():
             for item in items:
                 item.setHidden(False)
@@ -343,10 +344,16 @@ class TagFilter(gui.GroupBox):
 
         for item in items:
             #if len(self.selectedTags.intersection(file.tags)) > 0:  # OR
-            if len(self.selectedTags.intersection(item.tags)) == len(self.selectedTags):  # AND
-                item.setHidden(False)
-            else:
-                item.setHidden(True)
+            if mode == 'AND':
+                if len(self.selectedTags.intersection(item.tags)) == len(self.selectedTags):  # AND
+                    item.setHidden(False)
+                else:
+                    item.setHidden(True)
+            elif mode == 'OR':
+                if len(self.selectedTags.intersection(item.tags)) > 0:
+                    item.setHidden(False)
+                else:
+                    item.setHidden(True)
 
 class FileHandler(object):
     def __init__(self):
