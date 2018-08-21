@@ -40,6 +40,7 @@ import log
 import progress
 import csv
 import getpath
+import io
 
 def _parse_version(version_str):
     version_str = version_str.lower().strip()
