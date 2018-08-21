@@ -141,7 +141,7 @@ class SettingsTaskView(gui3d.TaskView):
         self.real_weight = weightBox.addWidget(gui.RadioButton(weights, 'Real Weight', gui3d.app.getSetting('real_weight')))
 
         tagsModes = []
-        tagsBox = self.addLeftWidget(gui.GroupBox('Tags Mode'))
+        tagsBox = self.addLeftWidget(gui.GroupBox('Tag Filter Mode'))
         self.or_mode = tagsBox.addWidget(gui.RadioButton(tagsModes, 'OR', gui3d.app.getSetting('tagsMode') == 'OR'), 0, 0)
         self.and_mode = tagsBox.addWidget(gui.RadioButton(tagsModes, 'AND', gui3d.app.getSetting('tagsMode') == 'AND'), 0, 1)
         self.nor_mode = tagsBox.addWidget(gui.RadioButton(tagsModes, 'NOT OR', gui3d.app.getSetting('tagsMode') == 'NOR'), 1, 0)
