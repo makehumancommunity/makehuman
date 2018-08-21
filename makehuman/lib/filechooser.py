@@ -268,7 +268,7 @@ class FileSortRadioButton(gui.RadioButton):
 
 class TagFilter(gui.GroupBox):
     def __init__(self):
-        super(TagFilter, self).__init__('Tag filter [Mode : ' + mh.getSetting('tagsMode') + ']')
+        super(TagFilter, self).__init__('Tag filter [Mode : ' + self.convertModes(mh.getSetting('tagsMode')) + ']')
         self.tags = set()
         self.selectedTags = set()
         self.tagToggles = []
@@ -294,7 +294,7 @@ class TagFilter(gui.GroupBox):
 
     def onShow(self, event):
         super(TagFilter, self).onShow(event)
-        self.setTitle('Tag filter [Mode : ' + mh.getSetting('tagsMode') + ']')
+        self.setTitle('Tag filter [Mode : ' + self.convertModes(mh.getSetting('tagsMode')) + ']')
 
     def showTags(self):
         if self.tagToggles:
@@ -357,11 +357,21 @@ class TagFilter(gui.GroupBox):
                     item.setHidden(False)
                 else:
                     item.setHidden(True)
-            elif mode == 'NOT':
+            elif mode == 'NOR':
                 if len(self.selectedTags.intersection((item.tags))) > 0:
                     item.setHidden(True)
                 else:
                     item.setHidden(False)
+            elif mode == 'NAND':
+                if len(self.selectedTags.intersection(item.tags)) == len(self.selectedTags):
+                    item.setHidden(True)
+                else:
+                    item.setHidden(False)
+
+    def convertModes(self, mode):
+        convmodes = {'NOR': 'NOT OR',
+                     'NAND': 'NOT AND'}
+        return convmodes.get(mode, mode)
 
 class FileHandler(object):
     def __init__(self):

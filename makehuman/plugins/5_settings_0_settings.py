@@ -142,9 +142,11 @@ class SettingsTaskView(gui3d.TaskView):
 
         tagsModes = []
         tagsBox = self.addLeftWidget(gui.GroupBox('Tags Mode'))
-        self.or_mode = tagsBox.addWidget(gui.RadioButton(tagsModes, 'OR', gui3d.app.getSetting('tagsMode') == 'OR'))
-        self.and_mode = tagsBox.addWidget(gui.RadioButton(tagsModes, 'AND', gui3d.app.getSetting('tagsMode') == 'AND'))
-        self.not_mode = tagsBox.addWidget(gui.RadioButton(tagsModes, 'NOT', gui3d.app.getSetting('tagsMode') == 'NOT'))
+        self.or_mode = tagsBox.addWidget(gui.RadioButton(tagsModes, 'OR', gui3d.app.getSetting('tagsMode') == 'OR'), 0, 0)
+        self.and_mode = tagsBox.addWidget(gui.RadioButton(tagsModes, 'AND', gui3d.app.getSetting('tagsMode') == 'AND'), 0, 1)
+        self.nor_mode = tagsBox.addWidget(gui.RadioButton(tagsModes, 'NOT OR', gui3d.app.getSetting('tagsMode') == 'NOR'), 1, 0)
+        self.nand_mode = tagsBox.addWidget(gui.RadioButton(tagsModes, 'NOT AND', gui3d.app.getSetting('tagsMode') == 'NAND'), 1, 1)
+
 
         startupBox = self.addLeftWidget(gui.GroupBox('Startup'))
         self.preload = startupBox.addWidget(SettingCheckbox("Preload macro targets", 'preloadTargets'))
@@ -212,9 +214,13 @@ class SettingsTaskView(gui3d.TaskView):
         def onClicked(event):
             gui3d.app.setSetting('tagsMode', 'OR')
 
-        @self.not_mode.mhEvent
+        @self.nor_mode.mhEvent
         def onClicked(event):
-            gui3d.app.setSetting('tagsMode', 'NOT')
+            gui3d.app.setSetting('tagsMode', 'NOR')
+
+        @self.nand_mode.mhEvent
+        def onClicked(event):
+            gui3d.app.setSetting('tagsMode', 'NAND')
 
         self.updateGui()
 
