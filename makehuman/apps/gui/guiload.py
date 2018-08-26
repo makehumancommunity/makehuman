@@ -41,6 +41,9 @@ import gui3d
 import filechooser as fc
 import qtgui as gui
 from getpath import formatPath
+import filecache
+import os
+import io
 
 
 class HumanFileSort(fc.FileSort):
@@ -71,7 +74,7 @@ class HumanFileSort(fc.FileSort):
         return meta
 
 
-class LoadTaskView(gui3d.TaskView):
+class LoadTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     def __init__(self, category):
 
@@ -94,8 +97,12 @@ class LoadTaskView(gui3d.TaskView):
 
         loadpath = gui3d.app.getSetting('loaddir')
         self.filechooser = fc.IconListFileChooser(loadpath, 'mhm', 'thumb', mh.getSysDataPath('notfound.thumb'), sort=HumanFileSort())
+        filecache.MetadataCacher.__init__(self, ['mhm'], 'models_filecache.mhc')
         self.addRightWidget(self.filechooser)
         self.addLeftWidget(self.filechooser.createSortBox())
+
+        self.filechooser.setFileLoadHandler(fc.TaggedFileLoader(self, useNameTag=True))
+        self.addLeftWidget(self.filechooser.createTagFilter())
 
         @self.filechooser.mhEvent
         def onFileSelected(filename):
@@ -117,4 +124,52 @@ class LoadTaskView(gui3d.TaskView):
         self.filechooser.setFocus()
 
         # HACK: otherwise the toolbar background disappears for some weird reason
-        mh.redraw()
+        # mh.redraw()
+
+    def getMetadataImpl(self, filename):
+        version = ''
+        name = ''
+        uuid = ''
+        tags = set()
+        if os.path.isfile(filename) and os.path.splitext(filename)[1] == '.mhm':
+            with io.open(filename, 'r') as f:
+                for line in f:
+                    if line and not line.startswith('#'):
+                        data = line.strip().split()
+                        if len(data) > 1:
+                            if data[0] == 'version':
+                                version = data[1]
+                            if data[0] == 'name':
+                                name = ' '.join(data[1:])
+                            if data[0] == 'uuid':
+                                uuid = data[1]
+                            if data[0] == 'tags':
+                                for tag in data[1:]:
+                                    tags.add(tag)
+                    if version and name and uuid and tags:
+                        break
+        if version < 'v1.1.3':
+            if tags:
+                name = ' '.join(tags)
+                tags.clear()
+        return (name, uuid, tags)
+
+    def getTagsFromMetadata(self, metadata):
+        _, _, tags = metadata
+        return tags
+
+    def getNameFromMetadata(self, metadata):
+        name, _, _ = metadata
+        return name
+
+    def getSearchPaths(self):
+        if self.modelPath:
+            return [self.modelPath]
+        else:
+            return [gui3d.app.getSetting('loaddir')]
+
+    def getFileExtensions(self):
+        return 'mhm'
+
+    def unload(self):
+        self.onUnload()

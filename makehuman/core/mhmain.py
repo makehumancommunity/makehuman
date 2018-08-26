@@ -839,6 +839,7 @@ class MHApplication(gui3d.Application, mh.Application):
         self.saveSettings(True)
         self.unloadPlugins()
         self.dumpMissingStrings()
+        self.files.load.unload()
 
     def onQuit(self, event):
         self.promptAndExit()
@@ -1502,6 +1503,7 @@ class MHApplication(gui3d.Application, mh.Application):
         self.clearUndoRedo()
         # Reset mesh is never forced to wireframe
         self.actions.wireframe.setChecked(False)
+        self.callEvent('onReset', self)
 
     # Camera navigation
     def rotateCamera(self, axis, amount):

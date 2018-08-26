@@ -45,6 +45,7 @@ import gui
 import gui3d
 from core import G
 from getpath import pathToUnicode, formatPath
+from events3d import EventHandler
 
 
 def saveMHM(path):
@@ -68,13 +69,149 @@ def saveMHM(path):
     img.save(os.path.join(savedir, name + '.thumb'))
 
     # Save the model
-    G.app.selectedHuman.save(path, name)
+    G.app.selectedHuman.save(path)
     #G.app.clearUndoRedo()
 
     # Remember last save folder
     gui3d.app.setSetting('savedir', formatPath(os.path.dirname(path)))
 
     G.app.status('Your model has been saved to %s.', path)
+
+class UuidView(gui.GroupBox):
+
+    def __init__(self):
+        super(UuidView, self).__init__('UUID')
+        self.uuidText = gui.TextView()
+        self.addWidget(self.uuidText)
+        self.genButton = self.addWidget(gui.Button('Generate UUID'))
+        self.uuidText.setWordWrap(True)
+
+        @self.genButton.mhEvent
+        def onClicked(event):
+            self.uuid = '\n'.join(self.isplit(G.app.selectedHuman.newUuid(), 24))
+            self.uuidText.setText(self.uuid)
+
+    def onShow(self, event):
+        super(UuidView, self).onShow(event)
+        self.uuid = '\n'.join(self.isplit(G.app.selectedHuman.getUuid(), 24))
+        self.uuidText.setText(self.uuid)
+
+    def clearUuid(self):
+        self.uuid = ''
+        self.uuidText.setText('')
+
+    def getUuid(self):
+        return self.uuid.replace('\n','')
+
+    @classmethod
+    def isplit(cls, string, width):
+        if string:
+            n = len(string) // width
+            r = len(string) % width
+            l = []
+            for i in range(n):
+                l.append(string[i*width:(i+1)*width])
+            l.append(string[-r:])
+            return l
+        else:
+            return string
+
+
+class TagsView(gui.GroupBox):
+
+    def __init__(self):
+        super(TagsView, self).__init__('Tags')
+        self.editList = []
+        for i in range(5):
+            self.editList.append(self.addWidget(gui.TextEdit('')))
+
+    def setTags(self, tags):
+        tags = sorted(tags)
+        for edit in self.editList:
+            if tags:
+                edit.setText(tags.pop(0))
+            else:
+                edit.setText('')
+
+    def getTags(self):
+        tags = set()
+        for edit in self.editList:
+            tag = edit.getText().lower()
+            if tag:
+                tags.add(tag)
+        return tags
+
+    tags=property(getTags, setTags)
+
+    def clearTags(self):
+        for edit in self.editList:
+            edit.setText('')
+
+    def onShow(self, event):
+        super(TagsView, self).onShow(event)
+        self.setTags(G.app.selectedHuman.getTags())
+
+    def onHide(self, event):
+        super(TagsView, self).onHide(event)
+        G.app.selectedHuman.setTags(self.getTags())
+
+
+class NameView(gui.GroupBox):
+
+    def __init__(self):
+        super(NameView, self).__init__('Name')
+        self.nameEdit = self.addWidget(gui.TextEdit())
+
+    def getName(self):
+        return self.nameEdit.getText()
+
+    def setName(self, name):
+        self.nameEdit.setText(name)
+
+    def onShow(self, event):
+        super(NameView, self).onShow(event)
+        self.setName(G.app.selectedHuman.getName())
+
+    def onHide(self, event):
+        super(NameView, self).onHide(event)
+        G.app.selectedHuman.setName(self.getName())
+
+    def clearName(self):
+        self.setName('')
+
+
+class MetadataView(gui.QtWidgets.QWidget, gui.Widget):
+
+    def __init__(self):
+
+        super(MetadataView, self).__init__()
+
+        layout = gui.QtWidgets.QVBoxLayout()
+        self.setLayout(layout)
+
+        self.name_view = NameView()
+        layout.addWidget(self.name_view)
+
+        self.uuid_view = UuidView()
+        layout.addWidget(self.uuid_view)
+
+        self.tags_view = TagsView()
+        layout.addWidget(self.tags_view)
+
+        self.reset_button = gui.Button('Reset Metadata')
+        layout.addWidget(self.reset_button)
+
+        @self.reset_button.mhEvent
+        def onClicked(event):
+            self.uuid_view.clearUuid()
+            self.tags_view.clearTags()
+            self.name_view.clearName()
+            G.app.selectedHuman.setName('')
+            G.app.selectedHuman.clearTags()
+            G.app.selectedHuman.setUuid('')
+
+    def getMetadata(self):
+        return self.name_view.getName(), self.uuid_view.getUuid(), self.tags_view.getTags()
 
 
 class SaveTaskView(gui3d.TaskView):
@@ -96,10 +233,16 @@ class SaveTaskView(gui3d.TaskView):
         self.fileentry = self.addTopWidget(gui.FileEntryView('Save', mode='save'))
         self.fileentry.setFilter('MakeHuman Models (*.mhm)')
 
+        self.metadata_view = self.addLeftWidget(MetadataView())
+
         @self.fileentry.mhEvent
         def onFileSelected(event):
             path = event.path
             if path:
+                _name, _uuid, _tags = self.metadata_view.getMetadata()
+                G.app.selectedHuman.setName(_name)
+                G.app.selectedHuman.setUuid(_uuid)
+                G.app.selectedHuman.setTags(_tags)
                 if not path.lower().endswith(".mhm"):
                     path += ".mhm"
                 if event.source in ('return', 'button') and \

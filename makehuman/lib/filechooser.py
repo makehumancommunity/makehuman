@@ -416,9 +416,10 @@ class TaggedFileLoader(FileHandler):
     This library object needs to implement a getTags(filename) method.
     """
 
-    def __init__(self, library):
+    def __init__(self, library, useNameTag=False):
         super(TaggedFileLoader, self).__init__()
         self.library = library
+        self.useNameTag = useNameTag
 
     def refresh(self, files):
         """
@@ -426,11 +427,16 @@ class TaggedFileLoader(FileHandler):
         """
         self.fileChooser.removeTags()
         for file in files:
-            label = getpath.pathToUnicode( os.path.basename(file) )
-            if len(self.fileChooser.extensions) > 0:
-                label = os.path.splitext(label)[0].replace('_', ' ')
-            label = label[0].capitalize() + label[1:]
+            label=''
             tags = self.library.getTags(filename = file)
+            if self.useNameTag:
+                name = self.library.getName(filename = file)
+                label = name
+            if not label:
+                label = getpath.pathToUnicode(os.path.basename(file))
+                if len(self.fileChooser.extensions) > 0:
+                    label = os.path.splitext(label)[0].replace('_', ' ')
+                label = label[0].capitalize() + label[1:]
             self.fileChooser.addItem(file, label, self.getPreview(file), tags)
         self.fileChooser.showTags()
 
