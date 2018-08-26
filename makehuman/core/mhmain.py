@@ -236,7 +236,8 @@ class MHApplication(gui3d.Application, mh.Application):
                 'guiTheme': 'makehuman',
                 'restoreWindowSize': True,
                 'windowGeometry': '',
-                'tagFilterMode': 'OR'
+                'tagFilterMode': 'OR',
+                'useNameTags': False
             }
         else:
             self._default_settings = {
@@ -258,7 +259,8 @@ class MHApplication(gui3d.Application, mh.Application):
                 'preloadTargets': False,
                 'restoreWindowSize': True,
                 'windowGeometry': '',
-                'tagFilterMode': 'OR'
+                'tagFilterMode': 'OR',
+                'useNameTags': False
             }
 
         self._settings = dict(self._default_settings)

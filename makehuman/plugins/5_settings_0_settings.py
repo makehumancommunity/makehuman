@@ -147,6 +147,8 @@ class SettingsTaskView(gui3d.TaskView):
         self.nor_mode = self.tagFilterBox.addWidget(gui.RadioButton(tagFilter, 'NOT OR', gui3d.app.getSetting('tagFilterMode') == 'NOR'), 1, 0)
         self.nand_mode = self.tagFilterBox.addWidget(gui.RadioButton(tagFilter, 'NOT AND', gui3d.app.getSetting('tagFilterMode') == 'NAND'), 1, 1)
 
+        nameBox = self.addLeftWidget(gui.GroupBox('Name Tags:'))
+        self.useNameTags = nameBox.addWidget(SettingCheckbox('Use Name Tags', 'useNameTags'))
 
         startupBox = self.addLeftWidget(gui.GroupBox('Startup'))
         self.preload = startupBox.addWidget(SettingCheckbox("Preload macro targets", 'preloadTargets'))
@@ -163,7 +165,7 @@ class SettingsTaskView(gui3d.TaskView):
 
         self.checkboxes.extend([self.realtimeUpdates, self.realtimeNormalUpdates,
             self.realtimeFitting, self.cameraAutoZoom, self.sliderImages,
-            self.preload, self.saveScreenSize])
+            self.useNameTags, self.preload, self.saveScreenSize])
 
         themes = []
         self.themesBox = self.addRightWidget(gui.GroupBox('Theme'))

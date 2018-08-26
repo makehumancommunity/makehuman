@@ -100,8 +100,8 @@ class LoadTaskView(gui3d.TaskView, filecache.MetadataCacher):
         filecache.MetadataCacher.__init__(self, ['mhm'], 'models_filecache.mhc')
         self.addRightWidget(self.filechooser)
         self.addLeftWidget(self.filechooser.createSortBox())
-
-        self.filechooser.setFileLoadHandler(fc.TaggedFileLoader(self, useNameTag=True))
+        self.fileLoadHandler = fc.TaggedFileLoader(self, useNameTags=mh.getSetting('useNameTags'))
+        self.filechooser.setFileLoadHandler(self.fileLoadHandler)
         self.addLeftWidget(self.filechooser.createTagFilter())
 
         @self.filechooser.mhEvent
@@ -114,6 +114,8 @@ class LoadTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
+
+        self.fileLoadHandler.setNameTagsUsage(useNameTags = mh.getSetting('useNameTags'))
 
         self.modelPath = gui3d.app.currentFile.dir
         if self.modelPath is None:

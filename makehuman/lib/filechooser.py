@@ -426,10 +426,10 @@ class TaggedFileLoader(FileHandler):
     This library object needs to implement a getTags(filename) method.
     """
 
-    def __init__(self, library, useNameTag=False):
+    def __init__(self, library, useNameTags=False):
         super(TaggedFileLoader, self).__init__()
         self.library = library
-        self.useNameTag = useNameTag
+        self.useNameTags = useNameTags
 
     def refresh(self, files):
         """
@@ -439,7 +439,7 @@ class TaggedFileLoader(FileHandler):
         for file in files:
             label=''
             tags = self.library.getTags(filename = file)
-            if self.useNameTag:
+            if self.useNameTags:
                 name = self.library.getName(filename = file)
                 label = name
             if not label:
@@ -449,6 +449,9 @@ class TaggedFileLoader(FileHandler):
                 label = label[0].capitalize() + label[1:]
             self.fileChooser.addItem(file, label, self.getPreview(file), tags)
         self.fileChooser.showTags()
+
+    def setNameTagsUsage(self, useNameTags=False):
+        self.useNameTags = useNameTags
 
 class MhmatFileLoader(FileHandler):
 
