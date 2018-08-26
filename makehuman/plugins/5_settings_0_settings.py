@@ -140,11 +140,13 @@ class SettingsTaskView(gui3d.TaskView):
         self.rel_weight = weightBox.addWidget(gui.RadioButton(weights, 'Relative Weight', not gui3d.app.getSetting('real_weight')))
         self.real_weight = weightBox.addWidget(gui.RadioButton(weights, 'Real Weight', gui3d.app.getSetting('real_weight')))
 
-        tagsModes = []
-        tagsBox = self.addLeftWidget(gui.GroupBox('Tags Mode'))
-        self.or_mode = tagsBox.addWidget(gui.RadioButton(tagsModes, 'OR', gui3d.app.getSetting('tagsMode') == 'OR'))
-        self.and_mode = tagsBox.addWidget(gui.RadioButton(tagsModes, 'AND', gui3d.app.getSetting('tagsMode') == 'AND'))
-        self.not_mode = tagsBox.addWidget(gui.RadioButton(tagsModes, 'NOT', gui3d.app.getSetting('tagsMode') == 'NOT'))
+        tagFilter = []
+        self.tagFilterBox = self.addLeftWidget(gui.GroupBox('Tag Filter Mode'))
+        self.or_mode = self.tagFilterBox.addWidget(gui.RadioButton(tagFilter, 'OR', gui3d.app.getSetting('tagFilterMode') == 'OR'), 0, 0)
+        self.and_mode = self.tagFilterBox.addWidget(gui.RadioButton(tagFilter, 'AND', gui3d.app.getSetting('tagFilterMode') == 'AND'), 0, 1)
+        self.nor_mode = self.tagFilterBox.addWidget(gui.RadioButton(tagFilter, 'NOT OR', gui3d.app.getSetting('tagFilterMode') == 'NOR'), 1, 0)
+        self.nand_mode = self.tagFilterBox.addWidget(gui.RadioButton(tagFilter, 'NOT AND', gui3d.app.getSetting('tagFilterMode') == 'NAND'), 1, 1)
+
 
         startupBox = self.addLeftWidget(gui.GroupBox('Startup'))
         self.preload = startupBox.addWidget(SettingCheckbox("Preload macro targets", 'preloadTargets'))
@@ -206,15 +208,19 @@ class SettingsTaskView(gui3d.TaskView):
 
         @self.and_mode.mhEvent
         def onClicked(event):
-            gui3d.app.setSetting('tagsMode', 'AND')
+            gui3d.app.setSetting('tagFilterMode', 'AND')
 
         @self.or_mode.mhEvent
         def onClicked(event):
-            gui3d.app.setSetting('tagsMode', 'OR')
+            gui3d.app.setSetting('tagFilterMode', 'OR')
 
-        @self.not_mode.mhEvent
+        @self.nor_mode.mhEvent
         def onClicked(event):
-            gui3d.app.setSetting('tagsMode', 'NOT')
+            gui3d.app.setSetting('tagFilterMode', 'NOR')
+
+        @self.nand_mode.mhEvent
+        def onClicked(event):
+            gui3d.app.setSetting('tagFilterMode', 'NAND')
 
         self.updateGui()
 
@@ -225,19 +231,15 @@ class SettingsTaskView(gui3d.TaskView):
         use_metric = gui3d.app.getSetting('units') == 'metric'
         if use_metric:
             self.metric.setChecked(True)
-            gui3d.app.setSetting('units', 'metric')
         else:
             self.imperial.setChecked(True)
-            gui3d.app.setSetting('units', 'imperial')
         gui3d.app.loadGrid()
 
         use_real_weight = gui3d.app.getSetting('real_weight')
         if use_real_weight:
             self.real_weight.setChecked(True)
-            gui3d.app.setSetting('real_weight', True)
         else:
             self.rel_weight.setChecked(True)
-            gui3d.app.setSetting('real_weight', False)
 
         lang = gui3d.app.getSetting('language')
         for radioBtn in self.languageBox.children:
@@ -248,6 +250,14 @@ class SettingsTaskView(gui3d.TaskView):
         for radioBtn in self.themesBox.children:
             if radioBtn.theme == theme:
                 radioBtn.updateButton(True)
+
+        convmodes = {'NOR': 'NOT OR',
+                     'NAND': 'NOT AND'}
+        mode = convmodes.get(gui3d.app.getSetting('tagFilterMode'), gui3d.app.getSetting('tagFilterMode'))
+
+        for radioBtn in self.tagFilterBox.children:
+            radioBtn.setChecked(radioBtn.getLabel() == mode)
+
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
