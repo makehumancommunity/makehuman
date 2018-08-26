@@ -150,7 +150,7 @@ class LoadTaskView(gui3d.TaskView, filecache.MetadataCacher):
                                     tags.add(tag)
                     if version and name and uuid and tags:
                         break
-        if version < 'v1.1.3':
+        if version < 'v1.2.0':
             if tags:
                 name = ' '.join(tags)
                 tags.clear()

@@ -284,7 +284,7 @@ class TagFilter(gui.GroupBox):
             return
 
         self.tags.add(tag)
-        toggle = gui.CheckBox(tag.capitalize())
+        toggle = gui.CheckBox(tag.title())
         toggle.tag = tag
         self.tagToggles.append(toggle)
 
@@ -296,10 +296,13 @@ class TagFilter(gui.GroupBox):
         super(TagFilter, self).onShow(event)
         self.setTitle('Tag Filter [Mode : ' + self.convertModes(mh.getSetting('tagFilterMode')) + ']')
 
-    def showTags(self):
+    def showTags(self, selection=None):
         if self.tagToggles:
             for toggle in sorted(self.tagToggles, key=lambda t: t.tag):
                 self.addWidget(toggle)
+                if selection and toggle.tag in selection:
+                    toggle.setChecked(True)
+                    self.selectedTags.add(toggle.tag.lower())
 
     def removeTags(self):
         if self.tagToggles:
@@ -435,6 +438,7 @@ class TaggedFileLoader(FileHandler):
         """
         Load tags from mhclo file.
         """
+        oldSelection = self.fileChooser.getSelectedTags().copy()
         self.fileChooser.removeTags()
         for file in files:
             label=''
@@ -448,7 +452,7 @@ class TaggedFileLoader(FileHandler):
                     label = os.path.splitext(label)[0].replace('_', ' ')
                 label = label[0].capitalize() + label[1:]
             self.fileChooser.addItem(file, label, self.getPreview(file), tags)
-        self.fileChooser.showTags()
+        self.fileChooser.showTags(oldSelection)
 
     def setNameTagsUsage(self, useNameTags=False):
         self.useNameTags = useNameTags
@@ -602,13 +606,17 @@ class FileChooserBase(QtWidgets.QWidget, gui.Widget):
             self.tagFilter.addTags(tags)
         return None
 
-    def showTags(self):
+    def showTags(self, selection=None):
         if self.tagFilter:
-            self.tagFilter.showTags()
+            self.tagFilter.showTags(selection)
 
     def removeTags(self):
         if self.tagFilter:
             self.tagFilter.clearAll()
+
+    def getSelectedTags(self):
+        if self.tagFilter:
+            return self.tagFilter.getSelectedTags()
 
     def removeItem(self, file):
         listItem = self._getListItem(file)
