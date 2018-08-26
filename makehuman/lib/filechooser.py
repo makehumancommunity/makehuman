@@ -608,7 +608,7 @@ class FileChooserBase(QtWidgets.QWidget, gui.Widget):
 
     def removeTags(self):
         if self.tagFilter:
-            self.tagFilter.removeTags()
+            self.tagFilter.clearAll()
 
     def removeItem(self, file):
         listItem = self._getListItem(file)
