@@ -117,12 +117,14 @@ class LoadTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         self.fileLoadHandler.setNameTagsUsage(useNameTags = mh.getSetting('useNameTags'))
 
-        self.modelPath = gui3d.app.currentFile.dir
-        if self.modelPath is None:
-            self.modelPath = gui3d.app.getSetting('loaddir')
-
-        self.fileentry.directory = self.modelPath
-        self.filechooser.setPaths(self.modelPath)
+        #self.modelPath = gui3d.app.currentFile.dir
+        #if self.modelPath is None:
+        #    self.modelPath = gui3d.app.getSetting('loaddir')
+        #
+        #self.fileentry.directory = self.modelPath
+        #self.filechooser.setPaths(self.modelPath)
+        self.fileentry.directory = gui3d.app.getSetting('loaddir')
+        self.filechooser.setPaths(gui3d.app.getSetting('loaddir'))
         self.filechooser.setFocus()
 
         # HACK: otherwise the toolbar background disappears for some weird reason
