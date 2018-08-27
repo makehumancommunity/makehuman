@@ -1507,7 +1507,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
                         log.debug('Model Name %s' % self.getName())
                     elif lineData[0] == 'tags' and len(lineData) > 1:
                         for tag in lineData[1:]:
-                            self.addTag(tag)
+                            self.addTag(tag.replace(',,', ' '))
                     elif lineData[0] == 'modifier':
                         try:
                             self.getModifier(lineData[1]).setValue(float(lineData[2]), skipDependencies=True)
@@ -1587,7 +1587,8 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             if self.getName():
                 f.write('name %s\n' % self.getName())
             if self.getTags():
-                f.write('tags %s\n' % ' '.join(sorted(self.getTags())))
+                tags = [t.replace(' ', ',,') for t in self.getTags()]
+                f.write('tags %s\n' % ' '.join(sorted(tags)))
             cam_rot = list(G.app.modelCamera.getRotation()[:2])
             cam_trans = list(G.app.modelCamera.translation[:3])
             cam_zoom = [G.app.modelCamera.zoomFactor]
