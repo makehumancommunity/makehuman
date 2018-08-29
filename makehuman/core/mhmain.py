@@ -237,7 +237,8 @@ class MHApplication(gui3d.Application, mh.Application):
                 'restoreWindowSize': True,
                 'windowGeometry': '',
                 'tagFilterMode': 'OR',
-                'useNameTags': False
+                'useNameTags': False,
+                'tagCount': 5
             }
         else:
             self._default_settings = {
@@ -260,7 +261,8 @@ class MHApplication(gui3d.Application, mh.Application):
                 'restoreWindowSize': True,
                 'windowGeometry': '',
                 'tagFilterMode': 'OR',
-                'useNameTags': False
+                'useNameTags': False,
+                'tagCount': 5
             }
 
         self._settings = dict(self._default_settings)

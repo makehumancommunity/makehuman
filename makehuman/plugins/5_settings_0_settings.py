@@ -147,6 +147,11 @@ class SettingsTaskView(gui3d.TaskView):
         self.nor_mode = self.tagFilterBox.addWidget(gui.RadioButton(tagFilter, 'NOT OR', gui3d.app.getSetting('tagFilterMode') == 'NOR'), 1, 0)
         self.nand_mode = self.tagFilterBox.addWidget(gui.RadioButton(tagFilter, 'NOT AND', gui3d.app.getSetting('tagFilterMode') == 'NAND'), 1, 1)
 
+        tagsBox = self.addLeftWidget(gui.GroupBox('Tags Count'))
+        self.countEdit = tagsBox.addWidget(gui.TextEdit(str(gui3d.app.getSetting('tagCount'))), 0, 0, columnSpan=0)
+        tagsBox.addWidget(gui.TextView(' Tags '), 0, 1)
+        self.countEdit.textChanged.connect(self.onTextChanged)
+
         nameBox = self.addLeftWidget(gui.GroupBox('Name Tags:'))
         self.useNameTags = nameBox.addWidget(SettingCheckbox('Use Name Tags', 'useNameTags'))
 
@@ -260,6 +265,7 @@ class SettingsTaskView(gui3d.TaskView):
         for radioBtn in self.tagFilterBox.children:
             radioBtn.setChecked(radioBtn.getLabel() == mode)
 
+        self.countEdit.setText(str(gui3d.app.getSetting('tagCount')))
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
@@ -267,6 +273,11 @@ class SettingsTaskView(gui3d.TaskView):
     def onHide(self, event):
         gui3d.TaskView.onHide(self, event)
         gui3d.app.saveSettings()
+
+    def onTextChanged(self):
+        text = self.countEdit.text
+        if text.isdigit():
+            gui3d.app.setSetting('tagCount', int(text))
 
 def load(app):
     category = app.getCategory('Settings')
