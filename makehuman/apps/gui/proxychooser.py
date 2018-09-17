@@ -365,7 +365,7 @@ class ProxyChooserTaskView(gui3d.TaskView, filecache.MetadataCacher):
             self.signalChange()
 
     def deselectAllProxies(self):
-        selectionsCopy = self.getSelection()
+        selectionsCopy = list(self.getSelection())
         for p in selectionsCopy:
             self.deselectProxy(p.file, suppressSignal = True)
         self.signalChange()
