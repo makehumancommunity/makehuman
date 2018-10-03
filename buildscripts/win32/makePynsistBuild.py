@@ -43,15 +43,22 @@ import sys
 import configparser
 import datetime
 import shutil
+from distutils.dir_util import copy_tree
 
 pathname = os.path.dirname(sys.argv[0])
 build_scripts = os.path.abspath(os.path.join(pathname,'..'))
+rootdir = os.path.abspath(os.path.join(build_scripts,'..'))
+parentdir = os.path.abspath(os.path.join(rootdir,'..'))
+defaultworkdir = os.path.abspath(os.path.join(parentdir,'work'))
 
 os.chdir(build_scripts)
+
+deleteAfterExport = ["docs","blendertools","create_pylint_log.py","testsuite"]
 
 sys.path = [build_scripts] + sys.path
 try:
     import build_prepare
+    from build_prepare import export
 except:
     print("Failed to import build_prepare, expected to find it at %s. Make sure to run this script from .../buildscripts/win32/" % build_scripts)
     exit(1)
@@ -63,11 +70,15 @@ else:
     print("Could not find build.conf")
     exit(1)
 
-if len(sys.argv) < 2:
-    print("Expected first argument to be location of build prepare export folder")
-    exit(1)
+exportDir = None
+if len(sys.argv) > 1:
+    exportDir = sys.argv[1]
+if exportDir is None:
+    exportDir = defaultworkdir
 
-exportDir = sys.argv[1]
+shutil.rmtree(exportDir)
+
+export(rootdir,exportDir,False,False)
 
 if not os.path.exists(exportDir):
     print("Export dir %s does not exist" % exportDir)
@@ -105,4 +116,42 @@ iconDst = os.path.join(exportDir,"makehuman.ico")
 
 shutil.copy(wrapperSrc,wrapperDst)
 shutil.copy(iconSrc,iconDst)
+
+targetmhdir = os.path.abspath(os.path.join(exportDir,'makehuman'))
+for d in deleteAfterExport:
+    f = os.path.abspath(os.path.join(targetmhdir,d))
+    if os.path.exists(f):
+        if os.path.isfile(f):
+            os.remove(f)
+        else:
+            shutil.rmtree(f)
+
+pluginsdir = os.path.abspath(os.path.join(targetmhdir,'plugins'))
+
+mhx2 = os.path.abspath(os.path.join(parentdir,'mhx2-makehuman-exchange'))
+if os.path.exists(mhx2):
+    tocopy = os.path.abspath(os.path.join(mhx2,'9_export_mhx2'))
+    todest = os.path.abspath(os.path.join(pluginsdir,'9_export_mhx2'))
+    copy_tree(tocopy, todest)
+else:
+    print("MHX2 was not found in parent directory")
+
+asset = os.path.abspath(os.path.join(parentdir,'community-plugins-assetdownload'))
+if os.path.exists(asset):
+    tocopy = os.path.abspath(os.path.join(asset,'8_asset_downloader'))
+    todest = os.path.abspath(os.path.join(pluginsdir,'8_asset_downloader'))
+    copy_tree(tocopy, todest)
+else:
+    print("asset downloader was not found in parent directory")
+
+mhapi = os.path.abspath(os.path.join(parentdir,'community-plugins-mhapi'))
+if os.path.exists(mhapi):
+    tocopy = os.path.abspath(os.path.join(mhapi,'1_mhapi'))
+    todest = os.path.abspath(os.path.join(pluginsdir,'1_mhapi'))
+    copy_tree(tocopy, todest)
+else:
+    print("MHAPI was not found in parent directory")
+
+print("\n\nBuild has been prepared in " + exportDir + ".\n")
+print("Next step is to cd into that dir and run pynsist.\n")
 
