@@ -49,7 +49,7 @@ pathname = os.path.dirname(sys.argv[0])
 build_scripts = os.path.abspath(os.path.join(pathname,'..'))
 rootdir = os.path.abspath(os.path.join(build_scripts,'..'))
 parentdir = os.path.abspath(os.path.join(rootdir,'..'))
-defaultworkdir = os.path.abspath(os.path.join(parentdir,'work'))
+defaultworkdir = os.path.abspath(os.path.join(parentdir,'pynsist-work'))
 
 os.chdir(build_scripts)
 
