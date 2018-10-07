@@ -505,7 +505,6 @@ def getSoftwareLicense(richtext=False):
 
 def getThirdPartyLicenses(richtext=False):
     import getpath
-    from io import open
     from collections import OrderedDict
     def _title(name, url, license):
         if richtext:
@@ -538,26 +537,25 @@ makes use of.\n"""
     license_folder = getpath.getSysPath('licenses')
     if not os.path.isdir(license_folder):
         return result + _error("Error: external licenses folder is not found, this is an incomplete MakeHuman distribution!")
-    external_licenses = [ ("PyQt4", ("pyQt4-license.txt", "http://www.riverbankcomputing.co.uk", "GPLv3")),
-                          ("Qt4", ("qt4-license.txt", "http://www.qt-project.org", "LGPLv2.1")),
+    external_licenses = [ ("PyQt5", ("pyQt5-license.txt", "http://www.riverbankcomputing.com", "GPLv3")),
+                          ("Qt5", ("qt5-license.txt", "http://www.qt.io", "GPLv3")),
                           ("Numpy", ("numpy-license.txt", "http://www.numpy.org", "BSD (3-clause)")),
                           ("PyOpenGL", ("pyOpenGL-license.txt", "http://pyopengl.sourceforge.net", "BSD (3-clause)")),
                           ("Transformations", ("transformations-license.txt", "http://www.lfd.uci.edu/~gohlke/", "BSD (3-clause)")),
-                          ("pyFBX", ("pyFbx-license.txt", "http://wiki.blender.org/index.php/Extensions:2.6/Py/Scripts/Import-Export/Autodesk_FBX", "GPLv2")),
-                          ("Python hglib", ("hglib-license.txt", "http://mercurial.selenic.com/wiki/PythonHglib", "MIT"))
+                          ("pyFBX", ("pyFbx-license.txt", "http://wiki.blender.org/index.php/Extensions:2.6/Py/Scripts/Import-Export/Autodesk_FBX", "GPLv2"))
                         ]
     external_licenses = OrderedDict(external_licenses)
 
-    for name, (lic_file, url, lic_type) in list(external_licenses.items()):
+    for name, (lic_file, url, lic_type) in external_licenses.items():
         result += _title(name, url, lic_type)
 
         lfile = os.path.join(license_folder, lic_file)
         if not os.path.isfile(lfile):
             result += "\n%s\n" % _error("Error: License file %s is not found, this is an incomplete MakeHuman distribution!" % lfile)
             continue
-        f = io.open(lfile, encoding='utf-8')
-        text = f.read()
-        f.close()
+        with io.open(lfile, encoding='utf-8') as f:
+            text = f.read()
+
         text = _wordwrap(text)
         result += "\n%s\n" % _block(text)
 
