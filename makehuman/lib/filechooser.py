@@ -373,6 +373,10 @@ class TagFilter(gui.GroupBox):
                      'NAND': 'NOT AND'}
         return convmodes.get(mode, mode)
 
+    def filterModeSwitched(self):
+        self.setTitle('Tag Filter [Mode : ' + self.convertModes(mh.getSetting('tagFilterMode')) + ']')
+    ################# ===> Connect this function with the onFilterModeSwitched event ###################################
+
 class FileHandler(object):
     def __init__(self):
         self.fileChooser = None

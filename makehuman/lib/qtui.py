@@ -700,6 +700,7 @@ class Application(QtWidgets.QApplication, events3d.EventHandler):
         self.logger_event = log.getLogger('mh.event')
         self.eventHandlers = []
         # self.installEventFilter(self)
+        QtGui.qt_set_sequence_auto_mnemonic(False)
 
     def OnInit(self):
         import debugdump

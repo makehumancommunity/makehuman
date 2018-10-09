@@ -41,6 +41,7 @@ import mh
 import gui3d
 import gui
 import log
+from language import language
 
 class SettingCheckbox(gui.CheckBox):
     def __init__(self, label, settingName, postAction=None):
@@ -147,6 +148,7 @@ class SettingsTaskView(gui3d.TaskView):
         self.nor_mode = self.tagFilterBox.addWidget(gui.RadioButton(tagFilter, 'NOT OR', gui3d.app.getSetting('tagFilterMode') == 'NOR'), 1, 0)
         self.nand_mode = self.tagFilterBox.addWidget(gui.RadioButton(tagFilter, 'NOT AND', gui3d.app.getSetting('tagFilterMode') == 'NAND'), 1, 1)
 
+        self.createFilterModeSwitch()
 
         startupBox = self.addLeftWidget(gui.GroupBox('Startup'))
         self.preload = startupBox.addWidget(SettingCheckbox("Preload macro targets", 'preloadTargets'))
@@ -251,6 +253,9 @@ class SettingsTaskView(gui3d.TaskView):
             if radioBtn.theme == theme:
                 radioBtn.updateButton(True)
 
+        self.updateTagFilterModes()
+
+    def updateTagFilterModes(self):
         convmodes = {'NOR': 'NOT OR',
                      'NAND': 'NOT AND'}
         mode = convmodes.get(gui3d.app.getSetting('tagFilterMode'), gui3d.app.getSetting('tagFilterMode'))
@@ -258,6 +263,17 @@ class SettingsTaskView(gui3d.TaskView):
         for radioBtn in self.tagFilterBox.children:
             radioBtn.setChecked(radioBtn.getLabel() == mode)
 
+    def createFilterModeSwitch(self):
+        action = gui.Action('switchFilterMode', language.getLanguageString('Switch Filter Mode'), self.switchFilterMode)
+        gui3d.app.mainwin.addAction(action)
+        mh.setShortcut(mh.Modifiers.ALT, mh.Keys.f, action)
+
+    def switchFilterMode(self):
+        modes = ['OR', 'AND', 'NOR', 'NAND']
+        index = (modes.index(gui3d.app.getSetting('tagFilterMode')) + 1) % 4
+        gui3d.app.setSetting('tagFilterMode', modes[index])
+        self.updateTagFilterModes()
+        ############################# ==> Emit event onFiltermodeSwitched ##############################################
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
