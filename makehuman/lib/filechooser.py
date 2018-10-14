@@ -373,9 +373,8 @@ class TagFilter(gui.GroupBox):
                      'NAND': 'NOT AND'}
         return convmodes.get(mode, mode)
 
-    def filterModeSwitched(self):
+    def labelSwitch(self):
         self.setTitle('Tag Filter [Mode : ' + self.convertModes(mh.getSetting('tagFilterMode')) + ']')
-    ################# ===> Connect this function with the onFilterModeSwitched event ###################################
 
 class FileHandler(object):
     def __init__(self):
@@ -465,6 +464,8 @@ class MhmatFileLoader(FileHandler):
 
 class FileChooserBase(QtWidgets.QWidget, gui.Widget):
 
+    switchFuncList = []
+
     def __init__(self, path, extensions, sort = FileSort(), doNotRecurse = False):
         super(FileChooserBase, self).__init__()
         gui.Widget.__init__(self)
@@ -506,8 +507,13 @@ class FileChooserBase(QtWidgets.QWidget, gui.Widget):
         @self.tagFilter.mhEvent
         def onTagsChanged(selectedTags):
             self.applyTagFilter()
+        self.switchFuncList.append(self.onTagFilterModeSwitched)
 
         return self.tagFilter
+
+    def onTagFilterModeSwitched(self):
+        self.tagFilter.labelSwitch()
+        self.applyTagFilter()
 
     def setPaths(self, value):
         self.paths = value if isinstance(value, list) else [value]

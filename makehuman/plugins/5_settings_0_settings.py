@@ -42,6 +42,7 @@ import gui3d
 import gui
 import log
 from language import language
+from filechooser import FileChooserBase as fc
 
 class SettingCheckbox(gui.CheckBox):
     def __init__(self, label, settingName, postAction=None):
@@ -273,7 +274,8 @@ class SettingsTaskView(gui3d.TaskView):
         index = (modes.index(gui3d.app.getSetting('tagFilterMode')) + 1) % 4
         gui3d.app.setSetting('tagFilterMode', modes[index])
         self.updateTagFilterModes()
-        ############################# ==> Emit event onFiltermodeSwitched ##############################################
+        for switchFunc in fc.switchFuncList:
+            switchFunc()
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
