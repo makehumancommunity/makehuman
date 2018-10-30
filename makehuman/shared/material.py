@@ -333,7 +333,7 @@ class Material(object):
             f = io.open(filename, "rU", encoding="utf-8")
         except:
             f = None
-        if f == None:
+        if f is None:
             log.error("Failed to load material from file %s.", filename)
             return
 
@@ -504,7 +504,7 @@ class Material(object):
             f = io.open(filename, 'w', encoding='utf-8')
         except:
             f = None
-        if f == None:
+        if f is None:
             log.error("Failed to open material file %s for writing.", filename)
             return
 
@@ -1465,7 +1465,7 @@ def peekMetadata(filename):
         f = io.open(filename, "rU", encoding="utf-8")
     except:
         f = None
-    if f == None:
+    if f is None:
         log.error("Failed to load metadata from material file %s.", filename)
         return
 

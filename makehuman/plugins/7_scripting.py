@@ -523,12 +523,12 @@ class ScriptingExecuteTab(gui3d.TaskView):
             dlg = gui.Dialog()
 
             desiredWidth = self.widthEdit.getText()
-            if(desiredWidth == None or not desiredWidth.isdigit()):
+            if(desiredWidth is None or not desiredWidth.isdigit()):
                 dlg.prompt("Input error","Width and height must be valid integers","OK")
                 return
 
             desiredHeight = self.heightEdit.getText()
-            if(desiredHeight == None or not desiredHeight.isdigit()):
+            if(desiredHeight is None or not desiredHeight.isdigit()):
                 dlg.prompt("Input error","Width and height must be valid integers","OK")
                 return
 

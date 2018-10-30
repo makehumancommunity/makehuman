@@ -50,7 +50,7 @@ def loadObjFile(path, obj = None):
     Parser does not support normals, and assumes all objects should be smooth
     shaded. Use duplicate vertices for achieving hard edges.
     """
-    if obj == None:
+    if obj is None:
         name = os.path.splitext( os.path.basename(path) )[0]
         obj = module3d.Object3D(name)
 

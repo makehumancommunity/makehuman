@@ -387,7 +387,7 @@ def loadTextProxy(human, filepath, type="Clothes"):
             status = doRefVerts
         elif key == 'weights':
             status = doWeights
-            if proxy.weights == None:
+            if proxy.weights is None:
                 proxy.weights = {}
             weights = []
             proxy.weights[words[1]] = weights

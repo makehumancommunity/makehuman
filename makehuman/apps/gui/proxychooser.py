@@ -339,7 +339,7 @@ class ProxyChooserTaskView(gui3d.TaskView, filecache.MetadataCacher):
         """
         if self.multiProxy:
             idx = self._getProxyIndex(mhclofile)
-            if idx == None:
+            if idx is None:
                 return
         else:
             if self.isProxySelected():
