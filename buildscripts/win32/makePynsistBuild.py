@@ -152,6 +152,15 @@ if os.path.exists(mhapi):
 else:
     print("MHAPI was not found in parent directory")
 
+socket = os.path.abspath(os.path.join(parentdir,'community-plugins-socket'))
+if os.path.exists(socket):
+    tocopy = os.path.abspath(os.path.join(socket,'8_server_socket'))
+    todest = os.path.abspath(os.path.join(pluginsdir,'8_server_socket'))
+    copy_tree(tocopy, todest)
+else:
+    print("socket plugin was not found in parent directory")
+
+
 print("\n\nBuild has been prepared in " + exportDir + ".\n")
 print("Next step is to cd into that dir and run pynsist.\n")
 
