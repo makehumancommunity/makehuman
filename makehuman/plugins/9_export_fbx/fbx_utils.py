@@ -1,10 +1,10 @@
-#!/usr/bin/env python3
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
 """
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehumancommunity.org/
+**Product Home Page:** http://www.makehuman.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
@@ -14,7 +14,7 @@
 
 **Licensing:**         AGPL3
 
-    This file is part of MakeHuman (www.makehumancommunity.org).
+    This file is part of MakeHuman (www.makehuman.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -37,6 +37,15 @@ Fbx utilities
 
 import os
 from .fbx_utils_bin import *
+from core import G
+
+DEBUGWRITE=False
+
+def debugWrite(content, location = "generic"):
+    if not DEBUGWRITE:
+        return
+    if hasattr(G.app, "mhapi"):
+        G.app.mhapi.utility.debugWrite(content, "FBX", location)
 
 #--------------------------------------------------------------------
 #   Radians - degrees
@@ -138,7 +147,7 @@ def ooLink(fp, child, parent, config):
 
     if config.binary:
         from . import fbx_binary
-        elem = fbx_binary.get_child_element(fp, 'Connections')
+        elem = fbx_binary.get_child_element(fp, b'Connections')
         fbx_binary.elem_connection(elem, b"OO", cid, pid)
         return
 
@@ -154,7 +163,7 @@ def opLink(fp, child, parent, channel, config):
 
     if config.binary:
         from . import fbx_binary
-        elem = fbx_binary.get_child_element(fp, 'Connections')
+        elem = fbx_binary.get_child_element(fp, b'Connections')
         fbx_binary.elem_connection(elem, b"OP", cid, pid, channel)
         return
 
