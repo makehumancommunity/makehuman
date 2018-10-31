@@ -28,7 +28,7 @@ makehuman/data/VERSION usr/share/makehuman-community/data
 makehuman/data/*.thumb usr/share/makehuman-community/data
 makehuman/data/*.ini usr/share/makehuman-community/data
 makehuman/data/*.list usr/share/makehuman-community/data
-extras/makehuman usr/bin
+extras/makehuman-community usr/bin
 extras/MakeHuman-Community.desktop usr/share/applications
 makehuman/license.txt usr/share/makehuman-community
 
