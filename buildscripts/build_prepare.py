@@ -87,10 +87,16 @@ import sys
 import os
 import subprocess
 import shutil
+import inspect
+
+pth = os.path.dirname(inspect.stack()[0][1])
 
 syspath = ["../makehuman","../makehuman/lib","../makehuman/apps","../makehuman/shared","../makehuman/core"]
-syspath.extend(sys.path)
-sys.path = syspath
+syspath2 = []
+for p in syspath:
+    syspath2.append( os.path.abspath( os.path.join(pth, p) ) )
+syspath2.extend(sys.path)
+sys.path = syspath2
 
 import getpath
 import gitutils
