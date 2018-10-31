@@ -59,7 +59,7 @@ def saveJson(struct, filepath, binary=False):
 
 
 def encodeJsonData(data, pad=""):
-    if data == None:
+    if data is None:
         return "none"
     elif isinstance(data, bool):
         if data == True:

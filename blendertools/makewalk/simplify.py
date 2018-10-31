@@ -66,7 +66,7 @@ def getActionFCurves(act, useVisible, useMarkers, scn):
 
     if useMarkers:
         (minTime, maxTime) = getMarkedTime(scn)
-        if minTime == None:
+        if minTime is None:
             print("Need two selected markers")
             return ([], 0, 0)
     else:

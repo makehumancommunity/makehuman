@@ -417,19 +417,19 @@ class Shader(object):
 
         if os.path.isfile(vertexSource):
             self.vertexId = self.createShader(vertexSource, GL_VERTEX_SHADER, self.defines, self.defineables)
-            if self.vertexId == None:
+            if self.vertexId is None:
                 raise RuntimeError("No vertex shader program compiled, cannot set vertex shader. (%s)" % vertexSource)
             glAttachShader(self.shaderId, self.vertexId)
 
         if os.path.isfile(geometrySource) and 'GL_GEOMETRY_SHADER' in globals():
             self.geometryId = self.createShader(geometrySource, GL_GEOMETRY_SHADER, self.defines, self.defineables)
-            if self.geometryId == None:
+            if self.geometryId is None:
                 raise RuntimeError("No geometry shader program compiled, cannot set geometry shader. (%s)" % geometrySource)
             glAttachShader(self.shaderId, self.geometryId)
 
         if os.path.isfile(fragmentSource):
             self.fragmentId = self.createShader(fragmentSource, GL_FRAGMENT_SHADER, self.defines, self.defineables)
-            if self.fragmentId == None:
+            if self.fragmentId is None:
                 raise RuntimeError("No fragment shader program compiled, cannot set fragment shader. (%s)" % fragmentSource)
             glAttachShader(self.shaderId, self.fragmentId)
 

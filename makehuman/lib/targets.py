@@ -98,7 +98,7 @@ class Component(object):
         return repr((self.key, self.data, self.path))
 
     def isRoot(self):
-        return self.parent == None
+        return self.parent is None
 
     def getVariables(self):
         """

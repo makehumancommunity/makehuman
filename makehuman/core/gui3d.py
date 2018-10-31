@@ -309,7 +309,7 @@ class Category(View):
     def addTask(self, task):
         if task.name in self.tasksByName:
             raise KeyError('A task with this name already exists', task.name)
-        if task.sortOrder == None:
+        if task.sortOrder is None:
             orders = [t.sortOrder for t in self.tasks]
             o = 0
             while o in orders:
@@ -448,7 +448,7 @@ class Application(events3d.EventHandler):
         if category.parent:
             raise RuntimeError('The category is already attached')
 
-        if sortOrder == None:
+        if sortOrder is None:
             orders = [c.sortOrder for c in list(self.categories.values())]
             o = 0
             while o in orders:
