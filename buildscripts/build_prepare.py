@@ -263,7 +263,7 @@ class MHAppExporter(object):
                     versionsub_replaced = True
                 lines.append(line)
             f.close()
-            f = open(self.targetFile('makehuman/makehuman.py'), 'wb')
+            f = open(self.targetFile('makehuman/makehuman.py'), 'w')
             f.write(''.join(lines))
             f.close()
             print('\n')
