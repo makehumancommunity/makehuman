@@ -57,11 +57,11 @@ settings["package_sub"] = None
 settings["signString"] = "Anonymous"
 settings["performSign"] = False
 settings["performUpload"] = False
-settings["hgpath"] = "/usr/bin/hg"
+settings["gitpath"] = "/usr/bin/git"
 
 files_to_chmod_executable = [
-    "usr/bin/makehuman",
-    "usr/share/makehuman/makehuman",
+    "usr/bin/makehuman-community",
+    "usr/share/makehuman/makehuman-community",
     "usr/share/makehuman/makehuman.py",
     ]
 
@@ -134,7 +134,7 @@ def configure(confpath):
   else:
     print("Using config file at %s. NOTE: properties in config file will override any other settings!" % confpath)
 
-    settings["hgpath"] = _conf_get(conf, 'General', 'hgPath', settings["hgpath"])
+    settings["gitpath"] = _conf_get(conf, 'General', 'gitPath', settings["gitpath"])
     settings["package_version"] = _conf_get(conf, 'PPA', 'packageVersion', settings["package_version"])
     settings["package_sub"] = _conf_get(conf, 'PPA', 'packageSub', settings["package_sub"])
     settings["signString"] = _conf_get(conf, 'PPA', 'signString', settings["signString"])
@@ -164,15 +164,15 @@ def configurePaths():
   # Where is the source code located?
   settings["source_root"] = os.path.realpath( os.path.join(settings["location_of_script"], '..', '..') )
   print("Source root: " + settings["source_root"])
-  if not os.path.isdir( os.path.join(settings["source_root"], '.hg') ):
-    print("Error, the hg root folder %s does not contain .hg folder!" % settings["source_root"])
+  if not os.path.isdir( os.path.join(settings["source_root"], '.git') ):
+    print("Error, the git root folder %s does not contain .git folder!" % settings["source_root"])
     print("Giving up.\n\n");
     sys.exit(1)
 
   # We can now read build.conf
   configure(os.path.join(settings["source_root"], 'buildscripts', 'build.conf'))
 
-  # Folder where hg contents are exported and prepared for packaging (scripts are run)
+  # Folder where git contents are exported and prepared for packaging (scripts are run)
   settings["build_prepare_destination"] = os.path.realpath( os.path.join(settings["build_root"],'build_prepare') )
   if not os.path.exists(settings["build_prepare_destination"]):
       os.mkdir(settings["build_prepare_destination"])
@@ -191,9 +191,9 @@ def configurePaths():
   shutil.copytree(settings["deb_config_location"],settings["deb_staging_location"])
 
   # Final destination for specific build configs
-  settings["main_deb_def"] = os.path.join(settings["deb_staging_location"],"makehuman")
+  settings["main_deb_def"] = os.path.join(settings["deb_staging_location"],"makehuman-community")
   print("Target deb definition dir for main: " + settings["main_deb_def"])
-  settings["dev_deb_def"] = os.path.join(settings["deb_staging_location"],"makehuman-dev")
+  settings["dev_deb_def"] = os.path.join(settings["deb_staging_location"],"makehuman-community-dev")
   print("Target deb definition dir for dev: " + settings["dev_deb_def"])
 
   # Changelog locations
@@ -221,14 +221,14 @@ def configurePaths():
   print("Export dir for *-dev files: " + settings["manual_export_location"]);
 
   # .orig tarballs to create
-  fn = "makehuman_" + settings["package_version"]
+  fn = "makehuman-community_" + settings["package_version"]
   fn = fn + "+" + settings["timestamp"]
   fn = fn + ".orig.tar.gz"
 
   settings["main_tar_file"] = os.path.abspath(os.path.join(settings["deb_staging_location"], fn))
   print("Main source tarball: " + settings["main_tar_file"])
 
-  fn = "makehuman-dev_" + settings["package_version"]
+  fn = "makehuman-community-dev_" + settings["package_version"]
   fn = fn + "+" + settings["timestamp"]
   fn = fn + ".orig.tar.gz"
 
@@ -274,7 +274,8 @@ def buildSourceTree(dest = None):
   try:
     import build_prepare
   except:
-    print("Failed to import build_prepare, expected to find it at %s. Make sure to run this script from hgroot/buildscripts/deb/" % os.path.normpath(os.path.realpath(os.path.join(settings["location_of_script"], '..'))))
+    print(sys.exc_info()[0])
+    print("Failed to import build_prepare, expected to find it at %s. Make sure to run this script from buildscripts/ppa/" % os.path.normpath(os.path.realpath(os.path.join(settings["location_of_script"], '..'))))
     exit(1)
   if os.path.exists(settings["build_prepare_destination"]):
     shutil.rmtree(settings["build_prepare_destination"])
@@ -353,7 +354,9 @@ def createSourceTarballs():
   print("Tarfile: " + settings["main_tar_file"])
   print("CWD: " + os.getcwd())
 
-  subprocess.check_call(["tar","-C",settings["build_prepare_destination"],"-czf", settings["main_tar_file"], "makehuman","README","extras"])
+  args = ["tar","-C",settings["build_prepare_destination"],"-czf", settings["main_tar_file"], "makehuman","README","extras"]
+  print(args)
+  subprocess.check_call(["tar","-C",settings["build_prepare_destination"],"-czf", settings["main_tar_file"], "makehuman","README.md","extras"])
 
   print("\nABOUT TO CREATE SOURCE TARBALL FOR -DEV DATA\n\n");
 
@@ -375,12 +378,12 @@ def createSourceDebs():
   ts = time.strftime("%a, %d %b %Y %H:%M:%S +0200")
 
   with open(settings["main_changelog"], "w") as text_file:
-    text_file.write("makehuman (" + settings["package_version"] + "+" + settings["timestamp"] + "-" + settings["package_sub"] + ") trusty; urgency=low\n\n")
+    text_file.write("makehuman-community (" + settings["package_version"] + "+" + settings["timestamp"] + "-" + settings["package_sub"] + ") bionic; urgency=low\n\n")
     text_file.write("  * Version bump\n\n")
     text_file.write(" -- " + settings["signString"] + "  " + ts + "\n\n")
 
   with open(settings["dev_changelog"], "w") as text_file:
-    text_file.write("makehuman-dev (" + settings["package_version"] + "+" + settings["timestamp"] + "-" + settings["package_sub"] + ") trusty; urgency=low\n\n")
+    text_file.write("makehuman-community-dev (" + settings["package_version"] + "+" + settings["timestamp"] + "-" + settings["package_sub"] + ") bionic; urgency=low\n\n")
     text_file.write("  * Version bump\n\n")
     text_file.write(" -- " + settings["signString"] + "  " + ts + "\n\n")
 
