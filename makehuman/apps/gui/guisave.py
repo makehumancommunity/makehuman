@@ -123,7 +123,9 @@ class TagsView(gui.GroupBox):
         super(TagsView, self).__init__('Tags')
         self.editList = []
         for _ in range(int(G.app.getSetting('tagCount'))):
-            self.editList.append(self.addWidget(gui.TextEdit('')))
+            edit = gui.TextEdit('')
+            edit.setMaxLength(25)
+            self.editList.append(self.addWidget(edit))
 
     def setTags(self, tags):
         tags = sorted(tags)
@@ -152,7 +154,9 @@ class TagsView(gui.GroupBox):
         editDiff = int(G.app.getSetting('tagCount')) - len(self.editList)
         if editDiff > 0:
             for _ in range(editDiff):
-                self.editList.append(self.addWidget(gui.TextEdit('')))
+                edit = gui.TextEdit('')
+                edit.setMaxLength(25)
+                self.editList.append(self.addWidget(edit))
         elif editDiff < 0:
             for _ in range(abs(editDiff)):
                 edit = self.editList.pop()
