@@ -118,11 +118,15 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         if not isinstance(tags, set):
             raise ValueError('Parameter must be set type')
         else:
-            self._tags = tags
+            tset = set()
+            for t in tags:
+                tset.add(t[:25]) # Max. tag length is 25
+            self._tags = tset
+
     tags = property(getTags, setTags)
 
     def addTag(self, tag=''):
-        self._tags.add(tag.lower())
+        self._tags.add(tag.lower()[:25]) # Max. tag length is 25
 
     def clearTags(self):
         self._tags.clear()
