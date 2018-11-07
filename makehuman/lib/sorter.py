@@ -12,7 +12,7 @@ Definition of Sorter class.
 
 **Authors:**           Thanasis Papoutsidakis
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 

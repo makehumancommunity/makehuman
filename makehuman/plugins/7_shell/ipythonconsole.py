@@ -12,7 +12,7 @@ IPython Qt Console
 
 **Authors:**           Jonas Hauquier, Aranuvir
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 

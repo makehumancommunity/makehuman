@@ -12,7 +12,7 @@ Logging.
 
 **Authors:**           Glynn Clements
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 
