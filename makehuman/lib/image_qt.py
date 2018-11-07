@@ -4,7 +4,7 @@
 """ 
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 

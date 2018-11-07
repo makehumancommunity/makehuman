@@ -6,7 +6,7 @@ Handles WaveFront .obj 3D mesh files.
 
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
@@ -165,7 +165,7 @@ def writeObjFile(path, meshes, writeMTL=True, config=None, filterMaskedFaces=Tru
 
     fp.write(
         "# MakeHuman exported OBJ\n" +
-        "# www.makehuman.org\n\n")
+        "# www.makehumancommunity.org\n\n")
 
     if writeMTL:
         mtlfile = path.replace(".obj",".mtl")
@@ -244,7 +244,7 @@ def writeObjFile(path, meshes, writeMTL=True, config=None, filterMaskedFaces=Tru
         fp = open(mtlfile, 'w', encoding="utf-8")
         fp.write(
             '# MakeHuman exported MTL\n' +
-            '# www.makehuman.org\n\n')
+            '# www.makehumancommunity.org\n\n')
         for mesh in meshes:
             writeMaterial(fp, mesh.material, config)
         fp.close()

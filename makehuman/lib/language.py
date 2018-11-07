@@ -6,7 +6,7 @@ Translation and localization module.
 
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    http://code.google.com/p/makehuman/
 

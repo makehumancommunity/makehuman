@@ -6,7 +6,7 @@ Metadata Search Functionality for Tagged Settings Libraries.
 
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 

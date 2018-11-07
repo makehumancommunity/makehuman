@@ -4,7 +4,7 @@
 """
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
@@ -63,7 +63,7 @@ def writeHeader(fp, filepath, config):
     up_axis, front_axis, coord_axis = fbx_utils.RIGHT_HAND_AXES[mesh_orientation]
 
     fp.write("""; FBX 7.3.0 project file
-; Exported from MakeHuman TM (www.makehuman.org)
+; Exported from MakeHuman TM (www.makehumancommunity.org)
 ; ----------------------------------------------------
 
 FBXHeaderExtension:  {
@@ -91,7 +91,7 @@ FBXHeaderExtension:  {
             Version: 100
             Title: ""
             Subject: ""
-            Author: "www.makehuman.org"
+            Author: "www.makehumancommunity.org"
             Keywords: ""
             Revision: ""
             Comment: ""
