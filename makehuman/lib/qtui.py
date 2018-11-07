@@ -46,12 +46,15 @@ from PyQt5 import QtCore, QtGui, QtOpenGL, QtWidgets
 import glmodule as gl
 import events3d
 import qtgui
-import mhqueue
+import eventqueue
 import time
 import getpath
 
 import makehuman
 import getpath
+
+from mhversion import MHVersion
+
 if False and makehuman.isBuild():
     # Set absolute Qt plugin path programatically on frozen deployment to fix
     # crashes when Qt is on DLL PATH in windows.
@@ -419,7 +422,9 @@ def supportedImageFormats():
     return [ str(s).lower() for s in QtGui.QImageReader.supportedImageFormats() ]
 
 class Frame(QtWidgets.QMainWindow):
-    title = "MakeHuman"
+
+    mhv = MHVersion()
+    title = mhv.fullTitle
 
     def __init__(self, app, size):
         self.app = app
@@ -695,12 +700,13 @@ class Application(QtWidgets.QApplication, events3d.EventHandler):
         self.logger_event = log.getLogger('mh.event')
         self.eventHandlers = []
         # self.installEventFilter(self)
+        QtGui.qt_set_sequence_auto_mnemonic(False)
 
     def OnInit(self):
         import debugdump
         debugdump.dump.appendQt()
 
-        self.messages = mhqueue.Manager(self._postAsync)
+        self.messages = eventqueue.Manager(self._postAsync)
         self.mainwin = Frame(self, (G.windowWidth, G.windowHeight))
         self.statusBar = self.mainwin.statusBar
         self.progressBar = self.mainwin.progressBar

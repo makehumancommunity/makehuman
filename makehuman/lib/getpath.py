@@ -39,23 +39,38 @@ Utility module for finding the user home path.
 import sys
 import os
 from xdg_parser import XDG_PATHS
+import io
 
 __home_path = None
-
 
 def pathToUnicode(path):
     """
     Unicode representation of the filename.
-    String is decoded with the codeset used by the filesystem of the operating
+    Bytes is decoded with the codeset used by the filesystem of the operating
     system.
     Unicode representations of paths are fit for use in GUI.
-    If the path parameter is not a string, it will be returned unchanged.
+    If the path parameter is not a string or bytes, it will be returned unchanged.
     """
-    if isinstance(path, str):
-        return path
-    elif path:
-        # Approach for basestring type, as well as others such as QString
-        return str(path, 'utf-8')
+
+    if isinstance(path, bytes):
+        # Approach for bytes string type
+        try:
+            return str(path, 'utf-8')
+        except UnicodeDecodeError as e:
+            pass
+        try:
+            return str(path, sys.getfilesystemencoding())
+        except UnicodeDecodeError as e:
+            pass
+        try:
+            return str(path, sys.getdefaultencoding())
+        except UnicodeDecodeError as e:
+            pass
+        try:
+            import locale
+            return str(path, locale.getpreferredencoding())
+        except UnicodeDecodeError as e:
+            return ''
     else:
         return path
 
@@ -63,7 +78,36 @@ def pathToUnicode(path):
 def formatPath(path):
     if path is None:
         return None
-    return pathToUnicode( os.path.normpath(path).replace("\\", "/") )
+    return pathToUnicode(os.path.normpath(path).replace("\\", "/"))
+
+
+
+if sys.platform.startswith('linux'):
+
+    configFile = os.path.expanduser('~/.config/makehuman.conf')
+
+elif sys.platform.startswith('darwin'):
+
+    configFile = os.path.expanduser('~/Library/Application Support/MakeHuman/makehuman.conf')
+
+elif sys.platform.startswith('win32'):
+
+    configFile = os.path.join(os.getenv('LOCALAPPDATA', ''), 'makehuman.conf')
+
+else:
+
+    configFile = ''
+
+configPath = ''
+
+if os.path.isfile(configFile):
+    with io.open(configFile, 'r') as f:
+        configPath = f.readline().strip()
+
+        if os.path.isdir(configPath):
+            __home_path = formatPath(configPath)
+
+
 
 def canonicalPath(path):
     """
@@ -91,30 +135,30 @@ def getHomePath():
 
     alt_home_path = os.environ.get("MH_HOME_LOCATION", '')
     if os.path.exists(alt_home_path):
-        __home_path = alt_home_path
+        __home_path = formatPath(alt_home_path)
             
     if __home_path is not None:
         return __home_path
 
     # Windows
-    if sys.platform == 'win32':
+    if sys.platform.startswith('win'):
         import winreg
         keyname = r'Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders'
         #name = 'Personal'
-        k = winreg.OpenKey(winreg.HKEY_CURRENT_USER, keyname)
-        value, type_ = winreg.QueryValueEx(k, 'Personal')
-        if type_ == winreg.REG_EXPAND_SZ:
-            __home_path = formatPath(winreg.ExpandEnvironmentStrings(value))
-            return __home_path
-        elif type_ == winreg.REG_SZ:
-            __home_path = formatPath(value)
-            return __home_path
-        else:
-            raise RuntimeError("Couldn't determine user folder")
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, keyname) as k:
+            value, type_ = winreg.QueryValueEx(k, 'Personal')
+            if type_ == winreg.REG_EXPAND_SZ:
+                __home_path = formatPath(winreg.ExpandEnvironmentStrings(value))
+                return __home_path
+            elif type_ == winreg.REG_SZ:
+                __home_path = formatPath(value)
+                return __home_path
+            else:
+                raise RuntimeError("Couldn't determine user folder")
 
     # Unix-based
     else:
-        __home_path = pathToUnicode( os.path.expanduser('~') )
+        __home_path = pathToUnicode(os.path.expanduser('~'))
         return __home_path
 
 def getPath(subPath = ""):
@@ -125,7 +169,7 @@ def getPath(subPath = ""):
     path = getHomePath()
 
     # Windows
-    if sys.platform == 'win32':
+    if sys.platform.startswith('win'):
         path = os.path.join(path, "makehuman")
 
     # MAC OSX

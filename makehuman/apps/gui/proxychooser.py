@@ -339,7 +339,7 @@ class ProxyChooserTaskView(gui3d.TaskView, filecache.MetadataCacher):
         """
         if self.multiProxy:
             idx = self._getProxyIndex(mhclofile)
-            if idx == None:
+            if idx is None:
                 return
         else:
             if self.isProxySelected():
@@ -381,7 +381,7 @@ class ProxyChooserTaskView(gui3d.TaskView, filecache.MetadataCacher):
         contain multiple entries, if this is library allows selecting only a
         single proxy, the list is either of length 0 or 1.
         """
-        return list(self.selectedProxies)
+        return self.selectedProxies
 
     def getObjects(self):
         """

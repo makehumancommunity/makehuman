@@ -44,7 +44,7 @@ import re
 import subprocess
 
 ## Version information #########################################################
-__version__ = "1.1.2"                   # Major, minor and patch version number
+__version__ = "1.2.0"                   # Major, minor and patch version number
 release = False                         # False for nightly
 versionSub = ""                         # Short version description
 meshVersion = "hm08"                    # Version identifier of the basemesh
@@ -99,12 +99,9 @@ def getVersionStr(verbose=True, full=False):
     if isRelease() and not full:
         return _versionStr()
     else:
-        if 'HGREVISION' not in os.environ:
-            get_hg_revision()
-        result = _versionStr() + " (r%s %s)" % (os.environ['HGREVISION'], os.environ['HGNODEID'])
-        if verbose:
-            result += (" [%s]" % os.environ['HGREVISION_SOURCE'])
-        return result
+        from mhversion import MHVersion
+        mhv = MHVersion()
+        return mhv.currentBranch + ":" + mhv.currentShortCommit
 
 def getShortVersion(noSub=False):
     """
@@ -133,186 +130,12 @@ def getCwd():
     else:
         return os.path.dirname(os.path.realpath(__file__))
 
-def getHgRoot(subpath=''):
-    cwd = getCwd()
-    return os.path.realpath(os.path.join(cwd, '..', subpath))
-
-def get_revision_hg_info():
-    # Return local revision number of hg parent
-    hgRoot = getHgRoot()
-    output = subprocess.Popen(["hg","-q","parents","--template","{rev}:{node|short}"], stdout=subprocess.PIPE, stderr=sys.stderr, cwd=hgRoot).communicate()[0]
-    output = output.strip().split(':')
-    rev = output[0].strip().replace('+', '')
-    revid = output[1].strip().replace('+', '')
-    try:
-        branch = subprocess.Popen(["hg","-q","branch"], stdout=subprocess.PIPE, stderr=sys.stderr, cwd=hgRoot).communicate()[0].replace('\n','').strip()
-    except:
-        branch = None
-    return (rev, revid, branch)
-
-def get_revision_dirstate_parent(folder=None):
-    # First fallback: try to parse the dirstate file in .hg manually
-    import binascii
-
-    dirstatefile = io.open(getHgRoot('.hg/dirstate'), 'r')
-    st = dirstatefile.read(40)
-    dirstatefile.close()
-    l = len(st)
-    if l == 40:
-        nodeid = binascii.hexlify(st)[:20]
-        nodeid_short = nodeid[:12]
-    elif l > 0 and l < 40:
-        raise RuntimeError('Hg working directory state appears damaged!')
-
-    # Build mapping of nodeid to local revision number
-    node_rev_map = dict()
-    revlogfile = io.open(getHgRoot('.hg/store/00changelog.i'), 'r')
-    st = revlogfile.read(32)
-
-    rev_idx = 0
-    while st:
-        st = revlogfile.read(10)
-        if st:
-            _nodeid = binascii.hexlify(st)
-            node_rev_map[_nodeid] = rev_idx
-
-        rev_idx += 1
-        st = revlogfile.read(54)
-
-    revlogfile.close()
-    if nodeid not in node_rev_map:
-        raise RuntimeError("Failed to lookup local revision number for node %s" % nodeid)
-    rev = node_rev_map[nodeid]
-    return (str(rev), nodeid_short)
-
-
-def get_revision_cache_tip(folder=None):
-    # Second fallback: try to parse the cache file in .hg manually
-    # Retrieves revision of tip, which might not actually be the working dir parent revision
-    cachefile = io.open(getHgRoot('.hg/cache/tags'), 'r')
-    for line in iter(cachefile):
-        if line == "\n":
-            break
-        line = line.split()
-        rev = int(line[0].strip())
-        nodeid = line[1].strip()
-        nodeid_short = nodeid[:12]
-        # Tip is at the top of the file
-        return (str(rev), nodeid_short)
-    raise RuntimeError("No tip revision found in tags cache file")
-
-def get_revision_hglib():
-    # The following only works if python-hglib is installed.
-    import hglib
-    hgclient = hglib.open(getHgRoot())
-    parent = hgclient.parents()[0]
-    branch = hgclient.branch()
-    return (parent.rev.replace('+',''), parent.node[:12], branch)
-
-def get_revision_file():
-    # Default fallback to use if we can't figure out HG revision in any other
-    # way: Use this file's hg revision.
-    pattern = re.compile(r'[^0-9]')
-    return pattern.sub("", "$Revision: 6893 $")
-
-def get_hg_revision_1():
-    """
-    Retrieve (local) revision number and short nodeId of current working dir
-    parent.
-    """
-    hgrev = None
-
-    try:
-        hgrev = get_revision_hg_info()
-        os.environ['HGREVISION_SOURCE'] = "hg parents command"
-        os.environ['HGREVISION'] = str(hgrev[0])
-        os.environ['HGNODEID'] = str(hgrev[1])
-        if hgrev[2]:
-            os.environ['HGBRANCH'] = hgrev[2]
-        return hgrev
-    except Exception as e:
-        print("NOTICE: Failed to get hg version number from command line: " + format(str(e)) + " (This is just a head's up, not a critical error)", file=sys.stderr)
-
-    try:
-        hgrev = get_revision_hglib()
-        os.environ['HGREVISION_SOURCE'] = "python-hglib"
-        os.environ['HGREVISION'] = str(hgrev[0])
-        os.environ['HGNODEID'] = str(hgrev[1])
-        if hgrev[2]:
-            os.environ['HGBRANCH'] = hgrev[2]
-        return hgrev
-    except Exception as e:
-        print("NOTICE: Failed to get hg version number using hglib: " + format(str(e)) + " (This is just a head's up, not a critical error)", file=sys.stderr)
-
-    try:
-        hgrev = get_revision_dirstate_parent()
-        os.environ['HGREVISION_SOURCE'] = ".hg dirstate file"
-        os.environ['HGREVISION'] = str(hgrev[0])
-        os.environ['HGNODEID'] = str(hgrev[1])
-        return hgrev
-    except Exception as e:
-        print("NOTICE: Failed to get hg parent version from dirstate file: " + format(str(e)) + " (This is just a head's up, not a critical error)", file=sys.stderr)
-
-    try:
-        hgrev = get_revision_cache_tip()
-        os.environ['HGREVISION_SOURCE'] = ".hg cache file tip"
-        os.environ['HGREVISION'] = str(hgrev[0])
-        os.environ['HGNODEID'] = str(hgrev[1])
-        return hgrev
-    except Exception as e:
-        print("NOTICE: Failed to get hg tip version from cache file: " + format(str(e)) + " (This is just a head's up, not a critical error)", file=sys.stderr)
-
-    #TODO Disabled this fallback for now, it's possible to do this using the hg keyword extension, but not recommended and this metric was never really reliable (it only caused more confusion)
-    '''
-    print >> sys.stderr,  "NOTICE: Using HG rev from file stamp. This is likely outdated, so the number in the title bar might be off by a few commits."
-    hgrev = get_revision_file()
-    os.environ['HGREVISION_SOURCE'] = "approximated from file stamp"
-    os.environ['HGREVISION'] = hgrev[0]
-    os.environ['HGNODEID'] = hgrev[1]
-    return hgrev
-    '''
-
-    if hgrev is None:
-        rev = "?"
-        revid = "UNKNOWN"
-        hgrev = (rev, revid)
-    else:
-        rev, revid = hgrev
-    os.environ['HGREVISION_SOURCE'] = "none found"
-    os.environ['HGREVISION'] = str(rev)
-    os.environ['HGNODEID'] = str(revid)
-
-    return hgrev
-
-def get_hg_revision():
-    # Use the data/VERSION file if it exists. This is created and managed by build scripts
-    import getpath
-    versionFile = getpath.getSysDataPath("VERSION")
-    if os.path.exists(versionFile):
-        version_ = io.open(versionFile).read().strip()
-        print("data/VERSION file detected using value from version file: %s" % version_, file=sys.stderr)
-        os.environ['HGREVISION'] = str(version_.split(':')[0])
-        os.environ['HGNODEID'] = str(version_.split(':')[1])
-        os.environ['HGREVISION_SOURCE'] = "data/VERSION static revision data"
-    elif not isBuild():
-        print("NO VERSION file detected, retrieving revision info from HG", file=sys.stderr)
-        # Set HG rev in environment so it can be used elsewhere
-        hgrev = get_hg_revision_1()
-        print("Detected HG revision: r%s (%s)" % (hgrev[0], hgrev[1]), file=sys.stderr)
-    else:
-        # Don't bother trying to retrieve HG info for a build release, there should be a data/VERSION file
-        os.environ['HGREVISION'] = ""
-        os.environ['HGNODEID'] = ""
-        os.environ['HGREVISION_SOURCE'] = "skipped for build"
-
-    return (os.environ['HGREVISION'], os.environ['HGNODEID'])
-
 def set_sys_path():
     """
     Append local module folders to python search path.
     """
     #[BAL 07/11/2013] make sure we're in the right directory
-    if sys.platform != 'darwin': # Causes issues with py2app builds on MAC
+    if not sys.platform.startswith('darwin'): # Causes issues with py2app builds on MAC
         os.chdir(getCwd())
     syspath = ["./", "./lib", "./apps", "./shared", "./apps/gui","./core"]
     syspath.extend(sys.path)
@@ -331,7 +154,7 @@ def get_platform_paths():
 
     home = getpath.getPath()
 
-    if sys.platform == 'win32':
+    if sys.platform.startswith('win'):
         stdout_filename = os.path.join(home, "python_out.txt")
         stderr_filename = os.path.join(home, "python_err.txt")
 
@@ -690,7 +513,6 @@ def getSoftwareLicense(richtext=False):
 
 def getThirdPartyLicenses(richtext=False):
     import getpath
-    from io import open
     from collections import OrderedDict
     def _title(name, url, license):
         if richtext:
@@ -723,26 +545,25 @@ makes use of.\n"""
     license_folder = getpath.getSysPath('licenses')
     if not os.path.isdir(license_folder):
         return result + _error("Error: external licenses folder is not found, this is an incomplete MakeHuman distribution!")
-    external_licenses = [ ("PyQt4", ("pyQt4-license.txt", "http://www.riverbankcomputing.co.uk", "GPLv3")),
-                          ("Qt4", ("qt4-license.txt", "http://www.qt-project.org", "LGPLv2.1")),
+    external_licenses = [ ("PyQt5", ("pyQt5-license.txt", "http://www.riverbankcomputing.com", "GPLv3")),
+                          ("Qt5", ("qt5-license.txt", "http://www.qt.io", "GPLv3")),
                           ("Numpy", ("numpy-license.txt", "http://www.numpy.org", "BSD (3-clause)")),
                           ("PyOpenGL", ("pyOpenGL-license.txt", "http://pyopengl.sourceforge.net", "BSD (3-clause)")),
                           ("Transformations", ("transformations-license.txt", "http://www.lfd.uci.edu/~gohlke/", "BSD (3-clause)")),
-                          ("pyFBX", ("pyFbx-license.txt", "http://wiki.blender.org/index.php/Extensions:2.6/Py/Scripts/Import-Export/Autodesk_FBX", "GPLv2")),
-                          ("Python hglib", ("hglib-license.txt", "http://mercurial.selenic.com/wiki/PythonHglib", "MIT"))
+                          ("pyFBX", ("pyFbx-license.txt", "http://wiki.blender.org/index.php/Extensions:2.6/Py/Scripts/Import-Export/Autodesk_FBX", "GPLv2"))
                         ]
     external_licenses = OrderedDict(external_licenses)
 
-    for name, (lic_file, url, lic_type) in list(external_licenses.items()):
+    for name, (lic_file, url, lic_type) in external_licenses.items():
         result += _title(name, url, lic_type)
 
         lfile = os.path.join(license_folder, lic_file)
         if not os.path.isfile(lfile):
             result += "\n%s\n" % _error("Error: License file %s is not found, this is an incomplete MakeHuman distribution!" % lfile)
             continue
-        f = io.open(lfile, encoding='utf-8')
-        text = f.read()
-        f.close()
+        with io.open(lfile, encoding='utf-8') as f:
+            text = f.read()
+
         text = _wordwrap(text)
         result += "\n%s\n" % _block(text)
 
@@ -757,7 +578,6 @@ def main():
         make_user_dir()
         get_platform_paths()
         redirect_standard_streams()
-        get_hg_revision()
         os.environ['MH_VERSION'] = getVersionStr()
         os.environ['MH_SHORT_VERSION'] = getShortVersion()
         os.environ['MH_MESH_VERSION'] = getBasemeshVersion()

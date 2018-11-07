@@ -35,6 +35,7 @@ __pycache__/
 *.list
 *.bvh
 *.mhskel
+/makehuman/data/*
 base_1-1_contents.txt
 
 # Pydev Eclipse#
@@ -75,3 +76,4 @@ base_1-1_contents.txt
 .Trashes
 ehthumbs.db
 Thumbs.db
+/venv*

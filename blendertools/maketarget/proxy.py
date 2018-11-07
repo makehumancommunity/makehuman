@@ -138,7 +138,7 @@ class CProxy:
             tmpl = open(filepath, "rU")
         except:
             tmpl = None
-        if tmpl == None:
+        if tmpl is None:
             print(("*** Cannot open %s" % realpath))
             return None
 

@@ -90,7 +90,7 @@ class FileModifiedEvent(events3d.Event):
     def addReason(self, reason):
         """Add the given reason to the event's reason list."""
         if reason is not None:
-            if hasattr(reason, '__iter__'):
+            if hasattr(reason, '__iter__') and not isinstance(reason, str):
                 self.reasons |= set(reason)
             else:
                 self.reasons.add(reason)

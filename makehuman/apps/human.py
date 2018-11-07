@@ -47,6 +47,7 @@ import log
 import material
 import animation
 import sys
+from uuid import uuid4
 
 from makehuman import getBasemeshVersion, getShortVersion, getVersionStr, getVersion
 
@@ -57,6 +58,10 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         guicommon.Object.__init__(self, mesh)
 
         self.hasWarpTargets = False
+
+        self._name = ''
+        self._tags = set()
+        self._uuid = ''
 
         self.MIN_AGE = 1.0
         self.MAX_AGE = 90.0
@@ -97,6 +102,48 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         animation.AnimatedMesh.__init__(self, skel=None, mesh=self.meshData, vertexToBoneMapping=None)
         # Make sure that shadow vertices are copied
         self.refreshStaticMeshes()
+
+    def getName(self):
+        return self._name
+
+    def setName(self, name=''):
+        self._name = name
+
+    humanName = property(getName, setName)
+
+    def getTags(self):
+        return self._tags
+
+    def setTags(self, tags):
+        if not isinstance(tags, set):
+            raise ValueError('Parameter must be set type')
+        else:
+            tset = set()
+            for t in tags:
+                tset.add(t[:25]) # Max. tag length is 25
+            self._tags = tset
+
+    tags = property(getTags, setTags)
+
+    def addTag(self, tag=''):
+        self._tags.add(tag.lower()[:25]) # Max. tag length is 25
+
+    def clearTags(self):
+        self._tags.clear()
+
+    def getUuid(self):
+        if self._uuid:
+            return self._uuid
+        else:
+            return ''
+
+    def setUuid(self, _uuid=''):
+        self._uuid = _uuid
+
+    def newUuid(self):
+        self._uuid = str(uuid4())
+        return self._uuid
+
 
     def setProxy(self, proxy):
         oldPxy = self.getProxy()
@@ -1240,6 +1287,10 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
         self.targetsDetailStack = {}
 
+        self.setUuid('')
+        self.setName('')
+        self.clearTags()
+
         self.setMaterial(self._defaultMaterial)
 
         self.callEvent('onChanging', events3d.HumanEvent(self, 'reset'))
@@ -1425,82 +1476,86 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
         subdivide = False
 
-        f = io.open(filename, 'rU', encoding="utf-8")
+        with io.open(filename, 'rU', encoding="utf-8") as f:
 
-        for lh in list(G.app.loadHandlers.values()):
-            try:
-                lh(self, ['status', 'started'], strict)
-            except:
-                if strict:
-                    e = sys.exc_info()
-                    raise e[0](e[1]).with_traceback(e[2])
-                else:
-                    log.warning("Exception while starting MHM loading.", exc_info=True)
-
-        lines = f.readlines()
-
-        def _load_property(lineData):
-            try:
-                _do_load_property(lineData)
-            except:
-                if strict:
-                    e = sys.exc_info()
-                    raise e[0](e[1]).with_traceback(e[2])
-                else:
-                    log.warning("Exception while loading MHM property.", exc_info=True)
-
-        def _do_load_property(lineData):
-            if len(lineData) > 0 and not lineData[0] == '#':
-                if lineData[0] == 'version':
-                    log.message('Version %s', lineData[1])
-                elif lineData[0] == 'tags':
-                    for tag in lineData[1:]:
-                        log.debug('Tag %s', tag)
-                elif lineData[0] == 'modifier':
-                    try:
-                        self.getModifier(lineData[1]).setValue(float(lineData[2]), skipDependencies=True)
-                    except KeyError:
-                        log.warning('Unknown modifier specified in MHM file: %s', lineData[1])
-                elif lineData[0] == 'camera':
-                    rot = list(map(float, lineData[1:3])) + [0.0]
-                    trans = list(map(float, lineData[3:6]))
-                    zoom = float(lineData[6])
-                    G.app.modelCamera.setRotation(rot)
-                    G.app.modelCamera.translation[:3] = trans[:3]
-                    G.app.modelCamera.setZoomFactor(zoom)
-                elif lineData[0] == 'subdivide':
-                    G.app.selectedHuman._mhm_do_subdivide = lineData[1].lower() in ['true', 'yes']
-                elif lineData[0] in G.app.loadHandlers:
-                    G.app.loadHandlers[lineData[0]](self, lineData, strict)
-                else:
+            for lh in list(G.app.loadHandlers.values()):
+                try:
+                    lh(self, ['status', 'started'], strict)
+                except:
                     if strict:
-                        raise RuntimeError('Unknown property in MHM file: %s' % (lineData, ))
+                        e = sys.exc_info()
+                        raise e[0](e[1]).with_traceback(e[2])
                     else:
-                        log.warning('Unknown property in MHM file: %s', lineData)
+                        log.warning("Exception while starting MHM loading.", exc_info=True)
 
-        version = _get_version(lines)
-        if not _compare_versions(version, getShortVersion(noSub=True)):
-            log.message("MHM file is of version %s, attempting to load with backward compatibility")
-            import compat
-            compat.loadMHM(version, lines, _load_property, strict)
-        else:
-            fprog = Progress(len(lines))
-            for data in lines:
-                lineData = data.strip().split()
-                _load_property(lineData)
-                fprog.step()
+            lines = f.readlines()
 
-        log.debug("Finalizing MHM loading.")
-        for lh in set(G.app.loadHandlers.values()):
-            try:
-                lh(self, ['status', 'finished'], strict)
-            except:
-                if strict:
-                    e = sys.exc_info()
-                    raise e[0](e[1]).with_traceback(e[2])
-                else:
-                    log.warning("Exception while finishing MHM loading.", exc_info=True)
-        f.close()
+            def _load_property(lineData):
+                try:
+                    _do_load_property(lineData)
+                except:
+                    if strict:
+                        e = sys.exc_info()
+                        raise e[0](e[1]).with_traceback(e[2])
+                    else:
+                        log.warning("Exception while loading MHM property.", exc_info=True)
+
+            def _do_load_property(lineData):
+                if len(lineData) > 0 and not lineData[0] == '#':
+                    if lineData[0] == 'version':
+                        log.message('Version %s', lineData[1])
+                    elif lineData[0] == 'uuid' and len(lineData) > 1:
+                        self.setUuid(lineData[1])
+                    elif lineData[0] == 'name' and len(lineData) > 1:
+                        self.setName(' '.join(lineData[1:]))
+                        log.debug('Model Name %s' % self.getName())
+                    elif lineData[0] == 'tags' and len(lineData) > 1:
+                        for tag in lineData[1:]:
+                            self.addTag(tag.replace(',,', ' '))
+                    elif lineData[0] == 'modifier':
+                        try:
+                            self.getModifier(lineData[1]).setValue(float(lineData[2]), skipDependencies=True)
+                        except KeyError:
+                            log.warning('Unknown modifier specified in MHM file: %s', lineData[1])
+                    elif lineData[0] == 'camera':
+                        rot = list(map(float, lineData[1:3])) + [0.0]
+                        trans = list(map(float, lineData[3:6]))
+                        zoom = float(lineData[6])
+                        G.app.modelCamera.setRotation(rot)
+                        G.app.modelCamera.translation[:3] = trans[:3]
+                        G.app.modelCamera.setZoomFactor(zoom)
+                    elif lineData[0] == 'subdivide':
+                        G.app.selectedHuman._mhm_do_subdivide = lineData[1].lower() in ['true', 'yes']
+                    elif lineData[0] in G.app.loadHandlers:
+                        G.app.loadHandlers[lineData[0]](self, lineData, strict)
+                    else:
+                        if strict:
+                            raise RuntimeError('Unknown property in MHM file: %s' % (lineData, ))
+                        else:
+                            log.warning('Unknown property in MHM file: %s', lineData)
+
+            version = _get_version(lines)
+            if not _compare_versions(version, getShortVersion(noSub=True)):
+                log.message("MHM file is of version %s, attempting to load with backward compatibility" % version)
+                import compat
+                compat.loadMHM(version, lines, _load_property, strict)
+            else:
+                fprog = Progress(len(lines))
+                for data in lines:
+                    lineData = data.strip().split()
+                    _load_property(lineData)
+                    fprog.step()
+
+            log.debug("Finalizing MHM loading.")
+            for lh in set(G.app.loadHandlers.values()):
+                try:
+                    lh(self, ['status', 'finished'], strict)
+                except:
+                    if strict:
+                        e = sys.exc_info()
+                        raise e[0](e[1]).with_traceback(e[2])
+                    else:
+                        log.warning("Exception while finishing MHM loading.", exc_info=True)
 
         self.blockEthnicUpdates = False
         self._setEthnicVals()
@@ -1520,7 +1575,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         progress(1.0)
         log.message("Done loading MHM file.")
 
-    def save(self, filename, tags):
+    def save(self, filename):
         import io
         from progress import Progress
         progress = Progress(len(G.app.saveHandlers))
@@ -1528,46 +1583,51 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         event.path = filename
         self.callEvent('onChanging', event)
 
-        f = io.open(filename, "w", encoding="utf-8")
-        f.write('# Written by MakeHuman %s\n' % getVersionStr())
-        f.write('version %s\n' % getShortVersion(noSub=True))
-        f.write('tags %s\n' % tags)
-        cam_rot = list(G.app.modelCamera.getRotation()[:2])
-        cam_trans = list(G.app.modelCamera.translation[:3])
-        cam_zoom = [G.app.modelCamera.zoomFactor]
-        f.write('camera %s %s %s %s %s %s\n' % tuple(cam_rot + cam_trans + cam_zoom))
+        with io.open(filename, "w", encoding="utf-8") as f:
+            f.write('# Written by MakeHuman %s\n' % getVersionStr())
+            f.write('version %s\n' % getShortVersion(noSub=True))
+            if self.getUuid():
+                f.write('uuid %s\n' % self.getUuid())
+            if self.getName():
+                f.write('name %s\n' % self.getName())
+            if self.getTags():
+                tags = [t.replace(' ', ',,') for t in self.getTags()]
+                f.write('tags %s\n' % ' '.join(sorted(tags)))
+            cam_rot = list(G.app.modelCamera.getRotation()[:2])
+            cam_trans = list(G.app.modelCamera.translation[:3])
+            cam_zoom = [G.app.modelCamera.zoomFactor]
+            f.write('camera %s %s %s %s %s %s\n' % tuple(cam_rot + cam_trans + cam_zoom))
 
-        for modifier in self.modifiers:
-            if modifier.getValue() or modifier.isMacro():
-                f.write('modifier %s %f\n' % (modifier.fullName, modifier.getValue()))
+            for modifier in self.modifiers:
+                if modifier.getValue() or modifier.isMacro():
+                    f.write('modifier %s %f\n' % (modifier.fullName, modifier.getValue()))
 
-        class SaveWriter(object):
-            def __init__(self, file_obj):
-                self.f = file_obj
+            class SaveWriter(object):
+                def __init__(self, file_obj):
+                    self.f = file_obj
 
-            def write(self, text):
-                # Ensure that handlers write lines ending with newline character
-                if not text.endswith("\n"):
-                    text = text+"\n"
-                self.f.write(text)
+                def write(self, text):
+                    # Ensure that handlers write lines ending with newline character
+                    if not text.endswith("\n"):
+                        text = text+"\n"
+                    self.f.write(text)
 
-            def writelines(self, text):
-                # Ensure that handlers write lines ending with newline character
-                if not text.endswith("\n"):
-                    text = text+"\n"
-                self.f.writelines(text)
+                def writelines(self, text):
+                    # Ensure that handlers write lines ending with newline character
+                    if not text.endswith("\n"):
+                        text = text+"\n"
+                    self.f.writelines(text)
 
-            def __getattr__(self, attr):
-                return self.f.__getattribute__(attr)
+                def __getattr__(self, attr):
+                    return self.f.__getattribute__(attr)
 
-        f = SaveWriter(f)
+            f = SaveWriter(f)
 
-        for handler in G.app.saveHandlers:
-            handler(self, f)
-            progress.step()
+            for handler in G.app.saveHandlers:
+                handler(self, f)
+                progress.step()
 
-        f.write('subdivide %s' % self.isSubdivided())
+            f.write('subdivide %s' % self.isSubdivided())
 
-        f.close()
         progress(1)
         self.callEvent('onChanged', event)

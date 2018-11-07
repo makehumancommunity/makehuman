@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
 """
@@ -37,6 +37,15 @@ Fbx utilities
 
 import os
 from .fbx_utils_bin import *
+from core import G
+
+DEBUGWRITE=False
+
+def debugWrite(content, location = "generic"):
+    if not DEBUGWRITE:
+        return
+    if hasattr(G.app, "mhapi"):
+        G.app.mhapi.utility.debugWrite(content, "FBX", location)
 
 #--------------------------------------------------------------------
 #   Radians - degrees
@@ -138,7 +147,7 @@ def ooLink(fp, child, parent, config):
 
     if config.binary:
         from . import fbx_binary
-        elem = fbx_binary.get_child_element(fp, 'Connections')
+        elem = fbx_binary.get_child_element(fp, b'Connections')
         fbx_binary.elem_connection(elem, b"OO", cid, pid)
         return
 
@@ -154,7 +163,7 @@ def opLink(fp, child, parent, channel, config):
 
     if config.binary:
         from . import fbx_binary
-        elem = fbx_binary.get_child_element(fp, 'Connections')
+        elem = fbx_binary.get_child_element(fp, b'Connections')
         fbx_binary.elem_connection(elem, b"OP", cid, pid, channel)
         return
 

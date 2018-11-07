@@ -45,7 +45,8 @@ def calculateSurface(mesh, vertGroups=None, faceMask=None):
     calculate area of a subset of the mesh and filter out other faces.
     """
     if vertGroups is not None:
-        fvert = mesh.getFacesForGroups(vertGroups)
+        f_idx = mesh.getFacesForGroups(vertGroups)
+        fvert = mesh.fvert[f_idx]
     elif faceMask is not None:
         f_idx = np.argwhere(faceMask)[...,0]
         fvert = mesh.fvert[f_idx]
@@ -77,7 +78,8 @@ def calculateVolume(mesh, vertGroups=None, faceMask=None):
     Mesh is expected to be closed.
     """
     if vertGroups is not None:
-        fvert = mesh.getFacesForGroups(vertGroups)
+        f_idx = mesh.getFacesForGroups(vertGroups)
+        fvert = mesh.fvert[f_idx]
     elif faceMask is not None:
         f_idx = np.argwhere(faceMask)[...,0]
         fvert = mesh.fvert[f_idx]

@@ -1,5 +1,0 @@
-#!/bin/bash
-
-cd /usr/share/makehuman
-python makehuman.py "$@"
-

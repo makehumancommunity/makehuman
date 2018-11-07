@@ -154,7 +154,7 @@ class TabsBase(Widget):
 class Tabs(QtWidgets.QTabWidget, TabsBase):
     def __init__(self, parent = None):
         QtWidgets.QTabWidget.__init__(self, parent)
-        TabsBase.__init__(self)
+        #TabsBase.__init__(self)
 
     def _makeTab(self, tab, idx=None):
         tab.child = TabBar(self)
@@ -177,7 +177,7 @@ class Tabs(QtWidgets.QTabWidget, TabsBase):
 class TabBar(QtWidgets.QTabBar, TabsBase):
     def __init__(self, parent = None):
         QtWidgets.QTabBar.__init__(self, parent)
-        TabsBase.__init__(self)
+        #TabsBase.__init__(self)
         self.setDrawBase(False)
 
     def tabBar(self):
@@ -198,7 +198,7 @@ class GroupBox(QtWidgets.QGroupBox, Widget):
     def __init__(self, label = ''):
         label = getLanguageString(label) if label else ''
         QtWidgets.QGroupBox.__init__(self, label)
-        Widget.__init__(self)
+        #Widget.__init__(self)
         self.layout = QtWidgets.QGridLayout(self)
 
     def __str__(self):
@@ -333,7 +333,7 @@ class Slider(QtWidgets.QWidget, Widget):
 
     def __init__(self, value=0.0, min=0.0, max=1.0, label=None, vertical=False, valueConverter=None, image=None, scale=1000):
         super(Slider, self).__init__()
-        Widget.__init__(self)
+        #Widget.__init__(self)
         self.text = getLanguageString(label) or ''
         self.valueConverter = valueConverter
 
@@ -557,13 +557,13 @@ class Button(QtWidgets.QPushButton, ButtonBase):
     def __init__(self, label=None, selected=False):
         label = getLanguageString(label)
         super(Button, self).__init__(label)
-        ButtonBase.__init__(self)
+        #ButtonBase.__init__(self)
 
 class CheckBox(QtWidgets.QCheckBox, ButtonBase):
     def __init__(self, label=None, selected=False):
         label = getLanguageString(label)
         super(CheckBox, self).__init__(label)
-        ButtonBase.__init__(self)
+        #ButtonBase.__init__(self)
         self.setChecked(selected)
 
 class RadioButton(QtWidgets.QRadioButton, ButtonBase):
@@ -572,7 +572,7 @@ class RadioButton(QtWidgets.QRadioButton, ButtonBase):
     def __init__(self, group, label=None, selected=False):
         label = getLanguageString(label)
         super(RadioButton, self).__init__(label)
-        ButtonBase.__init__(self)
+        #ButtonBase.__init__(self)
         self.group = group
         self.group.append(self)
         self.setChecked(selected)
@@ -689,7 +689,7 @@ class ListItem(QtWidgets.QListWidgetItem):
 class ListView(QtWidgets.QListWidget, Widget):
     def __init__(self):
         super(ListView, self).__init__()
-        Widget.__init__(self)
+        #Widget.__init__(self)
         self._vertical_scrolling = True
         self.itemActivated[QtWidgets.QListWidgetItem].connect(self._activate)
         self.itemClicked[QtWidgets.QListWidgetItem].connect(self._clicked)
@@ -815,7 +815,7 @@ class TextView(QtWidgets.QLabel, Widget):
     def __init__(self, label = ''):
         label = getLanguageString(label)
         super(TextView, self).__init__(label)
-        Widget.__init__(self)
+        #Widget.__init__(self)
 
     def setText(self, text):
         text = getLanguageString(text)
@@ -840,7 +840,7 @@ def filenameValidator(text):
 class TextEdit(QtWidgets.QLineEdit, Widget):
     def __init__(self, text='', validator = None):
         super(TextEdit, self).__init__(text)
-        Widget.__init__(self)
+        #Widget.__init__(self)
         self.setValidator(validator)
         self.textEdited['QString'].connect(self._textChanged)
         self.returnPressed.connect(self._enter)
@@ -937,7 +937,7 @@ class DocumentEdit(QtWidgets.QTextEdit, Widget):
 
     def __init__(self, text=''):
         super(DocumentEdit, self).__init__(text)
-        Widget.__init__(self)
+        #Widget.__init__(self)
         self.setAcceptRichText(False)
 
     @property
@@ -957,7 +957,7 @@ class DocumentEdit(QtWidgets.QTextEdit, Widget):
 class ProgressBar(QtWidgets.QProgressBar, Widget):
     def __init__(self, visible=True):
         super(ProgressBar, self).__init__()
-        Widget.__init__(self)
+        #Widget.__init__(self)
         self.setVisible(visible)
 
     def setProgress(self, progress):
@@ -1060,7 +1060,7 @@ class MouseActionEdit(QtWidgets.QLabel, Widget):
 class StackedBox(QtWidgets.QStackedWidget, Widget):
     def __init__(self):
         super(StackedBox, self).__init__()
-        Widget.__init__(self)
+        #Widget.__init__(self)
         self.layout().setAlignment(QtCore.Qt.AlignTop)
         self.autoResize = False
         self.currentChanged[int].connect(self.widgetChanged)
@@ -1191,7 +1191,7 @@ class AboutBox(QtWidgets.QMessageBox):
     def __init__(self, parent, title, text):
         super(AboutBox, self).__init__(title, text, QtWidgets.QMessageBox.Information, 0, 0, 0, parent)
 
-        if sys.platform == 'darwin':
+        if sys.platform.startswith('darwin'):
             self.setWindowFlags(QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowSystemMenuHint)
         # Grab window icon of parent
         icon = self.windowIcon()
@@ -1218,7 +1218,7 @@ class AboutBoxScrollbars(QtWidgets.QDialog):
             re_match_urls = re.compile(r"""((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.‌​][a-z]{2,4}/)(?:[^\s()<>]+|(([^\s()<>]+|(([^\s()<>]+)))*))+(?:(([^\s()<>]+|(‌​([^\s()<>]+)))*)|[^\s`!()[]{};:'".,<>?«»“”‘’]))""", re.DOTALL)
             return re_match_urls.sub(lambda x: '<a href="%(url)s" style="color: #ffa02f;">%(url)s</a>' % dict(url=str(x.group())), text)
 
-        if sys.platform == 'darwin':
+        if sys.platform.startswith('darwin'):
             self.setWindowFlags(QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowSystemMenuHint)
         # Grab window icon of parent
         icon = self.windowIcon()
@@ -1232,7 +1232,7 @@ class AboutBoxScrollbars(QtWidgets.QDialog):
         label.setOpenExternalLinks(True)
         label.setTextFormat(QtCore.Qt.RichText)
 
-        if sys.platform == 'darwin':
+        if sys.platform.startswith('darwin'):
             label.setContentsMargins(16, 0, 0, 0)
         else:
             label.setContentsMargins(2, 0, 0, 0)
@@ -1260,7 +1260,7 @@ class AboutBoxScrollbars(QtWidgets.QDialog):
         buttonBox.setContentsMargins(0, 0, 10, 0)
 
         grid = QtWidgets.QGridLayout()
-        if sys.platform == 'darwin':
+        if sys.platform.startswith('darwin'):
             grid.addWidget(versionLabel, 0, 1, 1, 1, QtCore.Qt.AlignTop)
             grid.addWidget(iconLabel, 0, 0, 2, 1, QtCore.Qt.AlignTop)
         else:
@@ -1277,7 +1277,7 @@ class AboutBoxScrollbars(QtWidgets.QDialog):
         grid.addWidget(scroll, 1, 1, 1, 1)
         grid.addWidget(buttonBox, 2, 0, 1, 2)
 
-        if sys.platform == 'darwin':
+        if sys.platform.startswith('darwin'):
             f = self.font()
             f.setBold(True)
             label.setFont(f)
@@ -1348,7 +1348,7 @@ class FileEntryView(QtWidgets.QWidget, Widget):
         """
 
         super(FileEntryView, self).__init__()
-        Widget.__init__(self)
+        #Widget.__init__(self)
 
         # Declare data
 
@@ -1556,7 +1556,7 @@ class SplashScreen(QtWidgets.QSplashScreen):
 class StatusBar(QtWidgets.QStatusBar, Widget):
     def __init__(self):
         super(StatusBar, self).__init__()
-        Widget.__init__(self)
+        #Widget.__init__(self)
         self._perm = QtWidgets.QLabel()
         self.addWidget(self._perm, 1)
         self.duration = 2000
@@ -1713,7 +1713,7 @@ class Viewport(QtWidgets.QWidget):
 class VScrollArea(QtWidgets.QWidget, Widget):
     def __init__(self):
         super(VScrollArea, self).__init__()
-        Widget.__init__(self)
+        #Widget.__init__(self)
 
         self._viewport = Viewport()
         self._scrollbar = QtWidgets.QScrollBar(QtCore.Qt.Vertical)
@@ -1803,7 +1803,7 @@ class TreeView(QtWidgets.QTreeWidget, Widget):
 
     def __init__(self, parent = None):
         super(TreeView, self).__init__(parent)
-        Widget.__init__(self)
+        #Widget.__init__(self)
         self.itemActivated[QtWidgets.QTreeWidgetItem, int].connect(self._activate)
         self.itemExpanded[QtWidgets.QTreeWidgetItem].connect(self._expand)
         if TreeView._dirIcon is None:
@@ -1827,7 +1827,7 @@ class TreeView(QtWidgets.QTreeWidget, Widget):
 class SpinBox(QtWidgets.QSpinBox, Widget):
     def __init__(self, value, parent = None):
         super(SpinBox, self).__init__(parent)
-        Widget.__init__(self)
+        #Widget.__init__(self)
         self.setRange(0, 99999)
         self.setValue(value)
         self.valueChanged[int].connect(self._changed)
@@ -2079,7 +2079,7 @@ class TableItem(QtWidgets.QTableWidgetItem):
 class TableView(QtWidgets.QTableWidget, Widget):
     def __init__(self):
         super(TableView, self).__init__()
-        Widget.__init__(self)
+        #Widget.__init__(self)
 
     def setItem(self, row, col, text, data = None):
         item = TableItem(text)
@@ -2093,7 +2093,7 @@ class TableView(QtWidgets.QTableWidget, Widget):
 class ImageView(QtWidgets.QLabel, QtWidgets.QScrollArea, Widget):
     def __init__(self):
         super(ImageView, self).__init__()
-        Widget.__init__(self)
+        #Widget.__init__(self)
         self.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop)
         self.setMinimumSize(50,50)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred)
@@ -2152,7 +2152,7 @@ class ImageView(QtWidgets.QLabel, QtWidgets.QScrollArea, Widget):
 class ZoomableImageView(QtWidgets.QScrollArea, Widget):
     def __init__(self):
         QtWidgets.QScrollArea.__init__(self)
-        Widget.__init__(self)
+        #Widget.__init__(self)
         self.imageLabel = QtWidgets.QLabel()
         self.imageLabel.setBackgroundRole(QtGui.QPalette.Base)
         self.imageLabel.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop)
@@ -2237,10 +2237,10 @@ class ZoomableImageView(QtWidgets.QScrollArea, Widget):
     def wheelEvent(self, event, displace = True):
         ratbef = self.ratio
         if G.app.getSetting('invertMouseWheel'):
-            delta = event.delta()
+            delta = event.angleDelta()
         else:
-            delta = -event.delta()
-        factor = 1 - delta*0.0007
+            delta = -event.angleDelta()
+        factor = 1 - delta.y()*0.0007
         self.ratio *= factor
         if self.ratio > 1.0:
             self.ratio = 1.0

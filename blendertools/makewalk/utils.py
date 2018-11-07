@@ -82,15 +82,15 @@ RigifyLayers = 27*[True] + 5*[False]
 #   Identify rig type
 #
 
-def allBonesInList(list, rig):
-    for bname in list:
-        if bname not in list(rig.pose.bones.keys()):
+def allBonesInList(blist, rig):
+    for bname in blist:
+        if bname not in rig.pose.bones.keys():
             return False
     return True
 
 
 def isMhxRig(rig):
-    return ('foot.rev.L' in list(rig.pose.bones.keys()))
+    return ('foot.rev.L' in rig.pose.bones.keys())
 
 def isDefaultRig(rig):
     return allBonesInList(['risorius03.L', 'shoulder01.R', "upperleg01.L", "upperleg02.L"], rig)
@@ -99,14 +99,14 @@ def isMbRig(rig):
     return allBonesInList(["LeftArm", "LeftArmRoll"], rig)
 
 def isMhx7Rig(rig):
-    return ('FootRev_L' in list(rig.pose.bones.keys()))
+    return ('FootRev_L' in rig.pose.bones.keys())
 
 def isRigify(rig):
-    return ('MCH-spine.flex' in list(rig.pose.bones.keys()))
+    return ('MCH-spine.flex' in rig.pose.bones.keys())
 
 
 def isMakeHumanRig(rig):
-    return ("MhAlpha8" in list(rig.keys()))
+    return ("MhAlpha8" in rig.keys())
 
 #
 #   nameOrNone(string):
@@ -280,7 +280,7 @@ def getActiveFramesBetweenMarkers(ob, scn):
         return getActiveFrames(ob)
     active = getActiveFrames0(ob)
     frames = []
-    for time in list(active.keys()):
+    for time in active.keys():
         if time >= minTime and time <= maxTime:
             frames.append(time)
     frames.sort()

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
 # ##### BEGIN GPL LICENSE BLOCK #####
@@ -24,12 +24,9 @@
 
 
 import math
-
+#import log
 from collections import namedtuple, OrderedDict
-
-
 from . import encode_bin, data_types
-
 
 # "Constants"
 FBX_VERSION = 7300
@@ -195,14 +192,14 @@ def similar_values_iter(v1, v2, e=1e-6):
 
 def vcos_transformed_gen(raw_cos, m=None):
     # Note: we could most likely get much better performances with numpy, but will leave this as TODO for now.
-    gen = list(zip(*(iter(raw_cos),) * 3))
+    gen = zip(*(iter(raw_cos),) * 3)
     return gen if m is None else (m * Vector(v) for v in gen)
 
 def nors_transformed_gen(raw_nors, m=None):
     # Great, now normals are also expected 4D!
     # XXX Back to 3D normals for now!
     # gen = zip(*(iter(raw_nors),) * 3 + (_infinite_gen(1.0),))
-    gen = list(zip(*(iter(raw_nors),) * 3))
+    gen = zip(*(iter(raw_nors),) * 3)
     return gen if m is None else (m * Vector(v) for v in gen)
 
 
@@ -285,12 +282,23 @@ def elem_empty(elem, name):
 
 
 def _elem_data_single(elem, name, value, func_name):
+
     sub_elem = elem_empty(elem, name)
+
+    from . import fbx_utils
+    fbx_utils.debugWrite(name, "elem_data_single")
+    fbx_utils.debugWrite(value, "elem_data_single")
+
     getattr(sub_elem, func_name)(value)
     return sub_elem
 
 
 def _elem_data_vec(elem, name, value, func_name):
+
+    from . import fbx_utils
+    fbx_utils.debugWrite(name, "elem_data_single")
+    fbx_utils.debugWrite(value, "elem_data_single")
+
     sub_elem = elem_empty(elem, name)
     func = getattr(sub_elem, func_name)
     for v in value:
@@ -298,6 +306,7 @@ def _elem_data_vec(elem, name, value, func_name):
     return sub_elem
 
 def get_child_element(parentelem, name):
+    assert(isinstance(name, bytes))
     for child in parentelem.elems:
         if child.id == name:
             return child
@@ -458,6 +467,12 @@ def _elem_props_set(elem, ptype, name, value, flags):
     elif len(ptype) > 3:
         # We assume value is iterable, else it's a bug!
         for callback, val in zip(ptype[2:], value):
+            #log.debug(p)
+            #log.debug(type(p))
+            #log.debug(callback)
+            #log.debug(type(callback))
+            #log.debug(val)
+            #log.debug(type(val))
             getattr(p, callback)(val)
 
 
@@ -473,8 +488,7 @@ def _elem_props_flags(animatable, custom):
 
 def elem_props_set(elem, ptype, name, value=None, animatable=False, custom=False):
     ptype = FBX_PROPERTIES_DEFINITIONS[ptype]
-    import log
-    log.debug('propset %s %s %s', name, value, type(value))
+    #log.debug('propset %s %s %s', name, value, type(value))
     _elem_props_set(elem, ptype, name, value, _elem_props_flags(animatable, custom))
 
 
@@ -496,7 +510,7 @@ def elem_props_template_init(templates, template_type):
     if tmpl is not None:
         written = tmpl.written[0]
         props = tmpl.properties
-        ret = OrderedDict((name, [val, ptype, anim, written]) for name, (val, ptype, anim) in list(props.items()))
+        ret = OrderedDict((name, [val, ptype, anim, written]) for name, (val, ptype, anim) in props.items())
     return ret
 
 
@@ -529,7 +543,7 @@ def elem_props_template_finalize(template, elem):
     subtypes in each and every elements, if they are not overriden by that element.
     Yes, hairy, FBX that is to say. When they could easily support several subtypes per template... :(
     """
-    for name, (value, ptype_name, animatable, written) in list(template.items()):
+    for name, (value, ptype_name, animatable, written) in template.items():
         if written:
             continue
         ptype = FBX_PROPERTIES_DEFINITIONS[ptype_name]
@@ -543,16 +557,21 @@ FBXTemplate = namedtuple("FBXTemplate", ("type_name", "prop_type_name", "propert
 
 def get_properties(properties):
     for p in properties:
-        if len(p) < 3:
+        #log.debug(p)
+        if len(p) < 2:
             continue
+        if len(p) == 2:
+            name = p[0]
+            value, ptype, animatable = p[1]
+            custom = False
         if len(p) == 3:
             name, ptype, value = p
             animatable = False
             custom = False
-        elif len(p) == 4:
+        if len(p) == 4:
             name, ptype, value, animatable = p
             custom = False
-        else:
+        if len(p) > 4:
             name, ptype, value, animatable, custom = p
 
         yield (name, ptype, value, animatable, custom)
@@ -565,16 +584,24 @@ def fbx_template_generate(definitionsNode, objectType_name, users_count, propert
         elem = elem_data_single_string(template, b"PropertyTemplate", propertyTemplate_name)
         props = elem_properties(elem)
 
+        #log.debug("--- fbx_template_generate ---")
+        #log.debug(len(properties))
+
         for name, ptype, value, animatable, custom in get_properties(properties):
             try:
                 elem_props_set(props, ptype, name, value, animatable, custom)
             except Exception as e:
-                import log
-                log.debug("FBX: Failed to write template prop (%r) (%s)", e, str((props, ptype, name, value, animatable)))
+                #log.debug("FBX: Failed to write template prop (%r) (%s)", e, str((props, ptype, name, value, animatable)))
+                pass
 
 
 def fbx_name_class(name, cls=None):
     if cls is None:
-        cls,name = name.split('::')
+        cls,name = name.split(b'::')
+    #log.debug(cls)
+    #log.debug(type(cls))
+    #log.debug(name)
+    #log.debug(type(name))
+    #log.debug(type(FBX_NAME_CLASS_SEP))
     return FBX_NAME_CLASS_SEP.join((name, cls))
 

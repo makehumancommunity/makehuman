@@ -257,6 +257,7 @@ def getArgs():
     # optional arguments
     parser.add_argument('-v', '--version', action='version', version=version())
     parser.add_argument("-d", "--nodelete", action="store_true", help="Don't delete old version when updating files")
+    parser.add_argument('-y', '--yes-really-download-old-assets', action="store_true", help="Confirm you understand this means you download from tuxfamily")
 
     # optional positional arguments
     parser.add_argument("repository", default=defaultRepo, nargs='?', help="Alternative repository name to download from (optional)")
@@ -278,6 +279,18 @@ if __name__ == '__main__':
     global DONTREMOVE
 
     args = getArgs()
+
+    if not "yes_really_download_old_assets" in args or args["yes_really_download_old_assets"] is None or not args["yes_really_download_old_assets"]:
+        print("\n!!! WARNING WARNING WARNING !!!\n")
+        print("build_prepare.py downloads the old makehuman assets from tuxfamily, whereas")
+        print("the current assets are stored on github. To download the current assets,")
+        print("use download_assets_git.py instead.\n")
+        print("If you understand the consequences, you can still use this old script and")
+        print("get the old tuxfamily assets by running:\n")
+        print("    python download_assets.py --yes-really-download-old-assets\n")
+        print("!!! WARNING WARNING WARNING !!!\n")
+        sys.exit(1)
+
     repo = args.get('repository', defaultRepo)
     for c in ['.', '/', '\\']:
         if c in repo:

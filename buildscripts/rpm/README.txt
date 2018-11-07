@@ -30,7 +30,7 @@ As root, run the bash script for installing the required dependencies.
 This script also installs optional but recommended dependencies. If you
 only want the really required dependencies, run
 
-  yum install numpy PyOpenGL PyQt4
+  yum install python3-numpy python3-pyopengl python3-QtPy
 
 
 STEP 4 RUN MAKEHUMAN

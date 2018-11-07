@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
 """
@@ -53,18 +53,18 @@ def writeObjectDefs(fp, meshes, nShapes, config):
     nMeshes = len(meshes)
 
     properties = [
-        ("Color",   "p_color_rgb",      [0.8,0.8,0.8]),
-        ("BBoxMin", "p_vector_3d",      [0,0,0]),
-        ("BBoxMax", "p_vector_3d",      [0,0,0]),
-        ("Primary Visibility", "p_bool", True),
-        ("Casts Shadows", "p_bool",     True),
-        ("Receive Shadows", "p_bool",   True)
+        (b"Color", ((0.8, 0.8, 0.8), "p_color_rgb", False)),
+        (b"BBoxMin", ((0.0, 0.0, 0.0), "p_vector_3d", False)),
+        (b"BBoxMax", ((0.0, 0.0, 0.0), "p_vector_3d", False)),
+        (b"Primary Visibility", (True, "p_bool", False)),
+        (b"Casts Shadows", (True, "p_bool", False)),
+        (b"Receive Shadows", (True, "p_bool", False))
     ]
 
     if config.binary:
         from . import fbx_binary
-        elem = fbx_binary.get_child_element(fp, 'Definitions')
-        fbx_binary.fbx_template_generate(elem, "Geometry", (nMeshes + nShapes), "FbxMesh", properties)
+        elem = fbx_binary.get_child_element(fp, b'Definitions')
+        fbx_binary.fbx_template_generate(elem, b"Geometry", (nMeshes + nShapes), b"FbxMesh", properties)
         return
 
     from . import fbx_utils
@@ -98,12 +98,12 @@ def writeGeometryProp(fp, mesh, config):
     coord = mesh.coord + config.offset
 
     properties = [
-        ("MHName", "p_string", "%sMesh" % mesh.name, False, True)
+        (b"MHName", "p_string", "%sMesh" % mesh.name, False, True)
     ]
 
     if config.binary:
         from . import fbx_binary
-        elem = fbx_binary.get_child_element(fp, 'Objects')
+        elem = fbx_binary.get_child_element(fp, b'Objects')
         fbx_binary.fbx_data_mesh_element(elem, key, id, properties, coord, mesh.fvert, mesh.vnorm, mesh.texco, mesh.fuvs)
         return
 
@@ -260,16 +260,16 @@ def writeMeshProp(fp, mesh, config):
     id,key = getId("Model::%sMesh" % mesh.name)
 
     properties = [
-        ("RotationActive", "p_bool", 1),
-        ("InheritType", "p_enum", 1),
-        ("ScalingMax", "p_vector_3d", [0,0,0]),
-        ("DefaultAttributeIndex", "p_integer", 0),
-        ("MHName", "p_string", mesh.name, False, True)
+        (b"RotationActive", "p_bool", 1),
+        (b"InheritType", "p_enum", 1),
+        (b"ScalingMax", "p_vector_3d", [0.0,0.0,0.0]),
+        (b"DefaultAttributeIndex", "p_integer", 0),
+        (b"MHName", "p_string", mesh.name, False, True)
     ]
 
     if config.binary:
         from . import fbx_binary
-        elem = fbx_binary.get_child_element(fp, 'Objects')
+        elem = fbx_binary.get_child_element(fp, b'Objects')
         fbx_binary.fbx_data_model_element(elem, key, id, properties)
         return
 

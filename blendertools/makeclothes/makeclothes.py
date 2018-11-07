@@ -1368,7 +1368,7 @@ excludeList = [
 
 def writeValue(ext, arg, exclude, pad, depth, fp):
     if (len(str(arg)) == 0 or
-        arg == None or
+        arg is None or
         arg == [] or
         ext[0] == '_' or
         ext in excludeList or
