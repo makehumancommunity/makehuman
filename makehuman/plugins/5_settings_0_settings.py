@@ -43,8 +43,11 @@ import mh
 import gui3d
 import gui
 import log
+
 from qtui import getExistingDirectory
 from getpath import getHomePath, formatPath
+from language import language
+from filechooser import FileChooserBase as fc
 
 class SettingCheckbox(gui.CheckBox):
     def __init__(self, label, settingName, postAction=None):
@@ -158,6 +161,8 @@ class SettingsTaskView(gui3d.TaskView):
 
         nameBox = self.addLeftWidget(gui.GroupBox('Name Tags:'))
         self.useNameTags = nameBox.addWidget(SettingCheckbox('Use Name Tags', 'useNameTags'))
+
+        self.createFilterModeSwitch()
 
         startupBox = self.addLeftWidget(gui.GroupBox('Startup'))
         self.preload = startupBox.addWidget(SettingCheckbox("Preload macro targets", 'preloadTargets'))
@@ -287,6 +292,9 @@ class SettingsTaskView(gui3d.TaskView):
             if radioBtn.theme == theme:
                 radioBtn.updateButton(True)
 
+        self.updateTagFilterModes()
+
+    def updateTagFilterModes(self):
         convmodes = {'NOR': 'NOT OR',
                      'NAND': 'NOT AND'}
         mode = convmodes.get(gui3d.app.getSetting('tagFilterMode'), gui3d.app.getSetting('tagFilterMode'))
@@ -295,6 +303,19 @@ class SettingsTaskView(gui3d.TaskView):
             radioBtn.setChecked(radioBtn.getLabel() == mode)
 
         self.countEdit.setText(str(gui3d.app.getSetting('tagCount')))
+
+    def createFilterModeSwitch(self):
+        action = gui.Action('switchFilterMode', language.getLanguageString('Switch Filter Mode'), self.switchFilterMode)
+        gui3d.app.mainwin.addAction(action)
+        mh.setShortcut(mh.Modifiers.ALT, mh.Keys.f, action)
+
+    def switchFilterMode(self):
+        modes = ['OR', 'AND', 'NOR', 'NAND']
+        index = (modes.index(gui3d.app.getSetting('tagFilterMode')) + 1) % 4
+        gui3d.app.setSetting('tagFilterMode', modes[index])
+        self.updateTagFilterModes()
+        for switchFunc in fc.switchFuncList:
+            switchFunc()
 
     def onShow(self, event):
         gui3d.TaskView.onShow(self, event)
