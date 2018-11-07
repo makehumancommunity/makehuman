@@ -236,7 +236,9 @@ class MHApplication(gui3d.Application, mh.Application):
                 'guiTheme': 'makehuman',
                 'restoreWindowSize': True,
                 'windowGeometry': '',
-                'tagFilterMode': 'OR'
+                'tagFilterMode': 'OR',
+                'useNameTags': False,
+                'tagCount': 5
             }
         else:
             self._default_settings = {
@@ -258,7 +260,9 @@ class MHApplication(gui3d.Application, mh.Application):
                 'preloadTargets': False,
                 'restoreWindowSize': True,
                 'windowGeometry': '',
-                'tagFilterMode': 'OR'
+                'tagFilterMode': 'OR',
+                'useNameTags': False,
+                'tagCount': 5
             }
 
         self._settings = dict(self._default_settings)
@@ -839,6 +843,7 @@ class MHApplication(gui3d.Application, mh.Application):
         self.saveSettings(True)
         self.unloadPlugins()
         self.dumpMissingStrings()
+        self.files.load.unload()
 
     def onQuit(self, event):
         self.promptAndExit()

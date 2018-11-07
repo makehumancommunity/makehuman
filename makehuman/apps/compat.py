@@ -311,6 +311,20 @@ class MHM10Loader(object):
     def getAcceptedVersion(self):
         return (1, 0)
 
+
+class MHM11Loader(object):
+
+    def loadProperty(self, line_data, default_load_callback, strict):
+        if line_data[0] == 'tags':
+            line_data[0] = 'name'
+            default_load_callback(line_data)
+        else:
+            default_load_callback(line_data)
+
+    def getAcceptedVersion(self):
+        return(1, 1)
+
+
 def getMHMLoader(version):
     for loader in mhm_loaders:
         if all([(i < len(version) and v == version[i]) for i, v in enumerate(loader.getAcceptedVersion())]):
@@ -330,5 +344,5 @@ def loadMHM(version, lines, default_load_callback, strict=False):
         fprog.step()
 
 
-mhm_loaders = [ MHM10Loader() ]
+mhm_loaders = [ MHM10Loader(), MHM11Loader() ]
 
