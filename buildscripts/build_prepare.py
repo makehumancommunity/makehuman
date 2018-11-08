@@ -240,10 +240,6 @@ class MHAppExporter(object):
             _recursive_cp(self.sourceFile(f), self.targetFile(f))
         print("\n")
 
-        # Write VERSION file to export folder
-        print("Writing data/VERSION file to export folder\n")
-        self.writeVersionFile()
-
         # If RELEASE status or version-sub was set in config, update it in exported mh source file
         if (self.IS_RELEASE is not None) or (self.VERSION_SUB is not None) :
             f = open(self.targetFile('makehuman/makehuman.py'), 'r')
@@ -267,6 +263,10 @@ class MHAppExporter(object):
             f.write(''.join(lines))
             f.close()
             print('\n')
+
+        # Write VERSION file to export folder
+        print("Writing data/VERSION file to export folder\n")
+        self.writeVersionFile()
 
         # Re-arrange folders
         for f in os.listdir( self.targetFile() ):
@@ -431,6 +431,8 @@ class MHAppExporter(object):
         if not self.overrideGitCommit is None:
             mhv.currentShortCommit = self.overrideGitcommit
             mhv.currentLongCommit = self.overrideGitcommit
+
+        mhv.isRelease = (self.IS_RELEASE is not None) and self.IS_RELEASE
 
         mhv.writeVersionFile(versionFile)
 
