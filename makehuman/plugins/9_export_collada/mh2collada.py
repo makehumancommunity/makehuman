@@ -111,14 +111,14 @@ def exportCollada(filepath, config):
             fp = None
             log.error("Unable to open file for writing %s" % filepath)
 
-        date = time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.localtime())
+        date = time.strftime("%Y-%m-%dT%H:%M:%S+00:00", time.gmtime())
         # TODO revise to make this enum-like
         if config.yUpFaceZ or config.yUpFaceX:
             upvector = "Y_UP"
         else:
             upvector = "Z_UP"
         fp.write('<?xml version="1.0" encoding="utf-8"?>\n' +
-            '<COLLADA version="1.4.0" xmlns="http://www.collada.org/2005/11/COLLADASchema">\n' +
+            '<COLLADA version="1.4.1" xmlns="http://www.collada.org/2005/11/COLLADASchema">\n' +
             '  <asset>\n' +
             '    <contributor>\n' +
             '      <author>www.makehumancommunity.org</author>\n' +
