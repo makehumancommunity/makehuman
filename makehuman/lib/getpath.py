@@ -157,10 +157,19 @@ def getHomePath():
             else:
                 raise RuntimeError("Couldn't determine user folder")
 
-    # Unix-based
+    # Linux
+    elif sys.platform.startswith('linux'):
+        doc_folder = XDG_PATHS.get('DOCUMENTS', '')
+        if os.path.isdir(doc_folder):
+            __home_path = doc_folder
+        else:
+            __home_path = pathToUnicode(os.path.expanduser('~'))
+
+    # Darwin
     else:
-        __home_path = pathToUnicode(os.path.expanduser('~'))
-        return __home_path
+        __home_path = os.path.expanduser('~')
+
+    return __home_path
 
 def getPath(subPath = ""):
     """
@@ -180,11 +189,7 @@ def getPath(subPath = ""):
 
     # Unix/Linux
     else:
-        doc_folder = XDG_PATHS.get('DOCUMENTS', '')
-        if os.path.isdir(doc_folder) and not os.environ.get("MH_HOME_LOCATION", None):
-            path = os.path.join(doc_folder, "makehuman")
-        else:
-            path = os.path.join(path, "makehuman")
+        path = os.path.join(path, "makehuman")
 
     path = os.path.join(path, 'v1py3')
 
