@@ -6,17 +6,17 @@ MakeHuman python entry-point.
 
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Glynn Clements, Jonas Hauquier, Joel Palmius
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3 
 
-    This file is part of MakeHuman (www.makehuman.org).
+    This file is part of MakeHuman Community (www.makehumancommunity.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -52,7 +52,7 @@ meshVersion = "hm08"                    # Version identifier of the basemesh
 
 __author__ = "Jonas Hauquier, Joel Palmius, Glynn Clements, Thomas Larsson et al."
 __copyright__ = "Copyright 2017 Data Collection AB and listed authors"
-__credits__ = ["See http://www.makehuman.org/halloffame"]
+__credits__ = ["See http://www.makehumancommunity.org/halloffame"]
 __license__ = "AGPLv3"
 __maintainer__ = "Joel Palmius, Jonas Hauquier"
 __status__ = "Production" if release else "Development"
@@ -247,14 +247,14 @@ def parse_arguments():
 
 def getCopyrightMessage(short=False):
     if short:
-        return """MakeHuman Copyright (C) 2001-2017 http://www.makehuman.org
+        return """MakeHuman Copyright (C) 2001-2017 http://www.makehumancommunity.org
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it
 under certain conditions. For details use the option --license"""
 
     return """Makehuman is a completely free, open source, innovative and 
 professional software for the modelling of 3-Dimensional humanoid characters
-Copyright (C) 2001-2017  www.makehuman.org
+Copyright (C) 2001-2017  www.makehumancommunity.org
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -278,7 +278,7 @@ for exports.
 A human readable explanation of the license terms can be found via
 the MakeHuman home page:
 
-    http://www.makehuman.org
+    http://www.makehumancommunity.org
 
 Licenses for dependencies are included in the licenses folder.
 
@@ -491,7 +491,7 @@ def getCredits(richtext=False):
     else:
         result = ''
     return result + '''The list of people that made this software can be found at our website at 
-http://www.makehuman.org/halloffame'''
+http://www.makehumancommunity.org/halloffame'''
 
 def getSoftwareLicense(richtext=False):
     import getpath

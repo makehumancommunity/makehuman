@@ -10,7 +10,7 @@
 
 **Authors:**           Thomas Larsson, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 
@@ -120,7 +120,7 @@ def writeEffects(fp, rmesh):
     else:
         alpha = 1.0
     writeTexture(fp, 'diffuse', mat.diffuseTexture, mat.diffuseColor, mat.diffuseIntensity, s=1.0, a=alpha)
-    writeTexture(fp, 'transparency', mat.diffuseTexture, None, mat.transparencyMapIntensity)
+    writeTexture(fp, 'transparent', mat.diffuseTexture, None, mat.transparencyMapIntensity)
     writeTexture(fp, 'specular', mat.specularMapTexture, mat.specularColor, mat.specularMapIntensity, s=1.0, a=alpha)
     writeIntensity(fp, 'shininess', 256*mat.shininess)
     writeTexture(fp, 'normal', mat.normalMapTexture, None, mat.normalMapIntensity)
@@ -130,7 +130,6 @@ def writeEffects(fp, rmesh):
 
     fp.write(
         '          </phong>\n' +
-        '          <extra/>\n' +
         '        </technique>\n' +
         '        <extra>\n' +
         '          <technique profile="GOOGLEEARTH">\n' +
@@ -165,13 +164,16 @@ def writeIntensity(fp, tech, intensity):
 
 def writeTexture(fp, tech, filepath, color, intensity, s=1.0, a=1.0):
     fp.write('            <%s>\n' % tech)
-    if color:
-        fp.write('              <color>%.4f %.4f %.4f %.4f</color> \n' % (s*color.r, s*color.g, s*color.b, a))
-    #if intensity:
-    #    fp.write('              <float>%s</float>\n' % intensity)
     if filepath:
         texname = getTextureName(filepath)
         fp.write('              <texture texture="%s-sampler" texcoord="UVTex"/>\n' % texname)
+    elif color:
+        fp.write('              <color>%.4f %.4f %.4f %.4f</color> \n' % (s * color.r, s * color.g, s * color.b, a))
+    else:
+        fp.write('              <color>%.4f %.4f %.4f %.4f</color> \n' % (s * 1.0, s * 1.0, s * 1.0, a)) #White
+    #if intensity:
+    #    fp.write('              <float>%s</float>\n' % intensity)
+
     fp.write('            </%s>\n' % tech)
 
 #----------------------------------------------------------------------

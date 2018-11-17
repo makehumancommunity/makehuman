@@ -260,7 +260,8 @@ QTextEdit:focus
 QScrollBar:horizontal {
      border: 1px solid #222222;
      background: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0.0 #121212, stop: 0.2 #282828, stop: 1 #484848);
-     height: 7px;
+     min-height: 10px;
+     max-height: 11px;
      margin: 0px 16px 0 16px;
 }
 

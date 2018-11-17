@@ -10,7 +10,7 @@
 
 **Authors:**           Joel Palmius, Marc Flerackers, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 
@@ -194,13 +194,14 @@ class SettingsTaskView(gui3d.TaskView):
             else:
                 filePath = getConfigPath('makehuman.conf')
                 homePath = formatPath(getExistingDirectory(getHomePath()))
-                if sys.platform.startswith('darwin') or sys.platform.startswith('linux') and not os.path.isdir(getConfigPath('')):
-                    os.makedirs(getConfigPath(''))
-                if os.path.isdir(homePath) and os.path.isdir(getConfigPath('')):
-                    with io.open(filePath, 'w') as f:
-                        f.writelines(homePath + '\n')
-                self.homeButton.setLabel('Delete Config File')
-                gui3d.app.statusPersist('Home Folder Location: ' + homePath)
+                if homePath != '.':
+                    if sys.platform.startswith('darwin') or sys.platform.startswith('linux') and not os.path.isdir(getConfigPath('')):
+                        os.makedirs(getConfigPath(''))
+                    if os.path.isdir(homePath) and os.path.isdir(getConfigPath('')):
+                        with io.open(filePath, 'w') as f:
+                            f.writelines(homePath + '\n')
+                    self.homeButton.setLabel('Delete Config File')
+                    gui3d.app.statusPersist('Home Folder Location: ' + homePath)
 
         self.checkboxes.extend([self.realtimeUpdates, self.realtimeNormalUpdates,
             self.realtimeFitting, self.cameraAutoZoom, self.sliderImages,
