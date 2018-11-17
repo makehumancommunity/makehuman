@@ -174,11 +174,6 @@ def close_standard_streams():
     sys.stdout.close()
     sys.stderr.close()
 
-def copy_old_data(oldPath, newPath):
-    import shutil
-    if (oldPath != newPath):
-            shutil.copytree(oldPath, newPath, symlinks=True)
-
 def make_user_dir():
     """
     Make sure MakeHuman folder storing per-user files exists.
@@ -186,10 +181,7 @@ def make_user_dir():
     import getpath
     userDir = getpath.getPath()
     if not os.path.isdir(userDir):
-        if sys.platform.startswith('linux') and os.path.isdir(os.path.join(getpath.getHomePath(), 'makehuman/v1py3')):
-            copy_old_data(os.path.join(getpath.getHomePath(), 'makehuman/v1py3'), userDir)
-        else:
-            os.makedirs(userDir)
+        os.makedirs(userDir)
     userDataDir = getpath.getPath('data')
     if not os.path.isdir(userDataDir):
         os.makedirs(userDataDir)
