@@ -89,13 +89,13 @@ if __name__ == '__main__':
 
     if isLinux and XDG_DIRS:
 
-            print('Found XDG_DIRS:', ', '.join(XDG_DIRS), '\n')
+        print('Found XDG_DIRS:', ', '.join(XDG_DIRS), '\n')
 
-            max_len = max([len(d) for d in XDG_DIRS])
-            f_str = '{0:' + str(max_len) + 's}  --->   {1}'
+        max_len = max([len(d) for d in XDG_DIRS])
+        f_str = '{0:' + str(max_len) + 's}  --->   {1}'
 
-            for d in XDG_DIRS:
-                print(f_str.format(d, XDG_PATHS.get(d)))
+        for d in XDG_DIRS:
+            print(f_str.format(d, XDG_PATHS.get(d)))
 
     else:
 
