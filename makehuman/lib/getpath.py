@@ -42,45 +42,8 @@ import io
 
 __home_path = None
 
-
-def pathToUnicode(path):
-    """
-    Unicode representation of the filename.
-    Bytes is decoded with the codeset used by the filesystem of the operating
-    system.
-    Unicode representations of paths are fit for use in GUI.
-    If the path parameter is not a string or bytes, it will be returned unchanged.
-    """
-
-    if isinstance(path, bytes):
-        # Approach for bytes string type
-        try:
-            return str(path, 'utf-8')
-        except UnicodeDecodeError as e:
-            pass
-        try:
-            return str(path, sys.getfilesystemencoding())
-        except UnicodeDecodeError as e:
-            pass
-        try:
-            return str(path, sys.getdefaultencoding())
-        except UnicodeDecodeError as e:
-            pass
-        try:
-            import locale
-            return str(path, locale.getpreferredencoding())
-        except UnicodeDecodeError as e:
-            return ''
-    else:
-        return path
-
-
-def formatPath(path):
-    if path is None:
-        return None
-    return pathToUnicode(os.path.normpath(path).replace("\\", "/"))
-
-
+# Search for an optional configuration file, providing another location for the home folder.
+# The encoding of the file must be utf-8 and an absolute path is expected.
 
 if sys.platform.startswith('linux'):
 
@@ -101,12 +64,48 @@ else:
 configPath = ''
 
 if os.path.isfile(configFile):
-    with io.open(configFile, 'r') as f:
+    with io.open(configFile, 'r', encoding='utf-8') as f:
         configPath = f.readline().strip()
 
         if os.path.isdir(configPath):
-            __home_path = formatPath(configPath)
+            __home_path = os.path.normpath(configPath).replace("\\", "/")
 
+
+def pathToUnicode(path):
+    """
+    Unicode representation of the filename.
+    Bytes is decoded with the codeset used by the filesystem of the operating
+    system.
+    Unicode representations of paths are fit for use in GUI.
+    """
+
+    if isinstance(path, bytes):
+        # Approach for bytes string type
+        try:
+            return str(path, 'utf-8')
+        except UnicodeDecodeError:
+            pass
+        try:
+            return str(path, sys.getfilesystemencoding())
+        except UnicodeDecodeError:
+            pass
+        try:
+            return str(path, sys.getdefaultencoding())
+        except UnicodeDecodeError:
+            pass
+        try:
+            import locale
+            return str(path, locale.getpreferredencoding())
+        except UnicodeDecodeError:
+            return path
+    else:
+        return path
+
+
+def formatPath(path):
+    if path is None:
+        return None
+    return pathToUnicode(os.path.normpath(path).replace("\\", "/"))
 
 
 def canonicalPath(path):
@@ -133,8 +132,9 @@ def getHomePath():
     # Cache the home path
     global __home_path
 
+    # The environment variable MH_HOME_LOCATION will supersede any other settings for the home folder.
     alt_home_path = os.environ.get("MH_HOME_LOCATION", '')
-    if os.path.exists(alt_home_path):
+    if os.path.isdir(alt_home_path):
         __home_path = formatPath(alt_home_path)
             
     if __home_path is not None:
