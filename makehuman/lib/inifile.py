@@ -59,4 +59,4 @@ def parseINI(s, replace = []):
     return _s2u(result)
 
 def formatINI(d):
-    return json.dumps(d, indent=4, ensure_ascii=True) + '\n'
+    return json.dumps(d, indent=4, ensure_ascii=False) + '\n'
