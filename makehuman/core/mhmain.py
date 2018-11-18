@@ -238,7 +238,8 @@ class MHApplication(gui3d.Application, mh.Application):
                 'windowGeometry': '',
                 'tagFilterMode': 'OR',
                 'useNameTags': False,
-                'tagCount': 5
+                'tagCount': 5,
+                'makehumanTags': ['makehuman™']
             }
         else:
             self._default_settings = {
@@ -262,7 +263,8 @@ class MHApplication(gui3d.Application, mh.Application):
                 'windowGeometry': '',
                 'tagFilterMode': 'OR',
                 'useNameTags': False,
-                'tagCount': 5
+                'tagCount': 5,
+                'makehumanTags': ['makehuman™']
             }
 
         self._settings = dict(self._default_settings)

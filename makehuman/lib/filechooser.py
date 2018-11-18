@@ -276,7 +276,7 @@ class TagFilter(gui.GroupBox):
     def setTags(self, tags):
         self.clearAll()
         for tag in tags:
-            self.addTag(tag)
+            self.addTag(tag.lower())
 
     def addTag(self, tag):
         tag = tag.lower()
@@ -296,13 +296,28 @@ class TagFilter(gui.GroupBox):
         super(TagFilter, self).onShow(event)
         self.setTitle('Tag Filter [Mode : ' + self.convertModes(mh.getSetting('tagFilterMode')) + ']')
 
-    def showTags(self, selection=None):
-        if self.tagToggles:
-            for toggle in sorted(self.tagToggles, key=lambda t: t.tag):
-                self.addWidget(toggle)
-                if selection and toggle.tag in selection:
-                    toggle.setChecked(True)
-                    self.selectedTags.add(toggle.tag.lower())
+    def showTags(self, selection=None, stickyTags=None):
+        tagToggles = self.tagToggles[:]
+        if isinstance(stickyTags, str):
+            stickyTags = [stickyTags]
+        if isinstance(stickyTags, list):
+            stickyTags = [s.lower() for s in stickyTags if isinstance(s, str)]
+            tagsOrder = [None] * len(stickyTags)
+            for toggle in tagToggles[:]:
+                if toggle.tag in stickyTags:
+                    tagsOrder[stickyTags.index(toggle.tag)] = toggle
+                    tagToggles.remove(toggle)
+            for stickyToggle in tagsOrder:
+                if stickyToggle:
+                    self.addWidget(stickyToggle)
+                    if selection and stickyToggle.tag in selection:
+                        stickyToggle.setChecked(True)
+                        self.selectedTags.add(stickyToggle.tag.lower())
+        for toggle in sorted(tagToggles, key=lambda t: t.tag):
+            self.addWidget(toggle)
+            if selection and toggle.tag in selection:
+                toggle.setChecked(True)
+                self.selectedTags.add(toggle.tag.lower())
 
     def removeTags(self):
         if self.tagToggles:
@@ -479,7 +494,7 @@ class FileChooserBase(QtWidgets.QWidget, gui.Widget):
 
     switchFuncList = []
 
-    def __init__(self, path, extensions, sort = FileSort(), doNotRecurse = False):
+    def __init__(self, path, extensions, sort = FileSort(), doNotRecurse = False, stickyTags=None):
         super(FileChooserBase, self).__init__()
         gui.Widget.__init__(self)
 
@@ -498,6 +513,7 @@ class FileChooserBase(QtWidgets.QWidget, gui.Widget):
 
         self.setFileLoadHandler(FileHandler())
         self.tagFilter = None
+        self.stickyTags = stickyTags
 
         self._autoRefresh = True
         self.mutexExtensions = False
@@ -618,7 +634,7 @@ class FileChooserBase(QtWidgets.QWidget, gui.Widget):
 
     def showTags(self, selection=None):
         if self.tagFilter:
-            self.tagFilter.showTags(selection)
+            self.tagFilter.showTags(selection, self.stickyTags)
 
     def removeTags(self):
         if self.tagFilter:
@@ -904,7 +920,7 @@ class ListFileChooser(FileChooserBase):
                 self.setSelection(selections[0])
 
 class IconListFileChooser(ListFileChooser):
-    def __init__(self, path, extensions, previewExtensions='bmp', notFoundImage=None, clearImage=None, name="File chooser", multiSelect=False, verticalScrolling=False, sort=FileSort(), noneItem = False, doNotRecurse = False):
+    def __init__(self, path, extensions, previewExtensions='bmp', notFoundImage=None, clearImage=None, name="File chooser", multiSelect=False, verticalScrolling=False, sort=FileSort(), noneItem = False, doNotRecurse = False, stickyTags = None):
         super(IconListFileChooser, self).__init__(path, extensions, name, multiSelect, verticalScrolling, sort, noneItem, doNotRecurse)
         self.setPreviewExtensions(previewExtensions)
         self.notFoundImage = notFoundImage
@@ -913,6 +929,7 @@ class IconListFileChooser(ListFileChooser):
         #self.children.setIconSize(QtCore.QSize(50,50))
         self.setIconSize(50,50)
         self.children.setWordWrap(True)
+        self.stickyTags = stickyTags
 
     def addItem(self, file, label, preview, tags=[], pos = None):
         item = super(IconListFileChooser, self).addItem(file, label, preview, tags, pos)
