@@ -269,24 +269,22 @@ class FileSortRadioButton(gui.RadioButton):
 class TagFilter(gui.GroupBox):
     def __init__(self):
         super(TagFilter, self).__init__('Tag Filter [Mode : ' + self.convertModes(mh.getSetting('tagFilterMode')) + ']')
-        self.tags = set()
+        self.tags = {}
         self.selectedTags = set()
-        self.tagToggles = []
 
     def setTags(self, tags):
         self.clearAll()
         for tag in tags:
-            self.addTag(tag.lower())
+            self.addTag(tag)
 
     def addTag(self, tag):
         tag = tag.lower()
         if tag in self.tags:
             return
 
-        self.tags.add(tag)
         toggle = gui.CheckBox(tag.title())
         toggle.tag = tag
-        self.tagToggles.append(toggle)
+        self.tags[tag] = toggle
 
         @toggle.mhEvent
         def onClicked(event):
@@ -297,32 +295,31 @@ class TagFilter(gui.GroupBox):
         self.setTitle('Tag Filter [Mode : ' + self.convertModes(mh.getSetting('tagFilterMode')) + ']')
 
     def showTags(self, selection=None, stickyTags=None):
-        tagToggles = self.tagToggles[:]
+
         if isinstance(stickyTags, str):
             stickyTags = [stickyTags]
+
         if isinstance(stickyTags, list):
             stickyTags = [s.lower() for s in stickyTags if isinstance(s, str)]
-            tagsOrder = [None] * len(stickyTags)
-            for toggle in tagToggles[:]:
-                if toggle.tag in stickyTags:
-                    tagsOrder[stickyTags.index(toggle.tag)] = toggle
-                    tagToggles.remove(toggle)
-            for stickyToggle in tagsOrder:
-                if stickyToggle:
-                    self.addWidget(stickyToggle)
-                    if selection and stickyToggle.tag in selection:
-                        stickyToggle.setChecked(True)
-                        self.selectedTags.add(stickyToggle.tag.lower())
-        for toggle in sorted(tagToggles, key=lambda t: t.tag):
-            self.addWidget(toggle)
-            if selection and toggle.tag in selection:
-                toggle.setChecked(True)
-                self.selectedTags.add(toggle.tag.lower())
+            for tag in stickyTags:
+                toggle = self.tags.get(tag)
+                if toggle:
+                    self.addWidget(toggle)
+                    if selection and tag in selection:
+                        toggle.setChecked(True)
+                        self.selectedTags.add(tag)
+
+        if stickyTags is None: stickyTags = set()
+
+        for tag in sorted(set(self.tags.keys()).difference(stickyTags)):
+            self.addWidget(self.tags.get(tag))
+            if selection and tag in selection:
+                self.tags.get(tag).setChecked(True)
+                self.selectedTags.add(tag)
 
     def removeTags(self):
-        if self.tagToggles:
-            for toggle in self.tagToggles:
-                self.removeWidget(toggle)
+        for toggle in self.tags.values():
+            self.removeWidget(toggle)
 
     def addTags(self, tags):
         for tag in tags:
@@ -341,10 +338,9 @@ class TagFilter(gui.GroupBox):
         self.callEvent('onTagsChanged', self.selectedTags)
 
     def clearAll(self):
-        for tggl in self.tagToggles:
+        for tggl in self.tags.values():
             tggl.hide()
             tggl.destroy()
-        self.tagToggles = []
         self.selectedTags.clear()
         self.tags.clear()
 
@@ -352,7 +348,7 @@ class TagFilter(gui.GroupBox):
         return self.selectedTags
 
     def getTags(self):
-        return self.tags
+        return set(self.tags.keys())
 
     def filterActive(self):
         return len(self.getSelectedTags()) > 0
