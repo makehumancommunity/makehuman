@@ -242,6 +242,12 @@ class MHApplication(gui3d.Application, mh.Application):
                 'makehumanTags': ['makehuman™']
             }
         else:
+
+            # For development:
+            # Update _versionSentinel, when changing any default value, to invalidate settings.ini!
+            # Recommended value is the md5 hexdigest of time.strftime("%a, %b %d %Y %H:%M:%S +0000", time.gmtime()).
+            # To generate a new value you can run buildscripts/versionsentinel.py.
+
             self._default_settings = {
                 'realtimeUpdates': True,
                 'realtimeFitting': True,
@@ -264,7 +270,8 @@ class MHApplication(gui3d.Application, mh.Application):
                 'tagFilterMode': 'OR',
                 'useNameTags': False,
                 'tagCount': 5,
-                'makehumanTags': ['makehuman™']
+                'makehumanTags': ['makehuman™'],
+                '_versionSentinel': 'A3A03B96EE01B885799828A03E33FEB0' # GM Time was: Tue, Nov 20 2018 15:10:51 +0000
             }
 
         self._settings = dict(self._default_settings)
@@ -936,7 +943,12 @@ class MHApplication(gui3d.Application, mh.Application):
             if f:
                 settings = mh.parseINI(f.read())
 
-                if 'version' in settings and settings['version'] == mh.getVersionDigitsStr():
+                if not mh.isRelease():
+                    if self._default_settings.get('_versionSentinel') != settings.get('_versionSentinel'):
+                        log.warning('Default settings were changed, invalidating settings.ini')
+                        return
+
+                if settings.get('version') == mh.getVersionDigitsStr():
                     # Only load settings for this specific version
                     del settings['version']
                     for setting_name, value in settings.items():
