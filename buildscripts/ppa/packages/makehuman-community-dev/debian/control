@@ -47,7 +47,7 @@ Description: Raw obj files for MakeHuman bodyparts.
 
 Package: makehuman-community-proxymeshes-dev
 Architecture: all
-Depends: ${misc:Depends}, makehuman
+Depends: ${misc:Depends}, makehuman-community
 Conflicts: makehuman-data
 Description: Raw obj and proxy files for MakeHuman proxies.
  These are the unprocessed files for MakeHuman proxies. It is
@@ -57,7 +57,7 @@ Description: Raw obj and proxy files for MakeHuman proxies.
 
 Package: makehuman-community-3dobjs-dev
 Architecture: all
-Depends: ${misc:Depends}, makehuman
+Depends: ${misc:Depends}, makehuman-community
 Conflicts: makehuman-data
 Description: Raw files for the base mesh.
  These are the unprocessed files for MakeHuman base mesh. It is
