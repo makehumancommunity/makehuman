@@ -8,7 +8,7 @@ Homepage: http://www.makehumancommunity.org
 
 Package: makehuman-community-blendertools
 Architecture: all
-Recommends: blender
+Suggests: blender
 Depends: ${misc:Depends}
 Description: MakeHuman integration scripts for Blender.
  This package suggests installing Blender. Regardless, all scripts are
