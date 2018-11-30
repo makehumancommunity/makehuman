@@ -50,10 +50,7 @@ from .glsettings import GLSettings
 
 import files3d
 import mh
-
-gg_mouse_pos = None
-g_mouse_pos = None
-
+import random
 
 class Canvas(QOpenGLWidget):
 
@@ -75,10 +72,7 @@ class Canvas(QOpenGLWidget):
 
         self.lastPos = QPoint()
 
-        self.trolltechGreen = QColor.fromCmykF(0.40, 0.0, 1.0, 0.0)
-        self.trolltechPurple = QColor.fromCmykF(0.39, 0.39, 0.0, 0.0)
-
-        self.testCubeMesh = files3d.loadMesh(mh.getSysDataPath("3dobjs/TestCubeQuads.obj"))
+        self.testCubeMesh = files3d.loadMesh(mh.getSysDataPath("3dobjs/base.obj"))
 
         G.app.TESTCUBE = self.testCubeMesh
 
@@ -170,18 +164,12 @@ class Canvas(QOpenGLWidget):
         self.gl.glNewList(genList, self.gl.GL_COMPILE)
         self.gl.glBegin(self.gl.GL_QUADS)
 
-        r = 1.0
-        g = 0.0
-        b = 0.0
-
-        scale = 0.1
+        scale = 0.05
 
         for face in self.testCubeMesh.fvert:
 
-            r = r - 0.1
-            b = b + 0.1
-
-            self.gl.glColor3f(r, g, b)
+            hue = random.uniform(0.0, 1.0)
+            self.gl.glColor3f(hue, hue, hue)
 
             for vertexIndex in face:
                 x = self.testCubeMesh.coord[vertexIndex][0] * scale
