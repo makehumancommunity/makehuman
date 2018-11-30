@@ -163,7 +163,13 @@ class MaterialTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         # Path where proxy file is located
         if proxy:
-            paths = [os.path.dirname(proxy.file)] + paths
+            dirname = os.path.abspath(os.path.dirname(proxy.file))
+            parent = os.path.abspath(os.path.join(dirname, '..'))
+            asset_basename = os.path.basename(dirname)
+            asset_parentbase = os.path.basename(parent)
+            user_parent_base = getpath.getDataPath(asset_parentbase)
+            user_asset_final = os.path.abspath(os.path.join(user_parent_base,asset_basename))
+            paths = [dirname, user_asset_final] + paths
 
         return paths
 
