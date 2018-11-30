@@ -62,15 +62,39 @@ from shader import Shader
 import profiler
 import sys
 
+import inspect
+
 g_primitiveMap = [GL_POINTS, GL_LINES, GL_TRIANGLES, GL_QUADS]
 
 TEX_NOT_FOUND = False
 MAX_TEXTURE_UNITS = 0
 
+def do_not_call_glmodule():
+    print("\n\n\nDO NOT CALL METHODS IN GLMODULE, ONLY USE REFACTORED METHODS")
+
+    info = dict()
+
+    stack = inspect.currentframe().f_back
+    info["line_number"] = str(stack.f_lineno)
+    info["caller_name"] = stack.f_globals["__name__"]
+    info["file_name"] = stack.f_globals["__file__"]
+    info["caller_method"] = inspect.stack()[1][3]
+    
+    print("THE METHOD {}.{}():{}".format(info["caller_name"], info["caller_method"], info["line_number"]))
+
+    stack = inspect.currentframe().f_back.f_back
+    info["line_number"] = str(stack.f_lineno)
+    info["caller_name"] = stack.f_globals["__name__"]
+    info["file_name"] = stack.f_globals["__file__"]
+    info["caller_method"] = inspect.stack()[1][3]
+    
+    print("WAS CALLED FROM {}.{}():{}".format(info["caller_name"], info["caller_method"], info["line_number"]))
+
+    sys.exit(1)
+
 def grabScreen(x, y, width, height, filename = None, productionRender=False):
 
-    print("DO NOT CALL METHODS IN GLMODULE, ONLY USE REFACTORED METHODS")
-    sys.exit(1)
+    do_not_call_glmodule()
 
     if width <= 0 or height <= 0:
         raise RuntimeError("width or height is 0")
@@ -125,8 +149,7 @@ pickingBufferDirty = True
 
 def updatePickingBuffer():
 
-    print("DO NOT CALL METHODS IN GLMODULE, ONLY USE REFACTORED METHODS")
-    sys.exit(1)
+    do_not_call_glmodule()
 
     width = G.windowWidth
     height = G.windowHeight
@@ -369,8 +392,7 @@ def OnInit():
 
 def OnExit():
 
-    print("DO NOT CALL METHODS IN GLMODULE, ONLY USE REFACTORED METHODS")
-    sys.exit(1)
+    do_not_call_glmodule()
 
     # Deactivate the pointers to vertex and normal array
     glDisableClientState(GL_VERTEX_ARRAY)
@@ -385,8 +407,7 @@ def setSceneLighting(scene):
     """
     # Set global scene ambient
 
-    print("DO NOT CALL METHODS IN GLMODULE, ONLY USE REFACTORED METHODS")
-    sys.exit(1)
+    do_not_call_glmodule()
 
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, A(scene.environment.ambience, 1.0))
 
@@ -431,8 +452,7 @@ def transformObject(obj):
 
 def drawMesh(obj):
 
-    print("DO NOT CALL METHODS IN GLMODULE, ONLY USE REFACTORED METHODS")
-    sys.exit(1)
+    do_not_call_glmodule()
 
     if not obj.visibility:
         return
@@ -652,8 +672,7 @@ def drawMesh(obj):
 
 def pickMesh(obj):
 
-    print("DO NOT CALL METHODS IN GLMODULE, ONLY USE REFACTORED METHODS")
-    sys.exit(1)
+    do_not_call_glmodule()
 
     if not obj.visibility:
         return
@@ -724,8 +743,7 @@ def renderSkin(dst, vertsPerPrimitive, verts, index = None, objectMatrix = None,
                texture = None, UVs = None, textureMatrix = None,
                color = None, clearColor = None):
 
-    print("DO NOT CALL METHODS IN GLMODULE, ONLY USE REFACTORED METHODS")
-    sys.exit(1)
+    do_not_call_glmodule()
 
     if isinstance(dst, Texture):
         glBindTexture(GL_TEXTURE_2D, dst.textureId)
