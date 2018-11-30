@@ -4,17 +4,17 @@
 """
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Marc Flerackers
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 
-    This file is part of MakeHuman (www.makehuman.org).
+    This file is part of MakeHuman (www.makehumancommunity.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -73,7 +73,7 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
         self.uk = self.braBox.addWidget(gui.TextView('UK: '))
         '''
 
-    def addSlider(self, sliderCategory, slider, enabledCondition):
+    def addSlider(self, sliderCategory, slider, enabledCondition=None):
         super(MeasureTaskView, self).addSlider(sliderCategory, slider, enabledCondition)
 
         slider.valueConverter = MeasurementValueConverter(self, slider.modifier)
@@ -132,10 +132,11 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
 
         self.syncGUIStats()
         self.updateMeshes()
-        human = G.app.selectedHuman
+        #human = G.app.selectedHuman
 
     def onHide(self, event):
-        human = G.app.selectedHuman
+        #human = G.app.selectedHuman
+        self.setStatus('')
 
     def onSliderFocus(self, slider):
         self.lastActive = slider
@@ -167,6 +168,7 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
         if G.app.currentTask == self:
             self.updateMeshes()
             self.syncSliders()
+            self.syncGUIStats()
 
     def onHumanTranslated(self, event):
         self.measureObject.setPosition(G.app.selectedHuman.getPosition())
@@ -182,22 +184,33 @@ class MeasureTaskView(guimodifier.ModifierTaskView):
 
     def syncGUIStats(self):
         self.syncStatistics()
+        self.showMacroStatus()
         #self.syncBraSizes()
 
     def syncStatistics(self):
+
+        def getMeasureString(val):
+            if G.app.getSetting('units') == 'metric':
+                result = '%.2f cm' % val
+            else:
+                result = '%.2f in' % val
+            return result
+
         human = G.app.selectedHuman
 
-        height = human.getHeightCm()
-        if G.app.getSetting('units') == 'metric':
-            height = '%.2f cm' % height
-        else:
-            height = '%.2f in' % (height * 0.393700787)
+        meshHight = human.getHeightCm()
+        if G.app.getSetting('units') == 'imperial':
+            meshHight *= 0.393700787
+        height = getMeasureString(meshHight)
+        chest = getMeasureString(self.getMeasure('measure/measure-bust-circ-decr|incr'))
+        waist = getMeasureString(self.getMeasure('measure/measure-waist-circ-decr|incr'))
+        hips = getMeasureString(self.getMeasure('measure/measure-hips-circ-decr|incr'))
 
         lang = language.language
         self.height.setTextFormat(lang.getLanguageString('Height') + ': %s', height)
-        self.chest.setTextFormat(lang.getLanguageString('Chest') + ': %s', self.getMeasure('measure/measure-bust-circ-decr|incr'))
-        self.waist.setTextFormat(lang.getLanguageString('Waist') + ': %s', self.getMeasure('measure/measure-waist-circ-decr|incr'))
-        self.hips.setTextFormat(lang.getLanguageString('Hips') + ': %s', self.getMeasure('measure/measure-hips-circ-decr|incr'))
+        self.chest.setTextFormat(lang.getLanguageString('Chest') + ': %s', chest)
+        self.waist.setTextFormat(lang.getLanguageString('Waist') + ': %s', waist)
+        self.hips.setTextFormat(lang.getLanguageString('Hips') + ': %s', hips)
 
     def syncBraSizes(self):
         # TODO unused

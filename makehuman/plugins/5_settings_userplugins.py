@@ -1,20 +1,20 @@
-#!/usr/bin/python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Joel Palmius, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 
-    This file is part of MakeHuman (www.makehuman.org).
+    This file is part of MakeHuman (www.makehumancommunity.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -39,7 +39,6 @@ TODO
 import gui3d
 import gui
 import os
-import glob
 import zipfile
 import log
 import getpath
@@ -47,18 +46,19 @@ import shutil
 
 class UserPluginCheckBox(gui.CheckBox):
 
-    def __init__(self, module):
-        super(UserPluginCheckBox, self).__init__(module, module in gui3d.app.getSetting('activeUserPlugins'))
-        self.module = module
+    def __init__(self, name, path=''):
+        super(UserPluginCheckBox, self).__init__(name, name in gui3d.app.getSetting('activeUserPlugins'))
+        self.name = name
+        self.path = path
 
     def onClicked(self, event):
         if self.selected:
             includes = gui3d.app.getSetting('activeUserPlugins')
-            includes.append(self.module)
+            includes.append(self.name)
             gui3d.app.setSetting('activeUserPlugins', includes)
         else:
             includes = gui3d.app.getSetting('activeUserPlugins')
-            includes.remove(self.module)
+            includes.remove(self.name)
             gui3d.app.setSetting('activeUserPlugins', includes)
 
         gui3d.app.saveSettings()
@@ -69,146 +69,159 @@ class UserPluginsTaskView(gui3d.TaskView):
 
         info_msg = "Install new plugins by either copying to the user plugins folder or using the built in installer.\n"\
                    "The installer only handles Python script files and plugin packages in plain zip file format."\
-                   "\n\nTo (de-)activate a plugin it must be (un-)checked in the list. Changes only come into effect" \
-                   " after MakeHuman is restarted."
+                   "\n\nTo activate a plugin it must be checked in the list. Then click the \"Activate\"-Button or " \
+                   "restart MakeHuman.\nTo deactivate a plugin uncheck it in the list and restart MakeHuman."
 
         gui3d.TaskView.__init__(self, category, 'User Plugins')
 
-        userPlugins = self.getUserPlugins()
+        self.userPlugins = getUserPlugins()
         activePlugins = gui3d.app.getSetting('activeUserPlugins')
 
         for plugin in activePlugins:
-            if plugin not in userPlugins:
+            if plugin not in [k for k, _ in self.userPlugins]:
                 activePlugins.remove(plugin)
 
         gui3d.app.setSetting('activeUserPlugins', activePlugins)
         gui3d.app.saveSettings()
 
-        self.home = os.path.expanduser('~')
+        self.home = getpath.getHomePath()
 
-        self.scroll = self.addTopWidget(gui.VScrollArea())
+        scroll = self.addTopWidget(gui.VScrollArea())
         self.userPluginBox = gui.GroupBox('User Plugins')
         self.userPluginBox.setSizePolicy(gui.SizePolicy.MinimumExpanding, gui.SizePolicy.Preferred)
-        self.scroll.setWidget(self.userPluginBox)
+        scroll.setWidget(self.userPluginBox)
 
-        for i, plugin in enumerate(userPlugins):
-            self.userPluginBox.addWidget(UserPluginCheckBox(plugin), row=i, alignment=gui.QtCore.Qt.AlignTop)
+        self.updatePluginList()
 
-        self.installWidget = gui.QtWidgets.QWidget()
+        installWidget = gui.QtWidgets.QWidget()
         installWidgetLayout = gui.QtWidgets.QVBoxLayout()
-        self.installWidget.setLayout(installWidgetLayout)
-        self.addLeftWidget(self.installWidget)
+        installWidget.setLayout(installWidgetLayout)
+        self.addLeftWidget(installWidget)
 
-        self.installBox = gui.GroupBox('')
+        installBox = gui.GroupBox('')
         self.installPyButton = gui.Button('Install Plugin File')
-        self.installBox.addWidget(self.installPyButton)
+        installBox.addWidget(self.installPyButton)
         self.installZipButton = gui.Button('Install Zipped Plugin')
-        self.installBox.addWidget(self.installZipButton)
-        installWidgetLayout.addWidget(self.installBox)
+        installBox.addWidget(self.installZipButton)
+        installWidgetLayout.addWidget(installBox)
 
-        self.reloadBox = gui.GroupBox('')
+        actionsBox = gui.GroupBox('')
         self.reloadButton = gui.Button('Reload Plugins Folder')
-        self.reloadBox.addWidget(self.reloadButton)
-        installWidgetLayout.addWidget(self.reloadBox)
+        actionsBox.addWidget(self.reloadButton)
+        self.activateButton = gui.Button('Activate Plugins')
+        actionsBox.addWidget(self.activateButton)
+        installWidgetLayout.addWidget(actionsBox)
 
-        self.infoBox = gui.GroupBox('Info')
-        self.infoText = gui.TextView(info_msg)
-        self.infoText.setWordWrap(True)
-        self.infoText.setSizePolicy(gui.SizePolicy.Ignored, gui.SizePolicy.MinimumExpanding)
-        self.infoBox.addWidget(self.infoText)
-        installWidgetLayout.addWidget(self.infoBox)
+        infoBox = gui.GroupBox('Info')
+        infoText = gui.TextView(info_msg)
+        infoText.setWordWrap(True)
+        infoText.setSizePolicy(gui.SizePolicy.Ignored, gui.SizePolicy.MinimumExpanding)
+        infoBox.addWidget(infoText)
+        installWidgetLayout.addWidget(infoBox)
         installWidgetLayout.addStretch(1)
 
         @self.installZipButton.mhEvent
         def onClicked(event):
 
             filename = getpath.pathToUnicode(gui.QtWidgets.QFileDialog.getOpenFileName(gui3d.app.mainwin, directory=self.home,
-                                             filter='Zip files ( *.zip );; All files ( *.* )'))
+                                             filter='Zip files ( *.zip );; All files ( *.* )')[0])
 
             dest_path = getpath.getPath('plugins')
             if os.path.isfile(filename):
-                result = self.decompress(filename, dest_path)
-                if result == 1:
-                    gui3d.app.prompt('Error', 'Not a zip file {0:s}'.format(filename), 'OK')
+                result = decompress(filename, dest_path)
+                if result == 0:
+                    self.updatePluginList()
+                    gui3d.app.prompt('Info', 'The plugin copied successfully. To activate, check '
+                                     'the plugin in the list and press the "Activate"-Button or restart MakeHuman.',
+                                     'OK', helpId='installPluginHelp')
                 elif result == 3:
                     gui3d.app.prompt('Warning', 'Potentially dangerous zip file, containing files with unsuitable path. '
                                                 'Inspect/fix the zip file before usage!', 'OK')
-                elif result == -1:
+                elif result == 4:
                     gui3d.app.prompt('Error', 'Zip file {0:s} contains exiting files.'.format(filename), 'OK')
-                elif result == 0:
-                    gui3d.app.prompt('Info', 'The plugin copied successfully. To activate check '
-                                     'the plugin in the list and restart MakeHuman.', 'OK', helpId='installPluginHelp' )
-                    for child in self.userPluginBox.children:
-                        self.userPluginBox.removeWidget(child)
-                    updatePlugins = self.getUserPlugins()
-                    for i, plugin in enumerate(updatePlugins):
-                        self.userPluginBox.addWidget(UserPluginCheckBox(plugin), row = i, alignment=gui.QtCore.Qt.AlignTop)
+                elif result == 1:
+                    gui3d.app.prompt('Error', 'Not a zip file {0:s}'.format(filename), 'OK')
             self.home = os.path.dirname(filename)
 
         @self.installPyButton.mhEvent
         def onClicked(event):
             filename = getpath.pathToUnicode(gui.QtWidgets.QFileDialog.getOpenFileName(gui3d.app.mainwin, directory=self.home,
-                                             filter='Python files ( *.py );; All files ( *.* )'))
+                                             filter='Python files ( *.py );; All files ( *.* )')[0])
             if os.path.isfile(filename) and os.path.splitext(filename)[1] == '.py':
                 try:
                     shutil.copy2(filename, getpath.getPath('plugins'))
                 except OSError as e:
                     gui3d.app.prompt('Error', 'Failed to copy {0:s} to user plugins folder'.format(filename), 'OK')
-                for child in self.userPluginBox.children:
-                    self.userPluginBox.removeWidget(child)
-                updatePlugins = self.getUserPlugins()
-                for i, plugin in enumerate(updatePlugins):
-                    self.userPluginBox.addWidget(UserPluginCheckBox(plugin), row=i, alignment=gui.QtCore.Qt.AlignTop)
-                gui3d.app.prompt('Info', 'The plugin copied successfully. To activate check '
-                                 'the plugin in the list and restart MakeHuman.', 'OK', helpId='installPluginHelp')
+                self.updatePluginList()
+                gui3d.app.prompt('Info', 'The plugin copied successfully. To activate, check '
+                                 'the plugin in the list and press the "Activate"-Button or restart MakeHuman.',
+                                 'OK', helpId='installPluginHelp')
             self.home = os.path.dirname(filename)
 
         @self.reloadButton.mhEvent
         def onClicked(event):
+            self.updatePluginList()
+
+        @self.activateButton.mhEvent
+        def onClicked(event):
             for child in self.userPluginBox.children:
-                self.userPluginBox.removeWidget(child)
-            updatePlugins = self.getUserPlugins()
-            for i, plugin in enumerate(updatePlugins):
-                self.userPluginBox.addWidget(UserPluginCheckBox(plugin), row=i, alignment=gui.QtCore.Qt.AlignTop)
+                if child.selected:
+                    if not child.module in gui3d.app.modules:
+                        if not gui3d.app.loadPlugin(name=child.module, location=child.path):
+                            gui3d.app.prompt('Error', 'Cannot load module {0:s}\nCheck the log files'.format(child.module), 'OK')
+                    else:
+                        log.message('Module %s already exists and will not be imported a second time.', child.module)
 
-    def getUserPlugins(self):
-        pluginList = []
+    def updatePluginList(self):
+        for child in self.userPluginBox.children:
+            self.userPluginBox.removeWidget(child)
+        updatePlugins = getUserPlugins()
+        for i, (name, location) in enumerate(sorted(updatePlugins, key=lambda plugin: plugin[0])):
+            self.userPluginBox.addWidget(UserPluginCheckBox(name, location), row=i, alignment=gui.QtCore.Qt.AlignTop)
 
-        userPlugins = glob.glob(getpath.getPath(os.path.join("plugins/", '[!_]*.py')))
-        if userPlugins:
-            for userPlugin in userPlugins:
-                pluginList.append(os.path.splitext(os.path.basename(userPlugin))[0])
 
-        for fname in os.listdir(getpath.getPath("plugins/")):
-            if fname[0] != "_":
-                    folder = os.path.join("plugins", fname)
-                    if os.path.isdir(getpath.getPath(folder)) and ("__init__.py" in os.listdir(getpath.getPath(folder))):
-                        pluginList.append(fname)
+def getUserPlugins():
 
-        pluginList.sort()
-        return pluginList
+    pluginsToLoad = []
+    user_path = getpath.getPath('plugins')
 
-    def decompress(self, filename, dest_path):
-        if not zipfile.is_zipfile(filename):
-            log.message('Not a zip file: {0}'.format(filename))
-            return 1
-        if not os.path.isdir(dest_path):
-            log.message('Not a directory: {0}'.format(dest_path))
-            return 2
-        with zipfile.ZipFile(filename) as zf:
-            for f in zf.infolist():
-                if os.path.isabs(os.path.split(f.filename)[0]) or '..' in os.path.split(f.filename)[0]:
-                    log.warning('Potentially dangerous zip file, '
-                                'containing files with unsuitable path: {0}  {1}'.format(filename, f.filename))
-                    return 3
-                if os.path.exists(os.path.join(dest_path, f.filename)):
-                    log.warning('Zip file contains existing file: {0}  {1}'.format(filename, f.filename))
-                    return -1
-            try:
-                zf.extractall(dest_path)
-            except:
-                pass
-        return 0
+    for file in os.listdir(user_path):
+
+        location = os.path.join(user_path, file)
+
+        if os.path.isdir(location) and not file.startswith('_'):
+            pLocation = os.path.join(location, '__init__.py')
+            if os.path.isfile(pLocation):
+                pluginsToLoad.append((file, pLocation))
+
+        elif os.path.isfile(location) and file.endswith('.py') and not file.startswith('_'):
+            name = os.path.splitext(file)[0]
+            pluginsToLoad.append((name, location))
+
+    return pluginsToLoad
+
+def decompress(filename, dest_path):
+    if not zipfile.is_zipfile(filename):
+        log.message('Not a zip file: {0}'.format(filename))
+        return 1
+    if not os.path.isdir(dest_path):
+        log.message('Not a directory: {0}'.format(dest_path))
+        return 2
+    with zipfile.ZipFile(filename) as zf:
+        for f in zf.infolist():
+            if os.path.isabs(os.path.split(f.filename)[0]) or '..' in os.path.split(f.filename)[0]:
+                log.warning('Potentially dangerous zip file, '
+                            'containing files with unsuitable path: {0}  {1}'.format(filename, f.filename))
+                return 3
+            if os.path.exists(os.path.join(dest_path, f.filename)):
+                log.warning('Zip file contains existing file: {0}  {1}'.format(filename, f.filename))
+                return 4
+        try:
+            zf.extractall(dest_path)
+        except:
+            pass
+    return 0
+
 
 def load(app):
     category = app.getCategory('Settings')

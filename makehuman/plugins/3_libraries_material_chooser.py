@@ -4,17 +4,17 @@
 """
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Jonas Hauquier, Marc Flerackers
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 
-    This file is part of MakeHuman (www.makehuman.org).
+    This file is part of MakeHuman (www.makehumancommunity.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -76,7 +76,8 @@ class MaterialTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         self.materials = None
 
-        self.filechooser = self.addRightWidget(fc.IconListFileChooser(self.materials, 'mhmat', ['thumb', 'png'], mh.getSysDataPath('skins/notfound.thumb'), name='Material'))
+        self.filechooser = self.addRightWidget(fc.IconListFileChooser(self.materials, 'mhmat', ['thumb', 'png'],
+          mh.getSysDataPath('skins/notfound.thumb'), name='Material', stickyTags=gui3d.app.getSetting('makehumanTags')))
         self.filechooser.setIconSize(50,50)
         self.filechooser.enableAutoRefresh(False)
         #self.filechooser.setFileLoadHandler(fc.MhmatFileLoader())
@@ -162,7 +163,13 @@ class MaterialTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
         # Path where proxy file is located
         if proxy:
-            paths = [os.path.dirname(proxy.file)] + paths
+            dirname = os.path.abspath(os.path.dirname(proxy.file))
+            parent = os.path.abspath(os.path.join(dirname, '..'))
+            asset_basename = os.path.basename(dirname)
+            asset_parentbase = os.path.basename(parent)
+            user_parent_base = getpath.getDataPath(asset_parentbase)
+            user_asset_final = os.path.abspath(os.path.join(user_parent_base,asset_basename))
+            paths = [dirname, user_asset_final] + paths
 
         return paths
 

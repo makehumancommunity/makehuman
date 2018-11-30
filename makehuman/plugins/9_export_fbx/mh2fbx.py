@@ -1,20 +1,20 @@
-#!/usr/bin/env python3
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
 """
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Thomas Larsson, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 
-    This file is part of MakeHuman (www.makehuman.org).
+    This file is part of MakeHuman Community (www.makehumancommunity.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -37,7 +37,7 @@ Fbx exporter
 """
 
 import os.path
-import io
+import codecs
 
 from core import G
 import log
@@ -50,6 +50,9 @@ from . import fbx_deformer
 from . import fbx_material
 from . import fbx_anim
 
+from .encode_bin import genTree
+
+DEBUGWRITE=False
 
 def exportFbx(filepath, config):
     G.app.progress(0, text="Preparing")
@@ -58,6 +61,9 @@ def exportFbx(filepath, config):
     config.setupTexFolder(filepath)
 
     log.message("Write FBX file %s" % filepath)
+
+    if hasattr(G.app, "mhapi") and DEBUGWRITE:
+        G.app.mhapi.utility.resetDebugWriter("FBX")
 
     filename = os.path.basename(filepath)
     name = config.goodName(os.path.splitext(filename)[0])
@@ -99,7 +105,7 @@ def exportFbx(filepath, config):
         root = fbx_binary.elem_empty(None, b"")
         fp = root
     else:
-        fp = io.open(filepath, "w", encoding="utf-8")
+        fp = codecs.open(filepath, "w", encoding="utf-8")
 
     fbx_utils.resetId()  # Reset global ID generator
     fbx_utils.setAbsolutePath(filepath)  # TODO fix this
@@ -131,22 +137,30 @@ def exportFbx(filepath, config):
 
     nVertexGroups, nShapes = fbx_deformer.getObjectCounts(meshes)
 
+    fbx_utils.debugWrite(genTree(fp))
+
     # 2) FBX template definitions
     # GlobalSettings template definition
     fbx_header.writeObjectDefs(fp, meshes, skel, action, config)
+    fbx_utils.debugWrite(genTree(fp))
     # Skeleton template definition
     fbx_skeleton.writeObjectDefs(fp, meshes, skel, config)
+    fbx_utils.debugWrite(genTree(fp))
     # Material template definition
     if config.useMaterials:
         fbx_material.writeObjectDefs(fp, meshes, config)
     # Objects template definition
     fbx_mesh.writeObjectDefs(fp, meshes, nShapes, config)
+    fbx_utils.debugWrite(genTree(fp))
     # Skin deformer template definition
     fbx_deformer.writeObjectDefs(fp, meshes, skel, config)
+    fbx_utils.debugWrite(genTree(fp))
     # Animation template definition
     if useAnim:
         fbx_anim.writeObjectDefs(fp, action, config)
     if not config.binary: fp.write('}\n\n')
+
+    fbx_utils.debugWrite(genTree(fp))
 
     # 3) FBX object properties (the actual data)
     fbx_header.writeObjectProps(fp, config)
@@ -160,6 +174,8 @@ def exportFbx(filepath, config):
         # TODO support binary FBX animations export
         fbx_anim.writeObjectProps(fp, action, skel, config)
     if not config.binary: fp.write('}\n\n')
+
+    fbx_utils.debugWrite(genTree(fp))
 
     # 4) FBX node links
     fbx_utils.startLinking()

@@ -6,17 +6,17 @@ File properties cache
 
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 
-    This file is part of MakeHuman (www.makehuman.org).
+    This file is part of MakeHuman Community (www.makehumancommunity.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -73,7 +73,7 @@ class FileCache(object):
 
     def getMetadata(self, filename):
         """Retrieve a metadata entry from this cache"""
-        fileId = getpath.canonicalPath(filepath)
+        fileId = getpath.canonicalPath(filename)
         return self[fileId]
 
     def cleanup(self):
@@ -216,6 +216,11 @@ class MetadataCacher(object):
         name, tags = metadata
         return tags
 
+    def getNameFromMetadata(self, metadata):
+        """Override this if the format of the metadata is different."""
+        name, tags = metadata
+        return name
+
     def getSearchPaths(self):
         """This method should be implemented by the library to return the paths
         that should be searched for updating the cache.
@@ -263,6 +268,13 @@ class MetadataCacher(object):
             return self.getTagsFromMetadata(metadata)
         else:
             return set()
+
+    def getName(self, filename):
+        metadata = self.getMetadata(filename)
+        if metadata is not None:
+            return self.getNameFromMetadata(metadata)
+        else:
+            return ''
 
     def getAllTags(self):
         result = set()

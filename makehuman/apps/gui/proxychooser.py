@@ -4,17 +4,17 @@
 """
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 
-    This file is part of MakeHuman (www.makehuman.org).
+    This file is part of MakeHuman Community (www.makehumancommunity.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -138,7 +138,7 @@ class ProxyChooserTaskView(gui3d.TaskView, filecache.MetadataCacher):
             if not os.path.isfile(clearIcon):
                 clearIcon = getpath.getSysDataPath('clear.thumb')
 
-        self.filechooser = fc.IconListFileChooser(self.paths, self.getFileExtension(), 'thumb', notfoundIcon, clearIcon, name=self.label, multiSelect=self.multiProxy, noneItem = not self.multiProxy)
+        self.filechooser = fc.IconListFileChooser(self.paths, self.getFileExtension(), 'thumb', notfoundIcon, clearIcon, name=self.label, multiSelect=self.multiProxy, noneItem = not self.multiProxy, stickyTags=gui3d.app.getSetting('makehumanTags'))
         self.addRightWidget(self.filechooser)
 
         self.filechooser.setIconSize(50,50)
@@ -339,7 +339,7 @@ class ProxyChooserTaskView(gui3d.TaskView, filecache.MetadataCacher):
         """
         if self.multiProxy:
             idx = self._getProxyIndex(mhclofile)
-            if idx == None:
+            if idx is None:
                 return
         else:
             if self.isProxySelected():
@@ -381,7 +381,7 @@ class ProxyChooserTaskView(gui3d.TaskView, filecache.MetadataCacher):
         contain multiple entries, if this is library allows selecting only a
         single proxy, the list is either of length 0 or 1.
         """
-        return list(self.selectedProxies)
+        return self.selectedProxies
 
     def getObjects(self):
         """

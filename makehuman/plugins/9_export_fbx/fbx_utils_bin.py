@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
 # ##### BEGIN GPL LICENSE BLOCK #####
@@ -24,12 +24,9 @@
 
 
 import math
-
+#import log
 from collections import namedtuple, OrderedDict
-
-
 from . import encode_bin, data_types
-
 
 # "Constants"
 FBX_VERSION = 7300
@@ -61,7 +58,7 @@ FBX_TEXTURE_VERSION = 202
 FBX_ANIM_KEY_VERSION = 4008
 
 FBX_NAME_CLASS_SEP = b"\x00\x01"
-FBX_ANIM_PROPSGROUP_NAME = b"d"
+FBX_ANIM_PROPSGROUP_NAME = "d"
 
 FBX_KTIME = 46186158000  # This is the number of "ktimes" in one second (yep, precision over the nanosecond...)
 
@@ -69,46 +66,46 @@ FBX_KTIME = 46186158000  # This is the number of "ktimes" in one second (yep, pr
 # MAT_CONVERT_BONE = Matrix.Rotation(math.pi / 2.0, 4, 'Z')  # Blender is +Y, FBX is -X.
 
 
-BLENDER_OBJECT_TYPES_MESHLIKE = {b'MESH'}
+BLENDER_OBJECT_TYPES_MESHLIKE = {'MESH'}
 
 
 def getMeshOrientation(config):
     if config.yUpFaceZ:
-        return (b'Y', b'Z')
+        return ('Y', 'Z')
     if config.yUpFaceX:
-        return (b'Y', b'X')
+        return ('Y', 'X')
     if config.zUpFaceNegY:
-        return (b'Z', b'-Y')
+        return ('Z', '-Y')
     if config.zUpFaceX:
-        return (b'Z', b'X')
-    return (b'Y', b'Z')
+        return ('Z', 'X')
+    return ('Y', 'Z')
 
 RIGHT_HAND_AXES = {
     # Up, Front -> FBX values (tuples of (axis, sign), Up, Front, Coord).
-    (b'X',  b'Y'):  ((0, 1),  (1, 1),  (2, 1)),
-    (b'X',  b'-Y'): ((0, 1),  (1, -1), (2, -1)),
-    (b'X',  b'Z'):  ((0, 1),  (2, 1),  (1, -1)),
-    (b'X',  b'-Z'): ((0, 1),  (2, -1), (1, 1)),
-    (b'-X', b'Y'):  ((0, -1), (1, 1),  (2, -1)),
-    (b'-X', b'-Y'): ((0, -1), (1, -1), (2, 1)),
-    (b'-X', b'Z'):  ((0, -1), (2, 1),  (1, 1)),
-    (b'-X', b'-Z'): ((0, -1), (2, -1), (1, -1)),
-    (b'Y',  b'X'):  ((1, 1),  (0, 1),  (2, -1)),
-    (b'Y',  b'-X'): ((1, 1),  (0, -1), (2, 1)),
-    (b'Y',  b'Z'):  ((1, 1),  (2, 1),  (0, 1)),
-    (b'Y',  b'-Z'): ((1, 1),  (2, -1), (0, -1)),
-    (b'-Y', b'X'):  ((1, -1), (0, 1),  (2, 1)),
-    (b'-Y', b'-X'): ((1, -1), (0, -1), (2, -1)),
-    (b'-Y', b'Z'):  ((1, -1), (2, 1),  (0, -1)),
-    (b'-Y', b'-Z'): ((1, -1), (2, -1), (0, 1)),
-    (b'Z',  b'X'):  ((2, 1),  (0, 1),  (1, 1)),
-    (b'Z',  b'-X'): ((2, 1),  (0, -1), (1, -1)),
-    (b'Z',  b'Y'):  ((2, 1),  (1, 1),  (0, -1)),
-    (b'Z',  b'-Y'): ((2, 1),  (1, -1), (0, 1)),  # Blender system!
-    (b'-Z', b'X'):  ((2, -1), (0, 1),  (1, -1)),
-    (b'-Z', b'-X'): ((2, -1), (0, -1), (1, 1)),
-    (b'-Z', b'Y'):  ((2, -1), (1, 1),  (0, 1)),
-    (b'-Z', b'-Y'): ((2, -1), (1, -1), (0, -1)),
+    ('X',  'Y'):  ((0, 1),  (1, 1),  (2, 1)),
+    ('X',  '-Y'): ((0, 1),  (1, -1), (2, -1)),
+    ('X',  'Z'):  ((0, 1),  (2, 1),  (1, -1)),
+    ('X',  '-Z'): ((0, 1),  (2, -1), (1, 1)),
+    ('-X', 'Y'):  ((0, -1), (1, 1),  (2, -1)),
+    ('-X', '-Y'): ((0, -1), (1, -1), (2, 1)),
+    ('-X', 'Z'):  ((0, -1), (2, 1),  (1, 1)),
+    ('-X', '-Z'): ((0, -1), (2, -1), (1, -1)),
+    ('Y',  'X'):  ((1, 1),  (0, 1),  (2, -1)),
+    ('Y',  '-X'): ((1, 1),  (0, -1), (2, 1)),
+    ('Y',  'Z'):  ((1, 1),  (2, 1),  (0, 1)),
+    ('Y',  '-Z'): ((1, 1),  (2, -1), (0, -1)),
+    ('-Y', 'X'):  ((1, -1), (0, 1),  (2, 1)),
+    ('-Y', '-X'): ((1, -1), (0, -1), (2, -1)),
+    ('-Y', 'Z'):  ((1, -1), (2, 1),  (0, -1)),
+    ('-Y', '-Z'): ((1, -1), (2, -1), (0, 1)),
+    ('Z',  'X'):  ((2, 1),  (0, 1),  (1, 1)),
+    ('Z',  '-X'): ((2, 1),  (0, -1), (1, -1)),
+    ('Z',  'Y'):  ((2, 1),  (1, 1),  (0, -1)),
+    ('Z',  '-Y'): ((2, 1),  (1, -1), (0, 1)),  # Blender system!
+    ('-Z', 'X'):  ((2, -1), (0, 1),  (1, -1)),
+    ('-Z', '-X'): ((2, -1), (0, -1), (1, 1)),
+    ('-Z', 'Y'):  ((2, -1), (1, 1),  (0, 1)),
+    ('-Z', '-Y'): ((2, -1), (1, -1), (0, -1)),
 }
 
 
@@ -135,16 +132,16 @@ FBX_FRAMERATES = (
 # Note: this could be in a utility (math.units e.g.)...
 
 UNITS = {
-    b"meter": 1.0,  # Ref unit!
-    b"kilometer": 0.001,
-    b"millimeter": 1000.0,
-    b"foot": 1.0 / 0.3048,
-    b"inch": 1.0 / 0.0254,
-    b"turn": 1.0,  # Ref unit!
-    b"degree": 360.0,
-    b"radian": math.pi * 2.0,
-    b"second": 1.0,  # Ref unit!
-    b"ktime": FBX_KTIME,
+    "meter": 1.0,  # Ref unit!
+    "kilometer": 0.001,
+    "millimeter": 1000.0,
+    "foot": 1.0 / 0.3048,
+    "inch": 1.0 / 0.0254,
+    "turn": 1.0,  # Ref unit!
+    "degree": 360.0,
+    "radian": math.pi * 2.0,
+    "second": 1.0,  # Ref unit!
+    "ktime": FBX_KTIME,
 }
 
 
@@ -195,14 +192,14 @@ def similar_values_iter(v1, v2, e=1e-6):
 
 def vcos_transformed_gen(raw_cos, m=None):
     # Note: we could most likely get much better performances with numpy, but will leave this as TODO for now.
-    gen = list(zip(*(iter(raw_cos),) * 3))
+    gen = zip(*(iter(raw_cos),) * 3)
     return gen if m is None else (m * Vector(v) for v in gen)
 
 def nors_transformed_gen(raw_nors, m=None):
     # Great, now normals are also expected 4D!
     # XXX Back to 3D normals for now!
     # gen = zip(*(iter(raw_nors),) * 3 + (_infinite_gen(1.0),))
-    gen = list(zip(*(iter(raw_nors),) * 3))
+    gen = zip(*(iter(raw_nors),) * 3)
     return gen if m is None else (m * Vector(v) for v in gen)
 
 
@@ -285,12 +282,23 @@ def elem_empty(elem, name):
 
 
 def _elem_data_single(elem, name, value, func_name):
+
     sub_elem = elem_empty(elem, name)
+
+    from . import fbx_utils
+    fbx_utils.debugWrite(name, "elem_data_single")
+    fbx_utils.debugWrite(value, "elem_data_single")
+
     getattr(sub_elem, func_name)(value)
     return sub_elem
 
 
 def _elem_data_vec(elem, name, value, func_name):
+
+    from . import fbx_utils
+    fbx_utils.debugWrite(name, "elem_data_single")
+    fbx_utils.debugWrite(value, "elem_data_single")
+
     sub_elem = elem_empty(elem, name)
     func = getattr(sub_elem, func_name)
     for v in value:
@@ -298,6 +306,7 @@ def _elem_data_vec(elem, name, value, func_name):
     return sub_elem
 
 def get_child_element(parentelem, name):
+    assert(isinstance(name, bytes))
     for child in parentelem.elems:
         if child.id == name:
             return child
@@ -379,38 +388,38 @@ def elem_properties(elem):
 #     these are just Vector3D ultimately... *sigh* (again).
 FBX_PROPERTIES_DEFINITIONS = {
     # Generic types.
-    b"p_bool": (b"bool", b"", b"add_int32"),  # Yes, int32 for a bool (and they do have a core bool type)!!!
-    b"p_integer": (b"int", b"Integer", b"add_int32"),
-    b"p_ulonglong": (b"ULongLong", b"", b"add_int64"),
-    b"p_double": (b"double", b"Number", b"add_float64"),  # Non-animatable?
-    b"p_number": (b"Number", b"", b"add_float64"),  # Animatable-only?
-    b"p_enum": (b"enum", b"", b"add_int32"),
-    b"p_vector_3d": (b"Vector3D", b"Vector", b"add_float64", b"add_float64", b"add_float64"),  # Non-animatable?
-    b"p_vector": (b"Vector", b"", b"add_float64", b"add_float64", b"add_float64"),  # Animatable-only?
-    b"p_color_rgb": (b"ColorRGB", b"Color", b"add_float64", b"add_float64", b"add_float64"),  # Non-animatable?
-    b"p_color": (b"Color", b"", b"add_float64", b"add_float64", b"add_float64"),  # Animatable-only?
-    b"p_string": (b"KString", b"", b"add_string_unicode"),
-    b"p_string_url": (b"KString", b"Url", b"add_string_unicode"),
-    b"p_string_xrefurl": (b"KString", b"XrefUrl", b"add_string_unicode"),
-    b"p_timestamp": (b"KTime", b"Time", b"add_int64"),
-    b"p_datetime": (b"DateTime", b"", b"add_string_unicode"),
+    "p_bool": (b"bool", b"", "add_int32"),  # Yes, int32 for a bool (and they do have a core bool type)!!!
+    "p_integer": (b"int", b"Integer", "add_int32"),
+    "p_ulonglong": (b"ULongLong", b"", "add_int64"),
+    "p_double": (b"double", b"Number", "add_float64"),  # Non-animatable?
+    "p_number": (b"Number", b"", "add_float64"),  # Animatable-only?
+    "p_enum": (b"enum", b"", "add_int32"),
+    "p_vector_3d": (b"Vector3D", b"Vector", "add_float64", "add_float64", "add_float64"),  # Non-animatable?
+    "p_vector": (b"Vector", b"", "add_float64", "add_float64", "add_float64"),  # Animatable-only?
+    "p_color_rgb": (b"ColorRGB", b"Color", "add_float64", "add_float64", "add_float64"),  # Non-animatable?
+    "p_color": (b"Color", b"", "add_float64", "add_float64", "add_float64"),  # Animatable-only?
+    "p_string": (b"KString", b"", "add_string_unicode"),
+    "p_string_url": (b"KString", b"Url", "add_string_unicode"),
+    "p_string_xrefurl": (b"KString", b"XrefUrl", "add_string_unicode"),
+    "p_timestamp": (b"KTime", b"Time", "add_int64"),
+    "p_datetime": (b"DateTime", b"", "add_string_unicode"),
     # Special types.
-    b"p_object": (b"object", b""),  # XXX Check this! No value for this prop??? Would really like to know how it works!
-    b"p_compound": (b"Compound", b""),
+    "p_object": (b"object", b""),  # XXX Check this! No value for this prop??? Would really like to know how it works!
+    "p_compound": (b"Compound", b""),
     # Specific types (sic).
     # ## Objects (Models).
-    b"p_lcl_translation": (b"Lcl Translation", b"", b"add_float64", b"add_float64", b"add_float64"),
-    b"p_lcl_rotation": (b"Lcl Rotation", b"", b"add_float64", b"add_float64", b"add_float64"),
-    b"p_lcl_scaling": (b"Lcl Scaling", b"", b"add_float64", b"add_float64", b"add_float64"),
-    b"p_visibility": (b"Visibility", b"", b"add_float64"),
-    b"p_visibility_inheritance": (b"Visibility Inheritance", b"", b"add_int32"),
+    "p_lcl_translation": (b"Lcl Translation", b"", "add_float64", "add_float64", "add_float64"),
+    "p_lcl_rotation": (b"Lcl Rotation", b"", "add_float64", "add_float64", "add_float64"),
+    "p_lcl_scaling": (b"Lcl Scaling", b"", "add_float64", "add_float64", "add_float64"),
+    "p_visibility": (b"Visibility", b"", "add_float64"),
+    "p_visibility_inheritance": (b"Visibility Inheritance", b"", "add_int32"),
     # ## Cameras!!!
-    b"p_roll": (b"Roll", b"", b"add_float64"),
-    b"p_opticalcenterx": (b"OpticalCenterX", b"", b"add_float64"),
-    b"p_opticalcentery": (b"OpticalCenterY", b"", b"add_float64"),
-    b"p_fov": (b"FieldOfView", b"", b"add_float64"),
-    b"p_fov_x": (b"FieldOfViewX", b"", b"add_float64"),
-    b"p_fov_y": (b"FieldOfViewY", b"", b"add_float64"),
+    "p_roll": (b"Roll", b"", "add_float64"),
+    "p_opticalcenterx": (b"OpticalCenterX", b"", "add_float64"),
+    "p_opticalcentery": (b"OpticalCenterY", b"", "add_float64"),
+    "p_fov": (b"FieldOfView", b"", "add_float64"),
+    "p_fov_x": (b"FieldOfViewX", b"", "add_float64"),
+    "p_fov_y": (b"FieldOfViewY", b"", "add_float64"),
 }
 
 def get_ascii_properties(properties, indent=0):
@@ -441,12 +450,12 @@ def get_ascii_property(name, ptype, value, animatable=False, custom=False):
     flags = _elem_props_flags(animatable, custom)
     ptype = FBX_PROPERTIES_DEFINITIONS[ptype]
 
-    if len(ptype) > 2 and b'string' in ptype[2]:
-        value = [b'"%s"' % v for v in value]
-    elif len(ptype) > 2 and b'int' in ptype[2]:
+    if len(ptype) > 2 and 'string' in ptype[2]:
+        value = ['"%s"' % v for v in value]
+    elif len(ptype) > 2 and 'int' in ptype[2]:
         value = [int(v) for v in value]
 
-    return b'P: "%s", "%s", "%s", "%s", %s' % (name, ptype[0], ptype[1], flags, (b','.join([v for v in value])))
+    return 'P: "%s", "%s", "%s", "%s", %s' % (name, ptype[0], ptype[1], flags, (','.join([str(v) for v in value])))
 
 def _elem_props_set(elem, ptype, name, value, flags):
     p = elem_data_single_string(elem, b"P", name)
@@ -454,11 +463,17 @@ def _elem_props_set(elem, ptype, name, value, flags):
         p.add_string(t)
     p.add_string(flags)
     if len(ptype) == 3:
-        getattr(p, str(ptype[2], encoding='utf-8'))(value)
+        getattr(p, ptype[2])(value)
     elif len(ptype) > 3:
         # We assume value is iterable, else it's a bug!
         for callback, val in zip(ptype[2:], value):
-            getattr(p, str(callback, encoding='utf-8'))(val)
+            #log.debug(p)
+            #log.debug(type(p))
+            #log.debug(callback)
+            #log.debug(type(callback))
+            #log.debug(val)
+            #log.debug(type(val))
+            getattr(p, callback)(val)
 
 
 def _elem_props_flags(animatable, custom):
@@ -473,8 +488,7 @@ def _elem_props_flags(animatable, custom):
 
 def elem_props_set(elem, ptype, name, value=None, animatable=False, custom=False):
     ptype = FBX_PROPERTIES_DEFINITIONS[ptype]
-    import log
-    log.debug('propset %s %s %s', str(name), str(value), type(value))
+    #log.debug('propset %s %s %s', name, value, type(value))
     _elem_props_set(elem, ptype, name, value, _elem_props_flags(animatable, custom))
 
 
@@ -483,7 +497,7 @@ def elem_props_compound(elem, cmpd_name, custom=False):
         name = cmpd_name + b"|" + name
         elem_props_set(elem, ptype, name, value, animatable=animatable, custom=custom)
 
-    elem_props_set(elem, b"p_compound", cmpd_name, custom=custom)
+    elem_props_set(elem, "p_compound", cmpd_name, custom=custom)
     return _setter
 
 
@@ -543,16 +557,21 @@ FBXTemplate = namedtuple("FBXTemplate", ("type_name", "prop_type_name", "propert
 
 def get_properties(properties):
     for p in properties:
-        if len(p) < 3:
+        #log.debug(p)
+        if len(p) < 2:
             continue
+        if len(p) == 2:
+            name = p[0]
+            value, ptype, animatable = p[1]
+            custom = False
         if len(p) == 3:
             name, ptype, value = p
             animatable = False
             custom = False
-        elif len(p) == 4:
+        if len(p) == 4:
             name, ptype, value, animatable = p
             custom = False
-        else:
+        if len(p) > 4:
             name, ptype, value, animatable, custom = p
 
         yield (name, ptype, value, animatable, custom)
@@ -565,16 +584,24 @@ def fbx_template_generate(definitionsNode, objectType_name, users_count, propert
         elem = elem_data_single_string(template, b"PropertyTemplate", propertyTemplate_name)
         props = elem_properties(elem)
 
+        #log.debug("--- fbx_template_generate ---")
+        #log.debug(len(properties))
+
         for name, ptype, value, animatable, custom in get_properties(properties):
             try:
                 elem_props_set(props, ptype, name, value, animatable, custom)
             except Exception as e:
-                import log
-                log.debug("FBX: Failed to write template prop (%r) (%s)", e, str((props, ptype, name, value, animatable)))
+                #log.debug("FBX: Failed to write template prop (%r) (%s)", e, str((props, ptype, name, value, animatable)))
+                pass
 
 
 def fbx_name_class(name, cls=None):
     if cls is None:
         cls,name = name.split(b'::')
+    #log.debug(cls)
+    #log.debug(type(cls))
+    #log.debug(name)
+    #log.debug(type(name))
+    #log.debug(type(FBX_NAME_CLASS_SEP))
     return FBX_NAME_CLASS_SEP.join((name, cls))
 

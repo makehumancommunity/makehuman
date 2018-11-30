@@ -6,17 +6,17 @@ Qt filechooser widget.
 
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Glynn Clements, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 
-    This file is part of MakeHuman (www.makehuman.org).
+    This file is part of MakeHuman Community (www.makehumancommunity.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -265,12 +265,12 @@ class FileSortRadioButton(gui.RadioButton):
         self.chooser.sortBy = self.field
         self.chooser.refresh()
 
+
 class TagFilter(gui.GroupBox):
     def __init__(self):
-        super(TagFilter, self).__init__('Tag filter')
-        self.tags = set()
+        super(TagFilter, self).__init__('Tag Filter [Mode : ' + self.convertModes(mh.getSetting('tagFilterMode')) + ']')
+        self.tags = {}
         self.selectedTags = set()
-        self.tagToggles = []
 
     def setTags(self, tags):
         self.clearAll()
@@ -282,14 +282,44 @@ class TagFilter(gui.GroupBox):
         if tag in self.tags:
             return
 
-        self.tags.add(tag)
-        toggle = self.addWidget(gui.CheckBox(tag.capitalize()))
+        toggle = gui.CheckBox(tag.title())
         toggle.tag = tag
-        self.tagToggles.append(toggle)
+        self.tags[tag] = toggle
 
         @toggle.mhEvent
         def onClicked(event):
             self.setTagState(toggle.tag, toggle.selected)
+
+    def onShow(self, event):
+        super(TagFilter, self).onShow(event)
+        self.setTitle('Tag Filter [Mode : ' + self.convertModes(mh.getSetting('tagFilterMode')) + ']')
+
+    def showTags(self, selection=None, stickyTags=None):
+
+        if isinstance(stickyTags, str):
+            stickyTags = [stickyTags]
+
+        if isinstance(stickyTags, list):
+            stickyTags = [s.lower() for s in stickyTags if isinstance(s, str)]
+            for tag in stickyTags:
+                toggle = self.tags.get(tag)
+                if toggle:
+                    self.addWidget(toggle)
+                    if selection and tag in selection:
+                        toggle.setChecked(True)
+                        self.selectedTags.add(tag)
+
+        if stickyTags is None: stickyTags = set()
+
+        for tag in sorted(set(self.tags.keys()).difference(stickyTags)):
+            self.addWidget(self.tags.get(tag))
+            if selection and tag in selection:
+                self.tags.get(tag).setChecked(True)
+                self.selectedTags.add(tag)
+
+    def removeTags(self):
+        for toggle in self.tags.values():
+            self.removeWidget(toggle)
 
     def addTags(self, tags):
         for tag in tags:
@@ -308,10 +338,9 @@ class TagFilter(gui.GroupBox):
         self.callEvent('onTagsChanged', self.selectedTags)
 
     def clearAll(self):
-        for tggl in self.tagToggles:
+        for tggl in self.tags.values():
             tggl.hide()
             tggl.destroy()
-        self.tagToggles = []
         self.selectedTags.clear()
         self.tags.clear()
 
@@ -319,23 +348,47 @@ class TagFilter(gui.GroupBox):
         return self.selectedTags
 
     def getTags(self):
-        return self.tags
+        return set(self.tags.keys())
 
     def filterActive(self):
         return len(self.getSelectedTags()) > 0
 
     def filter(self, items):
+        mode = mh.getSetting('tagFilterMode')
         if not self.filterActive():
             for item in items:
                 item.setHidden(False)
             return
 
         for item in items:
-            #if len(self.selectedTags.intersection(file.tags)) > 0:  # OR
-            if len(self.selectedTags.intersection(item.tags)) == len(self.selectedTags):  # AND
-                item.setHidden(False)
-            else:
-                item.setHidden(True)
+            if mode == 'OR':
+                if len(self.selectedTags.intersection(item.tags)) > 0:
+                    item.setHidden(False)
+                else:
+                    item.setHidden(True)
+            elif mode == 'AND':
+                if len(self.selectedTags.intersection(item.tags)) == len(self.selectedTags):
+                    item.setHidden(False)
+                else:
+                    item.setHidden(True)
+            elif mode == 'NOR':
+                if len(self.selectedTags.intersection((item.tags))) > 0:
+                    item.setHidden(True)
+                else:
+                    item.setHidden(False)
+            elif mode == 'NAND':
+                if len(self.selectedTags.intersection(item.tags)) == len(self.selectedTags):
+                    item.setHidden(True)
+                else:
+                    item.setHidden(False)
+
+    def convertModes(self, mode):
+        convmodes = {'NOR': 'NOT OR',
+                     'NAND': 'NOT AND'}
+        return convmodes.get(mode, mode)
+
+    def labelSwitch(self):
+        self.setTitle('Tag Filter [Mode : ' + self.convertModes(mh.getSetting('tagFilterMode')) + ']')
 
 class FileHandler(object):
     def __init__(self):
@@ -390,21 +443,33 @@ class TaggedFileLoader(FileHandler):
     This library object needs to implement a getTags(filename) method.
     """
 
-    def __init__(self, library):
+    def __init__(self, library, useNameTags=False):
         super(TaggedFileLoader, self).__init__()
         self.library = library
+        self.useNameTags = useNameTags
 
     def refresh(self, files):
         """
         Load tags from mhclo file.
         """
+        oldSelection = self.fileChooser.getSelectedTags().copy()
+        self.fileChooser.removeTags()
         for file in files:
-            label = getpath.pathToUnicode( os.path.basename(file) )
-            if len(self.fileChooser.extensions) > 0:
-                label = os.path.splitext(label)[0].replace('_', ' ')
-            label = label[0].capitalize() + label[1:]
+            label=''
             tags = self.library.getTags(filename = file)
+            if self.useNameTags:
+                name = self.library.getName(filename = file)
+                label = name
+            if not label:
+                label = getpath.pathToUnicode(os.path.basename(file))
+                if len(self.fileChooser.extensions) > 0:
+                    label = os.path.splitext(label)[0].replace('_', ' ')
+                label = label[0].capitalize() + label[1:]
             self.fileChooser.addItem(file, label, self.getPreview(file), tags)
+        self.fileChooser.showTags(oldSelection)
+
+    def setNameTagsUsage(self, useNameTags=False):
+        self.useNameTags = useNameTags
 
 class MhmatFileLoader(FileHandler):
 
@@ -423,7 +488,9 @@ class MhmatFileLoader(FileHandler):
 
 class FileChooserBase(QtWidgets.QWidget, gui.Widget):
 
-    def __init__(self, path, extensions, sort = FileSort(), doNotRecurse = False):
+    switchFuncList = []
+
+    def __init__(self, path, extensions, sort = FileSort(), doNotRecurse = False, stickyTags=None):
         super(FileChooserBase, self).__init__()
         gui.Widget.__init__(self)
 
@@ -442,6 +509,7 @@ class FileChooserBase(QtWidgets.QWidget, gui.Widget):
 
         self.setFileLoadHandler(FileHandler())
         self.tagFilter = None
+        self.stickyTags = stickyTags
 
         self._autoRefresh = True
         self.mutexExtensions = False
@@ -464,8 +532,13 @@ class FileChooserBase(QtWidgets.QWidget, gui.Widget):
         @self.tagFilter.mhEvent
         def onTagsChanged(selectedTags):
             self.applyTagFilter()
+        self.switchFuncList.append(self.onTagFilterModeSwitched)
 
         return self.tagFilter
+
+    def onTagFilterModeSwitched(self):
+        self.tagFilter.labelSwitch()
+        self.applyTagFilter()
 
     def setPaths(self, value):
         self.paths = value if isinstance(value, list) else [value]
@@ -554,6 +627,18 @@ class FileChooserBase(QtWidgets.QWidget, gui.Widget):
         if self.tagFilter:
             self.tagFilter.addTags(tags)
         return None
+
+    def showTags(self, selection=None):
+        if self.tagFilter:
+            self.tagFilter.showTags(selection, self.stickyTags)
+
+    def removeTags(self):
+        if self.tagFilter:
+            self.tagFilter.clearAll()
+
+    def getSelectedTags(self):
+        if self.tagFilter:
+            return self.tagFilter.getSelectedTags()
 
     def removeItem(self, file):
         listItem = self._getListItem(file)
@@ -831,7 +916,7 @@ class ListFileChooser(FileChooserBase):
                 self.setSelection(selections[0])
 
 class IconListFileChooser(ListFileChooser):
-    def __init__(self, path, extensions, previewExtensions='bmp', notFoundImage=None, clearImage=None, name="File chooser", multiSelect=False, verticalScrolling=False, sort=FileSort(), noneItem = False, doNotRecurse = False):
+    def __init__(self, path, extensions, previewExtensions='bmp', notFoundImage=None, clearImage=None, name="File chooser", multiSelect=False, verticalScrolling=False, sort=FileSort(), noneItem = False, doNotRecurse = False, stickyTags = None):
         super(IconListFileChooser, self).__init__(path, extensions, name, multiSelect, verticalScrolling, sort, noneItem, doNotRecurse)
         self.setPreviewExtensions(previewExtensions)
         self.notFoundImage = notFoundImage
@@ -840,6 +925,7 @@ class IconListFileChooser(ListFileChooser):
         #self.children.setIconSize(QtCore.QSize(50,50))
         self.setIconSize(50,50)
         self.children.setWordWrap(True)
+        self.stickyTags = stickyTags
 
     def addItem(self, file, label, preview, tags=[], pos = None):
         item = super(IconListFileChooser, self).addItem(file, label, preview, tags, pos)

@@ -4,17 +4,17 @@
 """
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 
-    This file is part of MakeHuman (www.makehuman.org).
+    This file is part of MakeHuman Community (www.makehumancommunity.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -40,6 +40,7 @@ import log
 import progress
 import csv
 import getpath
+import io
 
 def _parse_version(version_str):
     version_str = version_str.lower().strip()
@@ -310,6 +311,20 @@ class MHM10Loader(object):
     def getAcceptedVersion(self):
         return (1, 0)
 
+
+class MHM11Loader(object):
+
+    def loadProperty(self, line_data, default_load_callback, strict):
+        if line_data[0] == 'tags':
+            line_data[0] = 'name'
+            default_load_callback(line_data)
+        else:
+            default_load_callback(line_data)
+
+    def getAcceptedVersion(self):
+        return(1, 1)
+
+
 def getMHMLoader(version):
     for loader in mhm_loaders:
         if all([(i < len(version) and v == version[i]) for i, v in enumerate(loader.getAcceptedVersion())]):
@@ -329,5 +344,5 @@ def loadMHM(version, lines, default_load_callback, strict=False):
         fprog.step()
 
 
-mhm_loaders = [ MHM10Loader() ]
+mhm_loaders = [ MHM10Loader(), MHM11Loader() ]
 

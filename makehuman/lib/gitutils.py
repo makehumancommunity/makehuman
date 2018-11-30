@@ -10,7 +10,7 @@
 
 **Authors:**           Jonas Hauquier, Glynn Clements, Joel Palmius, Marc Flerackers
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 
@@ -57,7 +57,7 @@ def findPathToGit():
         _gitcmd = os.environ['GIT_COMMAND']
         return _gitcmd
 
-    if sys.platform == 'win32':
+    if sys.platform.startswith('win'):
         _findPathToGitWindows()
     else:
         _findPathToGitUnixoid()
@@ -81,7 +81,6 @@ def _findPathToGitUnixoid():
     global _gitdir
 
     for path in os.environ["PATH"].split(os.pathsep):
-        print(path)
         path = path.strip('"')
         exe_file = os.path.join(path, 'git')
         if os.path.isfile(exe_file):

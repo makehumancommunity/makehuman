@@ -6,17 +6,17 @@ MakeHuman python entry-point.
 
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Glynn Clements, Jonas Hauquier, Joel Palmius
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3 
 
-    This file is part of MakeHuman (www.makehuman.org).
+    This file is part of MakeHuman Community (www.makehumancommunity.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -44,15 +44,15 @@ import re
 import subprocess
 
 ## Version information #########################################################
-__version__ = "1.1.2"                   # Major, minor and patch version number
+__version__ = "1.2.0"                   # Major, minor and patch version number
 release = False                         # False for nightly
 versionSub = ""                         # Short version description
 meshVersion = "hm08"                    # Version identifier of the basemesh
 ################################################################################
 
 __author__ = "Jonas Hauquier, Joel Palmius, Glynn Clements, Thomas Larsson et al."
-__copyright__ = "Copyright 2017 Data Collection AB and listed authors"
-__credits__ = ["See http://www.makehuman.org/halloffame"]
+__copyright__ = "Copyright 2018 Data Collection AB and listed authors"
+__credits__ = ["See http://www.makehumancommunity.org/halloffame"]
 __license__ = "AGPLv3"
 __maintainer__ = "Joel Palmius, Jonas Hauquier"
 __status__ = "Production" if release else "Development"
@@ -135,7 +135,7 @@ def set_sys_path():
     Append local module folders to python search path.
     """
     #[BAL 07/11/2013] make sure we're in the right directory
-    if sys.platform != 'darwin': # Causes issues with py2app builds on MAC
+    if not sys.platform.startswith('darwin'): # Causes issues with py2app builds on MAC
         os.chdir(getCwd())
     syspath = ["./", "./lib", "./apps", "./shared", "./apps/gui","./core"]
     syspath.extend(sys.path)
@@ -154,7 +154,7 @@ def get_platform_paths():
 
     home = getpath.getPath()
 
-    if sys.platform == 'win32':
+    if sys.platform.startswith('win'):
         stdout_filename = os.path.join(home, "python_out.txt")
         stderr_filename = os.path.join(home, "python_err.txt")
 
@@ -239,14 +239,14 @@ def parse_arguments():
 
 def getCopyrightMessage(short=False):
     if short:
-        return """MakeHuman Copyright (C) 2001-2017 http://www.makehuman.org
+        return """MakeHuman Copyright (C) 2001-2018 http://www.makehumancommunity.org
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it
 under certain conditions. For details use the option --license"""
 
     return """Makehuman is a completely free, open source, innovative and 
 professional software for the modelling of 3-Dimensional humanoid characters
-Copyright (C) 2001-2017  www.makehuman.org
+Copyright (C) 2001-2018  www.makehumancommunity.org
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -270,7 +270,7 @@ for exports.
 A human readable explanation of the license terms can be found via
 the MakeHuman home page:
 
-    http://www.makehuman.org
+    http://www.makehumancommunity.org
 
 Licenses for dependencies are included in the licenses folder.
 
@@ -317,7 +317,7 @@ class LicenseInfo(object):
         self.author = "MakeHuman Team"
         self.license = "AGPL3"
         self.homepage = "http://www.makehumancommunity.org"
-        self.copyright = "(c) MakeHuman.org 2001-2017"
+        self.copyright = "(c) MakeHuman.org 2001-2018"
         self._keys = ["author", "license", "copyright", "homepage"]
         self._customized = False
 
@@ -483,7 +483,7 @@ def getCredits(richtext=False):
     else:
         result = ''
     return result + '''The list of people that made this software can be found at our website at 
-http://www.makehuman.org/halloffame'''
+http://www.makehumancommunity.org/halloffame'''
 
 def getSoftwareLicense(richtext=False):
     import getpath
@@ -505,7 +505,6 @@ def getSoftwareLicense(richtext=False):
 
 def getThirdPartyLicenses(richtext=False):
     import getpath
-    from io import open
     from collections import OrderedDict
     def _title(name, url, license):
         if richtext:
@@ -538,26 +537,25 @@ makes use of.\n"""
     license_folder = getpath.getSysPath('licenses')
     if not os.path.isdir(license_folder):
         return result + _error("Error: external licenses folder is not found, this is an incomplete MakeHuman distribution!")
-    external_licenses = [ ("PyQt4", ("pyQt4-license.txt", "http://www.riverbankcomputing.co.uk", "GPLv3")),
-                          ("Qt4", ("qt4-license.txt", "http://www.qt-project.org", "LGPLv2.1")),
+    external_licenses = [ ("PyQt5", ("pyQt5-license.txt", "http://www.riverbankcomputing.com", "GPLv3")),
+                          ("Qt5", ("qt5-license.txt", "http://www.qt.io", "GPLv3")),
                           ("Numpy", ("numpy-license.txt", "http://www.numpy.org", "BSD (3-clause)")),
                           ("PyOpenGL", ("pyOpenGL-license.txt", "http://pyopengl.sourceforge.net", "BSD (3-clause)")),
                           ("Transformations", ("transformations-license.txt", "http://www.lfd.uci.edu/~gohlke/", "BSD (3-clause)")),
-                          ("pyFBX", ("pyFbx-license.txt", "http://wiki.blender.org/index.php/Extensions:2.6/Py/Scripts/Import-Export/Autodesk_FBX", "GPLv2")),
-                          ("Python hglib", ("hglib-license.txt", "http://mercurial.selenic.com/wiki/PythonHglib", "MIT"))
+                          ("pyFBX", ("pyFbx-license.txt", "http://wiki.blender.org/index.php/Extensions:2.6/Py/Scripts/Import-Export/Autodesk_FBX", "GPLv2"))
                         ]
     external_licenses = OrderedDict(external_licenses)
 
-    for name, (lic_file, url, lic_type) in list(external_licenses.items()):
+    for name, (lic_file, url, lic_type) in external_licenses.items():
         result += _title(name, url, lic_type)
 
         lfile = os.path.join(license_folder, lic_file)
         if not os.path.isfile(lfile):
             result += "\n%s\n" % _error("Error: License file %s is not found, this is an incomplete MakeHuman distribution!" % lfile)
             continue
-        f = io.open(lfile, encoding='utf-8')
-        text = f.read()
-        f.close()
+        with io.open(lfile, encoding='utf-8') as f:
+            text = f.read()
+
         text = _wordwrap(text)
         result += "\n%s\n" % _block(text)
 

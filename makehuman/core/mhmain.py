@@ -4,17 +4,17 @@
 """
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Glynn Clements, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 
-    This file is part of MakeHuman (www.makehuman.org).
+    This file is part of MakeHuman Community (www.makehumancommunity.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -38,8 +38,7 @@ Main application GUI component.
 
 import sys
 import os
-import glob
-import imp
+import importlib.util
 import io
 
 from core import G
@@ -235,11 +234,22 @@ class MHApplication(gui3d.Application, mh.Application):
                 'highspeed': 5,
                 'realtimeNormalUpdates': False,
                 'units': 'metric',
+                'real_weight': False,
                 'guiTheme': 'makehuman',
                 'restoreWindowSize': True,
-                'windowGeometry': ''
+                'windowGeometry': '',
+                'tagFilterMode': 'OR',
+                'useNameTags': False,
+                'tagCount': 5,
+                'makehumanTags': ['makehuman™']
             }
         else:
+
+            # For development:
+            # Update _versionSentinel, when changing any default value, to invalidate settings.ini!
+            # Recommended value is the md5 hexdigest of time.strftime("%a, %b %d %Y %H:%M:%S +0000", time.gmtime()).
+            # To generate a new value you can run buildscripts/versionsentinel.py.
+
             self._default_settings = {
                 'realtimeUpdates': True,
                 'realtimeFitting': True,
@@ -248,6 +258,7 @@ class MHApplication(gui3d.Application, mh.Application):
                 'lowspeed': 1,
                 'highspeed': 5,
                 'units':'metric',
+                'real_weight': False,
                 'invertMouseWheel':False,
                 'language':'english',
                 'excludePlugins':[],
@@ -257,7 +268,12 @@ class MHApplication(gui3d.Application, mh.Application):
                 'guiTheme': 'makehuman',
                 'preloadTargets': False,
                 'restoreWindowSize': True,
-                'windowGeometry': ''
+                'windowGeometry': '',
+                'tagFilterMode': 'OR',
+                'useNameTags': False,
+                'tagCount': 5,
+                'makehumanTags': ['makehuman™'],
+                '_versionSentinel': 'A3A03B96EE01B885799828A03E33FEB0' # GM Time was: Tue, Nov 20 2018 15:10:51 +0000
             }
 
         self._settings = dict(self._default_settings)
@@ -507,69 +523,73 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def loadPlugins(self):
 
-        # Load plugins not starting with _
-        pluginsToLoad = glob.glob(mh.getSysPath(os.path.join("plugins/",'[!_]*.py')))
-        userPlugins = glob.glob(mh.getPath(os.path.join("plugins/", '[!_]*.py')))
-        if userPlugins:
-            for userPlugin in userPlugins:
-                name = os.path.splitext(os.path.basename(userPlugin))[0]
-                if name in self.getSetting('activeUserPlugins'):
-                    pluginsToLoad.append(mh.getRelativePath(userPlugin, mh.getPath(), False))
+        pluginsToLoad = []
 
-        # Load plugin packages (folders with a file called __init__.py)
-        for fname in os.listdir(mh.getSysPath("plugins/")):
-            if fname[0] != "_":
-                folder = os.path.join("plugins", fname)
-                if os.path.isdir(folder) and ("__init__.py" in os.listdir(folder)):
-                    pluginsToLoad.append(folder)
+        sys_path = os.path.abspath(mh.getSysPath('plugins'))
+        user_path = mh.getPath('plugins')
 
-        for fname in os.listdir(mh.getPath("plugins/")):
-            if fname[0] != "_":
-                if fname in self.getSetting('activeUserPlugins'):
-                    folder = os.path.join("plugins", fname)
-                    if os.path.isdir(mh.getPath(folder)) and ("__init__.py" in os.listdir(mh.getPath(folder))):
-                        pluginsToLoad.append(folder)
+        for file in os.listdir(sys_path):
 
-        pluginsToLoad.sort()
+            location = os.path.join(sys_path, file)
 
+            if os.path.isdir(location) and not file.startswith('_'):
+                pLocation = os.path.join(location, '__init__.py')
+                if os.path.isfile(pLocation):
+                    pluginsToLoad.append((file, pLocation))
 
-        fprog = Progress(len(pluginsToLoad))
-        for path in pluginsToLoad:
-            self.loadPlugin(path)
-            fprog.step()
+            elif os.path.isfile(location) and file.endswith('.py') and not file.startswith('_'):
+                name = os.path.splitext(file)[0]
+                pluginsToLoad.append((name, location))
 
-    def loadPlugin(self, path):
+        for file in os.listdir(user_path):
 
-        try:
-            name, ext = os.path.splitext(os.path.basename(path))
-            if name not in self.getSetting('excludePlugins'):
+            location = os.path.join(user_path, file)
+
+            if os.path.isdir(location) and not file.startswith('_') and file in self.getSetting('activeUserPlugins'):
+                pLocation = os.path.join(location, '__init__.py')
+                if os.path.isfile(pLocation):
+                    pluginsToLoad.append((file, pLocation))
+
+            elif os.path.isfile(location) and file.endswith('.py') and not file.startswith('_') and file in self.getSetting('activeUserPlugins'):
+                name = os.path.splitext(file)[0]
+                pluginsToLoad.append((name, location))
+
+        for name, location in sorted(pluginsToLoad, key=lambda plugin: plugin[0]):
+            self.loadPlugin(name=name, location=location)
+
+    def loadPlugin(self, name, location):
+
+        if not name in self.getSetting('excludePlugins'):
+
+            try:
                 log.message('Importing plugin %s', name)
-                #module = imp.load_source(name, path)
+                spec = importlib.util.spec_from_file_location(name=name, location=location)
+                if not spec:
+                    log.message("Could not import plugin: %s", name)
+                    return False
+                else:
+                    module = importlib.util.module_from_spec(spec)
+                    sys.modules[name] = module
 
-                module = None
-                fp, pathname, description = imp.find_module(name, ["plugins/", mh.getPath("plugins/")])
-                try:
-                    module = imp.load_module(name, fp, pathname, description)
-                finally:
-                    if fp:
-                        fp.close()
-                if module is None:
-                    log.message("Could not import plugin %s", name)
-                    return
+                    spec.loader.exec_module(module)
+                    self.modules[name] = module
 
-                self.modules[name] = module
-                log.message('Imported plugin %s', name)
-                log.message('Loading plugin %s', name)
-                module.load(self)
-                log.message('Loaded plugin %s', name)
+                    log.message('Imported plugin %s', name)
 
-                # Process all non-user-input events in the queue to make sure
-                # any callAsync events are run.
-                self.processEvents()
-            else:
-                self.modules[name] = None
-        except Exception as _:
-            log.warning('Could not load %s', name, exc_info=True)
+                    log.message('Loading plugin %s', name)
+                    module.load(self)
+                    log.message('Loaded plugin %s', name)
+
+                    self.processEvents()
+                    return True
+
+            except:
+                log.warning('Could not load %s', name, exc_info=True)
+                return False
+
+        else:
+            self.modules[name] = None
+            return False
 
     def unloadPlugins(self):
 
@@ -834,6 +854,7 @@ class MHApplication(gui3d.Application, mh.Application):
         self.saveSettings(True)
         self.unloadPlugins()
         self.dumpMissingStrings()
+        self.files.load.unload()
 
     def onQuit(self, event):
         self.promptAndExit()
@@ -924,7 +945,12 @@ class MHApplication(gui3d.Application, mh.Application):
             if f:
                 settings = mh.parseINI(f.read())
 
-                if 'version' in settings and settings['version'] == mh.getVersionDigitsStr():
+                if not mh.isRelease():
+                    if self._default_settings.get('_versionSentinel') != settings.get('_versionSentinel'):
+                        log.warning('Default settings were changed, invalidating settings.ini')
+                        return
+
+                if settings.get('version') == mh.getVersionDigitsStr():
                     # Only load settings for this specific version
                     del settings['version']
                     for setting_name, value in settings.items():
@@ -1723,7 +1749,7 @@ class MHApplication(gui3d.Application, mh.Application):
         mh.Application.OnInit(self)
 
         #[BAL 07/14/2013] work around focus bug in PyQt on OS X
-        if sys.platform == 'darwin':
+        if sys.platform.startswith('darwin'):
             G.app.mainwin.raise_()
 
         self.setLanguage("english")
@@ -1742,7 +1768,7 @@ class MHApplication(gui3d.Application, mh.Application):
 
         self.splash = gui.SplashScreen(self.getThemeResource('images', 'splash.png'), mh.getVersionDigitsStr())
         self.splash.show()
-        if sys.platform != 'darwin':
+        if not sys.platform.startswith('darwin'):
             self.mainwin.hide()  # Fix for OSX crash thanks to Francois (issue #593)
 
         self.tabs = self.mainwin.tabs

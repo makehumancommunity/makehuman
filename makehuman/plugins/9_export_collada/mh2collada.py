@@ -4,17 +4,17 @@
 """
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Thomas Larsson, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 
-    This file is part of MakeHuman (www.makehuman.org).
+    This file is part of MakeHuman (www.makehumancommunity.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -111,17 +111,17 @@ def exportCollada(filepath, config):
             fp = None
             log.error("Unable to open file for writing %s" % filepath)
 
-        date = time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.localtime())
+        date = time.strftime("%Y-%m-%dT%H:%M:%S+00:00", time.gmtime())
         # TODO revise to make this enum-like
         if config.yUpFaceZ or config.yUpFaceX:
             upvector = "Y_UP"
         else:
             upvector = "Z_UP"
         fp.write('<?xml version="1.0" encoding="utf-8"?>\n' +
-            '<COLLADA version="1.4.0" xmlns="http://www.collada.org/2005/11/COLLADASchema">\n' +
+            '<COLLADA version="1.4.1" xmlns="http://www.collada.org/2005/11/COLLADASchema">\n' +
             '  <asset>\n' +
             '    <contributor>\n' +
-            '      <author>www.makehuman.org</author>\n' +
+            '      <author>www.makehumancommunity.org</author>\n' +
             '    </contributor>\n' +
             '    <created>%s</created>\n' % date +
             '    <modified>%s</modified>\n' % date +

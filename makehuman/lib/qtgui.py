@@ -4,17 +4,17 @@
 """
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Glynn Clements, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 
-    This file is part of MakeHuman (www.makehuman.org).
+    This file is part of MakeHuman Community (www.makehumancommunity.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -1191,7 +1191,7 @@ class AboutBox(QtWidgets.QMessageBox):
     def __init__(self, parent, title, text):
         super(AboutBox, self).__init__(title, text, QtWidgets.QMessageBox.Information, 0, 0, 0, parent)
 
-        if sys.platform == 'darwin':
+        if sys.platform.startswith('darwin'):
             self.setWindowFlags(QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowSystemMenuHint)
         # Grab window icon of parent
         icon = self.windowIcon()
@@ -1218,7 +1218,7 @@ class AboutBoxScrollbars(QtWidgets.QDialog):
             re_match_urls = re.compile(r"""((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.‌​][a-z]{2,4}/)(?:[^\s()<>]+|(([^\s()<>]+|(([^\s()<>]+)))*))+(?:(([^\s()<>]+|(‌​([^\s()<>]+)))*)|[^\s`!()[]{};:'".,<>?«»“”‘’]))""", re.DOTALL)
             return re_match_urls.sub(lambda x: '<a href="%(url)s" style="color: #ffa02f;">%(url)s</a>' % dict(url=str(x.group())), text)
 
-        if sys.platform == 'darwin':
+        if sys.platform.startswith('darwin'):
             self.setWindowFlags(QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowSystemMenuHint)
         # Grab window icon of parent
         icon = self.windowIcon()
@@ -1232,7 +1232,7 @@ class AboutBoxScrollbars(QtWidgets.QDialog):
         label.setOpenExternalLinks(True)
         label.setTextFormat(QtCore.Qt.RichText)
 
-        if sys.platform == 'darwin':
+        if sys.platform.startswith('darwin'):
             label.setContentsMargins(16, 0, 0, 0)
         else:
             label.setContentsMargins(2, 0, 0, 0)
@@ -1260,7 +1260,7 @@ class AboutBoxScrollbars(QtWidgets.QDialog):
         buttonBox.setContentsMargins(0, 0, 10, 0)
 
         grid = QtWidgets.QGridLayout()
-        if sys.platform == 'darwin':
+        if sys.platform.startswith('darwin'):
             grid.addWidget(versionLabel, 0, 1, 1, 1, QtCore.Qt.AlignTop)
             grid.addWidget(iconLabel, 0, 0, 2, 1, QtCore.Qt.AlignTop)
         else:
@@ -1277,7 +1277,7 @@ class AboutBoxScrollbars(QtWidgets.QDialog):
         grid.addWidget(scroll, 1, 1, 1, 1)
         grid.addWidget(buttonBox, 2, 0, 1, 2)
 
-        if sys.platform == 'darwin':
+        if sys.platform.startswith('darwin'):
             f = self.font()
             f.setBold(True)
             label.setFont(f)

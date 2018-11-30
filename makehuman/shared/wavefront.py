@@ -6,17 +6,17 @@ Handles WaveFront .obj 3D mesh files.
 
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Joel Palmius, Marc Flerackers, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 
-    This file is part of MakeHuman (www.makehuman.org).
+    This file is part of MakeHuman Community (www.makehumancommunity.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -50,7 +50,7 @@ def loadObjFile(path, obj = None):
     Parser does not support normals, and assumes all objects should be smooth
     shaded. Use duplicate vertices for achieving hard edges.
     """
-    if obj == None:
+    if obj is None:
         name = os.path.splitext( os.path.basename(path) )[0]
         obj = module3d.Object3D(name)
 
@@ -165,7 +165,7 @@ def writeObjFile(path, meshes, writeMTL=True, config=None, filterMaskedFaces=Tru
 
     fp.write(
         "# MakeHuman exported OBJ\n" +
-        "# www.makehuman.org\n\n")
+        "# www.makehumancommunity.org\n\n")
 
     if writeMTL:
         mtlfile = path.replace(".obj",".mtl")
@@ -244,7 +244,7 @@ def writeObjFile(path, meshes, writeMTL=True, config=None, filterMaskedFaces=Tru
         fp = open(mtlfile, 'w', encoding="utf-8")
         fp.write(
             '# MakeHuman exported MTL\n' +
-            '# www.makehuman.org\n\n')
+            '# www.makehumancommunity.org\n\n')
         for mesh in meshes:
             writeMaterial(fp, mesh.material, config)
         fp.close()

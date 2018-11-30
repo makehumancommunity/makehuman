@@ -4,17 +4,17 @@
 """
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Thomas Larsson, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 
-    This file is part of MakeHuman (www.makehuman.org).
+    This file is part of MakeHuman Community (www.makehumancommunity.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -253,7 +253,7 @@ class Skeleton(object):
                         # does not hava a bone with the same name as this bone. This bone will not receive any weights.
                         # This warning is rather serious: it means that one of the bones in your seleton will not have
                         # weights.
-                        log.warning("No explicit weight reference bone mapping for bone %s, and cannot implicitly map by name. This bone will not have any weights. This might be normal if this is for example a proxy only weighted to a few bones.", bone.name)
+                        log.debug("No explicit weight reference bone mapping for bone %s, and cannot implicitly map by name. This bone will not have any weights. This might be normal if this is for example a proxy only weighted to a few bones.", bone.name)
 
             if len(b_weights) > 0:
                 weights[bone.name] = b_weights

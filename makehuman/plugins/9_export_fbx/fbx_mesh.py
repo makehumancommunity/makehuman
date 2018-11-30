@@ -1,20 +1,20 @@
-#!/usr/bin/env python3
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
 """
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Thomas Larsson, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 
-    This file is part of MakeHuman (www.makehuman.org).
+    This file is part of MakeHuman Community (www.makehumancommunity.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -53,25 +53,15 @@ def writeObjectDefs(fp, meshes, nShapes, config):
     nMeshes = len(meshes)
 
     properties = [
-        ("Color",   "p_color_rgb",      [0.8,0.8,0.8]),
-        ("BBoxMin", "p_vector_3d",      [0,0,0]),
-        ("BBoxMax", "p_vector_3d",      [0,0,0]),
-        ("Primary Visibility", "p_bool", True),
-        ("Casts Shadows", "p_bool",     True),
-        ("Receive Shadows", "p_bool",   True)
+        (b"Color", ((0.8, 0.8, 0.8), "p_color_rgb", False)),
+        (b"BBoxMin", ((0.0, 0.0, 0.0), "p_vector_3d", False)),
+        (b"BBoxMax", ((0.0, 0.0, 0.0), "p_vector_3d", False)),
+        (b"Primary Visibility", (True, "p_bool", False)),
+        (b"Casts Shadows", (True, "p_bool", False)),
+        (b"Receive Shadows", (True, "p_bool", False))
     ]
 
     if config.binary:
-
-        properties = [
-            (b"Color", b"p_color_rgb", [0.8, 0.8, 0.8]),
-            (b"BBoxMin", b"p_vector_3d", [0, 0, 0]),
-            (b"BBoxMax", b"p_vector_3d", [0, 0, 0]),
-            (b"Primary Visibility", b"p_bool", True),
-            (b"Casts Shadows", b"p_bool", True),
-            (b"Receive Shadows", b"p_bool", True)
-        ]
-
         from . import fbx_binary
         elem = fbx_binary.get_child_element(fp, b'Definitions')
         fbx_binary.fbx_template_generate(elem, b"Geometry", (nMeshes + nShapes), b"FbxMesh", properties)
@@ -108,14 +98,10 @@ def writeGeometryProp(fp, mesh, config):
     coord = mesh.coord + config.offset
 
     properties = [
-        ("MHName", "p_string", "%sMesh" % mesh.name, False, True)
+        (b"MHName", "p_string", "%sMesh" % mesh.name, False, True)
     ]
 
     if config.binary:
-        key = key.encode('utf-8')
-        properties = [
-            (b"MHName", b"p_string", b"%sMesh" % bytes(mesh.name,encoding='utf-8'), False, True)
-        ]
         from . import fbx_binary
         elem = fbx_binary.get_child_element(fp, b'Objects')
         fbx_binary.fbx_data_mesh_element(elem, key, id, properties, coord, mesh.fvert, mesh.vnorm, mesh.texco, mesh.fuvs)
@@ -274,22 +260,14 @@ def writeMeshProp(fp, mesh, config):
     id,key = getId("Model::%sMesh" % mesh.name)
 
     properties = [
-        ("RotationActive", "p_bool", 1),
-        ("InheritType", "p_enum", 1),
-        ("ScalingMax", "p_vector_3d", [0,0,0]),
-        ("DefaultAttributeIndex", "p_integer", 0),
-        ("MHName", "p_string", mesh.name, False, True)
+        (b"RotationActive", "p_bool", 1),
+        (b"InheritType", "p_enum", 1),
+        (b"ScalingMax", "p_vector_3d", [0.0,0.0,0.0]),
+        (b"DefaultAttributeIndex", "p_integer", 0),
+        (b"MHName", "p_string", mesh.name, False, True)
     ]
 
     if config.binary:
-        properties = [
-            (b"RotationActive", b"p_bool", 1),
-            (b"InheritType", b"p_enum", 1),
-            (b"ScalingMax", b"p_vector_3d", [0, 0, 0]),
-            (b"DefaultAttributeIndex", b"p_integer", 0),
-            (b"MHName", b"p_string", mesh.name, False, True)
-        ]
-        key = key.encode()
         from . import fbx_binary
         elem = fbx_binary.get_child_element(fp, b'Objects')
         fbx_binary.fbx_data_model_element(elem, key, id, properties)

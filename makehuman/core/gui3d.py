@@ -4,17 +4,17 @@
 """
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Joel Palmius, Marc Flerackers
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 
-    This file is part of MakeHuman (www.makehuman.org).
+    This file is part of MakeHuman Community (www.makehumancommunity.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -311,7 +311,7 @@ class Category(View):
     def addTask(self, task):
         if task.name in self.tasksByName:
             raise KeyError('A task with this name already exists', task.name)
-        if task.sortOrder == None:
+        if task.sortOrder is None:
             orders = [t.sortOrder for t in self.tasks]
             o = 0
             while o in orders:
@@ -450,7 +450,7 @@ class Application(events3d.EventHandler):
         if category.parent:
             raise RuntimeError('The category is already attached')
 
-        if sortOrder == None:
+        if sortOrder is None:
             orders = [c.sortOrder for c in list(self.categories.values())]
             o = 0
             while o in orders:

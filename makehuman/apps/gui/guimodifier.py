@@ -6,17 +6,17 @@ Modifier taskview
 
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Glynn Clements, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 
-    This file is part of MakeHuman (www.makehuman.org).
+    This file is part of MakeHuman Community (www.makehumancommunity.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -49,6 +49,7 @@ from collections import OrderedDict
 import language
 import collections
 import io
+from mesh_operations import calculateSurface
 
 class ModifierTaskView(gui3d.TaskView):
     def __init__(self, category, name, label=None, saveName=None, cameraView=None):
@@ -162,15 +163,27 @@ class ModifierTaskView(gui3d.TaskView):
 
         age = human.getAgeYears()
         muscle = (human.getMuscle() * 100.0)
-        weight = (50 + (150 - 50) * human.getWeight())
         height = human.getHeightCm()
-        if G.app.getSetting('units') == 'metric':
-            units = 'cm'
+        if not G.app.getSetting('real_weight'):
+            weight = (50 + (150 - 50) * human.getWeight())
+            w_units = '%'
         else:
-            units = 'in'
-            height *= 0.393700787
+            bsa = calculateSurface(human.meshData, vertGroups=['body'])/100
+            # Estimating weight using Mosteller's formula for body surface area estimation
+            weight = bsa * bsa * 3600 / height
 
-        self.setStatus([ ['Gender',': %s '], ['Age',': %d '], ['Muscle',': %.2f%% '], ['Weight',': %.2f%% '], ['Height',': %.2f %s'] ], gender, age, muscle, weight, height, units)
+        if G.app.getSetting('units') == 'metric':
+            l_units = 'cm'
+            if G.app.getSetting('real_weight'):
+                w_units = 'kg'
+        else:
+            l_units = 'in.'
+            height *= 0.393700787
+            if G.app.getSetting('real_weight'):
+                w_units = 'lb.'
+                weight *= 2.20462
+
+        self.setStatus([ ['Gender',': %s  '], ['Age',': %d  '], ['Muscle',': %.2f %%  '], ['Weight',': %.2f %s  '], ['Height',': %.2f %s'] ], gender, age, muscle, weight, w_units, height, l_units)
 
     def setStatus(self, format, *args):
         G.app.statusPersist(format, *args)

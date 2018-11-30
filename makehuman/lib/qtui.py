@@ -4,17 +4,17 @@
 """
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Glynn Clements
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 
-    This file is part of MakeHuman (www.makehuman.org).
+    This file is part of MakeHuman Community (www.makehumancommunity.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -567,6 +567,7 @@ class Application(QtWidgets.QApplication, events3d.EventHandler):
         self.logger_event = log.getLogger('mh.event')
         self.eventHandlers = []
         # self.installEventFilter(self)
+        QtGui.qt_set_sequence_auto_mnemonic(False)
 
     def OnInit(self):
         import debugdump
@@ -590,6 +591,9 @@ class Application(QtWidgets.QApplication, events3d.EventHandler):
         #gl.OnExit()
 
     def stop(self):
+        print("ABOUT TO STOP APPLICATION")
+        # Explicitly stop thread to avoid a potential segfault on linux
+        self.messages.stop()
         self.callEvent('onStop', None)
         sys.exit()
         

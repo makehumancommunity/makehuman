@@ -4,17 +4,17 @@
 """ 
 **Project Name:**      MakeHuman
 
-**Product Home Page:** http://www.makehuman.org/
+**Product Home Page:** http://www.makehumancommunity.org/
 
 **Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
 
 **Authors:**           Joel Palmius
 
-**Copyright(c):**      MakeHuman Team 2001-2017
+**Copyright(c):**      MakeHuman Team 2001-2018
 
 **Licensing:**         AGPL3
 
-    This file is part of MakeHuman (www.makehuman.org).
+    This file is part of MakeHuman Community (www.makehumancommunity.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -41,7 +41,7 @@ import os
 import re
 import platform
 import string
-if sys.platform == 'win32':
+if sys.platform.startswith('win'):
     import winreg
 import log
 import getpath
@@ -126,13 +126,13 @@ class DebugDump(object):
         self.write("PLATFORM.PROCESSOR: %s", platform.processor())
         self.write("PLATFORM.UNAME.RELEASE: %s", platform.uname()[2])
 
-        if sys.platform == 'linux2':
-            self.write("PLATFORM.LINUX_DISTRIBUTION: %s", string.join(platform.linux_distribution()," "))
+        if sys.platform.startswith('linux'):
+            self.write("PLATFORM.LINUX_DISTRIBUTION: %s", ' '.join(platform.linux_distribution()))
             
-        if sys.platform.startswith("darwin"):
+        if sys.platform.startswith('darwin'):
             self.write("PLATFORM.MAC_VER: %s", platform.mac_ver()[0])
             
-        if sys.platform == 'win32':
+        if sys.platform.startswith('win'):
             self.write("PLATFORM.WIN32_VER: %s", " ".join(platform.win32_ver()))
 
         import numpy
