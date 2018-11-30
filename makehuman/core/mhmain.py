@@ -1348,9 +1348,9 @@ class MHApplication(gui3d.Application, mh.Application):
         if event.file != self.scene.file:
             return
 
-        if event.objectWasChanged:
-            from glmodule import setSceneLighting
-            setSceneLighting(self.scene)
+        #if event.objectWasChanged:
+        #    from glmodule import setSceneLighting
+        #    setSceneLighting(self.scene)
 
         for category in self.categories.values():
             self.callEventHandlers('onSceneChanged', event)
