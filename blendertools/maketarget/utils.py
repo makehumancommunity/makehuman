@@ -216,12 +216,22 @@ def getMyDocuments():
                 return name
         except Exception as e:
             print("Did not find path to My Documents folder")
-
+    if sys.platform.startswith('linux'):
+        try:
+            from .xdg_parser import XDG_PATHS
+            doc_folder = XDG_PATHS.get('DOCUMENTS', '')
+            if doc_folder and doc_folder != "":
+                print("Using " + doc_folder + " as user root")
+                return doc_folder
+        except:
+            print("Error when trying to get DOCUMENTS dir")
     return os.path.expanduser("~")
 
 
 def getMHDirectory():
-    return os.path.join(getMyDocuments(), "makehuman", "v1py3")
+    mydocs = getMyDocuments()
+    mhdir = os.path.join(mydocs, "makehuman", "v1py3")
+    return mhdir
 
 
 def getMHBlenderDirectory():

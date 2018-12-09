@@ -105,8 +105,7 @@ def goodName(name):
 
 def getFileName(pob, folder, ext):
     name = goodName(pob.name)
-    outdir = '%s/%s' % (folder, name)
-    outdir = os.path.realpath(os.path.expanduser(outdir))
+    outdir = os.path.join(folder,name)
     if not os.path.exists(outdir):
         print(("Creating directory %s" % outdir))
         try:
