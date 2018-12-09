@@ -109,14 +109,15 @@ class SkeletonLibrary(gui3d.TaskView, filecache.MetadataCacher):
             os.makedirs(self.userDataPath)
         self.paths = [self.userDataPath, self.sysDataPath]
 
-        self.filechooser = self.addRightWidget(fc.IconListFileChooser( \
+        self.filechooser = self.addRightWidget(fc.IconListFileChooser(
                                                     self.paths,
                                                     'mhskel',
                                                     'thumb',
                                                     name='Rig presets',
                                                     notFoundImage = mh.getSysDataPath('notfound.thumb'), 
                                                     noneItem = True, 
-                                                    doNotRecurse = True))
+                                                    doNotRecurse = True,
+                                                    stickyTags=gui3d.app.getSetting('makehumanTags')))
         self.filechooser.setIconSize(50,50)
         self.filechooser.enableAutoRefresh(False)
 

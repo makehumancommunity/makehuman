@@ -724,6 +724,9 @@ class Application(QtWidgets.QApplication, events3d.EventHandler):
         gl.OnExit()
 
     def stop(self):
+        print("ABOUT TO STOP APPLICATION")
+        # Explicitly stop thread to avoid a potential segfault on linux
+        self.messages.stop()
         self.callEvent('onStop', None)
         sys.exit()
         
