@@ -1713,9 +1713,9 @@ class MHApplication(gui3d.Application, mh.Application):
         # 4 - Symmetry toolbar
         toolbar = self.sym_toolbar = mh.addToolBar("Symmetry")
 
-        self.actions.symmetryR = action('symm1', self.getLanguageString('Symmmetry R>L'),     self.symmetryLeft)
-        self.actions.symmetryL = action('symm2', self.getLanguageString('Symmmetry L>R'),     self.symmetryRight)
-        self.actions.symmetry  = action('symm',  self.getLanguageString('Symmmetry'),         self.symmetry, toggle=True)
+        self.actions.symmetryR = action('symm1', self.getLanguageString('Symmetry R>L'),     self.symmetryLeft)
+        self.actions.symmetryL = action('symm2', self.getLanguageString('Symmetry L>R'),     self.symmetryRight)
+        self.actions.symmetry  = action('symm',  self.getLanguageString('Symmetry'),         self.symmetry, toggle=True)
 
 
         # 5 - Camera toolbar
