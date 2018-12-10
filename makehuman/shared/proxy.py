@@ -1007,7 +1007,8 @@ def _packStringList(strings):
     text = ''
     index = []
     for string in strings:
-        index.append(len(text))
+        asbytes = bytearray(text,'utf-8')
+        index.append(len(asbytes))
         text += string
     text = np.fromstring(text, dtype='S1')
     index = np.array(index, dtype=np.uint32)
