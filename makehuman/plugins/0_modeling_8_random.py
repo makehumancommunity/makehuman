@@ -130,12 +130,11 @@ def randomize(human, symmetry, macro, height, face, body):
     for m in modifiers:
         if m.fullName not in randomValues:
             randomValue = None
-            if m.groupName == 'head':
-                sigma = 0.1
-            elif m.fullName in ["forehead/forehead-nubian-less|more", "forehead/forehead-scale-vert-less|more"]:
+            if m.fullName in ["forehead/forehead-nubian-less|more", "forehead/forehead-scale-vert-less|more"]:
                 sigma = 0.02
                 # TODO add further restrictions on gender-dependent targets like pregnant and breast
-            elif "trans-horiz" in m.fullName or m.fullName == "hip/hip-trans-in|out":
+            elif m.fullName in ["hip/hip-trans-in|out", "torso/torso-trans-in|out", "neck/neck-trans-in|out", \
+                                "head/head-trans-in|out", "nose/nose-trans-in|out", "mouth/mouth-trans-in|out"]:
                 if symmetry == 1:
                     randomValue = m.getDefaultValue()
                 else:
@@ -145,7 +144,7 @@ def randomize(human, symmetry, macro, height, face, body):
                     mMin = max(mMin, m.getDefaultValue() - w/2)
                     mMax = min(mMax, m.getDefaultValue() + w/2)
                     randomValue = getRandomValue(mMin, mMax, m.getDefaultValue(), 0.1)
-            elif m.groupName in ["forehead", "eyebrows", "neck", "eyes", "nose", "ears", "chin", "cheek", "mouth"]:
+            elif m.groupName in ["head", "forehead", "eyebrows", "neck", "eyes", "nose", "ears", "chin", "cheek", "mouth"]:
                 sigma = 0.1
             elif m.groupName == 'macrodetails':
                 # TODO perhaps assign uniform random values to macro modifiers?
