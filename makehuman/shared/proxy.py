@@ -159,19 +159,20 @@ class Proxy:
         import files3d
         import guicommon
 
+        obj = False
         mesh = files3d.loadMesh(self.obj_file, maxFaces = self.max_pole)
         if not mesh:
             log.error("Failed to load %s", self.obj_file)
-
-        mesh.priority = self.z_depth           # Set render order
-        mesh.setCameraProjection(0)             # Set to model camera
-
-        obj = self.object = guicommon.Object(mesh, human.getPosition())
-        obj.proxy = self
-        obj.material = self.material
-        obj.setRotation(human.getRotation())
-        obj.setSolid(human.solid)    # Set to wireframe if human is in wireframe
-        # TODO perhaps other properties should be copied from human to object, such as subdivision state. For other hints, and duplicate code, see guicommon Object.setProxy()
+        else:
+            mesh.priority = self.z_depth           # Set render order
+            mesh.setCameraProjection(0)             # Set to model camera
+        
+            obj = self.object = guicommon.Object(mesh, human.getPosition())
+            obj.proxy = self
+            obj.material = self.material
+            obj.setRotation(human.getRotation())
+            obj.setSolid(human.solid)    # Set to wireframe if human is in wireframe
+            # TODO perhaps other properties should be copied from human to object, such as subdivision state. For other hints, and duplicate code, see guicommon Object.setProxy()
 
         # TODO why return both obj and mesh if you can access the mesh easily through obj.mesh?
         return mesh,obj
