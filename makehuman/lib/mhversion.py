@@ -93,7 +93,7 @@ class MHVersion:
 
         if os.path.exists(path):
             jsonin = None
-            with open(path,'r') as f:
+            with open(path, 'r', encoding='utf-8') as f:
                 jsonin = json.load(f)
 
             if not jsonin is None:
@@ -142,6 +142,6 @@ class MHVersion:
         if not self.isRelease is None:
             out["isRelease"] = self.isRelease
 
-        with open(path,'w') as f:
+        with open(path, 'w', encoding='utf-8') as f:
             json.dump(out,f, sort_keys=True, indent=4)
 

@@ -103,7 +103,7 @@ def downloadFile(ftp, filePath, destination, fileProgress):
 
 def parseContentsFile(filename):
     import io
-    f = io.open(filename, 'rU', encoding="utf-8")
+    f = io.open(filename, 'r', encoding="utf-8")
     fileData = f.read()
     contents = {}
     for l in fileData.split('\n'):

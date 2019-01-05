@@ -221,7 +221,7 @@ def loadModifierTaskViews(filename, human, category, taskviewClass=None):
     if not taskviewClass:
         taskviewClass = ModifierTaskView
 
-    data = json.load(io.open(filename, 'r'), object_pairs_hook=OrderedDict)
+    data = json.load(io.open(filename, 'r', encoding='utf-8'), object_pairs_hook=OrderedDict)
     taskViews = []
     # Create task views
     for taskName, taskViewProps in data.items():

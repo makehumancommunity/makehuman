@@ -128,7 +128,7 @@ def getBranchFromFile():
 
         if os.path.isfile(headFile):
 
-            with io.open(headFile,'r') as f:
+            with io.open(headFile,'r', encoding='utf-8') as f:
                 line = f.readline()
                 if line:
                     if line.startswith('ref'):
@@ -154,7 +154,7 @@ def getCommitFromFile(short = True):
 
         if os.path.isfile(commitFile):
 
-            with io.open(commitFile, 'r') as f:
+            with io.open(commitFile, 'r', encoding='utf-8') as f:
                 commit = f.readline().strip()
 
     if short and commit:

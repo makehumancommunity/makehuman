@@ -293,7 +293,7 @@ class Pose(AnimationTrack):
         """
         from collections import OrderedDict
         import json
-        mhupb = json.load(io.open(filename, 'r'), object_pairs_hook=OrderedDict)
+        mhupb = json.load(io.open(filename, 'r', encoding='utf-8'), object_pairs_hook=OrderedDict)
         self.name = mhupb['name']
         self.description = mhupb.get('description', '')
         self.tags = set([t.lower() for t in mhupb.get('tags', [])])
@@ -525,7 +525,7 @@ class VertexBoneWeights(object):
         """
         from collections import OrderedDict
         import json
-        weightsData = json.load(io.open(filename, 'r'), object_pairs_hook=OrderedDict)
+        weightsData = json.load(io.open(filename, 'r', encoding='utf-8'), object_pairs_hook=OrderedDict)
         log.message("Loaded vertex weights %s from file %s", weightsData.get('name', 'unnamed'), filename)
         result = VertexBoneWeights(weightsData['weights'], vertexCount, rootBone)
         result.license.fromJson(weightsData)
@@ -564,7 +564,7 @@ class VertexBoneWeights(object):
                    }
         jsondata.update(self.license.asDict())
 
-        f = io.open(filename, 'w')
+        f = io.open(filename, 'w', encoding='utf-8')
         json.dump(jsondata, f, indent=4, separators=(',', ': '))
         f.close()
 
@@ -1253,7 +1253,7 @@ def loadPoseFromMhpFile(filepath, skel):
     import io
 
     log.message("Loading MHP file %s", filepath)
-    fp = io.open(filepath, "rU", encoding="utf-8")
+    fp = io.open(filepath, "r", encoding="utf-8")
     valid_file = False
 
     boneMap = skel.getBoneToIdxMapping()

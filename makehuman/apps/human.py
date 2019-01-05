@@ -1476,7 +1476,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
         subdivide = False
 
-        with io.open(filename, 'rU', encoding="utf-8") as f:
+        with io.open(filename, 'r', encoding="utf-8") as f:
 
             for lh in list(G.app.loadHandlers.values()):
                 try:

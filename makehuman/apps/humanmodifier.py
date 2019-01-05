@@ -674,7 +674,7 @@ def loadModifiers(filename, human):
     from collections import OrderedDict
     modifiers = []
     lookup = OrderedDict()
-    data = json.load(io.open(filename, 'r'), object_pairs_hook=OrderedDict)
+    data = json.load(io.open(filename, 'r', encoding='utf-8'), object_pairs_hook=OrderedDict)
     for modifierGroup in data:
         groupName = modifierGroup['group']
         for mDef in modifierGroup['modifiers']:
@@ -708,7 +708,7 @@ def loadModifiers(filename, human):
     descFile = _tmp[0]+'_desc'+_tmp[1]
     hasDesc = OrderedDict([(key,False) for key in lookup.keys()])
     if os.path.isfile(descFile):
-        data = json.load(io.open(descFile, 'r'), object_pairs_hook=OrderedDict)
+        data = json.load(io.open(descFile, 'r', encoding='utf-8'), object_pairs_hook=OrderedDict)
         dCount = 0
         for mName, mDesc in data.items():
             try:

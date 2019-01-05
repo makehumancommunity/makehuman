@@ -330,7 +330,7 @@ class ZippedTargetsCrawler(TargetsCrawler):
 
         # Walk file path (not .npz archive) to find images to add to file list
         import io
-        with open(os.path.join(self.dataPath, 'images.list'), 'rU', encoding="utf-8") as imgfile:
+        with open(os.path.join(self.dataPath, 'images.list'), 'r', encoding="utf-8") as imgfile:
             for line in imgfile:
                 name = line.rstrip()
                 if not name.endswith('.png'):

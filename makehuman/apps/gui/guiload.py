@@ -60,7 +60,7 @@ class HumanFileSort(fc.FileSort):
         meta = {}
 
         import io
-        f = io.open(filename, 'rU', encoding="utf-8")
+        f = io.open(filename, 'r', encoding="utf-8")
         for line in f:
             line = line.strip()
             lineData = line.split()
@@ -136,7 +136,7 @@ class LoadTaskView(gui3d.TaskView, filecache.MetadataCacher):
         uuid = ''
         tags = set()
         if os.path.isfile(filename) and os.path.splitext(filename)[1] == '.mhm':
-            with io.open(filename, 'r') as f:
+            with io.open(filename, 'r', encoding='utf-8') as f:
                 for line in f:
                     if line and not line.startswith('#'):
                         data = line.strip().split()
