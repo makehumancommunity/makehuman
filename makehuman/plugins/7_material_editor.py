@@ -81,6 +81,12 @@ class MaterialEditorTaskView(gui3d.TaskView):
 
         self.materialBox = self.addRightWidget(gui.GroupBox('Material settings'))
 
+        # add a description box to inform about the asset
+        descBox = self.addLeftWidget(gui.GroupBox('Description'))
+        self.descrLbl = descBox.addWidget(gui.TextView(''))
+        self.descrLbl.setSizePolicy(gui.QtWidgets.QSizePolicy.Ignored, gui.QtWidgets.QSizePolicy.Preferred)
+        self.descrLbl.setWordWrap(True)
+
         if not shader.Shader.supported():
             log.notice('Shaders not supported')
             self.shaderList.setEnabled(False)
@@ -497,6 +503,12 @@ class MaterialEditorTaskView(gui3d.TaskView):
 
     def reloadMaterial(self):
         obj = self.getSelectedObject()
+
+        # update description
+        self.descrLbl.setText (obj.name + ":\n" +
+                str(len(obj.mesh.coord)) + " vertices\n" +
+                str(len(obj.mesh.fvert)) + " faces\n" +
+                str (obj.mesh.vertsPerFaceForExport) + " vertices per face.")
 
         if shader.Shader.supported():
             self.listShaders(obj.material)
