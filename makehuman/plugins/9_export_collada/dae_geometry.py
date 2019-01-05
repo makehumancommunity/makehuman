@@ -258,30 +258,31 @@ def writePolylist(fp, mesh, config):
     if config.useNormals:
         fp.write(
         '          <input offset="1" semantic="NORMAL" source="#%s-Normals"/>\n' % mesh.name +
-        '          <input offset="2" semantic="TEXCOORD" source="#%s-UV"/>\n' % mesh.name +
-        '          <vcount>')
+        '          <input offset="2" semantic="TEXCOORD" source="#%s-UV"/>\n' % mesh.name)
     else:
         fp.write(
-        '          <input offset="1" semantic="TEXCOORD" source="#%s-UV"/>\n' % mesh.name +
-        '          <vcount>')
+        '          <input offset="1" semantic="TEXCOORD" source="#%s-UV"/>\n' % mesh.name)
 
-    fp.write( ''.join(["4 " for fv in mesh.fvert]) )
+    vc = ''
+    p = ''
 
-    fp.write('\n' +
-        '          </vcount>\n'
-        '          <p>')
-    progress.step()
-
+    # get number of vertices per face
+    r = mesh.vertsPerFaceForExport
     for fn,fv in enumerate(mesh.fvert):
         fuv = mesh.fuvs[fn]
+        vc += str(r) + ' '
         if config.useNormals:
-            fp.write( ''.join([("%d %d %d " % (fv[n], fv[n], fuv[n])) for n in range(4)]) )
+            p += ''.join([("%d %d %d " % (fv[n], fv[n], fuv[n])) for n in range(r)])
         else:
-            fp.write( ''.join([("%d %d " % (fv[n], fuv[n])) for n in range(4)]) )
+            p += ''.join([("%d %d " % (fv[n], fuv[n])) for n in range(r)])
+
 
     fp.write(
-        '          </p>\n' +
-        '        </polylist>\n')
+    '          <vcount>' + vc +  '\n' +
+    '          </vcount>\n' +
+    '          <p>' + p + '\n' +
+    '          </p>\n' +
+    '        </polylist>\n')
     progress.step()
 
 #

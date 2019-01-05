@@ -203,6 +203,8 @@ def writeObjFile(path, meshes, writeMTL=True, config=None, filterMaskedFaces=Tru
     nVerts = 1
     nTexVerts = 1
     for mesh in meshes:
+        nPerFace = mesh.vertsPerFaceForExport
+        # print ("Export " + str (nPerFace) + "-faced mesh")
         fp.write("usemtl %s\n" % mesh.material.name)
         fp.write("g %s\n" % mesh.name)
 
@@ -212,13 +214,13 @@ def writeObjFile(path, meshes, writeMTL=True, config=None, filterMaskedFaces=Tru
                     if not mesh.face_mask[fn]:
                         continue
                     fuv = mesh.fuvs[fn]
-                    line = [" %d/%d/%d" % (fv[n]+nVerts, fuv[n]+nTexVerts, fv[n]+nVerts) for n in range(4)]
+                    line = [" %d/%d/%d" % (fv[n]+nVerts, fuv[n]+nTexVerts, fv[n]+nVerts) for n in range(nPerFace)]
                     fp.write("f" + "".join(line) + "\n")
             else:
                 for fn,fv in enumerate(mesh.fvert):
                     if not mesh.face_mask[fn]:
                         continue
-                    line = [" %d//%d" % (fv[n]+nVerts, fv[n]+nVerts) for n in range(4)]
+                    line = [" %d//%d" % (fv[n]+nVerts, fv[n]+nVerts) for n in range(nPerFace)]
                     fp.write("f" + "".join(line) + "\n")
         else:
             if mesh.has_uv:
@@ -226,13 +228,13 @@ def writeObjFile(path, meshes, writeMTL=True, config=None, filterMaskedFaces=Tru
                     if not mesh.face_mask[fn]:
                         continue
                     fuv = mesh.fuvs[fn]
-                    line = [" %d/%d" % (fv[n]+nVerts, fuv[n]+nTexVerts) for n in range(4)]
+                    line = [" %d/%d" % (fv[n]+nVerts, fuv[n]+nTexVerts) for n in range(nPerFace)]
                     fp.write("f" + "".join(line) + "\n")
             else:
                 for fn,fv in enumerate(mesh.fvert):
                     if not mesh.face_mask[fn]:
                         continue
-                    line = [" %d" % (fv[n]+nVerts) for n in range(4)]
+                    line = [" %d" % (fv[n]+nVerts) for n in range(nPerFace)]
                     fp.write("f" + "".join(line) + "\n")
 
         nVerts += len(mesh.coord)
