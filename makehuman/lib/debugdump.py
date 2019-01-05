@@ -40,7 +40,7 @@ import sys
 import os
 import re
 import platform
-import string
+import locale
 if sys.platform.startswith('win'):
     import winreg
 import log
@@ -113,6 +113,7 @@ class DebugDump(object):
         self.write("DEFAULT ENCODING: %s", sys.getdefaultencoding())
         self.write("FILESYSTEM ENCODING: %s", sys.getfilesystemencoding())
         self.write("STDOUT ENCODING: %s", sys.stdout.encoding)
+        self.write("LOCALE PREFERRED ENCODING: %s", locale.getpreferredencoding(False))
         self.write("WORKING DIRECTORY: %s", getpath.pathToUnicode(os.getcwd()))
         self.write("HOME LOCATION: %s", getpath.pathToUnicode(getpath.getHomePath()))
         syspath = os.path.pathsep.join( [getpath.pathToUnicode(p) for p in sys.path] )
