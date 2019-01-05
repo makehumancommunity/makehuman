@@ -98,8 +98,13 @@ class HelpTaskView(gui3d.TaskView):
 
         @self.versionButton.mhEvent
         def onClicked(event):
-            version_string = mh.getVersionDigitsStr() + ' ' + gitutils.getCurrentBranch() \
-                             + ':' + gitutils.getCurrentCommit(short=True)
+            version_string = ''
+            if mh.getVersionDigitsStr():
+                version_string += mh.getVersionDigitsStr()
+            if gitutils.getCurrentBranch():
+                version_string += ' ' + gitutils.getCurrentBranch()
+            if gitutils.getCurrentCommit(short=True):
+                version_string += ':' + gitutils.getCurrentCommit(short=True)
             gui3d.app.clipboard().setText(version_string)
             
     def onShow(self, event):

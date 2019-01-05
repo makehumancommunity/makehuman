@@ -133,7 +133,7 @@ def loadRecord(archivePath, recordID):
 
     import io.open
     time1 = time.time()
-    f = io.open(archivePath, 'rU', encoding="utf-8")
+    f = io.open(archivePath, 'r', encoding="utf-8")
     record = None
     for line in f:
         if line.find(recordID) != -1:
@@ -161,7 +161,7 @@ def searchRecord(archivePath, field):
     """
     import io
     time1 = time.time()
-    f = io.open(archivePath, 'rU', encoding="utf-8")
+    f = io.open(archivePath, 'r', encoding="utf-8")
     recordIDs = []
     for line in f:
         if line.find(field) != -1:

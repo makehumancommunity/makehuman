@@ -84,7 +84,7 @@ def inFile(path):
         if not os.path.isfile(path):
             yield []
             return
-        with io.open(path, 'rU', encoding="utf-8") as f:
+        with io.open(path, 'r', encoding="utf-8") as f:
             yield f
     except:
         log.error('Failed to load file %s', path, exc_info=True)
@@ -1044,7 +1044,7 @@ class MHApplication(gui3d.Application, mh.Application):
         self.bgTopLeftColor = [0.312, 0.312, 0.312]
         self.bgTopRightColor = [0.312, 0.312, 0.312]
 
-        f = io.open(os.path.join(mh.getSysDataPath("themes/"), theme + ".mht"), 'rU')
+        f = io.open(os.path.join(mh.getSysDataPath("themes/"), theme + ".mht"), 'r', encoding='utf-8')
 
         update_log = False
         for data in f.readlines():
@@ -1093,7 +1093,7 @@ class MHApplication(gui3d.Application, mh.Application):
         log.debug("Loaded theme %s", mh.getSysDataPath('themes/'+theme+'.mht'))
 
         try:
-            f = io.open(mh.getSysDataPath('themes/%s.qss' % theme), 'r')
+            f = io.open(mh.getSysDataPath('themes/%s.qss' % theme), 'r', encoding='utf-8')
             qStyle = "\n".join(f.readlines())
             self.setStyleSheet(qStyle)
             # Also set stylesheet on custom slider style

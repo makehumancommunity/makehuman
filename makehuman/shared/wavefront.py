@@ -54,7 +54,7 @@ def loadObjFile(path, obj = None):
         name = os.path.splitext( os.path.basename(path) )[0]
         obj = module3d.Object3D(name)
 
-    objFile = io.open(path, 'rU', encoding="utf-8")
+    objFile = io.open(path, 'r', encoding="utf-8")
 
     fg = None
     mtl = None

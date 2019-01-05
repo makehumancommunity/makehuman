@@ -94,7 +94,7 @@ class Skeleton(object):
         import getpath
         import os
         self._clear()
-        skelData = json.load(io.open(filepath, 'r'), object_pairs_hook=OrderedDict)
+        skelData = json.load(io.open(filepath, 'r', encoding='utf-8'), object_pairs_hook=OrderedDict)
 
         self.name = skelData.get("name", self.name)
         self.version = int(skelData.get("version", self.version))
@@ -184,7 +184,7 @@ class Skeleton(object):
         jsondata["joints"] = self.joint_pos_idxs
         jsondata["planes"] = self.planes
 
-        f = io.open(filename, 'w')
+        f = io.open(filename, 'w',encoding='utf-8')
         json.dump(jsondata, f, indent=4, separators=(',', ': '))
         f.close()
 
@@ -1450,7 +1450,7 @@ def load(filename, mesh=None):
 
 def peekMetadata(filename):
     import json
-    skelData = json.load(io.open(filename, 'r'))
+    skelData = json.load(io.open(filename, 'r', encoding='utf-8'))
     desc = skelData.get("description", "")
     name = skelData.get("name", "Skeleton")
     tags = set( [s.lower() for s in skelData.get("tags", [])] )

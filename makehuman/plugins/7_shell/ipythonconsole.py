@@ -142,7 +142,7 @@ class IPythonConsoleWidget(QtWidgets.QWidget, gui.Widget):
 
         ipy_stylesheet_path = getpath.getSysDataPath('themes/%s_console.css' % theme)
         try:
-            with open(ipy_stylesheet_path, 'r') as css_file:
+            with open(ipy_stylesheet_path, 'r', encoding='utf-8') as css_file:
                 stylesheet = css_file.read()
         except IOError:
             # No file to load, use default theme

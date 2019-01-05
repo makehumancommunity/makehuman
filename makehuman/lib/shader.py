@@ -326,7 +326,7 @@ class Shader(object):
 
     @staticmethod
     def createShader(file, type, defines = [], defineables = None):
-        with io.open(file, 'rU') as f:
+        with io.open(file, 'r', encoding='utf-8') as f:
             source = f.read()
         if "#version" not in source:
             log.warning("The shader source in %s does not contain an explicit GLSL version declaration. This could cause problems with some compilers.", file)

@@ -84,7 +84,7 @@ class ScriptingView(gui3d.TaskView):
                 return
 
             if(os.path.exists(filename)):
-                contents = io.open(filename, 'rU', encoding="utf-8").read()
+                contents = io.open(filename, 'r', encoding="utf-8").read()
                 self.scriptText.setText(contents)
                 dlg = gui.Dialog()
                 dlg.prompt("Load script","File was loaded in an acceptable manner","OK")

@@ -563,7 +563,7 @@ class RMRScene:
         self.lights = []
         RMRLight.lightCounter = 0
         path = os.path.join(lightsFolderPath,lightFile)
-        fileDescriptor = io.open(path)
+        fileDescriptor = io.open(path, 'r', encoding='utf-8')
 
         for data in fileDescriptor:
             #print (data)

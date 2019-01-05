@@ -338,7 +338,7 @@ def loadProxy(human, path, type="Clothes"):
 def loadTextProxy(human, filepath, type="Clothes"):
     import io
     try:
-        fp = io.open(filepath, "rU", encoding="utf-8")
+        fp = io.open(filepath, "r", encoding="utf-8")
     except IOError:
         log.error("*** Cannot open %s", filepath)
         return None
@@ -987,7 +987,7 @@ def peekMetadata(proxyFilePath, proxyType=None):
 
     # ASCII proxy file
     import io
-    fp = io.open(proxyFilePath, 'rU', encoding="utf-8")
+    fp = io.open(proxyFilePath, 'r', encoding="utf-8")
     uuid = None
     tags = set()
     for line in fp:

@@ -330,7 +330,7 @@ class Material(object):
         import io
         log.debug("Loading material from file %s", filename)
         try:
-            f = io.open(filename, "rU", encoding="utf-8")
+            f = io.open(filename, "r", encoding="utf-8")
         except:
             f = None
         if f is None:
@@ -1445,7 +1445,7 @@ class UVMap:
 
 def loadUvObjFile(filepath):
     import io
-    fp = io.open(filepath, "rU", encoding="utf-8")
+    fp = io.open(filepath, "r", encoding="utf-8")
     uvs = []
     fuvs = []
     for line in fp:
@@ -1462,7 +1462,7 @@ def loadUvObjFile(filepath):
 def peekMetadata(filename):
     import io
     try:
-        f = io.open(filename, "rU", encoding="utf-8")
+        f = io.open(filename, "r", encoding="utf-8")
     except:
         f = None
     if f is None:
