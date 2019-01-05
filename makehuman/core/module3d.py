@@ -629,7 +629,14 @@ class Object3D(object):
         self.group = np.zeros(nfaces, dtype=np.uint16)
         self.face_mask = np.ones(nfaces, dtype=bool)
 
+        # preset number of vertices for all export formats to 4
+        self.vertsPerFaceForExport = 4
         if nfaces != 0:
+
+            # evaluate if we have 3 or 4 vertices per face, do it here so it works for npz or obj file
+            if len(verts[0]) == 4 and verts[0][0] == verts[0][3]:
+                    self.vertsPerFaceForExport = 3
+
             self.fvert[...] = verts
             if uvs is not None:
                 self.fuvs[...] = uvs

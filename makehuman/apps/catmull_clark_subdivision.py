@@ -60,6 +60,7 @@ class SubdivisionObject(Object3D):
 
         self.MAX_FACES = object.MAX_FACES
         self.cameraMode = object.cameraMode
+        self.vertsPerFaceForExport = object.vertsPerFaceForExport
         self.visibility = object.visibility
         self.pickable = object.pickable
         self.transparentPrimitives = object.transparentPrimitives * 4
