@@ -4830,6 +4830,6 @@
         ]
     },
     "version": 110,
-    "tags": ["facial bones", "detailed hands", "detailed feet"],
+    "tags": ["facial bones", "detailed hands", "detailed feet", "MakeHuman™"],
     "weights_file": "default_weights.mhw"
 }
