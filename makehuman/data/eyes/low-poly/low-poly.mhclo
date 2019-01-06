@@ -29,6 +29,8 @@ uuid 1cc97a30-85a1-42e6-a9f7-b3e753732baa
 basemesh hm08
 
 name Low-Poly
+tag MakeHuman™
+
 obj_file low-poly.obj
 x_scale 5399 11998 1.7412
 z_scale 962 5320 2.2613
