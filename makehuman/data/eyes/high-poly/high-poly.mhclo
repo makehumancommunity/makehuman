@@ -28,6 +28,8 @@ uuid 2c12f43b-1303-432c-b7ce-d78346baf2e6
 basemesh hm08
 
 name HighPolyEyes
+tag MakeHuman™
+
 obj_file high-poly.obj
 x_scale 5399 11998 1.6482
 z_scale 962 5320 2.2795
