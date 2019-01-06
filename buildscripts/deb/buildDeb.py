@@ -12,7 +12,7 @@ MakeHuman debian package build script
 
 **Authors:**           Joel Palmius, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2018
+**Copyright(c):**      MakeHuman Team 2001-2019
 
 **Licensing:**         AGPL3
 
