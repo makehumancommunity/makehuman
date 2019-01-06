@@ -331,6 +331,8 @@ class SettingsTaskView(gui3d.TaskView):
         text = self.countEdit.text
         if text.isdigit():
             gui3d.app.setSetting('tagCount', int(text))
+        else:
+            self.countEdit.setText(str(gui3d.app.getSetting('tagCount')))
 
 def load(app):
     category = app.getCategory('Settings')
