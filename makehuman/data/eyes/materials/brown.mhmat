@@ -1,6 +1,8 @@
 # Material definition for Eye_brown
 
 name Eye_brown
+tag MakeHuman™
+
 ambientColor 0.11 0.11 0.11
 diffuseColor 1.0 1.0 1.0
 specularColor 1.0 1.0 1.0
