@@ -2,7 +2,7 @@
 
 ##
 # PyInstaller build script for MakeTarget standalone by Jonas Hauquier
-# Part of Makehuman (www.makehuman.org)
+# Part of Makehuman (www.makehumancommunity.org)
 # 
 # This script builds a linux one-file executable package (might also work for 
 # MacOS, not tested).

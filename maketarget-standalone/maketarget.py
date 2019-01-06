@@ -16,7 +16,7 @@ Commandline MakeTarget tool
 
 **Licensing:**         AGPL3
 
-    This file is part of MakeHuman (www.makehuman.org).
+    This file is part of MakeHuman (www.makehumancommunity.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -31,7 +31,7 @@ Commandline MakeTarget tool
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-**Coding Standards:**  See http://www.makehuman.org/node/165
+Homepage:  http://www.makehumancommunity.org/
 
 Abstract
 --------

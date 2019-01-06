@@ -317,7 +317,7 @@ class LicenseInfo(object):
         self.author = "MakeHuman Team"
         self.license = "AGPL3"
         self.homepage = "http://www.makehumancommunity.org"
-        self.copyright = "(c) MakeHuman.org 2001-2018"
+        self.copyright = "(c) www.makehumancommunity.org 2001-2018"
         self._keys = ["author", "license", "copyright", "homepage"]
         self._customized = False
 

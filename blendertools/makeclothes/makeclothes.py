@@ -14,7 +14,7 @@
 
 **Licensing:**         AGPL3
 
-    This file is part of MakeHuman (www.makehuman.org).
+    This file is part of MakeHuman (www.makehumancommunity.org).
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -1942,12 +1942,12 @@ def init():
 
     bpy.types.Scene.MCLicense = StringProperty(
         name="License",
-        default="AGPL3 (see also http://www.makehuman.org/doc/node/external_tools_license.html)",
+        default="AGPL3 (see also http://www.makehumancommunity.org/content/license.html)",
         maxlen=256)
 
     bpy.types.Scene.MCHomePage = StringProperty(
         name="HomePage",
-        default="http://www.makehuman.org/",
+        default="http://www.makehumancommunity.org//",
         maxlen=256)
 
     bpy.types.Scene.MCTag1 = StringProperty(

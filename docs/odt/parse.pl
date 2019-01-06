@@ -3,7 +3,7 @@
 use File::Basename;
 
 system "rm -f unescaped.xml docexport.xml";
-system "wget http://www.makehuman.org/docexport.xml";
+system "wget http://www.makehumancommunity.org//docexport.xml";
 
 open(FIL,"docexport.xml") || die;
 open(UT,">unescaped.xml") || die;
@@ -26,11 +26,11 @@ while($inlin = <FIL>)
   $inlin =~ s/^ +//g;
   $inlin =~ s/ alt="[^"]*"//g;
   $inlin =~ s/<a href="([^"]*)">\s*<img src="([^"]*)"/<a href="$1"><img src="$1"/g;
-  $inlin =~ s/src="http:\/\/www.makehuman.org/src="/g;
-  $inlin =~ s/src="http:\/\/makehuman.org/src="/g;
+  $inlin =~ s/src="http:\/\/www.makehumancommunity.org/src="/g;
+  $inlin =~ s/src="http:\/\/www.makehumancommunity.org/src="/g;
   $inlin =~ s/\/sites\/mhnew.jwp.se\/files\///g;
-  $inlin =~ s/\/sites\/makehuman.org\/files\///g;
-  $inlin =~ s/\/sites\/www.makehuman.org\/files\///g;
+  $inlin =~ s/\/sites\/www.makehumancommunity.org\/files\///g;
+  $inlin =~ s/\/sites\/www.makehumancommunity.org\/files\///g;
   $inlin =~ s/"\/images\//"_images\//g;
   $inlin =~ s/ style="[^"]*"//g;
   $inlin =~ s/ class="[^"]*"//g;
@@ -207,7 +207,7 @@ foreach $volume (@volumes)
 
       $xpath =~ s/[^0-9]//g;
 
-      print ANA "http://www.makehuman.org/node/$xpath image $img is too large ($xp" . "x$yp)\n";
+      print ANA "http://www.makehumancommunity.org//node/$xpath image $img is too large ($xp" . "x$yp)\n";
     }
   }
 

@@ -10,7 +10,7 @@
     <xsl:variable name="sid" select="Sid" />
     <xsl:variable name="nid" select="Nid" />
     <xsl:variable name="title" select="title" />
-    <xsl:variable name="root" select="'http://www.makehuman.org/node/'" />
+    <xsl:variable name="root" select="'http://www.makehumancommunity.org//node/'" />
     <xsl:for-each select="sectionbody">
       <xsl:for-each select=".//*[@class]">
         <xsl:value-of select="$root" /><xsl:value-of select="$sid" /><xsl:text> has a tag with a CLASS parameter.

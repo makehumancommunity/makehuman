@@ -51,7 +51,7 @@ STEP 5 HOW TO REPORT ERRORS
 ---------------------------
 If makehuman doesn't start, write a forum post under 
 
-  http://www.makehuman.org/forum/index.php
+  http://www.makehumancommunity.org/forum/index.php
 
 In this report you should include exactly what linux distribution you
 are using and at least the contents of the file

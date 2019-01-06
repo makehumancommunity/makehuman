@@ -4,13 +4,13 @@ Name:           PACKAGE_NAME
 Summary:        MakeHuman
 Version:        VER
 Release:        1
-URL:            http://www.makehuman.org
+URL:            http://www.makehumancommunity.org/
 License:        AGPLv3
 Group:          Applications/Graphics
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildRequires:  mercurial
 BuildRequires:  python
-Vendor:         MakeHuman.org
+Vendor:         www.makehumancommunity.org
 Packager:       Joel Palmius <joepal1976@hotmail.com>
 Provides:       makehuman
 Requires:       python3, python3-numpy python3-pyopengl python3-QtPy
@@ -35,7 +35,7 @@ Wavefront .obj, Stereolithography (.stl).
 liberal license for output content. This means that artists are given the 
 freedom to use their creations for both commercial and non-commercial 
 purposes. The copyright © 2001-2018 is retained by the MakeHuman™ Team
-(makehuman.org) which grants you permission to use released code under the GNU 
+(www.makehumancommunity.org) which grants you permission to use released code under the GNU
 Affero General Public License 3.0 (AGPL).
 
 %prep

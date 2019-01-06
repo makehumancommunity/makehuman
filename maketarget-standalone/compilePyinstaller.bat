@@ -1,5 +1,5 @@
 :: PyInstaller build script for MakeTarget standalone by Jonas Hauquier
-:: Part of Makehuman (www.makehuman.org)
+:: Part of Makehuman (www.makehumancommunity.org)
 ::
 :: This script builds a windows one-file executable for the maketarget app.
 :: To run this you need to download and extract pyinstaller in the pyinstaller

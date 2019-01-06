@@ -181,5 +181,5 @@ More information:
 -----------------
 
 For more specific details you can contact the author Jonas Hauquier at the
-makehuman.org website.
+www.makehumancommunity.org website.
 

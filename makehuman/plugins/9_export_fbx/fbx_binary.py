@@ -636,7 +636,7 @@ def fbx_header_elements(root, config, filepath, time=None):
     time is expected to be a datetime.datetime object, or None (using now() in this case).
     """
     import makehuman
-    app_vendor = "MakeHuman.org"
+    app_vendor = "www.makehumancommunity.org"
     app_name = "MakeHuman"
     app_ver = makehuman.getVersionStr()
 

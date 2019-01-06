@@ -14,7 +14,7 @@ A. The MakeHuman Source code and data
 
 MakeHuman source (all files that include code) and data (3d models, 3d morphings, images, other binary data and so forth) are released under AGPL with the exception described in section C.
 
-Copyright (C) 2001-2015  MakeHuman Team (makehuman.org)
+Copyright (C) 2001-2015  MakeHuman Team (www.makehumancommunity.org)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -248,7 +248,7 @@ The short version of CC0 is as follows:
 
 See also long version of CC0 (section D)
 
-For an elaboration and clarification on our intention and interpretation of these license terms see the License Explanation: http://www.makehuman.org/content/license_explanation.html
+For an elaboration and clarification on our intention and interpretation of these license terms see the License Explanation: http://www.makehumancommunity.org/content/license_explanation.html
 
 
 D. CC0 1.0 Universal
