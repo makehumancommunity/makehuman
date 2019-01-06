@@ -8,7 +8,7 @@ Plugin to apply custom targets.
 
 **Product Home Page:** http://www.makehumancommunity.org/
 
-**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
+**Github Code Home Page:**    https://github.com/makehumancommunity/
 
 **Authors:**           Eduardo Menezes de Morais, Jonas Hauquier
 

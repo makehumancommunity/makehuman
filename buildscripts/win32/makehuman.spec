@@ -7,7 +7,7 @@ MakeHuman pyinstaller spec file for Windows build
 
 **Product Home Page:** http://www.makehumancommunity.org/
 
-**Code Home Page:**    https://bitbucket.org/MakeHuman/makehuman/
+**Github Code Home Page:**    https://github.com/makehumancommunity/
 
 **Authors:**           Jonas Hauquier, Benjamin A Lau, Joel Palmius
 
