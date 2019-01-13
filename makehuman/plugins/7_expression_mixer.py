@@ -99,6 +99,8 @@ class ExpressionMixerTaskView(gui3d.TaskView):
         self.modifiers = {}
 
         savebox = self.addRightWidget(gui.GroupBox("Save"))
+        loadbox = self.addRightWidget(gui.GroupBox('Load'))
+        resetbox = self.addRightWidget(gui.GroupBox('Reset'))
 
         self.nameField = savebox.addWidget(TextEdit("Name"))
         self.descrField = savebox.addWidget(TextEdit("Description"))
@@ -114,14 +116,19 @@ class ExpressionMixerTaskView(gui3d.TaskView):
         self.licenseField.setValue(lic.license)
         self.websiteField.setValue(lic.homepage)
         self.descrField.setValue("No description set")
-        self.tagsField.setValue("no tag;expression")
+        self.tagsField.setValue("")
 
-        self.saveBtn = savebox.addWidget(gui.BrowseButton('save', "Save pose"))
+        self.saveBtn = savebox.addWidget(gui.BrowseButton(mode='save', label="Save pose"))
         self.saveBtn.setFilter("MakeHuman blend pose file (*.mhpose)")
         savepath = getpath.getDataPath('expressions')
         if not os.path.exists(savepath):
             os.makedirs(savepath)
         self.saveBtn.setDirectory(getpath.getDataPath('expressions'))
+
+        self.loadBtn = loadbox.addWidget(gui.BrowseButton(mode='open', label='Load pose'))
+        self.loadBtn.setFilter('MakeHuman Poses (*.mhpose)')
+
+        self.resetBtn = resetbox.addWidget(gui.Button('Reset'))
 
         @self.saveBtn.mhEvent
         def onClicked(path):
@@ -130,13 +137,21 @@ class ExpressionMixerTaskView(gui3d.TaskView):
                     path = path + ".mhpose"
                 self.saveCurrentPose(path)
 
+        @self.loadBtn.mhEvent
+        def onClicked(path):
+            if os.path.isfile(path):
+                self.loadPose(path)
+
+        @self.resetBtn.mhEvent
+        def onClicked(event):
+            self.resetExpression()
+
     def updatePose(self):
         posenames = []
         posevalues = []
-        for pname,pval in list(self.modifiers.items()):
-            if pval != 0:
-                posenames.append(pname)
-                posevalues.append(pval)
+        for pname,pval in self.modifiers.items():
+            posenames.append(pname)
+            posevalues.append(pval)
         if len(posenames) == 0:
             return
 
@@ -165,20 +180,21 @@ class ExpressionMixerTaskView(gui3d.TaskView):
         box = self.addLeftWidget(gui.SliderBox("Expressions"))
         # Create sliders
         for posename in self.poseunit_names:
-            slider = box.addWidget(ExprSlider(posename, self))
-            @slider.mhEvent
-            def onChange(event):
-                slider = event
-                self.modifiers[slider.posename] = slider.getValue()
-                self.updatePose()
+            if not posename.lower() == 'rest':
+                slider = box.addWidget(ExprSlider(posename, self))
+                @slider.mhEvent
+                def onChange(event):
+                    slider = event
+                    self.modifiers[slider.posename] = slider.getValue()
+                    self.updatePose()
 
-            @slider.mhEvent
-            def onChanging(event):
-                slider = event
-                self.modifiers[slider.posename] = slider.changingValue
-                self.updatePose()
+                @slider.mhEvent
+                def onChanging(event):
+                    slider = event
+                    self.modifiers[slider.posename] = slider.changingValue
+                    self.updatePose()
 
-            self.sliders.append(slider)
+                self.sliders.append(slider)
 
     def updateGui(self):
         for slider in self.sliders:
@@ -202,11 +218,6 @@ class ExpressionMixerTaskView(gui3d.TaskView):
         if gui3d.app.getSetting('cameraAutoZoom'):
             gui3d.app.setFaceCamera()
 
-
-    def onHumanChanging(self, event):
-        if event.change not in ['expression', 'material']:
-            self.resetTargets()
-
     def saveCurrentPose(self, filename):
         import makehuman
         unitpose_values = dict([(m,v) for m, v in self.modifiers.items() if v != 0])
@@ -226,20 +237,35 @@ class ExpressionMixerTaskView(gui3d.TaskView):
         json.dump(data, io.open(filename, 'w', encoding='utf-8'), indent=4)
         log.message("Saved pose as %s" % filename)
 
-    def resetTargets(self):
-        return
+    def loadPose(self, filename):
 
-        #log.debug("EXPRESSION RESET %d targets" % len(self.targets))
-        if self.targets:
-            human = gui3d.app.selectedHuman
-            for target in self.targets:
-                human.setDetail(target, 0)
-            try:
-                del algos3d._targetBuffer[target]
-            except KeyError:
-                pass
-            self.targets = {}
-            human.applyAllTargets()
+        data = json.load(io.open(filename, 'r', encoding='utf-8'))
+
+        self.nameField.setValue(data.get('name',''))
+        self.descrField.setValue(data.get('description',''))
+        self.authorField.setValue(data.get('author',''))
+        self.copyrightField.setValue(data.get('copyright',''))
+        self.licenseField.setValue(data.get('license',''))
+        self.websiteField.setValue(data.get('homepage',''))
+        tags = ';'.join(data.get('tags',['']))
+        self.tagsField.setValue(tags)
+        for m, v in data.get('unit_poses').items():
+            self.modifiers[m] = v
+
+        for slider in self.sliders:
+            slider.setValue(self.modifiers.get(slider.posename))
+            slider.update()
+
+        self.updatePose()
+
+        self.saveBtn.setEnabled(True)
+
+    def resetExpression(self):
+        for k in self.modifiers.keys():
+            self.modifiers[k] = 0
+        for slider in self.sliders:
+            slider.setValue(0)
+        self.updatePose()
 
     def onHumanChanged(self, event):
         # TODO reset?
