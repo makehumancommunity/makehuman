@@ -272,15 +272,18 @@ class MaterialTaskView(gui3d.TaskView, filecache.MetadataCacher):
         Produce a portable path for writing to file.
         """
         # TODO move as helper func to material module
-        if objFile:
-            objFile = getpath.canonicalPath(objFile)
-            if os.path.isfile(objFile):
-                objFile = os.path.dirname(objFile)
-            searchPaths = [ objFile ]
-        else:
-            searchPaths = []
+        if filepath:
+            if objFile:
+                objFile = getpath.canonicalPath(objFile)
+                if os.path.isfile(objFile):
+                    objFile = os.path.dirname(objFile)
+                searchPaths = [ objFile ]
+            else:
+                searchPaths = []
 
-        return getpath.getJailedPath(filepath, searchPaths)
+            return getpath.getJailedPath(filepath, searchPaths)
+        else:
+            return ''
 
     def getMaterialPath(self, relPath, objFile = None):
         if objFile:
