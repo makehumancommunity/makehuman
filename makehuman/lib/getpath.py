@@ -404,6 +404,13 @@ def getJailedPath(filepath, relativeTo, jailLimits=[getDataPath(), getSysDataPat
                 return True
         return False
 
+    # These paths may become messed up when using symlinks for user home.
+    # Make sure we use the same paths when calculating relative paths. 
+    filepath = os.path.realpath(filepath)
+
+    if relativeTo is str:
+        relativeTo = os.path.realpath(relativeTo)
+
     if _withinJail(filepath):
         relPath = getRelativePath(filepath, relativeTo, strict=True)
         if relPath:
