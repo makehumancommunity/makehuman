@@ -87,24 +87,8 @@ def _toUnicode(msg, *args):
         else:
             raise
 
-    if isinstance(msg_, str):
-        return msg_
-    elif isinstance(msg_, str):
-        try:
-            return msg_.decode(sys.getdefaultencoding())
-        except UnicodeError:
-            pass
-        try:
-            return msg_.decode(sys.getfilesystemencoding())
-        except UnicodeError:
-            pass
-        try:
-            import locale
-            return msg_.decode(locale.getpreferredencoding())
-        except UnicodeError:
-            pass
-
-        return msg_.decode('UTF-8', 'replace')
+    if isinstance(msg_, bytes):
+        return str(msg_, encoding='utf-8')
     else:
         return msg_
 
@@ -174,6 +158,7 @@ class NoiseFilter(logging.Filter):
 
 class DowngradeFilter(logging.Filter):
     def __init__(self, level):
+        super(DowngradeFilter, self).__init__()
         self.level = level
 
     def filter(self, record):
@@ -208,8 +193,9 @@ class SplashLogHandler(logging.Handler):
 
 class StatusLogHandler(logging.Handler):
     def emit(self, record):
-        if G.app is not None and G.app.statusBar is not None:
-            G.app.statusBar.showMessage("%s", self.format(record))
+        if G.app is not None and G.app.statusBar is not None and record.levelno >= ERROR:
+            msg = 'An ERROR Occurred. Check Utilities/Logs For More Information! Error Message:  {:s}'.format(record.getMessage())
+            G.app.statusBar.temporaryMessage("%s", msg, msec=10000)
 
 class ApplicationLogHandler(logging.Handler):
     def emit(self, record):

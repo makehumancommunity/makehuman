@@ -1512,7 +1512,7 @@ class SplashScreen(QtWidgets.QSplashScreen):
     def setProgress(self, progress):
         self.progress = float(progress)
         if self.progress < 0:
-            self.progress == 0.0
+            self.progress = 0.0
         if self.progress > 1:
             self.progress = 1.0
 
@@ -1560,6 +1560,7 @@ class StatusBar(QtWidgets.QStatusBar, Widget):
         self._perm = QtWidgets.QLabel()
         self.addWidget(self._perm, 1)
         self.duration = 2000
+        self.__old_text = []
 
     def showMessage(self, text, *args):
         if isinstance(text,list):
@@ -1582,6 +1583,20 @@ class StatusBar(QtWidgets.QStatusBar, Widget):
             text = getLanguageString(text)
         text = text % args
         self._perm.setText(text)
+
+    def temporaryMessage(self, text, *args, msec=2000):
+        timer = QtCore.QTimer()
+        if isinstance(text,list):
+            out = ""
+            for part in text:
+                out = out + getLanguageString(part)
+            text = out
+        else:
+            text = getLanguageString(text)
+        text = text % args
+        self.__old_text.append(self._perm.text())
+        self._perm.setText(text)
+        timer.singleShot(msec, lambda: self._perm.setText(self.__old_text.pop()))
 
 class VScrollLayout(QtWidgets.QLayout):
     def __init__(self, parent = None):
