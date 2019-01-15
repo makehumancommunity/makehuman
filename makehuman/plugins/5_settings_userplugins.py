@@ -166,11 +166,11 @@ class UserPluginsTaskView(gui3d.TaskView):
         def onClicked(event):
             for child in self.userPluginBox.children:
                 if child.selected:
-                    if not child.module in gui3d.app.modules:
-                        if not gui3d.app.loadPlugin(name=child.module, location=child.path):
-                            gui3d.app.prompt('Error', 'Cannot load module {0:s}\nCheck the log files'.format(child.module), 'OK')
+                    if not child.name in gui3d.app.modules:
+                        if not gui3d.app.loadPlugin(name=child.name, location=child.path):
+                            gui3d.app.prompt('Error', 'Cannot load module {0:s}\nCheck the log files'.format(child.name), 'OK')
                     else:
-                        log.message('Module %s already exists and will not be imported a second time.', child.module)
+                        log.message('Module %s already exists and will not be imported a second time.', child.name)
 
     def updatePluginList(self):
         for child in self.userPluginBox.children:
