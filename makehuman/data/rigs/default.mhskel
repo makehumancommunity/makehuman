@@ -4260,8 +4260,8 @@
         ],
         "levator06.R____plane": [
             "levator06.R____head",
-            "levator06.L____tail",
-            "levator02.L____head"
+            "levator06.R____tail",
+            "levator02.R____head"
         ],
         "lowerarm01.L____plane": [
             "lowerarm01.L____tail",
