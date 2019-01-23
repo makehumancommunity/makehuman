@@ -279,7 +279,10 @@ def getRelativePath(path, relativeTo = [getDataPath(), getSysDataPath()], strict
         else:
             return path
 
-    return formatPath( os.path.relpath(path, relto) )
+    relto = os.path.abspath(os.path.realpath(relto))
+    path = os.path.abspath(os.path.realpath(path))
+    rpath = os.path.relpath(path, relto)
+    return formatPath(rpath)
 
 def findFile(relPath, searchPaths = [getDataPath(), getSysDataPath()], strict=False):
     """
@@ -411,11 +414,12 @@ def getJailedPath(filepath, relativeTo, jailLimits=[getDataPath(), getSysDataPat
     if relativeTo is str:
         relativeTo = os.path.realpath(relativeTo)
 
+    output = None
+
     if _withinJail(filepath):
         relPath = getRelativePath(filepath, relativeTo, strict=True)
         if relPath:
-            return relPath
+            output = relPath
         else:
-            return getRelativePath(filepath, jailLimits)
-    else:
-        return None
+            output = getRelativePath(filepath, jailLimits)
+    return output
