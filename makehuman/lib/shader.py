@@ -482,9 +482,9 @@ class Shader(object):
                                 GL_TEXTURE0 + glmodule.MAX_TEXTURE_UNITS):
             glActiveTexture(gl_tex_idx)
             glBindTexture(GL_TEXTURE_2D, 0)
-            glDisable(GL_TEXTURE_2D)
+            #glDisable(GL_TEXTURE_2D)
             glBindTexture(GL_TEXTURE_1D, 0)
-            glDisable(GL_TEXTURE_1D)
+            #glDisable(GL_TEXTURE_1D)
 
     def requiresVertexTangent(self):
         return self.vertexTangentAttrId != -1

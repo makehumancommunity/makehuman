@@ -440,18 +440,18 @@ def drawMesh(obj):
                 for gl_tex_idx in range(GL_TEXTURE0 + 1, GL_TEXTURE0 + MAX_TEXTURE_UNITS):
                     glActiveTexture(gl_tex_idx)
                     glBindTexture(GL_TEXTURE_2D, 0)
-                    glDisable(GL_TEXTURE_2D)
+                    #glDisable(GL_TEXTURE_2D)
                     glBindTexture(GL_TEXTURE_1D, 0)
-                    glDisable(GL_TEXTURE_1D)
+                    #glDisable(GL_TEXTURE_1D)
         else:
             # Disable all textures (when in fixed function textureless shading mode)
             for gl_tex_idx in range(GL_TEXTURE0, GL_TEXTURE0 + MAX_TEXTURE_UNITS):
                 if have_activeTexture:
                     glActiveTexture(gl_tex_idx)
                 glBindTexture(GL_TEXTURE_2D, 0)
-                glDisable(GL_TEXTURE_2D)
+                #glDisable(GL_TEXTURE_2D)
                 glBindTexture(GL_TEXTURE_1D, 0)
-                glDisable(GL_TEXTURE_1D)
+                #glDisable(GL_TEXTURE_1D)
 
     if obj.nTransparentPrimitives:
         # TODO not needed for alpha-to-coverage rendering (it's face order independent)
@@ -617,6 +617,7 @@ def drawMesh(obj):
 
     glColorMaterial(GL_FRONT, GL_DIFFUSE)
 
+    # TODO: consider whether this is going to cause a crash on AMD cards. It's possible it should be commented out.
     if obj.isTextured and obj.texture and obj.solid:
         glDisable(GL_TEXTURE_2D)
 
@@ -791,7 +792,9 @@ def renderSkin(dst, vertsPerPrimitive, verts, index = None, objectMatrix = None,
 
     glEnableClientState(GL_COLOR_ARRAY)
 
+    # TODO: consider whether this is going to cause a crash on AMD cards. It's possible it should be commented out.
     glDisable(GL_TEXTURE_2D)
+
     glDisableClientState(GL_TEXTURE_COORD_ARRAY)
 
     surface = np.empty((height, width, 4), dtype = np.uint8)
