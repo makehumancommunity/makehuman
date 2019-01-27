@@ -150,8 +150,9 @@ class ExpressionMixerTaskView(gui3d.TaskView):
         posenames = []
         posevalues = []
         for pname,pval in self.modifiers.items():
-            posenames.append(pname)
-            posevalues.append(pval)
+            if pval != 0:
+                posenames.append(pname)
+                posevalues.append(pval)
         if len(posenames) == 0:
             return
 
