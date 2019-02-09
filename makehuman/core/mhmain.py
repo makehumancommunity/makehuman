@@ -239,7 +239,8 @@ class MHApplication(gui3d.Application, mh.Application):
                 'tagFilterMode': 'OR',
                 'useNameTags': False,
                 'tagCount': 5,
-                'makehumanTags': ['makehuman™']
+                'makehumanTags': ['makehuman™'],
+                'keepCustomValues': False
             }
         else:
 
@@ -271,7 +272,8 @@ class MHApplication(gui3d.Application, mh.Application):
                 'useNameTags': False,
                 'tagCount': 5,
                 'makehumanTags': ['makehuman™'],
-                '_versionSentinel': 'A3A03B96EE01B885799828A03E33FEB0' # GM Time was: Tue, Nov 20 2018 15:10:51 +0000
+                'keepCustomValues': False,
+                '_versionSentinel': 'ADF83BF89112337B261431C15C660D9A' # GM Time was: Sat, Feb 09 2019 23:13:56 +0000
             }
 
         self._settings = dict(self._default_settings)
@@ -940,27 +942,29 @@ class MHApplication(gui3d.Application, mh.Application):
 
     def loadSettings(self):
         with inFile("settings.ini") as f:
+            settings = {}
             if f:
                 settings = mh.parseINI(f.read())
-
-                if not mh.isRelease():
-                    if self._default_settings.get('_versionSentinel') != settings.get('_versionSentinel'):
-                        log.warning('Default settings were changed, invalidating settings.ini')
-                        return
-
-                if settings.get('version') == mh.getVersionDigitsStr():
-                    # Only load settings for this specific version
-                    del settings['version']
-                    for setting_name, value in settings.items():
-                        try:
-                            self.setSetting(setting_name, value)
-                        except:
-                            # Store the values of (yet) undeclared settings and defer until plugins are loaded
-                            self._undeclared_settings[setting_name] = value
-                else:
-                    log.warning("Incompatible MakeHuman settings (version %s) detected (expected %s). Loading default settings." % (settings.get('version','undefined'), mh.getVersionDigitsStr()))
             else:
                 log.warning("No settings file found, starting with default settings.")
+
+        if not mh.isRelease() and settings:
+            if self._default_settings.get('_versionSentinel') != settings.get('_versionSentinel'):
+                log.warning('Default settings were changed, invalidating settings.ini')
+                return
+
+        if settings.get('version') == mh.getVersionDigitsStr():
+            # Only load settings for this specific version
+            del settings['version']
+            for setting_name, value in settings.items():
+                try:
+                    self.setSetting(setting_name, value)
+                except:
+                    # Store the values of (yet) undeclared settings and defer until plugins are loaded
+                    self._undeclared_settings[setting_name] = value
+        else:
+            log.warning("Incompatible MakeHuman settings (version %s) detected (expected %s). Loading default settings." % (settings.get('version','undefined'), mh.getVersionDigitsStr()))
+
 
         if 'language' in self.settings:
             self.setLanguage(self.settings['language'])

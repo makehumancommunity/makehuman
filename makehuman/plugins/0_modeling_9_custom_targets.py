@@ -73,6 +73,7 @@ class CustomTargetsTaskView(gui3d.TaskView):
 
         self.optionsBox = self.addRightWidget(gui.GroupBox('Options'))
         rescanButton = self.optionsBox.addWidget(gui.Button("Rescan targets' folder"))
+        self.keepValues = self.optionsBox.addWidget(gui.CheckBox('Keep Values', app.getSetting('keepCustomValues')))
 
         self.folderBox = self.addRightWidget(gui.GroupBox('Folders'))
         self.targetsBox = self.addLeftWidget(gui.StackedBox())
@@ -81,7 +82,25 @@ class CustomTargetsTaskView(gui3d.TaskView):
 
         @rescanButton.mhEvent
         def onClicked(event):
+
+            backUpModifiers = {}
+
+            if self.keepValues.isChecked():
+                for name, modifier in self.modifiers.items():
+                    if modifier.getValue() != 0:
+                        backUpModifiers[name] = modifier.getValue()
+
             self.searchTargets()
+
+            if self.keepValues.isChecked():
+                for name, value in backUpModifiers.items():
+                    modifier = self.modifiers.get(name)
+                    if modifier:
+                        modifier.setValue(value)
+                self.syncSliders()
+                self.human.applyAllTargets()
+
+            backUpModifiers.clear()
 
         self.folders = []
         self.sliders = []
@@ -138,7 +157,7 @@ class CustomTargetsTaskView(gui3d.TaskView):
             return
 
         # Invalidate any cached targets
-        for m in list(self.modifiers.values()):
+        for m in self.modifiers.values():
             for tpath,_ in m.targets:
                 algos3d.refreshCachedTarget(tpath)
 
@@ -153,10 +172,10 @@ class CustomTargetsTaskView(gui3d.TaskView):
             self.folderBox.removeWidget(child)
             child.destroy()
 
-        for mod in list(self.modifiers.values()):
+        for mod in self.modifiers.values():
             self.human.removeModifier(mod)
             
-        self.modifiers = {}
+        self.modifiers.clear()
 
         # Apply changes to human (of unloaded modifiers)
         self.human.applyAllTargets()
@@ -201,7 +220,8 @@ class CustomTargetsTaskView(gui3d.TaskView):
         self.syncStatus()
 
     def onHide(self, event):
-        gui3d.app.statusPersist('')
+        self.app.statusPersist('')
+        self.app.setSetting('keepCustomValues', self.keepValues.isChecked())
 
     def onHumanChanging(self, event):
         if event.change == 'reset':
