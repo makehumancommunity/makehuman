@@ -205,6 +205,9 @@ class Material(object):
         self._specularColor = Color(1.0, 1.0, 1.0)
         self._shininess = 0.2
         self._emissiveColor = Color()
+        self._viewPortColor = Color()
+        self._viewPortAlpha = 1.0
+        self._hasViewPortColor = False
 
         self._opacity = 1.0
         self._translucency = 0.0
@@ -276,6 +279,9 @@ class Material(object):
         self._specularColor.copyFrom(material.specularColor)
         self._shininess = material.shininess
         self._emissiveColor.copyFrom(material.emissiveColor)
+        self._viewPortColor.copyFrom(material.viewPortColor)
+        self._viewPortAlpha = material.viewPortAlpha
+        self._hasViewPortColor = material._hasViewPortColor
 
         self._opacity = material.opacity
         self._translucency = material.translucency
@@ -379,6 +385,12 @@ class Material(object):
                 self._shininess = max(0.0, min(1.0, float(words[1])))
             elif words[0] == "emissiveColor":
                 self._emissiveColor.copyFrom([float(w) for w in words[1:4]])
+            elif words[0] == "viewPortColor":
+                self._viewPortColor.copyFrom([float(w) for w in words[1:4]])
+                self._hasViewPortColor = True
+            elif words[0] == "viewPortAlpha":
+                self._viewPortAlpha = max(0.0, min(1.0, float(words[1])))
+                self._hasViewPortColor = True
             elif words[0] == "opacity":
                 self._opacity = max(0.0, min(1.0, float(words[1])))
             elif words[0] == "translucency":
@@ -684,6 +696,30 @@ class Material(object):
         self._shininess = min(1.0, max(0.0, hardness))
 
     shininess = property(getShininess, setShininess)
+
+    def getViewPortColor(self):
+        return self._viewPortColor
+
+    def setViewPortColor(self, color):
+        self._viewPortColor.copyFrom(color)
+        self._hasViewPortColor = True
+
+    viewPortColor = property(getViewPortColor, setViewPortColor)
+
+    def getViewPortAlpha(self):
+        return self._viewPortAlpha
+
+    def setViewPortAlpha(self, alpha):
+        self._viewPortAlpha = max(0.0, min(1.0, alpha))
+        self._hasViewPortColor = True
+
+    viewPortAlpha = property(getViewPortAlpha, setViewPortAlpha)
+
+    def usesViewPortColor(self):
+        return self._hasViewPortColor
+
+    def enableViewPortColor(self, b=True):
+        self._hasViewPortColor = b
 
 
     def getSpecularIntensity(self):
