@@ -42,6 +42,7 @@ import numpy as np
 import unique # Bugfix for numpy.unique on older numpy versions
 
 import material
+import log
 
 class FaceGroup(object):
     """
@@ -709,12 +710,24 @@ class Object3D(object):
             for i in range (0, min(len(vert), self.vertsPerFaceForExport)): # use minimum of attached vertices, works for less than 3 also
                 vn = vert[i]                                                 # vertex.number
                 if self.nfaces[vn] > self.MAX_FACES:
-                    import log
                     log.error("Failed to index faces of mesh %s, you are probably loading a mesh with mixed nb of verts per face (do not mix tris and quads). Or your mesh has too many faces attached to one vertex (the maximum is %s-poles). In the second case, either increase MAX_FACES for this mesh, or improve the mesh topology.", self.name, self.MAX_FACES)
                     raise RuntimeError('Incompatible mesh topology.')
                     return
                 self.vface[vn,self.nfaces[vn]] = idx        # add the index of the face to the array, row given by vn, column by counter nfaces[vn]
                 self.nfaces[vn] +=1                         # now increment the counter
+
+        # now lets recalculate the maximum number of faces belonging to a plane
+        newmax = np.max(self.nfaces)
+
+        # keep in mind that a maximum number of neighboring faces lower than 4 will crash subdiv
+        if newmax < 4: 
+            newmax = 4
+
+        if newmax != self.MAX_FACES:
+            # it is different so resize vface
+            self.vface = np.delete (self.vface, np.s_[newmax::], 1)
+            self.MAX_FACES = newmax
+            log.debug ("Recalculated maxmimum number of faces for one vertex: %d", newmax)
 
 
     def getVertexWeights(self, parentWeights):

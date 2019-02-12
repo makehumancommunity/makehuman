@@ -535,6 +535,8 @@ def loadTextProxy(human, filepath, type="Clothes"):
         log.warning('Proxy file %s does not specify a Z depth. Using 50.', filepath)
         proxy.z_depth = 50
 
+    # since max-pole is used for the calculation of neighboring planes we have to double it initially
+    proxy.max_pole *= 2
     proxy._finalize(refVerts)
 
     return proxy
