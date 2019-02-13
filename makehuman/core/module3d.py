@@ -647,7 +647,7 @@ class Object3D(object):
         self.has_uv = uvs is not None
 
         if not skipUpdate:
-            self._update_faces()
+            self._update_faces(resize=True)
 
     def changeFaceMask(self, mask, indices = None):
         if indices is None:
@@ -694,7 +694,7 @@ class Object3D(object):
             self._inverse_vmap = originalToUnweldedMap
         return self._inverse_vmap
 
-    def _update_faces(self):
+    def _update_faces(self, resize = False):
         # 
         # this procedure is only called, when geometry is not taken from npz-file
         # 
@@ -716,18 +716,20 @@ class Object3D(object):
                 self.vface[vn,self.nfaces[vn]] = idx        # add the index of the face to the array, row given by vn, column by counter nfaces[vn]
                 self.nfaces[vn] +=1                         # now increment the counter
 
-        # now lets recalculate the maximum number of faces belonging to a plane
-        newmax = np.max(self.nfaces)
+        # in case this function is not called from catmull-clark function resize the self.vface to a minimum
+        if resize is True:
+            # now lets recalculate the maximum number of faces belonging to a plane
+            newmax = np.max(self.nfaces)
 
-        # keep in mind that a maximum number of neighboring faces lower than 4 will crash subdiv
-        if newmax < 4: 
-            newmax = 4
+            # keep in mind that a maximum number of neighboring faces lower than 4 will crash subdiv
+            if newmax < 4: 
+                newmax = 4
 
-        if newmax != self.MAX_FACES:
-            # it is different so resize vface
-            self.vface = np.delete (self.vface, np.s_[newmax::], 1)
-            self.MAX_FACES = newmax
-            log.debug ("Recalculated maxmimum number of faces for one vertex: %d", newmax)
+            if newmax != self.MAX_FACES:
+                # it is different so resize vface
+                self.vface = np.delete (self.vface, np.s_[newmax::], 1)
+                self.MAX_FACES = newmax
+                log.debug ("Recalculated maxmimum number of faces for one vertex: %d", newmax)
 
 
     def getVertexWeights(self, parentWeights):
