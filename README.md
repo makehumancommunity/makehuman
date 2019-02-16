@@ -45,7 +45,7 @@ If you rather run the code from source:
   
 Having done this, you can now start MakeHuman by running the makehuman.py script. 
 
-* If you want to see community plugins like assets - download them, put in the plugins directory, enable in settings and restart app:
+* If you want to see community plugins like the asset downloader - download them, put in the plugins directory, enable in settings and restart app:
   * https://github.com/makehumancommunity/community-plugins-mhapi
   * https://github.com/makehumancommunity/community-plugins-assetdownload
   * https://github.com/makehumancommunity/community-plugins-socket
