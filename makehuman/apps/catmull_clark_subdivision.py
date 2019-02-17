@@ -509,6 +509,14 @@ def _reverse_n_to_m_map(input, output, offset=0):
 
 
 def createSubdivisionObject(object, staticFaceMask=None):
+    #
+    # since the algorithm was written for quads we avoid triangle-meshes to be subdivided
+    # and return the object given
+    #
+    if object.vertsPerFaceForExport != 4:
+        log.debug('No Catmull-Clark subdivision on triangle-mesh %s.', object.name)
+        return object
+
     obj = SubdivisionObject(object, staticFaceMask)
     obj.create()
     return obj

@@ -42,6 +42,7 @@ import numpy as np
 import unique # Bugfix for numpy.unique on older numpy versions
 
 import material
+import log
 
 class FaceGroup(object):
     """
@@ -646,7 +647,7 @@ class Object3D(object):
         self.has_uv = uvs is not None
 
         if not skipUpdate:
-            self._update_faces()
+            self._update_faces(resize=True)
 
     def changeFaceMask(self, mask, indices = None):
         if indices is None:
@@ -693,30 +694,43 @@ class Object3D(object):
             self._inverse_vmap = originalToUnweldedMap
         return self._inverse_vmap
 
-    def _update_faces(self):
-        # Construct vface: arrange face indices for same v_idx in different columns
-        # Every row in the vface matrix contains a variable number of valid columns
-        # (the number of valid columns for each row is stored in the nfaces array)
-        map_ = np.argsort(self.fvert.flat)
-        vi = self.fvert.flat[map_]
-        # Map v_idx entries to row numbers of fvert (face_idx)
-        fi = np.mgrid[:self.fvert.shape[0],:self.fvert.shape[1]][0].flat[map_].astype(np.uint32)
-        del map_
-        ix, first = np.unique(vi, return_index=True)
-        n = first[1:] - first[:-1]    # entry-skip count, or the number of occurences of every idx
-        n_last = len(vi) - first[-1]  # Number of occurences of last idx
-        n = np.hstack((n, np.array([n_last])))  # Append last to complete n
+    def _update_faces(self, resize = False):
+        # 
+        # this procedure is only called, when geometry is not taken from npz-file
+        # 
+        # create an 2dim array self.vface for each vertex
+        #     which contains an array of faces, where the vertex belongs to, maximum of the array inside is self.MAX_FACES
+        # 
+        # use self.nfaces as counter for the inner array, it is needed afterwards
 
-        # Store number of valid columns per line in vface
-        self.nfaces[ix] = n.astype(np.uint8)
-        try:
-            for i in range(len(ix)):
-                # Unfortunately these type of slices require a python loop
-                self.vface[ix[i],:n[i]] = fi[first[i]:][:n[i]]
-        except Exception as e:
-            import log
-            log.error("Failed to index faces of mesh %s, you are probably loading a mesh with mixed nb of verts per face (do not mix tris and quads). Or your mesh has too many faces attached to one vertex (the maximum is %s-poles). In the second case, either increase MAX_FACES for this mesh, or improve the mesh topology. Original error message: (%s) %s", self.name, self.MAX_FACES, type(e), format(str(e)))
-            raise RuntimeError('Incompatible mesh topology.')
+        nverts = len(self.coord)
+        self.nfaces = np.zeros(nverts, dtype=np.uint8) # reset the counters to zero
+
+        for idx, vert in enumerate(self.fvert):                             # contains faces with vertex number
+            for i in range (0, min(len(vert), self.vertsPerFaceForExport)): # use minimum of attached vertices, works for less than 3 also
+                vn = vert[i]                                                 # vertex.number
+                if self.nfaces[vn] > self.MAX_FACES:
+                    log.error("Failed to index faces of mesh %s, you are probably loading a mesh with mixed nb of verts per face (do not mix tris and quads). Or your mesh has too many faces attached to one vertex (the maximum is %s-poles). In the second case, either increase MAX_FACES for this mesh, or improve the mesh topology.", self.name, self.MAX_FACES)
+                    raise RuntimeError('Incompatible mesh topology.')
+                    return
+                self.vface[vn,self.nfaces[vn]] = idx        # add the index of the face to the array, row given by vn, column by counter nfaces[vn]
+                self.nfaces[vn] +=1                         # now increment the counter
+
+        # in case this function is not called from catmull-clark function resize the self.vface to a minimum
+        if resize is True:
+            # now lets recalculate the maximum number of faces belonging to a plane
+            newmax = np.max(self.nfaces)
+
+            # keep in mind that a maximum number of neighboring faces lower than 4 will crash subdiv
+            if newmax < 4: 
+                newmax = 4
+
+            if newmax != self.MAX_FACES:
+                # it is different so resize vface
+                self.vface = np.delete (self.vface, np.s_[newmax::], 1)
+                self.MAX_FACES = newmax
+                log.debug ("Recalculated maxmimum number of faces for one vertex: %d", newmax)
+
 
     def getVertexWeights(self, parentWeights):
         """
