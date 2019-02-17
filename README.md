@@ -42,9 +42,15 @@ If you rather run the code from source:
   * compile\_models.py
   * compile\_proxies.py
   * compile\_targets.py
-
+  
 Having done this, you can now start MakeHuman by running the makehuman.py script. 
 
+* If you want to see community plugins like the asset downloader - download them, put in the plugins directory, enable in settings and restart app:
+  * https://github.com/makehumancommunity/community-plugins-mhapi
+  * https://github.com/makehumancommunity/community-plugins-assetdownload
+  * https://github.com/makehumancommunity/community-plugins-socket
+  * https://github.com/makehumancommunity/makehuman-plugin-for-blender
+  
 ## Branches
 
 There are three standard branches and some additional developer working branches:
