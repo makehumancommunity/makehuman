@@ -383,6 +383,7 @@ def loadTextProxy(human, filepath, type="Clothes"):
 
     folder = os.path.realpath(os.path.expanduser(os.path.dirname(filepath)))
     proxy = Proxy(filepath, type, human)
+    proxy.max_pole = 8;
     refVerts = []
 
     status = 0
