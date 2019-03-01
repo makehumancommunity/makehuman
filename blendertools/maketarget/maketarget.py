@@ -678,6 +678,7 @@ def saveVerts(fp, ob, verts, saveAll, first, last, offs):
         vco = verts[n-offs]
         bv = ob.data.vertices[n-offs]
         vec = vco - bv.co
+        vec = vec / ob.get('MhxScale', 1) # remove scaling
         if vec.length > Epsilon and (saveAll or bv.select):
             fp.write("%d %s %s %s\n" % (n, round(vec[0]), round(vec[2]), round(-vec[1])))
 

@@ -251,6 +251,7 @@ def loadTarget(filepath, context, irrelevant=[], offset=0):
     bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.mesh.select_all(action='DESELECT')
     bpy.ops.object.mode_set(mode='OBJECT')
+    scale = ob.get('MhxScale', 1)
 
     for v in ob.data.vertices:
         v.select = False
@@ -287,9 +288,9 @@ def loadTarget(filepath, context, irrelevant=[], offset=0):
             #vec = ob.data.vertices[index].co
             vec = skey.data[index].co
             if vec.length > 1e-4:
-                vec[0] += dx
-                vec[1] += -dz
-                vec[2] += dy
+                vec[0] += dx*scale
+                vec[1] += -dz*scale
+                vec[2] += dy*scale
                 ob.data.vertices[index].select = True
     fp.close()
     skey.slider_min = -1.0
