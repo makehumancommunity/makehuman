@@ -160,6 +160,15 @@ if os.path.exists(socket):
 else:
     print("socket plugin was not found in parent directory")
 
+mp = os.path.abspath(os.path.join(parentdir,'community-plugins-massproduce'))
+if os.path.exists(mp):
+    tocopy = os.path.abspath(os.path.join(mp,'9_massproduce'))
+    todest = os.path.abspath(os.path.join(pluginsdir,'9_massproduce'))
+    copy_tree(tocopy, todest)
+else:
+    print("mass produce plugin was not found in parent directory")
+
+
 
 print("\n\nBuild has been prepared in " + exportDir + ".\n")
 print("Next step is to cd into that dir and run pynsist.\n")
