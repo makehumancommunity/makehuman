@@ -109,6 +109,7 @@ class ExporterFBX(Exporter):
         cfg.feetOnGround      = self.feetOnGround.selected
         cfg.scale,cfg.unit    = self.taskview.getScale()
         cfg.binary            = self.binary.selected
+        cfg.scale *= 10
 
         cfg.hiddenGeom        = self.hiddenGeom.selected
 
