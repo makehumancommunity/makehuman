@@ -41,7 +41,7 @@ import webbrowser
 import mh
 import gui
 import os
-import gitutils
+from mhversion import MHVersion
 
 class HelpTaskView(gui3d.TaskView):
 
@@ -103,14 +103,8 @@ class HelpTaskView(gui3d.TaskView):
 
         @self.versionButton.mhEvent
         def onClicked(event):
-            version_string = ''
-            if mh.getVersionDigitsStr():
-                version_string += mh.getVersionDigitsStr()
-            if gitutils.getCurrentBranch():
-                version_string += ' ' + gitutils.getCurrentBranch()
-            if gitutils.getCurrentCommit(short=True):
-                version_string += ':' + gitutils.getCurrentCommit(short=True)
-            gui3d.app.clipboard().setText(version_string)
+            mhv = MHVersion()
+            gui3d.app.clipboard().setText(mhv.getFullVersionStr())
             
     def onShow(self, event):
     

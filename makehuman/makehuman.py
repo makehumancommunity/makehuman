@@ -46,7 +46,7 @@ import subprocess
 ## Version information #########################################################
 __version__ = "1.2.0"                   # Major, minor and patch version number
 release = False                         # False for nightly
-versionSub = ""                         # Short version description
+versionSub = "Alpha3"                   # Short version description
 meshVersion = "hm08"                    # Version identifier of the basemesh
 ################################################################################
 
@@ -63,6 +63,9 @@ def getVersionDigitsStr():
     String representation of the version number only (no additional info)
     """
     return __version__
+
+def getVersionSubStr():
+    return versionSub
 
 def _versionStr():
     if versionSub:

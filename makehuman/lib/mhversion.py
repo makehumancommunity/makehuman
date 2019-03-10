@@ -53,6 +53,7 @@ class MHVersion:
         self.currentBranch = "UNKNOWN"
         self.title = "MakeHuman Community"
         self.version = makehuman.getVersionDigitsStr()
+        self.versionSub = makehuman.getVersionSubStr()
         self.isRelease = makehuman.isRelease()
         self.fullTitle = None
         self.versionPath = versionPath
@@ -64,7 +65,10 @@ class MHVersion:
             if self.isRelease:
                 self.fullTitle = self.title + " " + self.version
             else:
-                self.fullTitle = self.title + " (" + self.currentBranch + ":" + self.currentShortCommit + ")"
+                self.fullTitle = self.title + " " + self.getFullVersionStr()
+
+    def getFullVersionStr(self):
+        return "{:s} {:s} ({:s}:{:s})".format(self.version, self.versionSub, self.currentBranch, self.currentShortCommit)
 
     def _checkForGitInfo(self):
 
