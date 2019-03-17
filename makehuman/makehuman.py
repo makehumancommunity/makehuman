@@ -292,9 +292,9 @@ forums at:
 
 The forums is also where you can contact the MakeHuman team. 
 
-Bugs can be reported on the project's bug tracker:
+Bugs can be reported on the project's bug tracker(s):
 
-    http://bugtracker.makehumancommunity.org
+    http://www.makehumancommunity.org/content/bugtracker.html
 """
 
 

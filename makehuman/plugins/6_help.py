@@ -79,11 +79,11 @@ class HelpTaskView(gui3d.TaskView):
         
         @self.reportBugButton.mhEvent
         def onClicked(event):
-            webbrowser.open('http://bugtracker.makehumancommunity.org/issues/new?project_id=makehuman')
+            webbrowser.open('http://www.makehumancommunity.org/content/bugtracker.html')
           
         @self.requestFeatureButton.mhEvent
         def onClicked(event):
-            webbrowser.open('http://bugtracker.makehumancommunity.org/issues/new?project_id=makehuman&issue[tracker_id]=2')
+            webbrowser.open('http://www.makehumancommunity.org/forum/viewforum.php?f=3')
 
         @self.faqButton.mhEvent
         def onClicked(event):
