@@ -217,7 +217,7 @@ class SceneEditorTaskView(guirender.RenderTaskView):
         self._scene = None
 
         def doLoad():
-            filename = mh.getOpenFileName(
+            filename, _ = mh.getOpenFileName(
                 G.app.getSetting('Scene_Editor_FileDlgPath'),
                 'MakeHuman scene (*.mhscene);;All files (*.*)')
             if filename:
@@ -258,7 +258,7 @@ class SceneEditorTaskView(guirender.RenderTaskView):
 
         @self.saveAsButton.mhEvent
         def onClicked(event):
-            filename = mh.getSaveFileName(
+            filename, _ = mh.getSaveFileName(
                 G.app.getSetting('Scene_Editor_FileDlgPath'),
                 'MakeHuman scene (*.mhscene);;All files (*.*)')
             if filename:
