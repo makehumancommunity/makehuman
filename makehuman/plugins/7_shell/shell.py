@@ -49,7 +49,7 @@ import importlib.util
 import mh
 from language import language
 
-hasIpython = (importlib.util.find_spec('qtconsole') != None) and (importlib.util.find_spec('IPython') != None)
+hasIpython = importlib.util.find_spec('qtconsole') is not None and importlib.util.find_spec('IPython') is not None
 if hasIpython:
     from . import ipythonconsole
 
@@ -69,109 +69,101 @@ class ShellTaskView(gui3d.TaskView):
         self.history = []
         self.histitem = None
 
+        #Register shortcut Shift S for the shell tab
+        action = gui.Action('shell', language.getLanguageString('Python Shell'),
+                            lambda: mh.changeTask('Utilities', 'Shell'))
+        G.app.mainwin.addAction(action)
+        mh.setShortcut(mh.Modifiers.SHIFT, mh.Keys.s, action)
+
         if hasIpython:
             # Use the more advanced Ipython console
             self.console = self.addTopWidget(ipythonconsole.IPythonConsoleWidget())
 
-            def gotoshell():
-                mh.changeTask('Utilities', 'Shell')
+        else:
 
-            action = gui.Action('ishell', language.getLanguageString('IPython shell'), gotoshell)
-            G.app.mainwin.addAction(action)
-            mh.setShortcut(mh.Modifiers.CTRL, mh.Keys.i, action)
+            # Fall back to old console
+            self.console = None
+            self.main = self.addTopWidget(QtWidgets.QWidget())
+            self.layout = QtWidgets.QGridLayout(self.main)
+            self.layout.setRowStretch(0, 0)
+            self.layout.setRowStretch(1, 0)
+            self.layout.setColumnStretch(0, 1)
+            self.layout.setColumnStretch(1, 0)
 
-            return
+            self.text = gui.DocumentEdit()
+            self.text.setSizePolicy(
+                QtWidgets.QSizePolicy.Expanding,
+                QtWidgets.QSizePolicy.Expanding)
+            self.layout.addWidget(self.text, 0, 0, 1, 2)
 
-        # Fall back to old console
-        self.console = None
-        self.main = self.addTopWidget(QtWidgets.QWidget())
-        self.layout = QtWidgets.QGridLayout(self.main)
-        self.layout.setRowStretch(0, 0)
-        self.layout.setRowStretch(1, 0)
-        self.layout.setColumnStretch(0, 1)
-        self.layout.setColumnStretch(1, 0)
+            self.line = ShellTextEdit()
+            self.line.setFocusPolicy(QtCore.Qt.StrongFocus)
+            self.layout.addWidget(self.line, 1, 0, 1, 1)
+            self.globals = {'G': G}
 
-        self.text = gui.DocumentEdit()
-        self.text.setSizePolicy(
-            QtWidgets.QSizePolicy.Expanding,
-            QtWidgets.QSizePolicy.Expanding)
-        self.layout.addWidget(self.text, 0, 0, 1, 2)
+            self.clear = gui.Button("Clear")
+            self.layout.addWidget(self.clear, 1, 1, 1, 1)
 
-        self.line = ShellTextEdit()
-        self.line.setFocusPolicy(QtCore.Qt.StrongFocus)
-        self.layout.addWidget(self.line, 1, 0, 1, 1)
-        self.globals = {'G': G}
+            @self.line.mhEvent
+            def onActivate(text):
+                self.execute(text)
+                self.history.append(text)
+                self.histitem = None
+                self.line.setText('')
 
-        self.clear = gui.Button("Clear")
-        self.layout.addWidget(self.clear, 1, 1, 1, 1)
+            @self.line.mhEvent
+            def onTabPressed(edit):
+                def _longest_common_substring(s1, s2):
+                    """
+                    This is simply the O(n) left-aligned version
+                    """
+                    limit = min(len(s1), len(s2))
+                    i = 0
+                    while i < limit and s1[i] == s2[i]:
+                        i += 1
+                    return s1[:i]
 
-        action = gui.Action('shell', language.getLanguageString('Default shell'), self.gotodefaultshell)
-        G.app.mainwin.addAction(action)
-        mh.setShortcut(mh.Modifiers.SHIFT, mh.Keys.s, action)
+                def _largest_common(strings):
+                    strings = list(strings)
+                    try:
+                        strings.remove('...')
+                    except:
+                        pass
 
-        @self.line.mhEvent
-        def onActivate(text):
-            self.execute(text)
-            self.history.append(text)
-            self.histitem = None
-            self.line.setText('')
+                    if len(strings) == 0:
+                        return ""
+                    elif len(strings) == 1:
+                        return strings[0]
+                    else:
+                        result = strings[0]
+                        for s in strings[1:]:
+                            result = _longest_common_substring(result, s)
+                        return result
 
-        @self.line.mhEvent
-        def onTabPressed(edit):
-            def _longest_common_substring(s1, s2):
-                """
-                This is simply the O(n) left-aligned version
-                """
-                limit = min(len(s1), len(s2))
-                i = 0
-                while i < limit and s1[i] == s2[i]:
-                    i += 1
-                return s1[:i]
+                line = edit.getText()
+                suggestions = self.getSuggestions(line)
 
-            def _largest_common(strings):
-                strings = list(strings)
-                try:
-                    strings.remove('...')
-                except:
-                    pass
+                if len(suggestions) == 0:
+                    return
+                if len(suggestions) > 1:
+                    self.write('\n'.join(suggestions)+"\n")
+                    scrollbar = self.text.verticalScrollBar()
+                    scrollbar.setSliderPosition(scrollbar.maximum())
+                    edit.setText(_largest_common(suggestions))
+                elif len(suggestions) == 1:
+                    edit.setText(suggestions[0])
 
-                if len(strings) == 0:
-                    return ""
-                elif len(strings) == 1:
-                    return strings[0]
-                else:
-                    result = strings[0]
-                    for s in strings[1:]:
-                        result = _longest_common_substring(result, s)
-                    return result
+            @self.clear.mhEvent
+            def onClicked(event):
+                self.clearText()
 
-            line = edit.getText()
-            suggestions = self.getSuggestions(line)
+            @self.line.mhEvent
+            def onUpArrow(_dummy):
+                self.upArrow()
 
-            if len(suggestions) == 0:
-                return
-            if len(suggestions) > 1:
-                self.write('\n'.join(suggestions)+"\n")
-                scrollbar = self.text.verticalScrollBar()
-                scrollbar.setSliderPosition(scrollbar.maximum())
-                edit.setText(_largest_common(suggestions))
-            elif len(suggestions) == 1:
-                edit.setText(suggestions[0])
-
-        @self.clear.mhEvent
-        def onClicked(event):
-            self.clearText()
-
-        @self.line.mhEvent
-        def onUpArrow(_dummy):
-            self.upArrow()
-
-        @self.line.mhEvent
-        def onDownArrow(_dummy):
-            self.downArrow()
-
-    def gotodefaultshell(self):
-        mh.changeTask('Utilities', 'Shell')
+            @self.line.mhEvent
+            def onDownArrow(_dummy):
+                self.downArrow()
 
 
     def getSuggestions(self, line):
