@@ -1880,7 +1880,7 @@ class BrowseButton(Button):
                 path = os.getcwd()
         return os.path.normpath(path)
 
-    def __init__(self, mode = 'open', label=None):
+    def __init__(self, mode = 'open', label=None, returnFilter=False):
         if label is None:
             label = '...'
         super(BrowseButton, self).__init__(label)
@@ -1888,7 +1888,7 @@ class BrowseButton(Button):
         self.filename = ""
         self._filter = ''
         self._mode = None
-
+        self._returnFilter = returnFilter
         self.mode = mode
 
     def getMode(self):
@@ -1930,6 +1930,12 @@ class BrowseButton(Button):
 
     filter = property(getFilter, setFilter)
 
+    def retrunFilter(self, b=None):
+        if b is None:
+            return self._returnFilter
+        elif isinstance(b, bool):
+            self._returnFilter = b
+
     def _clicked(self, state):
         self.callEvent('beforeBrowse', None)
 
@@ -1945,15 +1951,16 @@ class BrowseButton(Button):
         elif self.mode == 'dir':
             path = QtWidgets.QFileDialog.getExistingDirectory(G.app.mainwin, directory=self.directory)
 
-
         if path:
-            if isinstance(path, tuple):
-                path = path[0]
-            if self.mode == 'dir':
-                self.directory = path
+            if self._returnFilter and self.mode != 'dir':
+                self.callEvent('onClicked', path)
             else:
-                self.path = pathToUnicode(path)
-        self.callEvent('onClicked', path)
+                if self.mode == 'dir':
+                    self.directory = path
+                    self.callEvent('onClicked', path)
+                else:
+                    self.callEvent('onClicked', path[0])
+
 
 class ColorPickButton(Button):
     """

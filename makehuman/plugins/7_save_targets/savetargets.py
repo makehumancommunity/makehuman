@@ -43,6 +43,7 @@ import getpath as gp
 import algos3d
 import mh
 import log
+import re
 from core import G
 from language import language
 from uuid import uuid4
@@ -107,9 +108,9 @@ class SaveTargetsTaskView(gui3d.TaskView):
         self.saveButton = gui.Button('Save')
         self.saveBox.addWidget(self.saveButton)
 
-        self.saveAsButton = gui.BrowseButton(label='Save As ...', mode='save')
+        self.saveAsButton = gui.BrowseButton(label='Save As ...', mode='save', returnFilter=True)
         self.saveAsButton.path = os.path.join(self.dirName,  self.fileName)
-        self.saveAsButton.setFilter('MakeHuman Target ( *.target )')
+        self.saveAsButton.setFilter('MakeHuman Target (*.target);;All files (*.*)')
         self.saveBox.addWidget(self.saveAsButton)
 
         self.saveDiffBox = gui.GroupBox('Save Diff Target')
@@ -127,9 +128,9 @@ class SaveTargetsTaskView(gui3d.TaskView):
         self.saveDiffButton = gui.Button('Save')
         self.saveDiffBox.addWidget(self.saveDiffButton)
 
-        self.saveDiffAsButton = gui.BrowseButton(label='Save As ...', mode='save')
+        self.saveDiffAsButton = gui.BrowseButton(label='Save As ...', mode='save', returnFilter=True)
         self.saveDiffAsButton.path = os.path.join(self.diffDirName, self.diffFileName)
-        self.saveDiffAsButton.setFilter('MakeHuman Target ( *.target )')
+        self.saveDiffAsButton.setFilter('MakeHuman Target (*.target);;All files (*.*)')
         self.saveDiffBox.addWidget(self.saveDiffAsButton)
 
         self.clearButton = gui.Button(label='Clear Cache')
@@ -153,7 +154,7 @@ class SaveTargetsTaskView(gui3d.TaskView):
 
         @self.saveDiffAsButton.mhEvent
         def beforeBrowse(event):
-            self.saveDiffAsButton.path = os.path.join(self.dirName, self.fileName)
+            self.saveDiffAsButton.path = os.path.join(self.diffDirName, self.diffFileName)
 
         @self.saveButton.mhEvent
         def onClicked(event):
@@ -161,19 +162,27 @@ class SaveTargetsTaskView(gui3d.TaskView):
 
         @self.saveAsButton.mhEvent
         def onClicked(path):
-            if os.path.exists(path):
-                if not path.lower().endswith('.target'):
-                    error_msg = 'Cannot save target to file: {0:s}\nExpected a path to a .target file'.format(path)
+            if path:
+                savePath = path[0]
+                mo = re.search(r'\(.*\)', path[1])
+                if mo:
+                    ext = mo.group().strip('(*) ')
+                else:
+                    ext = ''
+                if not savePath.lower().endswith('.target') and ext != '.target':
+                    error_msg = 'Cannot save target to file: {0:s}\nExpected a path to a .target file'.format(savePath)
                     dialog = gui.Dialog()
                     dialog.prompt(title='Error', text=error_msg, button1Label='OK')
-                    log.error('Cannot save targets to %s. Not a .target file.', path)
+                    log.error('Cannot save targets to %s. Not a .target file.', savePath)
                     return
                 else:
-                    self.saveTargets(path, self.stripBaseTargets.selected)
-                    self.fileName = os.path.basename(path)
-                    self.dirName = os.path.dirname(path)
+                    if not savePath.lower().endswith('.target') and ext == '.target':
+                        savePath += ext
+                    self.saveTargets(savePath, self.stripBaseTargets.selected)
+                    self.fileName = os.path.basename(savePath)
+                    self.dirName = os.path.dirname(savePath)
                     self.nameEdit.setText(self.fileName)
-                    self.saveAsButton.path = path
+                    self.saveAsButton.path = savePath
                     G.app.statusPersist('Saving Target Directory: ' + self.dirName +
                                         '   Saving Diff Targets Directory: ' + self.diffDirName)
 
@@ -216,27 +225,35 @@ class SaveTargetsTaskView(gui3d.TaskView):
         @self.saveDiffAsButton.mhEvent
         def onClicked(path):
             if path:
+                savePath = path[0]
+                mo = re.search(r'\(.*\)', path[1])
+                if mo:
+                    ext = mo.group().strip('(*) ')
+                else:
+                    ext = ''
                 if not os.path.isfile(self.metaFile):
                     error_msg = 'No Base Model defined.\nPress "Set Base"'
                     dialog = gui.Dialog()
                     dialog.prompt(title='Error', text=error_msg, button1Label='OK')
                     log.warning(error_msg)
                 else:
-                    if not path.lower().endswith('.target'):
-                        error_msg = 'Cannot save diff target to file: {0:s}\nExpected a path to a .target file'.format(path)
+                    if not savePath.lower().endswith('.target') and ext != '.target':
+                        error_msg = 'Cannot save diff target to file: {0:s}\nExpected a path to a .target file'.format(savePath)
                         dialog = gui.Dialog()
                         dialog.prompt(title='Error', text=error_msg, button1Label='OK')
                         return
                     else:
+                        if not savePath.lower().endswith('.target') and ext == '.target':
+                            savePath += ext
                         human = G.app.selectedHuman
                         target = algos3d.getTarget(human.meshData, self.metaFile)
                         target.apply(human.meshData, -1)
-                        self.saveTargets(path, False)
+                        self.saveTargets(savePath, False)
                         target.apply(human.meshData, 1)
-                        self.diffFileName = os.path.basename(path)
-                        self.diffDirName = os.path.dirname(path)
+                        self.diffFileName = os.path.basename(savePath)
+                        self.diffDirName = os.path.dirname(savePath)
                         self.diffNameEdit.setText(self.diffFileName)
-                        self.saveDiffAsButton.path = path
+                        self.saveDiffAsButton.path = savePath
                         G.app.statusPersist('Saving Target Directory: ' + self.dirName +
                                             '   Saving Diff Targets Directory: ' + self.diffDirName)
 
