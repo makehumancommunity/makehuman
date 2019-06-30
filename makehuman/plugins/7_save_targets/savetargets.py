@@ -308,8 +308,8 @@ class SaveTargetsTaskView(gui3d.TaskView):
 
         algos3d.saveTranslationTarget(human.meshData, path)
         log.message('Saving target to %s', path)
-        self.fileName = os.path.basename(path)
-        self.dirName = os.path.dirname(path)
+        #self.fileName = os.path.basename(path)
+        #self.dirName = os.path.dirname(path)
 
         if strip:
             self.unstripTargets(human.meshData)
