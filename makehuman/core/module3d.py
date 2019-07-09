@@ -716,12 +716,50 @@ class Object3D(object):
                 self.vface[vn,self.nfaces[vn]] = idx        # add the index of the face to the array, row given by vn, column by counter nfaces[vn]
                 self.nfaces[vn] +=1                         # now increment the counter
 
+        imax = i+1    # just needed later not to be recalculated.
+
         # in case this function is not called from catmull-clark function resize the self.vface to a minimum
         if resize is True:
             # now lets recalculate the maximum number of faces belonging to a plane
             newmax = np.max(self.nfaces)
+            log.debug ("Calculated maxmimum number of faces for one vertex: %d", newmax)
 
-            # keep in mind that a maximum number of neighboring faces lower than 4 will crash subdiv
+
+            # unfortunately catmull-clark expects maxpoles and not maxfaces, so we need 
+            # also to calculate max-poles
+            # 
+            # for each vertex we have to check all attached faces, these faces are already collected in self.vface
+            #       when we check all the faces we will collect the neighbors using a modulo function, the vertices are
+            #       entered clockwise ... modulo allows us to use neighbor of 1 and 3 when index is 0
+            #       if not already existent, the neighbors are added to an array and the maximum size of this array will be maxpole
+            #
+            maxpole = 0
+            for vn, row in enumerate(self.vface):
+                noticed = np.zeros(self.MAX_FACES * 4, dtype = int)
+                m = 0
+                for j in range (0, self.nfaces[vn]):
+                    # collect neighbors
+                    face = row[j]
+                    for ix,v2 in enumerate(self.fvert[face]):
+                        if (v2 == vn):
+                            ln = self.fvert[face][(ix-1) %imax]
+                            rn = self.fvert[face][(ix+1) %imax]
+                            if ln not in noticed:
+                                noticed[m] = ln
+                                m += 1
+                            if rn not in noticed:
+                                noticed[m] = rn
+                                m += 1
+                            break
+                if m > maxpole:
+                    maxpole = m
+
+            log.debug ("calculated maxmimum number of poles for one vertex: %d", maxpole)
+
+            if newmax < maxpole:
+                newmax = maxpole
+
+            # keep in mind that a maximum number of neighboring faces lower than 4 will crash subdiv (try to load a cube)
             if newmax < 4: 
                 newmax = 4
 
@@ -729,7 +767,6 @@ class Object3D(object):
                 # it is different so resize vface
                 self.vface = np.delete (self.vface, np.s_[newmax::], 1)
                 self.MAX_FACES = newmax
-                log.debug ("Recalculated maxmimum number of faces for one vertex: %d", newmax)
 
 
     def getVertexWeights(self, parentWeights):
