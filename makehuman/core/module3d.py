@@ -722,8 +722,7 @@ class Object3D(object):
         if resize is True:
             # now lets recalculate the maximum number of faces belonging to a plane
             newmax = np.max(self.nfaces)
-            log.debug ("Calculated maxmimum number of faces for one vertex: %d", newmax)
-
+            log.debug ("Calculated maximum number of faces for one vertex: %d", newmax)
 
             # unfortunately catmull-clark expects maxpoles and not maxfaces, so we need 
             # also to calculate max-poles
@@ -754,7 +753,7 @@ class Object3D(object):
                 if m > maxpole:
                     maxpole = m
 
-            log.debug ("calculated maxmimum number of poles for one vertex: %d", maxpole)
+            log.debug ("Calculated maximum number of poles for one vertex: %d", maxpole)
 
             if newmax < maxpole:
                 newmax = maxpole
