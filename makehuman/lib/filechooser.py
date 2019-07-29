@@ -195,7 +195,7 @@ class FileSort(Sorter):
         self._meta = {}
 
         self.methods = [
-            ("name", os.path.basename),
+            ("name", lambda path: os.path.basename(path).lower()),
             ("created", os.path.getctime),
             ("modified", os.path.getmtime),
             ("size", os.path.getsize)]
