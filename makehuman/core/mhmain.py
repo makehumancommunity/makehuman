@@ -550,7 +550,7 @@ class MHApplication(gui3d.Application, mh.Application):
                 if os.path.isfile(pLocation):
                     pluginsToLoad.append((file, pLocation))
 
-            elif os.path.isfile(location) and file.endswith('.py') and not file.startswith('_') and file in self.getSetting('activeUserPlugins'):
+            elif os.path.isfile(location) and file.endswith('.py') and not file.startswith('_') and os.path.splitext(file)[0] in self.getSetting('activeUserPlugins'):
                 name = os.path.splitext(file)[0]
                 pluginsToLoad.append((name, location))
 
