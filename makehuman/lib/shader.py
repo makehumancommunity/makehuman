@@ -288,10 +288,10 @@ class Shader(object):
                 return cls._glsl_version
 
             cls._glsl_version_str = OpenGL.GL.glGetString(OpenGL.GL.GL_SHADING_LANGUAGE_VERSION)
-            # true string rather than byte string
-            cls._glsl_version_str = str(cls._glsl_version_str, encoding='utf-8')
-            log.debug(cls._glsl_version_str)
             if cls._glsl_version_str:
+                # true string rather than byte string
+                cls._glsl_version_str = str(cls._glsl_version_str, encoding='utf-8')
+                log.debug(cls._glsl_version_str)
                 import re
                 glsl_version = re.search('[0-9]+\.[0-9]+', cls._glsl_version_str).group(0)
                 glsl_v_major, glsl_v_minor = glsl_version.split('.')
