@@ -43,6 +43,7 @@ import sys
 import configparser
 import datetime
 import shutil
+import subprocess
 from distutils.dir_util import copy_tree
 
 pathname = os.path.dirname(sys.argv[0])
@@ -75,6 +76,9 @@ if len(sys.argv) > 1:
     exportDir = sys.argv[1]
 if exportDir is None:
     exportDir = defaultworkdir
+
+if not os.path.exists(exportDir):
+    os.mkdir(exportDir)
 
 shutil.rmtree(exportDir)
 
@@ -168,8 +172,31 @@ if os.path.exists(mp):
 else:
     print("mass produce plugin was not found in parent directory")
 
+subprocess.call(["pynsist", "pynsist.cfg"], cwd=exportDir)
 
+buildDir = exportDir + r"\build\nsis\\"
 
-print("\n\nBuild has been prepared in " + exportDir + ".\n")
-print("Next step is to cd into that dir and run pynsist.\n")
+for file in os.listdir(buildDir):
+    if file.endswith(".exe"):
+        os.remove(buildDir + file)
+        
+with open(buildDir + "installer.nsi", 'r') as file:
+    data = file.readlines()
 
+data[127] = 'CreateShortCut "$Desktop\makehuman-community.lnk" "$INSTDIR\Python\pythonw.exe" \
+            "$INSTDIR\mhstartwrapper.py" "$INSTDIR\makehuman.ico"\n\n'
+
+with open(buildDir + "installer.nsi", 'w') as file:
+    file.writelines(data)
+
+if os.name == 'nt':
+    try:
+        subprocess.call([os.environ["programfiles(x86)"] + r"\NSIS\makensis.exe", buildDir + r"installer.nsi"])
+    except Exception as e:
+        print("NSIS script failed with exception: " + e)
+        print("Do you have NSIS installed to the default location?")
+        print("If it is installed elsewhere, navigate to " + buildDir + " and right click \
+            installer.nsi and compile the script." )
+else:
+    #TODO: Add linux/mac equivelant.
+    pass
