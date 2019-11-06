@@ -41,6 +41,8 @@ from core import G
 
 import numpy as np
 
+from typing import Callable, List
+
 import OpenGL
 import OpenGL.GLU
 OpenGL.ERROR_CHECKING = G.args.get('debugopengl', False)
@@ -65,6 +67,16 @@ g_primitiveMap = [GL_POINTS, GL_LINES, GL_TRIANGLES, GL_QUADS]
 
 TEX_NOT_FOUND = False
 MAX_TEXTURE_UNITS = 0
+
+#TODO: Investigate possibility of decreasing performance impact. Better name?
+def safeRun(func: Callable, *args, fallbacks: List[Callable] = None, **kwargs):
+    try:
+        func(*args, **kwargs)
+    except Exception as error:
+        log.error(f"{func.__name__} raised {error}")
+        for fallback in fallbacks or []:
+            fallback(error)
+
 
 def grabScreen(x, y, width, height, filename = None, productionRender=False):
     if width <= 0 or height <= 0:
@@ -409,6 +421,7 @@ def transformObject(obj):
     glMultMatrixd(np.ascontiguousarray(m.T))
 
 def drawMesh(obj):
+
     if not obj.visibility:
         return
 
@@ -710,10 +723,12 @@ def renderSkin(dst, vertsPerPrimitive, verts, index = None, objectMatrix = None,
 
     width, height = dst.width, dst.height
 
-    framebuffer = glGenFramebuffers(1)
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer)
-    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dst.textureId, 0)
-    glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dst.textureId, 0)
+    framebuffer = safeRun(glGenFramebuffers(1), glGenFramebuffersEXT(1))
+    safeRun(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer), glBindFramebufferEXT(GL_FRAMEBUFFER, framebuffer))
+    safeRun(glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dst.textureId, 0), 
+    glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dst.textureId, 0))
+    safeRun(glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dst.textureId, 0), 
+    glFramebufferTexture2DEXT(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dst.textureId, 0))
 
     if clearColor is not None:
         glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3])
@@ -801,10 +816,12 @@ def renderSkin(dst, vertsPerPrimitive, verts, index = None, objectMatrix = None,
     glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, surface)
     surface = Image(data = np.ascontiguousarray(surface[::-1,:,:3]))
 
-    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0)
-    glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0)
-    glBindFramebuffer(GL_FRAMEBUFFER, 0)
-    glDeleteFramebuffers(np.array([framebuffer]))
+    safeRun(glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0), 
+    glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0))
+    safeRun(glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0), 
+    glFramebufferTexture2DEXT(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0))
+    safeRun(glBindFramebuffer(GL_FRAMEBUFFER, 0), glBindFramebufferEXT(GL_FRAMEBUFFER, 0))
+    safeRun(glDeleteFramebuffers(np.array([framebuffer])), glDeleteFramebuffersEXT(np.array([framebuffer])))
     glBindTexture(GL_TEXTURE_2D, 0)
 
     return surface
@@ -816,9 +833,9 @@ def renderToBuffer(width, height, productionRender = True):
     hasRenderToRenderbuffer().
     """
     # Create and bind framebuffer
-    framebuffer = glGenFramebuffers(1)
+    framebuffer = safeRun(glGenFramebuffers(1), glGenFramebuffersEXT(1))
     #glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer)
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer)
+    safeRun(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer), glBindFramebufferEXT(GL_FRAMEBUFFER, framebuffer))
 
     # Now that framebuffer is bound, verify whether dimensions are within max supported dimensions
     maxWidth, maxHeight = glGetInteger(GL_MAX_VIEWPORT_DIMS)
@@ -832,22 +849,28 @@ def renderToBuffer(width, height, productionRender = True):
         width = int(height / aspect)
 
     # Create and bind renderbuffers
-    renderbuffer = glGenRenderbuffers(1)    # We need a renderbuffer for both color and depth
-    depthRenderbuffer = glGenRenderbuffers(1)
-    glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer)
+    renderbuffer = safeRun(glGenRenderbuffers(1), glGenRenderbuffersEXT(1))    # We need a renderbuffer for both color and depth
+    depthRenderbuffer = safeRun(glGenRenderbuffers(1), glGenRenderbuffersEXT(1)) 
+    safeRun(glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer), glBindRenderbufferEXT(GL_RENDERBUFFER, renderbuffer))
     global have_multisample
     if have_multisample:
-        glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGBA, width, height)
+        safeRun(glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGBA, width, height), 
+            glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER, 4, GL_RGBA, width, height))
     else:
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, width, height)
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderbuffer)
+        safeRun(glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, width, height), 
+            glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, width, height))
+    safeRun(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderbuffer), 
+            glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderbuffer))
 
-    glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer)
+    safeRun(glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer), glBindRenderbufferEXT(GL_RENDERBUFFER, depthRenderbuffer))
     if have_multisample:
-        glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT16, width, height)
+        safeRun(glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT16, width, height), 
+            glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT16, width, height))
     else:
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height)
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer)
+        safeRun(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height), 
+            glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height))
+    safeRun(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer), 
+        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer))
 
     # TODO check with glCheckFramebufferStatus ?
     if not glCheckFramebufferStatus(GL_FRAMEBUFFER):
@@ -872,37 +895,38 @@ def renderToBuffer(width, height, productionRender = True):
 
     if have_multisample:
         # If we have drawn to a multisample renderbuffer, we need to transfer it to a simple buffer to read it
-        downsampledFramebuffer = glGenFramebuffers(1)
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer)       # Multisampled FBO
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, downsampledFramebuffer) # Regular FBO
-        regularRenderbuffer = glGenRenderbuffers(1)
-        glBindRenderbuffer(GL_RENDERBUFFER, regularRenderbuffer)
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, width, height)
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, regularRenderbuffer)
+        downsampledFramebuffer = safeRun(glGenFramebuffers(1), glGenFramebuffersEXT(1))
+        safeRun(glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer), glBindFramebufferEXT(GL_READ_FRAMEBUFFER, framebuffer))       # Multisampled FBO
+        safeRun(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, downsampledFramebuffer), glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER, downsampledFramebuffer)) # Regular FBO
+        regularRenderbuffer = safeRun(glGenRenderbuffers(1), glGenRenderbuffersEXT(1)) 
+        safeRun(glBindRenderbuffer(GL_RENDERBUFFER, regularRenderbuffer), glBindRenderbufferEXT(GL_RENDERBUFFER, regularRenderbuffer))
+        safeRun(glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, width, height), glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, width, height))
+        safeRun(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, regularRenderbuffer), 
+            glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, regularRenderbuffer))
         glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST)
 
         # Dealloc what we no longer need
-        glDeleteFramebuffers(np.array([framebuffer]))
+        safeRun(glDeleteFramebuffers(np.array([framebuffer])), glDeleteFramebuffersEXT(np.array([framebuffer])))
         framebuffer = downsampledFramebuffer
         del downsampledFramebuffer
-        glDeleteRenderbuffers(1, np.array([renderbuffer]))
+        safeRun(glDeleteRenderbuffers(1, np.array([renderbuffer])), glDeleteRenderbuffersEXT(1, np.array([renderbuffer])))
         renderbuffer = regularRenderbuffer
         del regularRenderbuffer
 
     # Read pixels
     surface = np.empty((height, width, 4), dtype = np.uint8)
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer)
+    safeRun(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer), glBindFramebufferEXT(GL_FRAMEBUFFER, framebuffer))
     glReadBuffer(GL_COLOR_ATTACHMENT0)
     glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, surface)
 
     surface = Image(data = np.ascontiguousarray(surface[::-1,:,[2,1,0]]))
 
     # Unbind frame buffer
-    glDeleteFramebuffers(np.array([framebuffer]))
-    glDeleteRenderbuffers(1, np.array([renderbuffer]))
-    glDeleteRenderbuffers(1, np.array([depthRenderbuffer]))
-    glBindRenderbuffer(GL_RENDERBUFFER, 0)
-    glBindFramebuffer(GL_FRAMEBUFFER, 0)
+    safeRun(glDeleteFramebuffers(np.array([framebuffer])), glDeleteFramebuffersEXT(np.array([framebuffer])))
+    safeRun(glDeleteRenderbuffers(1, np.array([renderbuffer])), glDeleteRenderbuffersEXT(1, np.array([renderbuffer])))
+    safeRun(glDeleteRenderbuffers(1, np.array([depthRenderbuffer])), glDeleteRenderbuffersEXT(1, np.array([depthRenderbuffer])))
+    safeRun(glBindRenderbuffer(GL_RENDERBUFFER, 0), glBindRenderbufferEXT(GL_RENDERBUFFER, 0))
+    safeRun(glBindFramebuffer(GL_FRAMEBUFFER, 0), glBindFramebuffer(GL_FRAMEBUFFER, 0))
 
     # Restore viewport dimensions to those of the window
     G.windowWidth = oldWidth
@@ -921,8 +945,8 @@ def renderAlphaMask(width, height, productionRender = True):
     hasRenderToRenderbuffer().
     """
     # Create and bind framebuffer
-    framebuffer = glGenFramebuffers(1)
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer)
+    framebuffer = safeRun(glGenFramebuffers(1), glGenFramebuffersEXT(1))
+    safeRun(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer), glBindFramebufferEXT(GL_FRAMEBUFFER, framebuffer))
 
     # Now that framebuffer is bound, verify whether dimensions are within max supported dimensions
     maxWidth, maxHeight = glGetInteger(GL_MAX_VIEWPORT_DIMS)
@@ -930,15 +954,17 @@ def renderAlphaMask(width, height, productionRender = True):
     height = min(height, maxHeight)
 
     # Create and bind renderbuffers
-    renderbuffer = glGenRenderbuffers(1)    # We need a renderbuffer for both color and depth
-    depthRenderbuffer = glGenRenderbuffers(1)
-    glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer)
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, width, height)
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderbuffer)
+    renderbuffer = safeRun(glGenRenderbuffers(1), glGenRenderbuffersEXT(1))     # We need a renderbuffer for both color and depth
+    depthRenderbuffer = safeRun(glGenRenderbuffers(1), glGenRenderbuffersEXT(1)) 
+    safeRun(glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer), glBindRenderbufferEXT(GL_RENDERBUFFER, renderbuffer))
+    safeRun(glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, width, height), glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, width, height))
+    safeRun(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderbuffer), 
+        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderbuffer))
 
-    glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer)
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height)
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer)
+    safeRun(glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer), glBindRenderbufferEXT(GL_RENDERBUFFER, depthRenderbuffer))
+    safeRun(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height), glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height))
+    safeRun(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer), 
+        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer))
 
     # TODO check with glCheckFramebufferStatus ?
     if not glCheckFramebufferStatus(GL_FRAMEBUFFER):
@@ -972,7 +998,7 @@ def renderAlphaMask(width, height, productionRender = True):
 
     # Read pixels
     surface = np.empty((height, width, 4), dtype = np.uint8)
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer)
+    safeRun(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer), glBindFramebufferEXT(GL_FRAMEBUFFER, framebuffer))
     glReadBuffer(GL_COLOR_ATTACHMENT0)
     glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, surface)
 
@@ -980,11 +1006,11 @@ def renderAlphaMask(width, height, productionRender = True):
     surface = Image(data = np.ascontiguousarray(surface[::-1,:,[3,3,3]]))
 
     # Unbind frame buffer
-    glDeleteFramebuffers(np.array([framebuffer]))
-    glDeleteRenderbuffers(1, np.array([renderbuffer]))
-    glDeleteRenderbuffers(1, np.array([depthRenderbuffer]));
-    glBindRenderbuffer(GL_RENDERBUFFER, 0)
-    glBindFramebuffer(GL_FRAMEBUFFER, 0)
+    safeRun(glDeleteFramebuffers(np.array([framebuffer])), glDeleteFramebuffersEXT(np.array([framebuffer])))
+    safeRun(glDeleteRenderbuffers(1, np.array([renderbuffer])), glDeleteRenderbuffersEXT(1, np.array([renderbuffer])))
+    safeRun(glDeleteRenderbuffers(1, np.array([depthRenderbuffer])), glDeleteRenderbuffersEXT(1, np.array([depthRenderbuffer])))
+    safeRun(glBindRenderbuffer(GL_RENDERBUFFER, 0), glBindRenderbufferEXT(GL_RENDERBUFFER, 0))
+    safeRun(glBindFramebuffer(GL_FRAMEBUFFER, 0), glBindFramebufferEXT(GL_FRAMEBUFFER, 0))
 
     # Restore viewport dimensions to those of the window
     G.windowWidth = oldWidth
