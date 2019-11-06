@@ -421,7 +421,6 @@ def transformObject(obj):
     glMultMatrixd(np.ascontiguousarray(m.T))
 
 def drawMesh(obj):
-
     if not obj.visibility:
         return
 
@@ -726,9 +725,9 @@ def renderSkin(dst, vertsPerPrimitive, verts, index = None, objectMatrix = None,
     framebuffer = safeRun(glGenFramebuffers(1), glGenFramebuffersEXT(1))
     safeRun(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer), glBindFramebufferEXT(GL_FRAMEBUFFER, framebuffer))
     safeRun(glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dst.textureId, 0), 
-    glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dst.textureId, 0))
+        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dst.textureId, 0))
     safeRun(glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dst.textureId, 0), 
-    glFramebufferTexture2DEXT(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dst.textureId, 0))
+        glFramebufferTexture2DEXT(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dst.textureId, 0))
 
     if clearColor is not None:
         glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3])
@@ -817,9 +816,9 @@ def renderSkin(dst, vertsPerPrimitive, verts, index = None, objectMatrix = None,
     surface = Image(data = np.ascontiguousarray(surface[::-1,:,:3]))
 
     safeRun(glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0), 
-    glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0))
+        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0))
     safeRun(glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0), 
-    glFramebufferTexture2DEXT(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0))
+        glFramebufferTexture2DEXT(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0))
     safeRun(glBindFramebuffer(GL_FRAMEBUFFER, 0), glBindFramebufferEXT(GL_FRAMEBUFFER, 0))
     safeRun(glDeleteFramebuffers(np.array([framebuffer])), glDeleteFramebuffersEXT(np.array([framebuffer])))
     glBindTexture(GL_TEXTURE_2D, 0)
