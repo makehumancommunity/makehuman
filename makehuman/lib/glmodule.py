@@ -71,11 +71,11 @@ MAX_TEXTURE_UNITS = 0
 #TODO: Investigate possibility of decreasing performance impact. Better name?
 def safeRun(func: Callable, *args, fallbacks: List[Callable] = None, **kwargs):
     try:
-        func(*args, **kwargs)
+        return func(*args, **kwargs)
     except Exception as error:
         log.error(f"{func.__name__} raised {error}")
         for fallback in fallbacks or []:
-            fallback(*args, **kwargs)
+            return fallback(*args, **kwargs)
 
 
 def grabScreen(x, y, width, height, filename = None, productionRender=False):
@@ -845,7 +845,7 @@ def renderToBuffer(width, height, productionRender = True):
 
     # Create and bind renderbuffers
     renderbuffer = safeRun(glGenRenderbuffers, 1, fallbacks=(glGenRenderbuffersEXT))    # We need a renderbuffer for both color and depth
-    depthRenderbuffer = safeRun(glGenRenderbuffers, 1, fallbacks=(glGenRenderbuffersEXT)) 
+    depthRenderbuffer = safeRun(glGenRenderbuffers, 1, fallbacks=(glGenRenderbuffersEXT))
     safeRun(glBindRenderbuffer, GL_RENDERBUFFER, renderbuffer, fallbacks=(glBindRenderbufferEXT))
     global have_multisample
     if have_multisample:
