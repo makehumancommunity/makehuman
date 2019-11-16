@@ -75,7 +75,7 @@ def safeRun(func: Callable, *args, fallbacks: List[Callable] = None, **kwargs):
     except Exception as error:
         log.error(f"{func.__name__} raised {error}")
         for fallback in fallbacks or []:
-            fallback(error)
+            fallback(*args, **kwargs)
 
 
 def grabScreen(x, y, width, height, filename = None, productionRender=False):
@@ -722,12 +722,10 @@ def renderSkin(dst, vertsPerPrimitive, verts, index = None, objectMatrix = None,
 
     width, height = dst.width, dst.height
 
-    framebuffer = safeRun(glGenFramebuffers(1), glGenFramebuffersEXT(1))
-    safeRun(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer), glBindFramebufferEXT(GL_FRAMEBUFFER, framebuffer))
-    safeRun(glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dst.textureId, 0), 
-        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dst.textureId, 0))
-    safeRun(glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dst.textureId, 0), 
-        glFramebufferTexture2DEXT(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dst.textureId, 0))
+    framebuffer = safeRun(glGenFramebuffers, 1, fallbacks=(glGenFramebuffersEXT))
+    safeRun(glBindFramebuffer, GL_FRAMEBUFFER, framebuffer, fallbacks=(glBindFramebufferEXT))
+    safeRun(glFramebufferTexture2D, GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dst.textureId, 0, fallbacks=(glFramebufferTexture2DEXT))
+    safeRun(glFramebufferTexture2D, GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dst.textureId, 0, fallbacks=(glFramebufferTexture2DEXT))
 
     if clearColor is not None:
         glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3])
@@ -815,12 +813,10 @@ def renderSkin(dst, vertsPerPrimitive, verts, index = None, objectMatrix = None,
     glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, surface)
     surface = Image(data = np.ascontiguousarray(surface[::-1,:,:3]))
 
-    safeRun(glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0), 
-        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0))
-    safeRun(glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0), 
-        glFramebufferTexture2DEXT(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0))
-    safeRun(glBindFramebuffer(GL_FRAMEBUFFER, 0), glBindFramebufferEXT(GL_FRAMEBUFFER, 0))
-    safeRun(glDeleteFramebuffers(np.array([framebuffer])), glDeleteFramebuffersEXT(np.array([framebuffer])))
+    safeRun(glFramebufferTexture2D, GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0, fallbacks=(glFramebufferTexture2DEXT))
+    safeRun(glFramebufferTexture2D, GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0, fallbacks=(glFramebufferTexture2DEXT))
+    safeRun(glBindFramebuffer, GL_FRAMEBUFFER, 0, fallbacks=(glBindFramebufferEXT))
+    safeRun(glDeleteFramebuffers, np.array([framebuffer]), fallbacks=(glDeleteFramebuffersEXT))
     glBindTexture(GL_TEXTURE_2D, 0)
 
     return surface
@@ -832,9 +828,9 @@ def renderToBuffer(width, height, productionRender = True):
     hasRenderToRenderbuffer().
     """
     # Create and bind framebuffer
-    framebuffer = safeRun(glGenFramebuffers(1), glGenFramebuffersEXT(1))
+    framebuffer = safeRun(glGenFramebuffers, 1, fallbacks=(glGenFramebuffersEXT))
     #glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer)
-    safeRun(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer), glBindFramebufferEXT(GL_FRAMEBUFFER, framebuffer))
+    safeRun(glBindFramebuffer, GL_FRAMEBUFFER, framebuffer, fallbacks=(glBindFramebufferEXT))
 
     # Now that framebuffer is bound, verify whether dimensions are within max supported dimensions
     maxWidth, maxHeight = glGetInteger(GL_MAX_VIEWPORT_DIMS)
@@ -848,28 +844,22 @@ def renderToBuffer(width, height, productionRender = True):
         width = int(height / aspect)
 
     # Create and bind renderbuffers
-    renderbuffer = safeRun(glGenRenderbuffers(1), glGenRenderbuffersEXT(1))    # We need a renderbuffer for both color and depth
-    depthRenderbuffer = safeRun(glGenRenderbuffers(1), glGenRenderbuffersEXT(1)) 
-    safeRun(glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer), glBindRenderbufferEXT(GL_RENDERBUFFER, renderbuffer))
+    renderbuffer = safeRun(glGenRenderbuffers, 1, fallbacks=(glGenRenderbuffersEXT))    # We need a renderbuffer for both color and depth
+    depthRenderbuffer = safeRun(glGenRenderbuffers, 1, fallbacks=(glGenRenderbuffersEXT)) 
+    safeRun(glBindRenderbuffer, GL_RENDERBUFFER, renderbuffer, fallbacks=(glBindRenderbufferEXT))
     global have_multisample
     if have_multisample:
-        safeRun(glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGBA, width, height), 
-            glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER, 4, GL_RGBA, width, height))
+        safeRun(glRenderbufferStorageMultisample, GL_RENDERBUFFER, 4, GL_RGBA, width, height, fallbacks=(glRenderbufferStorageMultisampleEXT))
     else:
-        safeRun(glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, width, height), 
-            glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, width, height))
-    safeRun(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderbuffer), 
-            glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderbuffer))
+        safeRun(glRenderbufferStorage, GL_RENDERBUFFER, GL_RGBA, width, height, fallbacks=(glRenderbufferStorageEXT))
+    safeRun(glFramebufferRenderbuffer, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderbuffer, fallbacks=(glFramebufferRenderbufferEXT))
 
-    safeRun(glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer), glBindRenderbufferEXT(GL_RENDERBUFFER, depthRenderbuffer))
+    safeRun(glBindRenderbuffer, GL_RENDERBUFFER, depthRenderbuffer, fallbacks=(glBindRenderbufferEXT))
     if have_multisample:
-        safeRun(glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT16, width, height), 
-            glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT16, width, height))
+        safeRun(glRenderbufferStorageMultisample, GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT16, width, height, fallbacks=(glRenderbufferStorageMultisampleEXT))
     else:
-        safeRun(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height), 
-            glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height))
-    safeRun(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer), 
-        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer))
+        safeRun(glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height, fallbacks=(glRenderbufferStorageEXT))
+    safeRun(glFramebufferRenderbuffer, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer, fallbacks=(glFramebufferRenderbufferEXT))
 
     # TODO check with glCheckFramebufferStatus ?
     if not glCheckFramebufferStatus(GL_FRAMEBUFFER):
@@ -894,38 +884,37 @@ def renderToBuffer(width, height, productionRender = True):
 
     if have_multisample:
         # If we have drawn to a multisample renderbuffer, we need to transfer it to a simple buffer to read it
-        downsampledFramebuffer = safeRun(glGenFramebuffers(1), glGenFramebuffersEXT(1))
-        safeRun(glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer), glBindFramebufferEXT(GL_READ_FRAMEBUFFER, framebuffer))       # Multisampled FBO
-        safeRun(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, downsampledFramebuffer), glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER, downsampledFramebuffer)) # Regular FBO
-        regularRenderbuffer = safeRun(glGenRenderbuffers(1), glGenRenderbuffersEXT(1)) 
-        safeRun(glBindRenderbuffer(GL_RENDERBUFFER, regularRenderbuffer), glBindRenderbufferEXT(GL_RENDERBUFFER, regularRenderbuffer))
-        safeRun(glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, width, height), glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, width, height))
-        safeRun(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, regularRenderbuffer), 
-            glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, regularRenderbuffer))
+        downsampledFramebuffer = safeRun(glGenFramebuffers, 1, fallbacks=(glGenFramebuffersEXT))
+        safeRun(glBindFramebuffer, GL_READ_FRAMEBUFFER, framebuffer, fallbacks=(glBindFramebufferEXT))       # Multisampled FBO
+        safeRun(glBindFramebuffer, GL_DRAW_FRAMEBUFFER, downsampledFramebuffer, fallbacks=(glBindFramebufferEXT)) # Regular FBO
+        regularRenderbuffer = safeRun(glGenRenderbuffers, 1, fallback=(glGenRenderbuffersEXT)) 
+        safeRun(glBindRenderbuffer, GL_RENDERBUFFER, regularRenderbuffer, fallbacks=(glBindRenderbufferEXT))
+        safeRun(glRenderbufferStorage, GL_RENDERBUFFER, GL_RGBA, width, height, fallbacks=(glRenderbufferStorageEXT))
+        safeRun(glFramebufferRenderbuffer, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, regularRenderbuffer, fallbacks=(glFramebufferRenderbufferEXT))
         glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST)
 
         # Dealloc what we no longer need
-        safeRun(glDeleteFramebuffers(np.array([framebuffer])), glDeleteFramebuffersEXT(np.array([framebuffer])))
+        safeRun(glDeleteFramebuffers, np.array([framebuffer]), fallbacks=(glDeleteFramebuffersEXT))
         framebuffer = downsampledFramebuffer
         del downsampledFramebuffer
-        safeRun(glDeleteRenderbuffers(1, np.array([renderbuffer])), glDeleteRenderbuffersEXT(1, np.array([renderbuffer])))
+        safeRun(glDeleteRenderbuffers, 1, np.array([renderbuffer]), fallbacks=(glDeleteRenderbuffersEXT))
         renderbuffer = regularRenderbuffer
         del regularRenderbuffer
 
     # Read pixels
     surface = np.empty((height, width, 4), dtype = np.uint8)
-    safeRun(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer), glBindFramebufferEXT(GL_FRAMEBUFFER, framebuffer))
+    safeRun(glBindFramebuffer, GL_FRAMEBUFFER, framebuffer, fallbacks=(glBindFramebufferEXT))
     glReadBuffer(GL_COLOR_ATTACHMENT0)
     glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, surface)
 
     surface = Image(data = np.ascontiguousarray(surface[::-1,:,[2,1,0]]))
 
     # Unbind frame buffer
-    safeRun(glDeleteFramebuffers(np.array([framebuffer])), glDeleteFramebuffersEXT(np.array([framebuffer])))
-    safeRun(glDeleteRenderbuffers(1, np.array([renderbuffer])), glDeleteRenderbuffersEXT(1, np.array([renderbuffer])))
-    safeRun(glDeleteRenderbuffers(1, np.array([depthRenderbuffer])), glDeleteRenderbuffersEXT(1, np.array([depthRenderbuffer])))
-    safeRun(glBindRenderbuffer(GL_RENDERBUFFER, 0), glBindRenderbufferEXT(GL_RENDERBUFFER, 0))
-    safeRun(glBindFramebuffer(GL_FRAMEBUFFER, 0), glBindFramebuffer(GL_FRAMEBUFFER, 0))
+    safeRun(glDeleteFramebuffers, np.array([framebuffer]), fallbacks=(glDeleteFramebuffersEXT))
+    safeRun(glDeleteRenderbuffers, 1, np.array([renderbuffer]), fallback=(glDeleteRenderbuffersEXT))
+    safeRun(glDeleteRenderbuffers, 1, np.array([depthRenderbuffer]), fallbacks=(glDeleteRenderbuffersEXT))
+    safeRun(glBindRenderbuffer, GL_RENDERBUFFER, 0, fallbacks=(glBindRenderbufferEXT))
+    safeRun(glBindFramebuffer, GL_FRAMEBUFFER, 0, fallbacks=(glBindFramebufferEXT))
 
     # Restore viewport dimensions to those of the window
     G.windowWidth = oldWidth
@@ -944,8 +933,8 @@ def renderAlphaMask(width, height, productionRender = True):
     hasRenderToRenderbuffer().
     """
     # Create and bind framebuffer
-    framebuffer = safeRun(glGenFramebuffers(1), glGenFramebuffersEXT(1))
-    safeRun(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer), glBindFramebufferEXT(GL_FRAMEBUFFER, framebuffer))
+    framebuffer = safeRun(glGenFramebuffers, 1, fallbacks=(glGenFramebuffersEXT))
+    safeRun(glBindFramebuffer, GL_FRAMEBUFFER, framebuffer, fallbacks=(glBindFramebufferEXT))
 
     # Now that framebuffer is bound, verify whether dimensions are within max supported dimensions
     maxWidth, maxHeight = glGetInteger(GL_MAX_VIEWPORT_DIMS)
@@ -953,17 +942,15 @@ def renderAlphaMask(width, height, productionRender = True):
     height = min(height, maxHeight)
 
     # Create and bind renderbuffers
-    renderbuffer = safeRun(glGenRenderbuffers(1), glGenRenderbuffersEXT(1))     # We need a renderbuffer for both color and depth
-    depthRenderbuffer = safeRun(glGenRenderbuffers(1), glGenRenderbuffersEXT(1)) 
-    safeRun(glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer), glBindRenderbufferEXT(GL_RENDERBUFFER, renderbuffer))
-    safeRun(glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, width, height), glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_RGBA, width, height))
-    safeRun(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderbuffer), 
-        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderbuffer))
+    renderbuffer = safeRun(glGenRenderbuffers, 1, fallbacks=(glGenRenderbuffersEXT))     # We need a renderbuffer for both color and depth
+    depthRenderbuffer = safeRun(glGenRenderbuffers, 1, fallbacks=(glGenRenderbuffersEXT)) 
+    safeRun(glBindRenderbuffer, GL_RENDERBUFFER, renderbuffer, fallbacks=(glBindRenderbufferEXT))
+    safeRun(glRenderbufferStorage, GL_RENDERBUFFER, GL_RGBA, width, height, fallbacks=(glRenderbufferStorageEXT))
+    safeRun(glFramebufferRenderbuffer, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderbuffer, fallbacks=(glFramebufferRenderbufferEXT))
 
-    safeRun(glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer), glBindRenderbufferEXT(GL_RENDERBUFFER, depthRenderbuffer))
-    safeRun(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height), glRenderbufferStorageEXT(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height))
-    safeRun(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer), 
-        glFramebufferRenderbufferEXT(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer))
+    safeRun(glBindRenderbuffer, GL_RENDERBUFFER, depthRenderbuffer, fallbacks=(glBindRenderbufferEXT))
+    safeRun(glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height, fallbacks=(glRenderbufferStorageEXT))
+    safeRun(glFramebufferRenderbuffer, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer, fallbacks=(glFramebufferRenderbufferEXT))
 
     # TODO check with glCheckFramebufferStatus ?
     if not glCheckFramebufferStatus(GL_FRAMEBUFFER):
@@ -997,7 +984,7 @@ def renderAlphaMask(width, height, productionRender = True):
 
     # Read pixels
     surface = np.empty((height, width, 4), dtype = np.uint8)
-    safeRun(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer), glBindFramebufferEXT(GL_FRAMEBUFFER, framebuffer))
+    safeRun(glBindFramebuffer, GL_FRAMEBUFFER, framebuffer, fallbacks=(glBindFramebufferEXT))
     glReadBuffer(GL_COLOR_ATTACHMENT0)
     glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, surface)
 
@@ -1005,11 +992,11 @@ def renderAlphaMask(width, height, productionRender = True):
     surface = Image(data = np.ascontiguousarray(surface[::-1,:,[3,3,3]]))
 
     # Unbind frame buffer
-    safeRun(glDeleteFramebuffers(np.array([framebuffer])), glDeleteFramebuffersEXT(np.array([framebuffer])))
-    safeRun(glDeleteRenderbuffers(1, np.array([renderbuffer])), glDeleteRenderbuffersEXT(1, np.array([renderbuffer])))
-    safeRun(glDeleteRenderbuffers(1, np.array([depthRenderbuffer])), glDeleteRenderbuffersEXT(1, np.array([depthRenderbuffer])))
-    safeRun(glBindRenderbuffer(GL_RENDERBUFFER, 0), glBindRenderbufferEXT(GL_RENDERBUFFER, 0))
-    safeRun(glBindFramebuffer(GL_FRAMEBUFFER, 0), glBindFramebufferEXT(GL_FRAMEBUFFER, 0))
+    safeRun(glDeleteFramebuffers, np.array([framebuffer]), fallbacks=(glDeleteFramebuffersEXT))
+    safeRun(glDeleteRenderbuffers, 1, np.array([renderbuffer]), fallbacks=(glDeleteRenderbuffersEXT))
+    safeRun(glDeleteRenderbuffers, 1, np.array([depthRenderbuffer]), fallbacks=(glDeleteRenderbuffersEXT))
+    safeRun(glBindRenderbuffer, GL_RENDERBUFFER, 0, fallbacks=(glBindRenderbufferEXT))
+    safeRun(glBindFramebuffer, GL_FRAMEBUFFER, 0, fallbacks=(glBindFramebufferEXT))
 
     # Restore viewport dimensions to those of the window
     G.windowWidth = oldWidth
