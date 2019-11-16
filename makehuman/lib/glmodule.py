@@ -887,7 +887,7 @@ def renderToBuffer(width, height, productionRender = True):
         downsampledFramebuffer = safeRun(glGenFramebuffers, 1, fallbacks=(glGenFramebuffersEXT))
         safeRun(glBindFramebuffer, GL_READ_FRAMEBUFFER, framebuffer, fallbacks=(glBindFramebufferEXT))       # Multisampled FBO
         safeRun(glBindFramebuffer, GL_DRAW_FRAMEBUFFER, downsampledFramebuffer, fallbacks=(glBindFramebufferEXT)) # Regular FBO
-        regularRenderbuffer = safeRun(glGenRenderbuffers, 1, fallback=(glGenRenderbuffersEXT)) 
+        regularRenderbuffer = safeRun(glGenRenderbuffers, 1, fallbacks=(glGenRenderbuffersEXT)) 
         safeRun(glBindRenderbuffer, GL_RENDERBUFFER, regularRenderbuffer, fallbacks=(glBindRenderbufferEXT))
         safeRun(glRenderbufferStorage, GL_RENDERBUFFER, GL_RGBA, width, height, fallbacks=(glRenderbufferStorageEXT))
         safeRun(glFramebufferRenderbuffer, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, regularRenderbuffer, fallbacks=(glFramebufferRenderbufferEXT))
@@ -911,7 +911,7 @@ def renderToBuffer(width, height, productionRender = True):
 
     # Unbind frame buffer
     safeRun(glDeleteFramebuffers, np.array([framebuffer]), fallbacks=(glDeleteFramebuffersEXT))
-    safeRun(glDeleteRenderbuffers, 1, np.array([renderbuffer]), fallback=(glDeleteRenderbuffersEXT))
+    safeRun(glDeleteRenderbuffers, 1, np.array([renderbuffer]), fallbacks=(glDeleteRenderbuffersEXT))
     safeRun(glDeleteRenderbuffers, 1, np.array([depthRenderbuffer]), fallbacks=(glDeleteRenderbuffersEXT))
     safeRun(glBindRenderbuffer, GL_RENDERBUFFER, 0, fallbacks=(glBindRenderbufferEXT))
     safeRun(glBindFramebuffer, GL_FRAMEBUFFER, 0, fallbacks=(glBindFramebufferEXT))
