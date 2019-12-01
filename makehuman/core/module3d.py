@@ -709,7 +709,7 @@ class Object3D(object):
         for idx, vert in enumerate(self.fvert):                             # contains faces with vertex number
             for i in range (0, min(len(vert), self.vertsPerFaceForExport)): # use minimum of attached vertices, works for less than 3 also
                 vn = vert[i]                                                 # vertex.number
-                if self.nfaces[vn] > self.MAX_FACES:
+                if self.nfaces[vn] >= self.MAX_FACES:
                     log.error("Failed to index faces of mesh %s, you are probably loading a mesh with mixed nb of verts per face (do not mix tris and quads). Or your mesh has too many faces attached to one vertex (the maximum is %s-poles). In the second case, either increase MAX_FACES for this mesh, or improve the mesh topology.", self.name, self.MAX_FACES)
                     raise RuntimeError('Incompatible mesh topology.')
                     return
