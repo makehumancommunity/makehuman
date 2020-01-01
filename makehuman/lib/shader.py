@@ -47,7 +47,7 @@ from core import G
 import io
 
 class Uniform(object):
-    def __init__(self, pgm, index, name, pytype, dims):
+    def __init__(self, index, location, name, pytype, dims):
         if type(name) is bytes:
             self.name = name.decode('utf-8')
         else:
@@ -56,13 +56,12 @@ class Uniform(object):
         self.pytype = pytype
         self.dims = dims
         self.values = None
-        self.pgm = pgm
-        self.location = glGetUniformLocation(self.pgm, name)
+        self.location = location
 
     def __call__(self, index, values):
         raise NotImplementedError
 
-    def update(self):
+    def update(self, pgm):
         pass
 
 class VectorUniform(Uniform):
@@ -118,9 +117,9 @@ class VectorUniform(Uniform):
             cls.uniformTypes2.clear()
         return type in cls.uniformTypes
 
-    def __init__(self, pgm, index, name, type):
+    def __init__(self, index, location, name, type):
         dims, dtype, pytype, glfunc, glquery = self.uniformTypes[type]
-        super(VectorUniform, self).__init__(pgm, index, name, pytype, dims)
+        super(VectorUniform, self).__init__(index, location, name, pytype, dims)
         self.type = type
         self.dtype = dtype
         self.glfunc = glfunc
@@ -134,11 +133,17 @@ class VectorUniform(Uniform):
         if len(self.dims) > 1:
             self.glfunc(self.location, 1, GL_TRUE, values)
         else:
-            self.glfunc(self.location, len(values) // self.dims[0], values)
+            try:
+                self.glfunc(self.location, len(values) // self.dims[0], values)
+            except GLerror as err:
+              log.error("%s", err.description)
 
-    def update(self):
+    def update(self, pgm):
         values = np.zeros(self.dims, dtype=self.dtype)
-        self.glquery(self.pgm, self.location, values)
+        try:
+            self.glquery(pgm, self.location, values)
+        except GLerror as err:
+          log.error("%s", err.description)
         if len(self.dims) > 1:
             values = values.T
         self.values = values
@@ -232,9 +237,9 @@ class SamplerUniform(Uniform):
             cls.textureTargets2.clear()
         return type in cls.textureTargets
 
-    def __init__(self, pgm, index, name, type):
+    def __init__(self, index, location, name, type):
         target = self.textureTargets[type]
-        super(SamplerUniform, self).__init__(pgm, index, name, str, (1,))
+        super(SamplerUniform, self).__init__(index, location, name, str, (1,))
         self.target = target
 
     def set(self, data):
@@ -252,7 +257,10 @@ class SamplerUniform(Uniform):
                 glBindTexture(self.target, 0)
             else:
                 glBindTexture(self.target, tex.textureId)
-        glUniform1i(self.location, cls.currentSampler)
+        try:
+            glUniform1i(self.location, cls.currentSampler)
+        except GLerror as err:
+          log.error("%s", err.description)
         cls.currentSampler += 1
 
     @classmethod
@@ -451,23 +459,23 @@ class Shader(object):
             self.uniforms = []
             for index in range(parameterCount):
                 name, size, type = glGetActiveUniform(self.shaderId, index)
+                location = glGetUniformLocation(self.shaderId, name)
                 if name.startswith(b'gl_'):
                     log.debug("Shader: adding built-in uniform %s", name)
                     self.glUniforms.append(name)
                     continue
                 if VectorUniform.check(type):
-                    uniform = VectorUniform(self.shaderId, index, name, type)
+                    uniform = VectorUniform(index, location, name, type)
                 elif SamplerUniform.check(type):
-                    uniform = SamplerUniform(self.shaderId, index, name, type)
-                # probably superfluous, to be deleted:
-                # uniform.update()
+                    uniform = SamplerUniform(index, location, name, type)
+                uniform.update(self.shaderId) # probably superfluous, to be deleted...
                 self.uniforms.append(uniform)
 
         return self.uniforms
 
     def updateUniforms(self):
         for uniform in self.getUniforms():
-            uniform.update()
+            uniform.update(self.shaderId)
 
     def setUniforms(self, params):
         import glmodule
