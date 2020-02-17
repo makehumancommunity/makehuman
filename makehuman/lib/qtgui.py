@@ -825,6 +825,17 @@ class TextView(QtWidgets.QLabel, Widget):
         text = getLanguageString(text)
         super(TextView,self).setText(text % values)
 
+    # Workaround for incorrect resizing with enabled word wrapping
+    # https://bugreports.qt.io/browse/QTBUG-37673
+    def resizeEvent(self, event):
+        super(TextView, self).resizeEvent(event)
+
+        if self.wordWrap():
+            # heightForWidth rely on minimumSize to evaulate, so reset it before
+            self.setMinimumHeight(0)
+            # define minimum height
+            self.setMinimumHeight(self.heightForWidth(self.width()))
+
 class SliderBox(GroupBox):
     pass
 
