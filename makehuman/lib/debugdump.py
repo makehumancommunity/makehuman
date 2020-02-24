@@ -126,7 +126,14 @@ class DebugDump(object):
         self.write("PLATFORM.UNAME.RELEASE: %s", platform.uname()[2])
 
         if sys.platform.startswith('linux'):
-            self.write("PLATFORM.LINUX_DISTRIBUTION: %s", ' '.join(platform.linux_distribution()))
+            try:
+                self.write("PLATFORM.LINUX_DISTRIBUTION: %s", ' '.join(platform.linux_distribution()))
+            except AttributeError:
+                try:
+                    import distro
+                    self.write("PLATFORM.LINUX_DISTRIBUTION: %s", ' '.join(distro.linux_distribution()))
+                except ImportError:
+                    self.write("PLATFORM.LINUX_DISTRIBUTION: %s", 'Unknown')
             
         if sys.platform.startswith('darwin'):
             self.write("PLATFORM.MAC_VER: %s", platform.mac_ver()[0])
