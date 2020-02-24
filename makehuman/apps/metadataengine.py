@@ -131,14 +131,13 @@ def loadRecord(archivePath, recordID):
       *string*.  The ID of the record to load.
     """
 
-    import io.open
-    time1 = time.time()
-    f = io.open(archivePath, 'r', encoding="utf-8")
+    time1 = time.perf_counter()
+    f = open(archivePath, 'r', encoding="utf-8")
     record = None
     for line in f:
         if line.find(recordID) != -1:
             record = line.split()
-            log.message('Found %s fields in %s sec', len(record), time.time() - time1)
+            log.message('Found %s fields in %s sec', len(record), time.perf_counter() - time1)
             break
     f.close()
     return record
@@ -159,15 +158,15 @@ def searchRecord(archivePath, field):
     field:     
       *string*.  The field to search for.
     """
-    import io
-    time1 = time.time()
-    f = io.open(archivePath, 'r', encoding="utf-8")
+
+    time1 = time.perf_counter()
+    f = open(archivePath, 'r', encoding="utf-8")
     recordIDs = []
     for line in f:
         if line.find(field) != -1:
             recordIDs.append(line.split()[0])
     f.close()
-    log.message('Found %s records in %s sec', len(recordIDs), time.time() - time1)
+    log.message('Found %s records in %s sec', len(recordIDs), time.perf_counter() - time1)
     return recordIDs
 
 
@@ -188,13 +187,12 @@ def saveRecord(archivePath, recordToSave):
 
       """
 
-    import io
-    time1 = time.time()
+    time1 = time.perf_counter()
     recordID = recordToSave.split()[0]
     records = []
     isExistent = None
     try:
-        f = io.open(archivePath, 'w', encoding="utf-8")
+        f = open(archivePath, 'w', encoding="utf-8")
         i = 0
         for line in f:
             if line.find(recordID) != -1:
@@ -212,10 +210,10 @@ def saveRecord(archivePath, recordToSave):
     if not isExistent:
         records.append(recordToSave)
 
-    f = io.open(archivePath, 'w', encoding="utf-8")
+    f = open(archivePath, 'w', encoding="utf-8")
     for record in records:
         f.write('%s\n' % record)
     f.close()
-    log.message('Record %s saved in %s sec', recordID, time.time() - time1)
+    log.message('Record %s saved in %s sec', recordID, time.perf_counter() - time1)
 
 
