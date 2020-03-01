@@ -18,7 +18,7 @@ pipeline {
                         returnStdout: true
                     ).trim()
                     env.EXPECTEDEXE = "${env.WORKSPACE}/../pynsist-work/build/nsis/makehuman-community_${env.DATESTAMP}.exe"
-                    env.DESIREDEXE = "${env.DISTDIR}/${params.BINARYNAME}-${env.DATESTAMP}-win32.exe"
+                    env.DESIREDEXE = "${env.DISTDIR}/${params.BINARYNAME}-${env.DATESTAMP}-windows.exe"
                 
                     sh "echo \"env.DISTDIR: ${env.DISTDIR}\""
                     sh "echo \"env.DATESTAMP: ${env.DATESTAMP}\""
@@ -183,7 +183,7 @@ pipeline {
               dir("${env.DISTDIR}") {
                   script {
                       sh "echo > README.txt \"Addons for blender 2.79 are not bundled. See the community homepage for these.\""
-                      sh "zip -r ${env.WORKSPACE}/${params.BINARYNAME}-${env.DATESTAMP}-win32.zip addons_for_blender_28x README.txt ${params.BINARYNAME}-${env.DATESTAMP}-win32.exe"
+                      sh "zip -r ${env.WORKSPACE}/${params.BINARYNAME}-${env.DATESTAMP}-windows.zip addons_for_blender_28x README.txt ${params.BINARYNAME}-${env.DATESTAMP}-windows.exe"
                   }
               }
           }
@@ -192,7 +192,7 @@ pipeline {
       stage('deploy') {
           steps {
               script {
-                  sh "scp ${env.WORKSPACE}/${params.BINARYNAME}-${env.DATESTAMP}-win32.zip ${params.DEPLOYDEST}"
+                  sh "scp ${env.WORKSPACE}/${params.BINARYNAME}-${env.DATESTAMP}-windows.zip ${params.DEPLOYDEST}"
               }
           }
       }
