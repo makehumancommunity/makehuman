@@ -195,7 +195,7 @@ if os.name == 'nt':
     makensis = os.path.join(os.environ["programfiles(x86)"], "NSIS", "makensis.exe")
 
 try:
-    subprocess.call([makensis, os.path.join(buildDir, "installer.nsi"])
+    subprocess.call([makensis, os.path.join(buildDir, "installer.nsi")])
 except Exception as e:
     print("NSIS script failed with exception: " + e)
     print("Do you have NSIS installed to the default location?")
