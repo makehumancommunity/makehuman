@@ -192,7 +192,7 @@ with open(os.path.join(buildDir, "installer.nsi"), 'w') as file:
 makensis = "/usr/bin/makensis"
 
 if os.name == 'nt':
-    makensis = os.path.join(os.environ["programfiles(x86)", "NSIS", "makensis.exe")
+    makensis = os.path.join(os.environ["programfiles(x86)"], "NSIS", "makensis.exe")
 
 try:
     subprocess.call([makensis, os.path.join(buildDir, "installer.nsi"])
