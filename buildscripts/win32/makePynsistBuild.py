@@ -180,7 +180,7 @@ for file in os.listdir(buildDir):
     if file.endswith(".exe"):
         os.remove(os.path.join(buildDir, file))
         
-with open(buildDir + "installer.nsi", 'r') as file:
+with open(os.path.join(buildDir,"installer.nsi"), 'r') as file:
     data = file.readlines()
 
 data[127] = 'CreateShortCut "$Desktop\makehuman-community.lnk" "$INSTDIR\Python\pythonw.exe" \
