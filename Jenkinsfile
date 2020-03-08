@@ -7,6 +7,7 @@ pipeline {
 		choice(name: 'RELEASE', choices: ['False', 'True'], description: 'Is release build')
 		string(name: 'VERSIONNAME', defaultValue: '1.2.0', description: 'Version part of file name (when release build)')
 		string(name: 'DEPLOYDEST', defaultValue: 'joepal1976@ssh.tuxfamily.org:makehuman/makehuman-repository/nightly/', description: 'Where to copy final binary')
+		boolean(name: 'ALLOWBRANCH', defaultValue: false, description: 'Check to allow building even when branch is not master')
 	}
 
 	stages {
@@ -28,6 +29,7 @@ pipeline {
 						env.ZIPNAME = "${env.WORKSPACE}/../${params.BINARYNAME}-${env.VERSIONNAME}-windows.zip"
 					}
 					env.DESIREDEXE = "${env.DISTDIR}/${env.EXENAME}"
+					env.PERFORMUPLOAD = true;
 
 					sh "echo \"env.DISTDIR: ${env.DISTDIR}\""
 					sh "echo \"env.DATESTAMP: ${env.DATESTAMP}\""
@@ -37,6 +39,20 @@ pipeline {
 					sh "echo \"env.ZIPNAME: ${env.ZIPNAME}\""
 				}
 			}
+		}
+
+		stage('failOnBranch') {
+		    when {
+		        not {
+		            branch 'master'
+		        }
+		    }
+		    steps
+		    {
+                if(!params.ALLOWBRANCH) {
+                    error('Will not build branches automatically for now')
+                }
+		    }
 		}
 
 		// Download asset binaries from github
