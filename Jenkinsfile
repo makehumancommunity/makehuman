@@ -49,8 +49,10 @@ pipeline {
 		    }
 		    steps
 		    {
-                if(!params.ALLOWBRANCH) {
-                    error('Will not build branches automatically for now')
+		        script {
+                    if(!params.ALLOWBRANCH) {
+                        error('Will not build branches automatically for now')
+                    }
                 }
 		    }
 		}
