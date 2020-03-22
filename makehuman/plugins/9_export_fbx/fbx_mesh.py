@@ -104,11 +104,11 @@ def writeGeometryProp(fp, mesh, config):
     if config.binary:
         from . import fbx_binary
         elem = fbx_binary.get_child_element(fp, b'Objects')
-        fbx_binary.fbx_data_mesh_element(elem, key, id, properties, coord, mesh.fvert, mesh.vnorm, mesh.texco, mesh.fuvs)
+        fbx_binary.fbx_data_mesh_element(elem, key, id, properties, coord, mesh.fvert, mesh.vnorm, mesh.texco, mesh.fuvs, mesh.vertsPerFaceForExport)
         return
 
     vertString = ",".join( ["%.4f,%.4f,%.4f" % tuple(co) for co in coord] )
-    if mesh.vertsPerPrimitive == 4:
+    if mesh.vertsPerFaceForExport == 4:
         indexString = ",".join( ['%d,%d,%d,%d' % (fv[0],fv[1],fv[2],-1-fv[3]) for fv in mesh.fvert] )
     else:
         indexString = ",".join( ['%d,%d,%d' % (fv[0],fv[1],-1-fv[2]) for fv in mesh.fvert] )
@@ -122,14 +122,14 @@ def writeGeometryProp(fp, mesh, config):
         '        Vertices: *%d {\n' % (3*nVerts) +
         '            a: %s\n' % vertString +
         '        } \n' +
-        '        PolygonVertexIndex: *%d {\n' % (mesh.vertsPerPrimitive*nFaces) +
+        '        PolygonVertexIndex: *%d {\n' % (mesh.vertsPerFaceForExport*nFaces) +
         '            a: %s\n' % indexString +
         '        } \n')
 
     # Must use normals for shapekeys
     nNormals = len(mesh.vnorm)
     normalString = ",".join( ["%.4f,%.4f,%.4f" % tuple(no) for no in mesh.vnorm] )
-    if mesh.vertsPerPrimitive == 4:
+    if mesh.vertsPerFaceForExport == 4:
         normalIndexString = ",".join( ['%d,%d,%d,%d' % (fv[0],fv[1],fv[2],fv[3]) for fv in mesh.fvert] )
     else:
         normalIndexString = ",".join( ['%d,%d,%d' % (fv[0],fv[1],fv[2]) for fv in mesh.fvert] )
@@ -144,7 +144,7 @@ def writeGeometryProp(fp, mesh, config):
         '            Normals: *%d {\n' % (3*nNormals) +
         '                a: %s\n' % normalString +
         '            }\n' +
-        '            NormalsIndex: *%d {\n' % (mesh.vertsPerPrimitive*len(mesh.fvert)) +
+        '            NormalsIndex: *%d {\n' % (mesh.vertsPerFaceForExport*len(mesh.fvert)) +
         '                a: %s\n' % normalIndexString +
         '            } \n')
 
@@ -232,10 +232,10 @@ def writeUvs2(fp, mesh):
     for fuv in mesh.fuvs:
         uvString.append(",".join( ['%.4f,%.4f' % (tuple(mesh.texco[vt])) for vt in fuv] ))
     uvString = ",".join(uvString)
-    if mesh.vertsPerPrimitive == 4:
+    if mesh.vertsPerFaceForExport == 4:
         indexString = ",".join( ['%d,%d,%d,%d' % (4*n,4*n+1,4*n+2,4*n+3) for n in range(nUvFaces)] )
     else:
-        indexString = ",".join( ['%d,%d,%d' % (4*n,4*n+1,4*n+2) for n in range(nUvFaces)] )
+        indexString = ",".join( ['%d,%d,%d' % (3*n,3*n+1,3*n+2) for n in range(nUvFaces)] )
 
     fp.write(
         '        LayerElementUV: 0 {\n' +
@@ -243,10 +243,10 @@ def writeUvs2(fp, mesh):
         '            Name: "%s_UV"\n' % mesh.name +
         '            MappingInformationType: "ByPolygonVertex"\n' +
         '            ReferenceInformationType: "IndexToDirect"\n' +
-        '            UV: *%d {\n' % (2*mesh.vertsPerPrimitive*nUvFaces) +
+        '            UV: *%d {\n' % (2*mesh.vertsPerFaceForExport*nUvFaces) +
         '                a: %s\n' % uvString[:-1] +
         '            } \n'
-        '            UVIndex: *%d {\n' % (mesh.vertsPerPrimitive*nUvFaces) +
+        '            UVIndex: *%d {\n' % (mesh.vertsPerFaceForExport*nUvFaces) +
         '                a: %s\n' % indexString +
         '            }\n' +
         '        }\n')

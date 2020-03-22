@@ -258,7 +258,7 @@ def fbx_data_pose_node_element(bindposeParent, key, id, bindmat):
     elem_data_single_int64(fbx_posenode, b"Node", id)
     elem_data_single_float64_array(fbx_posenode, b"Matrix", bindmat.ravel(order='C'))  # Use column-major order
 
-def fbx_data_mesh_element(objectsParent, key, id, properties, coord, fvert, vnorm, texco, fuv):
+def fbx_data_mesh_element(objectsParent, key, id, properties, coord, fvert, vnorm, texco, fuv, vertsperface):
     geom = elem_data_single_int64(objectsParent, b"Geometry", id)  #get_fbx_uuid_from_key(key))
     #log.debug("---KEY---")
     #log.debug(key)
@@ -284,13 +284,18 @@ def fbx_data_mesh_element(objectsParent, key, id, properties, coord, fvert, vnor
 
     # Polygon indices.
     # Bitwise negate last index to mark end of polygon loop
-    fvert_ = fvert.copy()
-    if fvert.shape[1] == 3:
-        #fvert_[:,2] = -1 - fvert_[:,2]
-        fvert_[:,2] = ~fvert_[:,2]
-    else:
-        fvert_[:,3] = ~fvert_[:,3]
+    fvert_ = [];
     import numpy as np
+
+    if vertsperface == 3:
+        fvert_ = np.zeros((len(fvert),3), dtype=np.float32)
+        fvert_[:,:3] = fvert[:,:3]
+        for fv in fvert_:
+            fv[2] = -1-fv[2]
+    else:
+        fvert_ = fvert.copy()
+        fvert_[:,3] = ~fvert_[:,3]
+
     t_pvi = array.array(data_types.ARRAY_INT32, fvert_.astype(np.int32).reshape(-1))
     elem_data_single_int32_array(geom, b"PolygonVertexIndex", t_pvi)
 
@@ -385,8 +390,15 @@ def fbx_data_mesh_element(objectsParent, key, id, properties, coord, fvert, vnor
     # UV layers.
     # Note: LayerElementTexture is deprecated since FBX 2011 - luckily!
     #       Textures are now only related to materials, in FBX!
+    fuv_ = []
+    if vertsperface == 3:
+        fuv_ = np.zeros((len(fuv),3), dtype=np.float32)
+        fuv_[:,:3] = fuv[:,:3]
+    else:
+        fuv_ = fuv
+
     t_uv = array.array(data_types.ARRAY_FLOAT64, texco.reshape(-1))
-    t_fuv = array.array(data_types.ARRAY_INT32, fuv.reshape(-1))
+    t_fuv = array.array(data_types.ARRAY_INT32, fuv_.astype(np.int32).reshape(-1))
     uvindex = 0
     lay_uv = elem_data_single_int32(geom, b"LayerElementUV", uvindex)
     elem_data_single_int32(lay_uv, b"Version", FBX_GEOMETRY_UV_VERSION)
