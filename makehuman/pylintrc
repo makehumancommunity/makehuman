@@ -43,7 +43,7 @@ load-plugins=
 #
 # W0614 - Unused import from wildcard import
 #
-disable=line-too-long,missing-docstring,invalid-name,too-many-lines,C0326,R0902,R0904,R0914,W0614,C0413,C0303,W0611,W0401,R0913
+disable=line-too-long,missing-docstring,invalid-name,too-many-lines,C0326,R0902,R0904,R0914,W0614,C0413,C0303,W0611,W0401,R0913,C0411,R1705,W0702,W0603,R0201
 
 
 [REPORTS]
