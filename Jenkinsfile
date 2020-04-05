@@ -57,6 +57,17 @@ pipeline {
 		    }
 		}
 
+		// Create a pylint log file
+		stage('pylint') {
+			steps {
+				script {
+					dir("makehuman") {
+						sh "python3 create_pylint_log.py"
+					}
+				}
+			}
+		}
+
 		// Download asset binaries from github
 		stage('downloadAssets') {
 			steps {
