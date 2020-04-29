@@ -2,6 +2,8 @@ pipeline {
 
 	agent any
 
+        triggers { cron('H 5 * * *') }
+
 	parameters {
 		string(name: 'BINARYNAME', defaultValue: 'makehuman-community', description: 'The name used in the output exe binary')
 		choice(name: 'RELEASE', choices: ['False', 'True'], description: 'Is release build')
