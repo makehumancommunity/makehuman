@@ -115,13 +115,14 @@ class CustomTargetsTaskView(gui3d.TaskView):
         group = []
 
         for root, dirs, files in os.walk(self.targetsPath):
+            dirs.sort()
             groupBox = self.targetsBox.addWidget(gui.GroupBox('Targets'))
             folderGroup = self.folderBox.addWidget(FolderButton(self, group, os.path.basename(root), groupBox, len(self.folderBox.children) == 0))
             folderGroup.targetCount = 0
             self.folders.append(groupBox)
 
             # TODO allow creating more complex modifiers (or we could also require the user to create a modifier .json file)
-            for f in files:
+            for f in sorted(files):
                 if f.endswith(".target"):
                     self.createTargetControls(groupBox, os.path.join(root, f))
                     folderGroup.targetCount += 1
