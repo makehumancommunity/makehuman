@@ -578,8 +578,8 @@ class RadioButton(QtWidgets.QRadioButton, ButtonBase):
         self.setChecked(selected)
         self._addToGroup(group)
 
-    def __del__(self):
-        self._removeFromGroup(self.group)
+    #def __del__(self):
+    #    self._removeFromGroup(self.group)
 
     def _addToGroup(self, group):
         if id(group) in type(self).groups:
