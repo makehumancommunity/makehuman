@@ -177,7 +177,7 @@ class PoseLibraryTaskView(gui3d.TaskView, filecache.MetadataCacher):
     def loadBvh(self, filepath, convertFromZUp="auto"):
         bvh_file = bvh.load(filepath, convertFromZUp)
         if COMPARE_BONE not in bvh_file.joints:
-            msg = 'The pose file cannot be used. It uses a rig different from MakeHuman\'s defualt rig'
+            msg = 'The pose file cannot be loaded. It uses a different rig then MakeHuman\'s default rig'
             G.app.prompt('Error', msg, 'OK')
             log.error('Pose file %s does not use the default rig.' % filepath)
             return None
