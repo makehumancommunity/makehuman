@@ -517,6 +517,10 @@ def createSubdivisionObject(object, staticFaceMask=None):
         log.debug('No Catmull-Clark subdivision on triangle-mesh %s.', object.name)
         return object
 
+    if len(object.texco) == 0:
+        log.debug('No Catmull-Clark subdivision on mesh %s without UV map.', object.name)
+        return object
+
     obj = SubdivisionObject(object, staticFaceMask)
     obj.create()
     return obj
