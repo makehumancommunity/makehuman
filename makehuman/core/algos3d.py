@@ -507,4 +507,4 @@ def defaultTargetLicense():
     import makehuman
     return makehuman.getAssetLicense( {"license": "AGPL3",
                                        "author": "MakeHuman",
-                                       "copyright": "2016 Data Collection AB, Joel Palmius, Jonas Hauquier"} )
+                                       "copyright": "2020 Data Collection AB, Joel Palmius, Jonas Hauquier"} )

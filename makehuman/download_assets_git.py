@@ -12,7 +12,7 @@ MakeHuman python entry-point.
 
 **Authors:**           Joel Palmius
 
-**Copyright(c):**      MakeHuman Team 2016 - 2019
+**Copyright(c):**      MakeHuman Team 2016-2020
 
 **Licensing:**         AGPL3 
 
