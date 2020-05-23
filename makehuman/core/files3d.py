@@ -12,7 +12,7 @@ Modules to handle supported 3D file formats.
 
 **Authors:**           Joel Palmius, Marc Flerackers
 
-**Copyright(c):**      MakeHuman Team 2001-2019
+**Copyright(c):**      MakeHuman Team 2001-2020
 
 **Licensing:**         AGPL3
 

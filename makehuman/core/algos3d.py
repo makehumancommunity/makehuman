@@ -12,7 +12,7 @@ MakeHuman 3D Transformation functions.
 
 **Authors:**           Joel Palmius, Marc Flerackers, Jonas Hauquier
 
-**Copyright(c):**      MakeHuman Team 2001-2019
+**Copyright(c):**      MakeHuman Team 2001-2020
 
 **Licensing:**         AGPL3
 
@@ -507,4 +507,4 @@ def defaultTargetLicense():
     import makehuman
     return makehuman.getAssetLicense( {"license": "AGPL3",
                                        "author": "MakeHuman",
-                                       "copyright": "2016 Data Collection AB, Joel Palmius, Jonas Hauquier"} )
+                                       "copyright": "2020 Data Collection AB, Joel Palmius, Jonas Hauquier"} )

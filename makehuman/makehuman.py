@@ -12,7 +12,7 @@ MakeHuman python entry-point.
 
 **Authors:**           Glynn Clements, Jonas Hauquier, Joel Palmius
 
-**Copyright(c):**      MakeHuman Team 2001-2019
+**Copyright(c):**      MakeHuman Team 2001-2020
 
 **Licensing:**         AGPL3 
 
@@ -51,7 +51,7 @@ meshVersion = "hm08"                    # Version identifier of the basemesh
 ################################################################################
 
 __author__ = "Jonas Hauquier, Joel Palmius, Glynn Clements, Thomas Larsson et al."
-__copyright__ = "Copyright 2018 Data Collection AB and listed authors"
+__copyright__ = "Copyright 2020 Data Collection AB and listed authors"
 __credits__ = ["See http://www.makehumancommunity.org/halloffame"]
 __license__ = "AGPLv3"
 __maintainer__ = "Joel Palmius, Jonas Hauquier"
@@ -242,14 +242,14 @@ def parse_arguments():
 
 def getCopyrightMessage(short=False):
     if short:
-        return """MakeHuman Copyright (C) 2001-2018 http://www.makehumancommunity.org
+        return """MakeHuman Copyright (C) 2001-2020 http://www.makehumancommunity.org
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it
 under certain conditions. For details use the option --license"""
 
     return """Makehuman is a completely free, open source, innovative and 
 professional software for the modelling of 3-Dimensional humanoid characters
-Copyright (C) 2001-2018  www.makehumancommunity.org
+Copyright (C) 2001-2020  www.makehumancommunity.org
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -320,7 +320,7 @@ class LicenseInfo(object):
         self.author = "MakeHuman Team"
         self.license = "AGPL3"
         self.homepage = "http://www.makehumancommunity.org"
-        self.copyright = "(c) www.makehumancommunity.org 2001-2018"
+        self.copyright = "(c) www.makehumancommunity.org 2001-2020"
         self._keys = ["author", "license", "copyright", "homepage"]
         self._customized = False
 

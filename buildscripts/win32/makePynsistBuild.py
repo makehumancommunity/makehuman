@@ -183,8 +183,8 @@ for file in os.listdir(buildDir):
 with open(os.path.join(buildDir,"installer.nsi"), 'r') as file:
     data = file.readlines()
 
-data[127] = 'CreateShortCut "$Desktop\makehuman-community.lnk" "$INSTDIR\Python\pythonw.exe" \
-            "$INSTDIR\mhstartwrapper.py" "$INSTDIR\makehuman.ico"\n\n'
+data[127] = 'CreateShortCut "$Desktop\makehuman-community.lnk" \'"$INSTDIR\Python\pythonw.exe"\' \
+            \'"$INSTDIR\mhstartwrapper.py"\' "$INSTDIR\makehuman.ico"\n\n'
 
 with open(os.path.join(buildDir, "installer.nsi"), 'w') as file:
     file.writelines(data)
