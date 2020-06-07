@@ -257,7 +257,7 @@ pipeline {
 			}
 			steps {
 				script {
-					sh "ssh joepal1976@ssh.tuxfamily.org 'rm ~/makehuman/makehuman-repository/nightly/makehuman-community-*-nightly-windows.zip'"
+					sh "ssh joepal1976@ssh.tuxfamily.org 'rm -f ~/makehuman/makehuman-repository/nightly/makehuman-community-*-nightly-windows.zip'"
 				}
 			}
 		}
