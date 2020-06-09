@@ -578,7 +578,6 @@ def main():
         os.environ['MH_VERSION'] = getVersionStr()
         os.environ['MH_SHORT_VERSION'] = getShortVersion()
         os.environ['MH_MESH_VERSION'] = getBasemeshVersion()
-        os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
         args = parse_arguments()
         init_logging()
     except Exception as e:
@@ -605,7 +604,6 @@ def main():
     # Here pyQt and PyOpenGL will be imported
     from mhmain import MHApplication
     application = MHApplication()
-    application.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
     application.run()
 
     #import cProfile

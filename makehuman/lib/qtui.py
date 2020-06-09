@@ -688,6 +688,7 @@ class AsyncEvent(QtCore.QEvent):
 
 class Application(QtWidgets.QApplication, events3d.EventHandler):
     def __init__(self):
+        os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
         super(Application, self).__init__(sys.argv)
         self.mainwin = None
         self.log_window = None
@@ -702,6 +703,7 @@ class Application(QtWidgets.QApplication, events3d.EventHandler):
         self.eventHandlers = []
         # self.installEventFilter(self)
         QtGui.qt_set_sequence_auto_mnemonic(False)
+        self.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
 
     def OnInit(self):
         import debugdump
