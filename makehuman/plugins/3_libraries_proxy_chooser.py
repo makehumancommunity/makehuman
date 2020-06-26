@@ -129,6 +129,10 @@ class ProxyTaskView(proxychooser.ProxyChooserTaskView):
             return
 
         self.human.setProxy(None)
+
+        if self.descriptionWidget:
+            self.descrLbl.setText('')
+
         self.filechooser.deselectItem(mhclofile)
 
         if not suppressSignal:
