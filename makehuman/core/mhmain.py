@@ -236,6 +236,7 @@ class MHApplication(gui3d.Application, mh.Application):
                 'guiTheme': 'makehuman',
                 'restoreWindowSize': True,
                 'windowGeometry': '',
+                'useHDPI': False,
                 'tagFilterMode': 'OR',
                 'useNameTags': False,
                 'tagCount': 5,
@@ -268,12 +269,13 @@ class MHApplication(gui3d.Application, mh.Application):
                 'preloadTargets': False,
                 'restoreWindowSize': True,
                 'windowGeometry': '',
+                'useHDPI': False,
                 'tagFilterMode': 'OR',
                 'useNameTags': False,
                 'tagCount': 5,
                 'makehumanTags': ['makehuman™'],
                 'keepCustomValues': False,
-                '_versionSentinel': 'ADF83BF89112337B261431C15C660D9A' # GM Time was: Sat, Feb 09 2019 23:13:56 +0000
+                '_versionSentinel': 'B26472743DC5DCE1721ADB5A91AAECAA' # GM Time was: Thu, Jun 25 2020 22:30:01 +0000
             }
 
         self._settings = dict(self._default_settings)
@@ -765,6 +767,11 @@ class MHApplication(gui3d.Application, mh.Application):
         self.mainwin.move(self.splash.pos())
 
         #self.splash.setFormat('<br><br><b><font size="10" color="#ffffff">%s</font></b>')
+
+        #Use HDPI settings
+        if self.getSetting('useHDPI'):
+            os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
+            self.setAttribute(gui.QtCore.Qt.AA_EnableHighDpiScaling)
 
         progress = Progress([36, 6, 15, 333, 40, 154, 257, 5], messaging=True)
 
