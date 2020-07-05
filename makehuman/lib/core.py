@@ -72,6 +72,7 @@ class Globals(object):
             for key in _PRE_STARTUP_KEYS:
                 if key in data:
                     self.preStartupSettings[key] = data[key]
+                    # Would be nice to log this, but log has not been initialized yet
                     print("PRE STARTUP SETTING: " + key + " = " + str(data[key]))
                 else:
                     self.preStartupSettings[key] = None
