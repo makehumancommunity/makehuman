@@ -768,11 +768,6 @@ class MHApplication(gui3d.Application, mh.Application):
 
         #self.splash.setFormat('<br><br><b><font size="10" color="#ffffff">%s</font></b>')
 
-        #Use HDPI settings
-        if self.getSetting('useHDPI'):
-            os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
-            self.setAttribute(gui.QtCore.Qt.AA_EnableHighDpiScaling)
-
         progress = Progress([36, 6, 15, 333, 40, 154, 257, 5], messaging=True)
 
         progress.firststep('Loading human')
