@@ -33,7 +33,7 @@ If you rather run the code from source:
 * Figure out how to run "pip": https://pip.pypa.io/en/stable/ (it should have been installed automatically by python), but on Linux use your default package menagemnt system
 * Use "pip" to install dependencies:
   * "pip install numpy"
-  * "pip install PyQt5"
+  * "pip install PyQt5" or, on Debian > 9 "pip3 install PyQt5==5.12.2"
   * "pip install PyOpenGL"
 * on Debian based systems you need to install: python3-numpy, python3-opengl, python3-pyqt5, python3-pyqt5.opengl, python3-pyqt5.qtsvg
 * Use git to clone https://github.com/makehumancommunity/makehuman.git (or download the source as a zip)
