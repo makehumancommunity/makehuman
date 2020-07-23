@@ -182,7 +182,7 @@ class Canvas(QtOpenGL.QGLWidget):
         format = QtOpenGL.QGLFormat()
         format.setAlpha(True)
         format.setDepthBufferSize(24)
-        if not G.args.get('noshaders', False):
+        if not G.preStartupSettings["noSampleBuffers"]:
             format.setSampleBuffers(True)
             format.setSamples(4)
         super(Canvas, self).__init__(format, parent)

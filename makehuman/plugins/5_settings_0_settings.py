@@ -174,6 +174,7 @@ class SettingsTaskView(gui3d.TaskView):
         self.saveScreenSize = startupBox.addWidget(SettingCheckbox("Restore window size", 'restoreWindowSize'))
         self.useHDPI = startupBox.addWidget(SettingCheckbox("Use HDPI", 'useHDPI', hdpiPostAction))
         self.noShaders = startupBox.addWidget(SettingCheckbox("No shaders", 'noShaders', hdpiPostAction))
+        self.noSampleBuffers = startupBox.addWidget(SettingCheckbox("No sample buffers", 'noSampleBuffers', hdpiPostAction))
 
         resetBox = self.addLeftWidget(gui.GroupBox('Restore settings'))
         self.resetButton = resetBox.addWidget(gui.Button("Restore to defaults"))

@@ -160,9 +160,13 @@ class DebugDump(object):
             noshaders = "set via command line"
         if G.preStartupSettings["noShaders"]:
             noshaders = "set via setting"
-        
         self.write("NOSHADERS: %s", noshaders)
         
+        nosamplebuffers = "not set"
+        if G.preStartupSettings["noSampleBuffers"]:
+            nosamplebuffers = "set via setting"
+        self.write("NOSAMPLEBUFFERS: %s", nosamplebuffers)
+
         self.close()
 
     def appendQt(self):

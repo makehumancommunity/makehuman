@@ -42,7 +42,7 @@ import os, json
 
 from getpath import getPath
 
-_PRE_STARTUP_KEYS = ["useHDPI", "noShaders"]
+_PRE_STARTUP_KEYS = ["useHDPI", "noShaders", "noSampleBuffers"]
 
 class Globals(object):
     def __init__(self):
