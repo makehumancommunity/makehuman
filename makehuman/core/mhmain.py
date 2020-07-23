@@ -237,6 +237,7 @@ class MHApplication(gui3d.Application, mh.Application):
                 'restoreWindowSize': True,
                 'windowGeometry': '',
                 'useHDPI': False,
+                'noShaders': False,
                 'tagFilterMode': 'OR',
                 'useNameTags': False,
                 'tagCount': 5,
@@ -270,6 +271,7 @@ class MHApplication(gui3d.Application, mh.Application):
                 'restoreWindowSize': True,
                 'windowGeometry': '',
                 'useHDPI': False,
+                'noShaders': False,
                 'tagFilterMode': 'OR',
                 'useNameTags': False,
                 'tagCount': 5,
@@ -810,10 +812,10 @@ class MHApplication(gui3d.Application, mh.Application):
         # self.splash.finish(self.mainwin)
         self.splash.close()
         self.splash = None
-
-        if not self.args.get('noshaders', False) and \
+            
+        if (not self.args.get('noshaders', False) or G.preStartupSettings["noShaders"]) and \
           ( not mh.Shader.supported() or mh.Shader.glslVersion() < (1,20) ):
-            self.prompt('Warning', 'Your system does not support OpenGL shaders (GLSL v1.20 required).\nOnly simple shading will be available.', 'Ok', None, None, None, 'glslWarning')
+            self.prompt('Warning', 'GLSL shaders have been disabled or are not supported.\nOnly simple shading will be available.', 'Ok', None, None, None, 'glslWarning')
 
         # Restore main window size and position
         geometry = self.getSetting('windowGeometry')

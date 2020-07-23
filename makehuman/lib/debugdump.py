@@ -46,6 +46,7 @@ if sys.platform.startswith('win'):
 import log
 import getpath
 from mhversion import MHVersion
+from core import G
 
 class DependencyError(Exception):
     def __init__(self, value):
@@ -153,6 +154,15 @@ class DebugDump(object):
         import OpenGL
         self.open()
         self.write("PYOPENGL.VERSION: %s", OpenGL.__version__)
+        
+        noshaders = "not set"
+        if G.args.get('noshaders', False):
+            noshaders = "set via command line"
+        if G.preStartupSettings["noShaders"]:
+            noshaders = "set via setting"
+        
+        self.write("NOSHADERS: %s", noshaders)
+        
         self.close()
 
     def appendQt(self):

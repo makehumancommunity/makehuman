@@ -269,7 +269,7 @@ class SamplerUniform(Uniform):
 
 class Shader(object):
     _supported = None
-    if G.args.get('noshaders', False):
+    if G.args.get('noshaders', False) or G.preStartupSettings["noShaders"]:
         _supported = False
 
     _glsl_version_str = None
