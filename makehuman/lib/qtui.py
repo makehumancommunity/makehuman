@@ -688,6 +688,12 @@ class AsyncEvent(QtCore.QEvent):
 
 class Application(QtWidgets.QApplication, events3d.EventHandler):
     def __init__(self):
+        if "useHDPI" in G.preStartupSettings and G.preStartupSettings["useHDPI"]:
+            # Would be nice to log this, but log has not been initialized yet
+            print("Trying to enable HDPI before launching Qt application")
+            os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
+            # Forward compatibility, since the AUTO_SCREEN* env variable is marked as deprecated in pyqt 5.14
+            os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
         super(Application, self).__init__(sys.argv)
         self.mainwin = None
         self.log_window = None
@@ -702,6 +708,8 @@ class Application(QtWidgets.QApplication, events3d.EventHandler):
         self.eventHandlers = []
         # self.installEventFilter(self)
         QtGui.qt_set_sequence_auto_mnemonic(False)
+        if "useHDPI" in G.preStartupSettings and G.preStartupSettings["useHDPI"]:
+            self.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
 
     def OnInit(self):
         import debugdump
