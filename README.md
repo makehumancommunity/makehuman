@@ -35,7 +35,7 @@ If you rather run the code from source:
   * "pip install numpy"
   * "pip install PyQt5"
   * "pip install PyOpenGL"
-* on Debian based systems you need to install: python3-numpy, python3-opengl, python3-pyqt5, python3-pyqt5.opengl, python3-pyqt5.qtsvg
+* on Debian based systems you need to install: python3-numpy, python3-opengl, python3-pyqt5, python3-pyqt5.qtopengl, python3-pyqt5.qtsvg
 * Use git to clone https://github.com/makehumancommunity/makehuman.git (or download the source as a zip)
 * Run the "download\_assets\_git.py" script in the "makehuman" subdirectory of the source code.
 * Optionally also run:
