@@ -26,7 +26,7 @@ pipeline {
 					if (env.RELEASE != "True") {
 						env.VERSIONNAME = env.DATESTAMP
 					} else {
-						env.VERSIONNAME = "${param.VERSIONNAME}"
+						env.VERSIONNAME = "${params.VERSIONNAME}"
 					}
 					env.EXPECTEDEXE = "${env.WORKSPACE}/../pynsist-work/build/nsis/makehuman-community_${env.VERSIONNAME}.exe"
 					env.EXENAME = "${params.BINARYNAME}-${env.VERSIONNAME}-windows.exe"
