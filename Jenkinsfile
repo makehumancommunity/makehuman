@@ -23,7 +23,10 @@ pipeline {
 						script: "date +\"%Y%m%d\"",
 						returnStdout: true
 					).trim()
-					env.EXPECTEDEXE = "${env.WORKSPACE}/../pynsist-work/build/nsis/makehuman-community_${env.DATESTAMP}.exe"
+					if (env.RELEASE != "True") {
+						param.VERSIONNAME = env.DATESTAMP
+					}
+					env.EXPECTEDEXE = "${env.WORKSPACE}/../pynsist-work/build/nsis/makehuman-community_${param.VERSIONNAME}.exe"
 					env.EXENAME = "${params.BINARYNAME}-${env.DATESTAMP}-windows.exe"
 					env.ZIPNAME = "${env.WORKSPACE}/../${params.BINARYNAME}-${env.DATESTAMP}-nightly-windows.zip"
 					if (env.RELEASE == "True") {
