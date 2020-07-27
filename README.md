@@ -7,13 +7,13 @@ _should_ be able to use the same instructions as windows users, although this ha
 
 At the point of writing this, the source code is almost ready for a stable release. 
 
-## Support requests:
+## Support requests
 
 If you have any questions about the software and its usage, please make a request in our forum: http://www.makehumancommunity.org/forum.
 
 A quick look through at least the top questions in the FAQ might be a good idea too: http://www.makehumancommunity.org/wiki/FAQ:Index
 
-We are not going to answer support requests on the bug tracker!
+Please do not use the issue tracker for general tech support. For such questions, please use the forums.
 
 ## Testing and reporting bugs
 
