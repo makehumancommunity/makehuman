@@ -238,10 +238,24 @@ def configurePaths():
   # Final destination for source deb
   settings["source_final_dest"] = os.path.join(settings["build_root"],"dist_ppa")
   print("Final destination for source deb definition: " + settings["source_final_dest"])
+  
+  if os.path.exists(settings["source_final_dest"]):
+    if not os.path.isdirectory(settings["source_final_dest"]):
+      print(settings["source_final_dest"] + " is not a directory")
+      sys.exit(1)
+  else:
+    os.mkdir(settings["source_final_dest"])
 
   # Final destination for source deb
   settings["binary_final_dest"] = os.path.join(settings["build_root"],"dist_deb")
   print("Final destination for binary deb files: " + settings["binary_final_dest"])
+
+  if os.path.exists(settings["binary_final_dest"]):
+    if not os.path.isdirectory(settings["binary_final_dest"]):
+      print(settings["binary_final_dest"] + " is not a directory")
+      sys.exit(1)
+  else:
+    os.mkdir(settings["binary_final_dest"])
 
   print("\n### Finished configuring locations ###\n")
   print("")
@@ -414,7 +428,8 @@ def createSourceDebs():
   else:
     subprocess.check_call(["debuild","-S","-sa"])
 
-  os.makedirs(settings["source_final_dest"])
+  if not os.path.exists(settings["source_final_dest"]):
+    os.makedirs(settings["source_final_dest"])
 
   print("Copying source deb output to " + settings["source_final_dest"])
 
@@ -450,7 +465,8 @@ def createBinaryDebs():
   else:
     subprocess.check_call(["debuild"])
 
-  os.makedirs(settings["binary_final_dest"])
+  if not os.path.exists(settings["binary_final_dest"]):
+    os.makedirs(settings["binary_final_dest"])
 
   print("Copying deb files to " + settings["binary_final_dest"])
 
