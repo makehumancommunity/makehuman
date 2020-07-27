@@ -264,6 +264,12 @@ pipeline {
 
 		// Upload zip to destination
 		stage('deploy') {
+			when {
+				expression {
+					params.RELEASE == "False"
+				}
+
+			}
 			steps {
 				script {
 					sh "scp ${env.ZIPNAME} ${params.DEPLOYDEST}"
