@@ -245,6 +245,7 @@ pipeline {
 				dir("${env.DISTDIR}") {
 					script {
 						sh "cp ${env.WORKSPACE}/buildscripts/win32/README.txt README.txt"
+						sh "unix2dos README.txt"
 						sh "zip -r ${env.ZIPNAME} addons_for_blender_28x README.txt ${env.EXENAME}"
 					}
 				}
