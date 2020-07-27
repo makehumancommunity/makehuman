@@ -241,7 +241,7 @@ pipeline {
 			steps {
 				dir("${env.DISTDIR}") {
 					script {
-						sh "echo > README.txt \"Addons for blender 2.79 are not bundled. See the community homepage for these.\""
+						sh "cp ${env.WORKSPACE}/buildscripts/win32/README.txt README.txt"
 						sh "zip -r ${env.ZIPNAME} addons_for_blender_28x README.txt ${env.EXENAME}"
 					}
 				}
