@@ -24,17 +24,18 @@ pipeline {
 						returnStdout: true
 					).trim()
 					if (env.RELEASE != "True") {
-						param.VERSIONNAME = env.DATESTAMP
+						env.VERSIONNAME = env.DATESTAMP
+					} else {
+						env.VERSIONNAME = "${param.VERSIONNAME}"
 					}
-					env.EXPECTEDEXE = "${env.WORKSPACE}/../pynsist-work/build/nsis/makehuman-community_${param.VERSIONNAME}.exe"
-					env.EXENAME = "${params.BINARYNAME}-${env.DATESTAMP}-windows.exe"
-					env.ZIPNAME = "${env.WORKSPACE}/../${params.BINARYNAME}-${env.DATESTAMP}-nightly-windows.zip"
+					env.EXPECTEDEXE = "${env.WORKSPACE}/../pynsist-work/build/nsis/makehuman-community_${env.VERSIONNAME}.exe"
+					env.EXENAME = "${params.BINARYNAME}-${env.VERSIONNAME}-windows.exe"
+					env.ZIPNAME = "${env.WORKSPACE}/../${params.BINARYNAME}-${env.VERSIONNAME}-nightly-windows.zip"
 					if (env.RELEASE == "True") {
-						env.EXENAME = "${params.BINARYNAME}-${env.VERSIONNAME}-windows.exe"
 						env.ZIPNAME = "${env.WORKSPACE}/../${params.BINARYNAME}-${env.VERSIONNAME}-windows.zip"
 					}
 					env.DESIREDEXE = "${env.DISTDIR}/${env.EXENAME}"
-					env.PERFORMUPLOAD = true;
+					env.PERFORMUPLOAD = (env.RELEASE != "True");
 
 					sh "echo \"env.DISTDIR: ${env.DISTDIR}\""
 					sh "echo \"env.DATESTAMP: ${env.DATESTAMP}\""
