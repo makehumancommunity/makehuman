@@ -249,14 +249,14 @@ def hasGitLFSSupport():
 
     return True
  
-def cloneRepo(repoUrl,repoDest,branch="master"):
+def cloneRepo(repoUrl,repoDest,branch="master",extraargs=''):
 
     global _gitcmd
     global _gitdir
 
     currentwd = os.getcwd()
 
-    args = [_gitcmd,"clone",repoUrl,repoDest]
+    args = [_gitcmd,"clone",extraargs,repoUrl,repoDest]
     subprocess.check_call(args)
 
     os.chdir(repoDest)
@@ -266,7 +266,7 @@ def cloneRepo(repoUrl,repoDest,branch="master"):
 
     os.chdir(currentwd)
 
-def pullRepo(repoLoc,branch="master"):
+def pullRepo(repoLoc,branch="master",extraargs=''):
 
     global _gitcmd
     global _gitdir
