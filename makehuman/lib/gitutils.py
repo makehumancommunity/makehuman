@@ -266,7 +266,7 @@ def cloneRepo(repoUrl,repoDest,branch="master",extraargs=''):
 
     os.chdir(currentwd)
 
-def pullRepo(repoLoc,branch="master",extraargs=''):
+def pullRepo(repoLoc,branch="master"):
 
     global _gitcmd
     global _gitdir
