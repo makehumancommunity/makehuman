@@ -63,7 +63,7 @@ class Globals(object):
         iniPath = getPath("settings.ini")
         data = None
         if os.path.exists(iniPath):
-            with open(iniPath) as f:
+            with open(iniPath, encoding='utf-8') as f:
                 data = json.load(f)
         if data is None:
             for key in _PRE_STARTUP_KEYS:
