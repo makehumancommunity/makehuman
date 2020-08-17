@@ -54,7 +54,7 @@ def loadObjFile(path, obj = None):
         name = os.path.splitext( os.path.basename(path) )[0]
         obj = module3d.Object3D(name)
 
-    objFile = io.open(path, 'r', encoding="utf-8")
+    objFile = open(path, 'r', encoding="utf-8")
 
     fg = None
     mtl = None
@@ -160,7 +160,7 @@ def writeObjFile(path, meshes, writeMTL=True, config=None, filterMaskedFaces=Tru
     if isinstance(path, io.IOBase):
         fp = path
     else:
-        fp = io.open(path, 'w', encoding="utf-8")
+        fp = open(path, 'w', encoding="utf-8")
 
 
     fp.write(

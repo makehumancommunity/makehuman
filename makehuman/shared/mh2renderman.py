@@ -44,7 +44,6 @@ The MakeHuman data structures are transposed into renderman objects.
 from getpath import getPath, getSysPath, getSysDataPath
 import os
 import numpy as np
-import io
 import subprocess
 import projection
 import time
@@ -563,7 +562,7 @@ class RMRScene:
         self.lights = []
         RMRLight.lightCounter = 0
         path = os.path.join(lightsFolderPath,lightFile)
-        fileDescriptor = io.open(path, 'r', encoding='utf-8')
+        fileDescriptor = open(path, 'r', encoding='utf-8')
 
         for data in fileDescriptor:
             #print (data)

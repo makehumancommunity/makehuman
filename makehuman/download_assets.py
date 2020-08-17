@@ -52,7 +52,6 @@ def version():
 
 import os
 import sys
-import io
 import shutil
 from ftplib import FTP
 
@@ -64,7 +63,7 @@ def downloadFromFTP(ftp, filePath, destination):
     downloaded = [0]    # Is a list so we can pass and change it in an inner func
     global f
     if destination:
-        f = io.open(destination, 'wb')
+        f = open(destination, 'wb')
     else:
         f = ""
 
@@ -102,8 +101,7 @@ def downloadFile(ftp, filePath, destination, fileProgress):
     downloadFromFTP(ftp, filePath, destination)
 
 def parseContentsFile(filename):
-    import io
-    f = io.open(filename, 'r', encoding="utf-8")
+    f = open(filename, 'r', encoding="utf-8")
     fileData = f.read()
     contents = {}
     for l in fileData.split('\n'):
@@ -120,8 +118,7 @@ def parseContentsFile(filename):
     return contents
 
 def writeContentsFile(filename, contents):
-    import io
-    f = io.open(filename, 'w', encoding="utf-8")
+    f = open(filename, 'w', encoding="utf-8")
     for fPath, mtime in list(contents.items()):
         f.write("%s %s\n" % (fPath, mtime))
     f.close()
@@ -237,7 +234,7 @@ def downloadFromHTTP(url, destination):
 
         return bytes_so_far
 
-    f = io.open(destination, 'wb')
+    f = open(destination, 'wb')
     response = urllib.request.urlopen(url)
     if response.getcode() != 200:
         raise RuntimeError('Failed to download file %s (error code %s)' % (url, response.getcode()))

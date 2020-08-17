@@ -37,7 +37,6 @@ TODO
 """
 
 import os
-import io
 import math
 import numpy as np
 from core import G
@@ -374,9 +373,8 @@ def loadProxy(human, path, type="Clothes"):
     return proxy
 
 def loadTextProxy(human, filepath, type="Clothes"):
-    import io
     try:
-        fp = io.open(filepath, "r", encoding="utf-8")
+        fp = open(filepath, "r", encoding="utf-8")
     except IOError:
         log.error("*** Cannot open %s", filepath)
         return None
@@ -547,7 +545,7 @@ def saveBinaryProxy(proxy, path):
     def _properPath(path):
         return getpath.getJailedPath(path, folder)
 
-    fp = io.open(path, 'wb')
+    fp = open(path, 'wb')
     tagStr, tagIdx = _packStringList(proxy.tags)
     uvStr,uvIdx = _packStringList([ _properPath(proxy.uvLayers[k]) for k in sorted(proxy.uvLayers.keys()) ])
 
@@ -1027,8 +1025,7 @@ def peekMetadata(proxyFilePath, proxyType=None):
             log.warning("Problem loading metadata from binary proxy, trying ASCII file: %s", e, exc_info=showTrace)
 
     # ASCII proxy file
-    import io
-    fp = io.open(proxyFilePath, 'r', encoding="utf-8")
+    fp = open(proxyFilePath, 'r', encoding="utf-8")
     uuid = None
     tags = set()
     for line in fp:

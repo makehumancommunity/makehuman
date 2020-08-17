@@ -45,7 +45,6 @@ __docformat__ = 'restructuredtext'
 
 import os
 from progress import Progress
-import io
 import transformations
 import log
 
@@ -79,7 +78,7 @@ def writeMeshFile(human, filepath, objects, config):
     filename = os.path.basename(filepath)
     name = formatName(os.path.splitext(filename)[0])
 
-    f = io.open(filepath, 'w', encoding="utf-8")
+    f = open(filepath, 'w', encoding="utf-8")
     lines = []
     lines.append('<?xml version="1.0" encoding="UTF-8"?>')
     lines.append('<!-- Exported from MakeHuman (www.makehumancommunity.org) -->')
@@ -224,7 +223,7 @@ def writeSkeletonFile(human, filepath, config):
     if config.scale != 1:
         skel = skel.scaled(config.scale)
 
-    f = io.open(filepath, 'w', encoding="utf-8")
+    f = open(filepath, 'w', encoding="utf-8")
     lines = []
 
     lines.append('<?xml version="1.0" encoding="UTF-8"?>')
@@ -286,7 +285,7 @@ def writeMaterialFile(human, filepath, objects, config):
     filename = filename + ".material"
     filepath = os.path.join(folderpath, filename)
 
-    f = io.open(filepath, 'w', encoding="utf-8")
+    f = open(filepath, 'w', encoding="utf-8")
     lines = []
 
     for objIdx, obj in enumerate(objects):

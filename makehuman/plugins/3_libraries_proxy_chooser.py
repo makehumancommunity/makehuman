@@ -56,8 +56,7 @@ class ProxyFileSort(fc.FileSort):
 
         faces = 0
         try:
-            import io
-            f = io.open(filename.replace('.proxy', '.obj'), 'r', encoding="utf-8")
+            f = open(filename.replace('.proxy', '.obj'), 'r', encoding="utf-8")
             for line in f:
                 lineData = line.split()
                 if lineData and lineData[0] == 'f':

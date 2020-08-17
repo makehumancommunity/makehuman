@@ -42,7 +42,6 @@ import os
 import log
 import json
 from getpath import getPath, getSysDataPath, getDataPath
-import io
 
 import collections
 
@@ -58,7 +57,7 @@ class Language(object):
         path = os.path.join(getSysDataPath("languages/"), lang + ".json")
         if not os.path.isfile(path):
             return
-        with io.open(path, 'r', encoding='utf-8') as f:
+        with open(path, 'r', encoding='utf-8') as f:
             try:
                 self.languageStrings = json.loads(f.read())
             except:
@@ -106,7 +105,7 @@ class Language(object):
         pathdir = os.path.dirname(path)
         if not os.path.isdir(pathdir):
             os.makedirs(pathdir)
-        with io.open(path, 'w', encoding='utf-8') as f:
+        with open(path, 'w', encoding='utf-8') as f:
             for string in self.missingStrings:
                 if self.language == "master":
                     f.write('"%s": "%s",\n' % (string.replace('\n', '\\n').encode('utf8'), string.replace('\n', '\\n').encode('utf8')))

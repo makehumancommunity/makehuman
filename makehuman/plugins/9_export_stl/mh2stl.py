@@ -50,7 +50,6 @@ import os
 import struct
 import numpy as np
 import math
-import io
 from progress import Progress
 
 # TODO perhaps add scale option
@@ -80,7 +79,7 @@ def exportStlAscii(filepath, config, exportJoints = False):
     objects = human.getObjects(True)
     meshes = [o.mesh.clone(1,True) for o in objects]
 
-    fp = io.open(filepath, 'w', encoding="utf-8")
+    fp = open(filepath, 'w', encoding="utf-8")
     solid = name.replace(' ','_')
     fp.write('solid %s\n' % solid)
 
@@ -160,7 +159,7 @@ def exportStlBinary(filepath, config, exportJoints = False):
     objects = human.getObjects(True)
     meshes = [o.mesh.clone(1,True) for o in objects]
 
-    fp = io.open(filepath, 'wb')
+    fp = open(filepath, 'wb')
     fp.write(b'\x00' * 80)
     fp.write(struct.pack(b'<I', 0))
     count = 0

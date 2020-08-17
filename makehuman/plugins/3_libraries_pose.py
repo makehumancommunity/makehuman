@@ -115,8 +115,7 @@ class PoseLibraryTaskView(gui3d.TaskView, filecache.MetadataCacher):
         name = os.path.splitext(os.path.basename(filename))[0]
         description = ""
         license = mh.getAssetLicense()
-        import io
-        f = io.open(filename, encoding='utf-8')
+        f = open(filename, encoding='utf-8')
         for l in f.read().split('\n'):
             l = l.strip()
             l = l.split()

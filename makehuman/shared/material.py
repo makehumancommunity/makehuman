@@ -333,10 +333,9 @@ class Material(object):
         """
         Parse .mhmat file and set as the properties of this material.
         """
-        import io
         log.debug("Loading material from file %s", filename)
         try:
-            f = io.open(filename, "r", encoding="utf-8")
+            f = open(filename, "r", encoding="utf-8")
         except:
             f = None
         if f is None:
@@ -510,10 +509,9 @@ class Material(object):
             return formatPath(filename)
 
     def toFile(self, filename, comments = []):
-        import io
 
         try:
-            f = io.open(filename, 'w', encoding='utf-8')
+            f = open(filename, 'w', encoding='utf-8')
         except:
             f = None
         if f is None:
@@ -1480,8 +1478,7 @@ class UVMap:
 
 
 def loadUvObjFile(filepath):
-    import io
-    fp = io.open(filepath, "r", encoding="utf-8")
+    fp = open(filepath, "r", encoding="utf-8")
     uvs = []
     fuvs = []
     for line in fp:
@@ -1496,9 +1493,8 @@ def loadUvObjFile(filepath):
     return uvs,fuvs
 
 def peekMetadata(filename):
-    import io
     try:
-        f = io.open(filename, "r", encoding="utf-8")
+        f = open(filename, "r", encoding="utf-8")
     except:
         f = None
     if f is None:

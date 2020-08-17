@@ -38,7 +38,6 @@ TODO
 
 import os
 import sys
-import io
 import mh
 import gui3d
 import gui
@@ -205,7 +204,7 @@ class SettingsTaskView(gui3d.TaskView):
                     if sys.platform.startswith('darwin') or sys.platform.startswith('linux') and not os.path.isdir(getConfigPath('')):
                         os.makedirs(getConfigPath(''))
                     if os.path.isdir(homePath) and os.path.isdir(getConfigPath('')):
-                        with io.open(filePath, 'w', encoding='utf-8') as f:
+                        with open(filePath, 'w', encoding='utf-8') as f:
                             f.writelines(homePath + '\n')
                     self.homeButton.setLabel('Delete Config File')
                     gui3d.app.statusPersist('Home Folder Location: ' + homePath)

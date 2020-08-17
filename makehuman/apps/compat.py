@@ -40,7 +40,6 @@ import log
 import progress
 import csv
 import getpath
-import io
 
 def _parse_version(version_str):
     version_str = version_str.lower().strip()
@@ -211,7 +210,7 @@ class MHM10Loader(object):
     def getModifierMapping(self):
         if self.modifier_mapping is None:
             self.modifier_mapping = dict()
-            f = io.open(getpath.getSysDataPath('modifiers/mh_1-0_modifier_mapping.csv'), 'r', encoding='utf-8')
+            f = open(getpath.getSysDataPath('modifiers/mh_1-0_modifier_mapping.csv'), 'r', encoding='utf-8')
             csvreader = csv.reader(f, delimiter=',', quotechar='"')
             for r_idx, row in enumerate(csvreader):
                 if r_idx == 0:

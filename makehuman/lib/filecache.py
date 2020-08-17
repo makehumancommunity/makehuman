@@ -42,7 +42,6 @@ import os
 import getpath
 import log
 import pickle as pickle
-import io
 
 CACHE_FORMAT_VERSION = 1  # You can use any type, strings or ints, only equality test is done on these
 
@@ -67,7 +66,7 @@ class FileCache(object):
 
     def save(self):
         """Save filecache to file"""
-        f = io.open(self.filepath, "wb")
+        f = open(self.filepath, "wb")
         pickle.dump(self, f, protocol=2)
         f.close()
 
@@ -334,7 +333,7 @@ def loadCache(filepath, expected_version=None):
 
     try:
         if os.path.isfile(filepath):
-            f = io.open(filepath, "rb")
+            f = open(filepath, "rb")
             result = pickle.load(f)
             f.close()
             if result.version != expected_version:

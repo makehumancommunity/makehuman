@@ -41,7 +41,6 @@ than Linux."""
 
 import sys
 import os
-import io
 
 isLinux = sys.platform.startswith('linux')
 
@@ -57,7 +56,7 @@ if isLinux:
         dirs = dict()
 
         if os.path.isfile(path):
-            with io.open(path, 'r', encoding='utf-8') as file:
+            with open(path, 'r', encoding='utf-8') as file:
                 for line in file:
                     if line and line.startswith('XDG_'):
                         line = line.strip()
