@@ -132,14 +132,13 @@ def loadRecord(archivePath, recordID):
     """
 
     time1 = time.perf_counter()
-    f = open(archivePath, 'r', encoding="utf-8")
-    record = None
-    for line in f:
-        if line.find(recordID) != -1:
-            record = line.split()
-            log.message('Found %s fields in %s sec', len(record), time.perf_counter() - time1)
-            break
-    f.close()
+    with open(archivePath, 'r', encoding="utf-8") as f:
+        record = None
+        for line in f:
+            if line.find(recordID) != -1:
+                record = line.split()
+                log.message('Found %s fields in %s sec', len(record), time.perf_counter() - time1)
+                break
     return record
 
 
@@ -160,12 +159,11 @@ def searchRecord(archivePath, field):
     """
 
     time1 = time.perf_counter()
-    f = open(archivePath, 'r', encoding="utf-8")
-    recordIDs = []
-    for line in f:
-        if line.find(field) != -1:
-            recordIDs.append(line.split()[0])
-    f.close()
+    with open(archivePath, 'r', encoding="utf-8") as f:
+        recordIDs = []
+        for line in f:
+            if line.find(field) != -1:
+                recordIDs.append(line.split()[0])
     log.message('Found %s records in %s sec', len(recordIDs), time.perf_counter() - time1)
     return recordIDs
 
@@ -192,28 +190,26 @@ def saveRecord(archivePath, recordToSave):
     records = []
     isExistent = None
     try:
-        f = open(archivePath, 'w', encoding="utf-8")
-        i = 0
-        for line in f:
-            if line.find(recordID) != -1:
-                i += 1
-                isExistent = 1
-                oldRecord = line.split()
-                newRecord = recordToSave.split()
-                if oldRecord[0] == recordID:
-                    line = joinRecords(newRecord, oldRecord)
-            records.append(line.strip())
-        f.close()
+        with open(archivePath, 'w', encoding="utf-8") as f:
+            i = 0
+            for line in f:
+                if line.find(recordID) != -1:
+                    i += 1
+                    isExistent = 1
+                    oldRecord = line.split()
+                    newRecord = recordToSave.split()
+                    if oldRecord[0] == recordID:
+                        line = joinRecords(newRecord, oldRecord)
+                records.append(line.strip())
     except:
         log.message('A new %s archive will be created', archivePath)
 
     if not isExistent:
         records.append(recordToSave)
 
-    f = open(archivePath, 'w', encoding="utf-8")
-    for record in records:
-        f.write('%s\n' % record)
-    f.close()
+    with open(archivePath, 'w', encoding="utf-8") as f:
+        for record in records:
+            f.write('%s\n' % record)
     log.message('Record %s saved in %s sec', recordID, time.perf_counter() - time1)
 
 

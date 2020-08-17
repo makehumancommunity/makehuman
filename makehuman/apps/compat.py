@@ -210,15 +210,14 @@ class MHM10Loader(object):
     def getModifierMapping(self):
         if self.modifier_mapping is None:
             self.modifier_mapping = dict()
-            f = open(getpath.getSysDataPath('modifiers/mh_1-0_modifier_mapping.csv'), 'r', encoding='utf-8')
-            csvreader = csv.reader(f, delimiter=',', quotechar='"')
-            for r_idx, row in enumerate(csvreader):
-                if r_idx == 0:
-                    # First line is header, drop it
-                    continue
-                if row[0]:
-                    self.modifier_mapping[row[0]] = (row[1], bool(row[2]))
-            f.close()
+            with open(getpath.getSysDataPath('modifiers/mh_1-0_modifier_mapping.csv'), 'r', encoding='utf-8') as f:
+                csvreader = csv.reader(f, delimiter=',', quotechar='"')
+                for r_idx, row in enumerate(csvreader):
+                    if r_idx == 0:
+                        # First line is header, drop it
+                        continue
+                    if row[0]:
+                        self.modifier_mapping[row[0]] = (row[1], bool(row[2]))
         return self.modifier_mapping
 
     def loadProperty(self, line_data, default_load_callback, strict):

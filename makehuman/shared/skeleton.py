@@ -183,9 +183,8 @@ class Skeleton(object):
         jsondata["joints"] = self.joint_pos_idxs
         jsondata["planes"] = self.planes
 
-        f = open(filename, 'w',encoding='utf-8')
-        json.dump(jsondata, f, indent=4, separators=(',', ': '))
-        f.close()
+        with open(filename, 'w',encoding='utf-8') as f:
+            json.dump(jsondata, f, indent=4, separators=(',', ': '))
 
         # Save weights
         weights = self.getVertexWeights(ref_weights)

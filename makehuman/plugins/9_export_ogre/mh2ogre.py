@@ -78,7 +78,6 @@ def writeMeshFile(human, filepath, objects, config):
     filename = os.path.basename(filepath)
     name = formatName(os.path.splitext(filename)[0])
 
-    f = open(filepath, 'w', encoding="utf-8")
     lines = []
     lines.append('<?xml version="1.0" encoding="UTF-8"?>')
     lines.append('<!-- Exported from MakeHuman (www.makehumancommunity.org) -->')
@@ -207,8 +206,8 @@ def writeMeshFile(human, filepath, objects, config):
         lines.append('    <skeletonlink name="%s.skeleton" />' % getbasefilename(filename))
     lines.append('</mesh>')
 
-    f.write("\n".join(lines))
-    f.close()
+    with open(filepath, 'w', encoding="utf-8") as f:
+        f.write("\n".join(lines))
 
 
 def writeSkeletonFile(human, filepath, config):
@@ -223,7 +222,6 @@ def writeSkeletonFile(human, filepath, config):
     if config.scale != 1:
         skel = skel.scaled(config.scale)
 
-    f = open(filepath, 'w', encoding="utf-8")
     lines = []
 
     lines.append('<?xml version="1.0" encoding="UTF-8"?>')
@@ -272,8 +270,8 @@ def writeSkeletonFile(human, filepath, config):
 
     lines.append('</skeleton>')
 
-    f.write("\n".join(lines))
-    f.close()
+    with open(filepath, 'w', encoding="utf-8") as f:
+        f.write("\n".join(lines))
     Pprogress.finish()
 
 
@@ -285,7 +283,6 @@ def writeMaterialFile(human, filepath, objects, config):
     filename = filename + ".material"
     filepath = os.path.join(folderpath, filename)
 
-    f = open(filepath, 'w', encoding="utf-8")
     lines = []
 
     for objIdx, obj in enumerate(objects):
@@ -329,8 +326,8 @@ def writeMaterialFile(human, filepath, objects, config):
         lines.append('}')
         progress.step()
 
-    f.write("\n".join(lines))
-    f.close()
+    with open(filepath, 'w', encoding="utf-8") as f:
+        f.write("\n".join(lines))
 
 def writeAnimation(human, linebuffer, animTrack, config):
     # TODO animations need to be adapted to rest pose and retargeted to user skeleton

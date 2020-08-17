@@ -115,26 +115,26 @@ class PoseLibraryTaskView(gui3d.TaskView, filecache.MetadataCacher):
         name = os.path.splitext(os.path.basename(filename))[0]
         description = ""
         license = mh.getAssetLicense()
-        f = open(filename, encoding='utf-8')
-        for l in f.read().split('\n'):
-            l = l.strip()
-            l = l.split()
-            if len(l) == 0:
-                continue
-            if l[0].lower() == 'tag':
-                tags.add((' '.join(l[1:])).lower())
-            elif l[0].lower() == 'name':
-                name = ' '.join(l[1:])
-            elif l[0].lower() == 'description':
-                description = ' '.join(l[1:])
-            elif l[0].lower() == 'author':
-                license.author = ' '.join(l[1:])
-            elif l[0].lower() == 'license':
-                license.license = ' '.join(l[1:])
-            elif l[0].lower() == 'copyright':
-                license.copyright = ' '.join(l[1:])
-            elif l[0].lower() == 'homepage':
-                license.homepage = ' '.join(l[1:])
+        with open(filename, encoding='utf-8') as f:
+            for l in f.read().split('\n'):
+                l = l.strip()
+                l = l.split()
+                if len(l) == 0:
+                    continue
+                if l[0].lower() == 'tag':
+                    tags.add((' '.join(l[1:])).lower())
+                elif l[0].lower() == 'name':
+                    name = ' '.join(l[1:])
+                elif l[0].lower() == 'description':
+                    description = ' '.join(l[1:])
+                elif l[0].lower() == 'author':
+                    license.author = ' '.join(l[1:])
+                elif l[0].lower() == 'license':
+                    license.license = ' '.join(l[1:])
+                elif l[0].lower() == 'copyright':
+                    license.copyright = ' '.join(l[1:])
+                elif l[0].lower() == 'homepage':
+                    license.homepage = ' '.join(l[1:])
         return (tags, name, description, license)
 
     def getTagsFromMetadata(self, metadata):

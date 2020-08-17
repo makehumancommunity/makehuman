@@ -562,27 +562,27 @@ class RMRScene:
         self.lights = []
         RMRLight.lightCounter = 0
         path = os.path.join(lightsFolderPath,lightFile)
-        fileDescriptor = open(path, 'r', encoding='utf-8')
+        with open(path, 'r', encoding='utf-8') as fileDescriptor:
 
-        for data in fileDescriptor:
-            #print (data)
-            dataList = data.split()
-            fromX = float(dataList[0])
-            fromY = float(dataList[1])
-            fromZ = float(dataList[2])
-            toX = float(dataList[3])
-            toY = float(dataList[4])
-            toZ = float(dataList[5])
-            lIntensity = float(dataList[6])
-            lType = dataList[7]
+            for data in fileDescriptor:
+                #print (data)
+                dataList = data.split()
+                fromX = float(dataList[0])
+                fromY = float(dataList[1])
+                fromZ = float(dataList[2])
+                toX = float(dataList[3])
+                toY = float(dataList[4])
+                toZ = float(dataList[5])
+                lIntensity = float(dataList[6])
+                lType = dataList[7]
 
-            l = RMRLight(self.ribsPath,[fromX, fromY, fromZ], [toX, toY, toZ], intensity = lIntensity, type = lType)
-            if len(dataList) >= 9:
-                l.blur = float(dataList[8])
-            if len(dataList) >= 10:
-                l.coneangle = float(dataList[9])
-            #print l
-            self.lights.append(l)
+                l = RMRLight(self.ribsPath,[fromX, fromY, fromZ], [toX, toY, toZ], intensity = lIntensity, type = lType)
+                if len(dataList) >= 9:
+                    l.blur = float(dataList[8])
+                if len(dataList) >= 10:
+                    l.coneangle = float(dataList[9])
+                #print l
+                self.lights.append(l)
 
 
 

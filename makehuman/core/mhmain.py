@@ -1051,36 +1051,36 @@ class MHApplication(gui3d.Application, mh.Application):
         self.bgTopLeftColor = [0.312, 0.312, 0.312]
         self.bgTopRightColor = [0.312, 0.312, 0.312]
 
-        f = open(os.path.join(mh.getSysDataPath("themes/"), theme + ".mht"), 'r', encoding='utf-8')
+        with open(os.path.join(mh.getSysDataPath("themes/"), theme + ".mht"), 'r', encoding='utf-8') as f:
 
-        update_log = False
-        for data in f.readlines():
-            lineData = data.split()
+            update_log = False
+            for data in f.readlines():
+                lineData = data.split()
 
-            if len(lineData) > 0:
-                if lineData[0] == "version":
-                    log.message('Theme %s version %s', theme, lineData[1])
-                elif lineData[0] == "color":
-                    if lineData[1] == "clear":
-                        self.clearColor[:] = [float(val) for val in lineData[2:5]]
-                    elif lineData[1] == "grid":
-                        self.gridColor[:] = [float(val) for val in lineData[2:5]]
-                    elif lineData[1] == "subgrid":
-                        self.gridSubColor[:] = [float(val) for val in lineData[2:5]]
-                    elif lineData[1] == "bgbottomleft":
-                        self.bgBottomLeftColor[:] = [float(val) for val in lineData[2:5]]
-                    elif lineData[1] == "bgbottomright":
-                        self.bgBottomRightColor[:] = [float(val) for val in lineData[2:5]]
-                    elif lineData[1] == "bgtopleft":
-                        self.bgTopLeftColor[:] = [float(val) for val in lineData[2:5]]
-                    elif lineData[1] == "bgtopright":
-                        self.bgTopRightColor[:] = [float(val) for val in lineData[2:5]]
-                elif lineData[0] == "logwindow_color":
-                    logLevel = lineData[1]
-                    if hasattr(log, logLevel) and isinstance(getattr(log, logLevel), int):
-                        update_log = True
-                        logLevel = int(getattr(log, logLevel))
-                        log._logLevelColors[logLevel] = lineData[2]
+                if len(lineData) > 0:
+                    if lineData[0] == "version":
+                        log.message('Theme %s version %s', theme, lineData[1])
+                    elif lineData[0] == "color":
+                        if lineData[1] == "clear":
+                            self.clearColor[:] = [float(val) for val in lineData[2:5]]
+                        elif lineData[1] == "grid":
+                            self.gridColor[:] = [float(val) for val in lineData[2:5]]
+                        elif lineData[1] == "subgrid":
+                            self.gridSubColor[:] = [float(val) for val in lineData[2:5]]
+                        elif lineData[1] == "bgbottomleft":
+                            self.bgBottomLeftColor[:] = [float(val) for val in lineData[2:5]]
+                        elif lineData[1] == "bgbottomright":
+                            self.bgBottomRightColor[:] = [float(val) for val in lineData[2:5]]
+                        elif lineData[1] == "bgtopleft":
+                            self.bgTopLeftColor[:] = [float(val) for val in lineData[2:5]]
+                        elif lineData[1] == "bgtopright":
+                            self.bgTopRightColor[:] = [float(val) for val in lineData[2:5]]
+                    elif lineData[0] == "logwindow_color":
+                        logLevel = lineData[1]
+                        if hasattr(log, logLevel) and isinstance(getattr(log, logLevel), int):
+                            update_log = True
+                            logLevel = int(getattr(log, logLevel))
+                            log._logLevelColors[logLevel] = lineData[2]
 
         if self.groundplaneGrid:
             self.groundplaneGrid.mesh.setMainColor(self.gridColor)
@@ -1100,14 +1100,14 @@ class MHApplication(gui3d.Application, mh.Application):
         log.debug("Loaded theme %s", mh.getSysDataPath('themes/'+theme+'.mht'))
 
         try:
-            f = open(mh.getSysDataPath('themes/%s.qss' % theme), 'r', encoding='utf-8')
-            qStyle = "\n".join(f.readlines())
-            self.setStyleSheet(qStyle)
-            # Also set stylesheet on custom slider style
-            for widget in self.allWidgets():
-                if isinstance(widget, gui.Slider):
-                    widget.setStyleSheet(qStyle)
-            log.debug("Loaded Qt style %s", mh.getSysDataPath('themes/'+theme+'.qss'))
+            with open(mh.getSysDataPath('themes/%s.qss' % theme), 'r', encoding='utf-8') as f:
+                qStyle = "\n".join(f.readlines())
+                self.setStyleSheet(qStyle)
+                # Also set stylesheet on custom slider style
+                for widget in self.allWidgets():
+                    if isinstance(widget, gui.Slider):
+                        widget.setStyleSheet(qStyle)
+                log.debug("Loaded Qt style %s", mh.getSysDataPath('themes/'+theme+'.qss'))
         except:
             self.setStyleSheet("")
             # Also set stylesheet on custom slider style

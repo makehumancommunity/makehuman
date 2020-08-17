@@ -381,7 +381,7 @@ def loadTextProxy(human, filepath, type="Clothes"):
 
     folder = os.path.realpath(os.path.expanduser(os.path.dirname(filepath)))
     proxy = Proxy(filepath, type, human)
-    proxy.max_pole = 8;
+    proxy.max_pole = 8
     refVerts = []
 
     status = 0
@@ -529,6 +529,7 @@ def loadTextProxy(human, filepath, type="Clothes"):
 
         else:
             log.warning('Unknown keyword %s found in proxy file %s', key, filepath)
+    fp.close()
 
     if proxy.z_depth == -1:
         log.warning('Proxy file %s does not specify a Z depth. Using 50.', filepath)
@@ -545,71 +546,70 @@ def saveBinaryProxy(proxy, path):
     def _properPath(path):
         return getpath.getJailedPath(path, folder)
 
-    fp = open(path, 'wb')
-    tagStr, tagIdx = _packStringList(proxy.tags)
-    uvStr,uvIdx = _packStringList([ _properPath(proxy.uvLayers[k]) for k in sorted(proxy.uvLayers.keys()) ])
+    with open(path, 'wb') as fp:
+        tagStr, tagIdx = _packStringList(proxy.tags)
+        uvStr,uvIdx = _packStringList([ _properPath(proxy.uvLayers[k]) for k in sorted(proxy.uvLayers.keys()) ])
 
-    licStr, licIdx = proxy.license.toNumpyString()
+        licStr, licIdx = proxy.license.toNumpyString()
 
-    folder = os.path.dirname(path)
+        folder = os.path.dirname(path)
 
 
-    vars_ = dict(
-        #proxyType = np.fromstring(proxy.type, dtype='S1'),     # TODO store proxy type?
-        name = np.fromstring(proxy.name, dtype='S1'),
-        uuid = np.fromstring(proxy.uuid, dtype='S1'),
-        description = np.fromstring(proxy.description, dtype='S1'),
-        basemesh = np.fromstring(proxy.basemesh, dtype='S1'),
-        tags_str = tagStr,
-        tags_idx = tagIdx,
-        lic_str = licStr,
-        lic_idx = licIdx,
-        uvLayers_str = uvStr,
-        uvLayers_idx = uvIdx,
-        obj_file = np.fromstring(_properPath(proxy.obj_file), dtype='S1'),
-        version = np.asarray(proxy.version, dtype=np.int32)
-    )
+        vars_ = dict(
+            #proxyType = np.fromstring(proxy.type, dtype='S1'),     # TODO store proxy type?
+            name = np.fromstring(proxy.name, dtype='S1'),
+            uuid = np.fromstring(proxy.uuid, dtype='S1'),
+            description = np.fromstring(proxy.description, dtype='S1'),
+            basemesh = np.fromstring(proxy.basemesh, dtype='S1'),
+            tags_str = tagStr,
+            tags_idx = tagIdx,
+            lic_str = licStr,
+            lic_idx = licIdx,
+            uvLayers_str = uvStr,
+            uvLayers_idx = uvIdx,
+            obj_file = np.fromstring(_properPath(proxy.obj_file), dtype='S1'),
+            version = np.asarray(proxy.version, dtype=np.int32)
+        )
 
-    if proxy.material_file:
-        vars_["material_file"] = np.fromstring(_properPath(proxy.material_file), dtype='S1')
+        if proxy.material_file:
+            vars_["material_file"] = np.fromstring(_properPath(proxy.material_file), dtype='S1')
 
-    if np.any(proxy.deleteVerts):
-        vars_["deleteVerts"] = proxy.deleteVerts
+        if np.any(proxy.deleteVerts):
+            vars_["deleteVerts"] = proxy.deleteVerts
 
-    if proxy.z_depth is not None and proxy.z_depth != -1:
-        vars_["z_depth"] = np.asarray(proxy.z_depth, dtype=np.int32)
+        if proxy.z_depth is not None and proxy.z_depth != -1:
+            vars_["z_depth"] = np.asarray(proxy.z_depth, dtype=np.int32)
 
-    if proxy.max_pole:
-        vars_["max_pole"] = np.asarray(proxy.max_pole, dtype=np.uint32)
+        if proxy.max_pole:
+            vars_["max_pole"] = np.asarray(proxy.max_pole, dtype=np.uint32)
 
-    proxy.tmatrix.toNumpyStruct(vars_)
+        proxy.tmatrix.toNumpyStruct(vars_)
 
-    special_poses = []
-    for posetype, posename in list(proxy.special_pose.items()):
-        special_poses.append(posetype)
-        special_poses.append(posename)
-    specialposeStr, specialposeIdx = _packStringList(special_poses)
-    vars_["special_pose_str"] = specialposeStr
-    vars_["special_pose_idx"] = specialposeIdx
+        special_poses = []
+        for posetype, posename in list(proxy.special_pose.items()):
+            special_poses.append(posetype)
+            special_poses.append(posename)
+        specialposeStr, specialposeIdx = _packStringList(special_poses)
+        vars_["special_pose_str"] = specialposeStr
+        vars_["special_pose_idx"] = specialposeIdx
 
-    if proxy.weights[:,1:].any():
-        # 3 ref verts used in this proxy
-        num_refverts = 3
-        vars_["ref_vIdxs"] = proxy.ref_vIdxs
-        vars_["offsets"] = proxy.offsets
-        vars_["weights"] = proxy.weights
-    else:
-        # Proxy uses exact fitting exclusively: store npz file more compactly
-        num_refverts = 1
-        vars_["ref_vIdxs"] = proxy.ref_vIdxs[:,0]
-        vars_["weights"] = proxy.weights[:,0]
-    vars_['num_refverts'] = np.asarray(num_refverts, dtype=np.int32)
+        if proxy.weights[:,1:].any():
+            # 3 ref verts used in this proxy
+            num_refverts = 3
+            vars_["ref_vIdxs"] = proxy.ref_vIdxs
+            vars_["offsets"] = proxy.offsets
+            vars_["weights"] = proxy.weights
+        else:
+            # Proxy uses exact fitting exclusively: store npz file more compactly
+            num_refverts = 1
+            vars_["ref_vIdxs"] = proxy.ref_vIdxs[:,0]
+            vars_["weights"] = proxy.weights[:,0]
+        vars_['num_refverts'] = np.asarray(num_refverts, dtype=np.int32)
 
-    if proxy.vertexBoneWeights_file:
-        vars_['vertexBoneWeights_file'] = np.fromstring(_properPath(proxy.vertexBoneWeights_file), dtype='S1')
+        if proxy.vertexBoneWeights_file:
+            vars_['vertexBoneWeights_file'] = np.fromstring(_properPath(proxy.vertexBoneWeights_file), dtype='S1')
 
-    np.savez_compressed(fp, **vars_)
-    fp.close()
+        np.savez_compressed(fp, **vars_)
     os.utime(path, None)  # Ensure modification time is updated
 
 def loadBinaryProxy(path, human, type):
@@ -1025,20 +1025,19 @@ def peekMetadata(proxyFilePath, proxyType=None):
             log.warning("Problem loading metadata from binary proxy, trying ASCII file: %s", e, exc_info=showTrace)
 
     # ASCII proxy file
-    fp = open(proxyFilePath, 'r', encoding="utf-8")
-    uuid = None
-    tags = set()
-    for line in fp:
-        words = line.split()
-        if len(words) == 0:
-            pass
-        elif words[0] == 'uuid':
-            uuid = words[1]
-        elif words[0] == 'tag':
-            tags.add(" ".join(words[1:]).lower())
-        elif words[0] == 'verts':
-            break
-    fp.close()
+    with open(proxyFilePath, 'r', encoding="utf-8") as fp:
+        uuid = None
+        tags = set()
+        for line in fp:
+            words = line.split()
+            if len(words) == 0:
+                pass
+            elif words[0] == 'uuid':
+                uuid = words[1]
+            elif words[0] == 'tag':
+                tags.add(" ".join(words[1:]).lower())
+            elif words[0] == 'verts':
+                break
     return (uuid, tags)
 
 

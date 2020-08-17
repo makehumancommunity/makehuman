@@ -56,12 +56,11 @@ class ProxyFileSort(fc.FileSort):
 
         faces = 0
         try:
-            f = open(filename.replace('.proxy', '.obj'), 'r', encoding="utf-8")
-            for line in f:
-                lineData = line.split()
-                if lineData and lineData[0] == 'f':
-                    faces += 1
-            f.close()
+            with open(filename.replace('.proxy', '.obj'), 'r', encoding="utf-8") as f:
+                for line in f:
+                    lineData = line.split()
+                    if lineData and lineData[0] == 'f':
+                        faces += 1
         except:
             pass
         meta['faces'] = faces
