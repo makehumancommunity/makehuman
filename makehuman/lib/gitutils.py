@@ -256,6 +256,9 @@ def cloneRepo(repoUrl,repoDest,branch="master",extraargs=''):
 
     currentwd = os.getcwd()
 
+    if isinstance(extraargs, list):
+        extraargs = ' '.join(extraargs)
+
     args = [_gitcmd,"clone",repoUrl,repoDest,extraargs]
     subprocess.check_call(args)
 
