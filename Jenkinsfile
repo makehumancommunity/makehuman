@@ -105,7 +105,7 @@ pipeline {
 					sh "echo >> build.conf \"isRelease = ${params.RELEASE}\""
 					sh "echo >> build.conf \"noDownload = True\""
 					sh "echo >> build.conf \"skipScripts = True\n\""
-					sh "echo >> build.conf \"version = ${params.VERSIONNAME}\n\""
+					sh "echo >> build.conf \"version = ${env.VERSIONNAME}\n\""
 					sh "echo >> build.conf \"[Deb]\n\n[Rpm]\n\""
 					sh "echo >> build.conf \"[Win32]\""
 					sh "echo >> build.conf \"packageName = makehumancommunity\""
