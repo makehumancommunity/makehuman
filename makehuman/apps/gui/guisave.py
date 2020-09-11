@@ -172,7 +172,7 @@ class TagsView(gui.GroupBox):
 class NameView(gui.GroupBox):
 
     def __init__(self):
-        super(NameView, self).__init__('Name')
+        super(NameView, self).__init__('Human Name')
         self.nameEdit = self.addWidget(gui.TextEdit())
 
     def getName(self):
@@ -201,6 +201,11 @@ class MetadataView(gui.QtWidgets.QWidget, gui.Widget):
 
         layout = gui.QtWidgets.QVBoxLayout()
         self.setLayout(layout)
+
+        self.label = gui.TextView('Metadata')
+        self.label.setAlignment(gui.QtCore.Qt.AlignHCenter)
+        layout.addWidget(self.label)
+        layout.addSpacing(10)
 
         self.name_view = NameView()
         layout.addWidget(self.name_view)
@@ -243,7 +248,7 @@ class SaveTaskView(gui3d.TaskView):
         # Declare new settings
         gui3d.app.addSetting('savedir', mh.getPath("models"))
 
-        self.fileentry = self.addTopWidget(gui.FileEntryView('Save', mode='save'))
+        self.fileentry = self.addTopWidget(gui.FileEntryView(label='File Name:', buttonLabel='Save', mode='save'))
         self.fileentry.setFilter('MakeHuman Models (*.mhm)')
 
         self.metadata_view = self.addLeftWidget(MetadataView())

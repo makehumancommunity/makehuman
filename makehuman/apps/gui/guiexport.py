@@ -57,7 +57,7 @@ class ExportTaskView(gui3d.TaskView):
         self._requiresUpdate = True
         self.showOverwriteWarning = False
 
-        self.fileentry = self.addTopWidget(gui.FileEntryView('Export', mode='save'))
+        self.fileentry = self.addTopWidget(gui.FileEntryView(label='File Name:', buttonLabel='Export', mode='save'))
         self.fileentry.directory = gui3d.app.getSetting('exportdir')
         self.fileentry.filter = 'All Files (*.*)'
 
