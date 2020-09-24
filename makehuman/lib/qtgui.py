@@ -1517,12 +1517,12 @@ class SplashScreen(QtWidgets.QSplashScreen):
     def __init__(self, image, version=""):
         super(SplashScreen, self).__init__(G.app.mainwin, getPixmap(image))
         self._stdout = sys.stdout
-        self.messageRect = QtCore.QRect(354, 531, 432, 41)
+        self.messageRect = QtCore.QRect(118, 545, 620, 41)
         self.messageAlignment = QtCore.Qt.AlignLeft
         self.message = ''
-        self.progressBarRect = QtCore.QRect(660, 581, 124, 8)
+        self.progressBarRect = QtCore.QRect(118, 576, 620, 8)
         self._version = version
-        self.versionRect = QtCore.QRect(186, 537, 88, 30)
+        self.versionRect = QtCore.QRect(24, 547, 88, 36)
         self.setProgress(0)
 
     def setProgress(self, progress):
