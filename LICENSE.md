@@ -69,7 +69,7 @@ D. Concerning the output from MakeHuman
 ---------------------------------------
 
 It is the opinion of the MakeHuman project that no output from MakeHuman
-contains any trace of program logic. That is, irregardless of whether you use
+contains any trace of program logic. That is, regardless of whether you use
 the UI as such or if you call functions of MakeHuman via a script (such as 
 via the blender importer), what you get is a combination of assets and your
 own creative input. As the assets have been released under CC0, there is no
