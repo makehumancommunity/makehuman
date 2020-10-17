@@ -548,15 +548,12 @@ def rasterizeVLines(dstImg, edges, delta):
         data[y.astype(int),np.floor(x).astype(int),:] = 255
         progress.step()
 
-def mapUVSoft(mesh = None):
+def mapUVSoft(mesh):
     """
     Project the UV map topology of the selected human mesh onto a texture
     (software rasterizer).
     """
     progress = Progress() (0)
-
-    if mesh is None:
-        mesh = G.app.selectedHuman.mesh
 
     W = 2048
     H = 2048
@@ -583,7 +580,7 @@ def mapUVSoft(mesh = None):
 
     delta = edges[:,1,:] - edges[:,0,:]
     vertical = np.abs(delta[:,1]) > np.abs(delta[:,0])
-    horizontal = -vertical
+    horizontal = ~vertical
 
     hdelta = delta[horizontal]
     vdelta = delta[vertical]
@@ -604,15 +601,12 @@ def mapUVSoft(mesh = None):
 
     return dstImg.convert(3)
 
-def mapUVGL():
+def mapUVGL(mesh):
     """
     Project the UV map topology of the selected human mesh onto a texture
     (hardware accelerated).
     """
     progress = Progress() (0)
-
-    if mesh is None:
-        mesh = G.app.selectedHuman.mesh
 
     W = 2048
     H = 2048
@@ -644,7 +638,7 @@ def mapUVGL():
 
     return dstImg.convert(3)
 
-def mapUV():
+def mapUV(mesh):
     """
     Project the UV map topology of the selected human mesh onto a texture.
     Uses OpenGL hardware acceleration if the necessary OGL features are
@@ -652,11 +646,11 @@ def mapUV():
     """
     if mh.hasRenderSkin():
         try:
-            return mapUVGL()
+            return mapUVGL(mesh)
         except Exception as e:
             log.debug(e)
             log.debug("Hardware skin rendering failed, falling back to software render.")
-            return mapUVSoft()
+            return mapUVSoft(mesh)
     else:
-        return mapUVSoft()
+        return mapUVSoft(mesh)
 
