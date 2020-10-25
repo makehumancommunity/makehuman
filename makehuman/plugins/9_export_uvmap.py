@@ -52,7 +52,7 @@ class ExporterUV(Exporter):
     def export(self, human, filename):
         import projection
 
-        dstImg = projection.mapUV()
+        dstImg = projection.mapUV(human.mesh)
         filepath = filename("png")
         dstImg.save(filepath)
 

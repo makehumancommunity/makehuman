@@ -1416,11 +1416,11 @@ class FileEntryView(QtWidgets.QWidget, Widget):
         self.layout.addWidget(self.label, 0, 0)
         self.layout.setColumnStretch(0, 0)
 
-        self.layout.addWidget(self.browse, 0, 1)
-        self.layout.setColumnStretch(1, 0)
+        self.layout.addWidget(self.edit, 0, 1)
+        self.layout.setColumnStretch(1, 1)
 
-        self.layout.addWidget(self.edit, 0, 2)
-        self.layout.setColumnStretch(2, 1)
+        self.layout.addWidget(self.browse, 0, 2)
+        self.layout.setColumnStretch(2, 0)
 
         self.mode = mode
 

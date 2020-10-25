@@ -48,6 +48,7 @@ import material
 import animation
 import sys
 from uuid import uuid4
+from mesh_operations import calculateSurface, calculateVolume
 
 from makehuman import getBasemeshVersion, getShortVersion, getVersionStr, getVersion
 
@@ -623,6 +624,17 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
     def getWeight(self):
         return self.weight
+
+    def getBsa(self):
+        return calculateSurface(self.meshData, vertGroups=['body'])/100
+
+    def getVolume(self):
+        return calculateVolume(self.meshData, vertGroups=['body'])/1000
+
+    def getWeightKg(self):
+        # Estimating weight using Mosteller's formula for body surface area estimation
+        bsa = self.getBsa()
+        return bsa * bsa * 3600 / self.getHeightCm()
 
     def _setWeightVals(self):
         self.maxweightVal = max(0.0, self.weight * 2 - 1)

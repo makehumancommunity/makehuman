@@ -48,7 +48,7 @@ from PyQt5 import QtCore
 ## Version information #########################################################
 __version__ = "1.2.0"                   # Major, minor and patch version number
 release = False                         # False for nightly
-versionSub = "beta2"                    # Short version description
+versionSub = "rc1"                      # Short version description
 meshVersion = "hm08"                    # Version identifier of the basemesh
 ################################################################################
 
