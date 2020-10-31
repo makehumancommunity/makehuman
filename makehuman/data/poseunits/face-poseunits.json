@@ -62,7 +62,7 @@
     "TonguePointDown"     
     ],
     "copyright": "(c) 2020 Data Collection AB, Joel Palmius, Jonas Hauquier",
-    "license": "GNU Affero General Public License 3",
+    "license": "CC0",
     "name": "Standard face pose units",
     "version": 110,
     "animation_file": "poseunits.bvh",
