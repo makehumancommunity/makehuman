@@ -40,6 +40,7 @@ import sys
 import os
 import re
 from core import G
+import log
 
 from PyQt5 import QtCore, QtGui, QtSvg, QtWidgets
 
@@ -1340,7 +1341,7 @@ class FileEntryView(QtWidgets.QWidget, Widget):
             return "FileSelectedEvent: Path: %s Source: '%s'" % (
                 repr(self.path), repr(self.source))
 
-    def __init__(self, buttonLabel, mode='open'):
+    def __init__(self, label='', buttonLabel='', mode='open' ):
         """FileEntryView constructor.
 
         The File Entry has a browse button on the left, which will open
@@ -1364,6 +1365,7 @@ class FileEntryView(QtWidgets.QWidget, Widget):
         # Declare data
 
         self._directory = ""
+        self.label = TextView(label)
 
         # Define controls
 
@@ -1411,17 +1413,20 @@ class FileEntryView(QtWidgets.QWidget, Widget):
 
         self.layout = QtWidgets.QGridLayout(self)
 
-        self.layout.addWidget(self.browse, 0, 0)
+        self.layout.addWidget(self.label, 0, 0)
         self.layout.setColumnStretch(0, 0)
 
         self.layout.addWidget(self.edit, 0, 1)
         self.layout.setColumnStretch(1, 1)
 
+        self.layout.addWidget(self.browse, 0, 2)
+        self.layout.setColumnStretch(2, 0)
+
         self.mode = mode
 
         if self.mode != 'dir':
-            self.layout.addWidget(self.confirm, 0, 2)
-            self.layout.setColumnStretch(2, 0)
+            self.layout.addWidget(self.confirm, 0, 3)
+            self.layout.setColumnStretch(3, 0)
 
     def getMode(self):
         """Get the FileEntryView's mode of operation."""
@@ -1498,8 +1503,8 @@ class FileEntryView(QtWidgets.QWidget, Widget):
             self.callEvent('onFileSelected',
                 self.FileSelectedEvent(self.path, source))
         else:
-            import log
             log.notice("The text box is empty. Please enter a valid file name.")
+            G.app.prompt("Missing Filename", "The text box is empty. Please enter a valid file name.", 'OK', helpId='noFileName')
             self.setFocus()
 
     def onFocus(self, event):
@@ -1512,12 +1517,12 @@ class SplashScreen(QtWidgets.QSplashScreen):
     def __init__(self, image, version=""):
         super(SplashScreen, self).__init__(G.app.mainwin, getPixmap(image))
         self._stdout = sys.stdout
-        self.messageRect = QtCore.QRect(354, 531, 432, 41)
+        self.messageRect = QtCore.QRect(118, 545, 620, 41)
         self.messageAlignment = QtCore.Qt.AlignLeft
         self.message = ''
-        self.progressBarRect = QtCore.QRect(660, 581, 124, 8)
+        self.progressBarRect = QtCore.QRect(118, 576, 620, 8)
         self._version = version
-        self.versionRect = QtCore.QRect(186, 537, 88, 30)
+        self.versionRect = QtCore.QRect(24, 547, 88, 36)
         self.setProgress(0)
 
     def setProgress(self, progress):

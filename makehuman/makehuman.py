@@ -47,7 +47,7 @@ from PyQt5 import QtCore
 ## Version information #########################################################
 __version__ = "1.2.0"                   # Major, minor and patch version number
 release = False                         # False for nightly
-versionSub = "beta2"                    # Short version description
+versionSub = "final"                    # Short version description
 meshVersion = "hm08"                    # Version identifier of the basemesh
 ################################################################################
 
@@ -265,11 +265,8 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-The MakeHuman source and data are released under the AGPL license.
-This also includes everything that is exported from or by MakeHuman. 
-However, respecting a set of conditions (which are explained in section 
-C of license.txt), you are allowed to instead use the CC0 license 
-for exports. 
+The MakeHuman source code is released under the AGPL license.
+The graphical assets bundled with MakeHuman have been released as CC0.
 
 A human readable explanation of the license terms can be found via
 the MakeHuman home page:
@@ -302,13 +299,7 @@ Bugs can be reported on the project's bug tracker(s):
 class LicenseInfo(object):
     """
     License information for MakeHuman assets.
-    If no properties are changed, the license object retrieved specifies
-    the licensing information that applies to the assets included in the
-    official MakeHuman release.
-    We consider assets to be the basemesh, targets, proxy definitions and their
-    fitting data, in general all the files in the data folder with the exclusion
-    of the data in the form as retained by the official exporters to which the
-    CC0 exception clause applies.
+    Assets bundled with the official MakeHuman binary have been released as CC0.
     Assets created by third parties can be bound to different licensing conditions,
     which is why properties can be set as a dict of format:
         {"author": ..., "license": ..., "copyright": ..., "homepage": ...}
@@ -319,7 +310,7 @@ class LicenseInfo(object):
         user-created assets.
         """
         self.author = "MakeHuman Team"
-        self.license = "AGPL3"
+        self.license = "CC0"
         self.homepage = "http://www.makehumancommunity.org"
         self.copyright = "(c) www.makehumancommunity.org 2001-2020"
         self._keys = ["author", "license", "copyright", "homepage"]
@@ -432,13 +423,7 @@ Homepage: %s""" % (self.author, self.license, self.copyright, self.homepage)
 def getAssetLicense(properties=None):
     """
     Retrieve the license information for MakeHuman assets.
-    If no custom properties are specified, the license object retrieved specifies
-    the licensing information that applies to the assets included in the
-    official MakeHuman release.
-    We consider assets to be the basemesh, targets, proxy definitions and their
-    fitting data, in general all the files in the data folder with the exclusion
-    of the data in the form as retained by the official exporters to which the
-    CC0 exception clause applies.
+    Assets bundled with the official MakeHuman binary have been released as CC0.
     Assets created by third parties can be bound to different licensing conditions,
     which is why properties can be set as a dict of format:
         {"author": ..., "license": ..., "copyright": ..., "homepage": ...}

@@ -167,9 +167,7 @@ class ModifierTaskView(gui3d.TaskView):
             weight = (50 + (150 - 50) * human.getWeight())
             w_units = '%'
         else:
-            bsa = calculateSurface(human.meshData, vertGroups=['body'])/100
-            # Estimating weight using Mosteller's formula for body surface area estimation
-            weight = bsa * bsa * 3600 / height
+            weight = human.getWeightKg()
 
         if G.app.getSetting('units') == 'metric':
             l_units = 'cm'

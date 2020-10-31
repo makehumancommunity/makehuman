@@ -99,7 +99,7 @@ class DownloadAssetsGit:
         if os.path.isdir(self._git_official_clone_location):
             gitutils.pullRepo(self._git_official_clone_location,self._git_official_assets_branch)
         else:
-            gitutils.cloneRepo(self._git_official_assets_repo,self._git_official_clone_location,self._git_official_assets_branch)
+            gitutils.cloneRepo(self._git_official_assets_repo,self._git_official_clone_location,self._git_official_assets_branch,extraargs=['--depth=1'])
 
         self.copyOfficialAssets()
 
