@@ -45,7 +45,6 @@ The skeleton supports skinning of a mesh using a list of vertex-to-bone
 assignments.
 """
 
-import io
 import math
 from math import pi
 
@@ -94,7 +93,7 @@ class Skeleton(object):
         import getpath
         import os
         self._clear()
-        skelData = json.load(io.open(filepath, 'r', encoding='utf-8'), object_pairs_hook=OrderedDict)
+        skelData = json.load(open(filepath, 'r', encoding='utf-8'), object_pairs_hook=OrderedDict)
 
         self.name = skelData.get("name", self.name)
         self.version = int(skelData.get("version", self.version))
@@ -184,9 +183,8 @@ class Skeleton(object):
         jsondata["joints"] = self.joint_pos_idxs
         jsondata["planes"] = self.planes
 
-        f = io.open(filename, 'w',encoding='utf-8')
-        json.dump(jsondata, f, indent=4, separators=(',', ': '))
-        f.close()
+        with open(filename, 'w',encoding='utf-8') as f:
+            json.dump(jsondata, f, indent=4, separators=(',', ': '))
 
         # Save weights
         weights = self.getVertexWeights(ref_weights)
@@ -1450,7 +1448,7 @@ def load(filename, mesh=None):
 
 def peekMetadata(filename):
     import json
-    skelData = json.load(io.open(filename, 'r', encoding='utf-8'))
+    skelData = json.load(open(filename, 'r', encoding='utf-8'))
     desc = skelData.get("description", "")
     name = skelData.get("name", "Skeleton")
     tags = set( [s.lower() for s in skelData.get("tags", [])] )

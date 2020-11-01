@@ -44,7 +44,6 @@ from OpenGL import GL
 import texture
 import log
 from core import G
-import io
 
 class Uniform(object):
     def __init__(self, index, location, name, pytype, dims):
@@ -334,7 +333,7 @@ class Shader(object):
 
     @staticmethod
     def createShader(file, type, defines = [], defineables = None):
-        with io.open(file, 'r', encoding='utf-8') as f:
+        with open(file, 'r', encoding='utf-8') as f:
             source = f.read()
         if "#version" not in source:
             log.warning("The shader source in %s does not contain an explicit GLSL version declaration. This could cause problems with some compilers.", file)

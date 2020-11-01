@@ -40,7 +40,6 @@ set by the (body) pose.
 
 import os
 import json
-import io
 
 import gui3d
 import bvh
@@ -117,7 +116,7 @@ class ExpressionTaskView(gui3d.TaskView, filecache.MetadataCacher):
         self.base_bvh = bvh.load(getpath.getSysDataPath('poseunits/face-poseunits.bvh'), allowTranslation="none")
         self.base_anim = self.base_bvh.createAnimationTrack(self.human.getBaseSkeleton(), name="Expression-Face-PoseUnits")
 
-        poseunit_json = json.load(io.open(getpath.getSysDataPath('poseunits/face-poseunits.json'),'r', encoding='utf-8'), object_pairs_hook=OrderedDict)
+        poseunit_json = json.load(open(getpath.getSysDataPath('poseunits/face-poseunits.json'),'r', encoding='utf-8'), object_pairs_hook=OrderedDict)
         self.poseunit_names = poseunit_json['framemapping']
 
         if len(self.poseunit_names) != self.base_bvh.frameCount:
@@ -208,7 +207,7 @@ class ExpressionTaskView(gui3d.TaskView, filecache.MetadataCacher):
 
     def getMetadataImpl(self, filename):
         import json
-        posedata = json.load(io.open(filename, 'r', encoding='utf-8'))
+        posedata = json.load(open(filename, 'r', encoding='utf-8'))
         name = posedata['name']
         description = posedata.get('description', '')
         tags = set([t.lower() for t in posedata.get('tags', [])])

@@ -35,8 +35,6 @@ Abstract
 
 TODO
 """
-import io
-
 # We need this for gui controls
 import gui3d
 import mh
@@ -84,7 +82,8 @@ class ScriptingView(gui3d.TaskView):
                 return
 
             if(os.path.exists(filename)):
-                contents = io.open(filename, 'r', encoding="utf-8").read()
+                with open(filename, 'r', encoding="utf-8") as f:
+                    contents = f.read()
                 self.scriptText.setText(contents)
                 dlg = gui.Dialog()
                 dlg.prompt("Load script","File was loaded in an acceptable manner","OK")
@@ -99,7 +98,7 @@ class ScriptingView(gui3d.TaskView):
             if not filename:
                 return
 
-            with io.open(filename, "w", encoding="utf-8") as f:
+            with open(filename, "w", encoding="utf-8") as f:
                 f.write(self.scriptText.getText())
             dlg = gui.Dialog()
             dlg.prompt("Save script","File was written in an acceptable manner","OK")

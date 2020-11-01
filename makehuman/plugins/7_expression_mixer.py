@@ -38,7 +38,6 @@ Development tool for blending unit poses together in an expression pose.
 
 import os
 import json
-import io
 
 import algos3d
 import gui3d
@@ -167,7 +166,7 @@ class ExpressionMixerTaskView(gui3d.TaskView):
         self.base_bvh = bvh.load(getpath.getSysDataPath('poseunits/face-poseunits.bvh'), allowTranslation="none")
         self.base_anim = self.base_bvh.createAnimationTrack(self.human.getBaseSkeleton(), name="Expression-Face-PoseUnits")
 
-        poseunit_json = json.load(io.open(getpath.getSysDataPath('poseunits/face-poseunits.json'),'r', encoding='utf-8'), object_pairs_hook=OrderedDict)
+        poseunit_json = json.load(open(getpath.getSysDataPath('poseunits/face-poseunits.json'),'r', encoding='utf-8'), object_pairs_hook=OrderedDict)
         self.poseunit_names = poseunit_json['framemapping']
         log.message('unit pose frame count:%s', len(self.poseunit_names))
 
@@ -235,12 +234,12 @@ class ExpressionMixerTaskView(gui3d.TaskView):
                  "license": self.licenseField.getValue(),
                  "homepage": self.websiteField.getValue()
                 }
-        json.dump(data, io.open(filename, 'w', encoding='utf-8'), indent=4)
+        json.dump(data, open(filename, 'w', encoding='utf-8'), indent=4)
         log.message("Saved pose as %s" % filename)
 
     def loadPose(self, filename):
 
-        data = json.load(io.open(filename, 'r', encoding='utf-8'))
+        data = json.load(open(filename, 'r', encoding='utf-8'))
 
         self.nameField.setValue(data.get('name',''))
         self.descrField.setValue(data.get('description',''))

@@ -48,7 +48,6 @@ import log
 from collections import OrderedDict
 import language
 import collections
-import io
 from mesh_operations import calculateSurface
 
 class ModifierTaskView(gui3d.TaskView):
@@ -219,7 +218,7 @@ def loadModifierTaskViews(filename, human, category, taskviewClass=None):
     if not taskviewClass:
         taskviewClass = ModifierTaskView
 
-    data = json.load(io.open(filename, 'r', encoding='utf-8'), object_pairs_hook=OrderedDict)
+    data = json.load(open(filename, 'r', encoding='utf-8'), object_pairs_hook=OrderedDict)
     taskViews = []
     # Create task views
     for taskName, taskViewProps in data.items():

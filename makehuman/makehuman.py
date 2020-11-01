@@ -39,7 +39,6 @@ This file starts the MakeHuman python application.
 
 import sys
 import os
-import io
 import re
 import subprocess
 
@@ -171,9 +170,9 @@ def redirect_standard_streams():
     import locale
     encoding = locale.getpreferredencoding()
     if stdout_filename:
-        sys.stdout = io.open(stdout_filename, "w", encoding=encoding, errors="replace")
+        sys.stdout = open(stdout_filename, "w", encoding=encoding, errors="replace")
     if stderr_filename:
-        sys.stderr = io.open(stderr_filename, "w", encoding=encoding, errors="replace")
+        sys.stderr = open(stderr_filename, "w", encoding=encoding, errors="replace")
 
 def close_standard_streams():
     sys.stdout.close()
@@ -543,7 +542,7 @@ makes use of.\n"""
         if not os.path.isfile(lfile):
             result += "\n%s\n" % _error("Error: License file %s is not found, this is an incomplete MakeHuman distribution!" % lfile)
             continue
-        with io.open(lfile, encoding='utf-8') as f:
+        with open(lfile, encoding='utf-8') as f:
             text = f.read()
 
         text = _wordwrap(text)

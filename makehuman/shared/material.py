@@ -333,10 +333,9 @@ class Material(object):
         """
         Parse .mhmat file and set as the properties of this material.
         """
-        import io
         log.debug("Loading material from file %s", filename)
         try:
-            f = io.open(filename, "r", encoding="utf-8")
+            f = open(filename, "r", encoding="utf-8")
         except:
             f = None
         if f is None:
@@ -510,10 +509,9 @@ class Material(object):
             return formatPath(filename)
 
     def toFile(self, filename, comments = []):
-        import io
 
         try:
-            f = io.open(filename, 'w', encoding='utf-8')
+            f = open(filename, 'w', encoding='utf-8')
         except:
             f = None
         if f is None:
@@ -1480,25 +1478,22 @@ class UVMap:
 
 
 def loadUvObjFile(filepath):
-    import io
-    fp = io.open(filepath, "r", encoding="utf-8")
-    uvs = []
-    fuvs = []
-    for line in fp:
-        words = line.split()
-        if len(words) == 0:
-            continue
-        elif words[0] == "vt":
-            uvs.append((float(words[1]), float(words[2])))
-        elif words[0] == "f":
-            fuvs.append( [(int(word.split("/")[1]) - 1) for word in words[1:]] )
-    fp.close()
+    with open(filepath, "r", encoding="utf-8") as fp:
+        uvs = []
+        fuvs = []
+        for line in fp:
+            words = line.split()
+            if len(words) == 0:
+                continue
+            elif words[0] == "vt":
+                uvs.append((float(words[1]), float(words[2])))
+            elif words[0] == "f":
+                fuvs.append( [(int(word.split("/")[1]) - 1) for word in words[1:]] )
     return uvs,fuvs
 
 def peekMetadata(filename):
-    import io
     try:
-        f = io.open(filename, "r", encoding="utf-8")
+        f = open(filename, "r", encoding="utf-8")
     except:
         f = None
     if f is None:
@@ -1524,6 +1519,7 @@ def peekMetadata(filename):
             description = " ".join(words[1:])
         else:
             pass
+    f.close()
 
     if description is None:
         description = "%s material" % name

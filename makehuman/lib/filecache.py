@@ -42,7 +42,6 @@ import os
 import getpath
 import log
 import pickle as pickle
-import io
 
 CACHE_FORMAT_VERSION = 1  # You can use any type, strings or ints, only equality test is done on these
 
@@ -67,9 +66,8 @@ class FileCache(object):
 
     def save(self):
         """Save filecache to file"""
-        f = io.open(self.filepath, "wb")
-        pickle.dump(self, f, protocol=2)
-        f.close()
+        with open(self.filepath, "wb") as f:
+            pickle.dump(self, f, protocol=2)
 
     def getMetadata(self, filename):
         """Retrieve a metadata entry from this cache"""
@@ -334,9 +332,8 @@ def loadCache(filepath, expected_version=None):
 
     try:
         if os.path.isfile(filepath):
-            f = io.open(filepath, "rb")
-            result = pickle.load(f)
-            f.close()
+            with open(filepath, "rb") as f:
+                result = pickle.load(f)
             if result.version != expected_version:
                 log.message("File cache %s has a different version (%s) than expected (%s), dropping it." % (filepath, result.version, expected_version))
                 del result

@@ -54,82 +54,80 @@ def loadObjFile(path, obj = None):
         name = os.path.splitext( os.path.basename(path) )[0]
         obj = module3d.Object3D(name)
 
-    objFile = io.open(path, 'r', encoding="utf-8")
+    with open(path, 'r', encoding="utf-8") as objFile:
 
-    fg = None
-    mtl = None
+        fg = None
+        mtl = None
 
-    verts = []
-    uvs = []
-    fverts = []
-    fuvs = []
-    groups = []
-    has_uv = False
-    materials = {}
-    faceGroups = {}
+        verts = []
+        uvs = []
+        fverts = []
+        fuvs = []
+        groups = []
+        has_uv = False
+        materials = {}
+        faceGroups = {}
 
-    for objData in objFile:
+        for objData in objFile:
 
-        lineData = objData.split()
-        if len(lineData) > 0:
+            lineData = objData.split()
+            if len(lineData) > 0:
 
-            command = lineData[0]
+                command = lineData[0]
 
-            # Vertex coordinate
-            if command == 'v':
-                verts.append((float(lineData[1]), float(lineData[2]), float(lineData[3])))
+                # Vertex coordinate
+                if command == 'v':
+                    verts.append((float(lineData[1]), float(lineData[2]), float(lineData[3])))
 
-            # Vertex texture (UV) coordinate
-            elif command == 'vt':
-                uvs.append((float(lineData[1]), float(lineData[2])))
+                # Vertex texture (UV) coordinate
+                elif command == 'vt':
+                    uvs.append((float(lineData[1]), float(lineData[2])))
 
-            # Face definition (reference to vertex attributes)
-            elif command == 'f':
-                if not fg:
-                    if 0 not in faceGroups:
-                        faceGroups[0] = obj.createFaceGroup('default-dummy-group')
-                    fg = faceGroups[0]
+                # Face definition (reference to vertex attributes)
+                elif command == 'f':
+                    if not fg:
+                        if 0 not in faceGroups:
+                            faceGroups[0] = obj.createFaceGroup('default-dummy-group')
+                        fg = faceGroups[0]
 
-                uvIndices = []
-                vIndices = []
-                for faceData in lineData[1:]:
-                    vInfo = faceData.split('/')
-                    vIdx = int(vInfo[0]) - 1  # -1 because obj is 1 based list
-                    vIndices.append(vIdx)
+                    uvIndices = []
+                    vIndices = []
+                    for faceData in lineData[1:]:
+                        vInfo = faceData.split('/')
+                        vIdx = int(vInfo[0]) - 1  # -1 because obj is 1 based list
+                        vIndices.append(vIdx)
 
-                    # If there are other data (uv, normals, etc)
-                    if len(vInfo) > 1 and vInfo[1] != '':
-                        uvIndex = int(vInfo[1]) - 1  # -1 because obj is 1 based list
-                        uvIndices.append(uvIndex)
+                        # If there are other data (uv, normals, etc)
+                        if len(vInfo) > 1 and vInfo[1] != '':
+                            uvIndex = int(vInfo[1]) - 1  # -1 because obj is 1 based list
+                            uvIndices.append(uvIndex)
 
-                if len(vIndices) == 3:
-                    vIndices.append(vIndices[0])
-                fverts.append(tuple(vIndices))
+                    if len(vIndices) == 3:
+                        vIndices.append(vIndices[0])
+                    fverts.append(tuple(vIndices))
 
-                if len(uvIndices) > 0:
-                    if len(uvIndices) == 3:
-                        uvIndices.append(uvIndices[0])
-                    has_uv = True
-                if len(uvIndices) < 4:
-                    uvIndices = [0, 0, 0, 0]
-                fuvs.append(tuple(uvIndices))
+                    if len(uvIndices) > 0:
+                        if len(uvIndices) == 3:
+                            uvIndices.append(uvIndices[0])
+                        has_uv = True
+                    if len(uvIndices) < 4:
+                        uvIndices = [0, 0, 0, 0]
+                    fuvs.append(tuple(uvIndices))
 
-                groups.append(fg.idx)
+                    groups.append(fg.idx)
 
-            elif command == 'g':
-                fgName = lineData[1]
-                if fgName not in faceGroups:
-                    faceGroups[fgName] = obj.createFaceGroup(fgName)
-                fg =  faceGroups[fgName]
+                elif command == 'g':
+                    fgName = lineData[1]
+                    if fgName not in faceGroups:
+                        faceGroups[fgName] = obj.createFaceGroup(fgName)
+                    fg =  faceGroups[fgName]
 
-            elif command == 'usemtl':
-                pass # ignore materials
+                elif command == 'usemtl':
+                    pass # ignore materials
 
-            elif command == 'o':
+                elif command == 'o':
 
-                obj.name = lineData[1]
-
-    objFile.close()
+                    obj.name = lineData[1]
 
     # Sanity check for loose vertices
     strayVerts = []
@@ -160,7 +158,7 @@ def writeObjFile(path, meshes, writeMTL=True, config=None, filterMaskedFaces=Tru
     if isinstance(path, io.IOBase):
         fp = path
     else:
-        fp = io.open(path, 'w', encoding="utf-8")
+        fp = open(path, 'w', encoding="utf-8")
 
 
     fp.write(
@@ -243,13 +241,12 @@ def writeObjFile(path, meshes, writeMTL=True, config=None, filterMaskedFaces=Tru
     fp.close()
 
     if writeMTL:
-        fp = open(mtlfile, 'w', encoding="utf-8")
-        fp.write(
-            '# MakeHuman exported MTL\n' +
-            '# www.makehumancommunity.org\n\n')
-        for mesh in meshes:
-            writeMaterial(fp, mesh.material, config)
-        fp.close()
+        with open(mtlfile, 'w', encoding="utf-8") as fp:
+            fp.write(
+                '# MakeHuman exported MTL\n' +
+                '# www.makehumancommunity.org\n\n')
+            for mesh in meshes:
+                writeMaterial(fp, mesh.material, config)
 
 
 #

@@ -41,7 +41,6 @@ transforming them into bone-based skeletons for use with skeletal animation.
 import skeleton
 import animation
 import log
-import io
 
 import numpy as np
 import transformations as tm
@@ -291,39 +290,39 @@ class BVH():
         else:
             autoAxis = False
 
-        fp = io.open(filepath, "r", encoding='utf-8')
+        with open(filepath, "r", encoding='utf-8') as fp:
 
-        # Read hierarchy
-        self.__expectKeyword('HIERARCHY', fp)
-        words = self.__expectKeyword('ROOT', fp)
-        rootJoint = self.addRootJoint(words[1])        
+            # Read hierarchy
+            self.__expectKeyword('HIERARCHY', fp)
+            words = self.__expectKeyword('ROOT', fp)
+            rootJoint = self.addRootJoint(words[1])
 
-        self.__readJoint(self.rootJoint, fp)
+            self.__readJoint(self.rootJoint, fp)
 
-        # Auto determine and adjust for up axis
-        if autoAxis:
-            self.convertFromZUp = self._autoGuessCoordinateSystem()
-            log.message("Automatically guessed coordinate system for BVH file %s (%s)" % (filepath, "Z-up" if self.convertFromZUp else "Y-up"))
-            if self.convertFromZUp:
-                # Conversion needed: convert from Z-up to Y-up
-                self.__cacheGetJoints()
-                for joint in self.jointslist:
-                    self.__calcPosition(joint, joint.offset)
+            # Auto determine and adjust for up axis
+            if autoAxis:
+                self.convertFromZUp = self._autoGuessCoordinateSystem()
+                log.message("Automatically guessed coordinate system for BVH file %s (%s)" % (filepath, "Z-up" if self.convertFromZUp else "Y-up"))
+                if self.convertFromZUp:
+                    # Conversion needed: convert from Z-up to Y-up
+                    self.__cacheGetJoints()
+                    for joint in self.jointslist:
+                        self.__calcPosition(joint, joint.offset)
 
-        # Read motion
-        self.__expectKeyword('MOTION', fp)
+            # Read motion
+            self.__expectKeyword('MOTION', fp)
 
-        words = self.__expectKeyword('Frames:', fp)
-        self.frameCount = int(words[1])
-        words = self.__expectKeyword('Frame', fp) # Time:
-        self.frameTime = float(words[2])
+            words = self.__expectKeyword('Frames:', fp)
+            self.frameCount = int(words[1])
+            words = self.__expectKeyword('Frame', fp) # Time:
+            self.frameTime = float(words[2])
 
-        for i in range(self.frameCount):
-            line = fp.readline()
-            words = line.split()
-            data = [float(word) for word in words]
-            for joint in self.getJointsBVHOrder():
-                data = self.__processChannelData(joint, data)
+            for i in range(self.frameCount):
+                line = fp.readline()
+                words = line.split()
+                data = [float(word) for word in words]
+                for joint in self.getJointsBVHOrder():
+                    data = self.__processChannelData(joint, data)
 
         self.__cacheGetJoints()
 
@@ -468,31 +467,30 @@ class BVH():
         """
         Write this BVH structure to a file.
         """
-        f = io.open(filename, 'w', encoding='utf-8')
+        with open(filename, 'w', encoding='utf-8') as f:
 
-        # Write structure
-        f.write('HIERARCHY\n')
-        self._writeJoint(f, self.rootJoint, 0)
+            # Write structure
+            f.write('HIERARCHY\n')
+            self._writeJoint(f, self.rootJoint, 0)
 
-        # Write animation
-        f.write('MOTION\n')
-        f.write('Frames: %s\n' % self.frameCount)
-        f.write('Frame Time: %f\n' % self.frameTime)
+            # Write animation
+            f.write('MOTION\n')
+            f.write('Frames: %s\n' % self.frameCount)
+            f.write('Frame Time: %f\n' % self.frameTime)
 
-        allJoints = [joint for joint in self.getJointsBVHOrder() if not joint.isEndConnector()]
-        jointsData = [joint.matrixPoses for joint in allJoints]
-        nJoints = len(jointsData)
-        nFrames = len(jointsData[0])
-        totalChannels = sum([len(joint.channels) for joint in allJoints])
+            allJoints = [joint for joint in self.getJointsBVHOrder() if not joint.isEndConnector()]
+            jointsData = [joint.matrixPoses for joint in allJoints]
+            nJoints = len(jointsData)
+            nFrames = len(jointsData[0])
+            totalChannels = sum([len(joint.channels) for joint in allJoints])
 
-        for fIdx in range(self.frameCount):
-            frameData = []
-            for joint in allJoints:
-                offset = fIdx * len(joint.channels)
-                frameData.extend(joint.frames[offset:offset + len(joint.channels)])
-            frameData = [str(fl) for fl in frameData]
-            f.write('%s\n' % " ".join(frameData))
-        f.close()
+            for fIdx in range(self.frameCount):
+                frameData = []
+                for joint in allJoints:
+                    offset = fIdx * len(joint.channels)
+                    frameData.extend(joint.frames[offset:offset + len(joint.channels)])
+                frameData = [str(fl) for fl in frameData]
+                f.write('%s\n' % " ".join(frameData))
 
     def _writeJoint(self, f, joint, ident):
         if joint.name == "End effector":

@@ -50,7 +50,6 @@ import os
 import struct
 import numpy as np
 import math
-import io
 from progress import Progress
 
 # TODO perhaps add scale option
@@ -80,65 +79,64 @@ def exportStlAscii(filepath, config, exportJoints = False):
     objects = human.getObjects(True)
     meshes = [o.mesh.clone(1,True) for o in objects]
 
-    fp = io.open(filepath, 'w', encoding="utf-8")
-    solid = name.replace(' ','_')
-    fp.write('solid %s\n' % solid)
+    with open(filepath, 'w', encoding="utf-8") as fp:
+        solid = name.replace(' ','_')
+        fp.write('solid %s\n' % solid)
 
-    progress(0.3, 0.99, "Writing Objects")
-    objprog = Progress(len(meshes))
+        progress(0.3, 0.99, "Writing Objects")
+        objprog = Progress(len(meshes))
 
-    def chunked_enumerate(offs, chunk_size, list_):
-        return zip(range(offs, offs + chunk_size), list_[offs:offs + chunk_size])
+        def chunked_enumerate(offs, chunk_size, list_):
+            return zip(range(offs, offs + chunk_size), list_[offs:offs + chunk_size])
 
-    for mesh in meshes:
-        coord = config.scale*mesh.coord + config.offset
-        offs = 0
-        chunk_size = 2000   # The higher the chunk size, the faster, but setting this too high can run into memory errors on some machines
-        meshprog = Progress(math.ceil( float(len(mesh.fvert)) / chunk_size ))
+        for mesh in meshes:
+            coord = config.scale*mesh.coord + config.offset
+            offs = 0
+            chunk_size = 2000   # The higher the chunk size, the faster, but setting this too high can run into memory errors on some machines
+            meshprog = Progress(math.ceil( float(len(mesh.fvert)) / chunk_size ))
 
-        if mesh.vertsPerFaceForExport == 3:
-            while(offs < len(mesh.fvert)):
-                fp.write("".join( [(
-                    'facet normal %f %f %f\n' % tuple(mesh.fnorm[fn]) +
-                    '\touter loop\n' +
-                    '\t\tvertex %f %f %f\n' % tuple(coord[fv[0]]) +
-                    '\t\tvertex %f %f %f\n' % tuple(coord[fv[1]]) +
-                    '\t\tvertex %f %f %f\n' % tuple(coord[fv[2]]) +
-                    '\tendloop\n' +
-                    '\tendfacet\n'
-                    ) for fn,fv in chunked_enumerate(offs, chunk_size, mesh.fvert)] ))
-                fp.flush()
-                os.fsync(fp.fileno())
-                offs += chunk_size
-                meshprog.step()
-        else:
-            while(offs < len(mesh.fvert)):
-                fp.write("".join( [(
-                    'facet normal %f %f %f\n' % tuple(mesh.fnorm[fn]) +
-                    '\touter loop\n' +
-                    '\t\tvertex %f %f %f\n' % tuple(coord[fv[0]]) +
-                    '\t\tvertex %f %f %f\n' % tuple(coord[fv[1]]) +
-                    '\t\tvertex %f %f %f\n' % tuple(coord[fv[2]]) +
-                    '\tendloop\n' +
-                    '\tendfacet\n' +
-                    'facet normal %f %f %f\n' % tuple(mesh.fnorm[fn]) +
-                    '\touter loop\n' +
-                    '\t\tvertex %f %f %f\n' % tuple(coord[fv[2]]) +
-                    '\t\tvertex %f %f %f\n' % tuple(coord[fv[3]]) +
-                    '\t\tvertex %f %f %f\n' % tuple(coord[fv[0]]) +
-                    '\tendloop\n' +
-                    '\tendfacet\n'
-                    ) for fn,fv in chunked_enumerate(offs, chunk_size, mesh.fvert)] ))
-                fp.flush()
-                os.fsync(fp.fileno())
-                offs += chunk_size
-                meshprog.step()
+            if mesh.vertsPerFaceForExport == 3:
+                while(offs < len(mesh.fvert)):
+                    fp.write("".join( [(
+                        'facet normal %f %f %f\n' % tuple(mesh.fnorm[fn]) +
+                        '\touter loop\n' +
+                        '\t\tvertex %f %f %f\n' % tuple(coord[fv[0]]) +
+                        '\t\tvertex %f %f %f\n' % tuple(coord[fv[1]]) +
+                        '\t\tvertex %f %f %f\n' % tuple(coord[fv[2]]) +
+                        '\tendloop\n' +
+                        '\tendfacet\n'
+                        ) for fn,fv in chunked_enumerate(offs, chunk_size, mesh.fvert)] ))
+                    fp.flush()
+                    os.fsync(fp.fileno())
+                    offs += chunk_size
+                    meshprog.step()
+            else:
+                while(offs < len(mesh.fvert)):
+                    fp.write("".join( [(
+                        'facet normal %f %f %f\n' % tuple(mesh.fnorm[fn]) +
+                        '\touter loop\n' +
+                        '\t\tvertex %f %f %f\n' % tuple(coord[fv[0]]) +
+                        '\t\tvertex %f %f %f\n' % tuple(coord[fv[1]]) +
+                        '\t\tvertex %f %f %f\n' % tuple(coord[fv[2]]) +
+                        '\tendloop\n' +
+                        '\tendfacet\n' +
+                        'facet normal %f %f %f\n' % tuple(mesh.fnorm[fn]) +
+                        '\touter loop\n' +
+                        '\t\tvertex %f %f %f\n' % tuple(coord[fv[2]]) +
+                        '\t\tvertex %f %f %f\n' % tuple(coord[fv[3]]) +
+                        '\t\tvertex %f %f %f\n' % tuple(coord[fv[0]]) +
+                        '\tendloop\n' +
+                        '\tendfacet\n'
+                        ) for fn,fv in chunked_enumerate(offs, chunk_size, mesh.fvert)] ))
+                    fp.flush()
+                    os.fsync(fp.fileno())
+                    offs += chunk_size
+                    meshprog.step()
 
-        meshprog.finish()
-        objprog.step()
+            meshprog.finish()
+            objprog.step()
 
-    fp.write('endsolid %s\n' % solid)
-    fp.close()
+        fp.write('endsolid %s\n' % solid)
     progress(1, None, "STL export finished. Exported file: %s", filepath)
 
 
@@ -160,38 +158,38 @@ def exportStlBinary(filepath, config, exportJoints = False):
     objects = human.getObjects(True)
     meshes = [o.mesh.clone(1,True) for o in objects]
 
-    fp = io.open(filepath, 'wb')
-    fp.write(b'\x00' * 80)
-    fp.write(struct.pack(b'<I', 0))
-    count = 0
+    with open(filepath, 'wb') as fp:
+        fp.write(b'\x00' * 80)
+        fp.write(struct.pack(b'<I', 0))
+        count = 0
 
-    progress(0.3, 0.99, "Writing Objects")
-    objprog = Progress(len(meshes))
-    for mesh in meshes:
-        coord = config.scale * mesh.coord + config.offset
+        progress(0.3, 0.99, "Writing Objects")
+        objprog = Progress(len(meshes))
+        for mesh in meshes:
+            coord = config.scale * mesh.coord + config.offset
 
-        for fn,fv in enumerate(mesh.fvert):
-            fno = mesh.fnorm[fn]
-            co = coord[fv]
+            for fn,fv in enumerate(mesh.fvert):
+                fno = mesh.fnorm[fn]
+                co = coord[fv]
 
-            fp.write(struct.pack(b'<fff', fno[0], fno[1], fno[2]))
-            fp.write(struct.pack(b'<fff', co[0][0], co[0][1], co[0][2]))
-            fp.write(struct.pack(b'<fff', co[1][0], co[1][1], co[1][2]))
-            fp.write(struct.pack(b'<fff', co[2][0], co[2][1], co[2][2]))
-            fp.write(struct.pack(b'<H', 0))
-            count += 1
-
-            if mesh.vertsPerFaceForExport != 3:
                 fp.write(struct.pack(b'<fff', fno[0], fno[1], fno[2]))
-                fp.write(struct.pack(b'<fff', co[2][0], co[2][1], co[2][2]))
-                fp.write(struct.pack(b'<fff', co[3][0], co[3][1], co[3][2]))
                 fp.write(struct.pack(b'<fff', co[0][0], co[0][1], co[0][2]))
+                fp.write(struct.pack(b'<fff', co[1][0], co[1][1], co[1][2]))
+                fp.write(struct.pack(b'<fff', co[2][0], co[2][1], co[2][2]))
                 fp.write(struct.pack(b'<H', 0))
                 count += 1
 
-        objprog.step()
+                if mesh.vertsPerFaceForExport != 3:
+                    fp.write(struct.pack(b'<fff', fno[0], fno[1], fno[2]))
+                    fp.write(struct.pack(b'<fff', co[2][0], co[2][1], co[2][2]))
+                    fp.write(struct.pack(b'<fff', co[3][0], co[3][1], co[3][2]))
+                    fp.write(struct.pack(b'<fff', co[0][0], co[0][1], co[0][2]))
+                    fp.write(struct.pack(b'<H', 0))
+                    count += 1
 
-    fp.seek(80)
-    fp.write(struct.pack('<I', count))
+            objprog.step()
+
+        fp.seek(80)
+        fp.write(struct.pack('<I', count))
     progress(1, None, "STL export finished. Exported file: %s", filepath)
 

@@ -39,7 +39,6 @@ Utility module for finding the user home path.
 import sys
 import os
 from xdg_parser import XDG_PATHS
-import io
 
 __home_path = None
 
@@ -65,7 +64,7 @@ else:
 configPath = ''
 
 if os.path.isfile(configFile):
-    with io.open(configFile, 'r', encoding='utf-8') as f:
+    with open(configFile, 'r', encoding='utf-8') as f:
         configPath = f.readline().strip()
 
         if os.path.isdir(configPath):

@@ -40,7 +40,6 @@ Data handlers for skeletal animation.
 
 import math
 import numpy as np
-import io
 import log
 import makehuman
 
@@ -293,7 +292,7 @@ class Pose(AnimationTrack):
         """
         from collections import OrderedDict
         import json
-        mhupb = json.load(io.open(filename, 'r', encoding='utf-8'), object_pairs_hook=OrderedDict)
+        mhupb = json.load(open(filename, 'r', encoding='utf-8'), object_pairs_hook=OrderedDict)
         self.name = mhupb['name']
         self.description = mhupb.get('description', '')
         self.tags = set([t.lower() for t in mhupb.get('tags', [])])
@@ -525,7 +524,7 @@ class VertexBoneWeights(object):
         """
         from collections import OrderedDict
         import json
-        weightsData = json.load(io.open(filename, 'r', encoding='utf-8'), object_pairs_hook=OrderedDict)
+        weightsData = json.load(open(filename, 'r', encoding='utf-8'), object_pairs_hook=OrderedDict)
         log.message("Loaded vertex weights %s from file %s", weightsData.get('name', 'unnamed'), filename)
         result = VertexBoneWeights(weightsData['weights'], vertexCount, rootBone)
         result.license.fromJson(weightsData)
@@ -564,9 +563,8 @@ class VertexBoneWeights(object):
                    }
         jsondata.update(self.license.asDict())
 
-        f = io.open(filename, 'w', encoding='utf-8')
-        json.dump(jsondata, f, indent=4, separators=(',', ': '))
-        f.close()
+        with open(filename, 'w', encoding='utf-8') as f:
+            json.dump(jsondata, f, indent=4, separators=(',', ': '))
 
     def create(self, data, vertexCount=None, rootBone=None):
         """
@@ -1250,70 +1248,67 @@ def loadPoseFromMhpFile(filepath, skel):
     """
     import log
     import os
-    import io
 
     log.message("Loading MHP file %s", filepath)
-    fp = io.open(filepath, "r", encoding="utf-8")
-    valid_file = False
+    with open(filepath, "r", encoding="utf-8") as fp:
+        valid_file = False
 
-    boneMap = skel.getBoneToIdxMapping()
-    nBones = len(list(boneMap.keys()))
-    poseMats = np.zeros((nBones,4,4),dtype=np.float32)
-    poseMats[:] = np.identity(4, dtype=np.float32)
+        boneMap = skel.getBoneToIdxMapping()
+        nBones = len(list(boneMap.keys()))
+        poseMats = np.zeros((nBones,4,4),dtype=np.float32)
+        poseMats[:] = np.identity(4, dtype=np.float32)
 
-    mats = dict()
-    for line in fp:
-        words = line.split()
-        if len(words) > 0 and words[0].startswith('#'):
-            # comment
-            continue
-        if len(words) < 10:
-            log.warning("Too short line in mhp file: %s" % " ".join(words))
-            continue
-        elif words[1] == "matrix":
-            bname = words[0]
-            boneIdx = boneMap[bname]
-            rows = []
-            n = 2
-            for i in range(4):
-                rows.append([float(words[n]), float(words[n+1]), float(words[n+2]), float(words[n+3])])
-                n += 4
-            # Invert Z rotation (for some reason this is required to make MHP orientations work)
-            rows[0][1] = -rows[0][1]
-            rows[1][0] = -rows[1][0]
-            # Invert X rotation
-            #rows[1][2] = -rows[1][2]
-            #rows[2][1] = -rows[2][1]
-            # Invert Y rotation
-            rows[0][2] = -rows[0][2]
-            rows[2][0] = -rows[2][0]
+        mats = dict()
+        for line in fp:
+            words = line.split()
+            if len(words) > 0 and words[0].startswith('#'):
+                # comment
+                continue
+            if len(words) < 10:
+                log.warning("Too short line in mhp file: %s" % " ".join(words))
+                continue
+            elif words[1] == "matrix":
+                bname = words[0]
+                boneIdx = boneMap[bname]
+                rows = []
+                n = 2
+                for i in range(4):
+                    rows.append([float(words[n]), float(words[n+1]), float(words[n+2]), float(words[n+3])])
+                    n += 4
+                # Invert Z rotation (for some reason this is required to make MHP orientations work)
+                rows[0][1] = -rows[0][1]
+                rows[1][0] = -rows[1][0]
+                # Invert X rotation
+                #rows[1][2] = -rows[1][2]
+                #rows[2][1] = -rows[2][1]
+                # Invert Y rotation
+                rows[0][2] = -rows[0][2]
+                rows[2][0] = -rows[2][0]
 
-            mats[boneIdx] = np.array(rows)
-        else:
-            log.warning("Unknown keyword in mhp file: %s" % words[1])
+                mats[boneIdx] = np.array(rows)
+            else:
+                log.warning("Unknown keyword in mhp file: %s" % words[1])
 
-    if not valid_file:
-        log.error("Loading of MHP file %s failed, probably a bad file." % filepath)
+        if not valid_file:
+            log.error("Loading of MHP file %s failed, probably a bad file." % filepath)
 
-    '''
-    # Apply pose to bones in breadth-first order (parent to child bone)
-    for boneIdx in sorted(mats.keys()):
-        bone = skel.boneslist[boneIdx]
-        mat = mats[boneIdx]
-        if bone.parent:
-            mat = np.dot(poseMats[bone.parent.index], np.dot(bone.matRestRelative, mat))
-        else:
-            mat = np.dot(self.matRestGlobal, mat)
-        poseMats[boneIdx] = mat
-
-    for boneIdx in sorted(mats.keys()):
-        bone = skel.boneslist[boneIdx]
-        poseMats[boneIdx] = np.dot(poseMats[boneIdx], la.inv(bone.matRestGlobal))
-    '''
-    for boneIdx in sorted(mats.keys()):
-        poseMats[boneIdx] = mats[boneIdx]
-
-    fp.close()
+        '''
+        # Apply pose to bones in breadth-first order (parent to child bone)
+        for boneIdx in sorted(mats.keys()):
+            bone = skel.boneslist[boneIdx]
+            mat = mats[boneIdx]
+            if bone.parent:
+                mat = np.dot(poseMats[bone.parent.index], np.dot(bone.matRestRelative, mat))
+            else:
+                mat = np.dot(self.matRestGlobal, mat)
+            poseMats[boneIdx] = mat
+    
+        for boneIdx in sorted(mats.keys()):
+            bone = skel.boneslist[boneIdx]
+            poseMats[boneIdx] = np.dot(poseMats[boneIdx], la.inv(bone.matRestGlobal))
+        '''
+        for boneIdx in sorted(mats.keys()):
+            poseMats[boneIdx] = mats[boneIdx]
 
     name = os.path.splitext(os.path.basename(filepath))[0]
     result = Pose(name, poseMats)

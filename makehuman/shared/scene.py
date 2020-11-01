@@ -38,7 +38,6 @@ Definitions of scene objects and the scene class.
 """
 
 import pickle as pickle
-import io
 
 import log
 import managed_file
@@ -206,7 +205,7 @@ class Scene(object):
         log.debug('Loading scene file: %s', path)
 
         try:
-            hfile = io.open(path, 'rb')
+            hfile = open(path, 'rb')
         except IOError as e:
             log.warning('Could not load %s: %s', path, e[1])
             return False
@@ -256,7 +255,7 @@ class Scene(object):
         log.debug('Saving scene file: %s', path)
 
         try:
-            hfile = io.open(path, 'wb')
+            hfile = open(path, 'wb')
         except IOError as e:
             log.warning('Could not save %s: %s', path, e[1])
             return False
