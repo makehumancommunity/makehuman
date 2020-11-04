@@ -45,7 +45,7 @@ If you rather run the code from source:
 
 All that you need should be available via apt. On a console prompt, run:
 
-* apt-get install python3-numpy, python3-opengl, python3-pyqt5, python3-pyqt5.qtopengl, python3-pyqt5.qtsvg
+* apt-get install python3-numpy python3-opengl python3-pyqt5 python3-pyqt5.qtopengl python3-pyqt5.qtsvg
 
 ### Installing python dependencies on windows
 
