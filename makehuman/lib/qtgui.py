@@ -1688,7 +1688,7 @@ class VScrollLayout(QtWidgets.QLayout):
             rect.setHeight(max(rect.height(), size.height()))
 
         # log.debug('VScrollLayout.setGeometry(child): %d %d %d %d', rect.x(), rect.y(), rect.width(), rect.height())
-        self._child.setGeometry(rect)
+        self._child.widget().setGeometry(rect)
 
     def expandingDirections(self):
         if self._child is None:
