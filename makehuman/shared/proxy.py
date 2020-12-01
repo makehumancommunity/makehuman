@@ -106,6 +106,7 @@ class Proxy:
         self.uvLayers = {}  # TODO what is this used for?
 
         self.material = material.Material(self.name)
+        self._backUpMaterial = None
 
         self._obj_file = None
         self._vertexBoneWeights_file = None

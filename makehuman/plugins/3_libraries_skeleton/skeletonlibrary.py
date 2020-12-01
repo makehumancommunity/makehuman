@@ -100,7 +100,7 @@ class SkeletonLibrary(gui3d.TaskView, filecache.MetadataCacher):
 
         self.selectedJoint = None
 
-        self.oldHumanMat = self.human.material
+        self.human._backUpMaterial = self.human.material.clone()
         self.oldPxyMats = dict()
 
         self.sysDataPath = getpath.getSysDataPath('rigs')
@@ -154,13 +154,11 @@ class SkeletonLibrary(gui3d.TaskView, filecache.MetadataCacher):
         # Set X-ray material
         if self.xray_mat is None:
             self.xray_mat = material.fromFile(mh.getSysDataPath('materials/xray.mhmat'))
-        self.oldHumanMat = self.human.material.clone()
-        self.oldPxyMats = dict()
+        self.human._backUpMaterial = self.human.material.clone()
         self.human.material = self.xray_mat
         for pxy in self.human.getProxies(includeHumanProxy=False):
-            obj = pxy.object
-            self.oldPxyMats[pxy.uuid] = obj.material.clone()
-            obj.material = self.xray_mat
+            pxy._backUpMaterial = pxy.object.material.clone()
+            pxy.object.material = self.xray_mat
 
         # Make sure skeleton is updated if human has changed
         if self.human.skeleton:
@@ -172,10 +170,12 @@ class SkeletonLibrary(gui3d.TaskView, filecache.MetadataCacher):
     def onHide(self, event):
         gui3d.TaskView.onHide(self, event)
 
-        self.human.material = self.oldHumanMat
+        self.human.material = self.human._backUpMaterial.clone()
+        self.human._backUpMaterial = None
         for pxy in self.human.getProxies(includeHumanProxy=False):
-            if pxy.uuid in self.oldPxyMats:
-                pxy.object.material = self.oldPxyMats[pxy.uuid]
+            if pxy._backUpMaterial:
+                pxy.object.material = pxy._backUpMaterial
+                pxy._backUpMaterial = None
 
         mh.redraw()
 

@@ -88,6 +88,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
         self.material = material.fromFile(getSysDataPath('skins/default.mhmat'))
         self._defaultMaterial = material.Material().copyFrom(self.material)
+        self._backUpMaterial = None
 
         # Init with no user-selected skeleton
         self.skeleton = None
