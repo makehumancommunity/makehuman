@@ -72,13 +72,13 @@ class FileCache(object):
     def getMetadata(self, filename):
         """Retrieve a metadata entry from this cache"""
         fileId = getpath.canonicalPath(filename)
-        return self[fileId]
+        return self._cache.get(fileId)
 
     def cleanup(self):
         """
         Remove non-existing entries from this cache
         """
-        for fileId in list(self._cache.keys()):
+        for fileId in self._cache.keys():
             if not os.path.exists(fileId):
                 try:
                     del self._cache[fileId]
