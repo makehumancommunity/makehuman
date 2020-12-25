@@ -11,6 +11,10 @@ Usage:
 import os
 import shutil
 from setuptools import setup
+import urllib.request
+from zipfile import ZipFile
+
+OPENGL_URL = 'http://download.tuxfamily.org/makehuman/build/macos-opengl-wrapper.zip'
 
 DEPENDENCIES = [
 'pip',
@@ -30,10 +34,21 @@ setup(
     setup_requires=['py2app'],
 )
 
+os.mkdir('temp');
+
+print('Downloading OpenGL...');
+urllib.request.urlretrieve(OPENGL_URL, './temp/OpenGL-packed.zip');
+
+print('Unpacking OpenGL...');
+with ZipFile('./temp/OpenGL-packed.zip', 'r') as zipObj:
+   # Extract all the contents of zip file in different directory
+   zipObj.extractall('temp')
+
 print('Copying OpenGL...');
-shutil.copytree('../../mac_packages/OpenGL', './dist/makehuman.app/Contents/Resources/lib/OpenGL');
+shutil.copytree('./temp/OpenGL', './dist/makehuman.app/Contents/Resources/lib/OpenGL');
 
 print('Cleaning environment...');
 shutil.rmtree('build')
+shutil.rmtree('temp')
 
 print('Done!');
