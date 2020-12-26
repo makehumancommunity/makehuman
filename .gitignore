@@ -77,3 +77,8 @@ base_1-1_contents.txt
 ehthumbs.db
 Thumbs.db
 /venv*
+
+# Builds #
+##########
+/buildscripts/darwin/build/*
+/buildscripts/darwin/dist/*

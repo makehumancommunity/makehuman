@@ -14,7 +14,7 @@ MakeHuman python entry-point.
 
 **Copyright(c):**      MakeHuman Team 2001-2020
 
-**Licensing:**         AGPL3 
+**Licensing:**         AGPL3
 
     This file is part of MakeHuman Community (www.makehumancommunity.org).
 
@@ -141,9 +141,15 @@ def set_sys_path():
     #[BAL 07/11/2013] make sure we're in the right directory
     if not sys.platform.startswith('darwin'): # Causes issues with py2app builds on MAC
         os.chdir(getCwd())
-    syspath = ["./", "./lib", "./apps", "./shared", "./apps/gui","./core"]
-    syspath.extend(sys.path)
-    sys.path = syspath
+        syspath = ["./", "./lib", "./apps", "./shared", "./apps/gui","./core"]
+        syspath.extend(sys.path)
+        sys.path = syspath
+    else:
+        data_path = "../Resources/makehuman"
+        os.chdir(data_path)
+        syspath = ["./lib", "./apps", "./shared", "./apps/gui", "./core", "../lib", "../"]
+        syspath.extend(sys.path)
+        sys.path = syspath
 
     if isBuild():
         # Make sure we load packaged DLLs instead of those present on the system
@@ -226,7 +232,7 @@ def parse_arguments():
     parser.add_argument("--debugopengl", action="store_true", help="enable OpenGL error checking and logging (slow)")
     parser.add_argument("--fullloggingopengl", action="store_true", help="log all OpenGL calls (very slow)")
     parser.add_argument("--debugnumpy", action="store_true", help="enable numpy runtime error messages")
-    
+
     if not isRelease():
         parser.add_argument("-t", "--runtests", action="store_true", help="run test suite (for developers)")
 
@@ -248,7 +254,7 @@ This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it
 under certain conditions. For details use the option --license"""
 
-    return """Makehuman is a completely free, open source, innovative and 
+    return """Makehuman is a completely free, open source, innovative and
 professional software for the modelling of 3-Dimensional humanoid characters
 Copyright (C) 2001-2020  www.makehumancommunity.org
 
@@ -283,12 +289,12 @@ For further help, have a look in the community wiki at:
 
     http://www.makehumancommunity.org/wiki/Main_Page
 
-If you have other questions or need support, feel free to ask on our 
+If you have other questions or need support, feel free to ask on our
 forums at:
 
     http://www.makehumancommunity.org/forum/
 
-The forums is also where you can contact the MakeHuman team. 
+The forums is also where you can contact the MakeHuman team.
 
 Bugs can be reported on the project's bug tracker(s):
 
@@ -436,7 +442,7 @@ def getAssetLicense(properties=None):
 
 def _wordwrap(text, chars_per_line=80):
     """Split the lines of a text between whitespaces when a line length exceeds
-    the specified number of characters. Newlines already present in text are 
+    the specified number of characters. Newlines already present in text are
     kept.
     """
     text_ = text.split('\n')
@@ -471,7 +477,7 @@ def getCredits(richtext=False):
         result = '<h2>MakeHuman credits</h2>'
     else:
         result = ''
-    return result + '''The list of people that made this software can be found at our website at 
+    return result + '''The list of people that made this software can be found at our website at
 http://www.makehumancommunity.org/halloffame'''
 
 def getSoftwareLicense(richtext=False):
@@ -518,7 +524,7 @@ def getThirdPartyLicenses(richtext=False):
         result = '<h2>Third-party licenses</h2>'
     else:
         result = ""
-    result += """MakeHuman includes a number of third part software components, which have 
+    result += """MakeHuman includes a number of third part software components, which have
 their own respective licenses. We express our gratitude to the developers of
 those libraries, without which MakeHuman would not have been made possible.
 Here follows a list of the third-party open source libraries that MakeHuman
