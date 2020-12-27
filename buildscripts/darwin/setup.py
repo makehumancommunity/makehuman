@@ -13,8 +13,11 @@ import shutil
 from setuptools import setup
 import urllib.request
 from zipfile import ZipFile
+from urllib.parse import urlparse
 
 OPENGL_URL = 'http://download.tuxfamily.org/makehuman/build/macos-opengl-wrapper.zip'
+
+PLUGIN_URLS = ['http://download.tuxfamily.org/makehuman/plugins/mhapi-latest.zip', 'http://download.tuxfamily.org/makehuman/plugins/assetdownloader-latest.zip', 'http://download.tuxfamily.org/makehuman/plugins/socket-latest.zip']
 
 DEPENDENCIES = [
 'pip',
@@ -22,10 +25,48 @@ DEPENDENCIES = [
 'pstats'
 ]
 
+def unpack(source, dest):
+    with ZipFile(source, 'r') as zipObj:
+       # Extract all the contents of zip file in different directory
+       zipObj.extractall(dest)
+
+if os.path.exists('temp'):
+    shutil.rmtree('temp');
+
+if os.path.exists('build'):
+    shutil.rmtree('build');
+
+os.mkdir('temp');
+os.mkdir('./temp/plugins')
+
+for plugin in PLUGIN_URLS:
+    filename = os.path.basename(urlparse(plugin).path);
+    print('Downloading: ' + filename);
+    urllib.request.urlretrieve(plugin, os.path.join('./temp', filename));
+    print('Unpacking: ' + filename);
+    unpack(os.path.join('./temp', filename), os.path.join('./temp/plugins', filename));
+
+TEMP_PLUGINS = []
+
+print('Copying plugins...');
+for item in os.listdir('./temp/plugins'):
+    s = os.path.join('./temp/plugins', item)
+    if os.path.isdir(s):
+        for item in os.listdir(s):
+            s2 = os.path.join(s, item)
+            d = os.path.join('../../makehuman/plugins', item)
+            if os.path.isdir(s2):
+                if os.path.exists(d):
+                    shutil.rmtree(d)
+                shutil.copytree(s2, d)
+                TEMP_PLUGINS.append(d)
+
+
 APP = ['../../makehuman/makehuman.py']
 DATA_FILES = ['../../makehuman']
 OPTIONS = {'packages': DEPENDENCIES, 'includes': DEPENDENCIES,'iconfile': 'makehuman.icns'}
 
+print('Building bundle...');
 setup(
     app=APP,
     name='MakeHuman',
@@ -33,8 +74,6 @@ setup(
     options={'py2app': OPTIONS},
     setup_requires=['py2app'],
 )
-
-os.mkdir('temp');
 
 print('Downloading OpenGL...');
 urllib.request.urlretrieve(OPENGL_URL, './temp/OpenGL-packed.zip');
@@ -50,5 +89,9 @@ shutil.copytree('./temp/OpenGL', './dist/makehuman.app/Contents/Resources/lib/Op
 print('Cleaning environment...');
 shutil.rmtree('build')
 shutil.rmtree('temp')
+
+print('Cleaning plugins...');
+for plugin in TEMP_PLUGINS:
+    shutil.rmtree(plugin)
 
 print('Done!');
