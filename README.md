@@ -55,7 +55,7 @@ figure out how to run "pip": https://pip.pypa.io/en/stable/ (it should have been
 Use "pip" to install dependencies. Run the following commands:
 
 * pip install numpy
-* pip install PyQt5==5.12.2
+* pip install PyQt5
 * pip install PyOpenGL
 
 ### Installing plugins
