@@ -33,7 +33,7 @@ If you rather run the code from source:
 * Install git (https://git-scm.com/) with LFS support (https://git-lfs.github.com/). Modern git clients have LFS support included per default. 
 * Make sure the command "git" is available via the PATH variable.
 * Install python 3.6.x or later from https://www.python.org/ (or via your system's package management). On windows you **MUST** use 64-bit python. 32-bit python will not work.
-* Install python dependencies (see below)
+* Install python dependencies (see the [Installing python dependencies](#installing-python-dependencies) section below)
 * Use git to clone https://github.com/makehumancommunity/makehuman.git (or download the source as a zip)
 * Run the "download\_assets\_git.py" script in the "makehuman" subdirectory of the source code.
 * Optionally also run:
