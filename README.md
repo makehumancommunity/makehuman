@@ -41,22 +41,13 @@ If you rather run the code from source:
   * compile\_proxies.py
   * compile\_targets.py
  
-### Installing python dependencies on debian, ubuntu, mint and similar systems
-
-All that you need should be available via apt. On a console prompt, run:
-
-* apt-get install python3-numpy python3-opengl python3-pyqt5 python3-pyqt5.qtopengl python3-pyqt5.qtsvg
-
-### Installing python dependencies on windows
-
+### Installing python dependencies
 You should be able to start the command "pip" by opening a console prompt ("run" -> "cmd.exe") and writing "pip". If not, 
 figure out how to run "pip": https://pip.pypa.io/en/stable/ (it should have been installed automatically by python)
 
-Use "pip" to install dependencies. Run the following commands:
+Use "pip" to install dependencies. Running the following command will install all python dependencies:
 
-* pip install numpy
-* pip install PyQt5
-* pip install PyOpenGL
+* pip install -r requirements.txt
 
 ### Installing plugins
 
