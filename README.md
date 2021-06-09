@@ -33,7 +33,7 @@ If you rather run the code from source:
 * Install git (https://git-scm.com/) with LFS support (https://git-lfs.github.com/). Modern git clients have LFS support included per default. 
 * Make sure the command "git" is available via the PATH variable.
 * Install python 3.6.x or later from https://www.python.org/ (or via your system's package management). On windows you **MUST** use 64-bit python. 32-bit python will not work.
-* Install python dependencies (see below)
+* Install python dependencies (see the [Installing python dependencies](#installing-python-dependencies) section below)
 * Use git to clone https://github.com/makehumancommunity/makehuman.git (or download the source as a zip)
 * Run the "download\_assets\_git.py" script in the "makehuman" subdirectory of the source code.
 * Optionally also run:
@@ -41,22 +41,13 @@ If you rather run the code from source:
   * compile\_proxies.py
   * compile\_targets.py
  
-### Installing python dependencies on debian, ubuntu, mint and similar systems
-
-All that you need should be available via apt. On a console prompt, run:
-
-* apt-get install python3-numpy python3-opengl python3-pyqt5 python3-pyqt5.qtopengl python3-pyqt5.qtsvg
-
-### Installing python dependencies on windows
-
+### Installing python dependencies
 You should be able to start the command "pip" by opening a console prompt ("run" -> "cmd.exe") and writing "pip". If not, 
 figure out how to run "pip": https://pip.pypa.io/en/stable/ (it should have been installed automatically by python)
 
-Use "pip" to install dependencies. Run the following commands:
+Use "pip" to install dependencies. Running the following command will install all python dependencies:
 
-* pip install numpy
-* pip install PyQt5
-* pip install PyOpenGL
+* pip install -r requirements.txt
 
 ### Installing plugins
 
