@@ -146,7 +146,8 @@ def set_sys_path():
         sys.path = syspath
     else:
         data_path = "../Resources/makehuman"
-        os.chdir(data_path)
+        if(os.path.isdir(data_path)):
+            os.chdir(data_path)
         syspath = ["./lib", "./apps", "./shared", "./apps/gui", "./core", "../lib", "../"]
         syspath.extend(sys.path)
         sys.path = syspath
