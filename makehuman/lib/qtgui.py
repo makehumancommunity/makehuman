@@ -52,7 +52,7 @@ from getpath import getSysDataPath, getPath, isSubPath, pathToUnicode
 def dummySvgCall():
     """Code which is here just so pyinstaller can discover we need SVG support"""
     dummy = QtSvg.QGraphicsSvgItem("some_svg.svg")
-    
+
 def getLanguageString(text, appendData=None, appendFormat=None):
     """Function to get the translation of a text according to the selected
     language.
@@ -1230,8 +1230,10 @@ class AboutBoxScrollbars(QtWidgets.QDialog):
             re_match_urls = re.compile(r"""((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.‌​][a-z]{2,4}/)(?:[^\s()<>]+|(([^\s()<>]+|(([^\s()<>]+)))*))+(?:(([^\s()<>]+|(‌​([^\s()<>]+)))*)|[^\s`!()[]{};:'".,<>?«»“”‘’]))""", re.DOTALL)
             return re_match_urls.sub(lambda x: '<a href="%(url)s" style="color: #ffa02f;">%(url)s</a>' % dict(url=str(x.group())), text)
 
-        if sys.platform.startswith('darwin'):
-            self.setWindowFlags(QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowSystemMenuHint)
+        # Causes whole app to hang
+        # if sys.platform.startswith('darwin'):
+        #     self.setWindowFlags(QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowSystemMenuHint)
+
         # Grab window icon of parent
         icon = self.windowIcon()
         size = icon.actualSize(QtCore.QSize(64, 64))

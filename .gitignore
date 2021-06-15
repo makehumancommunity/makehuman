@@ -78,7 +78,12 @@ ehthumbs.db
 Thumbs.db
 /venv*
 
-# Builds #
-##########
+# macOS Build Files #
+#####################
 /buildscripts/darwin/build/*
 /buildscripts/darwin/dist/*
+/buildscripts/darwin/.eggs/*
+
+# Python Packages #
+###################
+.eggs/*
