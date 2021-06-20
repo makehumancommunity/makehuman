@@ -45,9 +45,9 @@ import subprocess
 from PyQt5 import QtCore
 
 ## Version information #########################################################
-__version__ = "1.2.0"                   # Major, minor and patch version number
+__version__ = "1.2.1"                   # Major, minor and patch version number
 release = False                         # False for nightly
-versionSub = "final"                    # Short version description
+versionSub = "alpha"                    # Short version description
 meshVersion = "hm08"                    # Version identifier of the basemesh
 ################################################################################
 
