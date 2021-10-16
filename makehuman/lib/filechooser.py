@@ -778,8 +778,7 @@ class ListFileChooser(FileChooserBase):
             self.callEvent('onDeselectAll', None)
 
     def resizeEvent(self, event):
-        for listItem in self.children.getItems():
-            listItem.updateTooltip()
+        pass
 
     def setVerticalScrollingEnabled(self, enabled):
             self.children.setVerticalScrollingEnabled(enabled)
@@ -798,6 +797,7 @@ class ListFileChooser(FileChooserBase):
         item.file = file
         item.preview = preview
         item.tags = tags
+        item.setToolTip(label + "<p>" + file)
         super(ListFileChooser, self).addItem(file, label, preview, tags)
         return self.children.addItemObject(item, pos)
 
@@ -904,9 +904,6 @@ class ListFileChooser(FileChooserBase):
             else:
                 clearIcon = self.clearImage
             self.addItem(None, "None", clearIcon, pos = 0)
-
-        for listItem in self.children.getItems():
-            listItem.updateTooltip()
 
         if keepSelections:
             if self.multiSelect:

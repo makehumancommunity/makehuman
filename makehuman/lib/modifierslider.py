@@ -43,7 +43,7 @@ from core import G
 
 class ModifierSlider(gui.Slider):
 
-    def __init__(self, modifier, label=None, valueConverter=None, image=None, cameraView=None):
+    def __init__(self, modifier, label=None, valueConverter=None, image=None, cameraView=None, tooltip=None):
         if label is None:
             # Guess a suitable slider label from target name
             tlabel = modifier.name.split('-')
@@ -64,7 +64,7 @@ class ModifierSlider(gui.Slider):
         if not os.path.isfile(image):
             image = None
 
-        super(ModifierSlider, self).__init__(modifier.getValue(), modifier.getMin(), modifier.getMax(), label, valueConverter=valueConverter, image=image)
+        super(ModifierSlider, self).__init__(modifier.getValue(), modifier.getMin(), modifier.getMax(), label, valueConverter=valueConverter, image=image, tooltip=tooltip)
         self.modifier = modifier
         self.value = None
         self.changing = None
