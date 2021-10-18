@@ -15,6 +15,13 @@
       {"target": "bodyshapes-elvs-fem-ovary"},
       {"target": "bodyshapes-elvs-fem-thyroid"},
 
+      {"target": "bodyshapes-elvs-man-apple"},
+      {"target": "bodyshapes-elvs-man-rectangle"},
+      {"target": "bodyshapes-elvs-man-lean-column"},
+      {"target": "bodyshapes-elvs-man-triangle"},
+      {"target": "bodyshapes-elvs-man-invert-triangle"},
+      {"target": "bodyshapes-elvs-man-trapezoid"},
+
       {"target": "bodyshapes-elvs-man-adrenal"},
       {"target": "bodyshapes-elvs-man-liver"},
       {"target": "bodyshapes-elvs-man-gonadal"},

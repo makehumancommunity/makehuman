@@ -13,13 +13,21 @@
           {"mod": "bodyshapes/bodyshapes-elvs-fem-triangle", "label": "Elvs Female Triangle", "cam": "frontView"}
         ],
      "Female hormonal components": [
-          {"mod": "bodyshapes/bodyshapes-elvs-fem-adrenal", "label": "Elvs Female Adrenalin", "cam": "frontView"},
+          {"mod": "bodyshapes/bodyshapes-elvs-fem-adrenal", "label": "Elvs Female Adrenal", "cam": "frontView"},
           {"mod": "bodyshapes/bodyshapes-elvs-fem-liver", "label": "Elvs Female Liver", "cam": "frontView"},
           {"mod": "bodyshapes/bodyshapes-elvs-fem-ovary", "label": "Elvs Female Ovary", "cam": "frontView"},
           {"mod": "bodyshapes/bodyshapes-elvs-fem-thyroid", "label": "Elvs Female Thyroid", "cam": "frontView"}
 	],
+     "Male body shapes": [
+          {"mod": "bodyshapes/bodyshapes-elvs-man-apple", "label": "Elvs Male Apple", "cam": "frontView"},
+	  {"mod": "bodyshapes/bodyshapes-elvs-man-rectangle", "label": "Elvs Male Rectangle", "cam": "frontView"},
+	  {"mod": "bodyshapes/bodyshapes-elvs-man-lean-column", "label": "Elvs Male Lean Column", "cam": "frontView"},
+	  {"mod": "bodyshapes/bodyshapes-elvs-man-triangle", "label": "Elvs Male Triangle", "cam": "frontView"},
+	  {"mod": "bodyshapes/bodyshapes-elvs-man-invert-triangle", "label": "Elvs Male Inverted Triangle", "cam": "frontView"},
+	  {"mod": "bodyshapes/bodyshapes-elvs-man-trapezoid", "label": "Elvs Male Trapezoid", "cam": "frontView"}
+	],
      "Male hormonal components": [
-          {"mod": "bodyshapes/bodyshapes-elvs-man-adrenal", "label": "Elvs Male Adrenalin", "cam": "frontView"},
+          {"mod": "bodyshapes/bodyshapes-elvs-man-adrenal", "label": "Elvs Male Adrenal", "cam": "frontView"},
           {"mod": "bodyshapes/bodyshapes-elvs-man-liver", "label": "Elvs Male Liver", "cam": "frontView"},
           {"mod": "bodyshapes/bodyshapes-elvs-man-gonadal", "label": "Elvs Male Gonadal", "cam": "frontView"},
           {"mod": "bodyshapes/bodyshapes-elvs-man-thyroid", "label": "Elvs Male Thyroid", "cam": "frontView"}
