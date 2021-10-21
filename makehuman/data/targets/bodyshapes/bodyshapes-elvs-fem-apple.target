@@ -1,3 +1,13 @@
+# This is a target file for MakeHuman
+#
+# This asset was explicitly released as CC0 in October 2021. The license
+# text for CC0 can be found in the root of this repository.
+#
+# Original copyright (C) 2021 Elvaerwyn
+#
+# For more information, see homepage at http://www.makehumancommunity.org
+#
+# basemesh hm08
 753 .02 0 0
 754 .019 0 0
 755 .028 0 0
@@ -3597,7 +3607,6 @@
 16179 -.025 .004 -.001
 16180 -.020 0 .001
 16181 -.010 0 .003
-16182 0 0 0
 16183 0 -.017 -.020
 16184 .005 -.022 -.016
 16185 .008 .001 .025
@@ -4902,7 +4911,6 @@
 17508 .025 .004 -.001
 17509 .020 0 .001
 17510 .010 0 .003
-17511 0 0 0
 17512 0 -.017 -.020
 17513 -.005 -.022 -.016
 17514 -.008 .001 .025
