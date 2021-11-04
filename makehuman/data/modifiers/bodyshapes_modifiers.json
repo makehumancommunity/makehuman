@@ -1,0 +1,33 @@
+[
+  { "group": "bodyshapes",
+    "modifiers": [
+      {"target": "bodyshapes-elvs-fem-apple"},
+      {"target": "bodyshapes-elvs-fem-diamond"},
+      {"target": "bodyshapes-elvs-fem-full-hourglass"},
+      {"target": "bodyshapes-elvs-fem-neat-hourglass"},
+      {"target": "bodyshapes-elvs-fem-invert-triangle"},
+      {"target": "bodyshapes-elvs-fem-lean-column"},
+      {"target": "bodyshapes-elvs-fem-rectangle"},
+      {"target": "bodyshapes-elvs-fem-triangle"},
+
+      {"target": "bodyshapes-elvs-fem-adrenal"},
+      {"target": "bodyshapes-elvs-fem-liver"},
+      {"target": "bodyshapes-elvs-fem-ovary"},
+      {"target": "bodyshapes-elvs-fem-thyroid"},
+
+      {"target": "bodyshapes-elvs-man-apple"},
+      {"target": "bodyshapes-elvs-man-rectangle"},
+      {"target": "bodyshapes-elvs-man-lean-column"},
+      {"target": "bodyshapes-elvs-man-triangle"},
+      {"target": "bodyshapes-elvs-man-invert-triangle"},
+      {"target": "bodyshapes-elvs-man-trapezoid"},
+
+      {"target": "bodyshapes-elvs-man-adrenal"},
+      {"target": "bodyshapes-elvs-man-liver"},
+      {"target": "bodyshapes-elvs-man-gonadal"},
+      {"target": "bodyshapes-elvs-man-thyroid"}
+    ]
+  }
+]
+
+

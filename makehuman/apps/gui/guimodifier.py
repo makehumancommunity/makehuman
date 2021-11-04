@@ -91,6 +91,8 @@ class ModifierTaskView(gui3d.TaskView):
 
         # Add slider to groupbox
         self.modifiers[slider.modifier.fullName] = slider.modifier
+        if slider.modifier.description is not None and slider.modifier.description != "":
+            slider.setToolTip(slider.modifier.description)
         box.addWidget(slider)
         slider.enabledCondition = enabledCondition
         self.sliders.append(slider)
@@ -236,7 +238,10 @@ def loadModifierTaskViews(filename, human, category, taskviewClass=None):
                 modifier = human.getModifier(modifierName)
                 label = sDef.get('label', None)
                 camFunc = _getCamFunc( sDef.get('cam', None) )
-                slider = modifierslider.ModifierSlider(modifier, label=label, cameraView=camFunc)
+                tooltip = None
+                if len(modifier.description) > 0:
+                    tooltip=modifier.description
+                slider = modifierslider.ModifierSlider(modifier, label=label, cameraView=camFunc, tooltip=tooltip)
                 enabledCondition = sDef.get("enabledCondition", None)
                 taskView.addSlider(sliderCategory, slider, enabledCondition)
 

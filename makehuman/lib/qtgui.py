@@ -205,11 +205,14 @@ class GroupBox(QtWidgets.QGroupBox, Widget):
     def __str__(self):
         return "%s - %s" % (type(self), str(self.title()))
 
-    def addWidget(self, widget, row = None, column = 0, rowSpan = 1, columnSpan = 1, alignment = QtCore.Qt.Alignment(0)):
+    def addWidget(self, widget, row = None, column = 0, rowSpan = 1, columnSpan = 1, alignment = QtCore.Qt.Alignment(0), tooltip=None):
         # widget.setParent(self)
         if row is None:
             row = self.layout.count()
+        if tooltip is not None:
+            widget.setToolTip(tooltip)
         self.layout.addWidget(widget, row, column, rowSpan, columnSpan, alignment)
+
         widget.show()
         return widget
 
@@ -320,6 +323,9 @@ class _QSlider(QtWidgets.QSlider):
                 return
         super(_QSlider, self).mousePressEvent(event)
 
+#
+# adds a slider to a QGridLayout
+#
 class Slider(QtWidgets.QWidget, Widget):
     _imageCache = {}
     _show_images = False
@@ -332,7 +338,7 @@ class Slider(QtWidgets.QWidget, Widget):
             cls._imageCache[path] = getPixmap(path)
         return cls._imageCache[path]
 
-    def __init__(self, value=0.0, min=0.0, max=1.0, label=None, vertical=False, valueConverter=None, image=None, scale=1000):
+    def __init__(self, value=0.0, min=0.0, max=1.0, label=None, vertical=False, valueConverter=None, image=None, scale=1000, tooltip=None):
         super(Slider, self).__init__()
         #Widget.__init__(self)
         self.text = getLanguageString(label) or ''
@@ -347,6 +353,8 @@ class Slider(QtWidgets.QWidget, Widget):
         self.min = min
         self.max = max
         self.scale = scale
+        if tooltip is not None:
+            self.slider.setToolTip(tooltip)
         self.slider.setMinimum(0)
         self.slider.setMaximum(self.scale)
         self.slider.setValue(self._f2i(value))
@@ -609,33 +617,9 @@ class RadioButton(QtWidgets.QRadioButton, ButtonBase):
                 return radio
 
 class ListItem(QtWidgets.QListWidgetItem):
-    def __init__(self, label, tooltip = True):
+    def __init__(self, label):
         super(ListItem, self).__init__(label)
         self.__hasCheckbox = False
-        self.tooltip = tooltip
-
-    def updateTooltip(self):
-        """
-        Attach a mouse-over tooltip for this item if the text is too long to fit
-        the widget.
-        """
-        if not self.tooltip:
-            return
-
-        if not self.listWidget():
-            return
-
-        metrics = QtGui.QFontMetrics(self.font())
-
-        labelWidth = self.listWidget().width()
-        if self.icon():
-            labelWidth -= self.listWidget().iconSize().width() + 10
-            # pad size with 10px to account for margin between icon and text (this is an approximation)
-
-        if metrics.width(self.text)//2 > labelWidth:
-            self.setToolTip(self.text)
-        else:
-            self.setToolTip("")
 
     @property
     def hasCheckbox(self):
@@ -646,10 +630,6 @@ class ListItem(QtWidgets.QListWidgetItem):
 
     def getUserData(self):
         return self.data(QtCore.Qt.UserRole)
-
-    def setText(self, text):
-        super(ListItem, self).setText(text)
-        self.updateTooltip()
 
     @property
     def text(self):

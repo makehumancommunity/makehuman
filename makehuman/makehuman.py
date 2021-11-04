@@ -387,7 +387,7 @@ Homepage: %s""" % (self.author, self.license, self.copyright, self.homepage)
         if len(words) < 1:
             return
 
-        key = words[0]
+        key = words[0].rstrip(":")
         value = " ".join(words[1:])
 
         self.setProperty(key,value)
@@ -415,7 +415,7 @@ Homepage: %s""" % (self.author, self.license, self.copyright, self.homepage)
                 l_key = index[i]
                 l_val = index[i+1]
 
-                key = text[last:last+l_key].tostring()
+                key = str(text[last:last+l_key].tostring(), 'utf8')
                 val = str(text[last+l_key:last+l_key+l_val].tostring(), 'utf8')
                 stringDict[key] = val
 

@@ -409,7 +409,7 @@ def loadTextProxy(human, filepath, type="Clothes"):
             proxy.uuid = " ".join(words[1:])
         elif key == 'description':
             proxy.description = " ".join(words[1:])
-        elif key in ['author', 'license', 'homepage']:
+        elif key in ['author', 'license', 'homepage', 'author:', 'license:']:
             proxy.license.updateFromComment(words)
         elif key == 'tag':
             proxy.tags.append( " ".join(words[1:]).lower() )
