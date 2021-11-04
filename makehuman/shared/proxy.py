@@ -375,7 +375,7 @@ def loadProxy(human, path, type="Clothes"):
 
 def loadTextProxy(human, filepath, type="Clothes"):
     try:
-        fp = open(filepath, "r", encoding="utf-8")
+        fp = open(filepath, "r", encoding="utf-8", errors='ignore')
     except IOError:
         log.error("*** Cannot open %s", filepath)
         return None
@@ -1020,7 +1020,7 @@ def peekMetadata(proxyFilePath, proxyType=None):
             log.warning("Problem loading metadata from binary proxy, trying ASCII file: %s", e, exc_info=showTrace)
 
     # ASCII proxy file
-    with open(proxyFilePath, 'r', encoding="utf-8") as fp:
+    with open(proxyFilePath, 'r', encoding="utf-8", errors='ignore') as fp:
         uuid = None
         tags = set()
         for line in fp:
