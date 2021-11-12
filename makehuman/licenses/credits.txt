@@ -1,0 +1,33 @@
+
+<i>For data security reasons a person may use the real name or a pseudonym.</i>
+<h2>Members currently active:</h2>
+<b>Joel Palmius</b> (Sweden)
+- community administrator, programming, art, documentation
+
+<b>Aranuvir</b> (Germany)
+- community moderator, programming
+
+<b>Elvaerwyn</b> (Canada)
+- community moderator, art, targets, documentation
+
+<b>Jonas Hauquier aka duststorm</b> (Belgium)
+- community moderator, programming
+
+<b>Loki1950</b> (Canada)
+- community moderator
+
+<b>Punkduck</b> (Germany)
+- community moderator, programming, art, documentation
+
+<b>RobBaer</b> (United States)
+- community moderator, programming, documentation
+
+<h2>Former members, artists and programmers:</h2>
+<b>Glynn Clements</b>
+<b>Manuel Bastioni</b>
+<b>Marc Flerackers</b>
+<b>Thomas Larsson</b>
+<b>Thanasis Papoutsidakis</b>
+<b>Eduardo Menezes de Morais</b>
+<b>Christoph Gohlke</b>
+

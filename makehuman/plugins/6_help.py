@@ -51,6 +51,7 @@ class HelpTaskView(gui3d.TaskView):
 
         aboutBox = self.addLeftWidget(gui.GroupBox('About MakeHuman'))
         self.aboutButton = aboutBox.addWidget(gui.Button('About / License'))
+        self.creditsButton = aboutBox.addWidget(gui.Button('Credits'))
         self.websiteButton = aboutBox.addWidget(gui.Button('Website'))
         self.facebookButton = aboutBox.addWidget(gui.Button('FaceBook page'))
 
@@ -68,6 +69,10 @@ class HelpTaskView(gui3d.TaskView):
         @self.aboutButton.mhEvent
         def onClicked(event):
             gui3d.app.about()
+
+        @self.creditsButton.mhEvent
+        def onClicked(event):
+            gui3d.app.credits()
 
         @self.websiteButton.mhEvent
         def onClicked(event):

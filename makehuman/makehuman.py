@@ -472,15 +472,6 @@ def _wordwrap(text, chars_per_line=80):
         text.pop()
     return '\n'.join(text)
 
-def getCredits(richtext=False):
-    # TODO print contributors.txt
-    if richtext:
-        result = '<h2>MakeHuman credits</h2>'
-    else:
-        result = ''
-    return result + '''The list of people that made this software can be found at our website at
-http://www.makehumancommunity.org/halloffame'''
-
 def getSoftwareLicense(richtext=False):
     import getpath
     from io import open
@@ -557,6 +548,30 @@ makes use of.\n"""
 
     return result
 
+def getCredits(richtext=False):
+    import getpath
+
+    def _error(text):
+        if richtext:
+            return '<span style="color: red;">%s</span>' % text
+        else:
+            return text
+
+    def _block(text):
+        if richtext:
+            return '%s<hr style="border: 1px solid #ffa02f;">' % text
+        else:
+            return text
+
+    license_folder = getpath.getSysPath('licenses')
+    cfile = os.path.join(license_folder, "credits.txt")
+    if not os.path.isfile(cfile):
+        return ( _error("Error: Credits file %s is not found, this is an incomplete MakeHuman distribution!" % cfile))
+    with open(cfile, encoding='utf-8') as f:
+        text = f.read()
+
+    text = _wordwrap(text)
+    return( _block(text))
 
 def main():
     print(getCopyrightMessage(short=True) + "\n")
