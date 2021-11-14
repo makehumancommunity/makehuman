@@ -797,7 +797,8 @@ class ListFileChooser(FileChooserBase):
         item.file = file
         item.preview = preview
         item.tags = tags
-        item.setToolTip(label + "<p>" + file)
+        if label is not None and file is not None:
+            item.setToolTip(label + "<p>" + file)
         super(ListFileChooser, self).addItem(file, label, preview, tags)
         return self.children.addItemObject(item, pos)
 
