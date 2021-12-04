@@ -442,6 +442,7 @@ class OrbitalCamera(Camera):
         self._fovAngle = 90.0
 
         self.fixedRadius = False
+        self.noAutoScale = False
         self.scaleTranslations = True  # Enable to make translations depend on zoom factor (only work when zoomed in)
 
         # Ortho mode
@@ -524,6 +525,8 @@ class OrbitalCamera(Camera):
         return m
 
     def updateCamera(self):
+        if self.noAutoScale:
+            return
         human = G.app.selectedHuman
         # Set camera to human y center to compensate for varying human height
         bbox = human.getBoundingBox()
