@@ -88,7 +88,7 @@ class DownloadAssetsGit:
 
         self.readOverridesFromEnvironment()
 
-        if not os.path.isfile(self._git_command):
+        if self._git_command is None or not os.path.isfile(self._git_command):
             print("\n\n\nCould not find git command\n\n")
             sys.exit(1)
 
