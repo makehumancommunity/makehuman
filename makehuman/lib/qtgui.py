@@ -955,7 +955,7 @@ class ProgressBar(QtWidgets.QProgressBar, Widget):
     def setProgress(self, progress):
         min_ = self.minimum()
         max_ = self.maximum()
-        self.setValue(min_ + progress * (max_ - min_))
+        self.setValue(round(min_ + progress * (max_ - min_)))
 
 class ShortcutEdit(QtWidgets.QLabel, Widget):
     def __init__(self, shortcut):
