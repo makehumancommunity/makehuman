@@ -149,7 +149,11 @@ class FileCache(object):
                 if not (mtime > cached_mtime):
                     continue
 
-            self._cache[fileId] = (mtime,) + getMetadata(filepath)
+            try:
+                self._cache[fileId] = (mtime,) + getMetadata(filepath)
+            except Exception as e:
+                log.error('Error while parsing metadata for file ', str(e))
+                log.error('Failed to parse metadata for file ', filepath)
 
         if removeOldEntries:
             """Remove entries from cache that no longer exist"""
