@@ -201,7 +201,7 @@ class GroupBoxRadioButton(gui.RadioButton):
 
 def _getCamFunc(cameraName):
     if cameraName:
-        if hasattr(gui3d.app, cameraName) and isinstance(getattr(gui3d.app, cameraName), collections.Callable):
+        if hasattr(gui3d.app, cameraName) and isinstance(getattr(gui3d.app, cameraName), collections.abc.Callable):
             return cameraName
 
         return "set" + cameraName.upper()[0] + cameraName[1:]
