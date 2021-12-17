@@ -354,7 +354,7 @@ class VLayout(QtWidgets.QLayout):
         return width, y
 
     def sizeHint(self):
-        width, height = self._doLayout(0, 0, 1e9, 1e9, False)
+        width, height = self._doLayout(0, 0, int(1e9), int(1e9), False)
         return QtCore.QSize(width, height)
 
     def maximumSize(self):

@@ -142,7 +142,7 @@ class Object(events3d.EventHandler):
 
     @property
     def view(self):
-        if not self._view or not isinstance(self._view, collections.Callable):
+        if not self._view or not isinstance(self._view, collections.abc.Callable):
             return None
         return self._view()
 

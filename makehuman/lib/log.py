@@ -245,9 +245,7 @@ def init():
 
     config()
 
-    # Compatibility test for Python 2.6 logging module
-    if hasattr(logging, "captureWarnings") and isinstance(logging.captureWarnings, collections.Callable):
-        logging.captureWarnings(True)
+    logging.captureWarnings(True)
 
     try:
         logging.getLogger('OpenGL.formathandler').addFilter(NoiseFilter())
