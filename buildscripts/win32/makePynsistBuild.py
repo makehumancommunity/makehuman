@@ -140,37 +140,37 @@ if os.path.exists(mhx2):
 else:
     print("MHX2 was not found in parent directory: " + mhx2)
 
-asset = os.path.abspath(os.path.join(parentdir,'community-plugins-assetdownload'))
-if os.path.exists(asset):
-    tocopy = os.path.abspath(os.path.join(asset,'8_asset_downloader'))
-    todest = os.path.abspath(os.path.join(pluginsdir,'8_asset_downloader'))
-    copy_tree(tocopy, todest)
-else:
-    print("asset downloader was not found in parent directory: " + asset)
-
-mhapi = os.path.abspath(os.path.join(parentdir,'community-plugins-mhapi'))
-if os.path.exists(mhapi):
-    tocopy = os.path.abspath(os.path.join(mhapi,'1_mhapi'))
-    todest = os.path.abspath(os.path.join(pluginsdir,'1_mhapi'))
-    copy_tree(tocopy, todest)
-else:
-    print("MHAPI was not found in parent directory: " + mhapi)
-
-socket = os.path.abspath(os.path.join(parentdir,'community-plugins-socket'))
-if os.path.exists(socket):
-    tocopy = os.path.abspath(os.path.join(socket,'8_server_socket'))
-    todest = os.path.abspath(os.path.join(pluginsdir,'8_server_socket'))
-    copy_tree(tocopy, todest)
-else:
-    print("socket plugin was not found in parent directory: " + socket)
-
-mp = os.path.abspath(os.path.join(parentdir,'community-plugins-massproduce'))
-if os.path.exists(mp):
-    tocopy = os.path.abspath(os.path.join(mp,'9_massproduce'))
-    todest = os.path.abspath(os.path.join(pluginsdir,'9_massproduce'))
-    copy_tree(tocopy, todest)
-else:
-    print("mass produce plugin was not found in parent directory: " + mp)
+# asset = os.path.abspath(os.path.join(parentdir,'community-plugins-assetdownload'))
+# if os.path.exists(asset):
+#     tocopy = os.path.abspath(os.path.join(asset,'8_asset_downloader'))
+#     todest = os.path.abspath(os.path.join(pluginsdir,'8_asset_downloader'))
+#     copy_tree(tocopy, todest)
+# else:
+#     print("asset downloader was not found in parent directory: " + asset)
+# 
+# mhapi = os.path.abspath(os.path.join(parentdir,'community-plugins-mhapi'))
+# if os.path.exists(mhapi):
+#     tocopy = os.path.abspath(os.path.join(mhapi,'1_mhapi'))
+#     todest = os.path.abspath(os.path.join(pluginsdir,'1_mhapi'))
+#     copy_tree(tocopy, todest)
+# else:
+#     print("MHAPI was not found in parent directory: " + mhapi)
+# 
+# socket = os.path.abspath(os.path.join(parentdir,'community-plugins-socket'))
+# if os.path.exists(socket):
+#     tocopy = os.path.abspath(os.path.join(socket,'8_server_socket'))
+#     todest = os.path.abspath(os.path.join(pluginsdir,'8_server_socket'))
+#     copy_tree(tocopy, todest)
+# else:
+#     print("socket plugin was not found in parent directory: " + socket)
+# 
+# mp = os.path.abspath(os.path.join(parentdir,'community-plugins-massproduce'))
+# if os.path.exists(mp):
+#     tocopy = os.path.abspath(os.path.join(mp,'9_massproduce'))
+#     todest = os.path.abspath(os.path.join(pluginsdir,'9_massproduce'))
+#     copy_tree(tocopy, todest)
+# else:
+#     print("mass produce plugin was not found in parent directory: " + mp)
 
 subprocess.call(["pynsist", "pynsist.cfg"], cwd=exportDir)
 
