@@ -119,10 +119,6 @@ pipeline {
 			steps {
 				script {
 				sh "rm -rf ${env.WORKSPACE}/../mhx2-makehuman-exchange"
-				sh "rm -rf ${env.WORKSPACE}/../community-plugins-assetdownload"
-				sh "rm -rf ${env.WORKSPACE}/../community-plugins-mhapi"
-				sh "rm -rf ${env.WORKSPACE}/../community-plugins-socket"
-				sh "rm -rf ${env.WORKSPACE}/../community-plugins-massproduce"
 				sh "rm -rf ${env.WORKSPACE}/../community-plugins-makeclothes"
 				sh "rm -rf ${env.WORKSPACE}/../community-plugins-makeskin"
 				sh "rm -rf ${env.WORKSPACE}/../community-plugins-maketarget"
@@ -149,10 +145,6 @@ pipeline {
 				script {
 					sh "pwd"
 						sh "git clone https://github.com/makehumancommunity/mhx2-makehuman-exchange ${env.WORKSPACE}/../mhx2-makehuman-exchange"
-						sh "git clone https://github.com/makehumancommunity/community-plugins-assetdownload ${env.WORKSPACE}/../community-plugins-assetdownload"
-						sh "git clone https://github.com/makehumancommunity/community-plugins-mhapi ${env.WORKSPACE}/../community-plugins-mhapi"
-						sh "git clone https://github.com/makehumancommunity/community-plugins-socket ${env.WORKSPACE}/../community-plugins-socket"
-						sh "git clone https://github.com/makehumancommunity/community-plugins-massproduce ${env.WORKSPACE}/../community-plugins-massproduce"
 				}
 
 			}
