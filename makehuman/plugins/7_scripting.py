@@ -576,7 +576,7 @@ class Scripting():
     def saveModel(self,name,path = mh.getPath('models')):
         log.message("SCRIPT: saveModel(" + name + "," + path + ")")
         filename = os.path.join(path,name + ".mhm")
-        self.human.save(filename,name)
+        self.human.save(filename)
 
     def loadModel(self,name,path = mh.getPath('models')):
         log.message("SCRIPT: loadModel(" + name + "," + path + ")")
