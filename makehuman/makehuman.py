@@ -229,7 +229,7 @@ def parse_arguments():
     parser.add_argument('-v', '--version', action='version', version=getVersionStr())
     parser.add_argument("--license", action="store_true", help="Show full copyright notice and software license")
     parser.add_argument("--noshaders", action="store_true", help="disable shaders")
-    parser.add_argument("--nomultisampling", action="store_true", help="disable multisampling (used for anti-aliasing and alpha-to-coverage transparency rendering)")
+    parser.add_argument("--multisampling", action="store_true", help="enable multisampling (used for anti-aliasing and alpha-to-coverage transparency rendering)")
     parser.add_argument("--debugopengl", action="store_true", help="enable OpenGL error checking and logging (slow)")
     parser.add_argument("--fullloggingopengl", action="store_true", help="log all OpenGL calls (very slow)")
     parser.add_argument("--debugnumpy", action="store_true", help="enable numpy runtime error messages")

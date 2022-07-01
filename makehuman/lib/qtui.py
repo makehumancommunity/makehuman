@@ -183,8 +183,8 @@ class Canvas(QtWidgets.QOpenGLWidget):
         format.setAlphaBufferSize(8)
         format.setDepthBufferSize(24)
         format.setSwapBehavior(QtGui.QSurfaceFormat.DoubleBuffer)
-        if not G.preStartupSettings["noSampleBuffers"]:
-            format.setSamples(4)
+        #if not G.preStartupSettings["noSampleBuffers"]:
+        #    format.setSamples(4)
         super(Canvas, self).__init__(parent)
         self.setFormat(format)
         self.create()
