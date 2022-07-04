@@ -291,7 +291,7 @@ def OnInit():
         log.error("Failed to write GL debug info to debug dump: %s", format(str(e)))
 
     global have_multisample
-    if G.args.get('nomultisampling', False):
+    if not G.args.get('multisampling', False):
         have_multisample = False
     else:
         have_multisample = glInitMultisampleARB()
