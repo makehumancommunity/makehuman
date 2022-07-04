@@ -1058,6 +1058,6 @@ def draw(productionRender = False):
 
 def renderToCanvas():
     if draw():
-        G.canvas.swapBuffers()
+        # G.canvas.swapBuffers()
         # Indicate that picking buffer is out of sync with rendered frame (deferred update)
         markPickingBufferDirty()
