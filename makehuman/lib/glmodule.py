@@ -876,6 +876,7 @@ def renderToBuffer(width, height, productionRender = True):
     # Neutral background color
     oldClearColor = G.clearColor
     G.clearColor = (0.5,0.5,0.5, 1)
+    glEnable(GL_DEPTH_TEST);
 
     # Draw scene as usual
     draw(productionRender)
@@ -967,6 +968,7 @@ def renderAlphaMask(width, height, productionRender = True):
     # Transparent background color
     oldClearColor = G.clearColor
     G.clearColor = (0.5, 0.5, 0.5, 0)
+    glEnable(GL_DEPTH_TEST);
     # Change blend func to accumulate alpha
     glBlendFunc(GL_ONE, GL_ONE)
     # Disable multisampling
