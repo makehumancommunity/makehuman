@@ -145,6 +145,12 @@ QComboBox
     border-style: solid;
     border: 1px solid #1e1e1e;
     border-radius: 5;
+    color: white;
+    /*
+     * Padding is because Qt has a bug that ignores style color in a 
+     * combobox without it (for some incomprehensible reason)
+     */
+    padding: 2px;
 }
 
 QComboBox:hover,QPushButton:hover
