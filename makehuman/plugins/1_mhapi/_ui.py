@@ -45,10 +45,6 @@ class ComboBox(QComboBox, QWidget):
         if onChange:
             self.onChangeMethod = onChange
 
-        # Padding is because Qt has a bug that ignores style color in a 
-        # combobox without it (for some incomprehensible reason)
-        self.setStyleSheet("QComboBox { color: white; padding: 2px }")
-
     def setData(self,items):
         self.clear()
         for item in items:
