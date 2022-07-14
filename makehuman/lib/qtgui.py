@@ -2186,6 +2186,7 @@ class ZoomableImageView(QtWidgets.QScrollArea, Widget):
         self.workingWidth = None
         self.ratio = 1.0
         self.minratio = 0.1
+        self.mdown = None
 
     def setImage(self, img):
         pixmap = getPixmap(img)
@@ -2247,10 +2248,11 @@ class ZoomableImageView(QtWidgets.QScrollArea, Widget):
                                               event.buttons(), event.modifiers()), False)
             self.mdown = event.pos()
         else:
-            self.horizontalScrollBar().setValue(
-                self.horizontalScrollBar().value() + 2*(self.mdown.x() - event.pos().x()))
-            self.verticalScrollBar().setValue(
-                self.verticalScrollBar().value() + 2*(self.mdown.y() - event.pos().y()))
+            if self.mdown is not None:
+                self.horizontalScrollBar().setValue(
+                    self.horizontalScrollBar().value() + 2*(self.mdown.x() - event.pos().x()))
+                self.verticalScrollBar().setValue(
+                    self.verticalScrollBar().value() + 2*(self.mdown.y() - event.pos().y()))
             self.mdown = event.pos()
             self.refreshImage()
 

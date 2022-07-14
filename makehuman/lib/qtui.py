@@ -185,6 +185,7 @@ class Canvas(QtWidgets.QOpenGLWidget):
         format.setSwapBehavior(QtGui.QSurfaceFormat.DoubleBuffer)
         #if not G.preStartupSettings["noSampleBuffers"]:
         #    format.setSamples(4)
+        format.setSamples(0)
         super(Canvas, self).__init__(parent)
         self.setFormat(format)
         self.create()

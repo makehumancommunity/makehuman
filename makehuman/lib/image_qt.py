@@ -126,7 +126,7 @@ def resized(img, width, height, filter=0):
         transform = QtCore.Qt.SmoothTransformation
     else:
         transform = QtCore.Qt.FastTransformation
-    qi = qi.scaled(QtCore.QSize(width, height), 
+    qi = qi.scaled(QtCore.QSize(int(width), int(height)), 
                    transformMode=transform)
     return load(qi)
 
