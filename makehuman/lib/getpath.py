@@ -146,7 +146,10 @@ def getHomePath():
         keyname = r'Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders'
         #name = 'Personal'
         with winreg.OpenKey(winreg.HKEY_CURRENT_USER, keyname) as k:
-            value, type_ = winreg.QueryValueEx(k, 'Personal')
+            try:
+                value, type_ = winreg.QueryValueEx(k, 'Personal')
+            except FileNotFoundError:
+                value, type_ = "%USERPROFILE%\Documents", winreg.REG_EXPAND_SZ
             if type_ == winreg.REG_EXPAND_SZ:
                 __home_path = formatPath(winreg.ExpandEnvironmentStrings(value))
                 return __home_path
