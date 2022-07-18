@@ -2243,16 +2243,30 @@ class ZoomableImageView(QtWidgets.QScrollArea, Widget):
 
     def mouseMoveEvent(self, event):
         if event.buttons() & QtCore.Qt.RightButton:
-            self.wheelEvent(QtGui.QWheelEvent(event.pos(),
-                                              10 * (event.pos().y() - self.mdown.y()),
-                                              event.buttons(), event.modifiers()), False)
+            angleDeltay = 10 * (event.pos().y() - self.mdown.y())
+            displace = False
+            ratbef = self.ratio
+            if G.app.getSetting('invertMouseWheel'):
+                deltay = angleDeltay
+            else:
+                deltay = -angleDeltay
+            factor = 1 - deltay * 0.0007
+            self.ratio *= factor
+            if self.ratio > 1.0:
+                self.ratio = 1.0
+            if self.ratio < self.minratio:
+                self.ratio = self.minratio
+            dr = 2 * abs(self.ratio - ratbef) if displace else 0
+            self.refreshImage(True,
+                              (dr * (event.x() - self.width() / 2),
+                               dr * (event.y() - self.height() / 2)))
             self.mdown = event.pos()
         else:
             if self.mdown is not None:
                 self.horizontalScrollBar().setValue(
-                    self.horizontalScrollBar().value() + 2*(self.mdown.x() - event.pos().x()))
+                    self.horizontalScrollBar().value() + 2 * (self.mdown.x() - event.pos().x()))
                 self.verticalScrollBar().setValue(
-                    self.verticalScrollBar().value() + 2*(self.mdown.y() - event.pos().y()))
+                    self.verticalScrollBar().value() + 2 * (self.mdown.y() - event.pos().y()))
             self.mdown = event.pos()
             self.refreshImage()
 
