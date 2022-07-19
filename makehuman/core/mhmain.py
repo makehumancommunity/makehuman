@@ -231,6 +231,7 @@ class MHApplication(gui3d.Application, mh.Application):
                 'units': 'metric',
                 'real_weight': False,
                 'guiTheme': 'makehuman',
+                'sliderEditWidgetVisibility': False,
                 'restoreWindowSize': True,
                 'windowGeometry': '',
                 'useHDPI': False,
@@ -265,6 +266,7 @@ class MHApplication(gui3d.Application, mh.Application):
                 'rtl': False,
                 'sliderImages': True,
                 'guiTheme': 'makehuman',
+                'sliderEditWidgetVisibility': False,
                 'preloadTargets': False,
                 'restoreWindowSize': True,
                 'windowGeometry': '',
@@ -791,6 +793,10 @@ class MHApplication(gui3d.Application, mh.Application):
             self.setTheme(self.getSetting('guiTheme'))
         except:
             self.setTheme("default")
+        try:
+            self.setSliderEditWidgetVisibility(self.getSetting('sliderEditWidgetVisibility'))
+        except:
+            self.setSliderEditWidgetVisibility(False)
 
         progress.step('Applying targets')
         self.loadFinish()
@@ -1030,6 +1036,12 @@ class MHApplication(gui3d.Application, mh.Application):
             log.error('Failed to save settings file', exc_info=True)
             if promptOnFail:
                 self.prompt('Error', 'Could not save settings file.', 'OK')
+
+    def setSliderEditWidgetVisibility(self, isVisible):
+        for widget in self.allWidgets():
+            if isinstance(widget, gui.Slider):
+                widget.setEditWidgetVisibility(isVisible)
+
 
     # Themes
     def setTheme(self, theme):

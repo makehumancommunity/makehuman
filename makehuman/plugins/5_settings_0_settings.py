@@ -90,6 +90,24 @@ class ThemeRadioButton(gui.RadioButton):
             gui3d.app.setSetting('guiTheme', self.theme)
             gui3d.app.setTheme(self.theme)
 
+class SliderEditWidgetVisibilityRadioButton(gui.RadioButton):
+    def __init__(self, group, label, sliderEditWidgetVisibility):
+        self.sliderEditWidgetVisibility = sliderEditWidgetVisibility
+        checked = (gui3d.app.getSetting('sliderEditWidgetVisibility') == self.sliderEditWidgetVisibility)
+        super(SliderEditWidgetVisibilityRadioButton, self).__init__(group, label, checked)
+
+    def onClicked(self, event):
+        self.updated()
+
+    def updateButton(self, value):
+        self.setChecked(value)
+        self.updated()
+
+    def updated(self):
+        if self.selected:
+            gui3d.app.setSetting('sliderEditWidgetVisibility', self.sliderEditWidgetVisibility)
+            gui3d.app.setSliderEditWidgetVisibility(self.sliderEditWidgetVisibility)
+
 class PlatformRadioButton(gui.RadioButton):
     def __init__(self, group, looknfeel):
         super(PlatformRadioButton, self).__init__(group, looknfeel, gui3d.app.getLookAndFeel().lower() == looknfeel.lower())
@@ -217,6 +235,11 @@ class SettingsTaskView(gui3d.TaskView):
         self.themesBox = self.addRightWidget(gui.GroupBox('Theme'))
         self.themeNative = self.themesBox.addWidget(ThemeRadioButton(themes, "Native look", "default"))
         self.themeMH = self.themesBox.addWidget(ThemeRadioButton(themes, "MakeHuman", "makehuman"))
+
+        sliderEditWidgetVisibilities = []
+        self.sliderEditWidgetVisibilityBox = self.addRightWidget(gui.GroupBox('Slider\'s Edit Widget Visibility'))
+        self.sliderEditWidgetVisibilityVisible = self.sliderEditWidgetVisibilityBox.addWidget(SliderEditWidgetVisibilityRadioButton(sliderEditWidgetVisibilities, "Visible", True))
+        self.sliderEditWidgetVisibilityDefault = self.sliderEditWidgetVisibilityBox.addWidget(SliderEditWidgetVisibilityRadioButton(sliderEditWidgetVisibilities, "Default", False))
 
         # For debugging themes on multiple platforms
         '''

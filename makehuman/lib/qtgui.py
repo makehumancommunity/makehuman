@@ -342,7 +342,8 @@ class Slider(QtWidgets.QWidget, Widget):
         super(Slider, self).__init__()
         #Widget.__init__(self)
         self.text = getLanguageString(label) or ''
-        self.valueConverter = valueConverter
+
+        self.isEditWidgetVisible = False
 
         orient = (QtCore.Qt.Vertical if vertical else QtCore.Qt.Horizontal)
         self.slider = _QSlider(self, orient)
@@ -363,7 +364,6 @@ class Slider(QtWidgets.QWidget, Widget):
         self.slider.valueChanged[int].connect(self._changed)
         self.slider.sliderReleased.connect(self._released)
         self.slider.sliderPressed.connect(self._pressed)
-        self.slider.installEventFilter(self)
 
         self.label = QtWidgets.QLabel(self.text)
         # Decrease vertical gap between label and slider
@@ -374,10 +374,22 @@ class Slider(QtWidgets.QWidget, Widget):
         self.layout.setColumnStretch(0, 1)
         self.layout.setColumnStretch(1, 0)
         self.layout.setColumnStretch(2, 0)
+
+        self.edit = NarrowLineEdit(5)
+        self.edit.returnPressed.connect(self._enter)
+
+        self.units = QtWidgets.QLabel("")
+
+        self.layout.addWidget(self.units, 1, 2, 1, 1)
+        self.layout.addWidget(self.edit, 1, 1, 1, 1)
         self.layout.addWidget(self.label, 1, 0, 1, 1)
         self.layout.addWidget(self.slider, 2, 0, 1, -1)
+
         if not self.text:
             self.label.hide()
+        
+        self.edit.hide()
+        self.units.hide()
 
         if image is not None:
             self.image = QtWidgets.QLabel()
@@ -386,6 +398,14 @@ class Slider(QtWidgets.QWidget, Widget):
         else:
             self.image = None
 
+        # We must define 'self.edit' and 'self.slider' before we call
+        # 'installEventFilter()' on them.
+        self.slider.installEventFilter(self)
+        self.edit.installEventFilter(self)
+
+        # The assignment of 'valueConverter' can only happen after we defined
+        # self.edit and self.units as it hide/show these widgets.
+        self.valueConverter = valueConverter
         self._sync(value)
         self._update_image()
 
@@ -394,23 +414,27 @@ class Slider(QtWidgets.QWidget, Widget):
     def setValueConverter(self, valueConverter):
         self._valueConverter = valueConverter
         if self.valueConverter:
-            self.edit = NarrowLineEdit(5)
-            self.edit.installEventFilter(self)
-            self.edit.returnPressed.connect(self._enter)
-            self.layout.addWidget(self.edit, 1, 1, 1, 1)
             if hasattr(self.valueConverter, 'units'):
-                self.units = QtWidgets.QLabel(self.valueConverter.units)
-                self.layout.addWidget(self.units, 1, 2, 1, 1)
+                self.units.setText(self.valueConverter.units)
+                self.units.show()
             else:
-                self.units = None
+                self.units.hide()
         else:
-            self.edit = None
-            self.units = None
+            self.units.hide()
+        self.setEditWidgetVisibility(self.isEditWidgetVisible)
 
     def getValueConverter(self):
         return self._valueConverter
 
     valueConverter = property(getValueConverter, setValueConverter)
+
+    def setEditWidgetVisibility(self, isVisible):
+        self.isEditWidgetVisible = isVisible
+        if not self.isEditWidgetVisible and self.valueConverter is None:
+            self.edit.hide()
+        else:
+            self.edit.show()
+
 
     def sliderMousePressEvent(self, event):
         """
@@ -432,6 +456,7 @@ class Slider(QtWidgets.QWidget, Widget):
         newValue = self.fromDisplay(float(text))
         self.setValue(newValue)
         if abs(oldValue - newValue) > 1e-3:
+            self.callEvent('onChanging', newValue)
             self.callEvent('onChange', newValue)
 
     def toDisplay(self, value):
@@ -448,7 +473,7 @@ class Slider(QtWidgets.QWidget, Widget):
 
     def eventFilter(self, object, event):
         if object != self.slider and object != self.edit:
-            return
+            return False
         result = False
         if object == self.edit:
             result = self.edit.eventFilter(object, event)
@@ -498,7 +523,7 @@ class Slider(QtWidgets.QWidget, Widget):
         if self.edit is not None:
             self.edit.setText('%.2f' % self.toDisplay(value))
         if hasattr(self.valueConverter, 'units') and \
-           self.valueConverter.units != str(self.units.text()):
+            self.valueConverter.units != str(self.units.text()):
             self.units.setText(self.valueConverter.units)
 
     def _f2i(self, x):
