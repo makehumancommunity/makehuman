@@ -403,7 +403,7 @@ Homepage: %s""" % (self.author, self.license, self.copyright, self.homepage)
                 text += key + value
             text = np.fromstring(text, dtype='S1')
             index = np.array(index, dtype=np.uint32)
-            return text, index
+            return np.array([text, index], dtype=object)
 
         return _packStringDict(self.asDict())
 
