@@ -1315,7 +1315,7 @@ class AboutBoxScrollbars(QtWidgets.QDialog):
         self.setModal(True)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
-        size = QtCore.QSize(min(parent.size().width(), width + 60), 0.8 * parent.size().height())
+        size = QtCore.QSize(min(parent.size().width(), width + 60), int(0.8 * parent.size().height()))
         self.resize(size)
 
 

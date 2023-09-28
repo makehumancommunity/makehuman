@@ -216,9 +216,11 @@ class Canvas(QtWidgets.QOpenGLWidget):
         return (relPos.x(), relPos.y())
 
     def mousePressEvent(self, ev):
+        self.makeCurrent()
         self.mouseUpDownEvent(ev, "onMouseDownCallback")
 
     def mouseReleaseEvent(self, ev):
+        self.makeCurrent()
         self.mouseUpDownEvent(ev, "onMouseUpCallback")
 
     def mouseUpDownEvent(self, ev, direction):
@@ -230,6 +232,7 @@ class Canvas(QtWidgets.QOpenGLWidget):
 
         gg_mouse_pos = x, y
 
+        self.makeCurrent()
         G.app.callEvent(direction, events3d.MouseEvent(b, x, y))
 
         # Update screen
@@ -250,6 +253,7 @@ class Canvas(QtWidgets.QOpenGLWidget):
             x = y = None
 
         b = 1 if d > 0 else -1
+        self.makeCurrent()
         G.app.callEvent('onMouseWheelCallback', events3d.MouseWheelEvent(b, x, y))
 
         if g_mousewheel_t is None or t - g_mousewheel_t > MOUSEWHEEL_PICK_TIMEOUT:
@@ -287,6 +291,7 @@ class Canvas(QtWidgets.QOpenGLWidget):
 
         buttons = int(G.app.mouseButtons())
 
+        self.makeCurrent()
         G.app.callEvent('onMouseMovedCallback', events3d.MouseEvent(buttons, x, y, xrel, yrel))
 
         if buttons:
@@ -585,8 +590,7 @@ class Frame(QtWidgets.QMainWindow):
             state.add('fullscreen')
         if stateflags & QtCore.Qt.WindowActive:
             state.add('active')
-        if not (stateflags &
-            (QtCore.Qt.WindowMaximized | QtCore.Qt.WindowFullScreen)):
+        if not(stateflags & QtCore.Qt.WindowMaximized) and not(stateflags & QtCore.Qt.WindowFullScreen):
             state.add('normal geometry')
             if not stateflags & QtCore.Qt.WindowMinimized:
                 state.add('normal')
