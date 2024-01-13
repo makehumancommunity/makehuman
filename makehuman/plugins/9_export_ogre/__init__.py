@@ -66,9 +66,8 @@ class ExporterOgre(Exporter):
         mh2ogre.exportOgreMesh(filename("mesh.xml"), cfg)
 
     def build(self, options, taskview):
-        import gui
+        Exporter.build(self, options, taskview)
         self.taskview     = taskview
-        self.feetOnGround = options.addWidget(gui.CheckBox("Feet on ground", True))
 
     def getConfig(self):
         cfg = OgreConfig()
