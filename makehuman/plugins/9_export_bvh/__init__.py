@@ -52,6 +52,8 @@ class BvhConfig(ExportConfig):
     def __init__(self):
         ExportConfig.__init__(self)
         self.useRelPaths = True
+        self.allowDummyJoints = True
+        self.sortJointChildrenByName = False
 
 class ExporterBVH(Exporter):
     def __init__(self):
@@ -63,13 +65,17 @@ class ExporterBVH(Exporter):
 
     def build(self, options, taskview):
         import gui
+        Exporter.build(self, options, taskview)
         self.taskview       = taskview
         #self.exportAnimations = options.addWidget(gui.CheckBox("Animations", True))
-        self.feetOnGround = options.addWidget(gui.CheckBox("Feet on ground", True))
+        self.allowDummyJoints = options.addWidget(gui.CheckBox("Allow dummy joints", True))
+        self.sortJointChildrenByName = options.addWidget(gui.CheckBox("Sort joint children by name", False))
 
     def getConfig(self):
         cfg = BvhConfig()
         cfg.feetOnGround      = self.feetOnGround.selected
+        cfg.allowDummyJoints  = self.allowDummyJoints.selected
+        cfg.sortJointChildrenByName  = self.sortJointChildrenByName.selected
         cfg.scale,cfg.unit    = self.taskview.getScale()
         #cfg.exportAnimations = self.exportAnimations.selected
         cfg.exportAnimations = False
@@ -90,7 +96,7 @@ class ExporterBVH(Exporter):
             for animName in human.getAnimations():
                 fn = baseFilename + "_%s.bvh" % animName
                 log.message("Exporting file %s.", fn)
-                bvhData = bvh.createFromSkeleton(skel, human.getAnimation(animName))
+                bvhData = bvh.createFromSkeleton(skel, human.getAnimation(animName), cfg.allowDummyJoints, cfg.sortJointChildrenByName)
                 if cfg.scale != 1:
                     bvhData.scale(cfg.scale)
                 if cfg.feetOnGround:
@@ -100,9 +106,9 @@ class ExporterBVH(Exporter):
             fn = filename("bvh")
             log.message("Exporting file %s.", fn)
             if human.isPosed():
-                bvhData = bvh.createFromSkeleton(skel, human.getActiveAnimation())
+                bvhData = bvh.createFromSkeleton(skel, human.getActiveAnimation(), cfg.allowDummyJoints, cfg.sortJointChildrenByName)
             else:
-                bvhData = bvh.createFromSkeleton(skel)
+                bvhData = bvh.createFromSkeleton(skel, None, cfg.allowDummyJoints, cfg.sortJointChildrenByName)
             if cfg.scale != 1:
                 bvhData.scale(cfg.scale)
             if cfg.feetOnGround:

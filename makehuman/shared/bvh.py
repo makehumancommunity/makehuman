@@ -56,6 +56,7 @@ class BVH():
     """
     def __init__(self, name="Untitled"):
         self.name = name
+        self.filepath = ""
         self.joints = {}    # Lookup dict to find joints by name
         self.bvhJoints = [] # List of joints in the order in which they were defined in the BVH file (important for MOTION data parsing)
         self.jointslist = []    # Cached breadth-first list of all joints
@@ -64,6 +65,7 @@ class BVH():
         self.frameTime = -1
         self.frames = []
 
+        self.sortChildrenByName = False
         self.convertFromZUp = False     # Set to true to convert the coordinates from a Z-is-up coordinate system. Most motion capture data uses Y-is-up, though.
         self.allowTranslation = "onlyroot"  # Joints to accept translation animation data for
 
@@ -272,6 +274,9 @@ class BVH():
         """
         Retrieve joints as they were ordered in the BVH hierarchy definition.
         """
+        if self.bvhJoints is None and not self.rootJoint is None:
+            self.bvhJoints = []
+            self.rootJoint.recollect()
         return self.bvhJoints
 
     def fromFile(self, filepath):
@@ -281,6 +286,7 @@ class BVH():
         specified BVH file.
         """
         import os
+        self.filepath = filepath
         self.name = os.path.splitext(os.path.basename(filepath))[0]
         if self.convertFromZUp == "auto":
             autoAxis = True
@@ -355,7 +361,7 @@ class BVH():
                 log.debug("Cannot use reference joint %s for determining axis system, it is an end-effector (has no children)" % ref_joint.name)
                 ref_joint = None
         if ref_joint is None:
-            log.warning("Could not auto guess axis system for BVH file %s because no known joint name is found. Using Y up as default axis orientation." % filepath)
+            log.warning("Could not auto guess axis system for BVH file %s because no known joint name is found. Using Y up as default axis orientation." % self.filepath)
         else:
             tail_joint = ref_joint.children[0]
             direction = tail_joint.position - ref_joint.position
@@ -366,7 +372,7 @@ class BVH():
                 # Z-up
                 return True
 
-    def fromSkeleton(self, skel, animationTrack=None, dummyJoints=True):
+    def fromSkeleton(self, skel, animationTrack=None, dummyJoints=True, sortChildrenByName=False):
         """
         Construct a BVH object from a skeleton structure and optionally an 
         animation track. If no animation track is specified, a dummy animation
@@ -387,6 +393,8 @@ class BVH():
 
         NOTE: Make sure that the skeleton has only one root.
         """
+
+        self.sortChildrenByName = sortChildrenByName
 
         # Traverse skeleton joints in depth-first order
         for jointName in skel.getJointNames():
@@ -478,6 +486,8 @@ class BVH():
             f.write('Frames: %s\n' % self.frameCount)
             f.write('Frame Time: %f\n' % self.frameTime)
 
+            if self.sortChildrenByName:
+                self.bvhJoints = None
             allJoints = [joint for joint in self.getJointsBVHOrder() if not joint.isEndConnector()]
             jointsData = [joint.matrixPoses for joint in allJoints]
             nJoints = len(jointsData)
@@ -758,6 +768,9 @@ class BVHJoint():
     def addChild(self, joint):
         self.children.append(joint)
         joint.parent = self
+        if self.skeleton.sortChildrenByName:
+            import operator
+            self.children.sort(key=operator.attrgetter('name'))
 
     def getName(self):
         return self.name
@@ -773,6 +786,11 @@ class BVHJoint():
 
     def isEndConnector(self):
         return not self.hasChildren()
+
+    def recollect(self):
+        self.skeleton.bvhJoints.append(self)
+        for child in self.children:
+            child.recollect()
 
 
 def load(filename, convertFromZUp="auto", allowTranslation="onlyroot"):
@@ -790,7 +808,7 @@ def load(filename, convertFromZUp="auto", allowTranslation="onlyroot"):
     result.fromFile(filename)
     return result
 
-def createFromSkeleton(skel, animationTrack=None, dummyJoints=True):
+def createFromSkeleton(skel, animationTrack=None, dummyJoints=True, sortChildrenByName=False):
     result = BVH()
-    result.fromSkeleton(skel, animationTrack, dummyJoints)
+    result.fromSkeleton(skel, animationTrack, dummyJoints, sortChildrenByName)
     return result
