@@ -142,6 +142,8 @@ def configure(confpath):
     settings["performUpload"] = _conf_get(conf, 'PPA', 'performUpload', settings["performUpload"])
 
   if settings["package_sub"] is None or settings["package_version"] is None:
+    print ("Settings are:")
+    print (settings)
     print("build.conf is incorrect")
     sys.exit(1)
 
