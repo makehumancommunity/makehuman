@@ -1,0 +1,31 @@
+[project]
+name = "makehuman"
+version = "1.2.0"
+description = "Open-source software for the modelling of 3-Dimensional humanoid characters."
+
+authors = [
+    {name = "makehumancommunity"}
+]
+
+dependencies = [
+	"numpy>=1.17.4",
+	"PyQt5>=5.12.8",
+	"PyOpenGL>=3.1.0"
+]
+
+requires-python = "==3.11.*"
+readme = "README.md"
+
+classifiers = [
+	"License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)"
+]
+
+[tool.setuptools]
+packages = ["makehuman"]
+py-modules = ["__init__"]
+
+[project.scripts]
+makehuman = "makehuman:makehuman.main"
+
+[tool.pdm]
+distribution = false
