@@ -50,8 +50,7 @@ import sys
 from uuid import uuid4
 from mesh_operations import calculateSurface, calculateVolume
 
-from makehuman import getBasemeshVersion, getShortVersion, getVersionStr, getVersion
-
+from makehuman import main
 
 class Human(guicommon.Object, animation.AnimatedMesh):
 

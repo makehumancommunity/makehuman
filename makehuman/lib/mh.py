@@ -38,7 +38,7 @@ Python compatibility layer replacing the old C functions of MakeHuman.
 
 from core import G
 from getpath import getPath, getDataPath, getSysDataPath, getSysPath, getRelativePath
-from makehuman import getVersion, getVersionStr, getBasemeshVersion, getShortVersion, isRelease, isBuild, getVersionDigitsStr, getCopyrightMessage, getAssetLicense, getThirdPartyLicenses, getSoftwareLicense, getCredits
+from makehuman import main
 
 from glmodule import grabScreen, hasRenderSkin, renderSkin, getPickedColor, hasRenderToRenderbuffer, renderToBuffer, renderAlphaMask
 

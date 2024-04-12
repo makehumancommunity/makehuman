@@ -41,7 +41,7 @@ import os
 import getpath
 import subprocess
 import gitutils
-import makehuman
+from makehuman import main
 import json
 
 class MHVersion:
@@ -52,9 +52,9 @@ class MHVersion:
         self.currentLongCommit = "UNKNOWN"
         self.currentBranch = "UNKNOWN"
         self.title = "MakeHuman Community"
-        self.version = makehuman.getVersionDigitsStr()
-        self.versionSub = makehuman.getVersionSubStr()
-        self.isRelease = makehuman.isRelease()
+        self.version = main.getVersionDigitsStr()
+        self.versionSub = main.getVersionSubStr()
+        self.isRelease = main.isRelease()
         self.fullTitle = None
         self.versionPath = versionPath
 

@@ -21,11 +21,11 @@ classifiers = [
 ]
 
 [tool.setuptools]
-packages = ["makehuman"]
+packages = ["makehuman", "makehuman.apps", "makehuman.apps.gui" ,"makehuman.core", "makehuman.lib", "makehuman.plugins", "makehuman.shared"]
 py-modules = ["__init__"]
 
 [project.scripts]
-makehuman = "makehuman:makehuman.main"
+makehuman = "makehuman:main.main"
 
 [tool.pdm]
 distribution = false
