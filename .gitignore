@@ -84,6 +84,7 @@ Thumbs.db
 /buildscripts/darwin/dist/*
 /buildscripts/darwin/.eggs/*
 
-# Python Packages #
+# Python Packaging #
 ###################
-.eggs/*
+[Bb]uild
+.egg*/*
