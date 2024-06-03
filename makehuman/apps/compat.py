@@ -322,6 +322,15 @@ class MHM11Loader(object):
     def getAcceptedVersion(self):
         return(1, 1)
 
+class MHM12Loader(object):
+
+    def loadProperty(self, line_data, default_load_callback, strict):
+        default_load_callback(line_data)
+
+    def getAcceptedVersion(self):
+        return(1, 2)
+
+
 
 def getMHMLoader(version):
     for loader in mhm_loaders:
@@ -342,5 +351,5 @@ def loadMHM(version, lines, default_load_callback, strict=False):
         fprog.step()
 
 
-mhm_loaders = [ MHM10Loader(), MHM11Loader() ]
+mhm_loaders = [ MHM10Loader(), MHM11Loader(), MHM12Loader() ]
 
