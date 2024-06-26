@@ -39,6 +39,7 @@ Configuration file parser using JSON format
 import json
 import getpath
 
+
 def _s2u(value):
     if isinstance(value, str):
         return value
@@ -49,6 +50,7 @@ def _s2u(value):
     else:
         return value
 
+
 def parseINI(s, replace = []):
     if isinstance(s, bytes):
         s = s.decode('utf-8')
@@ -57,8 +59,9 @@ def parseINI(s, replace = []):
     except ValueError:
         for src, dst in replace + [("'",'"'), (": True",": true"), (": False",": false"), (": None",": null")]:
             s = s.replace(src, dst)
-        result = json.loads(s, encoding='utf-8')
+        result = json.loads(s)
     return _s2u(result)
+
 
 def formatINI(d):
     return json.dumps(d, indent=4, ensure_ascii=False) + '\n'
