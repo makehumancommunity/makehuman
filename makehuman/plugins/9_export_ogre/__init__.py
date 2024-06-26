@@ -38,7 +38,7 @@ Exporter plugin for the Ogre3d mesh format.
 
 from . import mh2ogre
 from export import Exporter, ExportConfig
-import imp
+import importlib
 
 class OgreConfig(ExportConfig):
 
@@ -60,7 +60,7 @@ class ExporterOgre(Exporter):
         self.orderPriority = 60.0
 
     def export(self, human, filename):
-        imp.reload(mh2ogre) # TODO ?
+        importlib.reload(mh2ogre) # TODO ?
         cfg = self.getConfig()
         cfg.setHuman(human)
         mh2ogre.exportOgreMesh(filename("mesh.xml"), cfg)
