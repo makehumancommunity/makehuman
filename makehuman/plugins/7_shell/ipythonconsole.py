@@ -40,10 +40,6 @@ Ipython qtconsole for embedding in MakeHuman
 """
 
 
-import imp
-from pygments.formatters import HtmlFormatter
-from pygments.style import StyleMeta
-
 from core import G
 import getpath
 import gui
@@ -54,8 +50,8 @@ from qtconsole.jupyter_widget import styles
 from qtconsole.inprocess import QtInProcessKernelManager
 from IPython.lib import guisupport
 
+from PyQt5 import QtWidgets
 
-from PyQt5 import QtCore, QtGui, QtSvg, QtWidgets
 
 class _QIPythonWidget(RichJupyterWidget):
     """ Convenience class for a live IPython console widget.
@@ -97,27 +93,6 @@ class _QIPythonWidget(RichJupyterWidget):
         self._execute(command,False)
 
 
-def load_pygments_style(style):
-    """Get an instance of a pygments Style class from a python file.
-    Finds the first class definition of type pygments.style.Style and returns an
-    instance of it.
-    """
-    # TODO include these contents in the css at compile time,
-    # we don't want to include python source files as data
-    module = imp.load_source(style, getpath.getSysDataPath('themes/%s.pygments' % style))
-
-    for member_name in dir(module):
-        member = getattr(module, member_name)
-        if isinstance(member, StyleMeta):
-            return member
-
-def pygments_style_to_css(style):
-    """Convert a pygments Style class or name of a style in pygments styles
-    folder into CSS. This is the CSS that contains the styling of the syntax
-    highlighting. """
-    return HtmlFormatter(style=style).get_style_defs('.highlight')
-
-
 class IPythonConsoleWidget(QtWidgets.QWidget, gui.Widget):
     """ An interactive shell widget using the ipython qt console """
     def __init__(self, parent=None):
@@ -149,19 +124,7 @@ class IPythonConsoleWidget(QtWidgets.QWidget, gui.Widget):
             stylesheet = styles.default_light_style_sheet
 
         # TODO not working yet (causes a crash for some reason)
-        '''
-        # Try parsing pygments Style python class if available, and add it to CSS
-        try:
-            style_obj = load_pygments_style(theme)
 
-            # Append syntax highlighting CSS to stylesheet
-            stylesheet += "\n\n" + pygments_style_to_css(style_obj)
-            # Use syntax highlighting defined in CSS stylesheet
-            self.ipyConsole.syntax_style = ""
-        except:
-            # else use default syntax style
-            self.ipyConsole.syntax_style = "monokai"
-        '''
         self.ipyConsole.syntax_style = "default"
 
         self.ipyConsole.style_sheet = stylesheet
