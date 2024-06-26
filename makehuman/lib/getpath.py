@@ -149,7 +149,7 @@ def getHomePath():
             try:
                 value, type_ = winreg.QueryValueEx(k, 'Personal')
             except FileNotFoundError:
-                value, type_ = "%USERPROFILE%\Documents", winreg.REG_EXPAND_SZ
+                value, type_ = r"%USERPROFILE%\Documents", winreg.REG_EXPAND_SZ
             if type_ == winreg.REG_EXPAND_SZ:
                 __home_path = formatPath(winreg.ExpandEnvironmentStrings(value))
                 return __home_path
