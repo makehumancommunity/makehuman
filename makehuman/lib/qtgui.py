@@ -453,7 +453,11 @@ class Slider(QtWidgets.QWidget, Widget):
         if not text:
             return
         oldValue = self.getValue()
-        newValue = self.fromDisplay(float(text))
+        try:
+            newValue = self.fromDisplay(float(text))
+        except ValueError:
+            newValue = oldValue
+
         self.setValue(newValue)
         if abs(oldValue - newValue) > 1e-3:
             self.callEvent('onChanging', newValue)
