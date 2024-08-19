@@ -317,8 +317,8 @@ class MHApplication(gui3d.Application, mh.Application):
             self.updateFilenameCaption()
 
         #self.modelCamera = mh.Camera()
-        #self.modelCamera.switchToOrtho()
         self.modelCamera = mh.OrbitalCamera()
+        self.modelCamera.switchToOrtho()
         #self.modelCamera.debug = True
 
         @self.modelCamera.mhEvent
@@ -731,7 +731,9 @@ class MHApplication(gui3d.Application, mh.Application):
         height = cam.getScale()
         aspect = cam.getAspect()
         width = height * aspect
-        self.backgroundGradient.mesh.resize(2.1*width, 2.1*height)
+        factor = 2.1 if cam._projection == 0 else 79.1
+
+        self.backgroundGradient.mesh.resize(factor*width, factor*height)
 
         self.backgroundGradient.setPosition([0, 0, -0.85*cam.farPlane])
 

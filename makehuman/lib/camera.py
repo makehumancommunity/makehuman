@@ -36,6 +36,7 @@ Abstract
 TODO
 """
 
+from logging import setLogRecordFactory
 import math
 import numpy as np
 
@@ -441,12 +442,15 @@ class OrbitalCamera(Camera):
         self.radius = 1.0
         self._fovAngle = 90.0
 
+        self.minRadius = 10
+        self.maxRadius = 20
+        
         self.fixedRadius = False
         self.noAutoScale = False
         self.scaleTranslations = True  # Enable to make translations depend on zoom factor (only work when zoomed in)
 
         # Ortho mode
-        self._projection = 0    # TODO properly test with projection mode as well
+        self._projection = 1    # TODO properly test with projection mode as well
 
         self._horizontalRotation = 0.0
         self._verticalInclination = 0.0
@@ -567,7 +571,9 @@ class OrbitalCamera(Camera):
         maxDistance = math.sqrt( -distances[ np.argsort(distances)[0] ] )
 
         # Set radius as max distance from bounding box
-        self.radius = maxDistance + 1
+        self.minRadius = maxDistance
+        self.maxRadius = maxDistance + 10
+        self.radius = maxDistance + 1 if not self.projection else self.radius
 
         if self.debug:
             import log
@@ -654,36 +660,73 @@ class OrbitalCamera(Camera):
         else:
             self.zoomFactor = zoomFactor
 
+    def setRadius(self, radius):
+        if radius < self.minRadius:
+            self.radius = self.minRadius
+        elif radius > self.maxRadius:
+            self.radius = self.maxRadius
+        else:
+            self.radius = radius
+
     def addZoom(self, amount):
         self.setZoomFactor(self.zoomFactor - (amount/4.0))
         if self.debug:
             import log
             log.debug("OrbitalCamera zoom: %s", self.zoomFactor)
 
-        if self.pickedPos is not None:
-            if not self.scaleTranslations and -amount < 0.0:
-                amount = abs(amount) / max(1.0, min(5.0, self.zoomFactor))
-                for i in range(3):
-                    if self.translation[i] < 0.0:
-                        self.translation[i] += amount
-                        self.translation[i] = min(self.translation[i], 0.0)
-                    elif self.translation[i] > 0.0:
-                        self.translation[i] -= amount
-                        self.translation[i] = max(self.translation[i], 0.0)
+        if not self.projection:
+            if self.pickedPos is not None:
+                if not self.scaleTranslations and -amount < 0.0:
+                    amount = abs(amount) / max(1.0, min(5.0, self.zoomFactor))
+                    for i in range(3):
+                        if self.translation[i] < 0.0:
+                            self.translation[i] += amount
+                            self.translation[i] = min(self.translation[i], 0.0)
+                        elif self.translation[i] > 0.0:
+                            self.translation[i] -= amount
+                            self.translation[i] = max(self.translation[i], 0.0)
+                else:
+                    #amount = abs(amount/4.0)
+                    #amount = abs(amount) / self.zoomFactor
+                    amount = abs(amount) / max(1.0, min(5.0, self.zoomFactor))
+                    #amount = abs(amount) / max(1.0, 0.3 * self.zoomFactor)
+                    for i in range(3):
+                        if self.translation[i] < self.pickedPos[i]:
+                            self.translation[i] += amount
+                            self.translation[i] = min(self.translation[i], self.pickedPos[i])
+                        elif self.translation[i] > self.pickedPos[i]:
+                            self.translation[i] -= amount
+                            self.translation[i] = max(self.translation[i], self.pickedPos[i])
+                    if self.pickedPos == self.translation:
+                        self.pickedPos = None
+
+        else:
+            x, y, z = 0, 1, 2
+
+            dir = np.array([
+                self.pickedPos[x] - self.translation[x],
+                self.pickedPos[y] - self.translation[y],
+                self.pickedPos[z] - self.translation[z],
+            ]) if self.pickedPos else 0.2
+
+            # rot, incl = getRotationForDirection(dir)
+
+            if isinstance(self.translation, list):
+                self.translation = np.array(self.translation)
+
+            if amount > 0:
+                pos = self._getTranslationForPosition(self.translation + dir)
             else:
-                #amount = abs(amount/4.0)
-                #amount = abs(amount) / self.zoomFactor
-                amount = abs(amount) / max(1.0, min(5.0, self.zoomFactor))
-                #amount = abs(amount) / max(1.0, 0.3 * self.zoomFactor)
-                for i in range(3):
-                    if self.translation[i] < self.pickedPos[i]:
-                        self.translation[i] += amount
-                        self.translation[i] = min(self.translation[i], self.pickedPos[i])
-                    elif self.translation[i] > self.pickedPos[i]:
-                        self.translation[i] -= amount
-                        self.translation[i] = max(self.translation[i], self.pickedPos[i])
-                if self.pickedPos == self.translation:
-                    self.pickedPos = None
+                pos = self._getTranslationForPosition(self.translation - dir)
+
+            self.setRadius(self.radius + amount)
+            self.setPosition(pos)
+
+            #Update
+            G.app.redraw()
+            G.app.processEvents()
+
+
         self.changed()
 
     def getMatrices(self, eye=None):
