@@ -78,7 +78,8 @@ def packStringList(strings):
     for string in strings:
         index.append(len(text))
         text += string
-    text = np.fromstring(text, dtype='S1')
+    #text = np.fromstring(text, dtype='S1')
+    text = np.frombuffer(text.encode(),dtype='S1')
     index = np.array(index, dtype=np.uint32)
     return text, index
 
@@ -87,11 +88,11 @@ def unpackStringList(text, index):
     last = None
     for i in index:
         if last is not None:
-            name = str(text[last:i].tostring(), 'utf-8')
+            name = str(text[last:i].tobytes(), 'utf-8')
             strings.append(name)
         last = i
     if last is not None:
-        name = str(text[last:].tostring(), 'utf8')
+        name = str(text[last:].tobytes(), 'utf8')
         strings.append(name)
 
     return strings

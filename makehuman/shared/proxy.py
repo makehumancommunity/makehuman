@@ -555,25 +555,24 @@ def saveBinaryProxy(proxy, path):
 
         folder = os.path.dirname(path)
 
-
         vars_ = dict(
             #proxyType = np.fromstring(proxy.type, dtype='S1'),     # TODO store proxy type?
-            name = np.fromstring(proxy.name, dtype='S1'),
-            uuid = np.fromstring(proxy.uuid, dtype='S1'),
-            description = np.fromstring(proxy.description, dtype='S1'),
-            basemesh = np.fromstring(proxy.basemesh, dtype='S1'),
+            name = np.frombuffer(proxy.name.encode(),dtype='S1'), 
+            uuid = np.frombuffer(proxy.uuid.encode(), dtype='S1'),
+            description = np.frombuffer(proxy.description.encode(), dtype='S1'),
+            basemesh = np.frombuffer(proxy.basemesh.encode(), dtype='S1'),
             tags_str = tagStr,
             tags_idx = tagIdx,
             lic_str = licStr,
             lic_idx = licIdx,
             uvLayers_str = uvStr,
             uvLayers_idx = uvIdx,
-            obj_file = np.fromstring(_properPath(proxy.obj_file), dtype='S1'),
+            obj_file = np.frombuffer(_properPath(proxy.obj_file).encode(), dtype='S1'),
             version = np.asarray(proxy.version, dtype=np.int32)
         )
 
         if proxy.material_file:
-            vars_["material_file"] = np.fromstring(_properPath(proxy.material_file), dtype='S1')
+            vars_["material_file"] = np.frombuffer(_properPath(proxy.material_file).encode(), dtype='S1')
 
         if np.any(proxy.deleteVerts):
             vars_["deleteVerts"] = proxy.deleteVerts
@@ -608,7 +607,7 @@ def saveBinaryProxy(proxy, path):
         vars_['num_refverts'] = np.asarray(num_refverts, dtype=np.int32)
 
         if proxy.vertexBoneWeights_file:
-            vars_['vertexBoneWeights_file'] = np.fromstring(_properPath(proxy.vertexBoneWeights_file), dtype='S1')
+            vars_['vertexBoneWeights_file'] = np.frombuffer(_properPath(proxy.vertexBoneWeights_file).encode(), dtype='S1')
 
         np.savez_compressed(fp, **vars_)
     os.utime(path, None)  # Ensure modification time is updated
@@ -1043,7 +1042,7 @@ def _packStringList(strings):
         asbytes = bytearray(text,'utf-8')
         index.append(len(asbytes))
         text += string
-    text = np.fromstring(text, dtype='S1')
+    text = np.frombuffer(text.encode(), dtype='S1')
     index = np.array(index, dtype=np.uint32)
     return text, index
 
