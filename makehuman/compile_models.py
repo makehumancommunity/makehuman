@@ -72,14 +72,14 @@ def compileMesh(path):
         #print ('Compiling mesh to binary: %s' % npzpath)
         try:
             files3d.loadTextMesh(obj, path)
-        except:
-            print('Could not load OBJ file %s. Perhaps it mixes tris and quads.' % path)
+        except Exception as ex:
+            print('Could not load OBJ file %s. Perhaps it mixes tris and quads.' % path, ex)
             #import traceback
             #traceback.print_exc(file=sys.stdout)
             return False
         files3d.saveBinaryMesh(obj, npzpath)
-    except:
-        print('Unable to save compiled mesh for file %s' % path)
+    except Exception as ex:
+        print('Unable to save compiled mesh for file %s' % path, ex)
         #import traceback
         #traceback.print_exc(file=sys.stdout)
         return False

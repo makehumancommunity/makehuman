@@ -401,7 +401,7 @@ Homepage: %s""" % (self.author, self.license, self.copyright, self.homepage)
                 index.append(len(key))
                 index.append(len(value))
                 text += key + value
-            text = np.fromstring(text, dtype='S1')
+            text = np.frombuffer(text.encode('utf-8'), dtype='S1')
             index = np.array(index, dtype=np.uint32)
             return np.array([text, index], dtype=object)
 
