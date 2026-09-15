@@ -317,7 +317,7 @@ def fbx_data_mesh_element(objectsParent, key, id, properties, coord, fvert, vnor
 
     elem_data_single_float64_array(lay_nor, b"Normals", t_ln)
 
-    elem_data_single_int32_array(lay_nor, b"NormalsIndex", fvert_.astype(np.int32).reshape(-1))
+    elem_data_single_int32_array(lay_nor, b"NormalsIndex", fvert[:, :vertsperface].astype(np.int32).reshape(-1))
     del t_ln
 
     # TODO export tangents
