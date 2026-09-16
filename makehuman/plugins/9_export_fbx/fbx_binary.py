@@ -731,9 +731,8 @@ def fbx_header_elements(root, config, filepath, time=None):
 
     mesh_orientation = getMeshOrientation(config)
     up_axis, front_axis, coord_axis = RIGHT_HAND_AXES[mesh_orientation]
-    # Currently not sure about that, but looks like default unit of FBX is cm...
-    #scale_factor = 10.0/config.scale  # MH scales the mesh coordinates, the scale factor is a constant
-    scale_factor = 10.0
+    # FBX unit scale is expressed in centimeters.
+    scale_factor = 10.0 / config.scale
     elem_props_set(props, "p_integer", b"UpAxis", up_axis[0])
     elem_props_set(props, "p_integer", b"UpAxisSign", up_axis[1])
     elem_props_set(props, "p_integer", b"FrontAxis", front_axis[0])
