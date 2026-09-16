@@ -61,6 +61,7 @@ def writeHeader(fp, filepath, config):
     from . import fbx_utils
     mesh_orientation = fbx_utils.getMeshOrientation(config)
     up_axis, front_axis, coord_axis = fbx_utils.RIGHT_HAND_AXES[mesh_orientation]
+    scale_factor = 10.0 / config.scale
 
     fp.write("""; FBX 7.3.0 project file
 ; Exported from MakeHuman TM (www.makehumancommunity.org)
@@ -126,8 +127,8 @@ GlobalSettings:  {
         P: "CoordAxisSign", "int", "Integer", "",%s
         P: "OriginalUpAxis", "int", "Integer", "",-1
         P: "OriginalUpAxisSign", "int", "Integer", "",1
-        P: "UnitScaleFactor", "double", "Number", "",10
-        P: "OriginalUnitScaleFactor", "double", "Number", "",1
+        P: "UnitScaleFactor", "double", "Number", "",%s
+        P: "OriginalUnitScaleFactor", "double", "Number", "",%s
         P: "AmbientColor", "ColorRGB", "Color", "",0,0,0
         P: "DefaultCamera", "KString", "", "", "Producer Perspective"
         P: "TimeMode", "enum", "", "",0
@@ -135,7 +136,7 @@ GlobalSettings:  {
         P: "TimeSpanStop", "KTime", "Time", "",46186158000
         P: "CustomFrameRate", "double", "Number", "",-1
     }
-}""" % (up_axis[0], up_axis[0], front_axis[0], front_axis[1], coord_axis[0], coord_axis[1]) + """
+}""" % (up_axis[0], up_axis[0], front_axis[0], front_axis[1], coord_axis[0], coord_axis[1], scale_factor, scale_factor) + """
 
 ; Documents Description
 ;------------------------------------------------------------------
